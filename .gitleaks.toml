@@ -1,0 +1,60 @@
+# gitleaks configuration (plan.md 4.1.5 and T0.2).
+# Runs in pre-commit (staged changes) and in CI (full history).
+#
+# Regexes must be Go RE2 compatible: no look-behind or look-ahead.
+# Test fixtures must BUILD fake keys at runtime (string concatenation) instead of writing
+# them out in full, so that this scanner never has to be switched off for tests.
+
+title = "Brand platform gitleaks config"
+
+[extend]
+# Start from the built-in ruleset (Stripe, Anthropic, AWS/R2-style keys, private keys,
+# generic high-entropy secrets, ...) and add the project-specific rules below.
+useDefault = true
+
+[[rules]]
+id = "project-stripe-key"
+description = "Stripe secret or restricted API key"
+regex = '''\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{10,}'''
+keywords = ["sk_live_", "sk_test_", "rk_live_", "rk_test_"]
+
+[[rules]]
+id = "project-stripe-webhook-secret"
+description = "Stripe webhook signing secret"
+regex = '''\bwhsec_[A-Za-z0-9+/=]{16,}'''
+keywords = ["whsec_"]
+
+[[rules]]
+id = "project-anthropic-key"
+description = "Anthropic API key"
+regex = '''\bsk-ant-[A-Za-z0-9_-]{20,}'''
+keywords = ["sk-ant-"]
+
+[[rules]]
+id = "project-resend-key"
+description = "Resend API key"
+regex = '''\bre_[A-Za-z0-9_]{24,}'''
+keywords = ["re_"]
+
+[[rules]]
+id = "project-age-secret-key"
+description = "age private key (backup decryption key). It must never leave the owner's offline storage."
+regex = '''AGE-SECRET-KEY-1[A-Z0-9]{20,}'''
+keywords = ["age-secret-key-1"]
+
+[[rules]]
+id = "project-sentry-auth-token"
+description = "Sentry auth token"
+regex = '''\bsntry[su]_[A-Za-z0-9+/=_-]{20,}'''
+keywords = ["sntrys_", "sntryu_"]
+
+[[rules]]
+id = "project-named-secret-assignment"
+description = "A known secret variable is assigned a literal value"
+regex = '''(?i)\b(?:SESSION_SECRET|BLIND_INDEX_KEY|FIELD_ENCRYPTION_KEYS|DATABASE_APP_USER_PASSWORD|R2_SECRET_ACCESS_KEY|R2_BACKUP_SECRET_ACCESS_KEY|RESEND_API_KEY|ANTHROPIC_API_KEY|STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET|TURNSTILE_SECRET_KEY|COMPANIES_HOUSE_API_KEY|RAILWAY_TOKEN(?:_STAGING|_PRODUCTION)?|SENTRY_AUTH_TOKEN)\s*[:=]\s*["']?[A-Za-z0-9+/=_.\-]{12,}'''
+keywords = [
+  "session_secret", "blind_index_key", "field_encryption_keys", "database_app_user_password",
+  "r2_secret_access_key", "r2_backup_secret_access_key", "resend_api_key", "anthropic_api_key",
+  "stripe_secret_key", "stripe_webhook_secret", "turnstile_secret_key",
+  "companies_house_api_key", "railway_token", "sentry_auth_token",
+]

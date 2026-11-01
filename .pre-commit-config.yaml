@@ -1,0 +1,54 @@
+# pre-commit hooks (plan.md T0.2). Install once per clone:
+#   uv tool install pre-commit && pre-commit install
+# The same checks run again in CI, so skipping a hook locally never gets a secret through.
+minimum_pre_commit_version: "4.0.0"
+
+repos:
+  # --- Secrets: first, so a leak is stopped before any other tool touches the files ---------
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+        args: ["--config", ".gitleaks.toml"]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: detect-private-key
+      - id: check-merge-conflict
+
+  # --- Python (api/) -------------------------------------------------------------------------
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.3
+    hooks:
+      - id: ruff-check
+        args: ["--fix", "--exit-non-zero-on-fix"]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      # --- Formatting for web, scripts, workflows and config -----------------------------------
+      - id: prettier
+        name: prettier
+        language: node
+        additional_dependencies: ["prettier@3.9.10"]
+        entry: prettier --write --ignore-unknown
+        types_or: [javascript, jsx, ts, tsx, json, css, yaml]
+        # Generated or vendored files are never reformatted.
+        exclude: ^(web/lib/api/schema\.ts|pnpm-lock\.yaml|docs/screenshots/.*)$
+
+      # --- Lint for the Next.js app. Runs only when web/ source code is staged ----------------
+      - id: eslint-web
+        name: eslint (web)
+        language: system
+        entry: pnpm --dir web exec eslint --max-warnings 0 .
+        pass_filenames: false
+        files: ^web/.*\.(js|jsx|mjs|cjs|ts|tsx)$
+
+      # --- NEXT_PUBLIC_* allowlist: nothing but the 9 public names may ever exist --------------
+      - id: check-public-env
+        name: NEXT_PUBLIC_* allowlist
+        language: system
+        entry: node scripts/check-public-env.mjs
+        pass_filenames: false
+        always_run: true

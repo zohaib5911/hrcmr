@@ -43,6 +43,25 @@ Docker (with Compose), Node.js 24 and pnpm, Python 3.12 with `uv`, and git. Comm
 running the local stack, the tests and the deployment are added to this file by the tasks
 that create them (local stack, API, web, CI and deployment).
 
+## Secret guard-rails (set up once per clone)
+
+```bash
+uv tool install pre-commit     # one-off, user-level
+pre-commit install             # installs the git hook for this clone
+node --test 'scripts/tests/*.test.mjs'   # unit tests for the guard scripts
+```
+
+| Guard | What it stops |
+|---|---|
+| `gitleaks` hook (`.gitleaks.toml`) | Committing API keys, webhook secrets, private keys, or a known secret variable set to a literal value. Also run in CI over the full history. |
+| `scripts/check-public-env.mjs` | Any `NEXT_PUBLIC_*` variable outside the 9 allowlisted names, or an allowlisted one holding a secret-shaped value. |
+| `scripts/scan-bundle.mjs` | Secret prefixes, or the literal value of a secret environment variable, inside the built browser bundle (`web/.next/static`, `web/public`). Fails if the build is missing. |
+| `.gitignore` | `.env`, `.env.*` (except `.env.example`), `*.pem`, `*.key`, `/secrets`. |
+
+`.env.example` lists variable **names only**. Copy it to `.env` for local development and use
+test keys only. Staging and production values are set in the Railway dashboard. The guard scripts
+report the file, line and rule that matched, never the matched value.
+
 ## Licence
 
 Proprietary. All rights reserved.
