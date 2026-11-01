@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** T1.5 Marketing layout
+- **Current task:** T2.1 Models
 
 ---
 
@@ -24,7 +24,7 @@ unless a task notes otherwise here.
 |---|---|---|
 | T0.8 | ~~Create the private GitHub repository~~ — done: `zohaib5911/hrcmr`, confirmed private. Still to do: (1) turn on **Settings → Security → Private vulnerability reporting** (referenced by `SECURITY.md`); (2) after the first green CI run, protect `main` under **Settings → Branches**: require a pull request and the one status check **CI passed**. I do not change GitHub settings myself. | plan T0.8, SECURITY.md |
 | T23.1 | Set the repository **variable** `STAGING_URL` (Settings → Secrets and variables → Actions → *Variables*; it is a public URL, not a secret) so the weekly ZAP scan has a target. The GitHub *secrets* stay the three in deployment-requirements §6. | `.github/workflows/security.yml` |
-| Anytime | Look at Dependabot's first two pull requests and merge or close them. **#1** moves the local/CI Redis image from 7.4 to **8.10**, a major version with a different licence story; production Redis is whatever Railway offers, so I would not take this blindly. **#2** moves the `uv` image in `api/Dockerfile` from 0.12.23 to 0.13.6; CI pins `setup-uv` to 0.12.23, so both places should change together. CI is green on both. I do not merge dependency updates myself. | `.github/dependabot.yml` |
+| Anytime | Dependabot #3 (web dev dependencies: ESLint 9 to 10 and TypeScript) fails CI and is left open for you to decide. #1 (Redis 8) was rejected and Redis major updates are ignored; #2 (uv 0.13.6) was merged with the CI pin. | `.github/dependabot.yml` |
 | Before launch | Give me the non-secret business details: brand name, domain, logo files (SVG lockup + mark, 512 px PNG favicon), accent colour, legal company name, number and registered office, ICO number, support email, sender address, confirm prices, Platform Admin emails, pixel and Companies House choices, optional office IPs. `brand.config.ts` currently holds the placeholder name "Brand". | deployment-requirements §1 |
 | When I ask | Put **dev/test keys** in your own local `.env` (`cp .env.example .env`) and reply "the .env is ready": a low-limit `ANTHROPIC_API_KEY` (T14.4), Stripe **test** key and `stripe listen` webhook secret (T16.1), optional `COMPANIES_HOUSE_API_KEY` (T4.1). Turnstile uses Cloudflare's public always-pass test keys locally. | deployment-requirements §7 |
 | T13.2 | Review the 8 original courses. | plan T13.2 |
@@ -94,6 +94,8 @@ marked `UNVERIFIED` and listed here with its location.
 46. **Sidebar state and the `[` key (T1.3):** the collapsed choice is a cookie (`sidebar=collapsed`) read by the layout, so the server draws the right width and nothing animates on load; it follows the theme cookie's pattern. `[` toggles it from a window listener that ignores repeats, modifier keys and any text field. T1.4 builds the global shortcut handler and should fold this into it.
 47. **Responsive rules found by testing (T1.3):** the sidebar is a fixed 260/72 px column from 768 px, and phones get the tab bar instead (every target at least 44 px, safe-area padding). The toolbar's wide search box needs 1024 px; between 768 and 1023 px only 508 px is left beside the sidebar, which made the page scroll sideways by 52 px until the search became an icon there. The page content has bottom padding for the tab bar, and a "Skip to content" link is the first Tab stop.
 48. **Screenshots on request (T1.3):** `tests/e2e/shell-screenshots.spec.ts` runs only with `SCREENSHOTS=1`, so ordinary runs never rewrite the images committed in `docs/screenshots/phase-1/`. The shell tests run against the production build (the signed-in routes are part of it), not the development server.
+49. **Public-site links and cookies (T1.5):** the nav in `web/lib/marketing-nav.ts` names the pages T18 builds (the sponsor page is `/sponsor-licence-compliance` because `/sponsor-compliance` is the app's); until they exist the links do not prefetch, and T18.1 must remove `prefetch={false}` and test that every link resolves. Pricing amounts are never in code: `PricingCards` and `HeadcountSlider` take them as props (shown with the plan's figures on the dev-only `/design/marketing`). Marketing pixels are not loaded yet; they must wait for `brand.cookieConsent.marketing` and the `brand:cookie-consent-changed` event.
+50. **Playwright output folder (Phase 1 gate):** reports go to `.playwright-results/` outside `web/`, because `next dev` watches `web/` and a failing test writing there reloaded every page in the design tests (the cause of earlier mass timeouts). `style-src-attr 'unsafe-inline'` is an accepted exception: see `docs/security.md`.
 
 ---
 
@@ -123,6 +125,18 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 ---
 
+### Phase 1 — Design system and app shell — gate passed 2026-11-02
+
+**What exists.** Design tokens and theming (light/dark, system), a primitive component library with a `/design` page (dev only), the signed-in app shell with 21 empty pages, the ⌘/Ctrl+K palette and `?` shortcuts sheet with every shortcut from plan 8.19, and the public-site frame (header, footer, section components, cookie consent).
+
+**Regression, whole suite once:** web 711 unit tests; 254 Playwright tests (production build and dev server, 0 failed, 0 skipped); API 172 tests; `tsc`, ESLint and `ruff`/`mypy` clean. CI ran green on T1.3; T1.4 and T1.5 are pushed with this gate.
+
+**Screenshots.** `docs/screenshots/phase-1/`: the shell, the palette and shortcuts sheet, the public home page (4 widths, light and dark), cookie banner, cookie settings and phone menu. The 20 other signed-in pages are the same empty-state template inside the shell; they get their own shots when their content is built.
+
+**Open at the gate:** the pages the marketing nav links to (T18); Dependabot #3 (ESLint 10 and TypeScript, CI red) is left open.
+
+---
+
 ## Task list
 
 ### Phase 0 — Foundations and guard-rails
@@ -141,8 +155,8 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T1.2** Primitive components — 2026-11-01. 39 component files in `web/components/ui/` (more than 40 components; the list is in the README), each shown in every state on `/design`; the date and number logic, CSV export and table sorting are pure, separately tested modules in `lib/ui/`. **Verified:** 571 unit tests (including jsdom component tests for the combobox's stale-search ordering and debounce, table sorting, selection and keys, the typed-name deletion gate and calendar navigation) and 131 Playwright tests, 100 of them in Chromium: real keyboard behaviour (focus kept, trapped and returned) for **Dialog, Sheet, Menu, Combobox, SegmentedControl, DatePicker and DataTable**, plus the other controls; and **axe-core with zero violations** at WCAG 2.2 AA plus best practice, in light and dark, at desktop and phone width, with reduced motion, and with each of 11 overlays open. Seven deliberate breakages of the components and logic each failed a test. `pnpm audit` and Semgrep are clean. **Found and fixed on the way:** `tailwind-merge` dropped the text colour from every `text-<size> text-<colour>` pair, which turned filled buttons' labels black (decision 38); the invisible switch thumb (palette is off); a hydration mismatch for users with reduced motion; popovers announced as unnamed dialogs; and a calendar and table that overflowed a 360 px phone (decisions 37 to 42). **Deferred on purpose, to the tasks that own them:** CommandPalette and KeyboardShortcutsSheet (T1.4), AskMadyPanel (T14.4), OrgChart canvas (T12.2), WeekGrid (T9.5) and Charts (first use, T14.1). Owner: none.
 - [x] **T1.3** App shell — 2026-11-01. `AppShell` for the signed-in app: translucent sidebar with the six groups and 21 pages, company switcher at the top and person at the bottom, collapse to 72 px with `[` (remembered by cookie, drawn by the server), a 56 px translucent toolbar (breadcrumbs, title, search, help, notifications bell, account menu with the theme), a phone tab bar with a "More" sheet, a skip link, the "Loading your workspace…" splash, and an empty page for every sidebar route. **Verified:** 612 unit tests (navigation, sidebar state, and component tests for the shell) and 198 Playwright tests. The shell runs against the production build at 390, 768, 1280 and 1920 px in light and dark: no sideways scroll, a 56 px toolbar, sidebar from 768 px and tab bar below it, content never under either, **axe zero violations in all eight combinations**, the open notification and account menus too, 44 px tab targets, the sheet's focus handling, and all 21 routes serving their page. Six deliberate breakages each failed a test. Semgrep clean. **Design QA (plan 5.12):** light and dark at 390, 768, 1280 and 1920 px, plus collapsed and the phone sheet, in `docs/screenshots/phase-1/`; 4 px spacing; one left edge; loading placeholders match the final layout (and stay round when collapsed); keyboard order (skip link first), visible focus and Esc closing the top layer checked in tests; axe clean; copy per 5.8; motion eases and is instant under reduced motion. **Found and fixed:** at 768 px the toolbar did not fit beside the sidebar and the page scrolled sideways by 52 px (the wide search box now starts at 1024 px; below that it is the icon). **Wired in later tasks:** search and help announce events that T1.4 listens for; Sign out arrives with T2.4/T3.4; counts and notifications with their APIs. Owner: none.
 - [x] **T1.4** Command palette and shortcuts — 2026-11-02. `Ctrl/Cmd+K` palette (static pages, recents), `?` shortcuts sheet, one global handler (`[`, `G` then D/E/R/C/L/A/T, `/`, `N`, row keys and `.` row menu), all listed in the sheet. **Verified:** 6 Playwright checks (each shortcut, sheet lists all, axe 0 in light and dark with both overlays open) plus unit tests; axe found and I fixed a low-contrast palette hint, an unreachable scroll area and bad heading ids. Owner: none.
-- [ ] **T1.5** Marketing layout
-- [ ] **Phase 1 gate**
+- [x] **T1.5** Marketing layout — 2026-11-02. Sticky translucent header with a phone menu sheet, 4-column footer with legal line from `brand.config.ts`, section components (hero, feature grid, alternating band, CTA band, FAQ accordion, pricing cards, headcount slider), cookie banner and preferences (`brand.cookieConsent`, Reject as easy as Accept), and a sample home page. **Verified:** Lighthouse mobile 95 / 100 / 96 / 100 (performance, accessibility, best practice, SEO); axe 0 on the home page at 4 widths × 2 themes, the menu and cookie dialog. Axe found and I fixed a low-contrast CTA lead. Header and footer links point at pages built in T18 and do not prefetch until then (decision 49). Owner: none.
+- [x] **Phase 1 gate** — 2026-11-02, summary above.
 
 ### Phase 2 — Backend core (identity, tenancy, RBAC, audit, files, email)
 - [ ] **T2.1** Models
