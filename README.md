@@ -82,6 +82,23 @@ signing secret from `docker compose logs stripe-cli` and put it in `.env` as
 project has been archived and its Docker images withdrawn, so RustFS (Apache-2.0, S3-compatible)
 was chosen with the owner's approval. Production still uses Cloudflare R2.
 
+## API (`api/`, FastAPI on Python 3.12)
+
+```bash
+cd api
+uv sync                                   # installs exactly what uv.lock says (fetches Python 3.12 if needed)
+uv run ruff check . && uv run ruff format --check . && uv run mypy      # lint, format, mypy --strict
+docker compose up -d --wait               # from the repo root: the integration tests need Postgres and Redis
+uv run pytest                             # fails with a clear message if the stack is not running
+uv run uvicorn app.main:create_app --factory --reload --port 8000       # needs a .env, see below
+docker build -t brand-api:dev api/        # production image: multi-stage, non-root (uid 10001), pinned digests
+```
+
+- **Endpoints:** `GET /api/v1/health` (liveness) and `GET /api/v1/ready` (Postgres and Redis; `503` if either is down). Interactive docs at `/api/v1/docs` when `APP_ENV` is `local` or `test`; they are not served when deployed.
+- **Errors** always look like `{"error": {"code", "message", "field"?, "request_id"}}`, and every response carries `X-Request-ID`.
+- **Configuration** comes from environment variables, and locally from the git-ignored `.env` in the repo root (`app/core/config.py`). Always required: `APP_ENV` (`local`, `test`, `staging` or `production`), `DOMAIN`, `WEB_ORIGIN`, `ADMIN_ORIGIN`, `API_ORIGIN`, `DATABASE_URL`, `REDIS_URL`, `SESSION_SECRET`, `FIELD_ENCRYPTION_KEYS`, `BLIND_INDEX_KEY`. `staging` and `production` refuse to start unless every third-party setting is present, and the error names the missing variables, never their values. Generate secrets with the commands in `deployment-requirements.txt` section 3.
+- **Logs** are one JSON object per line. Keys such as `password`, `token`, `authorization`, `ni_number` and `salary` are dropped, and passwords inside URLs are masked. Access lines never include the query string.
+
 ## Secret guard-rails (set up once per clone)
 
 ```bash
