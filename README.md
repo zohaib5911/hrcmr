@@ -152,6 +152,18 @@ Tests: logic in `lib/ui/*.test.ts` and `components/ui/*.test.tsx` (`pnpm test`, 
 focus and layout in `tests/e2e/design-components.spec.ts`; accessibility in `tests/e2e/design-a11y.spec.ts`
 (axe-core, zero violations, both themes, phone width, reduced motion, and every overlay while it is open).
 
+### The signed-in app shell (`web/app/(app)/`, `web/components/app/`)
+
+Every signed-in page is drawn inside `AppShell`: a translucent 260 px sidebar (72 px collapsed; press
+`[`, and the choice is remembered in a cookie so the server draws it right), a sticky 56 px toolbar with
+breadcrumbs, the page title, search, help, notifications and the account menu, and on phones a bottom
+tab bar (Home, People, Compliance, Time, Me) with a "More" sheet.
+
+- **One list.** `lib/navigation.ts` defines every sidebar item once; the sidebar, tab bar, breadcrumbs and placeholder pages are built from it, and a test fails if an item has no page. To add a page: add it there, create `app/(app)/<route>/page.tsx`.
+- **Placeholder pages.** Each sidebar route has a page (`PlaceholderPage`) that says what will appear there. The feature task that owns a route replaces it with the real page, using `PageHeader` for the title.
+- **No session yet.** Until the sign-in work (T3.4) the layout passes `session={null}` and the company and person show as loading placeholders, not invented names. Counts on sidebar rows come from the `badges` prop, and the bell's from `notificationCount`; both are empty until the API supplies them.
+- **Evidence.** Design QA screenshots (four widths, both themes, collapsed, phone sheet) are in `docs/screenshots/phase-1/`. Regenerate them with `SCREENSHOTS=1 pnpm exec playwright test shell-screenshots --project=production`.
+
 ### Typed API client
 
 The API is the contract. `pnpm gen:api` (run in `web/`, needs `uv`) exports the OpenAPI document with `python -m app.cli export-openapi` and writes `web/lib/api/schema.ts`; never edit that file. `pnpm gen:api:check` fails if it is stale (a pre-commit hook runs it when API code changes). Use the client from `web/lib/api/client.ts`: `createApiClient({ baseUrl })` is typed against the schema, sends the session cookie, and adds the CSRF header on state-changing requests. Paths in the spec are relative to the `/api/v1` server, so `NEXT_PUBLIC_API_URL` ends in `/api/v1`.

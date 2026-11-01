@@ -63,7 +63,7 @@ export function MenuItem({
   className,
   children,
   ...props
-}: ComponentProps<typeof MenuPrimitive.Item> & ItemExtras) {
+}: Omit<ComponentProps<typeof MenuPrimitive.Item>, "asChild"> & ItemExtras) {
   return (
     <MenuPrimitive.Item className={cn(item, destructive && DESTRUCTIVE, className)} {...props}>
       {icon ? <span className="shrink-0">{icon}</span> : null}
@@ -141,7 +141,7 @@ export function ContextMenuItem({
   className,
   children,
   ...props
-}: ComponentProps<typeof ContextPrimitive.Item> & ItemExtras) {
+}: Omit<ComponentProps<typeof ContextPrimitive.Item>, "asChild"> & ItemExtras) {
   return (
     <ContextPrimitive.Item className={cn(item, destructive && DESTRUCTIVE, className)} {...props}>
       {icon ? <span className="shrink-0">{icon}</span> : null}

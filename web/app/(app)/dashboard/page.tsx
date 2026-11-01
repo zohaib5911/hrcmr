@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 
+import { PlaceholderPage } from "@/components/app/placeholder-page";
+
 export const metadata: Metadata = { title: "Dashboard" };
 
-export default function DashboardPage() {
-  return (
-    <main>
-      <h1>Dashboard</h1>
-    </main>
-  );
+export default function Page() {
+  return <PlaceholderPage id="dashboard" />;
 }

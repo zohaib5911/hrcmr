@@ -40,7 +40,7 @@ export function SkeletonText({ lines = 3, className }: { lines?: number; classNa
 export function SkeletonPerson({ className }: { className?: string }) {
   return (
     <Group label="Loading" className={cn("flex items-center gap-3", className)}>
-      <Skeleton className="rounded-pill size-10" />
+      <Skeleton className="rounded-pill size-10 shrink-0" />
       <div className="flex flex-1 flex-col gap-2">
         <Skeleton className="h-4 w-1/3" />
         <Skeleton className="h-3 w-1/2" />
