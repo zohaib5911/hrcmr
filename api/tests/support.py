@@ -10,12 +10,13 @@ from typing import Any
 
 from app.core.config import Settings
 
-POSTGRES_PORT = os.environ.get("POSTGRES_PORT", "5432")
+POSTGRES_TEST_PORT = os.environ.get("POSTGRES_TEST_PORT", "5433")
 REDIS_PORT = os.environ.get("REDIS_PORT", "6379")
-# Matches docker-compose.yml. Override with TEST_DATABASE_URL / TEST_REDIS_URL (CI does).
+# Matches the `postgres-test` service in docker-compose.yml (a disposable server, superuser
+# access). Override with TEST_DATABASE_URL / TEST_REDIS_URL (CI does).
 TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL") or (
     f"postgresql+asyncpg://postgres:{os.environ.get('POSTGRES_PASSWORD', 'postgres')}"
-    f"@localhost:{POSTGRES_PORT}/app"
+    f"@localhost:{POSTGRES_TEST_PORT}/postgres"
 )
 TEST_REDIS_URL = os.environ.get("TEST_REDIS_URL") or f"redis://localhost:{REDIS_PORT}/15"
 

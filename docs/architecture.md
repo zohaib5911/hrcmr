@@ -48,6 +48,20 @@ injects `company_id` through a tenant-scoped session, and Postgres row-level sec
 checks `company_id = current_setting('app.company_id')::uuid` per transaction. Super-admin
 access uses a separate database role and is fully audited.
 
+Details that matter when changing the schema:
+
+- The policy is `company_id = app_current_company_id()`, which reads the `app.company_id` setting
+  that every tenant transaction sets with `set_config(..., true)`. Unset or empty gives NULL, so a
+  connection with no company sees no tenant rows. `app_owner` (migrations, backups) is not subject
+  to the policy and is never used by the API; the policy is deliberately not `FORCE`d, so `pg_dump`
+  works.
+- A view runs with its **owner's** rights, so a plain view over a tenant table would leak every
+  company's rows. Views must be `security_invoker`; materialised views and `SECURITY DEFINER`
+  functions are not allowed. `python -m app.cli check-rls` and the test suite enforce this.
+- Row-Level Security protects against missing filters and application bugs. It does not stop code
+  that can run arbitrary SQL as `app_user` from changing the setting, so queries are parameterised
+  and raw SQL is confined to `app/db/` (a test enforces it).
+
 ## Data protection
 
 Sensitive fields (National Insurance, passport, bank details, share codes, CoS numbers,

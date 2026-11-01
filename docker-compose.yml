@@ -39,6 +39,30 @@ services:
       start_period: 10s
 
   # ---------------------------------------------------------------------------------------------
+  # Disposable PostgreSQL for the automated tests. Data lives in memory and durability is switched
+  # off, so it is fast, resets on every restart, and can never clash with the roles and passwords
+  # of your development database (roles are cluster-wide, and the DB tests create them).
+  # ---------------------------------------------------------------------------------------------
+  postgres-test:
+    image: pgvector/pgvector:0.8.7-pg16
+    command:
+      ["postgres", "-c", "fsync=off", "-c", "synchronous_commit=off", "-c", "full_page_writes=off"]
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: postgres
+    ports:
+      - "127.0.0.1:${POSTGRES_TEST_PORT:-5433}:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------------------------
   # Redis 7: sessions, rate limits, ARQ job queue, cache.
   # ---------------------------------------------------------------------------------------------
   redis:

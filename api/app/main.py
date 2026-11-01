@@ -35,6 +35,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         engine = create_engine(settings)
         redis = create_redis(settings)
+        app.state.engine = engine
         app.state.probes = {
             "database": partial(ping_database, engine),
             "redis": partial(ping_redis, redis),

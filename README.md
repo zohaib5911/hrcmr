@@ -61,6 +61,7 @@ user must be in the `docker` group (log out and in again after adding it).
 | Service | Address (this machine only) | Stands in for | Notes |
 |---|---|---|---|
 | `postgres` | `localhost:5432`, database `app` | Railway Postgres | PostgreSQL 16 with pgvector. User `postgres`; roles `app_owner` and `app_user` are created by T0.5. |
+| `postgres-test` | `localhost:5433` | none | Disposable Postgres (in memory) used by the automated tests. Resets on restart. |
 | `redis` | `localhost:6379` | Railway Redis | Sessions, rate limits, job queue. |
 | `rustfs` | S3 API `http://localhost:9000`, console `http://localhost:9001` | Cloudflare R2 | Private bucket `files-dev` is created by the one-shot `rustfs-init` job, which then exits (that is normal). |
 | `mailpit` | SMTP `localhost:1025`, inbox `http://localhost:8025` | Resend | Catches every e-mail. Nothing leaves your machine. |
@@ -69,7 +70,7 @@ user must be in the `docker` group (log out and in again after adding it).
 
 All ports are bound to `127.0.0.1`. The local credentials (`postgres`/`postgres` for Postgres,
 `rustfsadmin` for RustFS) protect throwaway containers only. Override any of them, or any port
-(`POSTGRES_PORT`, `REDIS_PORT`, `S3_PORT`, `S3_CONSOLE_PORT`, `MAILPIT_SMTP_PORT`,
+(`POSTGRES_PORT`, `POSTGRES_TEST_PORT`, `REDIS_PORT`, `S3_PORT`, `S3_CONSOLE_PORT`, `MAILPIT_SMTP_PORT`,
 `MAILPIT_UI_PORT`, `CLAMAV_PORT`), in a local `.env`. If you change `RUSTFS_ACCESS_KEY` or
 `RUSTFS_SECRET_KEY`, set `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` to the same values.
 
@@ -98,6 +99,32 @@ docker build -t brand-api:dev api/        # production image: multi-stage, non-r
 - **Errors** always look like `{"error": {"code", "message", "field"?, "request_id"}}`, and every response carries `X-Request-ID`.
 - **Configuration** comes from environment variables, and locally from the git-ignored `.env` in the repo root (`app/core/config.py`). Always required: `APP_ENV` (`local`, `test`, `staging` or `production`), `DOMAIN`, `WEB_ORIGIN`, `ADMIN_ORIGIN`, `API_ORIGIN`, `DATABASE_URL`, `REDIS_URL`, `SESSION_SECRET`, `FIELD_ENCRYPTION_KEYS`, `BLIND_INDEX_KEY`. `staging` and `production` refuse to start unless every third-party setting is present, and the error names the missing variables, never their values. Generate secrets with the commands in `deployment-requirements.txt` section 3.
 - **Logs** are one JSON object per line. Keys such as `password`, `token`, `authorization`, `ni_number` and `salary` are dropped, and passwords inside URLs are masked. Access lines never include the query string.
+
+### Database (PostgreSQL 16, Row-Level Security)
+
+Two login roles, both created by a one-off superuser step and neither able to bypass Row-Level
+Security: **`app_owner`** owns the schema and runs migrations, and **`app_user`** is what the running
+API connects as. Every tenant table is confined to one company by the database itself, and
+`TenantSession` (`app/db/session.py`) adds a second, application-level filter.
+
+```bash
+# One-off per environment. Needs a SUPERUSER URL, passed only for this command (never in the API's settings):
+DATABASE_URL_ADMIN=postgresql+asyncpg://postgres:...@host/db  uv run python -m app.cli provision-db
+uv run python -m app.cli migrate          # alembic upgrade head, as app_owner (refuses any other role)
+uv run python -m app.cli check-rls        # fails if a tenant table, view or function breaks the rules below
+uv run alembic revision --autogenerate -m "describe the change"
+```
+
+`provision-db` takes the role names and passwords from `DATABASE_URL_OWNER` and `DATABASE_URL`
+(user must be `app_owner` / `app_user`), so there is nothing extra to configure. It is safe to re-run.
+
+**Rules for anyone writing a migration** (a test fails if they are broken):
+
+- A table with a `company_id` column must call `enable_tenant_rls("table")` in `upgrade()`; a table with `updated_at` must call `add_updated_at_trigger("table")`. Use `RecordMixin` and `TenantMixin` from `app/db/base.py`.
+- A view over tenant tables **must** be made with `create_tenant_view(...)`. A plain view runs as its owner, who is not subject to the policy, and shows every company's rows. Materialised views and `SECURITY DEFINER` functions are not allowed.
+- Raw SQL (`text()`, `exec_driver_sql`) lives only under `app/db/`. Everything else goes through the ORM via `TenantSession`.
+
+The tests use a **disposable Postgres** (`postgres-test`, port 5433, in memory), never your development database, because roles are cluster-wide and the tests create and re-password them.
 
 ## Secret guard-rails (set up once per clone)
 

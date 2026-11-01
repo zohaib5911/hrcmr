@@ -35,8 +35,9 @@ COPY --from=builder /opt/venv /opt/venv
 WORKDIR /app
 # Code is owned by root and read-only to the app user.
 COPY app ./app
-COPY gunicorn.conf.py ./
-RUN python -m compileall -q app gunicorn.conf.py
+COPY alembic ./alembic
+COPY alembic.ini gunicorn.conf.py ./
+RUN python -m compileall -q app alembic gunicorn.conf.py
 
 ENV PATH="/opt/venv/bin:${PATH}" \
     PYTHONUNBUFFERED=1 \

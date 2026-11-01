@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "UK HR and sponsor-compliance platform: FastAPI backend"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+    "alembic>=1.20.1",
     "asyncpg>=0.32.0",
     "fastapi>=0.162.0",
     "gunicorn>=26.2.0",
@@ -48,8 +49,10 @@ ignore = ["RUF012"]
 
 [tool.ruff.lint.per-file-ignores]
 # Tests may assert, and use obviously fake secret sentinels.
-"**/tests/**" = ["S101", "S105", "S106", "TC001", "TC002", "TC003"]
+"**/tests/**" = ["S101", "S105", "S106", "TC001", "TC002", "TC003", "E501"]
 "conftest.py" = ["S101", "S105", "S106", "TC001", "TC002", "TC003"]
+# Alembic files are generated from a template; typing-only import placement is noise there.
+"alembic/**" = ["TC001", "TC002", "TC003"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]
