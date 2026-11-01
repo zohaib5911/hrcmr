@@ -5,6 +5,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page } from "@playwright/test";
 
+import { settled } from "./settle";
+
 const TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"];
 
 /**
@@ -64,6 +66,7 @@ function accepted(
 }
 
 export async function audit(page: Page, where: string, mode: Mode = {}) {
+  await settled(page);
   const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
 
   const violations = results.violations.flatMap((v) =>

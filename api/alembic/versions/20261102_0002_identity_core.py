@@ -36,18 +36,21 @@ UPDATED_AT_TABLES = (
     "notifications",
 )
 
-# What the API's role may do to tables that have no tenant policy (they are read before a company is
-# known, or are not about a company at all). The owner, used by migrations, can do everything.
-GRANTS = {
-    "companies": "SELECT, INSERT, UPDATE",
-    "users": "SELECT, INSERT, UPDATE",
-    "platform_admins": "SELECT",
-    "sessions": "SELECT, INSERT, UPDATE, DELETE",
-    "invitations": "SELECT, INSERT, UPDATE",
-    "email_tokens": "SELECT, INSERT, UPDATE",
-    "terms_versions": "SELECT",
-    "terms_acceptances": "SELECT, INSERT",
-}
+# What the API's role (app_user) may do to tables that have no tenant policy (they are read before
+# a company is known, or are not about a company at all). The owner, used by migrations, can do
+# everything. Written out in full, one statement each, so each can be read and checked on its own.
+GRANTS = (
+    "GRANT SELECT, INSERT, UPDATE ON companies TO app_user",
+    "GRANT SELECT, INSERT, UPDATE ON users TO app_user",
+    "GRANT SELECT ON platform_admins TO app_user",
+    "GRANT SELECT, INSERT, UPDATE, DELETE ON sessions TO app_user",
+    "GRANT SELECT, INSERT, UPDATE ON invitations TO app_user",
+    "GRANT SELECT, INSERT, UPDATE ON email_tokens TO app_user",
+    "GRANT SELECT ON terms_versions TO app_user",
+    "GRANT SELECT, INSERT ON terms_acceptances TO app_user",
+)
+if APP_ROLE != "app_user":  # the statements above name the role literally
+    raise RuntimeError("the grants in this migration name app_user, which is no longer APP_ROLE")
 
 # The signed-in person, set per transaction next to `app.company_id`. Unset gives NULL, which
 # matches nothing, so a connection that does not say who it is sees no memberships.
@@ -655,8 +658,8 @@ def upgrade() -> None:
         "FOR EACH STATEMENT EXECUTE FUNCTION audit_events_append_only()"
     )
 
-    for table, privileges in GRANTS.items():
-        op.execute(f"GRANT {privileges} ON {table} TO {APP_ROLE}")
+    for grant in GRANTS:
+        op.execute(grant)
 
 
 def downgrade() -> None:
