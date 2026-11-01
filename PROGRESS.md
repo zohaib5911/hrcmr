@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-01
-- **Current task:** Phase 0 gate
+- **Current task:** T1.1 Tokens and theming
 
 ---
 
@@ -88,6 +88,20 @@ Checked 2026-11-01 on the build machine: git 2.56, Node 24.21, Python 3.14.8 (th
 
 Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
+### Phase 0 — Foundations and guard-rails — gate passed 2026-11-01
+
+**What exists.** A monorepo with a private GitHub remote; a one-command local stack (Postgres 16 with pgvector, a disposable test Postgres, Redis, RustFS for R2, Mailpit, ClamAV, Stripe CLI on request); a FastAPI service (settings that fail closed, JSON logging with secret redaction, request ids, one error envelope, health and readiness); a database layer in which the **database itself** confines every tenant table to one company (Row-Level Security, two non-bypass roles, a session that sets the company per transaction, drift checks for views and functions); a Next.js 16 app with host routing, a per-request nonce CSP and the section 4.6 headers; a typed API client generated from the API's own OpenAPI document; secret guard-rails at commit time, in the build and in CI; and the CI, security-scan and Dependabot setup.
+
+**Regression, on the commit that CI ran (`b4be559`, run 41323265569, all 11 jobs green):** API 172 tests; web 113 unit tests; 32 guard-script tests; 29 Playwright tests (security headers, host routing, a real typed call to a live API). `ruff`, `mypy --strict`, ESLint and `tsc --strict` are clean. Both container images pass Trivy (no fixable HIGH or CRITICAL findings) and run hardened (read-only filesystem, no capabilities, uid 10001). `pip-audit` and production `pnpm audit` report nothing. A ZAP baseline against the production web container reports 0 failures.
+
+**Security properties proved by tests that fail when the property is broken** (each by deliberately breaking the code and watching the suite go red): company A cannot read, change, delete, insert or move company B's rows even with raw SQL as the application role; the admin pages are a 404 on the main host (including 20 odd or encoded paths); every page carries a fresh CSP nonce and no `unsafe-inline`; secrets and the key-like words in the plan's list never reach the logs; no `NEXT_PUBLIC_*` name outside the allowlist exists; a fake secret fails the commit hook and the CI secret scan.
+
+**Screenshots.** None for this phase: it has no designed UI (T1.1 onward does).
+
+**Decisions and risks to remember** (details above): decision 16 (views must be `security_invoker`; affects T7.1 and T8.2); decision 20 (nonce CSP against cached pages, to be raised at T18.3 and T20.4); decision 22 (the web server must bind `0.0.0.0`; check `HOSTNAME` on Railway at T23.1); decision 26 (14-day cooldown; remove the `certifi` exception after 2026-11-06); decision 12 (never name a log field with `token` in it).
+
+**Open at the gate (none block Phase 1):** protect `main` and enable private vulnerability reporting (yours); decide on Dependabot PRs #1 and #2; the fake-secret check as a real GitHub PR (needs your go-ahead); no local `.env` generator yet (written when the first end-to-end test needs real settings).
+
 ---
 
 ## Task list
@@ -101,7 +115,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T0.6** Web skeleton — 2026-11-01. `web/`: Next.js 16.4.2, React 19.3, TypeScript 5.9 strict, Tailwind v4, shadcn/ui (Radix, Lucide) initialised, ESLint 9, Prettier; route groups `(marketing) (auth) (app) (admin)` with minimal pages; `proxy.ts` with host routing, per-request nonce CSP and the section 4.6 headers; `/healthz`; standalone Dockerfile (non-root, digest-pinned). Verified: 87 unit tests and 23 Playwright tests pass, also when run against the hardened container (uid 10001, no capabilities, read-only filesystem); `tsc`, ESLint, `pnpm build` (env check, build, bundle secret scan) clean; `pnpm audit --prod` clean. Header checks cover every page, the nonce on every script tag, static assets and attacker-supplied headers. The `(admin)` pages are a 404 on the main host, including 20 encoded or odd path variants. Four deliberate breakages (unsafe-inline, no admin guard, no CSP header, reused nonce) each fail the suites. Found and fixed: a rewrite bug that made the admin host return 404 (decision 22). Owner: none.
 - [x] **T0.7** Typed API client pipeline — 2026-11-01. `python -m app.cli export-openapi` (needs no environment, leaks nothing); `pnpm gen:api` / `gen:api:check` produce and verify `web/lib/api/schema.ts`; `web/lib/api/client.ts` (`openapi-fetch`, credentials included, CSRF header on writes, base-URL helpers); pre-commit hook for staleness. Verified: 172 API tests, 113 web unit tests (including compile-time type assertions), and 27 Playwright tests, among them a REAL call from the typed client to a running FastAPI server for `/health` and `/ready`. Fixed on the way: the spec advertised FastAPI's `HTTPValidationError` for 422 although the API returns the error envelope, so every operation now documents `ErrorEnvelope` for 4XX/5XX; and paths are now relative to a `/api/v1` server, so the client does not request `/api/v1/api/v1/health`. Owner: none.
 - [x] **T0.8** CI pipelines — 2026-11-01. `.github/workflows/ci.yml` (10 jobs plus the **CI passed** gate), `security.yml` (weekly and manual ZAP baseline, staging only), `dependabot.yml` (weekly, grouped, 14-day cooldown), `.zap/rules.tsv`. **Verified:** CI run 41323265569 on `main` is green (all 11 jobs); Dependabot's first two pull requests (#1, #2) also ran the whole workflow on the `pull_request` trigger and passed. A fresh clone of the commit passes the API (172 tests), the web unit tests (113) and guard-script tests (32), the generated-types check, the build with bundle scan, and 29 Playwright tests. Every scanner was run locally first, which found and fixed real issues (decisions 26 to 29). **Fake-secret check:** the exact CI gitleaks command exits 0 on the clean history (9 commits) and 1 on a commit that adds a made-up secret, with the value redacted. **Not done:** the same check as a real GitHub pull request. Creating a branch and PR was blocked by the permission classifier and I did not work around it. If you want it, say so: I would open a draft PR, confirm it goes red, then close it and delete the branch. Owner: protect `main` (require **CI passed**); decide on Dependabot PRs #1 and #2 (see the table above).
-- [ ] **Phase 0 gate** — full suite, summary here, nothing broken
+- [x] **Phase 0 gate** — 2026-11-01. Full suite green on `b4be559` in CI; summary under *Phase summaries*. Owner: none blocking.
 
 ### Phase 1 — Design system and app shell
 - [ ] **T1.1** Tokens and theming
