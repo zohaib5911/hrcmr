@@ -123,7 +123,7 @@ def test_openapi_documents_both_endpoints_and_the_503() -> None:
     schema = app.openapi()
     # Paths are relative to the documented server, which is where the web app's base URL points.
     assert schema["servers"] == [{"url": "/api/v1"}]
-    assert set(schema["paths"]) == {"/health", "/ready"}
+    assert {"/health", "/ready"} <= set(schema["paths"])
     assert schema["paths"]["/ready"]["get"]["operationId"] == "health_ready"
     ready = schema["paths"]["/ready"]["get"]["responses"]
     assert {"200", "503"} <= set(ready)

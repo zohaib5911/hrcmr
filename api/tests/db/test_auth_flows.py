@@ -308,7 +308,8 @@ async def test_the_second_step_is_asked_for_and_a_code_works_once(
     assert outcome.mfa_challenge is True
     assert outcome.session.mfa_passed is False
 
-    code = totp(secret, at=START.timestamp())
+    # The enrolment used this moment's code, so signing in needs the next one.
+    code = totp(secret, at=START.timestamp() + 30)
     async with GlobalSession(engine) as db:
         with pytest.raises(InvalidMfaCodeError):
             await auth.complete_mfa(

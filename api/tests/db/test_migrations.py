@@ -73,7 +73,7 @@ def test_migrations_apply_roll_back_and_apply_again_cleanly() -> None:
         command.upgrade(config, "head")
         assert _functions(db.owner_url) == FUNCTIONS
         assert asyncio.run(_query(db.owner_url, "select version_num from alembic_version")) == [
-            "0002_identity_core"
+            "0003_first_terms"
         ]
         assert _tables(db.owner_url) == IDENTITY_TABLES
         assert _all_functions(db.owner_url) == FUNCTIONS | IDENTITY_FUNCTIONS

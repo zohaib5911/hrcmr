@@ -70,6 +70,19 @@ class GlobalSession(AsyncSession):
     def __init__(self, bind: AsyncEngine, *, user_id: uuid.UUID | None = None) -> None:
         super().__init__(bind, expire_on_commit=False, info={USER_KEY: user_id})
 
+    async def scope_to_company(self, company_id: uuid.UUID) -> None:
+        """Confine the rest of this transaction (and later ones) to one company, like a tenant
+        session. For the moment a new company is created and its first rows are written."""
+        self.info[COMPANY_KEY] = company_id
+        await self.execute(_SET_COMPANY, {"company_id": str(company_id)})
+
+    async def act_as(self, user_id: uuid.UUID) -> None:
+        """Say who this is, part-way through a request (sign-in learns it from the password).
+
+        Applies to the transaction in progress and to every one after it on this session."""
+        self.info[USER_KEY] = user_id
+        await self.execute(_SET_USER, {"user_id": str(user_id)})
+
 
 # --- Session events. They act only on sessions that carry a company id ----------------------------
 

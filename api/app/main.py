@@ -20,6 +20,10 @@ from app.core.logging import configure_logging, get_logger
 from app.core.middleware import RequestContextMiddleware
 from app.core.redis import create_redis, ping_redis
 from app.db.engine import create_engine, ping_database
+from app.integrations.email import LoggingMailer, Mailer
+from app.integrations.turnstile import Turnstile
+from app.modules.auth.container import build_container
+from app.modules.auth.router import router as auth_router
 from app.modules.health.router import router as health_router
 
 if TYPE_CHECKING:
@@ -70,7 +74,7 @@ def _install_openapi(app: FastAPI) -> None:
     app.openapi = openapi  # type: ignore[method-assign]
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging()
 
@@ -79,6 +83,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         engine = create_engine(settings)
         redis = create_redis(settings)
         app.state.engine = engine
+        app.state.auth = build_container(
+            settings, redis, mailer or LoggingMailer(), Turnstile(settings.turnstile_secret_key)
+        )
         app.state.probes = {
             "database": partial(ping_database, engine),
             "redis": partial(ping_redis, redis),
@@ -125,5 +132,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     register_exception_handlers(app)
     app.include_router(health_router, prefix=API_PREFIX)
+    app.include_router(auth_router, prefix=API_PREFIX)
     _install_openapi(app)
     return app

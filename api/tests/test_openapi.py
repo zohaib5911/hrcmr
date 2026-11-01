@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -103,7 +104,17 @@ def test_export_needs_no_environment_and_leaks_nothing() -> None:
     document = json.loads(result.stdout)
     assert "/health" in document["paths"]
     text = result.stdout.lower()
-    for word in ("password", "secret", "postgresql", "redis://"):
+    # Field names such as "password" are part of the contract; connection strings and key prefixes
+    # would be a leak.
+    for word in (
+        "postgresql",
+        "redis://",
+        "sk_live",
+        "sk_test",
+        "whsec_",
+        "sk-ant-",
+        "private key",
+    ):
         assert word not in text
 
 
@@ -124,8 +135,10 @@ def test_paths_are_relative_to_the_server_so_clients_do_not_double_the_prefix(
 
 
 def test_operation_ids_are_readable(schema: dict[str, Any]) -> None:
-    ids = {op["operationId"] for _, _, op in operations(schema)}
-    assert ids == {"health_health", "health_ready"}
+    ids = [op["operationId"] for _, _, op in operations(schema)]
+    assert {"health_health", "health_ready", "auth_login", "auth_signup"} <= set(ids)
+    assert len(ids) == len(set(ids))  # unique
+    assert all(re.fullmatch(r"[a-z]+(_[a-z0-9]+)+", op_id) for op_id in ids)  # tag_name, no noise
 
 
 def test_the_served_document_matches_the_exported_one() -> None:

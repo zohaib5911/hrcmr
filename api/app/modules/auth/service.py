@@ -44,12 +44,14 @@ from app.modules.auth.passwords import (
     spend_verification_time,
     verify_password,
 )
-from app.modules.identity.models import User
+from app.modules.companies.models import Company
+from app.modules.identity.models import Membership, User
 
 if TYPE_CHECKING:
     from redis.asyncio import Redis
     from sqlalchemy.ext.asyncio import AsyncSession
 
+    from app.db.session import GlobalSession
     from app.modules.auth.sessions import SessionData, SessionStore
 
 logger = get_logger("app.auth")
@@ -171,12 +173,25 @@ class AuthService:
                 )
                 await self._notifier.account_locked(user.id, str(user.email), seconds)
 
+    async def failure_count(self, email: str) -> int:
+        """Wrong passwords in a row for this address (whether or not it has an account)."""
+        return int(await self._redis.get(f"login:fails:{hashed(email.strip().lower())}") or 0)
+
+    async def clear_lockout(self, email: str) -> None:
+        await self._clear_failures(email.strip().lower())
+
     async def _clear_failures(self, email: str) -> None:
         key = hashed(email)
         await self._redis.delete(f"login:fails:{key}", f"login:lock:{key}")
 
     async def login(
-        self, db: AsyncSession, *, email: str, password: str, ip: str | None, user_agent: str | None
+        self,
+        db: GlobalSession,
+        *,
+        email: str,
+        password: str,
+        ip: str | None,
+        user_agent: str | None,
     ) -> LoginOutcome:
         email = email.strip().lower()
         await self._check_limits(email, ip)
@@ -200,11 +215,35 @@ class AuthService:
             user.password_hash = hash_password(password)
 
         await self._alert_if_new_device(user, ip, user_agent)
+        return await self.open_session(db, user, ip=ip, user_agent=user_agent)
+
+    async def open_session(
+        self, db: GlobalSession, user: User, *, ip: str | None, user_agent: str | None
+    ) -> LoginOutcome:
+        """Start a session for a person who has just proved who they are (password, e-mail link).
+
+        With exactly one active company it becomes the active one; otherwise the person picks."""
+        await db.act_as(user.id)
+        rows = (
+            (
+                await db.execute(
+                    select(Membership.company_id)
+                    .join(Company, Company.id == Membership.company_id)
+                    .where(
+                        Membership.user_id == user.id,
+                        Membership.status == "active",
+                        Company.status == "active",
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
         challenge = user.mfa_enabled
         token, data = await self._sessions.create(
             db,
             user_id=user.id,
-            company_id=None,
+            company_id=rows[0] if len(rows) == 1 else None,
             ip=ip,
             user_agent=user_agent,
             mfa_passed=not challenge,
@@ -301,11 +340,20 @@ class AuthService:
         """Switch two-step verification on once the person proves their app has the secret.
 
         Returns the ten recovery codes, to be shown once; only their hashes are kept."""
-        if verify_totp(secret, code) is None:
+        step = verify_totp(secret, code)
+        if step is None:
             raise InvalidMfaCodeError
+        # The code that proved the setup cannot also be used to sign in a moment later.
+        await self._redis.set(f"totp:used:{user.id}:{step}", 1, ex=_TOTP_REPLAY_TTL, nx=True)
         codes = generate_recovery_codes()
         user.mfa_secret = secret
         user.mfa_enabled = True
+        user.recovery_codes_hash = [hash_recovery_code(c, self._recovery_key) for c in codes]
+        return codes
+
+    def regenerate_recovery_codes(self, user: User) -> list[str]:
+        """Replace all ten codes (the old ones stop working). Shown once, stored only as hashes."""
+        codes = generate_recovery_codes()
         user.recovery_codes_hash = [hash_recovery_code(c, self._recovery_key) for c in codes]
         return codes
 

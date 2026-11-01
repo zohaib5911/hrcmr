@@ -8,7 +8,7 @@ import {
   serverApiBaseUrl,
   type ApiErrorEnvelope,
 } from "./client";
-import type { components } from "./schema";
+import type { components, paths } from "./schema";
 
 type Health = components["schemas"]["HealthResponse"];
 type Ready = components["schemas"]["ReadyResponse"];
@@ -109,8 +109,16 @@ describe("a typed GET /ready", () => {
 
 describe("the generated types are the contract", () => {
   it("only the paths the API documents can be called", () => {
-    type Api = ReturnType<typeof createApiClient>;
-    expectTypeOf<Parameters<Api["GET"]>[0]>().toEqualTypeOf<"/health" | "/ready">();
+    type GetPaths = {
+      [P in keyof paths]: paths[P] extends { get: object } ? P : never;
+    }[keyof paths];
+    expectTypeOf<GetPaths>().toEqualTypeOf<
+      "/health" | "/ready" | "/auth/me" | "/auth/invitations/{token}"
+    >();
+    // The compiler refuses a path the API does not document (never run; it only has to compile).
+    const api = createApiClient({ baseUrl: BASE, readCookies: () => "" });
+    // @ts-expect-error "/nope" is not in the OpenAPI document
+    void (() => api.GET("/nope"));
   });
 
   it("the error body has the documented required fields", () => {
