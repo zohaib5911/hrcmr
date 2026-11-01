@@ -4,6 +4,9 @@ import { defineConfig } from "@playwright/test";
 
 const WEB_PORT = 3100;
 const API_PORT = 8100;
+// `next dev` for the /design page, which is a 404 in a production build. Tests address it as
+// `localhost`: Next.js blocks the dev server's own resources for any other origin.
+const DESIGN_PORT = 3101;
 
 const secret = (bytes: number) => randomBytes(bytes).toString("base64url");
 const postgresPassword = process.env.POSTGRES_PASSWORD ?? "postgres";
@@ -18,7 +21,18 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"]],
-  use: { baseURL: `http://127.0.0.1:${WEB_PORT}` },
+  projects: [
+    {
+      name: "production",
+      testIgnore: /design\.spec\.ts/,
+      use: { baseURL: `http://127.0.0.1:${WEB_PORT}` },
+    },
+    {
+      name: "design",
+      testMatch: /design\.spec\.ts/,
+      use: { baseURL: `http://localhost:${DESIGN_PORT}`, browserName: "chromium" },
+    },
+  ],
   webServer: [
     // The web app: the PRODUCTION build served the way the Docker image serves it, because that is
     // what the security headers and the host routing have to be right for.
@@ -28,6 +42,15 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
       env: { PORT: String(WEB_PORT) },
+    },
+    // The development server, for tests/e2e/design.spec.ts only. It writes to .next/dev, so it does
+    // not disturb the production build above.
+    {
+      command: `pnpm exec next dev --port ${DESIGN_PORT} --hostname 0.0.0.0`,
+      url: `http://127.0.0.1:${DESIGN_PORT}/healthz`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 120_000,
+      env: { NEXT_TELEMETRY_DISABLED: "1" },
     },
     // The API, for the typed-client tests. It needs the local Docker stack (`docker compose up -d --wait`).
     // Every secret here is random and used only by this test run.

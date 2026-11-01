@@ -35,7 +35,7 @@ repos:
         entry: prettier --write --ignore-unknown
         types_or: [javascript, jsx, ts, tsx, json, css, yaml]
         # Generated or vendored files are never reformatted.
-        exclude: ^(web/lib/api/schema\.ts|pnpm-lock\.yaml|docs/screenshots/.*)$
+        exclude: ^(web/lib/api/schema\.ts|web/pnpm-lock\.yaml|docs/screenshots/.*)$
 
       # --- Lint for the Next.js app. Runs only when web/ source code is staged ----------------
       - id: eslint-web

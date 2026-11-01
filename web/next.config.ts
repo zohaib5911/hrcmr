@@ -7,7 +7,12 @@ import { baseSecurityHeaders, permissionsPolicy } from "./lib/security/csp";
 // The repository root: brand.config.ts lives there, outside this folder.
 const repoRoot = path.resolve(process.cwd(), "..");
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const nextConfig: NextConfig = {
+  // Files named `page.dev.tsx` (the /design page) are routes only in development. In a production
+  // build they are not pages at all: not compiled, not served, not in the bundle.
+  pageExtensions: isProduction ? ["tsx", "ts", "jsx", "js"] : ["tsx", "ts", "jsx", "js", "dev.tsx"],
   // A self-contained server for the Docker image.
   output: "standalone",
   outputFileTracingRoot: repoRoot,
@@ -18,9 +23,10 @@ const nextConfig: NextConfig = {
   // Static assets bypass the proxy, so they get the base security headers here. The proxy sets
   // the per-request Content-Security-Policy and the same base headers on every page.
   async headers() {
-    const headers = Object.entries(baseSecurityHeaders(process.env.NODE_ENV === "production")).map(
-      ([key, value]) => ({ key, value }),
-    );
+    const headers = Object.entries(baseSecurityHeaders(isProduction)).map(([key, value]) => ({
+      key,
+      value,
+    }));
     // The Permissions-Policy of a PAGE depends on its path, so the proxy sets it. The routes the
     // proxy skips (the `matcher` exclusions in proxy.ts) never need a browser feature, so they get
     // the strictest value here. Pages are not listed, or this would overwrite the proxy's value.

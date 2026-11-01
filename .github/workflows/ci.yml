@@ -6,7 +6,7 @@
 #   api         ruff, ruff format, mypy --strict, pytest    (cd api && uv run ...)
 #   web         eslint, tsc, vitest, generated API types, scripts tests, production build with the
 #               NEXT_PUBLIC_* allowlist check and the browser-bundle secret scan
-#   e2e         Playwright against the production build and a live API
+#   e2e         Playwright: the production build and a live API, and the /design page in Chromium
 #   audit       pip-audit and pnpm audit on the locked dependencies
 #   semgrep     static analysis (SAST)
 #   images      Trivy scan of the api and web container images
@@ -184,7 +184,8 @@ jobs:
 
   # ---------------------------------------------------------------------------------------------
   # End-to-end: security headers, host routing and the typed API client, against the PRODUCTION
-  # build and a live API with random one-run secrets (web/playwright.config.ts).
+  # build and a live API with random one-run secrets; and the design tokens in a real browser, against
+  # a development server (web/playwright.config.ts).
   # ---------------------------------------------------------------------------------------------
   e2e:
     name: End-to-end (Playwright)
@@ -214,6 +215,8 @@ jobs:
           corepack enable
           pnpm install --frozen-lockfile
           uv sync --frozen --directory ../api
+      - name: Install the browser (Chromium, for the design-page tests)
+        run: pnpm exec playwright install --with-deps chromium
       - name: Playwright
         env:
           UV_FROZEN: "1"

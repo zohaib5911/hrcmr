@@ -108,7 +108,8 @@ cd web
 pnpm install
 pnpm dev                       # http://localhost:3000 (public site/app) and http://admin.localhost:3000 (back office)
 pnpm lint && pnpm typecheck && pnpm test      # ESLint, tsc --strict, Vitest
-pnpm test:e2e                  # builds, serves the production build like the Docker image, checks headers and host routing
+pnpm exec playwright install chromium   # one-off: the browser the design-page tests use
+pnpm test:e2e                  # production build (headers, host routing, typed client) and the /design page in Chromium
 docker build -f web/Dockerfile -t brand-web:dev .    # run from the REPO ROOT (brand.config.ts and scripts/ live there)
 ```
 
@@ -117,6 +118,17 @@ docker build -f web/Dockerfile -t brand-web:dev .    # run from the REPO ROOT (b
 - **Secrets.** Only the nine allow-listed `NEXT_PUBLIC_*` names reach the browser, and `pnpm build` runs `scripts/check-public-env.mjs` first and `scripts/scan-bundle.mjs` after. The web service holds no third-party keys.
 - **Container.** Next.js decides whether a rewrite is internal by comparing origins with the address the server is bound to. Bind `0.0.0.0` (the image sets `HOSTNAME=0.0.0.0`; a platform that overrides `HOSTNAME` must set it back). Bound to `127.0.0.1` the admin rewrite fails with a 500, never exposing admin pages.
 - **Dependencies.** `web/pnpm-workspace.yaml` refuses any package version published less than 14 days ago and blocks install scripts.
+
+### Design system (`web/app/globals.css`)
+
+The tokens from plan section 5 live in one stylesheet, and tests hold it to the plan.
+
+- **Colours** are CSS variables (`--bg`, `--label`, `--accent`, `--success`, ...) with light and dark values. Use the Tailwind names that point at them (`bg-canvas`, `bg-elevated`, `text-label`, `text-label-secondary`, `bg-accent text-on-accent`, `text-accent-text` for links, `bg-success-tint text-success` for a chip). Tailwind's default palette is switched off, so `bg-blue-500` does not exist; a component can only use a token.
+- **Type scale** (`text-large-title`, `text-title-1` to `text-title-3`, `text-headline`, `text-body`, `text-callout`, `text-subheadline`, `text-footnote`, `text-caption`; marketing `text-hero`, `text-section`, `text-lead`), **radius** (`rounded-control`, `-popover`, `-card`, `-sheet`, `-pill`), **elevation** (`shadow-e1` to `shadow-e3`; hairline borders in dark), **materials** (`material-chrome`, `material-sheet`), **page width** (`page-app`, `page-marketing`), **touch targets** (`hit-target`) and **motion** (`motion-micro`, `motion-small`, `motion-sheet`; the spring and variants are in `lib/motion.ts`).
+- **Theme.** The user's choice is a `theme` cookie (`light` or `dark`; none means follow the system), which the server stamps on `<html data-theme>` before the first byte, so there is no flash and no inline script. Any element can carry `data-theme` to preview the other theme inside a page. `components/app/theme-switch.tsx` changes it.
+- **`/design`** (`http://localhost:3000/design`) shows every token in both themes side by side, with the type scale, spacing and motion. It exists **only in development**: the file is `page.dev.tsx`, and `next.config.ts` enables that page extension outside production, so a production build does not contain the route at all.
+- **Brand colour.** `brand.config.ts` may change the accent colour and nothing else. `lib/design/brand-style.ts` refuses any colour that would make button labels or links fail WCAG AA.
+- **Fonts.** Inter, from the `@fontsource-variable/inter` package, is served from this site (no request to Google). The system font is first in the stack, so Apple devices show their own.
 
 ### Typed API client
 
