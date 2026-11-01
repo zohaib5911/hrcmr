@@ -11,8 +11,10 @@ from functools import partial
 from typing import TYPE_CHECKING, Any
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import Settings, get_settings
+from app.core.csrf import CsrfMiddleware
 from app.core.errors import ErrorEnvelope, register_exception_handlers
 from app.core.logging import configure_logging, get_logger
 from app.core.middleware import RequestContextMiddleware
@@ -103,7 +105,24 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = settings
     app.state.probes = {}
 
+    # Added first so it sits inside the request-id middleware and its refusals carry the request id.
+    app.add_middleware(
+        CsrfMiddleware,
+        secure=settings.app_env.is_deployed,
+        cookie_domain=f".{settings.domain}" if settings.app_env.is_deployed else None,
+    )
     app.add_middleware(RequestContextMiddleware)
+    # Outermost, so even a refusal (CSRF, rate limit) carries the headers the browser needs to show
+    # it. Only our own two origins, with credentials: never a wildcard (plan 4.2).
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[settings.web_origin, settings.admin_origin],
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "X-CSRF-Token", "X-Request-ID"],
+        expose_headers=["X-Request-ID", "Retry-After"],
+        max_age=600,
+    )
     register_exception_handlers(app)
     app.include_router(health_router, prefix=API_PREFIX)
     _install_openapi(app)

@@ -64,6 +64,9 @@ async def client(capsys: pytest.CaptureFixture[str]) -> AsyncIterator[httpx.Asyn
         transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
         async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
             capsys.readouterr()
+            # Like a browser that already has its CSRF cookie and sends the matching header.
+            http.cookies.set("csrf", "a-test-csrf-token")
+            http.headers["X-CSRF-Token"] = "a-test-csrf-token"
             yield http
 
 
@@ -252,3 +255,28 @@ async def test_docs_and_openapi_are_not_served_when_deployed(env: str) -> None:
                 response = await http.get(path)
                 assert response.status_code == 404, path
                 assert error_of(response)["code"] == "NOT_FOUND"
+
+
+async def test_cors_allows_only_our_own_origins_with_credentials(
+    client: httpx.AsyncClient,
+) -> None:
+    ours = build_settings().web_origin
+    allowed = await client.options(
+        "/test/items",
+        headers={
+            "Origin": ours,
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "x-csrf-token",
+        },
+    )
+    assert allowed.headers["access-control-allow-origin"] == ours
+    assert allowed.headers["access-control-allow-credentials"] == "true"
+    assert "x-csrf-token" in allowed.headers["access-control-allow-headers"].lower()
+
+    for origin in ("https://evil.example", "null"):
+        refused = await client.options(
+            "/test/items",
+            headers={"Origin": origin, "Access-Control-Request-Method": "POST"},
+        )
+        assert "access-control-allow-origin" not in refused.headers
+    assert allowed.headers["access-control-allow-origin"] != "*"
