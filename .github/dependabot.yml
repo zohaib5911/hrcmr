@@ -53,6 +53,11 @@ updates:
       day: monday
     cooldown:
       default-days: 14
+    # Redis 8 changes the licence; production uses Railway's Redis and the local stack stays on 7
+    # (owner decision, 2026-11-02). Minor and patch updates still come through.
+    ignore:
+      - dependency-name: "redis"
+        update-types: ["version-update:semver-major"]
     groups:
       compose-images:
         patterns: ["*"]
