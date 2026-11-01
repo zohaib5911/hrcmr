@@ -1,0 +1,371 @@
+# Continuous integration (plan.md T0.8). Runs on every pull request to main and on every push to main.
+#
+# What it checks, and where each check also runs locally:
+#   gitleaks    secrets anywhere in the git history        (pre-commit: gitleaks on staged changes)
+#   hooks       formatting and repository hygiene           (pre-commit, the hooks not covered below)
+#   api         ruff, ruff format, mypy --strict, pytest    (cd api && uv run ...)
+#   web         eslint, tsc, vitest, generated API types, scripts tests, production build with the
+#               NEXT_PUBLIC_* allowlist check and the browser-bundle secret scan
+#   e2e         Playwright against the production build and a live API
+#   audit       pip-audit and pnpm audit on the locked dependencies
+#   semgrep     static analysis (SAST)
+#   images      Trivy scan of the api and web container images
+#   config-scan Trivy misconfiguration scan of the Dockerfiles
+#   workflows   actionlint and zizmor on the workflow files themselves
+#   ci-ok       the one check to require in branch protection
+#
+# Security rules for this file (zizmor enforces most of them):
+#   - read-only token, no secrets, no pull_request_target, no untrusted text inside `run:` scripts;
+#   - third-party actions are pinned to a commit SHA (the tag is in the comment), scanners run as
+#     containers pinned by digest; Dependabot proposes the updates, after a 14-day cooldown;
+#   - no dependency caches, so a poisoned cache can never reach a later run;
+#   - credentials are not left in the checkout (persist-credentials: false).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    shell: bash # bash -eo pipefail: a failing command inside a pipe fails the step
+
+env:
+  # Scanner images, pinned by digest. Refresh deliberately: pull the new tag, read its digest with
+  #   docker buildx imagetools inspect <image>:<tag>
+  GITLEAKS_IMAGE: ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f # v8.30.1
+  SEMGREP_IMAGE: semgrep/semgrep@sha256:529ee8a277ec8adc5b534d7c74eea0a47e9de21d62852b6ba7ac6ba9566845c3 # 1.180.0
+  TRIVY_IMAGE: ghcr.io/aquasecurity/trivy@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa # 0.75.0
+  ACTIONLINT_IMAGE: rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 # 1.7.12
+  ZIZMOR_IMAGE: ghcr.io/zizmorcore/zizmor@sha256:a2eb396d886c053073405c7a980f2139ba2248ec172243cfa3841e57196e8101 # 1.30.1
+  # Trivy fetches its vulnerability database from a registry; two mirrors avoid rate-limit failures.
+  TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db:2,ghcr.io/aquasecurity/trivy-db:2
+  TRIVY_JAVA_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-java-db:1,ghcr.io/aquasecurity/trivy-java-db:1
+
+jobs:
+  # ---------------------------------------------------------------------------------------------
+  # Secrets: the whole history, so a key that was committed and then deleted is still caught.
+  # --redact keeps matched values out of the log.
+  # ---------------------------------------------------------------------------------------------
+  gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Scan the full git history
+        run: |
+          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/repo:ro" -w /repo "$GITLEAKS_IMAGE" \
+            git --config .gitleaks.toml --redact --no-banner --verbose /repo
+
+  # ---------------------------------------------------------------------------------------------
+  # The pre-commit hooks that no other job covers. gitleaks, ruff-check, eslint and the API-types
+  # check have their own jobs; skipping them here only avoids running them twice.
+  # ---------------------------------------------------------------------------------------------
+  hooks:
+    name: Formatting and hygiene (pre-commit)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          package-manager-cache: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.12.23"
+          enable-cache: false
+      - name: Run the hooks over every file
+        env:
+          SKIP: gitleaks,ruff-check,eslint-web,api-client-up-to-date
+        run: uvx --exclude-newer "14 days" pre-commit@4.7.0 run --all-files --show-diff-on-failure --color never
+
+  # ---------------------------------------------------------------------------------------------
+  # API: lint, formatting, types, tests. The tests use the same disposable Postgres and Redis as
+  # local development (docker-compose.yml), so CI and a laptop run identical services.
+  # ---------------------------------------------------------------------------------------------
+  api:
+    name: API (lint, types, tests)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+        working-directory: api
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.12.23"
+          enable-cache: false
+      - name: Start Postgres and Redis
+        working-directory: .
+        run: docker compose up -d --wait postgres-test redis
+      - name: Install exactly what uv.lock says
+        run: |
+          uv lock --check
+          uv sync --frozen
+      - name: ruff (lint)
+        run: uv run --frozen ruff check .
+      - name: ruff (format)
+        run: uv run --frozen ruff format --check .
+      - name: mypy (strict)
+        run: uv run --frozen mypy
+      - name: pytest
+        run: uv run --frozen pytest -q
+      - name: Service logs (only when something failed)
+        if: failure()
+        working-directory: .
+        run: docker compose logs --no-color --tail 100 postgres-test redis
+
+  # ---------------------------------------------------------------------------------------------
+  # Web: lint, types, unit tests, the generated API types, then the production build, which runs
+  # the NEXT_PUBLIC_* allowlist check first and the browser-bundle secret scan last.
+  # ---------------------------------------------------------------------------------------------
+  web:
+    name: Web (lint, types, tests, build)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+        working-directory: web
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          package-manager-cache: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.12.23"
+          enable-cache: false
+      - name: Install pnpm (the version pinned in web/package.json) and the locked dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+      - name: ESLint
+        run: pnpm lint
+      - name: TypeScript
+        run: pnpm typecheck
+      - name: Unit tests
+        run: pnpm test
+      - name: Guard-script tests (repository root)
+        working-directory: .
+        run: node --test 'scripts/tests/*.test.mjs'
+      - name: Generated API types are up to date
+        env:
+          UV_FROZEN: "1"
+        run: pnpm gen:api:check
+      - name: NEXT_PUBLIC_* allowlist
+        run: node ../scripts/check-public-env.mjs
+      - name: Build, then scan the browser bundle for secrets
+        run: pnpm build
+
+  # ---------------------------------------------------------------------------------------------
+  # End-to-end: security headers, host routing and the typed API client, against the PRODUCTION
+  # build and a live API with random one-run secrets (web/playwright.config.ts).
+  # ---------------------------------------------------------------------------------------------
+  e2e:
+    name: End-to-end (Playwright)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    defaults:
+      run:
+        shell: bash
+        working-directory: web
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          package-manager-cache: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.12.23"
+          enable-cache: false
+      - name: Start Postgres and Redis
+        working-directory: .
+        run: docker compose up -d --wait postgres-test redis
+      - name: Install dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
+          uv sync --frozen --directory ../api
+      - name: Playwright
+        env:
+          UV_FROZEN: "1"
+        run: pnpm test:e2e
+      - name: Service logs (only when something failed)
+        if: failure()
+        working-directory: .
+        run: docker compose logs --no-color --tail 100 postgres-test redis
+
+  # ---------------------------------------------------------------------------------------------
+  # Known-vulnerability audits of the locked dependencies, development tools included.
+  # ---------------------------------------------------------------------------------------------
+  audit:
+    name: Dependency audit (pip-audit, pnpm audit)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          package-manager-cache: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.12.23"
+          enable-cache: false
+      - name: pip-audit (every locked Python package)
+        working-directory: api
+        run: |
+          uv export --frozen --no-hashes --no-emit-project --output-file "$RUNNER_TEMP/requirements.txt"
+          uvx --exclude-newer "14 days" --from pip-audit==2.10.1 pip-audit \
+            -r "$RUNNER_TEMP/requirements.txt" --disable-pip --no-deps --progress-spinner off
+      - name: pnpm audit (production dependencies, moderate severity and above)
+        working-directory: web
+        run: |
+          corepack enable
+          pnpm audit --prod --audit-level moderate
+      - name: pnpm audit (development tools, high severity and above)
+        working-directory: web
+        run: pnpm audit --audit-level high
+
+  # ---------------------------------------------------------------------------------------------
+  # Static analysis. --error makes any finding fail the job. A finding that is a false positive is
+  # silenced on its own line with `nosemgrep: <rule-id>` and a comment saying why.
+  # ---------------------------------------------------------------------------------------------
+  semgrep:
+    name: Static analysis (Semgrep)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Semgrep
+        run: |
+          docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp -v "$PWD:/src:ro" -w /src "$SEMGREP_IMAGE" \
+            semgrep scan --error --metrics=off --quiet \
+              --config p/default --config p/python --config p/typescript --config p/nextjs \
+              --config p/dockerfile --config p/github-actions --config p/owasp-top-ten
+
+  # ---------------------------------------------------------------------------------------------
+  # Container images: build exactly as production does, then scan the result for fixable HIGH and
+  # CRITICAL vulnerabilities and for secrets baked into a layer.
+  # ---------------------------------------------------------------------------------------------
+  images:
+    name: Image scan (${{ matrix.name }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: api
+            dockerfile: api/Dockerfile
+            context: api
+          - name: web
+            dockerfile: web/Dockerfile
+            context: .
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build the image
+        env:
+          NAME: ${{ matrix.name }}
+          DOCKERFILE: ${{ matrix.dockerfile }}
+          CONTEXT: ${{ matrix.context }}
+        run: |
+          docker build -f "$DOCKERFILE" -t "brand-$NAME:ci" "$CONTEXT"
+          docker save "brand-$NAME:ci" --output "$RUNNER_TEMP/image.tar"
+      - name: Trivy
+        run: |
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -e TRIVY_CACHE_DIR=/work/cache -e TRIVY_DB_REPOSITORY -e TRIVY_JAVA_DB_REPOSITORY \
+            -v "$RUNNER_TEMP:/work" "$TRIVY_IMAGE" \
+            image --input /work/image.tar --scanners vuln,secret --severity HIGH,CRITICAL \
+            --ignore-unfixed --exit-code 1 --no-progress --skip-version-check
+
+  config-scan:
+    name: Dockerfile checks (Trivy)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Trivy misconfiguration scan
+        run: |
+          mkdir -p "$RUNNER_TEMP/trivy"
+          docker run --rm --user "$(id -u):$(id -g)" \
+            -e TRIVY_CACHE_DIR=/cache -e TRIVY_DB_REPOSITORY -e TRIVY_JAVA_DB_REPOSITORY \
+            -v "$RUNNER_TEMP/trivy:/cache" -v "$PWD:/repo:ro" -w /repo "$TRIVY_IMAGE" \
+            config --severity MEDIUM,HIGH,CRITICAL --exit-code 1 --skip-version-check \
+            --skip-files web/Dockerfile.dockerignore .
+
+  # ---------------------------------------------------------------------------------------------
+  # The workflow files are code that runs with this repository's token: lint them like code.
+  # zizmor runs offline here (no token), which still covers injection, permissions and pinning.
+  # ---------------------------------------------------------------------------------------------
+  workflows:
+    name: Workflow checks (actionlint, zizmor)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: actionlint
+        run: |
+          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/repo:ro" -w /repo "$ACTIONLINT_IMAGE" \
+            -color
+      - name: zizmor
+        run: |
+          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/repo:ro" -w /repo "$ZIZMOR_IMAGE" \
+            --offline --no-progress --min-severity low .github
+
+  # ---------------------------------------------------------------------------------------------
+  # One result for branch protection: require "CI passed" and nothing else. It fails if any job
+  # failed, was cancelled or was skipped.
+  # ---------------------------------------------------------------------------------------------
+  ci-ok:
+    name: CI passed
+    if: ${{ always() }}
+    needs: [gitleaks, hooks, api, web, e2e, audit, semgrep, images, config-scan, workflows]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Every job must have succeeded
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          echo "$NEEDS" | jq -e 'all(.[]; .result == "success")' > /dev/null

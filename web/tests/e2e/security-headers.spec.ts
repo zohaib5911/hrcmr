@@ -88,8 +88,21 @@ test.describe("other responses", () => {
     expect(h["x-content-type-options"]).toBe("nosniff");
     expect(h["x-frame-options"]).toBe("DENY");
     expect(h["strict-transport-security"]).toContain("includeSubDomains");
+    expect(h["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+    expect(h["permissions-policy"]).toBe("camera=(), microphone=(), geolocation=()");
     expect(h["x-powered-by"]).toBeUndefined();
   });
+
+  // These routes skip the proxy (see its matcher), so next.config.ts has to give them every header
+  // that is not per-request. A scanner (ZAP) flags a missing Permissions-Policy on any of them.
+  for (const path of ["/healthz", "/favicon.ico"]) {
+    test(`${path} carries the strictest Permissions-Policy`, async ({ request }) => {
+      const h = (await request.get(path)).headers();
+      expect(h["permissions-policy"]).toBe("camera=(), microphone=(), geolocation=()");
+      expect(h["x-content-type-options"]).toBe("nosniff");
+      expect(h["x-frame-options"]).toBe("DENY");
+    });
+  }
 
   test("the health check answers without caching", async ({ request }) => {
     const response = await request.get("/healthz");

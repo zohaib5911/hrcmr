@@ -1,0 +1,107 @@
+# Weekly dynamic security scan (plan.md T0.8): the OWASP ZAP baseline against STAGING.
+#
+# The baseline is passive: it crawls the site for a few minutes and inspects the responses (headers,
+# cookies, leaked information). It does not attack. It still only ever runs against staging:
+#   - the target must be an https:// URL with a `staging` label in its host name, so a typo or a
+#     manual run cannot point it at production or at somebody else's site;
+#   - the target comes from the STAGING_URL repository VARIABLE (not a secret; it is a public URL),
+#     or from the "target" input when run by hand.
+# Until staging exists (Phase 23) there is no URL, and the job says so in a warning and in the run
+# summary instead of pretending to have scanned anything.
+#
+# Rule levels live in .zap/rules.tsv: the headers this app guarantees on every response are FAIL.
+name: Security scan
+
+on:
+  schedule:
+    - cron: "23 4 * * 1" # Mondays 04:23 UTC
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Staging URL to scan (default: the STAGING_URL repository variable)"
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-scan
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  # ZAP "stable" as of 2026-11-01, pinned by digest. Refresh with:
+  #   docker buildx imagetools inspect ghcr.io/zaproxy/zaproxy:stable
+  ZAP_IMAGE: ghcr.io/zaproxy/zaproxy@sha256:030d3df57735dacbb83464854758e674dd9ad01d79d12a129a8e58b1fd384238
+
+jobs:
+  zap-baseline:
+    name: ZAP baseline (staging)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Choose the target
+        id: target
+        env:
+          INPUT_TARGET: ${{ inputs.target }}
+          STAGING_URL: ${{ vars.STAGING_URL }}
+        run: |
+          target="${INPUT_TARGET:-$STAGING_URL}"
+          if [ -z "$target" ]; then
+            echo "::warning title=ZAP baseline skipped::No staging URL yet. Set the STAGING_URL repository variable (Settings > Secrets and variables > Actions > Variables) once staging exists."
+            echo "### ZAP baseline skipped" >> "$GITHUB_STEP_SUMMARY"
+            echo "No staging URL is configured, so nothing was scanned." >> "$GITHUB_STEP_SUMMARY"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          case "$target" in
+            https://*) ;;
+            *) echo "::error::The target must start with https://"; exit 1 ;;
+          esac
+          host="${target#https://}"
+          host="${host%%/*}"
+          host="${host%%:*}"
+          case ".$host." in
+            *.staging.*) ;;
+            *) echo "::error::Refusing to scan '$host': only hosts with a 'staging' label are allowed."; exit 1 ;;
+          esac
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          echo "url=$target" >> "$GITHUB_OUTPUT"
+
+      - name: ZAP baseline scan
+        if: ${{ steps.target.outputs.skip != 'true' }}
+        env:
+          TARGET_URL: ${{ steps.target.outputs.url }}
+        run: |
+          # The ZAP container runs as its own user, so the working folder must be writable by it.
+          mkdir -m 777 zap-wrk
+          cp .zap/rules.tsv zap-wrk/rules.tsv
+          # -I: a WARN-level alert does not fail the run; FAIL-level alerts (rules.tsv) do.
+          docker run --rm -v "$PWD/zap-wrk:/zap/wrk:rw" "$ZAP_IMAGE" zap-baseline.py \
+            -t "$TARGET_URL" -c rules.tsv -m 5 -T 20 -I \
+            -r report.html -J report.json -w report.md
+
+      - name: Add the report to the run summary
+        if: ${{ !cancelled() && steps.target.outputs.skip != 'true' }}
+        run: |
+          if [ -f zap-wrk/report.md ]; then cat zap-wrk/report.md >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - name: Keep the full report
+        if: ${{ !cancelled() && steps.target.outputs.skip != 'true' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: zap-baseline-report
+          path: |
+            zap-wrk/report.html
+            zap-wrk/report.json
+            zap-wrk/report.md
+          if-no-files-found: warn
+          retention-days: 30

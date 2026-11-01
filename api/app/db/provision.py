@@ -34,11 +34,11 @@ APP_ROLE_SETTINGS = {
 
 async def _server_side(connection: AsyncConnection, template: str, **values: str) -> None:
     """Build a statement with the server's ``format()`` (``%I`` identifier, ``%L`` literal)."""
-    names = list(values)
-    arguments = ", ".join(f"CAST(:{name} AS text)" for name in names)
+    # The SQL text is a constant: the values travel as ONE bound text[] parameter, in keyword order.
     statement = (
         await connection.execute(
-            text(f"select format(:template, {arguments})"), {"template": template, **values}
+            text("select format(:template, VARIADIC CAST(:arguments AS text[]))"),
+            {"template": template, "arguments": list(values.values())},
         )
     ).scalar_one()
     # exec_driver_sql: the generated text may contain ':' or '%', which text() would misread.

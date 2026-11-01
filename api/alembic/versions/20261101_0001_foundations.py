@@ -18,7 +18,13 @@ depends_on: str | Sequence[str] | None = None
 
 # Created by the provisioning step as a superuser (pgvector is not a "trusted" extension). This is
 # a no-op when they exist, and makes a plain `alembic upgrade` work on an already-provisioned DB.
-EXTENSIONS = ("pgcrypto", "pg_trgm", "unaccent", "vector", "citext")
+CREATE_EXTENSIONS = (
+    "CREATE EXTENSION IF NOT EXISTS pgcrypto",
+    "CREATE EXTENSION IF NOT EXISTS pg_trgm",
+    "CREATE EXTENSION IF NOT EXISTS unaccent",
+    "CREATE EXTENSION IF NOT EXISTS vector",
+    "CREATE EXTENSION IF NOT EXISTS citext",
+)
 
 # RFC 9562 UUID v7: 48-bit Unix milliseconds, then random bits. PostgreSQL 16 has no uuidv7().
 UUID_V7 = """
@@ -58,8 +64,8 @@ $$
 
 
 def upgrade() -> None:
-    for extension in EXTENSIONS:
-        op.execute(f"CREATE EXTENSION IF NOT EXISTS {extension}")
+    for statement in CREATE_EXTENSIONS:
+        op.execute(statement)
     op.execute(UUID_V7)
     op.execute(CURRENT_COMPANY)
     op.execute(SET_UPDATED_AT)

@@ -2,7 +2,7 @@ import path from "node:path";
 
 import type { NextConfig } from "next";
 
-import { baseSecurityHeaders } from "./lib/security/csp";
+import { baseSecurityHeaders, permissionsPolicy } from "./lib/security/csp";
 
 // The repository root: brand.config.ts lives there, outside this folder.
 const repoRoot = path.resolve(process.cwd(), "..");
@@ -21,7 +21,17 @@ const nextConfig: NextConfig = {
     const headers = Object.entries(baseSecurityHeaders(process.env.NODE_ENV === "production")).map(
       ([key, value]) => ({ key, value }),
     );
-    return [{ source: "/:path*", headers }];
+    // The Permissions-Policy of a PAGE depends on its path, so the proxy sets it. The routes the
+    // proxy skips (the `matcher` exclusions in proxy.ts) never need a browser feature, so they get
+    // the strictest value here. Pages are not listed, or this would overwrite the proxy's value.
+    const unproxied = ["/_next/static/:path*", "/_next/image", "/favicon.ico", "/healthz"];
+    return [
+      { source: "/:path*", headers },
+      ...unproxied.map((source) => ({
+        source,
+        headers: [{ key: "Permissions-Policy", value: permissionsPolicy("/") }],
+      })),
+    ];
   },
 };
 

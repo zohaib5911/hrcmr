@@ -49,6 +49,12 @@ FROM ${NODE_IMAGE} AS runtime
 RUN groupadd --system --gid 10001 app \
  && useradd --system --uid 10001 --gid 10001 --no-create-home --home-dir /nonexistent \
         --shell /usr/sbin/nologin app
+# The server is `node web/server.js`; nothing here installs packages. npm, corepack and yarn ship in
+# the Node base image with their own dependencies (which scanners flag), so they are removed:
+# fewer files for an attacker to use, and no vulnerable code that cannot be reached anyway.
+RUN rm -rf /usr/local/lib/node_modules /opt/yarn-v* \
+        /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
+        /usr/local/bin/yarn /usr/local/bin/yarnpkg
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \

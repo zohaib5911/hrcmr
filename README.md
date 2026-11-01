@@ -167,6 +167,45 @@ node --test 'scripts/tests/*.test.mjs'   # unit tests for the guard scripts
 test keys only. Staging and production values are set in the Railway dashboard. The guard scripts
 report the file, line and rule that matched, never the matched value.
 
+## Continuous integration (GitHub Actions)
+
+`.github/workflows/ci.yml` runs on every pull request to `main` and every push to `main`. Each job
+is something you can also run on your machine.
+
+| Job | What it checks | Run it locally |
+|---|---|---|
+| Secret scan | gitleaks over the **whole git history** (output redacted) | `pre-commit run gitleaks --all-files` (staged changes only) |
+| Formatting and hygiene | prettier, ruff format, private keys, merge markers, `NEXT_PUBLIC_*` allowlist | `pre-commit run --all-files` |
+| API | ruff, ruff format, `mypy --strict`, pytest against Postgres 16 and Redis | see **API** above |
+| Web | ESLint, `tsc`, Vitest, guard-script tests, generated API types up to date, production build, `NEXT_PUBLIC_*` check, **browser-bundle secret scan** | see **Web** above |
+| End-to-end | Playwright on the production build and a live API | `pnpm test:e2e` |
+| Dependency audit | `pip-audit` on the locked Python packages; `pnpm audit` (production: moderate and above; dev tools: high and above) | `pnpm audit --prod` in `web/` |
+| Static analysis | Semgrep (`p/default`, Python, TypeScript, Next.js, Dockerfile, Actions, OWASP Top 10) | `docker run --rm -v "$PWD:/src:ro" -w /src semgrep/semgrep semgrep scan --config p/default --error` |
+| Image scan | Trivy on the built `api` and `web` images: fixable HIGH/CRITICAL vulnerabilities and baked-in secrets | `docker build`, then `trivy image` |
+| Dockerfile checks | Trivy misconfiguration scan | `trivy config .` |
+| Workflow checks | actionlint and zizmor on the workflow files | `actionlint`, `zizmor .github` |
+| **CI passed** | fails unless every job above succeeded | |
+
+**Branch protection (owner action).** After the first run, in GitHub go to **Settings > Branches** and
+protect `main`: require a pull request and require the single status check **CI passed**.
+
+**Weekly security scan.** `.github/workflows/security.yml` runs the OWASP ZAP baseline (passive, no
+attacks) against **staging only** every Monday and on demand. Set the repository **variable** (not a
+secret) `STAGING_URL` once staging exists; until then the run ends with a visible warning and scans
+nothing. The workflow refuses any URL that is not `https://` with a `staging` label in the host name.
+Rule levels are in `.zap/rules.tsv`.
+
+**Pins.** Third-party actions are pinned to a commit SHA, and the scanners run as containers pinned
+by digest, so a tag cannot be moved under us. Dependabot (`.github/dependabot.yml`) opens one grouped
+pull request per ecosystem each week for Python (uv), npm (pnpm), Docker, Docker Compose and Actions,
+and only proposes releases that are at least 14 days old. The scanner digests in `ci.yml` are not
+visible to Dependabot: refresh them by hand about once a month (the comment above them says how).
+
+**Dependency cooldown.** Both lockfiles refuse releases younger than 14 days
+(`web/pnpm-workspace.yaml` `minimumReleaseAge`, `api/pyproject.toml` `exclude-newer`). A security fix
+inside the window is let through by name with `exclude-newer-package`, with a comment saying when to
+remove it.
+
 ## Licence
 
 Proprietary. All rights reserved.
