@@ -17,6 +17,7 @@ from app.core.rate_limit import (
     SIGNUP_PER_IP,
     RateLimiter,
 )
+from app.core.rbac_matrix import permissions_for
 from app.db.ids import uuid7
 from app.modules.auth.invitations import accept_invitation, find_valid_invitation
 from app.modules.auth.passwords import (
@@ -337,6 +338,7 @@ async def build_me(db: GlobalSession, caller: Caller) -> MeResponse:
         companies=companies,
         active_company_id=active[1].id if active else None,
         role=role,  # type: ignore[arg-type]
+        permissions=sorted(permissions_for(role)),
         mfa=state.value,
         terms_acceptance_required=not accepted,
         terms_version=terms.version,

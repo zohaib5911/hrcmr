@@ -102,6 +102,10 @@ class MeResponse(BaseModel):
     companies: list[CompanyMembership]
     active_company_id: uuid.UUID | None
     role: Role | None
+    permissions: list[str] = Field(
+        description="What the active role may do (plan 7). The web app hides what is not listed; "
+        "the API still checks every request."
+    )
     mfa: Literal["not_required", "challenge", "enrol"]
     terms_acceptance_required: bool
     terms_version: str

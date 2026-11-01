@@ -512,6 +512,11 @@ export interface components {
              * @enum {string}
              */
             mfa: "not_required" | "challenge" | "enrol";
+            /**
+             * Permissions
+             * @description What the active role may do (plan 7). The web app hides what is not listed; the API still checks every request.
+             */
+            permissions: string[];
             /** Platform Admin */
             platform_admin: boolean;
             /** Role */
