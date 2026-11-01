@@ -65,3 +65,4 @@ report the file, line and rule that matched, never the matched value.
 ## Licence
 
 Proprietary. All rights reserved.
+# hrcmr
