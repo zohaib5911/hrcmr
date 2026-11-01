@@ -1,13 +1,139 @@
-import Link from "next/link";
+import {
+  BadgeCheck,
+  BellRing,
+  CalendarDays,
+  Clock,
+  FileText,
+  GraduationCap,
+  ShieldCheck,
+} from "lucide-react";
 
 import { brand } from "@brand";
 
+import { Faq } from "@/components/marketing/faq";
+import {
+  Band,
+  CtaBand,
+  FeatureGrid,
+  Hero,
+  Section,
+  SectionHeading,
+} from "@/components/marketing/sections";
+import { Card, CardBody } from "@/components/ui/card";
+import { SIGN_IN, SIGN_UP } from "@/lib/marketing-nav";
+
+const FAQ = [
+  {
+    question: "Do I need a sponsor licence to use it?",
+    answer: `No. ${brand.name} works as a plain HR system for any UK employer. If you do sponsor workers, it adds the records and reminders a licence holder is expected to keep.`,
+  },
+  {
+    question: "Does it give legal advice?",
+    answer:
+      "No. It helps you keep records and spot dates, and it shows its sources and the date they were checked. For a decision that matters, take advice from an immigration solicitor or adviser.",
+  },
+  {
+    question: "Where is our data kept?",
+    answer:
+      "Sensitive details such as passport numbers are encrypted before they are stored, every company's data is kept apart from every other's, and every change is written to an audit trail you can read.",
+  },
+  {
+    question: "Can I start without a card?",
+    answer: "Yes. You can start on the free plan and move to a paid plan when you need to.",
+  },
+] as const;
+
+const FEATURES = [
+  {
+    icon: ShieldCheck,
+    title: "Sponsor compliance",
+    body: "See what needs attention across your licence: expiring visas, reporting duties and missing records.",
+  },
+  {
+    icon: BadgeCheck,
+    title: "Right to work",
+    body: "Record each check, keep the evidence with it, and be told before a follow-up check is due.",
+  },
+  {
+    icon: CalendarDays,
+    title: "Leave",
+    body: "Requests, approvals and balances that take bank holidays into account.",
+  },
+  {
+    icon: Clock,
+    title: "Attendance and rota",
+    body: "Clock in, plan the week's shifts and publish them to the people working them.",
+  },
+  {
+    icon: FileText,
+    title: "Documents and policies",
+    body: "Keep company files with review dates, and see who has read and accepted each policy.",
+  },
+  {
+    icon: GraduationCap,
+    title: "Learning",
+    body: "Assign short compliance courses, track who has finished them and keep the certificates.",
+  },
+] as const;
+
 export default function HomePage() {
   return (
-    <main>
-      <h1>{brand.name}</h1>
-      <p>{brand.tagline}</p>
-      <Link href="/login">Sign in</Link>
-    </main>
+    <>
+      <Hero
+        eyebrow="HR and sponsor compliance"
+        title="Look after your people, and your licence."
+        lead={`${brand.name} keeps your HR records and your sponsor duties in one calm place, so nothing important is missed.`}
+        actions={[
+          { label: SIGN_UP.label, href: SIGN_UP.href },
+          { label: SIGN_IN.label, href: SIGN_IN.href, variant: "plain" },
+        ]}
+      />
+
+      <Section tone="raised" id="features">
+        <SectionHeading
+          title="Everything a small employer needs"
+          lead="From the first contract to the last day, with the sponsor duties built in rather than bolted on."
+        />
+        <FeatureGrid features={FEATURES} className="mt-12" />
+      </Section>
+
+      <Band
+        tone="page"
+        eyebrow="Never caught out"
+        title="Know what is due before it is due"
+        lead="Dates that matter are tracked for you and brought to the top of your dashboard in good time."
+        points={[
+          "Visa and document expiry reminders, sent ahead of the date.",
+          "A clear list of what to report, and by when.",
+          "Everything is kept with its evidence, ready for an audit.",
+        ]}
+        media={
+          <Card className="p-6">
+            <CardBody className="flex items-start gap-4">
+              <span className="bg-warning-tint text-warning inline-flex size-11 shrink-0 items-center justify-center rounded-full">
+                <BellRing aria-hidden strokeWidth={1.5} className="size-6" />
+              </span>
+              <div>
+                <p className="text-headline text-label">Reminders are sent before they are due</p>
+                <p className="text-body text-label-secondary mt-1">
+                  Visa, passport and right to work follow-up dates appear here, soonest first.
+                </p>
+              </div>
+            </CardBody>
+          </Card>
+        }
+      />
+
+      <Section tone="raised" id="faq">
+        <SectionHeading title="Questions people ask" className="mb-10" />
+        <Faq items={FAQ} />
+      </Section>
+
+      <CtaBand
+        title="Get your records in order today"
+        lead="Start on the free plan. No card needed."
+        actions={[{ label: SIGN_UP.label, href: SIGN_UP.href }]}
+      />
+    </>
   );
 }

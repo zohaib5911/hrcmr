@@ -5,9 +5,12 @@ import { ADMIN_HOST, BASE_URL, MAIN_HOST, headingOf } from "./helpers";
 const main = { host: MAIN_HOST };
 const admin = { host: ADMIN_HOST };
 
+// The public home page's heading (app/(marketing)/page.tsx).
+const HOME_HEADING = "Look after your people, and your licence.";
+
 test.describe("main host", () => {
   test("serves the public site and the app", async ({ request }) => {
-    expect(await headingOf(await request.get("/", { headers: main }))).toBe("Brand");
+    expect(await headingOf(await request.get("/", { headers: main }))).toBe(HOME_HEADING);
     expect(await headingOf(await request.get("/login", { headers: main }))).toBe("Sign in");
     expect(await headingOf(await request.get("/dashboard", { headers: main }))).toBe("Dashboard");
   });
@@ -90,7 +93,7 @@ test.describe("behind Cloudflare and Railway", () => {
   test("the Host header decides, whatever the forwarding headers say", async ({ request }) => {
     const forwarded = { "x-forwarded-proto": "https" };
     const site = await request.get("/", { headers: { ...main, ...forwarded } });
-    expect(await headingOf(site)).toBe("Brand");
+    expect(await headingOf(site)).toBe(HOME_HEADING);
 
     const back = await request.get("/", {
       headers: { ...admin, ...forwarded, "x-forwarded-host": ADMIN_HOST },
@@ -104,7 +107,7 @@ test.describe("behind Cloudflare and Railway", () => {
     const response = await request.get("/", {
       headers: { ...main, "x-forwarded-host": ADMIN_HOST },
     });
-    expect(await headingOf(response)).toBe("Brand");
+    expect(await headingOf(response)).toBe(HOME_HEADING);
     const direct = await request.get("/platform", {
       headers: { ...main, "x-forwarded-host": ADMIN_HOST },
     });
@@ -113,6 +116,6 @@ test.describe("behind Cloudflare and Railway", () => {
 
   test("an unknown host is treated as the public site", async ({ request }) => {
     const response = await request.get("/", { headers: { host: "random-name.up.railway.app" } });
-    expect(await headingOf(response)).toBe("Brand");
+    expect(await headingOf(response)).toBe(HOME_HEADING);
   });
 });

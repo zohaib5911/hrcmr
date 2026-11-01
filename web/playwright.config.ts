@@ -8,7 +8,7 @@ const API_PORT = 8100;
 // `localhost`: Next.js blocks the dev server's own resources for any other origin.
 const DESIGN_PORT = 3101;
 // The specs that need the development server. (design-guard.spec.ts runs against the production build.)
-const DESIGN_SPECS = /design(-a11y|-components)?\.spec\.ts$/;
+const DESIGN_SPECS = /design(-a11y|-components|-marketing)?\.spec\.ts$/;
 
 const secret = (bytes: number) => randomBytes(bytes).toString("base64url");
 const postgresPassword = process.env.POSTGRES_PASSWORD ?? "postgres";
@@ -19,6 +19,9 @@ const keys = JSON.stringify({ k1: randomBytes(32).toString("base64") });
 
 export default defineConfig({
   testDir: "tests/e2e",
+  // Outside web/: `next dev` watches this folder, and a failing test writing its report here made the
+  // development server reload every page under test, which timed out the whole "design" project.
+  outputDir: "../.playwright-results",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
