@@ -59,7 +59,7 @@ ignore = ["RUF012"]
 "**/tests/**" = ["S101", "S105", "S106", "TC001", "TC002", "TC003", "E501"]
 "conftest.py" = ["S101", "S105", "S106", "TC001", "TC002", "TC003"]
 # Alembic files are generated from a template; typing-only import placement is noise there.
-"alembic/**" = ["TC001", "TC002", "TC003"]
+"alembic/**" = ["TC001", "TC002", "TC003", "E501"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]

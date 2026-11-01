@@ -12,6 +12,22 @@ from app.cli import alembic_config
 from tests.db.support import engine_for, temporary_database
 
 FUNCTIONS = {"uuid_generate_v7", "app_current_company_id", "set_updated_at"}
+# The identity migration (T2.1) adds these tables and these two functions.
+IDENTITY_TABLES = [
+    "audit_events",
+    "companies",
+    "email_tokens",
+    "files",
+    "invitations",
+    "memberships",
+    "notifications",
+    "platform_admins",
+    "sessions",
+    "terms_acceptances",
+    "terms_versions",
+    "users",
+]
+IDENTITY_FUNCTIONS = {"app_current_user_id", "audit_events_append_only"}
 
 
 async def _query(url: str, sql: str) -> list[str]:
@@ -32,6 +48,23 @@ def _functions(url: str) -> set[str]:
     return set(asyncio.run(_query(url, sql)))
 
 
+def _tables(url: str) -> list[str]:
+    sql = (
+        "select table_name from information_schema.tables where table_schema = 'public' "
+        "and table_name <> 'alembic_version' and table_type = 'BASE TABLE'"
+    )
+    return asyncio.run(_query(url, sql))
+
+
+def _all_functions(url: str) -> set[str]:
+    sql = (
+        "select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace "
+        "where n.nspname = 'public' and not exists "
+        "(select 1 from pg_depend d where d.objid = p.oid and d.deptype = 'e')"
+    )
+    return set(asyncio.run(_query(url, sql)))
+
+
 def test_migrations_apply_roll_back_and_apply_again_cleanly() -> None:
     with temporary_database(migrate=False) as db:
         config = alembic_config(db.owner_url)
@@ -40,14 +73,22 @@ def test_migrations_apply_roll_back_and_apply_again_cleanly() -> None:
         command.upgrade(config, "head")
         assert _functions(db.owner_url) == FUNCTIONS
         assert asyncio.run(_query(db.owner_url, "select version_num from alembic_version")) == [
-            "0001_foundations"
+            "0002_identity_core"
         ]
+        assert _tables(db.owner_url) == IDENTITY_TABLES
+        assert _all_functions(db.owner_url) == FUNCTIONS | IDENTITY_FUNCTIONS
+
+        command.downgrade(config, "0001_foundations")
+        assert _tables(db.owner_url) == []
+        assert _all_functions(db.owner_url) == FUNCTIONS
 
         command.downgrade(config, "base")
         assert _functions(db.owner_url) == set()
+        assert _all_functions(db.owner_url) == set()
 
         command.upgrade(config, "head")
         assert _functions(db.owner_url) == FUNCTIONS
+        assert _tables(db.owner_url) == IDENTITY_TABLES
 
 
 def test_the_models_and_the_migrations_agree() -> None:

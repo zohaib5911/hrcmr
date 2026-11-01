@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** T2.1 Models
+- **Current task:** T2.2 Crypto
 
 ---
 
@@ -96,6 +96,7 @@ marked `UNVERIFIED` and listed here with its location.
 48. **Screenshots on request (T1.3):** `tests/e2e/shell-screenshots.spec.ts` runs only with `SCREENSHOTS=1`, so ordinary runs never rewrite the images committed in `docs/screenshots/phase-1/`. The shell tests run against the production build (the signed-in routes are part of it), not the development server.
 49. **Public-site links and cookies (T1.5):** the nav in `web/lib/marketing-nav.ts` names the pages T18 builds (the sponsor page is `/sponsor-licence-compliance` because `/sponsor-compliance` is the app's); until they exist the links do not prefetch, and T18.1 must remove `prefetch={false}` and test that every link resolves. Pricing amounts are never in code: `PricingCards` and `HeadcountSlider` take them as props (shown with the plan's figures on the dev-only `/design/marketing`). Marketing pixels are not loaded yet; they must wait for `brand.cookieConsent.marketing` and the `brand:cookie-consent-changed` event.
 50. **Playwright output folder (Phase 1 gate):** reports go to `.playwright-results/` outside `web/`, because `next dev` watches `web/` and a failing test writing there reloaded every page in the design tests (the cause of earlier mass timeouts). `style-src-attr 'unsafe-inline'` is an accepted exception: see `docs/security.md`.
+51. **Identity tables and tenancy (T2.1):** `sessions` and `invitations` have a `company_id` but are found by a cookie or an emailed link before any company is known, so they have no tenant policy and are listed in `PRE_TENANT_TABLES` (`app/db/rls.py`); only the auth service may touch them, through `GlobalSession`, filtering by token hash. `memberships` has the tenant policy plus `own_memberships` (a person reads their own rows through the new `app.user_id` setting, which `GlobalSession(user_id=...)` and `TenantSession` now set), so sign-in can list their companies. `companies` and `users` have no policy for the same reason; they are read through a membership. Company lists and the public careers slug lookup (T11) will need a deliberate path, not a loophole. The company purge in Phase 16 has to delete audit rows, which the trigger forbids: it will need its own, audited, owner-only route. `mfa_secret` is plain text until T2.2 swaps in `EncryptedString`.
 
 ---
 
@@ -159,7 +160,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **Phase 1 gate** — 2026-11-02, summary above.
 
 ### Phase 2 — Backend core (identity, tenancy, RBAC, audit, files, email)
-- [ ] **T2.1** Models
+- [x] **T2.1** Models — 2026-11-02. Migration `0002_identity_core`: companies, users, memberships, platform_admins, sessions, invitations, email_tokens, terms_versions and terms_acceptances, audit_events (append-only trigger plus no UPDATE/DELETE grant), files, notifications; `docs/data-model.md` is generated from the models and a test keeps it current. **Verified:** applies, rolls back to 0001 and to base, and re-applies cleanly; raw-SQL tests show companies cannot see each other's memberships or files, the audit trail cannot be updated, deleted or truncated even by the owner, and emails are unique whatever their case. Owner: none.
 - [ ] **T2.2** Crypto
 - [ ] **T2.3** Sessions and auth service
 - [ ] **T2.4** Auth endpoints

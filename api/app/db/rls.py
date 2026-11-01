@@ -43,6 +43,11 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncConnection
 
 POLICY_NAME = "tenant_isolation"
+
+# Tables that have a ``company_id`` but are read BEFORE a company is known: a session is found by
+# its cookie, an invitation by its emailed link. They are reached only through ``GlobalSession``,
+# by the authentication service, and every query on them filters explicitly (token hash or user).
+PRE_TENANT_TABLES = frozenset({"sessions", "invitations"})
 TENANT_FUNCTION = "app_current_company_id"
 UPDATED_AT_TRIGGER = "trg_set_updated_at"
 
@@ -157,9 +162,11 @@ _MISSING_TRIGGER = text(
 
 
 async def tables_missing_tenant_rls(
-    connection: AsyncConnection, *, exempt: frozenset[str] = frozenset()
+    connection: AsyncConnection, *, exempt: frozenset[str] = PRE_TENANT_TABLES
 ) -> list[str]:
-    """Tables that have a ``company_id`` column but no RLS or no ``tenant_isolation`` policy."""
+    """Tables that have a ``company_id`` column but no RLS or no ``tenant_isolation`` policy.
+
+    ``PRE_TENANT_TABLES`` are exempt by default; pass ``exempt=frozenset()`` to see them too."""
     rows = await connection.execute(_MISSING_RLS, {"policy": POLICY_NAME})
     return [name for (name,) in rows if name not in exempt]
 

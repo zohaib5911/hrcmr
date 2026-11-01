@@ -8,6 +8,7 @@ from sqlalchemy import text
 from sqlalchemy.pool import NullPool
 
 from app.db.rls import (
+    PRE_TENANT_TABLES,
     materialized_views,
     security_definer_functions,
     tables_missing_tenant_rls,
@@ -40,8 +41,14 @@ def test_guards_can_exempt_a_table_explicitly() -> None:
                 )
             async with engine.connect() as connection:
                 assert await tables_missing_tenant_rls(connection) == ["global_thing"]
-                exempt = frozenset({"global_thing"})
+                exempt = PRE_TENANT_TABLES | {"global_thing"}
                 assert await tables_missing_tenant_rls(connection, exempt=exempt) == []
+                # Without any exemption the two pre-tenant tables show up too.
+                assert await tables_missing_tenant_rls(connection, exempt=frozenset()) == [
+                    "global_thing",
+                    "invitations",
+                    "sessions",
+                ]
         finally:
             await engine.dispose()
 

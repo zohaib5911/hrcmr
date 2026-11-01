@@ -41,6 +41,7 @@ if TYPE_CHECKING:
 COMPANY_KEY = "company_id"
 USER_KEY = "user_id"
 _SET_COMPANY = text("select set_config('app.company_id', :company_id, true)")
+_SET_USER = text("select set_config('app.user_id', :user_id, true)")
 
 
 class TenantViolationError(RuntimeError):
@@ -62,8 +63,12 @@ class TenantSession(AsyncSession):
 
 
 class GlobalSession(AsyncSession):
-    def __init__(self, bind: AsyncEngine) -> None:
-        super().__init__(bind, expire_on_commit=False)
+    """For the few things that happen before a company is known: signing in, accepting an invite.
+
+    Pass ``user_id`` once the person is known, so they can read their own memberships."""
+
+    def __init__(self, bind: AsyncEngine, *, user_id: uuid.UUID | None = None) -> None:
+        super().__init__(bind, expire_on_commit=False, info={USER_KEY: user_id})
 
 
 # --- Session events. They act only on sessions that carry a company id ----------------------------
@@ -76,6 +81,9 @@ def _scope_transaction(
     company_id = session.info.get(COMPANY_KEY)
     if company_id is not None:
         connection.execute(_SET_COMPANY, {"company_id": str(company_id)})
+    user_id = session.info.get(USER_KEY)
+    if user_id is not None:
+        connection.execute(_SET_USER, {"user_id": str(user_id)})
 
 
 @event.listens_for(Session, "do_orm_execute")

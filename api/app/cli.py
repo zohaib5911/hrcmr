@@ -4,6 +4,8 @@ provision-db   Create/refresh the app_owner and app_user roles, ownership and ex
                Needs a SUPERUSER URL in DATABASE_URL_ADMIN (not part of the API's settings).
 migrate        Apply migrations (``alembic upgrade head``) as app_owner.
 check-rls      Fail if any tenant table lacks Row-Level Security or an updated_at trigger.
+export-openapi Print (or --output) the OpenAPI document.
+export-data-model Print (or --output) docs/data-model.md, generated from the models.
 """
 
 from __future__ import annotations
@@ -141,9 +143,12 @@ def openapi_document() -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m app.cli", description=__doc__)
     parser.add_argument(
-        "command", choices=["provision-db", "migrate", "check-rls", "export-openapi"]
+        "command",
+        choices=["provision-db", "migrate", "check-rls", "export-openapi", "export-data-model"],
     )
-    parser.add_argument("--output", type=Path, help="export-openapi: write to this file")
+    parser.add_argument(
+        "--output", type=Path, help="export-openapi, export-data-model: write to this file"
+    )
     args = parser.parse_args(argv)
 
     if args.command == "provision-db":
@@ -154,6 +159,15 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "export-openapi":
         document = openapi_document()
+        if args.output:
+            args.output.write_text(document)
+        else:
+            sys.stdout.write(document)
+        return 0
+    if args.command == "export-data-model":
+        from app.db.data_model import data_model_markdown
+
+        document = data_model_markdown()
         if args.output:
             args.output.write_text(document)
         else:
