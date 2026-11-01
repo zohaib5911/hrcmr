@@ -19,6 +19,7 @@ from app.core.rate_limit import (
 )
 from app.core.rbac_matrix import permissions_for
 from app.db.ids import uuid7
+from app.modules.audit.service import AuditContext, record
 from app.modules.auth.invitations import accept_invitation, find_valid_invitation
 from app.modules.auth.passwords import (
     PasswordProblem,
@@ -199,6 +200,14 @@ async def sign_up(
     db.add(Membership(user_id=user.id, company_id=company.id, role="company_admin"))
     db.add(TermsAcceptance(user_id=user.id, version=terms.version, ip=ip))
     token = await issue_email_token(db, user.id, "verify", VERIFY_TTL)
+    await record(
+        db,
+        AuditContext(company_id=company.id, actor_user_id=user.id, ip=ip),
+        "company.created",
+        entity_type="company",
+        entity_id=company.id,
+        after={"name": company.name, "plan": "free", "admin_email": email},
+    )
     await db.commit()
     await auth.mailer.send_template(
         to=email,
@@ -420,5 +429,13 @@ async def accept_invite(
     if new_user is not None:
         terms = await current_terms(db)
         db.add(TermsAcceptance(user_id=new_user.id, version=terms.version, ip=ip))
+    await record(
+        db,
+        AuditContext(company_id=invitation.company_id, actor_user_id=user.id, ip=ip),
+        "invitation.accepted",
+        entity_type="user",
+        entity_id=user.id,
+        after={"email": str(invitation.email), "role": invitation.role},
+    )
     await db.commit()
     return new_user

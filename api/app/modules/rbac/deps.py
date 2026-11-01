@@ -21,7 +21,7 @@ from __future__ import annotations
 import uuid  # noqa: TC003
 from collections.abc import AsyncIterator, Callable  # noqa: TC003
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastapi import Request  # noqa: TC002
 from sqlalchemy import select
@@ -29,7 +29,14 @@ from sqlalchemy import select
 from app.core.errors import AppError, ForbiddenError
 from app.core.rbac_matrix import PERMISSIONS, Scope, scope_for
 from app.db.session import GlobalDb, TenantSession, get_engine
-from app.modules.auth.deps import Auth, SignedIn  # noqa: TC001  (FastAPI reads these at run time)
+from app.modules.audit.service import AuditContext
+from app.modules.audit.service import record as record_audit
+from app.modules.auth.deps import (
+    Auth,
+    SignedIn,
+    client_ip,
+    user_agent,
+)
 from app.modules.auth.policy import mfa_state, require_mfa_satisfied
 from app.modules.companies.models import Company
 from app.modules.identity.models import Membership, TermsAcceptance
@@ -51,6 +58,43 @@ class Access:
     db: TenantSession
     employee_id: uuid.UUID | None  # the HR record this person is, if they have one
     reports: ReportsGraph
+    ip: str | None = None
+    user_agent: str | None = None
+    request_id: str | None = None
+
+    @property
+    def audit_context(self) -> AuditContext:
+        return AuditContext(
+            company_id=self.company_id,
+            actor_user_id=self.caller.user_id,
+            ip=self.ip,
+            user_agent=self.user_agent,
+            request_id=self.request_id,
+        )
+
+    async def audit(
+        self,
+        action: str,
+        *,
+        entity_type: str | None = None,
+        entity_id: uuid.UUID | None = None,
+        before: dict[str, Any] | None = None,
+        after: dict[str, Any] | None = None,
+        reason: str | None = None,
+        summary: str | None = None,
+    ) -> None:
+        """Record what this request did, in the same transaction as the change itself."""
+        await record_audit(
+            self.db,
+            self.audit_context,
+            action,
+            entity_type=entity_type,
+            entity_id=entity_id,
+            before=before,
+            after=after,
+            reason=reason,
+            summary=summary,
+        )
 
     async def can_reach(self, employee_id: uuid.UUID, relation: Relation = "reporting") -> bool:
         """May this person use the permission on that employee's record?"""
@@ -137,6 +181,9 @@ def require(permission: str) -> Callable[..., AsyncIterator[Access]]:
                 db=tenant,
                 employee_id=employee_id,
                 reports=ReportsGraph(tenant, company_id),
+                ip=client_ip(request),
+                user_agent=user_agent(request),
+                request_id=str(getattr(request.state, "request_id", "")) or None,
             )
 
     setattr(dependency, PERMISSION_ATTRIBUTE, permission)

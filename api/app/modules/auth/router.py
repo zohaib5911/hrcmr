@@ -12,6 +12,7 @@ from sqlalchemy import select
 from app.core.errors import AppError, ConflictError, ForbiddenError
 from app.core.totp import generate_secret, provisioning_uri
 from app.db.session import GlobalDb  # noqa: TC001  (FastAPI reads the annotation at run time)
+from app.modules.audit.service import AuditContext, record
 from app.modules.auth import accounts
 from app.modules.auth.deps import (
     Auth,
@@ -56,6 +57,30 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 TURNSTILE_AFTER_FAILURES = 3
 _MFA_PENDING_SECONDS = 600
+
+
+async def _audit(
+    db: GlobalDb, request: Request, caller: Caller, action: str, **details: object
+) -> None:
+    """Note a security change on the company the person is working in (if they are in one)."""
+    company_id = caller.company_id
+    if company_id is None:
+        return
+    await db.company_for_this_transaction(company_id)
+    await record(
+        db,
+        AuditContext(
+            company_id=company_id,
+            actor_user_id=caller.user_id,
+            ip=client_ip(request),
+            user_agent=user_agent(request),
+            request_id=str(getattr(request.state, "request_id", "")) or None,
+        ),
+        action,
+        entity_type="user",
+        entity_id=caller.user_id,
+        after=dict(details) or None,
+    )
 
 
 async def _me(db: GlobalDb, auth: Auth, token: str) -> MeResponse:
@@ -191,6 +216,7 @@ async def change_password(
     user.password_hash = hash_password(body.new_password)
     user.requires_password_change = False
     await auth.sessions.revoke_all(db, user.id, except_session_id=caller.session.session_id)
+    await _audit(db, request, caller, "auth.password.changed")
     token, data = await auth.sessions.rotate(
         db, caller.token, caller.session, ip=client_ip(request), user_agent=user_agent(request)
     )
@@ -233,6 +259,7 @@ async def mfa_verify(
         )
     codes = await auth.auth.confirm_mfa_enrolment(caller.user, str(secret), body.code)
     await auth.redis.delete(f"mfa:pending:{caller.user_id}")
+    await _audit(db, request, caller, "auth.mfa.enabled")
     token, data = await auth.sessions.rotate(
         db,
         caller.token,
@@ -293,13 +320,14 @@ async def _policy_requires_mfa(db: GlobalDb, caller: Caller) -> bool:
 
 
 @router.post("/mfa/disable", status_code=204, summary="Turn two-step verification off")
-async def mfa_disable(db: GlobalDb, auth: Auth, caller: SignedIn) -> None:
+async def mfa_disable(request: Request, db: GlobalDb, auth: Auth, caller: SignedIn) -> None:
     require_step_up(caller.session)
     if await _policy_requires_mfa(db, caller):
         raise ForbiddenError(
             "Your company requires two-step verification, so it cannot be turned off."
         )
     auth.auth.disable_mfa(caller.user)
+    await _audit(db, request, caller, "auth.mfa.disabled")
     await db.commit()
 
 

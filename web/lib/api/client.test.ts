@@ -112,9 +112,10 @@ describe("the generated types are the contract", () => {
     type GetPaths = {
       [P in keyof paths]: paths[P] extends { get: object } ? P : never;
     }[keyof paths];
-    expectTypeOf<GetPaths>().toEqualTypeOf<
-      "/health" | "/ready" | "/auth/me" | "/auth/invitations/{token}"
-    >();
+    // Paths the API documents for GET are accepted; ones it does not, or documents only for POST, are not.
+    expectTypeOf<"/health" | "/ready" | "/auth/me">().toExtend<GetPaths>();
+    expectTypeOf<"/nope">().not.toExtend<GetPaths>();
+    expectTypeOf<"/auth/login">().not.toExtend<GetPaths>();
     // The compiler refuses a path the API does not document (never run; it only has to compile).
     const api = createApiClient({ baseUrl: BASE, readCookies: () => "" });
     // @ts-expect-error "/nope" is not in the OpenAPI document

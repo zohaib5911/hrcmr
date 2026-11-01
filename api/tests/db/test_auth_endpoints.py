@@ -28,6 +28,9 @@ from tests.support import TEST_REDIS_URL, build_settings
 PASSWORD = "a long, unusual passphrase 42"
 NEW_PASSWORD = "another long, unusual passphrase 77"
 CSRF = "a-test-csrf-token"
+# The audit trail cannot be emptied between tests (that is the point of it), so ask only about the
+# companies this test created.
+AUDIT_ACTIONS = "select action from audit_events where company_id in (select id from companies)"
 
 
 @dataclass
@@ -141,6 +144,7 @@ async def test_sign_up_creates_a_free_company_and_admin_then_the_link_signs_them
     assert user[1] is None
     assert (await world.sql("select role from memberships"))[0][0] == "company_admin"
     assert (await world.sql("select count(*) from terms_acceptances"))[0][0] == 1
+    assert [r[0] for r in await world.sql(AUDIT_ACTIONS)] == ["company.created"]
 
     verified = await world.client.post(
         "/api/v1/auth/verify-email",
@@ -332,6 +336,8 @@ async def test_changing_a_password_needs_the_current_one_and_ends_other_sessions
     assert (await world.client.get("/api/v1/auth/me")).status_code == 200  # this browser stays in
     assert (await other.get("/api/v1/auth/me")).status_code == 401
     assert len(world.mail.of("password_changed")) == 1
+    actions = [r[0] for r in await world.sql(AUDIT_ACTIONS + " order by created_at")]
+    assert actions[-1] == "auth.password.changed"
 
 
 # --- two-step verification ---------------------------------------------------------------------------
@@ -386,6 +392,8 @@ async def test_two_step_verification_setup_challenge_step_up_and_turning_it_off(
     assert stepped.json()["step_up_active"] is True
     assert (await browser.post("/api/v1/auth/mfa/disable")).status_code == 204
     assert (await world.sql("select mfa_enabled, mfa_secret from users"))[0][0] is False
+    actions = [r[0] for r in await world.sql(AUDIT_ACTIONS + " order by created_at")]
+    assert actions[-2:] == ["auth.mfa.enabled", "auth.mfa.disabled"]
 
 
 async def test_a_company_that_requires_two_step_cannot_have_it_switched_off(world: World) -> None:
@@ -450,6 +458,9 @@ async def test_a_new_person_accepts_an_invitation_and_chooses_their_own_password
     assert reuse.status_code == 410
     assert reuse.json()["error"]["code"] == "INVITATION_INVALID"
     assert (await world.client.get("/api/v1/auth/invitations/not-a-token")).status_code == 410
+    assert "invitation.accepted" in [
+        r[0] for r in await world.sql("select action from audit_events")
+    ]
 
 
 async def test_someone_who_already_has_an_account_is_added_but_not_signed_in(world: World) -> None:

@@ -22,6 +22,7 @@ from app.core.redis import create_redis, ping_redis
 from app.db.engine import create_engine, ping_database
 from app.integrations.email import LoggingMailer, Mailer
 from app.integrations.turnstile import Turnstile
+from app.modules.audit.router import router as audit_router
 from app.modules.auth.container import build_container
 from app.modules.auth.router import router as auth_router
 from app.modules.health.router import router as health_router
@@ -133,5 +134,6 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     register_exception_handlers(app)
     app.include_router(health_router, prefix=API_PREFIX)
     app.include_router(auth_router, prefix=API_PREFIX)
+    app.include_router(audit_router, prefix=API_PREFIX)
     _install_openapi(app)
     return app

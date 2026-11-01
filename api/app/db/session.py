@@ -76,6 +76,12 @@ class GlobalSession(AsyncSession):
         self.info[COMPANY_KEY] = company_id
         await self.execute(_SET_COMPANY, {"company_id": str(company_id)})
 
+    async def company_for_this_transaction(self, company_id: uuid.UUID) -> None:
+        """Let this one transaction write a company's rows (an audit event for the company the
+        person is working in) without turning the session into a tenant session, so reads of their
+        own memberships in other companies are not narrowed."""
+        await self.execute(_SET_COMPANY, {"company_id": str(company_id)})
+
     async def act_as(self, user_id: uuid.UUID) -> None:
         """Say who this is, part-way through a request (sign-in learns it from the password).
 
