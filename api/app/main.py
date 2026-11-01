@@ -8,12 +8,12 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from functools import partial
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastapi import FastAPI
 
 from app.core.config import Settings, get_settings
-from app.core.errors import register_exception_handlers
+from app.core.errors import ErrorEnvelope, register_exception_handlers
 from app.core.logging import configure_logging, get_logger
 from app.core.middleware import RequestContextMiddleware
 from app.core.redis import create_redis, ping_redis
@@ -23,8 +23,49 @@ from app.modules.health.router import router as health_router
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
 
+    from fastapi.routing import APIRoute
+
 API_PREFIX = "/api/v1"
+# Every operation can fail with our error envelope. Declaring the 4XX and 5XX ranges documents it
+# for the generated TypeScript client, and stops FastAPI from advertising its own, different
+# `HTTPValidationError` shape for 422, which this API never returns.
+ERROR_RESPONSES: dict[int | str, dict[str, object]] = {
+    "4XX": {
+        "model": ErrorEnvelope,
+        "description": "The request could not be completed. `error.code` says why.",
+    },
+    "5XX": {
+        "model": ErrorEnvelope,
+        "description": "Something failed on our side. Quote `error.request_id` to support.",
+    },
+}
 logger = get_logger("app.main")
+
+
+def operation_id(route: APIRoute) -> str:
+    """Readable, stable operation ids (`health_ready`) for the generated TypeScript client."""
+    return f"{route.tags[0]}_{route.name}" if route.tags else route.name
+
+
+def _install_openapi(app: FastAPI) -> None:
+    """Describe the API the way a client calls it: paths relative to the `/api/v1` server.
+
+    The web app's base URL (NEXT_PUBLIC_API_URL) already ends in `/api/v1`, so documenting
+    `/api/v1/health` would make the generated client request `/api/v1/api/v1/health`.
+    """
+    build = app.openapi
+
+    def openapi() -> dict[str, Any]:
+        if app.openapi_schema is None:
+            schema = build()
+            schema["paths"] = {
+                path.removeprefix(API_PREFIX) or "/": item for path, item in schema["paths"].items()
+            }
+            schema["servers"] = [{"url": API_PREFIX}]
+            app.openapi_schema = schema
+        return app.openapi_schema
+
+    app.openapi = openapi  # type: ignore[method-assign]
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -52,6 +93,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         title="Platform API",
         version="0.1.0",
         lifespan=lifespan,
+        responses=ERROR_RESPONSES,
+        generate_unique_id_function=operation_id,
         # Docs are local-only; deployed environments get them via the super-admin API later.
         docs_url=f"{API_PREFIX}/docs" if settings.docs_enabled else None,
         redoc_url=None,
@@ -63,4 +106,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.add_middleware(RequestContextMiddleware)
     register_exception_handlers(app)
     app.include_router(health_router, prefix=API_PREFIX)
+    _install_openapi(app)
     return app

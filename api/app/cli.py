@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import os
+import secrets
 import sys
 from pathlib import Path
 
@@ -108,9 +110,40 @@ async def _check_rls() -> int:
     return 1 if failed else 0
 
 
+def openapi_document() -> str:
+    """The API's OpenAPI document as stable, sorted JSON.
+
+    The app is built with throwaway settings (nothing connects to anything), so this needs no
+    environment and can run in CI or on a machine with no secrets. The output contains none of them.
+    """
+    from pydantic import SecretStr
+
+    from app.core.config import AppEnv, Settings
+    from app.main import create_app
+
+    throwaway = secrets.token_urlsafe(32)
+    settings = Settings(
+        _env_file=None,
+        app_env=AppEnv.TEST,
+        domain="localhost",
+        web_origin="http://localhost:3000",
+        admin_origin="http://admin.localhost:3000",
+        api_origin="http://localhost:8000",
+        database_url=SecretStr("postgresql+asyncpg://openapi@localhost/openapi"),
+        redis_url=SecretStr("redis://localhost:6379/0"),
+        session_secret=SecretStr(throwaway),
+        field_encryption_keys=SecretStr(json.dumps({"k1": throwaway})),
+        blind_index_key=SecretStr(throwaway),
+    )
+    return json.dumps(create_app(settings).openapi(), indent=2, sort_keys=True) + "\n"
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m app.cli", description=__doc__)
-    parser.add_argument("command", choices=["provision-db", "migrate", "check-rls"])
+    parser.add_argument(
+        "command", choices=["provision-db", "migrate", "check-rls", "export-openapi"]
+    )
+    parser.add_argument("--output", type=Path, help="export-openapi: write to this file")
     args = parser.parse_args(argv)
 
     if args.command == "provision-db":
@@ -118,6 +151,13 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "migrate":
         command.upgrade(alembic_config(), "head")
+        return 0
+    if args.command == "export-openapi":
+        document = openapi_document()
+        if args.output:
+            args.output.write_text(document)
+        else:
+            sys.stdout.write(document)
         return 0
     return asyncio.run(_check_rls())
 

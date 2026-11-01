@@ -118,6 +118,10 @@ docker build -f web/Dockerfile -t brand-web:dev .    # run from the REPO ROOT (b
 - **Container.** Next.js decides whether a rewrite is internal by comparing origins with the address the server is bound to. Bind `0.0.0.0` (the image sets `HOSTNAME=0.0.0.0`; a platform that overrides `HOSTNAME` must set it back). Bound to `127.0.0.1` the admin rewrite fails with a 500, never exposing admin pages.
 - **Dependencies.** `web/pnpm-workspace.yaml` refuses any package version published less than 14 days ago and blocks install scripts.
 
+### Typed API client
+
+The API is the contract. `pnpm gen:api` (run in `web/`, needs `uv`) exports the OpenAPI document with `python -m app.cli export-openapi` and writes `web/lib/api/schema.ts`; never edit that file. `pnpm gen:api:check` fails if it is stale (a pre-commit hook runs it when API code changes). Use the client from `web/lib/api/client.ts`: `createApiClient({ baseUrl })` is typed against the schema, sends the session cookie, and adds the CSRF header on state-changing requests. Paths in the spec are relative to the `/api/v1` server, so `NEXT_PUBLIC_API_URL` ends in `/api/v1`.
+
 ### Database (PostgreSQL 16, Row-Level Security)
 
 Two login roles, both created by a one-off superuser step and neither able to bypass Row-Level

@@ -47,6 +47,14 @@ repos:
         pass_filenames: false
         files: ^web/.*\.(js|jsx|mjs|cjs|ts|tsx)$
 
+      # --- Generated API types must match the API: fails if web/lib/api/schema.ts is stale ---------
+      - id: api-client-up-to-date
+        name: generated API client types are up to date
+        language: system
+        entry: sh -c 'cd web && pnpm gen:api:check'
+        pass_filenames: false
+        files: ^(api/app/.*\.py|web/lib/api/schema\.ts|web/scripts/gen-api\.mjs)$
+
       # --- NEXT_PUBLIC_* allowlist: nothing but the 9 public names may ever exist --------------
       - id: check-public-env
         name: NEXT_PUBLIC_* allowlist

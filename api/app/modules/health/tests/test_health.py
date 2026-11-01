@@ -121,7 +121,10 @@ async def test_probes_run_concurrently() -> None:
 def test_openapi_documents_both_endpoints_and_the_503() -> None:
     app: FastAPI = create_app(build_settings())
     schema = app.openapi()
-    assert set(schema["paths"]) == {"/api/v1/health", "/api/v1/ready"}
-    ready = schema["paths"]["/api/v1/ready"]["get"]["responses"]
+    # Paths are relative to the documented server, which is where the web app's base URL points.
+    assert schema["servers"] == [{"url": "/api/v1"}]
+    assert set(schema["paths"]) == {"/health", "/ready"}
+    assert schema["paths"]["/ready"]["get"]["operationId"] == "health_ready"
+    ready = schema["paths"]["/ready"]["get"]["responses"]
     assert {"200", "503"} <= set(ready)
     assert "ReadyResponse" in json.dumps(ready["503"])
