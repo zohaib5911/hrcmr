@@ -1,0 +1,172 @@
+# Local development stack (plan.md T0.3). Production runs on Railway; this file is for your machine only.
+#
+#   docker compose up -d --wait                 start everything and wait until healthy
+#   docker compose --profile stripe up -d       also start the Stripe CLI (needs a test key, see README)
+#   docker compose down                         stop (data is kept in named volumes)
+#   docker compose down -v                      stop and DELETE all local data
+#
+# Safe by design:
+#   - Every published port is bound to 127.0.0.1, so nothing is reachable from your network.
+#   - The credentials below protect throwaway local containers only. Override any of them in a
+#     local .env (never commit it). Real keys never go in this file.
+#
+# Stand-ins for production services:
+#   rustfs  -> Cloudflare R2 (S3 API). MinIO was the original choice but its community project is
+#              archived and its Docker images were withdrawn, so RustFS (Apache-2.0) replaces it.
+#   mailpit -> Resend (catches all outgoing mail; read it at http://localhost:8025)
+name: brand-dev
+
+services:
+  # ---------------------------------------------------------------------------------------------
+  # PostgreSQL 16 with pgvector. Extensions (pgcrypto, pg_trgm, unaccent, vector, citext) and the
+  # app_owner / app_user roles are created by the database-layer task (T0.5), not here.
+  # ---------------------------------------------------------------------------------------------
+  postgres:
+    image: pgvector/pgvector:0.8.7-pg16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: app
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------------------------
+  # Redis 7: sessions, rate limits, ARQ job queue, cache.
+  # ---------------------------------------------------------------------------------------------
+  redis:
+    image: redis:7.4.12-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 5s
+
+  # ---------------------------------------------------------------------------------------------
+  # RustFS: S3-compatible object storage standing in for Cloudflare R2.
+  #   S3 API  http://localhost:9000      Console  http://localhost:9001
+  # The app's R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY in your local .env must equal
+  # RUSTFS_ACCESS_KEY / RUSTFS_SECRET_KEY below.
+  # ---------------------------------------------------------------------------------------------
+  rustfs:
+    image: rustfs/rustfs:1.0.4
+    security_opt:
+      - "no-new-privileges:true"
+    environment:
+      RUSTFS_VOLUMES: /data
+      RUSTFS_ADDRESS: 0.0.0.0:9000
+      RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:9001
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:-rustfsadmin}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:-rustfsadmin}
+    ports:
+      - "127.0.0.1:${S3_PORT:-9000}:9000"
+      - "127.0.0.1:${S3_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - rustfsdata:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
+  # One-shot job: creates the private bucket `files-dev`, then exits 0. Safe to run repeatedly.
+  rustfs-init:
+    image: amazon/aws-cli:2.39.3
+    depends_on:
+      rustfs:
+        condition: service_healthy
+    restart: "no"
+    environment:
+      AWS_ACCESS_KEY_ID: ${RUSTFS_ACCESS_KEY:-rustfsadmin}
+      AWS_SECRET_ACCESS_KEY: ${RUSTFS_SECRET_KEY:-rustfsadmin}
+      AWS_DEFAULT_REGION: us-east-1
+      AWS_EC2_METADATA_DISABLED: "true"
+      # R2 and most S3 clones reject the newer default checksum headers.
+      AWS_REQUEST_CHECKSUM_CALCULATION: when_required
+      AWS_RESPONSE_CHECKSUM_VALIDATION: when_required
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - |
+        s3="aws --endpoint-url http://rustfs:9000"
+        if $$s3 s3api head-bucket --bucket files-dev >/dev/null 2>&1; then
+          echo "bucket files-dev already exists"
+        else
+          $$s3 s3api create-bucket --bucket files-dev >/dev/null
+          echo "bucket files-dev created"
+        fi
+
+  # ---------------------------------------------------------------------------------------------
+  # Mailpit: catches every outgoing e-mail. SMTP localhost:1025, inbox + API http://localhost:8025
+  # ---------------------------------------------------------------------------------------------
+  mailpit:
+    image: axllent/mailpit:v1.33.0
+    environment:
+      MP_MAX_MESSAGES: "1000"
+    ports:
+      - "127.0.0.1:${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "127.0.0.1:${MAILPIT_UI_PORT:-8025}:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------------------------
+  # ClamAV (clamd on tcp/3310): every upload is scanned; infected or unscannable files are rejected.
+  # First start downloads the signature database (about 300 MB) and needs roughly 1.5 GB of RAM
+  # (up to about 2.5 GB while it reloads signatures). The `clamav-db` volume keeps the signatures
+  # so later starts take seconds. The image's own healthcheck (`clamdcheck.sh`, PING/PONG) is used.
+  # ---------------------------------------------------------------------------------------------
+  clamav:
+    image: clamav/clamav:1.5.4
+    ports:
+      - "127.0.0.1:${CLAMAV_PORT:-3310}:3310"
+    volumes:
+      - clamav-db:/var/lib/clamav
+    healthcheck:
+      test: ["CMD", "clamdcheck.sh"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 10m
+
+  # ---------------------------------------------------------------------------------------------
+  # Stripe CLI (profile `stripe`, off by default): forwards TEST-mode webhooks to the API on your
+  # host. Needs STRIPE_SECRET_KEY (a test key) in your local .env. The webhook signing secret is
+  # printed in this container's log (`docker compose logs stripe-cli`); copy it into .env yourself.
+  # ---------------------------------------------------------------------------------------------
+  stripe-cli:
+    profiles: ["stripe"]
+    image: stripe/stripe-cli:v1.55.6
+    environment:
+      STRIPE_API_KEY: ${STRIPE_SECRET_KEY:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command:
+      - listen
+      - --forward-to
+      - http://host.docker.internal:8000/api/v1/webhooks/stripe
+      - --events
+      - checkout.session.completed,invoice.paid,invoice.payment_failed,customer.subscription.updated,customer.subscription.deleted,charge.refunded
+
+volumes:
+  pgdata:
+  redisdata:
+  rustfsdata:
+  clamav-db:

@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-01
-- **Current task:** T0.3 Local stack (Docker Compose)
+- **Current task:** T0.4 API skeleton
 
 ---
 
@@ -22,7 +22,7 @@ unless a task notes otherwise here.
 
 | Needed by | Owner action | Source |
 |---|---|---|
-| T0.8 | Create the **private GitHub repository** and tell me to add it as the `origin` remote. CI cannot go green on `main` without it. Also turn on **Security → Private vulnerability reporting** for the repo (referenced by `SECURITY.md`). | plan T0.8, SECURITY.md |
+| T0.8 | ~~Create the private GitHub repository~~ — done: `zohaib5911/hrcmr`, confirmed private. Still to do: turn on **Settings → Security → Private vulnerability reporting** (referenced by `SECURITY.md`), and later enable branch protection on `main` and the GitHub Actions secrets (section 6 of deployment-requirements). | plan T0.8, SECURITY.md |
 | Before launch | Give me the non-secret business details: brand name, domain, logo files (SVG lockup + mark, 512 px PNG favicon), accent colour, legal company name, number and registered office, ICO number, support email, sender address, confirm prices, Platform Admin emails, pixel and Companies House choices, optional office IPs. `brand.config.ts` currently holds the placeholder name "Brand". | deployment-requirements §1 |
 | When I ask | Put **dev/test keys** in your own local `.env` (`cp .env.example .env`) and reply "the .env is ready": a low-limit `ANTHROPIC_API_KEY` (T14.4), Stripe **test** key and `stripe listen` webhook secret (T16.1), optional `COMPANIES_HOUSE_API_KEY` (T4.1). Turnstile uses Cloudflare's public always-pass test keys locally. | deployment-requirements §7 |
 | T13.2 | Review the 8 original courses. | plan T13.2 |
@@ -47,10 +47,13 @@ marked `UNVERIFIED` and listed here with its location.
 1. **Spec files** `plan.md` and `deployment-requirements.txt` live at the repository root as the build specification.
 2. **Layout (T0.1):** all directories in plan section 3 exist and are kept in git with `.gitkeep`. Files that belong to a later task are created by that task, so no empty placeholder files exist: `.env.example`, `.gitleaks.toml`, `.pre-commit-config.yaml` (T0.2), `docker-compose.yml` (T0.3), `web/middleware.ts` (T0.6), `web/lib/permissions.ts` (RBAC tasks), `docs/data-model.md` (generated from models), `docs/security.md` (T21.2), `docs/runbooks/*` (T2.2 and T23.6).
 3. **T19.2–T19.15** are expanded below into one task per row 1–14 of plan section 10, in the order listed. Row 15 (the Sponsorship Job Checker) is T15.8.
-4. **Commits** are local, one per task, using Conventional Commits with the task id. I do not push to any remote without your say-so.
+4. **Commits and pushes:** one commit per task, using Conventional Commits with the task id. On 2026-11-01 the owner created the private repo `https://github.com/zohaib5911/hrcmr.git` (remote `origin`, branch `main`) and authorised me to push to it. I push after each task commit, and to no other remote.
 5. **Logo files:** `brand.config.ts` points at `/brand/logo.svg`, `/brand/mark.svg` and `/brand/favicon-512.png`. Neutral default assets are created in the web tasks and replaced by yours.
 6. **Guard-rails (T0.2):** `pre-commit` is installed user-level with `uv tool install pre-commit`; it builds its own pinned `gitleaks` and `prettier`. The `eslint (web)` hook runs only when web source files are staged and needs `pnpm` (arrives in T0.6). `scan-bundle` is deliberately strict: even a bare `sk_live`/`whsec_` prefix in browser code fails, and a missing build directory fails (exit 2) rather than passing silently. Test fixtures assemble fake keys at run time so gitleaks never needs an exception.
 7. **`.env.example`** holds names only, as the plan requires. Local-dev defaults (for example the model ids) live in the code's settings, not in the file.
+8. **MinIO replaced by RustFS (T0.3), approved by the owner 2026-11-01.** The plan named MinIO as the local R2 stand-in, but `minio/minio` and `minio/mc` are gone from Docker Hub and the GitHub repo is archived ("no longer maintained", last release Oct 2025). RustFS 1.0.4 (Apache-2.0) is used instead; the bucket is still `files-dev`. This affects local development and tests only. Production is still Cloudflare R2. Fallbacks if RustFS misbehaves: SeaweedFS, then Versity S3 Gateway. Verified on 2026-11-01 with boto3 (the client the API will use): presigned 60-second GET URLs return `Content-Disposition: attachment`, tampered and expired URLs are refused with 403, anonymous and wrong-credential access is refused, and a 12 MB multipart upload round-trips intact. No fallback needed.
+9. **Compose plugin:** `docker compose` was missing, so I installed v5.6.1 under `~/.docker/cli-plugins/` after checking its SHA-256 against the release's `checksums.txt`. Delete that one file to undo.
+10. **For T2.7:** newer AWS SDKs add checksum headers that R2 and most S3 clones reject. Configure the S3 client with request/response checksums `when_required`; `rustfs-init` already sets this.
 
 ---
 
@@ -71,7 +74,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 ### Phase 0 — Foundations and guard-rails
 - [x] **T0.1** Repo initialisation — 2026-11-01. `git init -b main`; full Section 3 directory tree; README, SECURITY, PROGRESS (all 145 task ids, checked against plan.md by script), `.gitignore`, `.editorconfig`, `brand.config.ts`, `docs/architecture.md`. Owner: none.
 - [x] **T0.2** Secret guard-rails before any code — 2026-11-01. `.gitleaks.toml` (default ruleset + 7 project rules), `.pre-commit-config.yaml` (gitleaks, ruff, ruff-format, prettier, eslint, plus detect-private-key and the NEXT_PUBLIC allowlist), `.env.example` (53 names, values empty; a test keeps it identical to deployment-requirements §4), `scripts/check-public-env.mjs`, `scripts/scan-bundle.mjs`, 32 unit tests. Proved in a throwaway clone: a fake `sk_live_` key and 6 other leak types are blocked (output redacted), a clean commit passes, `git check-ignore .env` → ignored; gitleaks finds nothing in the tree or history. Owner: none.
-- [ ] **T0.3** Local stack (Docker Compose)
+- [x] **T0.3** Local stack (Docker Compose) — 2026-11-01. `docker-compose.yml`: postgres+pgvector 0.8.7/pg16, redis 7.4, RustFS 1.0.4 (+ one-shot `files-dev` bucket job), mailpit 1.33, clamav 1.5.4, stripe-cli under profile `stripe`; every port bound to 127.0.0.1; healthchecks and named volumes; README section. Verified by running it: `docker compose up -d --wait` exits 0 (about 11 s warm) with all services healthy; Postgres 16.15 creates pgcrypto, pg_trgm, unaccent, vector and citext and runs a pgvector query; Redis answers with AOF on; RustFS passed 14 S3 checks; Mailpit round-trips an SMTP message; ClamAV detects EICAR (plain, in 7-byte chunks, and inside a ZIP) and passes clean data; Postgres, Redis and bucket data survive `down`/`up`; the Stripe CLI exits with a clear message when no key is set. Owner: none now (a Stripe test key is needed in Phase 16).
 - [ ] **T0.4** API skeleton
 - [ ] **T0.5** Database layer
 - [ ] **T0.6** Web skeleton

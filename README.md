@@ -39,9 +39,48 @@ The architecture is summarised in [`docs/architecture.md`](docs/architecture.md)
 
 ## Prerequisites
 
-Docker (with Compose), Node.js 24 and pnpm, Python 3.12 with `uv`, and git. Commands for
-running the local stack, the tests and the deployment are added to this file by the tasks
-that create them (local stack, API, web, CI and deployment).
+Docker Engine with the Compose v2 plugin, Node.js 24 and pnpm, Python 3.12 with `uv`, and git.
+Commands for the tests and the deployment are added to this file by the tasks that create them
+(API, web, CI and deployment).
+
+## Local stack (Docker Compose)
+
+Everything the app needs runs on your machine, so Phases 0 to 22 need no production accounts.
+
+```bash
+docker compose up -d --wait        # start everything; returns when all services are healthy
+docker compose ps                  # status
+docker compose logs -f clamav      # watch a service (first ClamAV start downloads signatures)
+docker compose down                # stop, keep data
+docker compose down -v             # stop and delete ALL local data
+```
+
+Docker must be running first. On Arch Linux: `sudo systemctl enable --now docker.service`, and your
+user must be in the `docker` group (log out and in again after adding it).
+
+| Service | Address (this machine only) | Stands in for | Notes |
+|---|---|---|---|
+| `postgres` | `localhost:5432`, database `app` | Railway Postgres | PostgreSQL 16 with pgvector. User `postgres`; roles `app_owner` and `app_user` are created by T0.5. |
+| `redis` | `localhost:6379` | Railway Redis | Sessions, rate limits, job queue. |
+| `rustfs` | S3 API `http://localhost:9000`, console `http://localhost:9001` | Cloudflare R2 | Private bucket `files-dev` is created by the one-shot `rustfs-init` job, which then exits (that is normal). |
+| `mailpit` | SMTP `localhost:1025`, inbox `http://localhost:8025` | Resend | Catches every e-mail. Nothing leaves your machine. |
+| `clamav` | `localhost:3310` | ClamAV on Railway | First start downloads about 300 MB of signatures and takes several minutes; needs about 1.5 GB RAM. Signatures are kept in a volume, so later starts are quick. |
+| `stripe-cli` | none | Stripe webhooks | Off by default; see below. |
+
+All ports are bound to `127.0.0.1`. The local credentials (`postgres`/`postgres` for Postgres,
+`rustfsadmin` for RustFS) protect throwaway containers only. Override any of them, or any port
+(`POSTGRES_PORT`, `REDIS_PORT`, `S3_PORT`, `S3_CONSOLE_PORT`, `MAILPIT_SMTP_PORT`,
+`MAILPIT_UI_PORT`, `CLAMAV_PORT`), in a local `.env`. If you change `RUSTFS_ACCESS_KEY` or
+`RUSTFS_SECRET_KEY`, set `R2_ACCESS_KEY_ID` and `R2_SECRET_ACCESS_KEY` to the same values.
+
+**Stripe webhooks (from Phase 16).** Put a Stripe **test-mode** key in your own `.env` as
+`STRIPE_SECRET_KEY`, run `docker compose --profile stripe up -d stripe-cli`, then read the webhook
+signing secret from `docker compose logs stripe-cli` and put it in `.env` as
+`STRIPE_WEBHOOK_SECRET`. Do not paste either value into chat.
+
+**Why RustFS and not MinIO?** The plan named MinIO as the local stand-in for R2. Its community
+project has been archived and its Docker images withdrawn, so RustFS (Apache-2.0, S3-compatible)
+was chosen with the owner's approval. Production still uses Cloudflare R2.
 
 ## Secret guard-rails (set up once per clone)
 
