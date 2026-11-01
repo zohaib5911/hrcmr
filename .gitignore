@@ -1,0 +1,60 @@
+# ---------------------------------------------------------------------------
+# Secrets: NEVER commit these. Only .env.example (variable NAMES) is tracked.
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+/secrets
+
+# ---------------------------------------------------------------------------
+# Node / Next.js
+# ---------------------------------------------------------------------------
+node_modules/
+.pnpm-store/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.egg-info/
+
+# ---------------------------------------------------------------------------
+# Test and build output
+# ---------------------------------------------------------------------------
+coverage/
+dist/
+build/
+playwright-report/
+test-results/
+blob-report/
+.lighthouseci/
+
+# ---------------------------------------------------------------------------
+# Local tooling and OS files
+# ---------------------------------------------------------------------------
+.claude/settings.local.json
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+*.swp
