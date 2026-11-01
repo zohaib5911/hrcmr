@@ -1,0 +1,11 @@
+# pnpm settings for this project.
+#
+# A version published less than 14 days ago is not installed. This gives the community time to
+# spot and pull a compromised release before it can reach this repository.
+minimumReleaseAge: 20160
+
+# Dependencies are not allowed to run install scripts unless listed here.
+onlyBuiltDependencies: []
+# Optional native fallback of the eslint import resolver; its prebuilt binaries ship as packages.
+ignoredBuiltDependencies:
+  - unrs-resolver

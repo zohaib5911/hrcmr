@@ -41,7 +41,9 @@ repos:
       - id: eslint-web
         name: eslint (web)
         language: system
-        entry: pnpm --dir web exec eslint --max-warnings 0 .
+        # cd first: Corepack reads the pinned pnpm version from the working directory's package.json,
+        # so `pnpm --dir web` from the repo root would fetch whatever pnpm is newest.
+        entry: sh -c 'cd web && pnpm exec eslint --max-warnings 0 .'
         pass_filenames: false
         files: ^web/.*\.(js|jsx|mjs|cjs|ts|tsx)$
 

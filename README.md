@@ -100,6 +100,24 @@ docker build -t brand-api:dev api/        # production image: multi-stage, non-r
 - **Configuration** comes from environment variables, and locally from the git-ignored `.env` in the repo root (`app/core/config.py`). Always required: `APP_ENV` (`local`, `test`, `staging` or `production`), `DOMAIN`, `WEB_ORIGIN`, `ADMIN_ORIGIN`, `API_ORIGIN`, `DATABASE_URL`, `REDIS_URL`, `SESSION_SECRET`, `FIELD_ENCRYPTION_KEYS`, `BLIND_INDEX_KEY`. `staging` and `production` refuse to start unless every third-party setting is present, and the error names the missing variables, never their values. Generate secrets with the commands in `deployment-requirements.txt` section 3.
 - **Logs** are one JSON object per line. Keys such as `password`, `token`, `authorization`, `ni_number` and `salary` are dropped, and passwords inside URLs are masked. Access lines never include the query string.
 
+## Web (`web/`, Next.js 16 with TypeScript, Tailwind v4, shadcn/ui)
+
+```bash
+corepack enable --install-directory ~/.local/bin pnpm   # one-off; pnpm's version comes from web/package.json
+cd web
+pnpm install
+pnpm dev                       # http://localhost:3000 (public site/app) and http://admin.localhost:3000 (back office)
+pnpm lint && pnpm typecheck && pnpm test      # ESLint, tsc --strict, Vitest
+pnpm test:e2e                  # builds, serves the production build like the Docker image, checks headers and host routing
+docker build -f web/Dockerfile -t brand-web:dev .    # run from the REPO ROOT (brand.config.ts and scripts/ live there)
+```
+
+- **Hosts.** `proxy.ts` (called `middleware.ts` before Next.js 16) routes by `Host`. `admin.*` serves the back office, which lives under an internal `/platform` segment that is a 404 on every host when requested directly. The admin host serves nothing else. Cloudflare must not rewrite the `Host` header.
+- **Security headers.** A per-request nonce Content-Security-Policy, HSTS, `nosniff`, `X-Frame-Options: DENY`, a strict referrer policy and a Permissions-Policy (`lib/security/csp.ts`). Because the nonce changes per request, pages are rendered per request.
+- **Secrets.** Only the nine allow-listed `NEXT_PUBLIC_*` names reach the browser, and `pnpm build` runs `scripts/check-public-env.mjs` first and `scripts/scan-bundle.mjs` after. The web service holds no third-party keys.
+- **Container.** Next.js decides whether a rewrite is internal by comparing origins with the address the server is bound to. Bind `0.0.0.0` (the image sets `HOSTNAME=0.0.0.0`; a platform that overrides `HOSTNAME` must set it back). Bound to `127.0.0.1` the admin rewrite fails with a 500, never exposing admin pages.
+- **Dependencies.** `web/pnpm-workspace.yaml` refuses any package version published less than 14 days ago and blocks install scripts.
+
 ### Database (PostgreSQL 16, Row-Level Security)
 
 Two login roles, both created by a one-off superuser step and neither able to bypass Row-Level

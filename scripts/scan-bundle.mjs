@@ -112,10 +112,13 @@ export function scanDirectories({ dirs, env = process.env, cwd = process.cwd() }
 function main() {
   const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
   const args = process.argv.slice(2);
+  // Defaults: everything the web app serves to browsers. The build output must exist; `public/` is
+  // optional (the app may have no public files yet).
+  const publicDir = path.join(repoRoot, "web/public");
   const dirs = (
     args.length > 0
       ? args
-      : [path.join(repoRoot, "web/.next/static"), path.join(repoRoot, "web/public")]
+      : [path.join(repoRoot, "web/.next/static"), ...(existsSync(publicDir) ? [publicDir] : [])]
   ).map((d) => path.resolve(d));
 
   const missing = dirs.filter((d) => !existsSync(d) || !statSync(d).isDirectory());
