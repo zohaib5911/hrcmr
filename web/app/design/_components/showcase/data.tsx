@@ -10,6 +10,7 @@ import { Card, CardBody, CardFooter, CardHeader } from "@/components/ui/card";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { EmptyState } from "@/components/ui/empty-state";
 import { KpiCard } from "@/components/ui/kpi-card";
+import { MenuItem } from "@/components/ui/menu";
 import { StatusChip } from "@/components/ui/status-chip";
 import { Timeline } from "@/components/ui/timeline";
 import { useToast } from "@/components/ui/toast";
@@ -230,7 +231,7 @@ export function DataSection() {
 
       <Demo
         title="Data table"
-        note="Click a header to sort. Click the table, then use J and K (or the arrows) to move, Enter to open, Space to select. Below 768 px each row is a card."
+        note="Click a header to sort. Click the table, then use J and K (or the arrows) to move, Enter to open, Space to select, . (full stop) for the row's menu. Below 768 px each row is a card."
       >
         <div className="w-full">
           <DataTable
@@ -242,6 +243,14 @@ export function DataSection() {
             selected={picked}
             onSelectedChange={setPicked}
             onRowOpen={open}
+            rowMenu={(person) => (
+              <>
+                <MenuItem onSelect={() => open(person)}>Open profile</MenuItem>
+                <MenuItem onSelect={() => toast.show({ title: `Reminder set for ${person.name}` })}>
+                  Set a reminder
+                </MenuItem>
+              </>
+            )}
             onExport={exportRows}
             pageSize={5}
             defaultSort={{ column: "name", direction: "asc" }}

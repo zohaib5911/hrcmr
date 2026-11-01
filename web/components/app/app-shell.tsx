@@ -1,14 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 
 import { ToastProvider } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { saveSidebarState } from "@/lib/sidebar-dom";
-import { wantsToggle } from "@/lib/sidebar";
 import type { ThemeChoice } from "@/lib/theme";
 
 import { MobileTabBar } from "./mobile-tab-bar";
+import { ShortcutProvider } from "./shortcut-provider";
 import type { ShellSession } from "./shell-types";
 import { Sidebar } from "./sidebar";
 import { Toolbar } from "./toolbar";
@@ -27,7 +27,8 @@ interface AppShellProps {
 
 /**
  * The signed-in app's frame (plan 5.6): translucent sidebar on the left (a tab bar on phones), a
- * sticky toolbar, and the page. `[` collapses the sidebar and the choice is remembered.
+ * sticky toolbar, and the page. It also hosts the keyboard shortcuts (`[` collapses the sidebar and the
+ * choice is remembered) and the command palette.
  */
 export function AppShell({
   children,
@@ -49,43 +50,35 @@ export function AppShell({
     );
   }, [collapsed]);
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (!wantsToggle(event)) return;
-      event.preventDefault();
-      toggle();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [toggle]);
-
   return (
     <TooltipProvider>
       <ToastProvider>
-        <div data-collapsed={collapsed} className="group/shell min-h-dvh">
-          <a
-            href="#main"
-            className="bg-elevated text-accent-text rounded-control shadow-e2 focus-visible:outline-accent fixed top-2 left-2 z-[90] -translate-y-20 px-4 py-2 font-medium focus:translate-y-0"
-          >
-            Skip to content
-          </a>
-          <Sidebar collapsed={collapsed} onToggle={toggle} session={session} badges={badges} />
-          <div className="flex min-h-dvh flex-col transition-[padding] motion-sheet motion-reduce:transition-none md:pl-[260px] md:group-data-[collapsed=true]/shell:pl-[72px]">
-            <Toolbar
-              user={session?.user ?? null}
-              theme={theme}
-              notificationCount={notificationCount}
-            />
-            <main
-              id="main"
-              tabIndex={-1}
-              className="page-app w-full flex-1 pt-6 pb-28 outline-none md:pb-10"
+        <ShortcutProvider onToggleSidebar={toggle}>
+          <div data-collapsed={collapsed} className="group/shell min-h-dvh">
+            <a
+              href="#main"
+              className="bg-elevated text-accent-text rounded-control shadow-e2 focus-visible:outline-accent fixed top-2 left-2 z-[90] -translate-y-20 px-4 py-2 font-medium focus:translate-y-0"
             >
-              {children}
-            </main>
+              Skip to content
+            </a>
+            <Sidebar collapsed={collapsed} onToggle={toggle} session={session} badges={badges} />
+            <div className="flex min-h-dvh flex-col transition-[padding] motion-sheet motion-reduce:transition-none md:pl-[260px] md:group-data-[collapsed=true]/shell:pl-[72px]">
+              <Toolbar
+                user={session?.user ?? null}
+                theme={theme}
+                notificationCount={notificationCount}
+              />
+              <main
+                id="main"
+                tabIndex={-1}
+                className="page-app w-full flex-1 pt-6 pb-28 outline-none md:pb-10"
+              >
+                {children}
+              </main>
+            </div>
+            <MobileTabBar />
           </div>
-          <MobileTabBar />
-        </div>
+        </ShortcutProvider>
       </ToastProvider>
     </TooltipProvider>
   );

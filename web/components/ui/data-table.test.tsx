@@ -5,6 +5,7 @@ import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { DataTable, type Column } from "./data-table";
+import { MenuItem } from "./menu";
 
 interface Person {
   id: string;
@@ -280,5 +281,90 @@ describe("DataTable states and paging", () => {
   it("the line can be moved", () => {
     render(<Table rows={people(60)} virtualiseAfter={50} />);
     expect(screen.queryByRole("button", { name: "Next page" })).not.toBeInTheDocument();
+  });
+});
+
+describe("DataTable row menu", () => {
+  const onArchive = vi.fn();
+  const rowMenu = (person: Person) => (
+    <>
+      <MenuItem onSelect={() => onArchive(person.id)}>Archive</MenuItem>
+      <MenuItem>Copy link</MenuItem>
+    </>
+  );
+
+  it("has no menu button unless a menu is given", () => {
+    render(<Table />);
+    expect(screen.queryByRole("button", { name: /^Actions for/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: "Actions" })).not.toBeInTheDocument();
+  });
+
+  it("adds a button to every row, named after the person, and a hidden column heading for it", () => {
+    render(<Table rowMenu={rowMenu} />);
+    for (const person of PEOPLE)
+      expect(screen.getByRole("button", { name: `Actions for ${person.name}` })).toBeVisible();
+    expect(screen.getByRole("columnheader", { name: "Actions" })).toBeInTheDocument();
+  });
+
+  it("the button opens that row's menu, and choosing an item runs it", async () => {
+    onArchive.mockClear();
+    render(<Table rowMenu={rowMenu} />);
+    await userEvent.click(screen.getByRole("button", { name: "Actions for Alan Turing" }));
+    const menu = screen.getByRole("menu");
+    expect(within(menu).getAllByRole("menuitem")).toHaveLength(2);
+    await userEvent.click(within(menu).getByRole("menuitem", { name: "Archive" }));
+    expect(onArchive).toHaveBeenCalledExactlyOnceWith("3");
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  });
+
+  it('"." opens the menu of the highlighted row; Esc closes it and the cursor is back in the table', async () => {
+    onArchive.mockClear();
+    render(<Table rowMenu={rowMenu} />);
+    const table = screen.getByRole("grid", { name: "People" });
+    act(() => table.focus());
+    await userEvent.keyboard("jj"); // Alan Turing
+    await userEvent.keyboard(".");
+    const menu = screen.getByRole("menu");
+    expect(menu).toBeVisible();
+    // It is Alan's menu: it hangs from his button.
+    expect(
+      screen.getByRole("button", { name: "Actions for Alan Turing", hidden: true }),
+    ).toHaveAttribute("aria-expanded", "true");
+    expect(
+      screen.getByRole("button", { name: "Actions for Ada Lovelace", hidden: true }),
+    ).toHaveAttribute("aria-expanded", "false");
+    await userEvent.keyboard("{Escape}");
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    expect(table).toHaveFocus();
+    // The highlight is where it was left, so J carries on from there.
+    await userEvent.keyboard("j");
+    expect(table.querySelector("tr[data-active]")?.textContent).toContain("Katherine Johnson");
+  });
+
+  it('choosing an item from the "." menu runs it and puts the cursor back in the table', async () => {
+    onArchive.mockClear();
+    render(<Table rowMenu={rowMenu} />);
+    const table = screen.getByRole("grid", { name: "People" });
+    act(() => table.focus());
+    await userEvent.keyboard(".");
+    await userEvent.keyboard("{Enter}"); // the first item
+    expect(onArchive).toHaveBeenCalledExactlyOnceWith("1");
+    expect(table).toHaveFocus();
+  });
+
+  it("a menu opened with the mouse gives focus back to its button, not the table", async () => {
+    render(<Table rowMenu={rowMenu} />);
+    const button = screen.getByRole("button", { name: "Actions for Ada Lovelace" });
+    await userEvent.click(button);
+    await userEvent.keyboard("{Escape}");
+    expect(button).toHaveFocus();
+  });
+
+  it('"." does nothing without a menu, or before a row is highlighted', async () => {
+    render(<Table />);
+    const table = screen.getByRole("grid", { name: "People" });
+    act(() => table.focus());
+    await userEvent.keyboard(".");
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
   });
 });

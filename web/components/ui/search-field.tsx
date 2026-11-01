@@ -15,6 +15,11 @@ type SearchFieldProps = Omit<ComponentProps<"input">, "type" | "size"> & {
   /** A shortcut to show while the field is empty, such as "⌘K". */
   shortcut?: string;
   containerClassName?: string;
+  /**
+   * Marks this as the search box for the list on the page, so pressing "/" anywhere moves the cursor
+   * here (plan 8.19). Give it to one field per page.
+   */
+  listSearch?: boolean;
 };
 
 /** A rounded search box (plan 5.7). Search as you type: the caller listens to `onChange`. */
@@ -22,6 +27,7 @@ export function SearchField({
   label,
   shortcut,
   containerClassName,
+  listSearch,
   className,
   ref,
   ...props
@@ -41,6 +47,7 @@ export function SearchField({
         ref={mergeRefs(input, ref)}
         type="search"
         role="searchbox"
+        data-list-search={listSearch ? "" : undefined}
         aria-label={label}
         placeholder={label}
         className={cn(

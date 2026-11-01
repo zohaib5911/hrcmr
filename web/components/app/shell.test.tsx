@@ -228,7 +228,7 @@ describe("the page frame", () => {
 });
 
 describe("the toolbar's controls", () => {
-  it("search and help announce what they want to open, for the features that arrive in T1.4", async () => {
+  it("search and help announce what they want to open; the shortcut provider answers", async () => {
     const AppShell = await loadShell("/employees");
     render(
       <AppShell initialCollapsed={false} theme="system" session={SESSION}>
@@ -239,9 +239,13 @@ describe("the toolbar's controls", () => {
     window.addEventListener(OPEN_PALETTE, () => heard.push("palette"));
     window.addEventListener(OPEN_SHORTCUTS, () => heard.push("shortcuts"));
     // There are two: the wide search box and the phone icon. Either opens the palette.
-    for (const button of screen.getAllByRole("button", { name: /^Search/ }))
+    for (const button of screen.getAllByRole("button", { name: /^Search/ })) {
       await userEvent.click(button);
+      expect(screen.getByRole("dialog", { name: "Search" })).toBeVisible();
+      await userEvent.keyboard("{Escape}");
+    }
     await userEvent.click(screen.getByRole("button", { name: "Help and keyboard shortcuts" }));
+    expect(screen.getByRole("dialog", { name: "Keyboard shortcuts" })).toBeVisible();
     expect(heard).toEqual(["palette", "palette", "shortcuts"]);
   });
 

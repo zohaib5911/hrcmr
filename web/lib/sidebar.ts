@@ -34,19 +34,3 @@ export function isEditableTarget(target: Target | null | undefined): boolean {
   if (target.isContentEditable) return true;
   return ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName ?? "");
 }
-
-interface KeyLike {
-  key: string;
-  ctrlKey: boolean;
-  metaKey: boolean;
-  altKey: boolean;
-  repeat: boolean;
-  target: Target | EventTarget | null;
-}
-
-/** `[` on its own collapses or expands the sidebar. */
-export function wantsToggle(event: KeyLike): boolean {
-  if (event.key !== "[" || event.ctrlKey || event.metaKey || event.altKey || event.repeat)
-    return false;
-  return !isEditableTarget(event.target as Target | null);
-}

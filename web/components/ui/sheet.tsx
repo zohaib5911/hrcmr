@@ -20,6 +20,11 @@ type SheetContentProps = Omit<ComponentProps<typeof DialogPrimitive.Content>, "t
   footer?: ReactNode;
   /** Which edge it slides from on screens 768 px and wider. Phones always get a bottom sheet. */
   side?: "right" | "left";
+  /**
+   * For a sheet that only has text to read, no buttons or fields: makes the scrolling body a tab stop
+   * so a keyboard user can scroll it with the arrow keys.
+   */
+  readOnly?: boolean;
 };
 
 /**
@@ -31,6 +36,7 @@ export function SheetContent({
   description,
   footer,
   side = "right",
+  readOnly,
   className,
   children,
   ...props
@@ -69,7 +75,12 @@ export function SheetContent({
         ) : (
           <DialogPrimitive.Description className="sr-only">{title}</DialogPrimitive.Description>
         )}
-        <div className="mt-4 min-h-0 flex-1 overflow-y-auto">{children}</div>
+        <div
+          className="mt-4 min-h-0 flex-1 overflow-y-auto"
+          {...(readOnly ? { tabIndex: 0, role: "region", "aria-label": title } : {})}
+        >
+          {children}
+        </div>
         {footer ? (
           <div className="border-separator mt-4 flex flex-wrap justify-end gap-2 border-t pt-4">
             {footer}

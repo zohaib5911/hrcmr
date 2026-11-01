@@ -63,7 +63,7 @@ for (const colorScheme of ["light", "dark"] as const) {
 
     test("a menu, open", async ({ page }) => {
       await openDesign(page);
-      await page.getByRole("button", { name: "Actions" }).click();
+      await page.getByRole("button", { name: "Actions", exact: true }).click();
       await expect(page.getByRole("menu")).toBeVisible();
       await audit(page, "menu", { modal: true });
     });

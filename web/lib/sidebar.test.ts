@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  SIDEBAR_COOKIE,
-  isEditableTarget,
-  parseSidebar,
-  sidebarCookie,
-  wantsToggle,
-} from "./sidebar";
+import { SIDEBAR_COOKIE, isEditableTarget, parseSidebar, sidebarCookie } from "./sidebar";
 
 describe("parseSidebar", () => {
   it("is collapsed only when it says so; anything else is expanded", () => {
@@ -33,48 +27,14 @@ describe("sidebarCookie", () => {
   });
 });
 
-describe("the [ key (plan 8.19: collapse sidebar)", () => {
-  const key = (
-    init: Partial<{
-      key: string;
-      ctrlKey: boolean;
-      metaKey: boolean;
-      altKey: boolean;
-      repeat: boolean;
-    }> & { target?: unknown },
-  ) =>
-    ({
-      key: "[",
-      ctrlKey: false,
-      metaKey: false,
-      altKey: false,
-      repeat: false,
-      target: null,
-      ...init,
-    }) as Parameters<typeof wantsToggle>[0];
-
-  it("toggles on a bare [", () => {
-    expect(wantsToggle(key({}))).toBe(true);
-  });
-
-  it("ignores every other key and any shortcut that merely contains it", () => {
-    expect(wantsToggle(key({ key: "]" }))).toBe(false);
-    expect(wantsToggle(key({ ctrlKey: true }))).toBe(false);
-    expect(wantsToggle(key({ metaKey: true }))).toBe(false);
-    expect(wantsToggle(key({ altKey: true }))).toBe(false);
-  });
-
-  it("does not repeat while the key is held", () => {
-    expect(wantsToggle(key({ repeat: true }))).toBe(false);
-  });
-
-  it("does nothing while the person is typing", () => {
-    for (const tag of ["input", "textarea", "select"]) {
-      expect(
-        wantsToggle(key({ target: { tagName: tag.toUpperCase(), isContentEditable: false } })),
-      ).toBe(false);
-    }
-    expect(wantsToggle(key({ target: { tagName: "DIV", isContentEditable: true } }))).toBe(false);
-    expect(isEditableTarget({ tagName: "BUTTON", isContentEditable: false })).toBe(false);
+describe("isEditableTarget", () => {
+  it("is true for text boxes, areas, selects and editable regions, and false for everything else", () => {
+    for (const tagName of ["INPUT", "TEXTAREA", "SELECT"])
+      expect(isEditableTarget({ tagName })).toBe(true);
+    expect(isEditableTarget({ tagName: "DIV", isContentEditable: true })).toBe(true);
+    expect(isEditableTarget({ tagName: "BUTTON" })).toBe(false);
+    expect(isEditableTarget({ tagName: "BODY" })).toBe(false);
+    expect(isEditableTarget(null)).toBe(false);
+    expect(isEditableTarget(undefined)).toBe(false);
   });
 });

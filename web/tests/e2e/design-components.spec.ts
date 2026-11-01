@@ -117,7 +117,7 @@ test.describe("Menu", () => {
   test("opens with Enter, moves with the arrow keys, finds items by typing, and Esc returns focus", async ({
     page,
   }) => {
-    const trigger = page.getByRole("button", { name: "Actions" });
+    const trigger = page.getByRole("button", { name: "Actions", exact: true });
     await focusVisible(page, trigger);
     await page.keyboard.press("Enter");
     const menu = page.getByRole("menu");
@@ -148,7 +148,7 @@ test.describe("Menu", () => {
   });
 
   test("a checkbox item toggles with Space and a radio item chooses", async ({ page }) => {
-    const trigger = page.getByRole("button", { name: "Actions" });
+    const trigger = page.getByRole("button", { name: "Actions", exact: true });
     await focusVisible(page, trigger);
     await page.keyboard.press("Enter");
     const checkbox = page.getByRole("menuitemcheckbox", { name: "Show archived" });

@@ -9,6 +9,7 @@ import {
   ChevronsUpDown,
   Columns3,
   Download,
+  Ellipsis,
 } from "lucide-react";
 import {
   useEffect,
@@ -66,6 +67,11 @@ interface DataTableProps<Row> {
   onSelectedChange?: (ids: ReadonlySet<string>) => void;
   /** Enter on the highlighted row, or a click on the row's open button on phones. */
   onRowOpen?: (row: Row) => void;
+  /**
+   * The actions for one row, as `MenuItem`s. Adds a "more" button to every row, and "." opens the menu
+   * of the highlighted row. Leave it out for a table whose rows have no actions.
+   */
+  rowMenu?: (row: Row) => ReactNode;
   /** Adds an Export button. It is given the rows in the order shown and the columns that are visible. */
   onExport?: (rows: readonly Row[], columns: readonly Column<Row>[]) => void;
   pageSize?: number;
@@ -82,13 +88,36 @@ const subscribePhone = (onChange: () => void) => {
   return () => query.removeEventListener("change", onChange);
 };
 
+interface RowActionsProps {
+  /** Names the row for assistive technology: "Actions for Ada Lovelace". */
+  label: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onCloseAutoFocus?: (event: Event) => void;
+  children: ReactNode;
+}
+
+/** The "more" button at the end of a row, and the menu it opens. */
+function RowActions({ label, open, onOpenChange, onCloseAutoFocus, children }: RowActionsProps) {
+  return (
+    <Menu {...(open === undefined ? {} : { open })} {...(onOpenChange ? { onOpenChange } : {})}>
+      <MenuTrigger asChild>
+        <IconButton label={label} size="sm">
+          <Icon icon={Ellipsis} size={20} />
+        </IconButton>
+      </MenuTrigger>
+      <MenuContent {...(onCloseAutoFocus ? { onCloseAutoFocus } : {})}>{children}</MenuContent>
+    </Menu>
+  );
+}
+
 const textOf = (value: SortValue | undefined, fallback: string) =>
   value === null || value === undefined ? fallback : String(value);
 
 /**
  * A table for people records (plan 5.7). Sticky header, sortable columns, column visibility, row
  * selection, a density toggle and an export hook. J and K (or the arrow keys) move through rows,
- * Enter opens one, Space selects it. Over 200 rows it draws only what is on screen; below 768 px each
+ * Enter opens one, Space selects it and "." opens its menu. Over 200 rows it draws only what is on screen; below 768 px each
  * row becomes a card.
  */
 export function DataTable<Row>({
@@ -102,6 +131,7 @@ export function DataTable<Row>({
   selected,
   onSelectedChange,
   onRowOpen,
+  rowMenu,
   onExport,
   pageSize = 25,
   virtualiseAfter = 200,
@@ -110,6 +140,10 @@ export function DataTable<Row>({
 }: DataTableProps<Row>) {
   const tableId = useId();
   const scroller = useRef<HTMLDivElement>(null);
+  const grid = useRef<HTMLTableElement>(null);
+  // The row whose menu is open, and whether the "." key opened it (focus then goes back to the table).
+  const [menuRowId, setMenuRowId] = useState<string | null>(null);
+  const menuOpenedByKey = useRef(false);
   const [sort, setSort] = useState(defaultSort ?? null);
   const [hidden, setHidden] = useState<ReadonlySet<string>>(
     () => new Set(columns.filter((c) => c.defaultHidden).map((c) => c.id)),
@@ -211,7 +245,10 @@ export function DataTable<Row>({
     else if (key === "PageUp") moveTo(current - 10);
     else if (key === "Enter" && activeIndex >= 0 && onRowOpen) onRowOpen(shown[activeIndex] as Row);
     else if (key === " " && selectable && activeIndex >= 0) toggleRow(shown[activeIndex] as Row);
-    else return;
+    else if (key === "." && rowMenu && activeIndex >= 0) {
+      menuOpenedByKey.current = true;
+      setMenuRowId(getRowId(shown[activeIndex] as Row));
+    } else return;
     event.preventDefault();
   }
 
@@ -368,6 +405,9 @@ export function DataTable<Row>({
                   <div className="text-headline text-label min-w-0 flex-1">
                     {primary?.cell(row)}
                   </div>
+                  {rowMenu ? (
+                    <RowActions label={`Actions for ${nameOf(row)}`}>{rowMenu(row)}</RowActions>
+                  ) : null}
                 </div>
                 <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
                   {visible
@@ -399,12 +439,13 @@ export function DataTable<Row>({
   }
 
   // ---- Wider screens: a table ---------------------------------------------------------------
-  const columnCount = visible.length + (selectable ? 1 : 0);
+  const columnCount = visible.length + (selectable ? 1 : 0) + (rowMenu ? 1 : 0);
   return (
     <div className={className}>
       {toolbar}
       <div ref={scroller} className="bg-elevated rounded-card shadow-e1 max-h-[75vh] overflow-auto">
         <table
+          ref={grid}
           role="grid"
           tabIndex={0}
           aria-label={caption}
@@ -482,6 +523,14 @@ export function DataTable<Row>({
                   </th>
                 );
               })}
+              {rowMenu ? (
+                <th
+                  scope="col"
+                  className="bg-elevated border-separator sticky top-0 z-10 w-14 border-b px-2"
+                >
+                  <span className="sr-only">Actions</span>
+                </th>
+              ) : null}
             </tr>
           </thead>
           <tbody>
@@ -531,6 +580,28 @@ export function DataTable<Row>({
                       {column.cell(row)}
                     </td>
                   ))}
+                  {rowMenu ? (
+                    <td className="w-14 px-2 text-right">
+                      <RowActions
+                        label={`Actions for ${nameOf(row)}`}
+                        open={menuRowId === id}
+                        onOpenChange={(open) => {
+                          // A click on the button opened it (the "." key sets the row itself).
+                          if (open) menuOpenedByKey.current = false;
+                          setMenuRowId(open ? id : null);
+                        }}
+                        onCloseAutoFocus={(event) => {
+                          // Opened with ".", the person was in the table: put them back there.
+                          if (!menuOpenedByKey.current) return;
+                          menuOpenedByKey.current = false;
+                          event.preventDefault();
+                          grid.current?.focus();
+                        }}
+                      >
+                        {rowMenu(row)}
+                      </RowActions>
+                    </td>
+                  ) : null}
                 </tr>
               );
             })}

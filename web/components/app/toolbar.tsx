@@ -2,12 +2,12 @@
 
 import { CircleHelp, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useSyncExternalStore } from "react";
 
 import { IconButton } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Tooltip } from "@/components/ui/tooltip";
 import { breadcrumbsFor, findNavItem } from "@/lib/navigation";
+import { keyLabel } from "@/lib/platform";
 import { OPEN_PALETTE, OPEN_SHORTCUTS, announce } from "@/lib/shell-events";
 import type { ThemeChoice } from "@/lib/theme";
 
@@ -15,16 +15,7 @@ import { AvatarMenu } from "./avatar-menu";
 import { Breadcrumbs } from "./breadcrumbs";
 import { NotificationsBell } from "./notifications-bell";
 import type { ShellUser } from "./shell-types";
-
-const subscribeNever = () => () => {};
-/** "⌘K" on a Mac, "Ctrl K" elsewhere. The server cannot know which, so it sends the Mac one and the browser corrects it. */
-function useSearchHint() {
-  return useSyncExternalStore(
-    subscribeNever,
-    () => (/Mac|iPhone|iPad/.test(navigator.platform) ? "⌘K" : "Ctrl K"),
-    () => "⌘K",
-  );
-}
+import { useApple } from "./use-apple";
 
 interface ToolbarProps {
   user: ShellUser | null;
@@ -39,7 +30,8 @@ interface ToolbarProps {
 export function Toolbar({ user, theme, notificationCount }: ToolbarProps) {
   const pathname = usePathname();
   const item = findNavItem(pathname);
-  const hint = useSearchHint();
+  const apple = useApple();
+  const hint = apple ? "⌘K" : `${keyLabel("Mod", false)} K`;
   return (
     <header className="material-chrome border-separator sticky top-0 z-20 flex h-14 items-center gap-3 border-b px-4 md:px-8">
       <div className="min-w-0 flex-1 lg:flex-none lg:basis-80">
