@@ -36,7 +36,7 @@ export function ThemeSwitch({ initial }: { initial: ThemeChoice }) {
             onChange={() => select(value)}
             className="peer sr-only"
           />
-          <span className="text-callout text-label-secondary peer-checked:bg-elevated peer-checked:text-label peer-checked:shadow-e1 motion-micro hit-target rounded-control peer-focus-visible:outline-accent inline-flex cursor-pointer items-center px-3 font-medium transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2">
+          <span className="text-callout text-label peer-checked:bg-elevated peer-checked:shadow-e1 motion-micro hit-target rounded-control peer-focus-visible:outline-accent inline-flex cursor-pointer items-center px-3 font-medium transition-colors peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2">
             {label}
           </span>
         </label>

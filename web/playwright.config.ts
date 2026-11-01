@@ -7,6 +7,8 @@ const API_PORT = 8100;
 // `next dev` for the /design page, which is a 404 in a production build. Tests address it as
 // `localhost`: Next.js blocks the dev server's own resources for any other origin.
 const DESIGN_PORT = 3101;
+// The specs that need the development server. (design-guard.spec.ts runs against the production build.)
+const DESIGN_SPECS = /design(-a11y|-components)?\.spec\.ts$/;
 
 const secret = (bytes: number) => randomBytes(bytes).toString("base64url");
 const postgresPassword = process.env.POSTGRES_PASSWORD ?? "postgres";
@@ -24,12 +26,12 @@ export default defineConfig({
   projects: [
     {
       name: "production",
-      testIgnore: /design\.spec\.ts/,
+      testIgnore: DESIGN_SPECS,
       use: { baseURL: `http://127.0.0.1:${WEB_PORT}` },
     },
     {
       name: "design",
-      testMatch: /design\.spec\.ts/,
+      testMatch: DESIGN_SPECS,
       use: { baseURL: `http://localhost:${DESIGN_PORT}`, browserName: "chromium" },
     },
   ],

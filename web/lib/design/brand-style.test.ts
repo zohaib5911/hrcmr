@@ -37,6 +37,13 @@ describe("brandAccentCss", () => {
     );
   });
 
+  it("refuses a light accent whose link text fails on its own tint, even though white text passes", () => {
+    // White on #BB00FF is 4.6:1, but the link colour on a 12% tint of it is 4.4:1 (tinted buttons).
+    expect(() => brandAccentCss({ accent: "#BB00FF", accentDark: DEFAULT_ACCENT.dark })).toThrow(
+      /own tint/,
+    );
+  });
+
   it("refuses a dark accent that is too dim for black button text or for links on cards", () => {
     expect(() => brandAccentCss({ accent: DEFAULT_ACCENT.light, accentDark: "#1A3A66" })).toThrow(
       /AA/,

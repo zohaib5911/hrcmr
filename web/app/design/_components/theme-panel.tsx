@@ -18,14 +18,15 @@ const GROUPS: readonly { group: TokenGroup; title: string }[] = [
 
 // Written out in full so Tailwind finds every class.
 const TEXT_SAMPLES = [
-  { className: "text-label", name: "Label" },
-  { className: "text-label-secondary", name: "Secondary" },
-  { className: "text-label-tertiary", name: "Tertiary (large only)" },
-  { className: "text-accent-text", name: "Link" },
-  { className: "text-success", name: "Success" },
-  { className: "text-warning", name: "Warning" },
-  { className: "text-danger", name: "Danger" },
-  { className: "text-info", name: "Info" },
+  { className: "text-label text-callout", name: "Label" },
+  { className: "text-label-secondary text-callout", name: "Secondary" },
+  // The plan allows tertiary text for large text only (3:1), so this sample is 28 px bold.
+  { className: "text-label-tertiary text-title-1", name: "Tertiary: large only" },
+  { className: "text-accent-text text-callout", name: "Link" },
+  { className: "text-success text-callout", name: "Success" },
+  { className: "text-warning text-callout", name: "Warning" },
+  { className: "text-danger text-callout", name: "Danger" },
+  { className: "text-info text-callout", name: "Info" },
 ] as const;
 
 const SURFACE_SAMPLES = [
@@ -98,7 +99,7 @@ export function ThemePanel({ theme }: { theme: "light" | "dark" }) {
                 {surface.name}
               </p>
               {TEXT_SAMPLES.map((sample) => (
-                <p key={sample.name} className={`${sample.className} text-callout`}>
+                <p key={sample.name} className={sample.className}>
                   {sample.name}
                 </p>
               ))}
@@ -129,7 +130,7 @@ export function ThemePanel({ theme }: { theme: "light" | "dark" }) {
           <span className="text-accent-text text-body underline underline-offset-2">
             A link in the accent colour
           </span>
-          <span className="bg-fill-secondary text-label-secondary rounded-control hit-target text-body inline-flex items-center px-3">
+          <span className="bg-fill-secondary text-placeholder rounded-control hit-target text-body inline-flex items-center px-3">
             Placeholder text
           </span>
         </div>

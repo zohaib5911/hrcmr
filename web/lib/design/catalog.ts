@@ -44,6 +44,18 @@ export const COLOUR_TOKENS: readonly ColourToken[] = [
     use: "Input placeholder text (darker than the secondary label so it passes AA on an input fill)",
   },
   { name: "--separator", swatch: "bg-separator", group: "surface", use: "Hairlines" },
+  {
+    name: "--knob",
+    swatch: "bg-knob",
+    group: "surface",
+    use: "The white thumb of a switch, in both themes",
+  },
+  {
+    name: "--scrim",
+    swatch: "bg-scrim",
+    group: "material",
+    use: "The dimmed backdrop behind dialogs and sheets",
+  },
   { name: "--accent", swatch: "bg-accent", group: "accent", use: "Primary buttons and focus ring" },
   { name: "--accent-pressed", swatch: "bg-accent-pressed", group: "accent", use: "Pressed state" },
   {
@@ -51,6 +63,12 @@ export const COLOUR_TOKENS: readonly ColourToken[] = [
     swatch: "bg-accent-text",
     group: "accent",
     use: "Links and small accent text",
+  },
+  {
+    name: "--accent-tint",
+    swatch: "bg-accent-tint",
+    group: "accent",
+    use: "Soft accent background: tinted buttons, selected rows, avatars",
   },
   {
     name: "--on-accent",
@@ -313,6 +331,13 @@ export const CONTRAST_PAIRS: readonly ContrastPair[] = [
       use: "Status chip",
     })),
   ]),
+  ...SURFACES.map((over): ContrastPair => ({
+    fg: "--accent-text",
+    bg: "--accent-tint",
+    over,
+    min: 4.5,
+    use: "Tinted button label",
+  })),
   { fg: "--on-accent", bg: "--accent", min: 4.5, use: "Primary button label" },
   { fg: "--on-accent", bg: "--accent-pressed", min: 4.5, use: "Primary button label, pressed" },
   ...SURFACES.flatMap((over): ContrastPair[] => [

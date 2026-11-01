@@ -14,6 +14,7 @@ import {
   TYPE_STYLES,
 } from "../../lib/design/catalog";
 import { composite, contrastRatio, parseComputedColour } from "../../lib/design/contrast";
+import { openDesign } from "../support/design-page";
 import { EXPECTED_DARK, EXPECTED_LIGHT } from "../support/expected-tokens";
 import { resolveColour } from "../support/colour";
 
@@ -25,19 +26,6 @@ const THEMES = [
 const themeSwitch = (page: Page) => page.getByRole("group", { name: "Colour theme" });
 
 const px = (value: string) => (value === "normal" ? 0 : Number.parseFloat(value));
-
-async function openDesign(page: Page) {
-  const problems: string[] = [];
-  page.on("console", (message) => {
-    if (message.type() === "error") problems.push(`console: ${message.text()}`);
-  });
-  page.on("pageerror", (error) => problems.push(`page error: ${error.message}`));
-  await page.goto("/design");
-  await expect(page.getByRole("heading", { level: 1, name: "Design tokens" })).toBeVisible();
-  // Hydration has run once every live token value has been read from the browser.
-  await expect(page.locator('[data-token-value="--bg"]').first()).not.toHaveText("…");
-  return problems;
-}
 
 test.describe("every token, in both themes", () => {
   test("the page loads cleanly and fetches nothing from outside this site", async ({ page }) => {
@@ -105,7 +93,7 @@ test.describe("every token, in both themes", () => {
         theme === "light" ? "rgba(120, 120, 128, 0.12)" : "rgba(120, 120, 128, 0.24)",
       );
       // A derived token shows its real result, not the formula.
-      await expect(shown("--accent-text")).toHaveText(theme === "light" ? "#0063C8" : "#2997FF");
+      await expect(shown("--accent-text")).toHaveText(theme === "light" ? "#0060C1" : "#2997FF");
     });
 
     test(`${theme}: every text and control pair meets WCAG AA as the browser resolves it`, async ({

@@ -130,6 +130,28 @@ The tokens from plan section 5 live in one stylesheet, and tests hold it to the 
 - **Brand colour.** `brand.config.ts` may change the accent colour and nothing else. `lib/design/brand-style.ts` refuses any colour that would make button labels or links fail WCAG AA.
 - **Fonts.** Inter, from the `@fontsource-variable/inter` package, is served from this site (no request to Google). The system font is first in the stack, so Apple devices show their own.
 
+### Components (`web/components/ui/`)
+
+Every primitive from plan section 5.7 that is not owned by a later task: buttons, text and number
+fields, search, text area, select, combobox, date and date-range pickers, time picker, file drop,
+switch, checkbox, radio cards, segmented control, tabs, card, dialog, sheet, confirm dialog, inline
+confirm, popover, menus, tooltip, toasts, alert, empty and error states, skeletons, progress, stepper,
+chips, avatars, KPI card, timeline, calendar and the data table. Run `pnpm dev` and open
+`http://localhost:3000/design` to see each one in all its states, in both themes.
+
+Rules that the tooling enforces:
+
+- **Tokens only.** Tailwind's default palette is off, so use `bg-elevated`, `text-label`, `bg-accent-tint`, not `bg-white`. A test fails on any raw colour class.
+- **No `style=""`.** The Content-Security-Policy blocks inline styles in server-rendered HTML, so they silently do nothing in production. ESLint rejects the `style` prop; use classes or SVG attributes.
+- **Join classes with `cn()`** from `lib/utils`. It knows this design system's text sizes, radii and shadows. Plain `tailwind-merge` does not, and drops the colour from `text-callout text-on-accent`.
+- **Contrast.** On the grey input fill, use `text-label` or `text-placeholder`, never `text-label-secondary` (4.1 to 4.4:1). `text-label-tertiary` is for large text and icons only. Use a gray or filled button inside a coloured alert, not a tinted one. `pnpm test` and the axe suite check all of this.
+- **Dates are ISO strings** (`"2026-11-01"`), never `Date` objects. The pickers show `1 Nov 2026` and read `1/11/26`, day first.
+- **Providers.** `TooltipProvider` and `ToastProvider` go once near the root (the app shell does this from T1.3).
+
+Tests: logic in `lib/ui/*.test.ts` and `components/ui/*.test.tsx` (`pnpm test`, jsdom); real-browser keyboard,
+focus and layout in `tests/e2e/design-components.spec.ts`; accessibility in `tests/e2e/design-a11y.spec.ts`
+(axe-core, zero violations, both themes, phone width, reduced motion, and every overlay while it is open).
+
 ### Typed API client
 
 The API is the contract. `pnpm gen:api` (run in `web/`, needs `uv`) exports the OpenAPI document with `python -m app.cli export-openapi` and writes `web/lib/api/schema.ts`; never edit that file. `pnpm gen:api:check` fails if it is stale (a pre-commit hook runs it when API code changes). Use the client from `web/lib/api/client.ts`: `createApiClient({ baseUrl })` is typed against the schema, sends the session cookie, and adds the CSRF header on state-changing requests. Paths in the spec are relative to the `/api/v1` server, so `NEXT_PUBLIC_API_URL` ends in `/api/v1`.

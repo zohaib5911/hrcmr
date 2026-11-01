@@ -68,8 +68,11 @@ export const DEVIATIONS = {
 /** Tokens the plan does not list, which the pairs above need (see PROGRESS.md decision 30). */
 const ADDED_LIGHT: Record<string, string> = {
   "--placeholder": "#636366", // the plan's #6E6E73 is 4.0:1 on an input fill over the canvas
-  "--accent-text": "color-mix(in srgb, var(--accent) 88%, black)",
+  "--accent-text": "color-mix(in srgb, var(--accent) 85%, black)",
+  "--accent-tint": "color-mix(in srgb, var(--accent) 12%, transparent)",
   "--on-accent": "#FFFFFF",
+  "--scrim": "rgba(0,0,0,0.4)",
+  "--knob": "#FFFFFF",
   "--info-fill": "#0071E3",
   "--success-tint": "color-mix(in srgb, var(--success-fill) 12%, transparent)",
   "--warning-tint": "color-mix(in srgb, var(--warning-fill) 12%, transparent)",
@@ -85,7 +88,10 @@ const DARK_RING = "0 0 0 1px rgba(255,255,255,0.08)"; // plan 5.4: borders, not 
 const ADDED_DARK: Record<string, string> = {
   "--placeholder": "#A1A1A6",
   "--accent-text": "var(--accent)",
+  "--accent-tint": "color-mix(in srgb, var(--accent) 12%, transparent)",
   "--on-accent": "#000000",
+  "--scrim": "rgba(0,0,0,0.6)",
+  "--knob": "#FFFFFF",
   "--info-fill": "#64D2FF",
   "--success-tint": "color-mix(in srgb, var(--success-fill) 12%, transparent)",
   "--warning-tint": "color-mix(in srgb, var(--warning-fill) 12%, transparent)",

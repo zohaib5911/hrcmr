@@ -42,6 +42,8 @@
   --bg-grouped: #f2f2f7;
   --fill-secondary: rgba(120, 120, 128, 0.12);
   --separator: rgba(60, 60, 67, 0.18);
+  --scrim: rgba(0, 0, 0, 0.4);
+  --knob: #ffffff;
 
   /* Text */
   --label: #1d1d1f;
@@ -52,7 +54,8 @@
   /* Accent. Only these three may be overridden by brand.config.ts (lib/design/brand-style.ts). */
   --accent: #0071e3;
   --accent-pressed: #0062c4;
-  --accent-text: color-mix(in srgb, var(--accent) 88%, black);
+  --accent-text: color-mix(in srgb, var(--accent) 85%, black);
+  --accent-tint: color-mix(in srgb, var(--accent) 12%, transparent);
   --on-accent: #ffffff;
 
   /* Status: the plain token is for text, -fill for dots and bars, -tint for chips (12%). */
@@ -89,6 +92,8 @@
     --bg-grouped: #000000;
     --fill-secondary: rgba(120, 120, 128, 0.24);
     --separator: rgba(84, 84, 88, 0.6);
+    --scrim: rgba(0, 0, 0, 0.6);
+    --knob: #ffffff;
 
     --label: #f5f5f7;
     --label-secondary: #a1a1a6;
@@ -98,6 +103,7 @@
     --accent: #2997ff;
     --accent-pressed: #0a84ff;
     --accent-text: var(--accent);
+    --accent-tint: color-mix(in srgb, var(--accent) 12%, transparent);
     --on-accent: #000000;
 
     --success: #30d158;
@@ -132,6 +138,8 @@
   --bg-grouped: #000000;
   --fill-secondary: rgba(120, 120, 128, 0.24);
   --separator: rgba(84, 84, 88, 0.6);
+  --scrim: rgba(0, 0, 0, 0.6);
+  --knob: #ffffff;
 
   --label: #f5f5f7;
   --label-secondary: #a1a1a6;
@@ -141,6 +149,7 @@
   --accent: #2997ff;
   --accent-pressed: #0a84ff;
   --accent-text: var(--accent);
+  --accent-tint: color-mix(in srgb, var(--accent) 12%, transparent);
   --on-accent: #000000;
 
   --success: #30d158;
@@ -269,6 +278,8 @@
   --color-grouped: var(--bg-grouped);
   --color-fill-secondary: var(--fill-secondary);
   --color-separator: var(--separator);
+  --color-scrim: var(--scrim);
+  --color-knob: var(--knob);
   --color-label: var(--label);
   --color-label-secondary: var(--label-secondary);
   --color-label-tertiary: var(--label-tertiary);
@@ -276,6 +287,7 @@
   --color-accent: var(--accent);
   --color-accent-pressed: var(--accent-pressed);
   --color-accent-text: var(--accent-text);
+  --color-accent-tint: var(--accent-tint);
   --color-on-accent: var(--on-accent);
   --color-success: var(--success);
   --color-success-fill: var(--success-fill);
@@ -415,4 +427,38 @@
 @utility motion-sheet {
   transition-duration: var(--duration-sheet);
   transition-timing-function: var(--ease-spring);
+}
+
+/* Loading placeholder: a flat tile with one soft highlight passing over it (plan 5.5). Still when motion is reduced. */
+@utility skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--fill-secondary);
+  border-radius: var(--radius-control);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--bg-elevated) 55%, transparent),
+      transparent
+    );
+    animation: skeleton-shimmer 1.8s var(--ease-standard) infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::after {
+      animation: none;
+    }
+  }
+}
+
+@keyframes skeleton-shimmer {
+  to {
+    transform: translateX(100%);
+  }
 }
