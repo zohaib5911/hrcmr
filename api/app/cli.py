@@ -4,6 +4,7 @@ provision-db   Create/refresh the app_owner and app_user roles, ownership and ex
                Needs a SUPERUSER URL in DATABASE_URL_ADMIN (not part of the API's settings).
 migrate        Apply migrations (``alembic upgrade head``) as app_owner.
 check-rls      Fail if any tenant table lacks Row-Level Security or an updated_at trigger.
+rotate-keys    Re-encrypt every encrypted column with the active key (after adding a new key).
 export-openapi Print (or --output) the OpenAPI document.
 export-data-model Print (or --output) docs/data-model.md, generated from the models.
 """
@@ -112,6 +113,23 @@ async def _check_rls() -> int:
     return 1 if failed else 0
 
 
+async def _rotate_keys() -> int:
+    from app.db.rotate import rotate_keys
+
+    settings = get_settings()
+    if settings.database_url_owner is None:
+        raise SystemExit("DATABASE_URL_OWNER is not set. Key rotation must reach every company.")
+    engine = create_async_engine(settings.database_url_owner.get_secret_value())
+    try:
+        changed = await rotate_keys(engine)
+    finally:
+        await engine.dispose()
+    for label, count in changed.items():
+        print(f"{label}: {count} re-encrypted")  # noqa: T201
+    print("Done. Remove an old key from FIELD_ENCRYPTION_KEYS only after a second run changes 0.")  # noqa: T201
+    return 0
+
+
 def openapi_document() -> str:
     """The API's OpenAPI document as stable, sorted JSON.
 
@@ -144,7 +162,14 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="python -m app.cli", description=__doc__)
     parser.add_argument(
         "command",
-        choices=["provision-db", "migrate", "check-rls", "export-openapi", "export-data-model"],
+        choices=[
+            "provision-db",
+            "migrate",
+            "check-rls",
+            "export-openapi",
+            "export-data-model",
+            "rotate-keys",
+        ],
     )
     parser.add_argument(
         "--output", type=Path, help="export-openapi, export-data-model: write to this file"
@@ -164,6 +189,8 @@ def main(argv: list[str] | None = None) -> int:
         else:
             sys.stdout.write(document)
         return 0
+    if args.command == "rotate-keys":
+        return asyncio.run(_rotate_keys())
     if args.command == "export-data-model":
         from app.db.data_model import data_model_markdown
 

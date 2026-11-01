@@ -173,6 +173,10 @@ class Settings(BaseSettings):
                 raise ValueError(
                     f"APP_ENV={self.app_env.value} requires these variables: {', '.join(missing)}"
                 )
+            # Keys that cannot encrypt must stop the boot, not the first employee record.
+            from app.core.crypto import KeyRing
+
+            KeyRing.from_settings(self)
         return self
 
     @property

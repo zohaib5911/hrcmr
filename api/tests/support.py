@@ -39,7 +39,7 @@ def build_settings(**overrides: Any) -> Settings:
         "field_encryption_keys": json.dumps(
             {"k1": base64.b64encode(secrets.token_bytes(32)).decode()}
         ),
-        "blind_index_key": random_secret(32),
+        "blind_index_key": base64.b64encode(secrets.token_bytes(32)).decode(),
     }
     values.update(overrides)
     values = {k: v for k, v in values.items() if v is not None}

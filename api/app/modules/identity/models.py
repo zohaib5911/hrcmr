@@ -36,6 +36,7 @@ from sqlalchemy.dialects.postgresql import CITEXT, INET
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, RecordMixin, TenantMixin, TimestampMixin, UUIDPrimaryKeyMixin
+from app.db.types import EncryptedString
 
 ROLES = (
     "company_admin",
@@ -65,8 +66,7 @@ class User(Base, RecordMixin):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=true())
 
     mfa_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=false())
-    # Encrypted by ``EncryptedString`` (T2.2); the column is text either way.
-    mfa_secret: Mapped[str | None] = mapped_column(Text)
+    mfa_secret: Mapped[str | None] = mapped_column(EncryptedString("users.mfa_secret"))
     recovery_codes_hash: Mapped[list[str]] = mapped_column(
         ARRAY(Text), nullable=False, server_default="{}"
     )

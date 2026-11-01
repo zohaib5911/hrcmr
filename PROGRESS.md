@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** T2.2 Crypto
+- **Current task:** T2.3 Sessions and auth service
 
 ---
 
@@ -161,7 +161,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 ### Phase 2 — Backend core (identity, tenancy, RBAC, audit, files, email)
 - [x] **T2.1** Models — 2026-11-02. Migration `0002_identity_core`: companies, users, memberships, platform_admins, sessions, invitations, email_tokens, terms_versions and terms_acceptances, audit_events (append-only trigger plus no UPDATE/DELETE grant), files, notifications; `docs/data-model.md` is generated from the models and a test keeps it current. **Verified:** applies, rolls back to 0001 and to base, and re-applies cleanly; raw-SQL tests show companies cannot see each other's memberships or files, the audit trail cannot be updated, deleted or truncated even by the owner, and emails are unique whatever their case. Owner: none.
-- [ ] **T2.2** Crypto
+- [x] **T2.2** Crypto — 2026-11-02. `app/core/crypto.py` (AES-256-GCM, `v1:<kid>:` prefix, context bound as authenticated data, blind-index HMAC scoped by purpose and company, `mask_tail`), `EncryptedString` column type (`users.mfa_secret` now uses it), `python -m app.cli rotate-keys` (finds columns by type, repeatable), key settings validated at start in staging and production, runbook `docs/runbooks/key-rotation.md`. **Verified:** 27 tests: round trip, tamper and wrong-column refusal, rotation of stored rows to a new key and removal of the old one, bad key settings refused by name. Owner: none (generate the keys per deployment-requirements section 3 at T23).
 - [ ] **T2.3** Sessions and auth service
 - [ ] **T2.4** Auth endpoints
 - [ ] **T2.5** RBAC
