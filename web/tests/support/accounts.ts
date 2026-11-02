@@ -70,8 +70,11 @@ export async function createSignedInAdmin(
   account: Account = newAccount(),
 ): Promise<Account> {
   const headers = await csrfHeaders(request);
+  // The test API trusts X-Real-IP from this machine (api/tests/e2e_server.py), so a sign-up made here
+  // counts against a made-up address and not the shared one that allows only 5 an hour.
+  const visitor = `10.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${1 + Math.floor(Math.random() * 254)}`;
   const signup = await request.post(`${API}/auth/signup`, {
-    headers,
+    headers: { ...headers, "X-Real-IP": visitor },
     data: {
       company_name: account.company,
       bank_holiday_region: "england-and-wales",

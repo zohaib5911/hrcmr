@@ -29,6 +29,8 @@ export const test = base.extend({
     if (!session) {
       session = signUp();
       sessions.set(testInfo.file, session);
+      // A failed sign-up is not kept: the next test of the file tries again.
+      session.catch(() => sessions.delete(testInfo.file));
     }
     // eslint-disable-next-line react-hooks/rules-of-hooks -- Playwright's `use`, not a React hook
     await use(await session);
