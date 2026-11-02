@@ -32,9 +32,13 @@ import {
 } from "@/lib/company/access";
 import { ROLE_LABELS, type Role } from "@/lib/auth/roles";
 
+import { RolesViewer } from "./roles-viewer";
+import { TwoStepPolicyCard } from "./two-step-policy";
 import { ConfirmSheet, InviteSheet, RoleSheet } from "./user-access-sheets";
 
 type AccessList = components["schemas"]["AccessList"];
+type TwoStepPolicy = components["schemas"]["TwoStepPolicy"];
+type RoleMatrix = components["schemas"]["RoleMatrix"];
 
 const ROLES = Object.keys(ROLE_LABELS) as Role[];
 
@@ -110,7 +114,15 @@ type Open =
   | { kind: "confirm"; action: "suspend" | "reactivate" | "reset" | "cancel"; user: AccessUser };
 
 /** `/company/users` (plan 8.15): everyone who can sign in, with filters, invitations and row actions. */
-export function UserAccessPage({ list }: { list: AccessList }) {
+export function UserAccessPage({
+  list,
+  policy,
+  matrix,
+}: {
+  list: AccessList;
+  policy: TwoStepPolicy;
+  matrix: RoleMatrix;
+}) {
   const [filters, setFilters] = useState<Filters>(NO_FILTERS);
   const [open, setOpen] = useState<Open | null>(null);
   const me = useMe();
@@ -155,7 +167,12 @@ export function UserAccessPage({ list }: { list: AccessList }) {
       <PageHeader
         title="User access"
         description="Everyone who can sign in to your company, and what they can do."
-        actions={invite}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <RolesViewer matrix={matrix} />
+            {invite}
+          </div>
+        }
       />
       <div className="flex flex-col gap-4">
         {banner ? (
@@ -235,6 +252,7 @@ export function UserAccessPage({ list }: { list: AccessList }) {
             />
           }
         />
+        <TwoStepPolicyCard policy={policy} mayChange={viewer.canAssign} />
       </div>
       {open?.kind === "invite" ? (
         <InviteSheet

@@ -72,6 +72,23 @@ test("an invitation is sent, shown as invited, resent and cancelled", async ({ p
   await expect(grid.getByText("Nia Clarke")).toHaveCount(0);
 });
 
+test("the policy cards are there, and the role viewer lists what a role can do", async ({
+  page,
+}) => {
+  await open(page);
+  const policy = page.getByRole("radiogroup", { name: "Two-step verification policy" });
+  await expect(policy.getByRole("radio", { name: /Optional for everyone/ })).toBeChecked();
+  await expect(policy.getByRole("radio", { name: /Required for all users/ })).toBeEnabled();
+
+  await page.getByRole("button", { name: "What can each role do?" }).click();
+  const sheet = page.getByRole("dialog", { name: "What can each role do?" });
+  await expect(sheet.getByText("Full control", { exact: false })).toBeVisible();
+  await sheet.getByLabel("Role", { exact: true }).selectOption("employee");
+  await expect(sheet.getByText("See their own profile")).toBeVisible();
+  await expect(sheet.getByText("Add and change company profile")).toHaveCount(0);
+  await audit(page, "role viewer", { modal: true });
+});
+
 for (const colorScheme of ["light", "dark"] as const) {
   test.describe(`${colorScheme} theme`, () => {
     test.use({ colorScheme });

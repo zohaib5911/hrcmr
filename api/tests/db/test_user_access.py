@@ -141,14 +141,14 @@ def _row(listing: dict[str, Any], **match: Any) -> dict[str, Any]:
     return row
 
 
-async def _audit_actions(rig: dict[str, Any]) -> list[str]:
+async def _audit_actions(rig: dict[str, Any], prefix: str = "user.") -> list[str]:
     async with rig["owner"].connect() as c:
         rows = await c.execute(
             text(
                 "select action from audit_events where company_id = :c "
-                "and action like 'user.%' order by created_at"
+                "and action like :p order by created_at"
             ),
-            {"c": rig["a"]},
+            {"c": rig["a"], "p": prefix + "%"},
         )
         return [r[0] for r in rows]
 
@@ -343,3 +343,62 @@ async def test_resetting_two_step_needs_a_recent_confirmation(rig: dict[str, Any
     assert (await phone_lost.get(f"{API}/company")).status_code == 401  # signed out everywhere
     assert (await admin.post(f"{API}/users/{them['id']}/reset-two-step")).status_code == 409
     assert "user.two_step_reset" in await _audit_actions(rig)
+
+
+async def test_the_two_step_policy_is_read_changed_audited_and_counted(rig: dict[str, Any]) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    hr = await rig["person"]("hr_admin", rig["a"])
+    assert (await admin.get(f"{API}/security/two-step")).json() == {
+        "policy": "optional",
+        "to_set_up": 0,
+    }
+    assert (await hr.put(f"{API}/security/two-step", json={"policy": "all"})).status_code == 403
+    assert (
+        await admin.put(f"{API}/security/two-step", json={"policy": "bogus"})
+    ).status_code == 422
+
+    # Not yet set up by the admin: the policy would cover them too.
+    admins_only = (await admin.put(f"{API}/security/two-step", json={"policy": "admins"})).json()
+    assert admins_only == {"policy": "admins", "to_set_up": 1}
+    # The admin sets theirs up; now only HR is still to do.
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text("update users set mfa_enabled = true where email like 'company_admin%'")
+        )
+    everyone = (await admin.put(f"{API}/security/two-step", json={"policy": "all"})).json()
+    assert everyone == {"policy": "all", "to_set_up": 1}
+    await admin.put(f"{API}/security/two-step", json={"policy": "all"})  # no change: not audited
+    # Switching it on is felt on the next request of anyone it newly covers.
+    refused = await hr.get(f"{API}/users")
+    assert refused.json()["error"]["code"] == "MFA_ENROLMENT_REQUIRED"
+
+    other = await rig["person"]("company_admin", rig["b"])
+    assert (await other.get(f"{API}/security/two-step")).json()["policy"] == "optional"
+    changes = await _audit_actions(rig, "company.mfa_policy")
+    assert len(changes) == 2
+
+
+async def test_the_role_viewer_is_built_from_the_permission_matrix(rig: dict[str, Any]) -> None:
+    from app.core.rbac_matrix import ROLE_PERMISSIONS
+
+    admin = await rig["person"]("company_admin", rig["a"])
+    matrix = (await admin.get(f"{API}/roles/matrix")).json()
+    by_role = {r["role"]: r for r in matrix["roles"]}
+    assert list(by_role) == [
+        "company_admin",
+        "hr_admin",
+        "people_manager",
+        "recruiter",
+        "employee",
+        "read_only_auditor",
+    ]
+    for role, summary in by_role.items():
+        listed = {i["permission"] for g in summary["groups"] for i in g["items"]}
+        assert listed == set(ROLE_PERMISSIONS[role])  # nothing missing, nothing invented
+        assert summary["total"] == len(listed)
+    employee = {i["label"]: i["scope"] for g in by_role["employee"]["groups"] for i in g["items"]}
+    assert employee["See their own profile"] == "own"
+    assert "Add and change company profile" not in employee
+    assert (
+        await (await rig["person"]("employee", rig["a"])).get(f"{API}/roles/matrix")
+    ).status_code == 403

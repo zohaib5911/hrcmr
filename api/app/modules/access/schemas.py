@@ -44,3 +44,36 @@ class InviteIn(RequestModel):
 
 class RoleIn(RequestModel):
     role: Role
+
+
+class TwoStepPolicy(BaseModel):
+    policy: Literal["optional", "admins", "all"]
+    to_set_up: int = Field(
+        description="Active people the policy covers who have not set up two-step verification yet."
+    )
+
+
+class TwoStepPolicyIn(RequestModel):
+    policy: Literal["optional", "admins", "all"]
+
+
+class RoleAction(BaseModel):
+    permission: str
+    label: str
+    scope: Literal["all", "own", "reports"]
+
+
+class RoleGroup(BaseModel):
+    area: str
+    label: str
+    items: list[RoleAction]
+
+
+class RoleSummary(BaseModel):
+    role: Role
+    groups: list[RoleGroup]
+    total: int
+
+
+class RoleMatrix(BaseModel):
+    roles: list[RoleSummary]

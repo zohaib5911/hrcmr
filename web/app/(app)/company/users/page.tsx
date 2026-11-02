@@ -8,7 +8,12 @@ export const metadata: Metadata = { title: "User access" };
 
 export default async function Page() {
   const client = await serverApi();
-  const list = client ? (await client.GET("/users")).data : undefined;
-  if (!list) notFound();
-  return <UserAccessPage list={list} />;
+  if (!client) notFound();
+  const [list, policy, matrix] = await Promise.all([
+    client.GET("/users"),
+    client.GET("/security/two-step"),
+    client.GET("/roles/matrix"),
+  ]);
+  if (!list.data || !policy.data || !matrix.data) notFound();
+  return <UserAccessPage list={list.data} policy={policy.data} matrix={matrix.data} />;
 }

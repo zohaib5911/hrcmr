@@ -978,6 +978,48 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/roles/matrix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Role Matrix
+         * @description Every role and, grouped by area, what it can do. Built from the permission matrix itself.
+         */
+        get: operations["access_role_matrix"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/security/two-step": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Two Step Policy */
+        get: operations["access_read_two_step_policy"];
+        /**
+         * Set Two Step Policy
+         * @description Who must use two-step verification: nobody, Company Admins, or everyone. People it newly
+         *     covers are asked to set it up on their next request.
+         */
+        put: operations["access_set_two_step_policy"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/tax-codes": {
         parameters: {
             query?: never;
@@ -2438,6 +2480,27 @@ export interface components {
             /** Token */
             token: string;
         };
+        /** RoleAction */
+        RoleAction: {
+            /** Label */
+            label: string;
+            /** Permission */
+            permission: string;
+            /**
+             * Scope
+             * @enum {string}
+             */
+            scope: "all" | "own" | "reports";
+        };
+        /** RoleGroup */
+        RoleGroup: {
+            /** Area */
+            area: string;
+            /** Items */
+            items: components["schemas"]["RoleAction"][];
+            /** Label */
+            label: string;
+        };
         /** RoleIn */
         RoleIn: {
             /**
@@ -2445,6 +2508,23 @@ export interface components {
              * @enum {string}
              */
             role: "company_admin" | "hr_admin" | "people_manager" | "recruiter" | "employee" | "read_only_auditor";
+        };
+        /** RoleMatrix */
+        RoleMatrix: {
+            /** Roles */
+            roles: components["schemas"]["RoleSummary"][];
+        };
+        /** RoleSummary */
+        RoleSummary: {
+            /** Groups */
+            groups: components["schemas"]["RoleGroup"][];
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "company_admin" | "hr_admin" | "people_manager" | "recruiter" | "employee" | "read_only_auditor";
+            /** Total */
+            total: number;
         };
         /** SignupRequest */
         SignupRequest: {
@@ -2542,6 +2622,27 @@ export interface components {
              * @description Monday to Sunday, always seven.
              */
             days: components["schemas"]["TradingDay"][];
+        };
+        /** TwoStepPolicy */
+        TwoStepPolicy: {
+            /**
+             * Policy
+             * @enum {string}
+             */
+            policy: "optional" | "admins" | "all";
+            /**
+             * To Set Up
+             * @description Active people the policy covers who have not set up two-step verification yet.
+             */
+            to_set_up: number;
+        };
+        /** TwoStepPolicyIn */
+        TwoStepPolicyIn: {
+            /**
+             * Policy
+             * @enum {string}
+             */
+            policy: "optional" | "admins" | "all";
         };
         /** WorkingPattern */
         "WorkingPattern-Input": {
@@ -5833,6 +5934,124 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReadyResponse"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    access_role_matrix: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleMatrix"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    access_read_two_step_policy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TwoStepPolicy"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    access_set_two_step_policy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TwoStepPolicyIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TwoStepPolicy"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

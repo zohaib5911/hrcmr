@@ -11,12 +11,26 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 
 from app.core.errors import AppError, ConflictError, NotFoundError
+from app.core.rbac_matrix import ROLE_PERMISSIONS
 from app.db.session import GlobalDb  # noqa: TC001
-from app.modules.access.schemas import AccessList, AccessUser, InviteIn, Role, RoleIn, Status
+from app.modules.access.roles import groups_for
+from app.modules.access.schemas import (
+    AccessList,
+    AccessUser,
+    InviteIn,
+    Role,
+    RoleIn,
+    RoleMatrix,
+    RoleSummary,
+    Status,
+    TwoStepPolicy,
+    TwoStepPolicyIn,
+)
 from app.modules.audit.service import record as record_audit
 from app.modules.auth.accounts import link
 from app.modules.auth.deps import Auth  # noqa: TC001
 from app.modules.auth.invitations import create_invitation, renew_invitation
+from app.modules.auth.policy import mfa_required
 from app.modules.auth.sessions import require_step_up
 from app.modules.companies.models import Company
 from app.modules.identity.models import Invitation, Membership, User
@@ -342,3 +356,61 @@ async def reset_two_step(
     await auth.sessions.revoke_all(db, user.id)
     await db.commit()
     return _member(member, user, you=access.caller.user_id)
+
+
+# --- the two-step policy and the role viewer ----------------------------------------------------
+
+
+async def _policy(access: Access) -> TwoStepPolicy:
+    policy = (
+        await access.db.execute(select(Company.mfa_policy).where(Company.id == access.company_id))
+    ).scalar_one()
+    rows = (
+        await access.db.execute(
+            select(Membership.role, User.mfa_enabled)
+            .join(User, User.id == Membership.user_id)
+            .where(Membership.status == "active")
+        )
+    ).all()
+    to_set_up = sum(
+        1 for role, enrolled in rows if not enrolled and mfa_required(policy=policy, role=role)
+    )
+    return TwoStepPolicy(policy=policy, to_set_up=to_set_up)  # type: ignore[arg-type]
+
+
+@router.get("/security/two-step", response_model=TwoStepPolicy)
+async def read_two_step_policy(access: Reads) -> TwoStepPolicy:
+    return await _policy(access)
+
+
+@router.put("/security/two-step", response_model=TwoStepPolicy)
+async def set_two_step_policy(body: TwoStepPolicyIn, access: Assigns) -> TwoStepPolicy:
+    """Who must use two-step verification: nobody, Company Admins, or everyone. People it newly
+    covers are asked to set it up on their next request."""
+    company = (
+        await access.db.execute(select(Company).where(Company.id == access.company_id))
+    ).scalar_one()
+    if company.mfa_policy != body.policy:
+        before, company.mfa_policy = company.mfa_policy, body.policy
+        await access.audit(
+            "company.mfa_policy_changed",
+            entity_type="company",
+            entity_id=company.id,
+            before={"mfa_policy": before},
+            after={"mfa_policy": body.policy},
+        )
+        await access.db.commit()
+    return await _policy(access)
+
+
+@router.get("/roles/matrix", response_model=RoleMatrix)
+async def role_matrix(access: Reads) -> RoleMatrix:
+    """Every role and, grouped by area, what it can do. Built from the permission matrix itself."""
+    return RoleMatrix(
+        roles=[
+            RoleSummary.model_validate(
+                {"role": role, "groups": groups_for(role), "total": len(ROLE_PERMISSIONS[role])}
+            )
+            for role in ROLE_LABELS
+        ]
+    )
