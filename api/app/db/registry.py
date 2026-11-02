@@ -8,6 +8,7 @@ from __future__ import annotations
 import app.modules.audit.models
 import app.modules.companies.models
 import app.modules.email.models
+import app.modules.employees.models
 import app.modules.files.models
 import app.modules.holidays.models
 import app.modules.identity.models

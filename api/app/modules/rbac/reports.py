@@ -2,10 +2,10 @@
 
 A person with a ``_reports`` permission acts on their direct and indirect reports. Two chains exist:
 the Reporting Authority (line manager) and the Leave Sanctioning Authority. Both are columns on the
-``employees`` table (T4), and are walked here with one recursive query.
+employee's assignment effective today (plan 6.3), and are walked
+here with one recursive query.
 
-The query is written against the columns by name, not against the employees model, because the model
-arrives in Phase 4; it works unchanged once that table has these columns. Row-Level Security applies
+The query is written against the columns by name rather than the model. Row-Level Security applies
 (the session is a tenant session) and the company is also named in the query.
 """
 
@@ -14,7 +14,7 @@ from __future__ import annotations
 import uuid  # noqa: TC003
 from typing import TYPE_CHECKING, Literal
 
-from sqlalchemy import Uuid, column, select, table
+from sqlalchemy import Date, Uuid, column, func, select, table
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,9 +22,11 @@ if TYPE_CHECKING:
 Relation = Literal["reporting", "leave"]
 
 _EMPLOYEES = table(
-    "employees",
-    column("id", Uuid),
+    "employee_assignments",
+    column("employee_id", Uuid),
     column("company_id", Uuid),
+    column("ended_at", Date),
+    column("effective_from", Date),
     column("reporting_authority_employee_id", Uuid),
     column("leave_sanctioning_employee_id", Uuid),
 )
@@ -50,15 +52,29 @@ class ReportsGraph:
         if key not in self._cache:
             link = _EMPLOYEES.c[_COLUMN_FOR[relation]]
             chain = (
-                select(_EMPLOYEES.c.id)
-                .where(link == manager_id, _EMPLOYEES.c.company_id == self._company_id)
+                select(_EMPLOYEES.c.employee_id.label("id"))
+                .where(
+                    link == manager_id,
+                    _EMPLOYEES.c.company_id == self._company_id,
+                    _EMPLOYEES.c.effective_from <= func.current_date(),
+                    (
+                        _EMPLOYEES.c.ended_at.is_(None)
+                        | (_EMPLOYEES.c.ended_at > func.current_date())
+                    ),
+                )
                 .cte("chain", recursive=True)
             )
             # UNION (not UNION ALL) drops repeated rows, so a loop in the data (A reports to B and B
             # to A) ends instead of running forever.
             chain = chain.union(
-                select(_EMPLOYEES.c.id).where(
-                    link == chain.c.id, _EMPLOYEES.c.company_id == self._company_id
+                select(_EMPLOYEES.c.employee_id).where(
+                    link == chain.c.id,
+                    _EMPLOYEES.c.company_id == self._company_id,
+                    _EMPLOYEES.c.effective_from <= func.current_date(),
+                    (
+                        _EMPLOYEES.c.ended_at.is_(None)
+                        | (_EMPLOYEES.c.ended_at > func.current_date())
+                    ),
                 )
             )
             rows = await self._db.execute(select(chain.c.id))

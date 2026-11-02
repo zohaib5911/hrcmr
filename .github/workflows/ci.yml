@@ -123,6 +123,8 @@ jobs:
           docker compose run --rm rustfs-init
           # ClamAV downloads its signatures on first start; it is waited for just before the tests.
           docker compose up -d clamav
+      - name: PDF rendering libraries
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-dejavu-core
       - name: Install exactly what uv.lock says
         run: |
           uv lock --check
@@ -222,6 +224,8 @@ jobs:
           corepack enable
           pnpm install --frozen-lockfile
           uv sync --frozen --directory ../api
+      - name: PDF rendering libraries
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-dejavu-core
       - name: Install the browser (Chromium, for the design-page tests)
         run: pnpm exec playwright install --with-deps chromium
       - name: Playwright

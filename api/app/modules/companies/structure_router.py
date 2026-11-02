@@ -101,6 +101,11 @@ async def list_locations(access: Reads) -> list[LocationOut]:
 
 @router.get("/locations/lookup/{postcode}", summary="Town and county for a postcode")
 async def look_up_postcode(postcode: str, request: Request, _: Writes) -> PostcodeOut:
+    return await postcode_town(postcode, request)
+
+
+async def postcode_town(postcode: str, request: Request) -> PostcodeOut:
+    """Shared by the locations form and the employee address form."""
     normal = normalise_postcode(postcode)
     if normal is None:
         raise AppError(

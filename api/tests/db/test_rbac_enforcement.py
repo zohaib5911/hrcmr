@@ -21,7 +21,6 @@ from app.core.crypto import KeyRing, set_keyring
 from app.core.errors import AppError, ForbiddenError
 from app.core.rbac_matrix import ROLES, Scope, has_permission, scope_for
 from app.db.ids import uuid7
-from app.db.rls import tenant_rls_statements
 from app.db.session import GlobalSession, TenantSession
 from app.main import create_app
 from app.modules.auth.sessions import SessionStore
@@ -34,6 +33,7 @@ from app.modules.rbac.rules import (
     ensure_company_keeps_an_admin,
     forbid_self_approval,
 )
+from tests.db.api_support import two_companies
 from tests.db.support import DatabaseUnderTest, engine_for
 from tests.support import TEST_REDIS_URL, build_settings
 
@@ -303,30 +303,13 @@ def test_no_real_endpoint_skips_authorisation() -> None:
 # --- the reports chain ------------------------------------------------------------------------------
 
 
-async def _employees(database: DatabaseUnderTest) -> tuple[uuid.UUID, uuid.UUID]:
-    """A table with the columns Phase 4 will give `employees`, and two companies' worth of rows."""
-    owner = engine_for(database.owner_url, poolclass=NullPool)
-    company_a, company_b = uuid7(), uuid7()
-    async with owner.begin() as c:
-        await c.execute(text("drop table if exists employees"))
-        await c.execute(
-            text(
-                "create table employees (id uuid primary key, company_id uuid not null, "
-                "reporting_authority_employee_id uuid, leave_sanctioning_employee_id uuid)"
-            )
-        )
-        for statement in tenant_rls_statements("employees", privileges=("SELECT",)):
-            await c.execute(text(statement))
-    await owner.dispose()
-    return company_a, company_b
-
-
 async def test_reports_are_found_at_any_depth_per_chain_and_never_across_companies(
     database: DatabaseUnderTest,
 ) -> None:
-    company_a, company_b = await _employees(database)
+    company_a, company_b = await two_companies(database)
     ceo, vp, lead, dev, other = (uuid7() for _ in range(5))
     loop_x, loop_y, outsider = uuid7(), uuid7(), uuid7()
+    future, past = uuid7(), uuid7()
     rows = [
         (ceo, company_a, None, None),
         (vp, company_a, ceo, lead),  # reports to the CEO; leave goes to the lead
@@ -339,11 +322,35 @@ async def test_reports_are_found_at_any_depth_per_chain_and_never_across_compani
     ]
     owner = engine_for(database.owner_url, poolclass=NullPool)
     async with owner.begin() as c:
+        # Use the migrated schema: this database is shared with later tests.
+        for ident, company in [(r[0], r[1]) for r in rows] + [
+            (future, company_a),
+            (past, company_a),
+        ]:
+            await c.execute(
+                text(
+                    "insert into employees (id, company_id, employee_number, first_name, last_name, email, hire_date) "
+                    "values (:i, :c, :n, 'Test', 'Person', 'test@example.com', '2000-01-01')"
+                ),
+                {"i": ident, "c": company, "n": str(ident)},
+            )
         for row in rows:
             await c.execute(
-                text("insert into employees values (:i, :c, :r, :l)"),
+                text(
+                    "insert into employee_assignments (employee_id, company_id, reporting_authority_employee_id, leave_sanctioning_employee_id, employment_type, effective_from) values (:i, :c, :r, :l, 'full_time', '2000-01-01')"
+                ),
                 {"i": row[0], "c": row[1], "r": row[2], "l": row[3]},
             )
+        # A planned future report and an ended report must not grant access today.
+        await c.execute(
+            text(
+                "insert into employee_assignments (employee_id, company_id, "
+                "reporting_authority_employee_id, effective_from, ended_at, employment_type) values "
+                "(:future, :company, :ceo, '2099-01-01', null, 'full_time'), "
+                "(:past, :company, :ceo, '2000-01-01', '2001-01-01', 'full_time')"
+            ),
+            {"future": future, "past": past, "company": company_a, "ceo": ceo},
+        )
     await owner.dispose()
 
     app_engine = engine_for(database.app_url, poolclass=NullPool)
@@ -351,7 +358,7 @@ async def test_reports_are_found_at_any_depth_per_chain_and_never_across_compani
 
     @event.listens_for(app_engine.sync_engine, "before_cursor_execute")
     def count(conn: Any, cursor: Any, statement: str, *args: Any) -> None:
-        if "employees" in statement:
+        if "employee_assignments" in statement:
             queries.append(statement)
 
     try:

@@ -28,6 +28,10 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 # --- runtime: no uv, no compilers, no package manager caches --------------------------------------
 FROM ${PYTHON_IMAGE} AS runtime
+# WeasyPrint (plan section 2): text-only inspection PDFs need Pango and a Unicode font.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 fonts-dejavu-core \
+ && rm -rf /var/lib/apt/lists/*
 RUN groupadd --system --gid 10001 app \
  && useradd --system --uid 10001 --gid 10001 --no-create-home --home-dir /nonexistent \
         --shell /usr/sbin/nologin app

@@ -10,3 +10,43 @@
 2026-11-02 16:06 | Claude Code | T5.2 | web invite sheet, row menu, e2e | next: T5.3
 2026-11-02 16:10 | Claude Code | T5.3 | policy + role viewer, API+web+e2e | next: Phase 5 gate
 2026-11-02 16:25 | Claude Code | Phase 5 gate | suites green, summary, PR | next: T6.1
+2026-11-02 16:29 | Claude Code | T6.1 | migration 0013 + models for all 6.3 tables; reports graph now reads current assignments | next: GET /employees, /employees/summary, list page
+2026-11-02 17:01 | Claude Code | T6.1 | list, summary, archived, tests | next: T6.2
+2026-11-02 22:38 | Claude Code | T6.2 | recovered uncommitted T6.2 work as wip commit c9ac8c3 | next: review, run tests, finish
+2026-11-02 22:39 | Claude Code | T6.2 | verified (API 3, e2e 8, lint/types clean), ticked | next: T6.3
+2026-11-02 22:41 | Claude Code | T6.3 | API: profile, status, opt-out+agreement, guarded delete + 4 tests | next: web profile page /employees/[id]
+2026-11-02 22:46 | Claude Code | T6.3 | web profile + e2e done, verified | next: T6.4
+2026-11-02 23:20 | Claude Code | T6.4 | API: personal details, address, contacts, identity, bank, reveal + 3 tests | next: web Personal tab
+2026-11-02 23:35 | Claude Code | T6.4 | web Personal tab (personal-tab.tsx, mounted on profile) lint/types/unit clean | next: e2e in employees.spec.ts
+2026-11-02 23:50 | Claude Code | T6.4 | done: API + web + e2e verified | next: T6.5
+2026-11-02 20:05 | Codex | T6.5 | synced dev, dispatched CI 41502580515; read requirements, lint/types clean | next employment API and tests
+2026-11-02 20:15 | Codex | T6.5 | employment API, audited CRUD, role history and date-aware readers; 9 integration tests pass | next Employment tab UI
+2026-11-02 20:25 | Codex | T6.4 CI | API job failed on stale generated data-model doc; regenerated and drift test passes | next push fix and verify Employment UI
+2026-11-02 18:46 | Codex | T6.5 | Employment UI and explicit-save e2e written; lint/types clean | next run affected Playwright and API tests
+2026-11-02 18:48 | Codex | T6.5 | initial checks found outdated reporting fixture and duplicate history locator; corrected both; whitespace is now 422 | next rerun affected tests
+2026-11-02 18:50 | Codex | T6.5 | Employment complete; affected API/reporting/doc 26 pass, web unit 13 pass, browser 2 pass; lint/types/build clean | next T6.6 salary
+2026-11-02 18:55 | Codex | T6.6 | salary history/preview API with permissions, tenant references and dated GOV.UK rates; 10 tests pass, lint/types clean | next hidden salary UI
+2026-11-02 18:59 | Codex | T6.6 | salary UI fetches on Show only; explicit Save, preview warning and lookups; browser test written | next run Salary journey
+2026-11-02 19:02 | Codex | T6.6 | complete; salary API/unit 10 pass, browser/setup 2 pass, lint/types/build clean; CI 41504657493 pending | next T6.7 Documents/PDF
+2026-11-02 18:55 | Codex | relay | T6.5/T6.6 complete and pushed; handover at task boundary, CI 41504657493 pending without failures | next check CI then T6.7 Documents/PDF
+2026-11-02 18:57 | Codex | T6.7 | requirements/baseline pass; WeasyPrint dependency and runtime/CI libraries added | next Documents API and PDF
+2026-11-02 19:00 | Codex | T6.7 | Documents API and masked inspection PDF; 3 tests pass, lint/types clean | next Documents UI and print button
+2026-11-02 19:02 | Codex | T6.7 | Documents UI and Print record implemented, browser test written | next browser verification
+2026-11-02 19:04 | Codex | T6.7 | browser upload locator corrected to FileDrop full accessible label | next rerun Documents journey
+2026-11-02 19:05 | Codex | T6.7 | FileDrop label lookup remains ambiguous; browser test now targets the dialog file input directly | next rerun Documents journey
+2026-11-02 19:07 | Codex | T6.7 | complete; API/PDF/security 3 pass, Documents browser/setup 2 pass, lint/types/build clean | next T6.8
+2026-11-02 19:08 | Codex | T6.8 | Activity API reuses audit pagination and includes owned file events; isolation/RBAC test passes | next related tab UI
+2026-11-02 19:09 | Codex | T6.8 | related shells and Activity UI built, browser journey written | next browser verification
+2026-11-02 19:11 | Codex | T6.8 | complete; Activity API 1 pass, browser/setup 2 pass, lint/types/build clean; previous CI now green | next Phase 6 gate integration gaps (link picker, Add photo)
+2026-11-02 19:15 | Codex | Phase 6 gate | deferred linking and photo API/UI built; User Access 10 tests and targeted photo/link tests pass | next combined browser check
+2026-11-02 19:18 | Codex | Phase 6 gate | link/photo browser 2 pass; list now shows uploaded avatars; screenshot spec ready, lint/types pass | next full-suite gate sequentially
+2026-11-02 19:21 | Codex | Phase 6 gate | API full 421 pass/1 fixture failure; real-schema reporting fixture fixed, affected 26 pass | next web/browser gate
+2026-11-02 19:22 | Codex | Phase 6 gate | web full 776 pass, guards 32 pass, lint/types/generated API clean | next full Playwright once
+2026-11-02 19:27 | Codex | Phase 6 gate | full Playwright running, exec 38612, /tmp/cmr-phase6-e2e.log; no failures through component checks | next inspect this run before rerunning
+2026-11-02 19:35 | Codex | Phase 6 gate | full Playwright 396 pass/144 screenshot-only skipped (11.9m); all gate checks now verified | next screenshots, summary and PR
+2026-11-02 19:38 | Codex | Phase 6 gate | captured 60 QA images; fixed role-only Overview label; screenshot helper resets scroll/focus and uses modal viewport | next verify fix and recapture
+2026-11-02 19:40 | Codex | Phase 6 gate | role-only fix API 3 pass; screenshot assertion narrowed to accessible Summary region after transition duplicate | next complete recapture
+2026-11-02 19:43 | Codex | Phase 6 gate | recapture 5 pass, screenshots reviewed; final QA fixes zero-valued facts rendering as Not set | next final artifact refresh and PR
+2026-11-02 19:46 | Codex | Phase 6 gate | final screenshots 5 pass/60 images, spot-reviewed; phase summary written; hierarchy deferral corrected to T12.1 | next PR and green CI merge
+2026-11-02 19:46 | Codex | Phase 6 gate | PR #11 opened (dev to main), local gate and 60 images complete | next all-green CI then merge with --merge --auto
+2026-11-02 19:52 | Codex | Phase 6 CI | patched brotli 1.2.1/pypdf 6.21.4, local audit clean/4 PDF tests pass; documented tested Jinja false-positive as email renderer does | next latest PR #11 CI

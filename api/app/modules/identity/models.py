@@ -96,8 +96,10 @@ class Membership(Base, RecordMixin, TenantMixin):
     )
     role: Mapped[str] = mapped_column(String(20), nullable=False)
     status: Mapped[str] = mapped_column(String(10), nullable=False, server_default="active")
-    # The HR record this person is. The employees table arrives in Phase 4, with the foreign key.
-    employee_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
+    # The HR record this person is (linking comes with T6.x; unlinked until then).
+    employee_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("employees.id", ondelete="SET NULL")
+    )
 
     __table_args__ = (
         UniqueConstraint("user_id", "company_id", name="uq_memberships_user_id_company_id"),
