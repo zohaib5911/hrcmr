@@ -28,6 +28,25 @@ Checks:
 
 - `actor_type in ('user', 'platform_admin', 'system')`
 
+## `bank_holidays`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `region` | VARCHAR(20) | no |  |  |
+| `on_date` | DATE | no |  |  |
+| `title` | VARCHAR(120) | no |  |  |
+| `source` | VARCHAR(200) | no |  |  |
+| `fetched_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `region in ('england-and-wales', 'scotland', 'northern-ireland')`
+
 ## `companies`
 
 | Column | Type | Null | Default | Notes |
@@ -53,6 +72,7 @@ Checks:
 | `leave_year_start_month_day` | VARCHAR(5) | no | `01-01` |  |
 | `allow_negative_leave_balance` | BOOLEAN | no | `false` |  |
 | `mfa_policy` | VARCHAR(10) | no | `optional` |  |
+| `bank_holidays_non_working` | BOOLEAN | no | `true` |  |
 | `ai_features_enabled` | BOOLEAN | no | `true` |  |
 | `changed_name_last_5_years` | BOOLEAN | no | `false` |  |
 | `previous_company_name` | VARCHAR(200) | yes |  |  |
@@ -105,6 +125,28 @@ Checks:
 Checks:
 
 - `doc_type in ('paye_reference_letter', 'latest_rti', 'employers_liability_insurance', 'premises_proof', 'lease_or_freehold', 'bank_statement_1', 'bank_statement_2', 'bank_statement_3', 'signed_annual_accounts', 'vat_certificate', 'food_hygiene_rating', 'business_licence', 'franchise_agreement', 'governing_body_registration', 'health_safety_rating', 'audited_annual_accounts', 'regulatory_body_certificate', 'other')`
+
+## `company_holidays`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `name` | VARCHAR(120) | no |  |  |
+| `start_date` | DATE | no |  |  |
+| `end_date` | DATE | no |  |  |
+| `holiday_type_id` | UUID | yes |  | references `holiday_types` |
+| `description` | TEXT | yes |  |  |
+| `deduct_from_annual_leave` | BOOLEAN | no | `false` |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `end_date >= start_date`
 
 ## `departments`
 
@@ -207,6 +249,24 @@ Checks:
 
 - `scan_status in ('pending', 'clean', 'infected', 'error')`
 - `size >= 0`
+
+## `holiday_types`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `name` | VARCHAR(80) | no |  |  |
+| `colour` | VARCHAR(10) | no | `blue` |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `colour in ('blue', 'green', 'orange', 'red', 'purple', 'teal', 'gray')`
 
 ## `invitations`
 
@@ -401,3 +461,22 @@ Checks:
 
 - `failed_login_count >= 0`
 - `theme_pref in ('system', 'light', 'dark')`
+
+## `working_pattern_days`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `weekday` | SMALLINT | no |  |  |
+| `is_working` | BOOLEAN | no | `false` |  |
+| `hours` | NUMERIC(4, 2) | no | `0` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `hours >= 0 and hours <= 24`
+- `weekday between 1 and 7`

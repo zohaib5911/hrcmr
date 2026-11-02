@@ -15,6 +15,7 @@ from arq import func
 
 from app.jobs.audit import tracked
 from app.jobs.email import deliver_email, sweep_email_outbox
+from app.jobs.holidays import bank_holidays_weekly
 from app.modules.email.outbox import MAX_ATTEMPTS
 from app.modules.files.service import remove_orphans
 
@@ -66,9 +67,9 @@ SCHEDULE: tuple[Schedule, ...] = (
     Schedule("files_orphans_daily", files_orphans_daily, {"hour": 2, "minute": 30}, "T2.7"),
     Schedule(
         "bank_holidays_weekly",
-        _nothing_yet("bank_holidays_weekly"),
+        bank_holidays_weekly,
         {"weekday": "mon", "hour": 3, "minute": 0},
-        "T9.1",
+        "T4.5",
     ),
     Schedule("register_ingest", _nothing_yet("register_ingest"), {"hour": 3, "minute": 30}, "T4.2"),
     Schedule(

@@ -9,5 +9,6 @@ import app.modules.audit.models
 import app.modules.companies.models
 import app.modules.email.models
 import app.modules.files.models
+import app.modules.holidays.models
 import app.modules.identity.models
 import app.modules.notifications.models  # noqa: F401

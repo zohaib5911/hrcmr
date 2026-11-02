@@ -376,6 +376,41 @@ export interface paths {
         patch: operations["company_update_company"];
         trace?: never;
     };
+    "/company-holidays": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a closure */
+        post: operations["holidays_add_holiday"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/company-holidays/{holiday_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a closure */
+        delete: operations["holidays_remove_holiday"];
+        options?: never;
+        head?: never;
+        /** Change a closure */
+        patch: operations["holidays_change_holiday"];
+        trace?: never;
+    };
     "/company/companies-house/{number}": {
         parameters: {
             query?: never;
@@ -622,6 +657,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/holiday-management": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bank holidays, closures and holiday types for a year */
+        get: operations["holidays_holiday_management"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/holiday-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a holiday type */
+        post: operations["holidays_add_type"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/holiday-types/{type_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Archive a holiday type */
+        delete: operations["holidays_archive_type"];
+        options?: never;
+        head?: never;
+        /** Rename or recolour a holiday type */
+        patch: operations["holidays_change_type"];
+        trace?: never;
+    };
     "/key-personnel": {
         parameters: {
             query?: never;
@@ -747,6 +834,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/working-pattern": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The company's normal working week */
+        get: operations["holidays_get_working_pattern"];
+        /** Set the company's normal working week */
+        put: operations["holidays_set_working_pattern"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -846,6 +951,16 @@ export interface components {
             items: components["schemas"]["AuditEventOut"][];
             /** Next Cursor */
             next_cursor: string | null;
+        };
+        /** BankHolidayOut */
+        BankHolidayOut: {
+            /**
+             * On Date
+             * Format: date
+             */
+            on_date: string;
+            /** Title */
+            title: string;
         };
         /** Body_company_add_document */
         Body_company_add_document: {
@@ -957,6 +1072,71 @@ export interface components {
             type_of_organisation: string | null;
             /** Website */
             website: string | null;
+        };
+        /** CompanyHolidayIn */
+        CompanyHolidayIn: {
+            /**
+             * Deduct From Annual Leave
+             * @default false
+             */
+            deduct_from_annual_leave: boolean;
+            /** Description */
+            description?: string | null;
+            /**
+             * End Date
+             * Format: date
+             */
+            end_date: string;
+            /** Holiday Type Id */
+            holiday_type_id?: string | null;
+            /** Name */
+            name: string;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+        };
+        /** CompanyHolidayOut */
+        CompanyHolidayOut: {
+            /** Deduct From Annual Leave */
+            deduct_from_annual_leave: boolean;
+            /** Description */
+            description: string | null;
+            /**
+             * End Date
+             * Format: date
+             */
+            end_date: string;
+            /** Holiday Type Id */
+            holiday_type_id: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /**
+             * Start Date
+             * Format: date
+             */
+            start_date: string;
+        };
+        /** CompanyHolidayPatch */
+        CompanyHolidayPatch: {
+            /** Deduct From Annual Leave */
+            deduct_from_annual_leave?: boolean | null;
+            /** Description */
+            description?: string | null;
+            /** End Date */
+            end_date?: string | null;
+            /** Holiday Type Id */
+            holiday_type_id?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Start Date */
+            start_date?: string | null;
         };
         /** CompanyMembership */
         CompanyMembership: {
@@ -1277,6 +1457,53 @@ export interface components {
              */
             status: "ok";
         };
+        /** HolidayManagement */
+        HolidayManagement: {
+            /** Bank Holidays */
+            bank_holidays: components["schemas"]["BankHolidayOut"][];
+            /**
+             * Bank Holidays Updated At
+             * @description When the list was last fetched from GOV.UK (empty before the first fetch).
+             */
+            bank_holidays_updated_at: string | null;
+            /** Company Holidays */
+            company_holidays: components["schemas"]["CompanyHolidayOut"][];
+            /**
+             * Region
+             * @enum {string}
+             */
+            region: "england-and-wales" | "scotland" | "northern-ireland";
+            /** Types */
+            types: components["schemas"]["HolidayTypeOut"][];
+            /** Year */
+            year: number;
+        };
+        /** HolidayTypeIn */
+        HolidayTypeIn: {
+            /**
+             * Colour
+             * @default blue
+             * @enum {string}
+             */
+            colour: "blue" | "green" | "orange" | "red" | "gray";
+            /** Name */
+            name: string;
+        };
+        /** HolidayTypeOut */
+        HolidayTypeOut: {
+            /**
+             * Colour
+             * @enum {string}
+             */
+            colour: "blue" | "green" | "orange" | "red" | "gray";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+        };
         /** InvitationDetails */
         InvitationDetails: {
             /** Company Name */
@@ -1545,6 +1772,30 @@ export interface components {
             /** Value */
             value: string;
         };
+        /** PatternDay */
+        "PatternDay-Input": {
+            /** Hours */
+            hours: number | string;
+            /** Is Working */
+            is_working: boolean;
+            /**
+             * Weekday
+             * @description 1 is Monday, 7 is Sunday.
+             */
+            weekday: number;
+        };
+        /** PatternDay */
+        "PatternDay-Output": {
+            /** Hours */
+            hours: string;
+            /** Is Working */
+            is_working: boolean;
+            /**
+             * Weekday
+             * @description 1 is Monday, 7 is Sunday.
+             */
+            weekday: number;
+        };
         /** PostcodeOut */
         PostcodeOut: {
             /** City */
@@ -1635,6 +1886,20 @@ export interface components {
         TokenRequest: {
             /** Token */
             token: string;
+        };
+        /** WorkingPattern */
+        "WorkingPattern-Input": {
+            /** Bank Holidays Non Working */
+            bank_holidays_non_working: boolean;
+            /** Days */
+            days: components["schemas"]["PatternDay-Input"][];
+        };
+        /** WorkingPattern */
+        "WorkingPattern-Output": {
+            /** Bank Holidays Non Working */
+            bank_holidays_non_working: boolean;
+            /** Days */
+            days: components["schemas"]["PatternDay-Output"][];
         };
     };
     responses: never;
@@ -2588,6 +2853,130 @@ export interface operations {
             };
         };
     };
+    holidays_add_holiday: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompanyHolidayIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyHolidayOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    holidays_remove_holiday: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                holiday_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    holidays_change_holiday: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                holiday_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompanyHolidayPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyHolidayOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     company_companies_house_lookup: {
         parameters: {
             query?: never;
@@ -3467,6 +3856,170 @@ export interface operations {
             };
         };
     };
+    holidays_holiday_management: {
+        parameters: {
+            query?: {
+                year?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HolidayManagement"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    holidays_add_type: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HolidayTypeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HolidayTypeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    holidays_archive_type: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    holidays_change_type: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["HolidayTypeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HolidayTypeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     company_list_key_personnel: {
         parameters: {
             query?: never;
@@ -3976,6 +4529,86 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReadyResponse"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    holidays_get_working_pattern: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkingPattern-Output"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    holidays_set_working_pattern: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkingPattern-Input"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkingPattern-Output"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

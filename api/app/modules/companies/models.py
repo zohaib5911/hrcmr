@@ -106,6 +106,10 @@ class Company(Base, RecordMixin):
 
     # Security.
     mfa_policy: Mapped[str] = mapped_column(String(10), nullable=False, server_default="optional")
+    # The working pattern's one company-wide switch: bank holidays are days nobody works.
+    bank_holidays_non_working: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=true()
+    )
     # The company's own switch for the AI features (they also need the server's API key).
     ai_features_enabled: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=true()

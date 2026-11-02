@@ -15,13 +15,16 @@ FUNCTIONS = {"uuid_generate_v7", "app_current_company_id", "set_updated_at"}
 # The identity migration (T2.1) adds these tables and these two functions.
 IDENTITY_TABLES = [
     "audit_events",
+    "bank_holidays",
     "companies",
     "company_compliance_documents",
+    "company_holidays",
     "departments",
     "designations",
     "email_outbox",
     "email_tokens",
     "files",
+    "holiday_types",
     "invitations",
     "key_persons",
     "locations",
@@ -32,6 +35,7 @@ IDENTITY_TABLES = [
     "terms_acceptances",
     "terms_versions",
     "users",
+    "working_pattern_days",
 ]
 IDENTITY_FUNCTIONS = {"app_current_user_id", "audit_events_append_only"}
 

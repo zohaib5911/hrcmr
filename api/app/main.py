@@ -39,6 +39,7 @@ from app.modules.email.outbox import OutboxMailer
 from app.modules.files.router import router as files_router
 from app.modules.files.service import FileService
 from app.modules.health.router import router as health_router
+from app.modules.holidays.router import router as holidays_router
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -174,6 +175,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(company_router, prefix=API_PREFIX)
     app.include_router(key_personnel_router, prefix=API_PREFIX)
     app.include_router(compliance_router, prefix=API_PREFIX)
+    app.include_router(holidays_router, prefix=API_PREFIX)
     app.include_router(structure_router, prefix=API_PREFIX)
     _install_openapi(app)
     return app

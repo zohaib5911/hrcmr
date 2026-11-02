@@ -3,6 +3,7 @@
 import {
   BadgeCheck,
   Building2,
+  CalendarDays,
   CreditCard,
   FileCheck2,
   FileText,
@@ -118,6 +119,23 @@ export function CompanyOverview({
               detail={`${compliance_documents} of 18`}
               icon={<Icon icon={FileCheck2} />}
               href="/company/compliance-documents"
+            />
+          ) : null}
+        </GroupedList>
+
+        <GroupedList heading="Time">
+          {can("holiday.calendar.read") ? (
+            <GroupedRow
+              title="Working pattern"
+              icon={<Icon icon={CalendarDays} />}
+              href="/company/working-pattern"
+            />
+          ) : null}
+          {can("holiday.calendar.read") ? (
+            <GroupedRow
+              title="Holidays and closures"
+              icon={<Icon icon={CalendarDays} />}
+              href="/holiday-management"
             />
           ) : null}
         </GroupedList>
