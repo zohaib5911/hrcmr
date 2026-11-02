@@ -261,7 +261,7 @@ Checks:
 
 Checks:
 
-- `relationship in ('spouse', 'partner', 'parent', 'child', 'sibling', 'relative', 'friend', 'other')`
+- `relationship in ('spouse', 'civil_partner', 'partner', 'parent', 'child', 'sibling', 'guardian', 'other_relative', 'friend', 'other')`
 
 ## `employee_addresses`
 

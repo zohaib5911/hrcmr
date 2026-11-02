@@ -21,3 +21,4 @@
 2026-11-02 23:50 | Claude Code | T6.4 | done: API + web + e2e verified | next: T6.5
 2026-11-02 20:05 | Codex | T6.5 | synced dev, dispatched CI 41502580515; read requirements, lint/types clean | next employment API and tests
 2026-11-02 20:15 | Codex | T6.5 | employment API, audited CRUD, role history and date-aware readers; 9 integration tests pass | next Employment tab UI
+2026-11-02 20:25 | Codex | T6.4 CI | API job failed on stale generated data-model doc; regenerated and drift test passes | next push fix and verify Employment UI

@@ -9,15 +9,15 @@ State: IN PROGRESS
 - T6.5 — Employment tab (hire date change with reason, effective-dated assignments + history, responsibilities, previous employment, education, training, memberships)
   - [x] Read requirements; API lint/types and web lint/types pass; DB baseline running with local service access
   - [x] Employment API and tests (9 employee integration tests pass)
-  - [ ] Employment tab UI
+  - [x] Employment tab UI (lint/types pass)
   - [ ] Employment e2e and final checks
-- Resume note: API complete; next build employment-tab.tsx, mount and fetch in profile page. Previous note: add tab in web/components/employees/profile-page.tsx (follow personal-tab.tsx: Section, useSubmit, FormSheet); API goes in a new api/app/modules/employees/employment_router.py registered in app/main.py like personal_router. Tables already exist (migration 0013). Salary is T6.6, not here.
+- Resume note: UI implemented; next Employment e2e. T6.4 CI doc drift fixed. Older note: API complete; next build employment-tab.tsx, mount and fetch in profile page. Previous note: add tab in web/components/employees/profile-page.tsx (follow personal-tab.tsx: Section, useSubmit, FormSheet); API goes in a new api/app/modules/employees/employment_router.py registered in app/main.py like personal_router. Tables already exist (migration 0013). Salary is T6.6, not here.
 
 ## Next tasks
 - T6.6, T6.7, T6.8, then Phase 6 gate
 
 ## Health
-- CI on dev: latest run green; T6.4 commit not yet run    CI on main: RED (flaky audit-export test, fixed on dev in the T6.1 branch; goes green when dev merges)
+- CI on dev: RED on ca40751: data-model doc drift; regenerated, drift test passes    CI on main: RED (flaky audit-export test, fixed on dev in the T6.1 branch; goes green when dev merges)
 - Local checks run: employee integration 9 pass; employment ruff/mypy clean; baseline web lint/types clean
 
 ## Issues / suggestions
