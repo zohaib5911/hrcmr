@@ -209,6 +209,31 @@ Checks:
 
 - `role in ('company_admin', 'hr_admin', 'people_manager', 'recruiter', 'employee', 'read_only_auditor')`
 
+## `key_persons`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `role` | VARCHAR(20) | no |  |  |
+| `first_name` | VARCHAR(100) | no |  |  |
+| `last_name` | VARCHAR(100) | no |  |  |
+| `designation` | VARCHAR(120) | yes |  |  |
+| `phone` | VARCHAR(40) | yes |  |  |
+| `email` | VARCHAR(254) | yes |  |  |
+| `proof_of_id_file_id` | UUID | yes |  |  |
+| `same_as_authorising_officer` | BOOLEAN | no | `false` |  |
+| `is_settled_or_british` | BOOLEAN | yes |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `role in ('authorising_officer', 'key_contact', 'level1_user', 'level2_user')`
+
 ## `locations`
 
 | Column | Type | Null | Default | Notes |

@@ -15,6 +15,7 @@ import { TextArea } from "@/components/ui/text-area";
 import { TextField } from "@/components/ui/text-field";
 import { useToast } from "@/components/ui/toast";
 import { Toggle } from "@/components/ui/toggle";
+import { YesNo } from "@/components/ui/yes-no";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 import {
@@ -36,11 +37,6 @@ interface DetailsSheetProps {
   features: Features;
   options: Options;
 }
-
-const YES_NO = [
-  { value: "no", label: "No" },
-  { value: "yes", label: "Yes" },
-] as const;
 
 /** The company's details, edited in a sheet (plan 8.15). Nothing is saved until Save. */
 export function DetailsSheet({
@@ -432,45 +428,5 @@ function DetailsForm({
         ) : null}
       </form>
     </SheetContent>
-  );
-}
-
-function YesNo({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: boolean;
-  onChange: (value: boolean) => void;
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <p className="text-callout text-label">{label}</p>
-      <div
-        role="radiogroup"
-        aria-label={label}
-        className="bg-fill-secondary rounded-control inline-flex w-fit gap-0.5 p-0.5"
-      >
-        {YES_NO.map((option) => {
-          const selected = (option.value === "yes") === value;
-          return (
-            <button
-              key={option.value}
-              type="button"
-              role="radio"
-              aria-checked={selected}
-              onClick={() => onChange(option.value === "yes")}
-              className={
-                "text-callout hit-target cursor-pointer rounded-[8px] px-4 font-medium outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent " +
-                (selected ? "bg-elevated text-label shadow-e1 font-semibold" : "text-label")
-              }
-            >
-              {option.label}
-            </button>
-          );
-        })}
-      </div>
-    </div>
   );
 }

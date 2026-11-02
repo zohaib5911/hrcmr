@@ -569,6 +569,61 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/key-personnel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The company's key personnel */
+        get: operations["company_list_key_personnel"];
+        put?: never;
+        /** Add a key person */
+        post: operations["company_add_key_person"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/key-personnel/{person_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a key person */
+        delete: operations["company_archive_key_person"];
+        options?: never;
+        head?: never;
+        /** Change a key person's details */
+        patch: operations["company_update_key_person"];
+        trace?: never;
+    };
+    "/key-personnel/{person_id}/proof-of-id": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A 60-second link to the identity document */
+        get: operations["company_proof_link"];
+        put?: never;
+        /** Upload proof of identity */
+        post: operations["company_upload_proof"];
+        /** Remove proof of identity */
+        delete: operations["company_remove_proof"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/locations": {
         parameters: {
             query?: never;
@@ -744,6 +799,11 @@ export interface components {
             /** File */
             file: string;
         };
+        /** Body_company_upload_proof */
+        Body_company_upload_proof: {
+            /** File */
+            file: string;
+        };
         /** Body_files_upload_file */
         Body_files_upload_file: {
             /** Category */
@@ -880,6 +940,11 @@ export interface components {
             /** Designations */
             designations: number;
             features: components["schemas"]["Features"];
+            /**
+             * Key Personnel Roles
+             * @description How many of the 4 key roles are filled.
+             */
+            key_personnel_roles: number;
             /** Locations */
             locations: number;
             /**
@@ -1096,6 +1161,92 @@ export interface components {
              */
             role: "company_admin" | "hr_admin" | "people_manager" | "recruiter" | "employee" | "read_only_auditor";
         };
+        /** KeyPersonIn */
+        KeyPersonIn: {
+            /** Designation */
+            designation?: string | null;
+            /** Email */
+            email?: string | null;
+            /** First Name */
+            first_name?: string | null;
+            /** Is Settled Or British */
+            is_settled_or_british?: boolean | null;
+            /** Last Name */
+            last_name?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "authorising_officer" | "key_contact" | "level1_user" | "level2_user";
+            /**
+             * Same As Authorising Officer
+             * @default false
+             */
+            same_as_authorising_officer: boolean;
+        };
+        /** KeyPersonOut */
+        KeyPersonOut: {
+            /** Designation */
+            designation: string | null;
+            /** Email */
+            email: string | null;
+            /** First Name */
+            first_name: string;
+            /** Has Proof Of Id */
+            has_proof_of_id: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Settled Or British */
+            is_settled_or_british: boolean | null;
+            /** Last Name */
+            last_name: string;
+            /** Phone */
+            phone: string | null;
+            /** Proof Of Id Name */
+            proof_of_id_name: string | null;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "authorising_officer" | "key_contact" | "level1_user" | "level2_user";
+            /** Same As Authorising Officer */
+            same_as_authorising_officer: boolean;
+        };
+        /**
+         * KeyPersonPatch
+         * @description Only the fields that are sent change.
+         */
+        KeyPersonPatch: {
+            /** Designation */
+            designation?: string | null;
+            /** Email */
+            email?: string | null;
+            /** First Name */
+            first_name?: string | null;
+            /** Is Settled Or British */
+            is_settled_or_british?: boolean | null;
+            /** Last Name */
+            last_name?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /** Same As Authorising Officer */
+            same_as_authorising_officer?: boolean | null;
+        };
+        /** KeyPersonnel */
+        KeyPersonnel: {
+            /** People */
+            people: components["schemas"]["KeyPersonOut"][];
+            /**
+             * Roles Filled
+             * @description How many of the 4 roles have someone in them.
+             */
+            roles_filled: number;
+        };
         /** LocationIn */
         LocationIn: {
             /** Address Line1 */
@@ -1269,6 +1420,13 @@ export interface components {
             county: string | null;
             /** Postcode */
             postcode: string;
+        };
+        /** ProofLink */
+        ProofLink: {
+            /** Expires In */
+            expires_in: number;
+            /** Url */
+            url: string;
         };
         /**
          * ReadyResponse
@@ -2951,6 +3109,288 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HealthResponse"];
                 };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_list_key_personnel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeyPersonnel"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_add_key_person: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KeyPersonIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeyPersonOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_archive_key_person: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                person_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_update_key_person: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                person_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["KeyPersonPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["KeyPersonOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_proof_link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                person_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProofLink"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_upload_proof: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                person_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_company_upload_proof"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_remove_proof: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                person_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description The request could not be completed. `error.code` says why. */
             "4XX": {

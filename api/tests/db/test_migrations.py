@@ -22,6 +22,7 @@ IDENTITY_TABLES = [
     "email_tokens",
     "files",
     "invitations",
+    "key_persons",
     "locations",
     "memberships",
     "notifications",

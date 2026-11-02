@@ -10,17 +10,20 @@ import { Icon } from "./icon";
 interface GroupedListProps {
   /** A small-caps caption above the group. */
   heading: string;
+  /** One sentence under the caption: what this group is. */
+  description?: string;
   children: ReactNode;
   className?: string;
 }
 
 /** The inset grouped list used by the settings pages (plan 5.7): a rounded block of rows with hairlines between. */
-export function GroupedList({ heading, children, className }: GroupedListProps) {
+export function GroupedList({ heading, description, children, className }: GroupedListProps) {
   return (
     <section aria-label={heading} className={cn("flex flex-col gap-2", className)}>
       <h2 className="text-caption text-label-secondary px-4 font-medium tracking-wider uppercase">
         {heading}
       </h2>
+      {description ? <p className="text-callout text-label-secondary px-4">{description}</p> : null}
       <ul className="bg-elevated rounded-card shadow-e1 divide-separator divide-y overflow-hidden">
         {children}
       </ul>
@@ -71,6 +74,16 @@ export function GroupedRow({ title, detail, icon, href, onClick }: GroupedRowPro
           {content}
         </button>
       )}
+    </li>
+  );
+}
+
+/** A row that says nothing is here yet, with the action that adds it. */
+export function GroupedEmpty({ children, action }: { children: ReactNode; action?: ReactNode }) {
+  return (
+    <li className="flex min-h-14 flex-wrap items-center justify-between gap-3 px-4 py-3">
+      <span className="text-body text-label-secondary">{children}</span>
+      {action}
     </li>
   );
 }

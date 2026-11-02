@@ -77,6 +77,7 @@ class CompanyOverview(BaseModel):
     locations: int
     departments: int
     designations: int
+    key_personnel_roles: int = Field(description="How many of the 4 key roles are filled.")
 
 
 class CompanyUpdate(BaseModel):

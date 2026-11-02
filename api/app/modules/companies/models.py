@@ -205,3 +205,42 @@ class Designation(Base, RecordMixin, TenantMixin):
     title: Mapped[str] = mapped_column(String(120), nullable=False)
     soc_code: Mapped[str | None] = mapped_column(String(4))
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+KEY_PERSON_ROLES = ("authorising_officer", "key_contact", "level1_user", "level2_user")
+
+
+class KeyPerson(Base, RecordMixin, TenantMixin):
+    """A person the Home Office knows the company by (plan.md 8.15). Level 2 users can be many; the
+    other three roles are held by one person each."""
+
+    __tablename__ = "key_persons"
+    __table_args__ = (
+        CheckConstraint(_in("role", KEY_PERSON_ROLES), name="role"),
+        Index(
+            "uq_key_persons_company_id_role",
+            "company_id",
+            "role",
+            unique=True,
+            postgresql_where=and_(column("role") != "level2_user", column("archived_at").is_(None)),
+        ),
+    )
+
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    role: Mapped[str] = mapped_column(String(20), nullable=False)
+    first_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    last_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    designation: Mapped[str | None] = mapped_column(String(120))
+    phone: Mapped[str | None] = mapped_column(String(40))
+    email: Mapped[str | None] = mapped_column(String(254))
+    # The scanned identity document, in file storage (never the bytes in the database).
+    proof_of_id_file_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
+    # This person is the Authorising Officer too: their details follow the officer's.
+    same_as_authorising_officer: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=false()
+    )
+    # The form asks whether the person is a British citizen or settled in the UK (yes or no).
+    is_settled_or_british: Mapped[bool | None] = mapped_column(Boolean)
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

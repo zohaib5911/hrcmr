@@ -1,6 +1,14 @@
 "use client";
 
-import { BadgeCheck, Building2, CreditCard, FileText, MapPin, Users } from "lucide-react";
+import {
+  BadgeCheck,
+  Building2,
+  CreditCard,
+  FileText,
+  MapPin,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
 import { useState } from "react";
 
 import { PageHeader } from "@/components/app/page-header";
@@ -28,7 +36,8 @@ export function CompanyOverview({
   overview: Overview;
   options: Options | null;
 }) {
-  const { company, features, users, locations, departments, designations } = overview;
+  const { company, features, users, locations, departments, designations, key_personnel_roles } =
+    overview;
   const can = useCan();
   const [editing, setEditing] = useState(false);
   const mayEdit = can("company.profile.write") && options !== null;
@@ -84,6 +93,14 @@ export function CompanyOverview({
               detail={String(designations)}
               icon={<Icon icon={BadgeCheck} />}
               href="/company/designations"
+            />
+          ) : null}
+          {can("company.profile.read") ? (
+            <GroupedRow
+              title="Key personnel"
+              detail={`${key_personnel_roles} of 4`}
+              icon={<Icon icon={ShieldCheck} />}
+              href="/company/key-personnel"
             />
           ) : null}
         </GroupedList>

@@ -20,6 +20,7 @@ if TYPE_CHECKING:
 DEFAULT_LIMIT = 1024 * 1024
 UPLOAD_LIMIT = 26 * 1024 * 1024  # a 25 MB file and its form fields
 LOGO_LIMIT = 3 * 1024 * 1024  # a 2 MB picture and its form fields
+PROOF_LIMIT = 11 * 1024 * 1024  # a 10 MB identity document and its form fields
 
 
 class BodyLimitMiddleware:
