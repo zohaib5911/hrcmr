@@ -11,14 +11,16 @@ State: IN PROGRESS
   - [x] Scanned profile photo upload/view and tests
   - [x] Full suite once and affected failure/QA checks
   - [x] 60 screenshots at 390/1280, light/dark; five-line phase summary
-  - [ ] Open dev-to-main PR and merge only on all-green CI
-- Resume note: Open PR dev to main (body prepared at /tmp/cmr-phase6-pr.md). Local gate done; no need to repeat full suites. Inspect PR checks and fix any red; merge using gh pr merge --merge --auto only once all checks green, then sync clean dev and start T7.1.
+  - [x] Open PR #11 dev to main
+  - [ ] Merge only on all-green CI
+- Resume note: Phase 6 PR #11 is open: https://github.com/zohaib5911/hrcmr/pull/11 . Wait for every CI check on the latest head to be green; fix any red on dev. Then gh pr merge 11 --merge --auto (no admin/bypass), sync clean dev and start T7.1. Local gate/evidence complete; no full-suite repeat needed.
+
 
 ## Next tasks
 - Phase 6 PR/merge, T7.1 through T7.6, Phase 7 gate then BLOCKED — audit requested
 
 ## Health
-- CI on dev: prior run 41504657493 green; new phase PR CI not yet started. CI on main: previous run red (fix included on dev).
+- CI on dev: prior run 41504657493 green; PR #11 CI pending. CI on main: previous run red (fix included on dev).
 - Local checks run: API full 421 pass/1 destructive fixture failure fixed, affected RBAC/User Access 26 pass; Overview QA API 3 pass. Web 776 pass, guards 32 pass, full Playwright 396 pass/144 screenshot-only skipped; final screenshots 5 pass (60 images). Ruff/mypy/eslint/tsc/generated API/build clean.
 
 ## Issues / suggestions

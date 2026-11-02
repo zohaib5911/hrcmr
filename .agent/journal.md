@@ -48,3 +48,4 @@
 2026-11-02 19:40 | Codex | Phase 6 gate | role-only fix API 3 pass; screenshot assertion narrowed to accessible Summary region after transition duplicate | next complete recapture
 2026-11-02 19:43 | Codex | Phase 6 gate | recapture 5 pass, screenshots reviewed; final QA fixes zero-valued facts rendering as Not set | next final artifact refresh and PR
 2026-11-02 19:46 | Codex | Phase 6 gate | final screenshots 5 pass/60 images, spot-reviewed; phase summary written; hierarchy deferral corrected to T12.1 | next PR and green CI merge
+2026-11-02 19:46 | Codex | Phase 6 gate | PR #11 opened (dev to main), local gate and 60 images complete | next all-green CI then merge with --merge --auto
