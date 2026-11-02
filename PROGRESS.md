@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** T5.1 User Access list
+- **Current task:** T5.2 Invite, role change, suspend, reset two-step
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -252,7 +252,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **Phase 4 gate** — 2026-11-02, summary under *Phase summaries*. — inset-grouped style, RBAC tests and audit events for every change
 
 ### Phase 5 — Users and access
-- [ ] **T5.1** User Access list, filters, unlinked-users banner
+- [x] **T5.1** User Access list, filters, unlinked-users banner — 2026-11-02. `GET /users` (`rbac.user.read`: Company Admin, HR Admin, Read-only Auditor; others get 403) lists the company's members with role, status, two-step, linked employee and "you", filterable by role, status and search, plus `total` and `unlinked` counts; never returns hashes or secrets. `/company/users`: sortable table with role and status filters, search, and the "N unlinked users" banner. Verified: 2 API tests (filters, counts, other company hidden, 6 roles), 5 unit tests, 6 browser tests (list, banner, filters, axe light/dark at 390 and 1280). Invited-but-not-yet-accepted people join the list in T5.2. Owner: none.
 - [ ] **T5.2** Invite flow, role change, suspend/reactivate, reset 2FA, link/unlink employee
 - [ ] **T5.3** MFA policy setting and "What can each role do?" viewer
 - [ ] **Phase 5 gate**

@@ -1,25 +1,22 @@
 # STATUS
-Updated: 2026-11-02 15:30 (Europe/London)    Agent: Claude Code    Branch: dev    Commit: f87ecb4
+Updated: 2026-11-02 15:30 (Europe/London)    Agent: Claude Code    Branch: dev    Commit: see git log
 State: IN PROGRESS
 
 ## Last completed
-- T4.7 — Pay settings (committed). Fixes from the 2026-11-02 list are all in (client IP, lockout/new-device e-mails, dev-only samples, strict models, top-100k list, Cloudflare ranges job).
+- T5.1 — User Access list, filters and unlinked banner (GET /users, /company/users)
 
 ## Current task
-- T4.7 done; Phase 4 gate passed, PR dev to main open (merge when CI is green)
-  - [x] CI fixes: TRUSTED_PROXY_CIDRS in deployment-requirements, two Semgrep findings, rotation test
-  - [x] e2e isolation: per-file company fixture (web/tests/support/fixtures.ts), fresh API DB each run, 1 local worker, test sign-ups use X-Real-IP
-  - [x] Full e2e run: 375 passed, 0 failed
-  - [x] Full API (384), web (755), guard (32): green
-  - [x] Phase 4 summary written, gate ticked
-  - [ ] PR dev -> main, merge when CI is green
-- Resume note: if the e2e result is green, write the 5-line Phase 4 summary (format of Phase 3), tick "Phase 4 gate", open the PR. If red, fix the real failures only (rate-limit cascades are already fixed).
+- T5.2 — Invite flow, role change, suspend/reactivate, reset 2FA, link/unlink
+  - [ ] API: invite (single-use link e-mail), pending invites in the list   <- start here
+  - [ ] API: role change (last-admin protection), suspend/reactivate, reset two-step (step-up)
+  - [ ] Web: Invite sheet, row actions menu
+- Resume note: extend api/app/modules/access/router.py and web/components/company/user-access-page.tsx; invitations live in identity.Invitation (pre-tenant, via GlobalSession; see auth/invitations.py).
 
 ## Next tasks
-- T5.1 (User Access list), T5.2, T5.3
+- T5.2, T5.3, T6.1
 
 ## Health
-- CI on dev: not yet run on the latest push    CI on main: red until the PR from dev merges (Web/Semgrep/API fixes are on dev)
+- CI on dev: not yet run for T5.1    CI on main: green (PR #7 merged)
 - Local checks run: API 380 pass, web unit 755 pass, ruff/mypy/eslint/tsc clean (before the last edits)
 
 ## Issues / suggestions

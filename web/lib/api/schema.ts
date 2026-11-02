@@ -1048,6 +1048,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Users */
+        get: operations["access_list_users"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/working-pattern": {
         parameters: {
             query?: never;
@@ -1097,6 +1114,65 @@ export interface components {
              * @constant
              */
             status: "check_your_inbox";
+        };
+        /** AccessList */
+        AccessList: {
+            /**
+             * Total
+             * @description Everyone in the company, whatever the filters.
+             */
+            total: number;
+            /**
+             * Unlinked
+             * @description Active users with no linked employee record.
+             */
+            unlinked: number;
+            /** Users */
+            users: components["schemas"]["AccessUser"][];
+        };
+        /** AccessUser */
+        AccessUser: {
+            /** Email */
+            email: string;
+            /**
+             * Employee Id
+             * @description The HR record they are, if linked.
+             */
+            employee_id: string | null;
+            /** First Name */
+            first_name: string;
+            /**
+             * Id
+             * Format: uuid
+             * @description The membership: this person's place in this company.
+             */
+            id: string;
+            /** Is You */
+            is_you: boolean;
+            /** Last Login At */
+            last_login_at: string | null;
+            /** Last Name */
+            last_name: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "company_admin" | "hr_admin" | "people_manager" | "recruiter" | "employee" | "read_only_auditor";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "suspended";
+            /**
+             * Two Step
+             * @description Whether they have set up two-step verification.
+             */
+            two_step: boolean;
+            /**
+             * User Id
+             * Format: uuid
+             */
+            user_id: string;
         };
         /** AddressOut */
         AddressOut: {
@@ -5846,6 +5922,49 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TradingDay"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    access_list_users: {
+        parameters: {
+            query?: {
+                role?: ("company_admin" | "hr_admin" | "people_manager" | "recruiter" | "employee" | "read_only_auditor") | null;
+                status?: ("active" | "suspended") | null;
+                /** @description Name or e-mail contains. */
+                q?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessList"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
