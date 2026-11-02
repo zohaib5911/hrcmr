@@ -6,6 +6,7 @@
 import { expect, test } from "../support/fixtures";
 
 import { audit } from "../support/axe";
+import { MAILPIT } from "../support/accounts";
 
 async function open(page: import("@playwright/test").Page) {
   await page.goto("/company/users");
@@ -31,6 +32,44 @@ test("the admin is listed, the banner counts unlinked users, and the filters nar
   await expect(table.getByText("Amira Hassan")).toBeVisible();
   await page.getByRole("searchbox", { name: "Search people" }).fill("zzz");
   await expect(page.getByText("Nobody matches")).toBeVisible();
+});
+
+test("an invitation is sent, shown as invited, resent and cancelled", async ({ page, request }) => {
+  await open(page);
+  await page.getByRole("button", { name: "Invite user" }).click();
+  const sheet = page.getByRole("dialog", { name: "Invite user" });
+  await sheet.getByRole("button", { name: "Send invitation" }).click();
+  await expect(sheet.getByText("Enter their first name.")).toBeVisible();
+  await audit(page, "invite sheet", { modal: true });
+
+  const email = `nia-${Date.now()}@example.com`;
+  await sheet.getByLabel("First name", { exact: true }).fill("Nia");
+  await sheet.getByLabel("Last name", { exact: true }).fill("Clarke");
+  await sheet.getByLabel("Work email", { exact: true }).fill(email);
+  await sheet.getByRole("radio", { name: /Recruiter/ }).click();
+  await sheet.getByRole("button", { name: "Send invitation" }).click();
+
+  const grid = page.getByRole("grid", { name: "People with access" });
+  await expect(grid.getByText("Nia Clarke")).toBeVisible();
+  await expect(grid.getByText("Invited", { exact: true })).toBeVisible();
+  await expect
+    .poll(async () => {
+      const found = await request.get(`${MAILPIT}/api/v1/search`, {
+        params: { query: `to:${email} subject:"You have been invited"` },
+      });
+      return ((await found.json()) as { messages: unknown[] }).messages.length;
+    })
+    .toBe(1);
+
+  await page.getByRole("button", { name: "Actions for Nia Clarke" }).click();
+  await page.getByRole("menuitem", { name: "Resend invitation" }).click();
+  await expect(page.getByText(`Invitation sent to ${email}`)).toBeVisible();
+
+  await page.getByRole("button", { name: "Actions for Nia Clarke" }).click();
+  await page.getByRole("menuitem", { name: "Cancel invitation" }).click();
+  const confirm = page.getByRole("dialog", { name: /Cancel the invitation for Nia Clarke/ });
+  await confirm.getByRole("button", { name: "Cancel invitation" }).click();
+  await expect(grid.getByText("Nia Clarke")).toHaveCount(0);
 });
 
 for (const colorScheme of ["light", "dark"] as const) {

@@ -3,17 +3,17 @@ Updated: 2026-11-02 15:30 (Europe/London)    Agent: Claude Code    Branch: dev  
 State: IN PROGRESS
 
 ## Last completed
-- T5.1 — User Access list, filters and unlinked banner (GET /users, /company/users)
+- T5.2 — invitations, role change, suspend/reactivate, two-step reset (link/unlink employee deferred to T6.1: no employees table yet)
 
 ## Current task
-- T5.2 — Invite flow, role change, suspend/reactivate, reset 2FA, link/unlink
-  - [ ] API: invite (single-use link e-mail), pending invites in the list   <- start here
-  - [ ] API: role change (last-admin protection), suspend/reactivate, reset two-step (step-up)
-  - [ ] Web: Invite sheet, row actions menu
-- Resume note: extend api/app/modules/access/router.py and web/components/company/user-access-page.tsx; invitations live in identity.Invitation (pre-tenant, via GlobalSession; see auth/invitations.py).
+- T5.3 — MFA policy setting and "What can each role do?" viewer
+  - [ ] API: GET/PUT two-step policy on /company (companies.mfa_policy exists); audit; Company Admin only
+  - [ ] API: GET /roles/matrix generated from rbac_matrix.py
+  - [ ] Web: policy radio cards + role viewer on /company/users (or sub-page)   <- start with the API
+- Resume note: policy values optional/admins/all are in app/modules/auth/policy.py; the matrix is app/core/rbac_matrix.py. T6.1 must add the link/unlink employee picker to User Access (api/app/modules/access, web/components/company/user-access-page.tsx).
 
 ## Next tasks
-- T5.2, T5.3, T6.1
+- T5.3, T6.1, T6.2
 
 ## Health
 - CI on dev: not yet run for T5.1    CI on main: green (PR #7 merged)

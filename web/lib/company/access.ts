@@ -32,3 +32,39 @@ export function unlinkedBanner(count: number): string | null {
 export function fullName(user: Pick<AccessUser, "first_name" | "last_name">): string {
   return `${user.first_name} ${user.last_name}`.trim();
 }
+
+export const ROLE_DESCRIPTIONS: Record<AccessUser["role"], string> = {
+  company_admin: "Full control, including roles, billing and company settings.",
+  hr_admin: "Runs HR day to day: employees, leave, documents and compliance.",
+  people_manager: "Sees and approves requests for their own team.",
+  recruiter: "Manages job postings, candidates and offers.",
+  employee: "Sees their own record, leave and documents.",
+  read_only_auditor: "Reads everything for an audit and changes nothing.",
+};
+
+export type RowAction = "role" | "suspend" | "reactivate" | "reset" | "resend" | "cancel";
+
+export interface Viewer {
+  role: string;
+  canInvite: boolean;
+  canAssign: boolean;
+}
+
+/**
+ * The actions to offer for one row. The API decides what is allowed; this only hides what would be
+ * refused: a pending invitation can be resent or cancelled, a member's role changed, suspended or
+ * reactivated, and two-step reset when they have it. Nobody acts on themselves, and only a Company
+ * Admin acts on a Company Admin.
+ */
+export function rowActions(user: AccessUser, viewer: Viewer): RowAction[] {
+  if (user.status === "invited") {
+    const mayInvite =
+      viewer.canInvite && (user.role !== "company_admin" || viewer.role === "company_admin");
+    return mayInvite ? ["resend", "cancel"] : [];
+  }
+  if (!viewer.canAssign || user.is_you) return [];
+  if (user.role === "company_admin" && viewer.role !== "company_admin") return [];
+  const actions: RowAction[] = ["role", user.status === "active" ? "suspend" : "reactivate"];
+  if (user.two_step) actions.push("reset");
+  return actions;
+}

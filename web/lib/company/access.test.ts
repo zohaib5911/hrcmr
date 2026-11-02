@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { filterUsers, fullName, NO_FILTERS, unlinkedBanner, type AccessUser } from "./access";
+import {
+  filterUsers,
+  fullName,
+  NO_FILTERS,
+  rowActions,
+  unlinkedBanner,
+  type AccessUser,
+} from "./access";
 
 const user = (over: Partial<AccessUser>): AccessUser => ({
   id: "m1",
@@ -13,6 +20,7 @@ const user = (over: Partial<AccessUser>): AccessUser => ({
   two_step: true,
   employee_id: null,
   last_login_at: null,
+  invite_expires_at: null,
   is_you: false,
   ...over,
 });
@@ -50,5 +58,36 @@ describe("unlinkedBanner and fullName", () => {
 
   it("joins the names", () => {
     expect(fullName(people[0]!)).toBe("Amira Hassan");
+  });
+});
+
+describe("rowActions", () => {
+  const admin = { role: "company_admin", canInvite: true, canAssign: true };
+  const hr = { role: "hr_admin", canInvite: true, canAssign: false };
+
+  it("offers a member's role, suspend and, with two-step on, reset", () => {
+    expect(rowActions(user({ role: "employee", two_step: false }), admin)).toEqual([
+      "role",
+      "suspend",
+    ]);
+    expect(rowActions(user({ role: "employee", two_step: true }), admin)).toEqual([
+      "role",
+      "suspend",
+      "reset",
+    ]);
+    expect(rowActions(people[2]!, admin)).toEqual(["role", "reactivate", "reset"]);
+  });
+
+  it("offers nothing on yourself, on an admin to a non-admin, or without the permission", () => {
+    expect(rowActions(user({ is_you: true }), admin)).toEqual([]);
+    expect(rowActions(people[1]!, hr)).toEqual([]);
+    expect(rowActions(user({}), { ...admin, role: "hr_admin" })).toEqual([]);
+  });
+
+  it("offers resend and cancel on an invitation, to someone who may invite", () => {
+    const invited = user({ status: "invited", role: "recruiter" });
+    expect(rowActions(invited, hr)).toEqual(["resend", "cancel"]);
+    expect(rowActions({ ...invited, role: "company_admin" }, hr)).toEqual([]);
+    expect(rowActions(invited, { ...hr, canInvite: false })).toEqual([]);
   });
 });

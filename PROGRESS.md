@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** T5.2 Invite, role change, suspend, reset two-step
+- **Current task:** T5.3 MFA policy and "What can each role do?"
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -253,7 +253,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 ### Phase 5 — Users and access
 - [x] **T5.1** User Access list, filters, unlinked-users banner — 2026-11-02. `GET /users` (`rbac.user.read`: Company Admin, HR Admin, Read-only Auditor; others get 403) lists the company's members with role, status, two-step, linked employee and "you", filterable by role, status and search, plus `total` and `unlinked` counts; never returns hashes or secrets. `/company/users`: sortable table with role and status filters, search, and the "N unlinked users" banner. Verified: 2 API tests (filters, counts, other company hidden, 6 roles), 5 unit tests, 6 browser tests (list, banner, filters, axe light/dark at 390 and 1280). Invited-but-not-yet-accepted people join the list in T5.2. Owner: none.
-- [ ] **T5.2** Invite flow, role change, suspend/reactivate, reset 2FA, link/unlink employee
+- [x] **T5.2** Invite flow, role change, suspend/reactivate, reset 2FA, link/unlink employee — 2026-11-02. API (`access` module): `POST /users/invitations` (single-use 72-hour link by e-mail; inviting the same address again renews the one invitation), resend, cancel; `PATCH /users/{id}/role`; `POST /users/{id}/suspend|reactivate|reset-two-step`. Rules reuse `rbac/rules.py`: only a Company Admin gives, removes or acts on the Company Admin role, a company always keeps one active Company Admin, nobody suspends or resets themselves, and the two-step reset needs a recent step-up and signs the person out everywhere. Every change is audited (`user.invited`, `user.role_changed`, `user.suspended`, ...). Web: Invite user sheet with role cards, a row menu for each action, "Invited" rows, and a password-confirm sheet for the two-step reset. Migration `0012` stores the invitee's name and lets `app_user` delete a cancelled invitation. Verified: 7 API tests, 8 unit tests, 7 browser tests. **Link/unlink employee is not built:** there is no employees table until T6.1; the link picker and its re-test are added there (note in T6.1). Decision 68: HR Admins invite but cannot change roles, because the permission matrix gives `rbac.role.assign` to Company Admins only. Owner: none.
 - [ ] **T5.3** MFA policy setting and "What can each role do?" viewer
 - [ ] **Phase 5 gate**
 

@@ -20,6 +20,8 @@ interface FormSheetProps {
   problem?: Problem | null;
   /** Offered when editing something that can be put away (archived), separated from Save. */
   archive?: { label: string; question: string; detail: string; onConfirm: () => Promise<void> };
+  /** The submit button's text; "Save" unless the sheet does something else ("Send invitation"). */
+  saveLabel?: string;
   children: ReactNode;
 }
 
@@ -33,6 +35,7 @@ export function FormSheet({
   busy = false,
   problem,
   archive,
+  saveLabel = "Save",
   children,
 }: FormSheetProps) {
   return (
@@ -59,7 +62,7 @@ export function FormSheet({
                 Cancel
               </Button>
               <Button type="submit" form="set-up-form" loading={busy}>
-                Save
+                {saveLabel}
               </Button>
             </div>
           </div>
