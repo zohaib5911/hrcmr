@@ -290,7 +290,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **Phase 6 gate** — 2026-11-02. PR #11 merged as 6acec98 after all 12 CI checks passed; API 422, web 776, guards 32, local Playwright 396, 60 reviewed QA screenshots.
 
 ### Phase 7 — Right to Work and sponsor compliance
-- [ ] **T7.1** Right to Work checks
+- [x] **T7.1** Right to Work checks — 2026-11-02. Four conditional types; encrypted/masked codes; clean evidence picker/upload/download; immutable history and reasoned corrections; company-timezone status view, directory filters/deep links/counts, profile tab/cards and masked PDFs. Verified: migration/doc 7, API/PDF 15, list unit 6, employee/setup browser 15 and RTW/setup 2 pass; lint/types/generated API/build pass.
 - [ ] **T7.2** Sponsor documents and sponsored employees page
 - [ ] **T7.3** Working-day calculator, change of circumstances, org changes
 - [ ] **T7.4** Reminders engine and register page
