@@ -37,6 +37,8 @@ async def create_invitation(
     email: str,
     role: str,
     invited_by: uuid.UUID | None,
+    first_name: str | None = None,
+    last_name: str | None = None,
     now: datetime | None = None,
 ) -> tuple[str, Invitation]:
     """Returns the token for the e-mailed link (shown once, never stored) and the invitation."""
@@ -45,6 +47,8 @@ async def create_invitation(
         company_id=company_id,
         email=email,
         role=role,
+        first_name=first_name,
+        last_name=last_name,
         token_hash=hash_token(token),
         expires_at=(now or datetime.now(UTC)) + INVITATION_TTL,
         invited_by=invited_by,
@@ -78,3 +82,14 @@ async def accept_invitation(
     invitation.accepted_at = moment
     await db.flush()
     return invitation
+
+
+async def renew_invitation(
+    db: AsyncSession, invitation: Invitation, *, now: datetime | None = None
+) -> str:
+    """A fresh link and a fresh 72 hours for the same invitation; the old link stops working."""
+    token = new_token()
+    invitation.token_hash = hash_token(token)
+    invitation.expires_at = (now or datetime.now(UTC)) + INVITATION_TTL
+    await db.flush()
+    return token

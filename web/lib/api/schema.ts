@@ -1065,6 +1065,132 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users/invitations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Invite User */
+        post: operations["access_invite_user"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/invitations/{invitation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Cancel Invitation */
+        delete: operations["access_cancel_invitation"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/invitations/{invitation_id}/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resend Invitation */
+        post: operations["access_resend_invitation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{membership_id}/reactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reactivate User */
+        post: operations["access_reactivate_user"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{membership_id}/reset-two-step": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reset Two Step
+         * @description For someone who lost their phone. Needs the caller to have confirmed it is them just now. The
+         *     person is signed out everywhere and sets two-step up again at their next sign-in.
+         */
+        post: operations["access_reset_two_step"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{membership_id}/role": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change Role */
+        patch: operations["access_change_role"];
+        trace?: never;
+    };
+    "/users/{membership_id}/suspend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Suspend User
+         * @description They cannot do anything until reactivated: every request checks the membership.
+         */
+        post: operations["access_suspend_user"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/working-pattern": {
         parameters: {
             query?: never;
@@ -1144,9 +1270,14 @@ export interface components {
             /**
              * Id
              * Format: uuid
-             * @description The membership: this person's place in this company.
+             * @description The membership, or the invitation while it is pending.
              */
             id: string;
+            /**
+             * Invite Expires At
+             * @description While invited: when the link ends.
+             */
+            invite_expires_at: string | null;
             /** Is You */
             is_you: boolean;
             /** Last Login At */
@@ -1162,7 +1293,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "active" | "suspended";
+            status: "active" | "suspended" | "invited";
             /**
              * Two Step
              * @description Whether they have set up two-step verification.
@@ -1170,9 +1301,9 @@ export interface components {
             two_step: boolean;
             /**
              * User Id
-             * Format: uuid
+             * @description Empty until the invitation is accepted.
              */
-            user_id: string;
+            user_id: string | null;
         };
         /** AddressOut */
         AddressOut: {
@@ -1881,6 +2012,23 @@ export interface components {
              */
             role: "company_admin" | "hr_admin" | "people_manager" | "recruiter" | "employee" | "read_only_auditor";
         };
+        /** InviteIn */
+        InviteIn: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** First Name */
+            first_name: string;
+            /** Last Name */
+            last_name: string;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "company_admin" | "hr_admin" | "people_manager" | "recruiter" | "employee" | "read_only_auditor";
+        };
         /** KeyPersonIn */
         KeyPersonIn: {
             /** Designation */
@@ -2289,6 +2437,14 @@ export interface components {
             new_password: string;
             /** Token */
             token: string;
+        };
+        /** RoleIn */
+        RoleIn: {
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "company_admin" | "hr_admin" | "people_manager" | "recruiter" | "employee" | "read_only_auditor";
         };
         /** SignupRequest */
         SignupRequest: {
@@ -5948,7 +6104,7 @@ export interface operations {
         parameters: {
             query?: {
                 role?: ("company_admin" | "hr_admin" | "people_manager" | "recruiter" | "employee" | "read_only_auditor") | null;
-                status?: ("active" | "suspended") | null;
+                status?: ("active" | "suspended" | "invited") | null;
                 /** @description Name or e-mail contains. */
                 q?: string | null;
             };
@@ -5965,6 +6121,290 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AccessList"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    access_invite_user: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InviteIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessUser"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    access_cancel_invitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    access_resend_invitation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                invitation_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessUser"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    access_reactivate_user: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                membership_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessUser"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    access_reset_two_step: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                membership_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessUser"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    access_change_role: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                membership_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RoleIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessUser"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    access_suspend_user: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                membership_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessUser"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

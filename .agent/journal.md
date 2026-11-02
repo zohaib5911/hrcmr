@@ -6,3 +6,4 @@
 2026-11-02 15:35 | Claude Code | T4 gate | full suites green, summary written, gate ticked | next: PR dev->main, merge on green, then T5.1
 2026-11-02 15:49 | Claude Code | T4 gate | PR #7 merged to main (CI green); asked Dependabot to rebase #5 | next: T5.1
 2026-11-02 15:56 | Claude Code | T5.1 | GET /users + /company/users + tests | next: T5.2 invite flow
+2026-11-02 16:01 | Claude Code | T5.2 | API done: invite/resend/cancel, role change, suspend/reactivate, reset two-step + 7 tests | next: web invite sheet + row actions

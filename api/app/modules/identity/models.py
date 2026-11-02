@@ -158,6 +158,8 @@ class Invitation(Base, RecordMixin):
     )
     email: Mapped[str] = mapped_column(CITEXT, nullable=False)
     role: Mapped[str] = mapped_column(String(20), nullable=False)
+    first_name: Mapped[str | None] = mapped_column(String(100))
+    last_name: Mapped[str | None] = mapped_column(String(100))
     token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     accepted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
