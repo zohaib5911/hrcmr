@@ -4,6 +4,9 @@
  * an employee and the unique-number rule, then the accessibility check. Filters and what each role
  * may see are covered by the API tests and lib/employees/list.test.ts.
  */
+import { request as playwrightRequest } from "@playwright/test";
+
+import { API, createSignedInAdmin, csrfHeaders, newAccount } from "../support/accounts";
 import { audit } from "../support/axe";
 import { expect, test } from "../support/fixtures";
 
@@ -117,4 +120,72 @@ test("a profile opens from the list, moves through the lifecycle, and then can o
   // The move above is history now, so the record can only be archived.
   await expect(page.getByText("This record cannot be deleted")).toBeVisible();
   await expect(page.getByText(/Archive it instead/)).toBeVisible();
+});
+
+test("the Personal tab saves details, an address and a contact, and shows identity only after a password check", async ({
+  browser,
+}) => {
+  // Its own administrator, so the test knows the password the step-up check asks for.
+  const account = newAccount("personal");
+  const api = await playwrightRequest.newContext();
+  await createSignedInAdmin(api, account);
+  const made = await api.post(`${API}/employees`, {
+    headers: await csrfHeaders(api),
+    data: {
+      first_name: "Dina",
+      last_name: "Frost",
+      email: "dina@example.com",
+      employee_number: "P100",
+      hire_date: "2025-01-06",
+    },
+  });
+  expect(made.status(), await made.text()).toBe(201);
+  const { id } = (await made.json()) as { id: string };
+  const context = await browser.newContext({ storageState: await api.storageState() });
+  await api.dispose();
+  const page = await context.newPage();
+
+  await open(page, `/employees/${id}`, "Dina Frost");
+  await page.getByRole("tab", { name: "Personal" }).click();
+
+  await page.getByRole("button", { name: "Edit details" }).click();
+  await page.getByLabel("Nationality", { exact: true }).fill("British");
+  await page.getByLabel("Marital status", { exact: true }).selectOption("civil_partnership");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("Details saved").first()).toBeVisible();
+  await expect(page.getByText("Civil partnership")).toBeVisible();
+  await expect(page.getByText("British")).toBeVisible();
+
+  await page.getByRole("button", { name: "Add address" }).click();
+  await page.getByLabel("Address line 1", { exact: true }).fill("1 High Street");
+  await page.getByLabel("Town and county", { exact: true }).fill("Leeds");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("1 High Street, Leeds")).toBeVisible();
+
+  await page.getByRole("button", { name: "Add contact" }).click();
+  await page.getByLabel("Name", { exact: true }).fill("Sam Frost");
+  await page.getByLabel("Relationship", { exact: true }).selectOption("civil_partner");
+  await page.getByLabel("Phone", { exact: true }).fill("07700 900456");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("Civil partner · 07700 900456")).toBeVisible();
+
+  // Identity: editing needs the password; afterwards it shows masked, and "Show" needs no second check.
+  await page
+    .getByRole("region", { name: "National Insurance and passport" })
+    .getByRole("button", { name: "Edit" })
+    .click();
+  await page.getByLabel("Your password", { exact: true }).fill(account.password);
+  await page.getByRole("button", { name: "Confirm" }).click();
+  await page.getByLabel("National Insurance number", { exact: true }).fill("AB 12 34 56 C");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByText("•• •• •• 56 C")).toBeVisible();
+  await expect(page.getByText("AB 12 34 56 C")).toHaveCount(0);
+  await page
+    .getByRole("region", { name: "National Insurance and passport" })
+    .getByRole("button", { name: "Show" })
+    .click();
+  await expect(page.getByText("AB 12 34 56 C")).toBeVisible();
+  await expect(page.getByText(/recorded in the audit trail/)).toBeVisible();
+  await audit(page, "personal tab");
+  await context.close();
 });
