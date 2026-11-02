@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-02 15:30 (Europe/London)    Agent: Claude Code    Branch: dev    Commit: see git log
+Updated: 2026-11-02 20:00 (Europe/London)    Agent: Codex    Branch: dev    Commit: 7f14225
 State: IN PROGRESS
 
 ## Last completed
@@ -7,14 +7,17 @@ State: IN PROGRESS
 
 ## Current task
 - T6.5 — Employment tab (hire date change with reason, effective-dated assignments + history, responsibilities, previous employment, education, training, memberships)
-  - [ ] read plan 8.3 Employment tab (plan.md ~line 767) and 6.3   <- start here
+  - [ ] Read requirements and run baseline checks
+  - [ ] Employment API and tests
+  - [ ] Employment tab UI
+  - [ ] Employment e2e and final checks
 - Resume note: add tab in web/components/employees/profile-page.tsx (follow personal-tab.tsx: Section, useSubmit, FormSheet); API goes in a new api/app/modules/employees/employment_router.py registered in app/main.py like personal_router. Tables already exist (migration 0013). Salary is T6.6, not here.
 
 ## Next tasks
 - T6.6, then Phase 6 gate
 
 ## Health
-- CI on dev: green on 3a1096f (manual run)    CI on main: RED (flaky audit-export test, fixed on dev in the T6.1 branch; goes green when dev merges)
+- CI on dev: latest run green; T6.4 commit not yet run    CI on main: RED (flaky audit-export test, fixed on dev in the T6.1 branch; goes green when dev merges)
 - Local checks run: API 380 pass, web unit 755 pass, ruff/mypy/eslint/tsc clean (before the last edits)
 
 ## Issues / suggestions
