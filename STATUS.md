@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-02 21:03 (Europe/London)    Agent: Codex    Branch: dev    Commit: 9461136
+Updated: 2026-11-02 21:03 (Europe/London)    Agent: Codex    Branch: dev    Commit: 4baaf65
 State: IN PROGRESS
 
 ## Last completed
@@ -7,12 +7,12 @@ State: IN PROGRESS
 
 ## Current task
 - T7.2 — Sponsor documents and sponsored employees page
-  - [ ] Read T7.2/6.4/8.5 requirements and nearest modules; baseline checks
+  - [x] Read T7.2/6.4/8.5 requirements and nearest modules; ruff/mypy/web types pass, T7.1 API baseline 15 pass
   - [ ] Sponsor document model/migration, encrypted references, versions and withdrawal/renewal
   - [ ] Scoped API, visa routes and sponsored employees query/tests
   - [ ] Employee document forms and sponsored employees table
   - [ ] Affected browser checks and final verification
-- Resume note: T7.1 complete. Next T7.2 model/API/UI in plan order; read relevant sections and copy employees/RTW patterns. Sponsor Compliance tab/PDF itself is T7.6; T7.2 needs document management reachable to use now. No T7.2 code yet.
+- Resume note: T7.1 complete. Next T7.2 model/API/UI in plan order; read relevant sections and copy employees/RTW patterns. Sponsor Compliance tab/PDF itself is T7.6; T7.2 needs document management reachable to use now. No T7.2 code yet. Use document.file.read/write plus employee reach; sponsored register requires compliance.overview.read. Renewal records target date/notes, does not change expiry or imply renewed. References encrypted and masked; updates preserve stored reference/CoS if fields left blank.
 
 ## Next tasks
 - T7.2, T7.3, T7.4, T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
