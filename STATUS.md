@@ -1,34 +1,35 @@
 # STATUS
-Updated: <fill in>    Agent: Claude Code    Branch: dev    Commit: <sha>
-State: HANDED OVER
+Updated: 2026-11-02 15:30 (Europe/London)    Agent: Claude Code    Branch: dev    Commit: f87ecb4
+State: IN PROGRESS
 
 ## Last completed
-- T4.3 — Key personnel (check PROGRESS.md)
+- T4.7 — Pay settings (committed). Fixes from the 2026-11-02 list are all in (client IP, lockout/new-device e-mails, dev-only samples, strict models, top-100k list, Cloudflare ranges job).
 
 ## Current task
-- T4.4 — Compliance documents — API done (migration 0008), web page not built, uncommitted
-- Resume note: commit the T4.4 API work, build the web page, then do the fixes listed in "Issues / suggestions" before T4.5
+- Phase 4 gate
+  - [x] CI fixes: TRUSTED_PROXY_CIDRS in deployment-requirements, two Semgrep findings, rotation test
+  - [x] e2e isolation: per-file company fixture (web/tests/support/fixtures.ts), fresh API DB each run, 1 local worker, test sign-ups use X-Real-IP
+  - [ ] Full e2e run (setup + production + design) -> /tmp scratchpad e2e3.log   <- running
+  - [ ] Full API + web unit suites once
+  - [ ] Phase 4 summary in PROGRESS.md, tick gate, commit, push
+  - [ ] PR dev -> main, merge when CI is green
+- Resume note: if the e2e result is green, write the 5-line Phase 4 summary (format of Phase 3), tick "Phase 4 gate", open the PR. If red, fix the real failures only (rate-limit cascades are already fixed).
 
 ## Next tasks
-- T4.4, T4.5, T4.6, T4.7
+- T5.1 (User Access list), T5.2, T5.3
 
 ## Health
-- CI on dev: create branch dev from main first    CI on main: red (shell.spec.ts:300 stale assertion; Dependabot #4 red)
-- Local checks run: n/a
+- CI on dev: not yet run on the latest push    CI on main: red until the PR from dev merges (Web/Semgrep/API fixes are on dev)
+- Local checks run: API 380 pass, web unit 755 pass, ruff/mypy/eslint/tsc clean (before the last edits)
 
 ## Issues / suggestions
-- Trust CF-Connecting-IP / X-Real-IP only from trusted proxies (auth/deps.py:38-41)
-- Send lockout + new-device emails (T2.3; replace SilentNotifier)
-- Move email samples (samples.py) to dev-only
-- Apply extra="forbid" to all request models via a shared base model
-- Breached-password fallback list: use top-100k
 - Remove the certifi exception after 2026-11-06
+- Dependabot #5 open: merge when CI is green
 
 ## Strategy / decisions taken
-- Relay mode: Claude Code and Codex alternate; one at a time, never together
-- AI features hidden unless ANTHROPIC_API_KEY is set; Ask Mady deferred
+- Relay mode; AI features hidden unless ANTHROPIC_API_KEY is set; Ask Mady deferred
 - style-src-attr 'unsafe-inline' accepted (animation library)
-- Dependabot #1 (Redis 8) rejected; keep Redis 7
+- e2e: API server never reused locally; sign-ups send X-Real-IP (test API trusts 127.0.0.0/8) so the 5/hour sign-up limit stays on
 
 ## Owner actions needed
-- Protect main (require CI) and enable private vulnerability reporting on GitHub
+- None blocking. Protect `main` (require PR + CI passed); enable private vulnerability reporting.
