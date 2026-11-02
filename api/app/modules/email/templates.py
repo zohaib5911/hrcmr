@@ -210,6 +210,8 @@ class Rendered:
     plain: str
 
 
+# HTML escaping is on for .html layouts (select_autoescape), and a missing value is an error.
+# nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
 _environment = Environment(
     loader=FileSystemLoader(LAYOUTS),
     autoescape=select_autoescape(["html"]),
@@ -257,7 +259,9 @@ def render(template: str, data: dict[str, str], settings: Settings) -> Rendered:
         return line.format(**plain)
 
     def say_html(line: str) -> Markup:
-        return Markup(line.format(**safe))  # noqa: S704  (the template's own text; values escaped)
+        # The line is this module's own wording, and every value in `safe` was escaped above.
+        # nosemgrep: python.flask.security.xss.audit.explicit-unescape-with-markup.explicit-unescape-with-markup  # noqa: E501
+        return Markup(line.format(**safe))  # noqa: S704
 
     def link_of(field: str | None) -> str | None:
         return data[field] if field else None
