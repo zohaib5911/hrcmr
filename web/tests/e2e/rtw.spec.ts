@@ -103,7 +103,7 @@ test("Right to Work conditionals, explicit saves, evidence selection, correction
   await dialog.getByRole("button", { name: "Save", exact: true }).focus();
   await dialog.getByRole("heading").click();
   expect(saves).toBe(0);
-  await audit(page, "Right to Work check sheet");
+  await audit(page, "Right to Work check sheet", { modal: true });
   await dialog.getByRole("button", { name: "Save", exact: true }).click();
   await expect(dialog).not.toBeVisible();
   expect(saves).toBe(1);
