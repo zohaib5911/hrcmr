@@ -3,17 +3,15 @@ Updated: 2026-11-02 15:30 (Europe/London)    Agent: Claude Code    Branch: dev  
 State: IN PROGRESS
 
 ## Last completed
-- T5.3 — two-step policy and role viewer (T5.1, T5.2 done before it)
+- Phase 5 gate (T5.1 to T5.3): full suites green, summary written, PR dev -> main opened
 
 ## Current task
-- Phase 5 gate
-  - [ ] Full suites once (API, web unit, Playwright incl. design, guard scripts)   <- start here
-  - [ ] Screenshots of /company/users at 390 and 1280, light and dark, into docs/screenshots/phase-5/ (extend web/tests/e2e/phase4-screenshots.spec.ts style)
-  - [ ] Phase 5 summary in PROGRESS.md, tick the gate, PR dev -> main, merge when CI is green
-- Resume note: the gate summary format is the Phase 4 one in PROGRESS.md. After the gate: T6.1 (employees); remember the link/unlink-employee picker for User Access.
+- T6.1 — Employee model + migrations (plan 6.3), list page with pills, filters, deep links, keyboard nav, summary line, archived list
+  - [ ] read plan 6.3 and 8.x employees section   <- start here
+- Resume note: add the link/unlink-employee picker to User Access (api/app/modules/access, web/components/company/user-access-page.tsx) once employees exist; Membership.employee_id has no foreign key yet (add it in the employees migration).
 
 ## Next tasks
-- T6.1, T6.2, T6.3
+- T6.2, T6.3, T6.4
 
 ## Health
 - CI on dev: not yet run for T5.1    CI on main: green (PR #7 merged)

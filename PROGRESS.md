@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** Phase 5 gate
+- **Current task:** T6.1 Employee model, list page, archived list
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -185,6 +185,18 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 **Open at the gate:** nothing blocking. Still waiting on you: protect `main`, enable private vulnerability reporting, decide Dependabot #4, and the brand details (the screens say "Brand" with no logo until then).
 
+### Phase 5 — Users and access — gate passed 2026-11-02
+
+**What exists.** `/company/users`: everyone who can sign in (members and pending invitations) with role, status, two-step and linked-employee columns, role/status/search filters and the "N unlinked users" banner. Invite user (single-use 72-hour link by e-mail, resend, cancel), change role, suspend and reactivate, and reset two-step (needs a recent step-up, signs the person out). A company always keeps one active Company Admin; only a Company Admin acts on that role. The two-step policy cards and a "What can each role do?" sheet generated from the permission matrix.
+
+**Not built yet.** Link/unlink employee waits for the employees table (T6.1).
+
+**Regression, whole suite once:** API 393 tests; web 763 unit tests; Playwright 368 passed plus 21 re-run after fixing two ambiguous locators in the specs (no product failures); guard scripts 32; `tsc`, ESLint, `ruff`, `mypy --strict`, `gen:api:check` clean.
+
+**Screenshots.** `docs/screenshots/phase-5/`: the page, the invite sheet and the role viewer in light and dark at 1280 and 390 px (12 images).
+
+**Open at the gate:** nothing blocking.
+
 ### Phase 4 — Company settings — gate passed 2026-11-02
 
 **What exists.** `/company` overview with eleven settings pages: details and logo, locations, departments, designations, key personnel, compliance documents, working pattern, bank holidays and closures, holiday types, trading hours, and the Pay group (bank accounts, tax codes, payment types, pay bands, pay schedules). Every change is permission-checked and audited; bank sort codes and account numbers are encrypted and only ever shown masked.
@@ -256,7 +268,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T5.1** User Access list, filters, unlinked-users banner — 2026-11-02. `GET /users` (`rbac.user.read`: Company Admin, HR Admin, Read-only Auditor; others get 403) lists the company's members with role, status, two-step, linked employee and "you", filterable by role, status and search, plus `total` and `unlinked` counts; never returns hashes or secrets. `/company/users`: sortable table with role and status filters, search, and the "N unlinked users" banner. Verified: 2 API tests (filters, counts, other company hidden, 6 roles), 5 unit tests, 6 browser tests (list, banner, filters, axe light/dark at 390 and 1280). Invited-but-not-yet-accepted people join the list in T5.2. Owner: none.
 - [x] **T5.2** Invite flow, role change, suspend/reactivate, reset 2FA, link/unlink employee — 2026-11-02. API (`access` module): `POST /users/invitations` (single-use 72-hour link by e-mail; inviting the same address again renews the one invitation), resend, cancel; `PATCH /users/{id}/role`; `POST /users/{id}/suspend|reactivate|reset-two-step`. Rules reuse `rbac/rules.py`: only a Company Admin gives, removes or acts on the Company Admin role, a company always keeps one active Company Admin, nobody suspends or resets themselves, and the two-step reset needs a recent step-up and signs the person out everywhere. Every change is audited (`user.invited`, `user.role_changed`, `user.suspended`, ...). Web: Invite user sheet with role cards, a row menu for each action, "Invited" rows, and a password-confirm sheet for the two-step reset. Migration `0012` stores the invitee's name and lets `app_user` delete a cancelled invitation. Verified: 7 API tests, 8 unit tests, 7 browser tests. **Link/unlink employee is not built:** there is no employees table until T6.1; the link picker and its re-test are added there (note in T6.1). Decision 68: HR Admins invite but cannot change roles, because the permission matrix gives `rbac.role.assign` to Company Admins only. Owner: none.
 - [x] **T5.3** Two-step policy and "What can each role do?" — 2026-11-02. API: `GET/PUT /security/two-step` (optional / Company Admins / everyone; Company Admin only to change; audited as `company.mfa_policy_changed`; says how many people still have to set it up; people newly covered are asked at their next request) and `GET /roles/matrix`, built from `rbac_matrix.py` so it cannot drift (a test checks every role's list matches exactly). Web, on `/company/users`: policy radio cards that save on choosing, and a "What can each role do?" sheet with a role picker and a grouped list. Verified: 2 API tests, 8 browser tests on the page (axe light and dark, 390 and 1280, sheets open). Owner: none.
-- [ ] **Phase 5 gate**
+- [x] **Phase 5 gate** — 2026-11-02, summary under *Phase summaries*.
 
 ### Phase 6 — Employees
 - [ ] **T6.1** Employee model, list page, archived list

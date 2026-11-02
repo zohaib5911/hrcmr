@@ -63,7 +63,7 @@ test("an invitation is sent, shown as invited, resent and cancelled", async ({ p
 
   await page.getByRole("button", { name: "Actions for Nia Clarke" }).click();
   await page.getByRole("menuitem", { name: "Resend invitation" }).click();
-  await expect(page.getByText(`Invitation sent to ${email}`)).toBeVisible();
+  await expect(page.getByText(`Invitation sent to ${email}`, { exact: true })).toBeVisible();
 
   await page.getByRole("button", { name: "Actions for Nia Clarke" }).click();
   await page.getByRole("menuitem", { name: "Cancel invitation" }).click();

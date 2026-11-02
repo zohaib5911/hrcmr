@@ -9,3 +9,4 @@
 2026-11-02 16:01 | Claude Code | T5.2 | API done: invite/resend/cancel, role change, suspend/reactivate, reset two-step + 7 tests | next: web invite sheet + row actions
 2026-11-02 16:06 | Claude Code | T5.2 | web invite sheet, row menu, e2e | next: T5.3
 2026-11-02 16:10 | Claude Code | T5.3 | policy + role viewer, API+web+e2e | next: Phase 5 gate
+2026-11-02 16:25 | Claude Code | Phase 5 gate | suites green, summary, PR | next: T6.1
