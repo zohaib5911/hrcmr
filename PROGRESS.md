@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** Phase 2 gate
+- **Current task:** T3.1 Auth screens
 
 ---
 
@@ -145,6 +145,20 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 ---
 
+### Phase 2 — Backend core (identity, tenancy, RBAC, audit, files, email) — gate passed 2026-11-02
+
+**What exists.** Identity and tenancy tables with Row-Level Security, field encryption, sessions, the 19 `/auth` endpoints, the RBAC matrix and `require()`, the permanent audit trail with its read/CSV endpoints, the file pipeline (size, type, magic bytes, ClamAV, private storage, 60-second links, clean-up), 11 branded e-mail templates with an encrypted outbox and retries, and the ARQ worker with the UTC schedule and job audit logging.
+
+**Regression, whole suite once:** API 330 tests; web 711 unit tests; 222 Playwright tests passed, 0 failed (the 32 skipped are the screenshot-only specs, which run only with `SCREENSHOTS=1`); guard scripts 32; `tsc`, ESLint, `ruff` and `mypy --strict` clean. Semgrep run locally with CI's rules: no findings.
+
+**Screenshots.** `docs/screenshots/email/`: every template as Mailpit shows it. The phase has no other screens.
+
+**Fixed along the way:** CI had been red since T2.4 on three counts, all repaired: the e2e contract check still expected only `/health` and `/ready`, Semgrep flagged `text()` in a migration and the SHA-1 in the breached-password check (now a justified `nosemgrep`: the Have I Been Pwned protocol requires it), and a tooltip test missed focus before hydration. CI results for the latest pushes are checked at the start of Phase 3.
+
+**Open at the gate:** nothing blocking. Still waiting on you: protect `main`, enable private vulnerability reporting, decide Dependabot #4, and the brand details (the e-mails say "Brand" with no logo until then).
+
+---
+
 ## Task list
 
 ### Phase 0 — Foundations and guard-rails
@@ -176,7 +190,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T2.7** Files — 2026-11-02. `POST /files` streams to a temp file, then checks size (25 MB), extension allowlist, magic bytes and ClamAV (fails closed), stores under a random `company/<id>/<uuid>` key and writes the `files` row; `GET /files/{id}` and `/download` (60 s presigned link, attachment, audited); `remove_orphans` clean-up (24 h grace) ready for T2.9 to schedule; 1 MB default / 26 MB upload body limit; CI now starts RustFS and ClamAV. **Verified:** 7 tests against real RustFS and ClamAV: clean PDF accepted and served, EICAR rejected, wrong magic byte rejected, oversize/empty, scanner down refuses, cross-company 404, orphan clean-up. Owner: none.
 - [x] **T2.8** Email — 2026-11-02. 11 branded HTML + plain-text templates (verify, reset, password changed, account exists, invite, login alert, notifications digest, reminder nudge, leave decision, policy request, deletion code); each takes only the values it declares, escapes them and refuses multi-line values and non-web links, so nothing sensitive can be passed in; `OutboxMailer` saves each message encrypted in `email_outbox`, `deliver_email` (ARQ) sends it through Resend or, with no key and `SMTP_HOST` set, Mailpit; 5 tries with backoff, row-locked, Resend idempotency key, payload erased once sent or given up; `email-samples` CLI + `web/scripts/email-screenshots.mjs`. **Verified:** 7 tests incl. all 11 delivered to a real Mailpit; screenshots in `docs/screenshots/email/`. Owner: none now (Resend key, `EMAIL_FROM`, `EMAIL_REPLY_TO` are already in the T23 list).
 - [x] **T2.9** Worker and scheduler — 2026-11-02. `python -m app.jobs.worker` (ARQ, same image and variables as the API) runs `deliver_email`, `worker_ping` and the UTC schedule: the 8 jobs the plan names (empty until their tasks), `files_orphans_daily` (T2.7, real), and `email_outbox_sweep` every minute; every run is logged and recorded as a `job.finished` / `job.failed` audit event (no company, actor `system`; per-minute jobs only on failure, and never the error text). **Verified:** 4 tests: schedule holds every plan job, the worker runs a queued sample job and an API-queued e-mail, runs and failures are audited; the real process starts and shuts down cleanly. Owner: none (the Railway `worker` service start command is `python -m app.jobs.worker`, listed under T23).
-- [ ] **Phase 2 gate**
+- [x] **Phase 2 gate** — 2026-11-02, summary under *Phase summaries*.
 
 ### Phase 3 — Auth UI and onboarding
 - [ ] **T3.1** Auth screens: login, MFA, forgot/reset password, verify email, accept invite
