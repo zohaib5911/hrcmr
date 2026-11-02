@@ -108,7 +108,7 @@ test("Right to Work conditionals, explicit saves, evidence selection, correction
   await expect(dialog).not.toBeVisible();
   expect(saves).toBe(1);
   const current = page.getByRole("region", { name: "Current Right to Work check", exact: true });
-  await expect(current.getByLabel("Right to Work: Evidence missing")).toBeVisible();
+  await expect(current.getByText("Right to Work: Evidence missing", { exact: true })).toBeVisible();
   await expect(current.getByText("W12345678", { exact: true })).toHaveCount(0);
   await expect(current.getByText(/678$/)).toBeVisible();
   const downloaded = page.waitForEvent("download");
@@ -143,7 +143,7 @@ test("Right to Work conditionals, explicit saves, evidence selection, correction
   await dialog.getByRole("button", { name: "Save", exact: true }).click();
   await expect(dialog).not.toBeVisible();
   expect(saves).toBe(2);
-  await expect(current.getByLabel("Right to Work: Pending")).toBeVisible();
+  await expect(current.getByText("Right to Work: Pending", { exact: true })).toBeVisible();
   const history = page.getByRole("region", { name: "Right to Work history", exact: true });
   await expect(history.getByText("Home Office online check", { exact: true })).toBeVisible();
   await expect(history.getByText("Superseded", { exact: true })).toBeVisible();
