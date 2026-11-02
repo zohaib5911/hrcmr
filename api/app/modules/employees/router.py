@@ -7,20 +7,30 @@ from __future__ import annotations
 import uuid  # noqa: TC003  (FastAPI reads the annotations at run time)
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func, or_, select
+from fastapi import APIRouter, Depends, Query, Request, UploadFile
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.exc import IntegrityError
 
-from app.core.errors import ConflictError
+from app.core.errors import AppError, ConflictError, NotFoundError
 from app.core.rbac_matrix import Scope
+from app.modules.audit.models import AuditEvent
 from app.modules.companies.models import Department, Designation
-from app.modules.employees.models import Employee, EmployeeAssignment
+from app.modules.employees.models import (
+    Employee,
+    EmployeeAssignment,
+    EmployeeCompensation,
+    EmployeeDocument,
+)
 from app.modules.employees.schemas import (
     EmployeeIn,
     EmployeeList,
+    EmployeeProfile,
     EmployeeRow,
     EmployeeSummary,
+    OptOutChange,
+    PermanentDelete,
     Status,
+    StatusChange,
 )
 from app.modules.rbac.deps import Access, require
 
@@ -28,6 +38,8 @@ router = APIRouter(tags=["employees"])
 
 Reads = Annotated[Access, Depends(require("employee.profile.read"))]
 Writes = Annotated[Access, Depends(require("employee.profile.write"))]
+Deletes = Annotated[Access, Depends(require("employee.profile.delete"))]
+AGREEMENT_NOTE = "48-hour week opt-out agreement"
 LIMIT = 2000
 
 
@@ -200,3 +212,193 @@ async def create_employee(body: EmployeeIn, access: Writes) -> EmployeeRow:
     )
     await access.db.commit()
     return _row(employee)
+
+
+async def _employee(access: Access, employee_id: uuid.UUID) -> Employee:
+    """The record, if this person may reach it; otherwise a 404 (existence is not revealed)."""
+    employee = (
+        await access.db.execute(select(Employee).where(Employee.id == employee_id))
+    ).scalar_one_or_none()
+    if employee is None or not await access.can_reach(employee_id):
+        raise NotFoundError
+    return employee
+
+
+async def _agreement_on_file(access: Access, employee_id: uuid.UUID) -> bool:
+    return (
+        await access.db.execute(
+            select(EmployeeDocument.id).where(
+                EmployeeDocument.employee_id == employee_id,
+                EmployeeDocument.notes == AGREEMENT_NOTE,
+            )
+        )
+    ).first() is not None
+
+
+async def _delete_blocker(access: Access, employee_id: uuid.UUID) -> str | None:
+    """Why this record may not be deleted for good, or None. A record with history is archived."""
+    history = {
+        "a role": select(EmployeeAssignment.id).where(
+            EmployeeAssignment.employee_id == employee_id
+        ),
+        "a salary record": select(EmployeeCompensation.id).where(
+            EmployeeCompensation.employee_id == employee_id
+        ),
+        "a document": select(EmployeeDocument.id).where(
+            EmployeeDocument.employee_id == employee_id
+        ),
+        "recorded changes": select(AuditEvent.id).where(
+            AuditEvent.entity_type == "employee",
+            AuditEvent.entity_id == employee_id,
+            AuditEvent.action != "employee.created",
+        ),
+    }
+    for what, query in history.items():
+        if (await access.db.execute(query.limit(1))).first() is not None:
+            return f"This record has {what}. Archive it instead, so that history is kept."
+    return None
+
+
+async def _profile(access: Access, employee: Employee) -> EmployeeProfile:
+    role = (
+        await access.db.execute(
+            select(Department.name, Designation.title)
+            .select_from(EmployeeAssignment)
+            .outerjoin(Department, Department.id == EmployeeAssignment.department_id)
+            .outerjoin(Designation, Designation.id == EmployeeAssignment.designation_id)
+            .where(
+                EmployeeAssignment.employee_id == employee.id, EmployeeAssignment.ended_at.is_(None)
+            )
+        )
+    ).first()
+    documents = (
+        await access.db.execute(
+            select(func.count())
+            .select_from(EmployeeDocument)
+            .where(EmployeeDocument.employee_id == employee.id)
+        )
+    ).scalar_one()
+    blocker = await _delete_blocker(access, employee.id)
+    return EmployeeProfile(
+        id=employee.id,
+        employee_number=employee.employee_number,
+        first_name=employee.first_name,
+        last_name=employee.last_name,
+        email=employee.email,
+        phone=employee.phone,
+        status=employee.status,  # type: ignore[arg-type]
+        hire_date=employee.hire_date,
+        leave_date=employee.leave_date,
+        department=role[0] if role else None,
+        designation=role[1] if role else None,
+        has_photo=employee.photo_file_id is not None,
+        opted_out_48h_week=employee.opted_out_48h_week,
+        has_opt_out_agreement=await _agreement_on_file(access, employee.id),
+        documents=documents,
+        can_delete=blocker is None,
+        delete_blocker=blocker,
+    )
+
+
+@router.get("/employees/{employee_id}", response_model=EmployeeProfile)
+async def get_employee(employee_id: uuid.UUID, access: Reads) -> EmployeeProfile:
+    return await _profile(access, await _employee(access, employee_id))
+
+
+@router.post("/employees/{employee_id}/status", response_model=EmployeeProfile)
+async def change_status(
+    employee_id: uuid.UUID, body: StatusChange, access: Writes
+) -> EmployeeProfile:
+    """Set to active, on leave, leaver or archived. A leaving date is optional."""
+    employee = await _employee(access, employee_id)
+    before = {"status": employee.status, "leave_date": employee.leave_date}
+    employee.status = body.status
+    employee.leave_date = body.leave_date if body.status in ("leaver", "on_leave") else None
+    after = {"status": employee.status, "leave_date": employee.leave_date}
+    if before != after:
+        await access.audit(
+            "employee.status_changed",
+            entity_type="employee",
+            entity_id=employee.id,
+            before={k: str(v) if v else None for k, v in before.items()},
+            after={k: str(v) if v else None for k, v in after.items()},
+        )
+    await access.db.commit()
+    return await _profile(access, employee)
+
+
+@router.put("/employees/{employee_id}/opt-out-48h", response_model=EmployeeProfile)
+async def set_opt_out(
+    employee_id: uuid.UUID, body: OptOutChange, access: Writes
+) -> EmployeeProfile:
+    """Record an opt-out of the 48-hour week. The signed agreement must be filed first."""
+    employee = await _employee(access, employee_id)
+    if body.opted_out and not await _agreement_on_file(access, employee.id):
+        raise ConflictError("Upload the signed opt-out agreement first.", field="opted_out")
+    if employee.opted_out_48h_week != body.opted_out:
+        employee.opted_out_48h_week = body.opted_out
+        await access.audit(
+            "employee.opt_out_48h_changed",
+            entity_type="employee",
+            entity_id=employee.id,
+            after={"opted_out": body.opted_out},
+        )
+    await access.db.commit()
+    return await _profile(access, employee)
+
+
+@router.post("/employees/{employee_id}/opt-out-48h/agreement", status_code=204)
+async def upload_agreement(
+    employee_id: uuid.UUID, request: Request, file: UploadFile, access: Writes
+) -> None:
+    employee = await _employee(access, employee_id)
+    record = await request.app.state.files.upload(
+        access,
+        file.file,
+        filename=file.filename,
+        owner_type="employee",
+        owner_id=employee.id,
+        category="hr_record",
+        commit=False,
+    )
+    access.db.add(
+        EmployeeDocument(
+            company_id=access.company_id,
+            employee_id=employee.id,
+            file_id=record.id,
+            category="hr_record",
+            notes=AGREEMENT_NOTE,
+        )
+    )
+    await access.audit(
+        "employee.opt_out_agreement_added",
+        entity_type="employee",
+        entity_id=employee.id,
+        after={"file": record.original_name},
+    )
+    await access.db.commit()
+
+
+@router.delete("/employees/{employee_id}", status_code=204)
+async def delete_employee(employee_id: uuid.UUID, body: PermanentDelete, access: Deletes) -> None:
+    """Delete a record made by mistake: one with no history, and only when the full name
+    is typed; anything else is archived."""
+    employee = await _employee(access, employee_id)
+    if body.confirm_name.strip().lower() != f"{employee.first_name} {employee.last_name}".lower():
+        raise AppError(
+            "VALIDATION_ERROR",
+            "Type the person's full name exactly to confirm.",
+            status_code=422,
+            field="confirm_name",
+        )
+    blocker = await _delete_blocker(access, employee.id)
+    if blocker:
+        raise ConflictError(blocker)
+    await access.audit(
+        "employee.deleted",
+        entity_type="employee",
+        entity_id=employee.id,
+        summary=f"{employee.employee_number}: {employee.first_name} {employee.last_name}",
+    )
+    await access.db.execute(delete(Employee).where(Employee.id == employee.id))
+    await access.db.commit()

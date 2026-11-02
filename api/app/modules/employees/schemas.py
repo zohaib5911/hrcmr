@@ -75,3 +75,40 @@ class EmployeeIn(RequestModel):
         if value > twelve_months_from(datetime.now(UTC).date()):
             raise ValueError("The hire date can be at most 12 months from today.")
         return value
+
+
+class EmployeeProfile(BaseModel):
+    """The header and the Overview tab of an employee's record (plan 8.3)."""
+
+    id: uuid.UUID
+    employee_number: str
+    first_name: str
+    last_name: str
+    email: str
+    phone: str | None
+    status: Status
+    hire_date: date
+    leave_date: date | None
+    department: str | None
+    designation: str | None
+    has_photo: bool
+    opted_out_48h_week: bool
+    has_opt_out_agreement: bool
+    documents: int = Field(description="Documents filed on the record.")
+    can_delete: bool = Field(
+        description="False when the record has history, so it can only be archived."
+    )
+    delete_blocker: str | None = Field(description="Why it cannot be deleted, in words.")
+
+
+class StatusChange(RequestModel):
+    status: Status
+    leave_date: date | None = None
+
+
+class OptOutChange(RequestModel):
+    opted_out: bool
+
+
+class PermanentDelete(RequestModel):
+    confirm_name: str = Field(min_length=1, max_length=250, description="The full name, typed.")

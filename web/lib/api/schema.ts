@@ -664,6 +664,85 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/employees/{employee_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Employee */
+        get: operations["employees_get_employee"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Employee
+         * @description Delete a record made by mistake: one with no history, and only when the full name
+         *     is typed; anything else is archived.
+         */
+        delete: operations["employees_delete_employee"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/opt-out-48h": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Set Opt Out
+         * @description Record an opt-out of the 48-hour week. The signed agreement must be filed first.
+         */
+        put: operations["employees_set_opt_out"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/opt-out-48h/agreement": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Agreement */
+        post: operations["employees_upload_agreement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change Status
+         * @description Set to active, on leave, leaver or archived. A leaving date is optional.
+         */
+        post: operations["employees_change_status"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/files": {
         parameters: {
             query?: never;
@@ -1553,6 +1632,11 @@ export interface components {
             /** File */
             file: string;
         };
+        /** Body_employees_upload_agreement */
+        Body_employees_upload_agreement: {
+            /** File */
+            file: string;
+        };
         /** Body_files_upload_file */
         Body_files_upload_file: {
             /** Category */
@@ -1995,6 +2079,64 @@ export interface components {
              * @description Matches before the 2000-row cap.
              */
             total: number;
+        };
+        /**
+         * EmployeeProfile
+         * @description The header and the Overview tab of an employee's record (plan 8.3).
+         */
+        EmployeeProfile: {
+            /**
+             * Can Delete
+             * @description False when the record has history, so it can only be archived.
+             */
+            can_delete: boolean;
+            /**
+             * Delete Blocker
+             * @description Why it cannot be deleted, in words.
+             */
+            delete_blocker: string | null;
+            /** Department */
+            department: string | null;
+            /** Designation */
+            designation: string | null;
+            /**
+             * Documents
+             * @description Documents filed on the record.
+             */
+            documents: number;
+            /** Email */
+            email: string;
+            /** Employee Number */
+            employee_number: string;
+            /** First Name */
+            first_name: string;
+            /** Has Opt Out Agreement */
+            has_opt_out_agreement: boolean;
+            /** Has Photo */
+            has_photo: boolean;
+            /**
+             * Hire Date
+             * Format: date
+             */
+            hire_date: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Name */
+            last_name: string;
+            /** Leave Date */
+            leave_date: string | null;
+            /** Opted Out 48H Week */
+            opted_out_48h_week: boolean;
+            /** Phone */
+            phone: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "on_leave" | "leaver" | "archived";
         };
         /** EmployeeRow */
         EmployeeRow: {
@@ -2442,6 +2584,11 @@ export interface components {
             /** Secret */
             secret: string;
         };
+        /** OptOutChange */
+        OptOutChange: {
+            /** Opted Out */
+            opted_out: boolean;
+        };
         /** Option */
         Option: {
             /** Label */
@@ -2564,6 +2711,14 @@ export interface components {
             /** Name */
             name: string;
         };
+        /** PermanentDelete */
+        PermanentDelete: {
+            /**
+             * Confirm Name
+             * @description The full name, typed.
+             */
+            confirm_name: string;
+        };
         /** PostcodeOut */
         PostcodeOut: {
             /** City */
@@ -2680,6 +2835,16 @@ export interface components {
             password: string;
             /** Turnstile Token */
             turnstile_token?: string | null;
+        };
+        /** StatusChange */
+        StatusChange: {
+            /** Leave Date */
+            leave_date?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "on_leave" | "leaver" | "archived";
         };
         /** StepUpRequest */
         StepUpRequest: {
@@ -4847,6 +5012,218 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EmployeeSummary"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_get_employee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeProfile"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_delete_employee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PermanentDelete"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_set_opt_out: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OptOutChange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeProfile"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_upload_agreement: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_employees_upload_agreement"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_change_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusChange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeProfile"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
