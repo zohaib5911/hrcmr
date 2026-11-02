@@ -1,0 +1,288 @@
+"""The upload pipeline and the clean-up job (plan.md 4.5).
+
+    stream to a temporary file  ->  size  ->  extension  ->  magic bytes  ->  virus scan
+        ->  store in the bucket under a random key  ->  ``files`` row
+
+Every step can refuse, and a refusal is recorded in the audit trail. Nothing is stored, and no row
+exists, until every check has passed, and a file is only ever served when its row says ``clean``.
+"""
+
+from __future__ import annotations
+
+import asyncio
+import hashlib
+import re
+import uuid
+from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING, BinaryIO
+
+from sqlalchemy import select
+
+from app.core.errors import AppError, ForbiddenError, NotFoundError
+from app.core.logging import get_logger
+from app.core.rbac_matrix import Scope
+from app.modules.files.models import File
+from app.modules.files.validation import (
+    ALLOWED,
+    MAX_BYTES,
+    extension_of,
+    safe_filename,
+    sniff,
+)
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncEngine
+
+    from app.integrations.clamav import ClamAV
+    from app.integrations.storage import Storage
+    from app.modules.rbac.deps import Access
+
+logger = get_logger("app.files")
+
+KEY_PREFIX = "company/"
+ORPHAN_GRACE = timedelta(hours=24)
+_HASH_CHUNK = 1024 * 1024
+_OWNER_TYPE = re.compile(r"[a-z][a-z_]{0,39}")
+
+
+@dataclass(frozen=True)
+class Rejection:
+    """Why an upload was refused: a stable code for the client and an audit record."""
+
+    code: str
+    message: str
+    status_code: int
+
+
+NOT_CONFIGURED = Rejection(
+    "STORAGE_NOT_CONFIGURED", "File storage is not set up on this server.", 503
+)
+EMPTY = Rejection("FILE_EMPTY", "That file is empty.", 422)
+TOO_LARGE = Rejection(
+    "PAYLOAD_TOO_LARGE", f"That file is larger than {MAX_BYTES // (1024 * 1024)} MB.", 413
+)
+BAD_TYPE = Rejection(
+    "FILE_TYPE_NOT_ALLOWED",
+    "That kind of file is not accepted. Use PDF, JPG, PNG, DOC, DOCX, XLSX or CSV.",
+    415,
+)
+MISMATCH = Rejection(
+    "FILE_TYPE_MISMATCH", "The file is not what its name says it is, so it was not accepted.", 415
+)
+INFECTED = Rejection(
+    "FILE_INFECTED", "A virus was found in that file, so it was not accepted.", 422
+)
+SCAN_DOWN = Rejection(
+    "SCAN_UNAVAILABLE",
+    "We could not check that file for viruses just now, so it was not accepted. Try again soon.",
+    503,
+)
+STORE_DOWN = Rejection(
+    "STORAGE_UNAVAILABLE", "We could not save that file just now. Try again soon.", 503
+)
+
+
+def _digest(stream: BinaryIO) -> str:
+    stream.seek(0)
+    sha = hashlib.sha256()
+    while chunk := stream.read(_HASH_CHUNK):
+        sha.update(chunk)
+    stream.seek(0)
+    return sha.hexdigest()
+
+
+def _size(stream: BinaryIO) -> int:
+    return stream.seek(0, 2)
+
+
+class FileService:
+    def __init__(self, storage: Storage | None, scanner: ClamAV) -> None:
+        self.storage = storage
+        self.scanner = scanner
+
+    async def _refuse(
+        self,
+        access: Access,
+        rejection: Rejection,
+        *,
+        name: str,
+        size: int,
+        detail: str | None = None,
+    ) -> AppError:
+        """Record the refusal (and keep it, even though the request fails) and build the error."""
+        await access.audit(
+            "file.upload.rejected",
+            entity_type="file",
+            summary=f"{rejection.code}: {name}",
+            after={"reason": rejection.code, "name": name, "size": size, "detail": detail},
+        )
+        await access.db.commit()
+        return AppError(rejection.code, rejection.message, status_code=rejection.status_code)
+
+    async def upload(
+        self,
+        access: Access,
+        stream: BinaryIO,
+        *,
+        filename: str | None,
+        owner_type: str | None = None,
+        owner_id: uuid.UUID | None = None,
+        category: str | None = None,
+    ) -> File:
+        """Check ``stream`` and, if it passes everything, store it. Commits on success."""
+        if self.storage is None:
+            raise AppError(NOT_CONFIGURED.code, NOT_CONFIGURED.message, status_code=503)
+        await self._check_owner(access, owner_type, owner_id)
+        name = safe_filename(filename)
+        size = await asyncio.to_thread(_size, stream)
+        if size == 0:
+            raise await self._refuse(access, EMPTY, name=name, size=size)
+        if size > MAX_BYTES:
+            raise await self._refuse(access, TOO_LARGE, name=name, size=size)
+
+        extension = extension_of(name)
+        if extension not in ALLOWED:
+            raise await self._refuse(access, BAD_TYPE, name=name, size=size, detail=extension[:10])
+        kind, mime = ALLOWED[extension]
+        if await asyncio.to_thread(sniff, stream) != kind:
+            raise await self._refuse(access, MISMATCH, name=name, size=size, detail=extension)
+
+        stream.seek(0)
+        verdict = await self.scanner.scan(stream)
+        if verdict.status == "infected":
+            raise await self._refuse(
+                access, INFECTED, name=name, size=size, detail=verdict.signature
+            )
+        if verdict.status != "clean":
+            raise await self._refuse(access, SCAN_DOWN, name=name, size=size)
+
+        sha256 = await asyncio.to_thread(_digest, stream)
+        key = f"{KEY_PREFIX}{access.company_id}/{uuid.uuid4().hex}"
+        record = File(
+            company_id=access.company_id,
+            storage_key=key,
+            original_name=name,
+            mime=mime,
+            size=size,
+            sha256=sha256,
+            scan_status="clean",
+            scanned_at=datetime.now(UTC),
+            owner_type=owner_type,
+            owner_id=owner_id,
+            category=category,
+            uploaded_by=access.caller.user_id,
+        )
+        access.db.add(record)
+        await access.db.flush()
+        await access.audit(
+            "file.uploaded",
+            entity_type="file",
+            entity_id=record.id,
+            after={"name": name, "mime": mime, "size": size, "owner_type": owner_type},
+        )
+        try:
+            # The bytes go in before the commit: if this fails nothing is kept, and if the commit
+            # fails afterwards the object is an orphan that the clean-up job removes.
+            await self.storage.put(key, stream, content_type=mime, size=size)
+        except Exception:
+            await access.db.rollback()
+            raise AppError(STORE_DOWN.code, STORE_DOWN.message, status_code=503) from None
+        await access.db.commit()
+        return record
+
+    async def download_url(self, access: Access, file_id: uuid.UUID) -> tuple[str, File]:
+        """A 60-second link for a file this person may read, after recording that they asked."""
+        if self.storage is None:
+            raise AppError(NOT_CONFIGURED.code, NOT_CONFIGURED.message, status_code=503)
+        record = await self.get(access, file_id)
+        if record.scan_status != "clean":
+            raise NotFoundError
+        await access.audit(
+            "file.downloaded", entity_type="file", entity_id=record.id, summary=record.original_name
+        )
+        await access.db.commit()
+        return self.storage.presign_get(record.storage_key, filename=record.original_name), record
+
+    async def get(self, access: Access, file_id: uuid.UUID) -> File:
+        """A file of this company that the person's permission reaches, else 404."""
+        record = (
+            await access.db.execute(
+                select(File).where(File.id == file_id, File.company_id == access.company_id)
+            )
+        ).scalar_one_or_none()
+        if record is None or not await self._reaches(access, record):
+            raise NotFoundError
+        return record
+
+    @staticmethod
+    async def _check_owner(
+        access: Access, owner_type: str | None, owner_id: uuid.UUID | None
+    ) -> None:
+        """What the file is attached to must be well formed, and within the person's reach."""
+        if owner_type is None and owner_id is None:
+            if access.scope is not Scope.ALL:
+                raise ForbiddenError
+            return
+        if owner_type is None or owner_id is None or not _OWNER_TYPE.fullmatch(owner_type):
+            raise AppError(
+                "VALIDATION_ERROR",
+                "Say what the file belongs to (a type and an id).",
+                status_code=422,
+                field="owner_type",
+            )
+        if access.scope is not Scope.ALL and (
+            owner_type != "employee" or not await access.can_reach(owner_id)
+        ):
+            raise ForbiddenError
+
+    @staticmethod
+    async def _reaches(access: Access, record: File) -> bool:
+        """Everyone with full scope; otherwise what the person uploaded or that is within reach."""
+        if access.scope is Scope.ALL or record.uploaded_by == access.caller.user_id:
+            return True
+        return (
+            record.owner_type == "employee"
+            and record.owner_id is not None
+            and await access.can_reach(record.owner_id)
+        )
+
+
+async def remove_orphans(
+    storage: Storage,
+    owner_engine: AsyncEngine,
+    *,
+    older_than: timedelta = ORPHAN_GRACE,
+    now: datetime | None = None,
+) -> int:
+    """Delete objects in the bucket that no ``files`` row points to; returns how many.
+
+    An upload that failed between storing the bytes and committing the row leaves one behind. The
+    grace period keeps this from racing an upload that is still in progress. It runs as the table
+    owner (outside any company), so it sees every company's rows.
+    """
+    from sqlalchemy import column, table
+
+    cutoff = (now or datetime.now(UTC)) - older_than
+    objects = [o for o in await storage.list_objects(KEY_PREFIX) if o.last_modified < cutoff]
+    if not objects:
+        return 0
+    files = table("files", column("storage_key"))
+    known: set[str] = set()
+    async with owner_engine.connect() as connection:
+        keys = [o.key for o in objects]
+        for start in range(0, len(keys), 1000):
+            result = await connection.execute(
+                select(files.c.storage_key).where(
+                    files.c.storage_key.in_(keys[start : start + 1000])
+                )
+            )
+            known.update(row[0] for row in result)
+    removed = 0
+    for stored in objects:
+        if stored.key not in known:
+            await storage.delete(stored.key)
+            removed += 1
+    if removed:
+        logger.info("orphans_removed", count=removed)
+    return removed
