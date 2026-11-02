@@ -27,7 +27,7 @@ test("the working pattern starts as Monday to Friday and saves a change", async 
   await expect(page.getByText("Working pattern saved").first()).toBeVisible();
   await page.reload();
   await expect(page.getByRole("heading", { level: 1, name: "Working pattern" })).toBeVisible();
-  await expect(page.getByText("Mon to Thu, 30 hours")).toBeVisible();
+  await expect(page.getByText("Mon to Thu, 30 hours").first()).toBeVisible();
   await expect(page.getByRole("switch", { name: "Friday" })).not.toBeChecked();
   await expect(
     page.getByRole("switch", { name: /Bank holidays are not working days/ }),

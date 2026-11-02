@@ -71,6 +71,11 @@ If you are cut off before this, that's fine: the journal, the `Next:` lines and 
 
 ## 6. Phase gates and audits
 - At the end of each phase: run the full suite once, save the screenshots, and write a 5-line phase summary in `PROGRESS.md`. Then open a PR `dev → main`.
+- **You have standing permission to merge that PR yourself, without asking:**
+  - merge only when **all** CI checks are green, using `gh pr merge <n> --merge --auto` (it waits for green);
+  - never use `--admin`, bypass branch protection, or force-push `main`;
+  - if CI fails, fix it on `dev` and push; never merge red;
+  - after merging, `git pull` on `dev` and continue with the next task. Don't wait for the merge to finish before starting it.
 - After Phases 7, 14 and 20: set `State: BLOCKED — audit requested` and stop. The owner runs an audit with a high-level model, and the fixes come back as tasks in `STATUS.md` "Next tasks".
 
 ## STATUS.md template (overwrite fully each time)

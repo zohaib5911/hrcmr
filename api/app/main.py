@@ -30,6 +30,7 @@ from app.integrations.postcodes import Postcodes
 from app.integrations.storage import Storage
 from app.integrations.turnstile import Turnstile
 from app.jobs.queue import open_queue
+from app.modules.access.router import router as access_router
 from app.modules.audit.router import router as audit_router
 from app.modules.auth.container import build_container
 from app.modules.auth.router import router as auth_router
@@ -184,6 +185,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(holidays_router, prefix=API_PREFIX)
     app.include_router(trading_hours_router, prefix=API_PREFIX)
     app.include_router(pay_router, prefix=API_PREFIX)
+    app.include_router(access_router, prefix=API_PREFIX)
     app.include_router(structure_router, prefix=API_PREFIX)
     _install_openapi(app)
     return app

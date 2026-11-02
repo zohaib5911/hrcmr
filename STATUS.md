@@ -1,25 +1,20 @@
 # STATUS
-Updated: 2026-11-02 15:30 (Europe/London)    Agent: Claude Code    Branch: dev    Commit: f87ecb4
+Updated: 2026-11-02 15:30 (Europe/London)    Agent: Claude Code    Branch: dev    Commit: see git log
 State: IN PROGRESS
 
 ## Last completed
-- T4.7 — Pay settings (committed). Fixes from the 2026-11-02 list are all in (client IP, lockout/new-device e-mails, dev-only samples, strict models, top-100k list, Cloudflare ranges job).
+- Phase 5 gate (T5.1 to T5.3): full suites green, summary written, PR dev -> main opened
 
 ## Current task
-- T4.7 done; Phase 4 gate passed, PR dev to main open (merge when CI is green)
-  - [x] CI fixes: TRUSTED_PROXY_CIDRS in deployment-requirements, two Semgrep findings, rotation test
-  - [x] e2e isolation: per-file company fixture (web/tests/support/fixtures.ts), fresh API DB each run, 1 local worker, test sign-ups use X-Real-IP
-  - [x] Full e2e run: 375 passed, 0 failed
-  - [x] Full API (384), web (755), guard (32): green
-  - [x] Phase 4 summary written, gate ticked
-  - [ ] PR dev -> main, merge when CI is green
-- Resume note: if the e2e result is green, write the 5-line Phase 4 summary (format of Phase 3), tick "Phase 4 gate", open the PR. If red, fix the real failures only (rate-limit cascades are already fixed).
+- T6.1 — Employee model + migrations (plan 6.3), list page with pills, filters, deep links, keyboard nav, summary line, archived list
+  - [ ] read plan 6.3 and 8.x employees section   <- start here
+- Resume note: add the link/unlink-employee picker to User Access (api/app/modules/access, web/components/company/user-access-page.tsx) once employees exist; Membership.employee_id has no foreign key yet (add it in the employees migration).
 
 ## Next tasks
-- T5.1 (User Access list), T5.2, T5.3
+- T6.2, T6.3, T6.4
 
 ## Health
-- CI on dev: not yet run on the latest push    CI on main: red until the PR from dev merges (Web/Semgrep/API fixes are on dev)
+- CI on dev: not yet run for T5.1    CI on main: green (PR #7 merged)
 - Local checks run: API 380 pass, web unit 755 pass, ruff/mypy/eslint/tsc clean (before the last edits)
 
 ## Issues / suggestions

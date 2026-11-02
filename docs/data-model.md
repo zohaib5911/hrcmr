@@ -293,6 +293,8 @@ Checks:
 | `company_id` | UUID | no |  | references `companies` |
 | `email` | CITEXT | no |  |  |
 | `role` | VARCHAR(20) | no |  |  |
+| `first_name` | VARCHAR(100) | yes |  |  |
+| `last_name` | VARCHAR(100) | yes |  |  |
 | `token_hash` | VARCHAR(64) | no |  | unique |
 | `expires_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
 | `accepted_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
