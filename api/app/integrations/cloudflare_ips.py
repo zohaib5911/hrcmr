@@ -66,7 +66,7 @@ async def fetch(client: httpx.AsyncClient | None = None) -> list[str]:
         for url in SOURCES:
             response = await http.get(url, timeout=TIMEOUT_SECONDS)
             response.raise_for_status()
-            ranges.extend(parse(response.text))
+            ranges.extend(parse(response.content.decode("utf-8", errors="replace")))
         return check(ranges)
     except httpx.HTTPError as exc:
         logger.warning("cloudflare_ranges_unavailable", kind=type(exc).__name__)

@@ -6,12 +6,12 @@ State: IN PROGRESS
 - T4.7 — Pay settings (committed). Fixes from the 2026-11-02 list are all in (client IP, lockout/new-device e-mails, dev-only samples, strict models, top-100k list, Cloudflare ranges job).
 
 ## Current task
-- Phase 4 gate
+- T4.7 done; Phase 4 gate passed, PR dev to main open (merge when CI is green)
   - [x] CI fixes: TRUSTED_PROXY_CIDRS in deployment-requirements, two Semgrep findings, rotation test
   - [x] e2e isolation: per-file company fixture (web/tests/support/fixtures.ts), fresh API DB each run, 1 local worker, test sign-ups use X-Real-IP
-  - [ ] Full e2e run (setup + production + design) -> /tmp scratchpad e2e3.log   <- running
-  - [ ] Full API + web unit suites once
-  - [ ] Phase 4 summary in PROGRESS.md, tick gate, commit, push
+  - [x] Full e2e run: 375 passed, 0 failed
+  - [x] Full API (384), web (755), guard (32): green
+  - [x] Phase 4 summary written, gate ticked
   - [ ] PR dev -> main, merge when CI is green
 - Resume note: if the e2e result is green, write the 5-line Phase 4 summary (format of Phase 3), tick "Phase 4 gate", open the PR. If red, fix the real failures only (rate-limit cascades are already fixed).
 
