@@ -46,7 +46,8 @@ export default defineConfig({
       url: `http://127.0.0.1:${WEB_PORT}/healthz`,
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
-      env: { PORT: String(WEB_PORT) },
+      // The pages that call the API (sign-in) are built to call the test API below.
+      env: { PORT: String(WEB_PORT), NEXT_PUBLIC_API_URL: `http://127.0.0.1:${API_PORT}/api/v1` },
     },
     // The development server, for tests/e2e/design.spec.ts only. It writes to .next/dev, so it does
     // not disturb the production build above.

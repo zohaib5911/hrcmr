@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** T3.1 Auth screens
+- **Current task:** T3.2 Setup wizard
 
 ---
 
@@ -104,6 +104,7 @@ marked `UNVERIFIED` and listed here with its location.
 56. **Files (T2.7):** an upload is refused (and audited as `file.upload.rejected`) at the first failing check; the object is stored before the row commits, so a failed commit leaves an orphan that `remove_orphans` deletes, and a file is served only when its row says `clean`. Someone with only `_own` document rights can attach files to their own employee record only. Uploads answer 503 `STORAGE_NOT_CONFIGURED` until the R2 variables are set.
 57. **E-mail (T2.8):** with no mail service configured (`RESEND_API_KEY` and `SMTP_HOST` both empty) the API logs that a message was asked for and sends nothing, so tests and a bare checkout still work. With `SMTP_HOST` set, messages wait in `email_outbox` until the worker (T2.9) runs `deliver_email`; T2.9 must also register `sweep_email_outbox` (every minute) so a message whose job was lost is picked up. The brand is the text "Brand" until the owner gives the real name and logo (email header has no logo image yet).
 58. **Worker (T2.9):** the worker needs `DATABASE_URL_OWNER` for job audit events and the orphan clean-up (platform events have no company, so the API role cannot write them); without it jobs still run and are logged but not audited. Schedule times are UTC. `sweep_email_outbox` is registered, as T2.8 required.
+59. **Sign-in screens (T3.1):** the sign-up link points to `/setup`, which T3.2 builds next (until then it is a 404, and the link is not prefetched). The screens call the API straight from the browser (cookie plus CSRF header), never through a Next.js route. Screenshots of these screens are taken at the Phase 3 gate, with the flow test.
 
 ---
 
@@ -193,7 +194,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **Phase 2 gate** — 2026-11-02, summary under *Phase summaries*.
 
 ### Phase 3 — Auth UI and onboarding
-- [ ] **T3.1** Auth screens: login, MFA, forgot/reset password, verify email, accept invite
+- [x] **T3.1** Sign-in screens — 2026-11-02. `/login` (UK/USA/AU region switch with the two not-yet regions disabled, show/hide password, Turnstile after 3 failures or when the API asks), `/login/mfa` (6-digit code or recovery code), `/forgot-password`, `/reset-password`, `/verify-email` (signs in on load, spends the token once, offers a fresh link if it fails) and `/accept-invite` (company, role, name, password with strength hint, terms), all on one calm panel in `app/(auth)`; Turnstile shows only where `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is set. **Verified:** 49 browser checks (6 screens x 2 themes x 4 widths: no sideways scroll, no console errors, axe clean; keyboard order) and 9 unit tests; the web build for the e2e run now gets `NEXT_PUBLIC_API_URL` and the API address is read in a way that reaches the browser bundle. Owner: none.
 - [ ] **T3.2** Setup wizard, "Check your inbox" screen and Turnstile
 - [ ] **T3.3** Terms gate, MFA enrolment flow and MFA policy enforcement
 - [ ] **T3.4** Signed-in session bootstrap, permission-aware sidebar, free-plan banner, 402 upgrade sheet
