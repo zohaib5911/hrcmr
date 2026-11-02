@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-02 20:57 (Europe/London)    Agent: Codex    Branch: dev    Commit: 5e0669b
+Updated: 2026-11-02 20:57 (Europe/London)    Agent: Codex    Branch: dev    Commit: 840ce30
 State: IN PROGRESS
 
 ## Last completed
@@ -14,7 +14,7 @@ State: IN PROGRESS
   - [x] Employee RTW tab and directory RTW pills/filters/deep links
   - [x] Browser scenario prepared; TypeScript and affected ESLint pass
   - [ ] Browser verification and final checks
-- Resume note: Second RTW browser run found StatusChip does not forward aria-label; RTW chip now includes its context as screen-reader text and test reads that text. Rerun RTW only. Production build and 15 employee/setup browser checks pass. RTW scenario stopped at axe call missing existing modal:true option (no app failure); fixed and rerun only rtw.spec.ts. UI implemented; browser scenario ready in web/tests/e2e/rtw.spec.ts, next run affected Playwright employees + rtw specs (UV_CACHE_DIR=/tmp/cmr-uv-cache); next verify T7.1 browser scenario for conditional forms, explicit saves, correction/history/PDF and evidence upload auto-selection, then finish checks. API/directory/PDF 15 pass, web list 6 pass, typecheck/lint pass. Core RTW API verified (12 RTW/PDF tests), migration/doc checks 7 pass. Next employee RTW tab and directory integration: status chips, conditional explicit-save forms, evidence picker/upload, correction and PDF actions; list status/pills/filters/deep links and summary counts. HR Admin records but cannot correct (rbac matrix); Company Admin correction only. Historical corrections stay historical; online corrections re-enter share code rather than reveal it. Candidate routes wait for Phase 11 validation.
+- Resume note: RTW browser verified saved/masked check + PDF + EvidenceMissing filter; immediate resize assertion caught before media-query rendering settled. Now wait for mobile cards and poll width. Rerun RTW only. Second RTW browser run found StatusChip does not forward aria-label; RTW chip now includes its context as screen-reader text and test reads that text. Rerun RTW only. Production build and 15 employee/setup browser checks pass. RTW scenario stopped at axe call missing existing modal:true option (no app failure); fixed and rerun only rtw.spec.ts. UI implemented; browser scenario ready in web/tests/e2e/rtw.spec.ts, next run affected Playwright employees + rtw specs (UV_CACHE_DIR=/tmp/cmr-uv-cache); next verify T7.1 browser scenario for conditional forms, explicit saves, correction/history/PDF and evidence upload auto-selection, then finish checks. API/directory/PDF 15 pass, web list 6 pass, typecheck/lint pass. Core RTW API verified (12 RTW/PDF tests), migration/doc checks 7 pass. Next employee RTW tab and directory integration: status chips, conditional explicit-save forms, evidence picker/upload, correction and PDF actions; list status/pills/filters/deep links and summary counts. HR Admin records but cannot correct (rbac matrix); Company Admin correction only. Historical corrections stay historical; online corrections re-enter share code rather than reveal it. Candidate routes wait for Phase 11 validation.
 
 
 ## Next tasks

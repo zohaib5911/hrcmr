@@ -118,9 +118,10 @@ test("Right to Work conditionals, explicit saves, evidence selection, correction
   await expect(page.getByLabel("Right to Work", { exact: true })).toHaveValue("EvidenceMissing");
   await expect(page.getByRole("grid").getByText("Rita Shah")).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
-    true,
-  );
+  await expect(page.getByRole("list", { name: "Employees", exact: true })).toBeVisible();
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
+    .toBe(true);
   await page.goto("/employees?rtw=Verified");
   await expect(page.getByText("Nobody matches", { exact: true })).toBeVisible();
   await page.goto("/employees?rtw=NeedsAttention");

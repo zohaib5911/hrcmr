@@ -58,3 +58,4 @@
 2026-11-02 20:55 | Codex | T7.1 | browser scenario prepared for all four conditionals, explicit record/upload, auto-selection, masked PDF/history and directory links | next run affected Playwright employees + rtw specs
 2026-11-02 20:57 | Codex | T7.1 | production build and 15 employee/setup browser checks pass; corrected new axe invocation to existing modal mode | next rerun rtw.spec.ts only
 2026-11-02 20:59 | Codex | T7.1 | RTW browser reached saved check; replaced ignored StatusChip aria-label with screen-reader context, updated scoped assertions | next rerun RTW only
+2026-11-02 21:01 | Codex | T7.1 | browser verified masked record/PDF/filter; resize assertion now waits for mobile table cards and responsive layout | next finish RTW scenario
