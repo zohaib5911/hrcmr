@@ -91,6 +91,7 @@ class EmployeeProfile(BaseModel):
     leave_date: date | None
     department: str | None
     designation: str | None
+    employment_type: str | None = None
     has_photo: bool
     opted_out_48h_week: bool
     has_opt_out_agreement: bool

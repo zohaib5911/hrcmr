@@ -263,7 +263,7 @@ async def _delete_blocker(access: Access, employee_id: uuid.UUID) -> str | None:
 async def _profile(access: Access, employee: Employee) -> EmployeeProfile:
     role = (
         await access.db.execute(
-            select(Department.name, Designation.title)
+            select(Department.name, Designation.title, EmployeeAssignment.employment_type)
             .select_from(EmployeeAssignment)
             .outerjoin(Department, Department.id == EmployeeAssignment.department_id)
             .outerjoin(Designation, Designation.id == EmployeeAssignment.designation_id)
@@ -290,6 +290,7 @@ async def _profile(access: Access, employee: Employee) -> EmployeeProfile:
         leave_date=employee.leave_date,
         department=role[0] if role else None,
         designation=role[1] if role else None,
+        employment_type=role[2] if role else None,
         has_photo=employee.photo_file_id is not None,
         opted_out_48h_week=employee.opted_out_48h_week,
         has_opt_out_agreement=await _agreement_on_file(access, employee.id),

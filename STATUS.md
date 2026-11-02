@@ -10,9 +10,9 @@ State: IN PROGRESS
   - [x] Deferred User Access employee linking API/UI; API and browser tests pass
   - [x] Profile photo API/UI; real scanned upload/read and browser tests pass
   - [x] Full suite once: API 421 pass/1 fixture failure fixed (affected 26 pass); web 776, guards 32, Playwright 396 pass/144 screenshot-only skipped
-  - [ ] Design QA screenshots at 390/1280; phase summary
+  - [ ] Captured 60 screenshots; QA found role-only Overview label issue; fix and recapture, then phase summary
   - [ ] PR dev to main; merge only on green CI
-- Resume note: All gate checks finished: API fixture fix verified by 26 affected tests; web/guards/Playwright pass. Run SCREENSHOTS=1 phase6-screenshots.spec.ts, inspect 390/1280 light/dark images, write 5-line summary and open dev-to-main PR; merge only once every CI check is green.
+- Resume note: Full browser 396 pass. First 60 screenshots captured; QA found Overview incorrectly says no role when assignment lacks department/designation. Added employment_type to profile and fallback text (affected API tests running/passed). Screenshot helper resets focus/scroll and captures modal viewport. Next recapture Phase 6 screenshots, inspect, summary and PR.
 
 
 ## Next tasks

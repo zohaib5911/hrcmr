@@ -9,6 +9,10 @@ test.skip(!process.env.SCREENSHOTS, "Phase gate screenshots only.");
 
 async function shoot(page: Page, name: string) {
   await page.evaluate(() => document.fonts.ready);
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    window.scrollTo(0, 0);
+  });
   await page.mouse.move(0, 0);
   await page.waitForTimeout(500);
   expect(
@@ -16,7 +20,8 @@ async function shoot(page: Page, name: string) {
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     ),
   ).toBeLessThanOrEqual(0);
-  await page.screenshot({ path: path.join(OUT, name + ".png"), fullPage: true });
+  const dialogOpen = await page.getByRole("dialog").isVisible();
+  await page.screenshot({ path: path.join(OUT, name + ".png"), fullPage: !dialogOpen });
 }
 
 for (const colorScheme of ["light", "dark"] as const) {
@@ -86,6 +91,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         await shoot(page, "create-" + suffix);
         await page.goto("/employees/" + id);
         await expect(page.getByRole("heading", { level: 1, name: "Mara Rosen" })).toBeVisible();
+        await expect(page.getByText("full time", { exact: true })).toBeVisible();
         await shoot(page, "overview-" + suffix);
         for (const tab of [
           "Personal",

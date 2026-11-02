@@ -2911,6 +2911,8 @@ export interface components {
             email: string;
             /** Employee Number */
             employee_number: string;
+            /** Employment Type */
+            employment_type?: string | null;
             /** First Name */
             first_name: string;
             /** Has Opt Out Agreement */

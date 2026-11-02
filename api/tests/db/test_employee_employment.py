@@ -79,6 +79,7 @@ async def test_roles_hire_date_history_and_audit(rig: dict[str, Any]) -> None:
     assert (await hr.get(f"{base}/employment")).json()["assignments"] == []
     made = await hr.post(f"{base}/assignments", json=ROLE)
     assert made.status_code == 201, made.text
+    assert (await hr.get(base)).json()["employment_type"] == "full_time"
     assert (await hr.post(f"{base}/assignments", json=ROLE)).status_code == 409
     assert (
         await hr.post(f"{base}/assignments", json={**ROLE, "effective_from": "2024-01-01"})

@@ -125,9 +125,11 @@ function Overview({ profile }: { profile: EmployeeProfile }) {
     <div className="flex flex-col gap-8">
       <section aria-label="Summary" className="grid gap-4 sm:grid-cols-2">
         <SummaryCard icon={Briefcase} label="Employment">
-          {profile.designation ? (
+          {profile.designation || profile.department || profile.employment_type ? (
             <>
-              <p className="text-headline text-label">{profile.designation}</p>
+              <p className="text-headline text-label">
+                {profile.designation || profile.employment_type?.replaceAll("_", " ")}
+              </p>
               <p className="text-callout text-label-secondary">
                 {profile.department ?? "No department"}
               </p>
