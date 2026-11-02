@@ -358,6 +358,77 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/company": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The company's details */
+        get: operations["company_get_company"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Change the company's details */
+        patch: operations["company_update_company"];
+        trace?: never;
+    };
+    "/company/companies-house/{number}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Look a company up at Companies House */
+        get: operations["company_companies_house_lookup"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/company/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The company logo */
+        get: operations["company_get_logo"];
+        put?: never;
+        /** Upload the company logo */
+        post: operations["company_upload_logo"];
+        /** Remove the company logo */
+        delete: operations["company_remove_logo"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/company/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The lists the details are chosen from */
+        get: operations["company_company_options"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/files": {
         parameters: {
             query?: never;
@@ -475,6 +546,21 @@ export interface components {
              */
             status: "check_your_inbox";
         };
+        /** AddressOut */
+        AddressOut: {
+            /** City */
+            city: string | null;
+            /** Country */
+            country: string | null;
+            /** County */
+            county: string | null;
+            /** Line1 */
+            line1: string | null;
+            /** Line2 */
+            line2: string | null;
+            /** Postcode */
+            postcode: string | null;
+        };
         /** AuditEventOut */
         AuditEventOut: {
             /** Action */
@@ -528,6 +614,11 @@ export interface components {
             /** Next Cursor */
             next_cursor: string | null;
         };
+        /** Body_company_upload_logo */
+        Body_company_upload_logo: {
+            /** File */
+            file: string;
+        };
         /** Body_files_upload_file */
         Body_files_upload_file: {
             /** Category */
@@ -550,6 +641,73 @@ export interface components {
         CodeRequest: {
             /** Code */
             code: string;
+        };
+        /** CompaniesHouseRecord */
+        CompaniesHouseRecord: {
+            address: components["schemas"]["AddressOut"];
+            /** Legal Structure */
+            legal_structure: string | null;
+            /** Name */
+            name: string;
+            /** Number */
+            number: string;
+            /** Status */
+            status: string | null;
+        };
+        /** CompanyDetails */
+        CompanyDetails: {
+            /** Ai Features Enabled */
+            ai_features_enabled: boolean;
+            /**
+             * Bank Holiday Region
+             * @enum {string}
+             */
+            bank_holiday_region: "england-and-wales" | "scotland" | "northern-ireland";
+            /** Changed Name Last 5 Years */
+            changed_name_last_5_years: boolean;
+            /** Contact Email */
+            contact_email: string | null;
+            /** Contact Phone */
+            contact_phone: string | null;
+            /** Has Logo */
+            has_logo: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Penalty Illegal Working Last 3 Years */
+            penalty_illegal_working_last_3_years: boolean;
+            /** Penalty Illegal Working Status */
+            penalty_illegal_working_status: string | null;
+            /**
+             * Plan
+             * @enum {string}
+             */
+            plan: "free" | "annual" | "ten_year";
+            /** Previous Company Name */
+            previous_company_name: string | null;
+            /** Registered Number */
+            registered_number: string | null;
+            /** Sector */
+            sector: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "suspended" | "pending_deletion" | "deleted";
+            /** Timezone */
+            timezone: string;
+            /** Trading Name */
+            trading_name: string | null;
+            /** Trading Period */
+            trading_period: string | null;
+            /** Type Of Organisation */
+            type_of_organisation: string | null;
+            /** Website */
+            website: string | null;
         };
         /** CompanyMembership */
         CompanyMembership: {
@@ -575,6 +733,67 @@ export interface components {
              * @enum {string}
              */
             status: "active" | "suspended";
+        };
+        /** CompanyOptions */
+        CompanyOptions: {
+            /** Bank Holiday Regions */
+            bank_holiday_regions: components["schemas"]["Option"][];
+            /** Legal Structures */
+            legal_structures: components["schemas"]["Option"][];
+            /** Sectors */
+            sectors: components["schemas"]["Option"][];
+            /** Timezones */
+            timezones: string[];
+            /** Trading Periods */
+            trading_periods: components["schemas"]["Option"][];
+        };
+        /** CompanyOverview */
+        CompanyOverview: {
+            company: components["schemas"]["CompanyDetails"];
+            features: components["schemas"]["Features"];
+            /**
+             * Users
+             * @description People who can sign in to this company.
+             */
+            users: number;
+        };
+        /**
+         * CompanyUpdate
+         * @description Only the fields that are sent change. ``null`` empties an optional field.
+         */
+        CompanyUpdate: {
+            /** Ai Features Enabled */
+            ai_features_enabled?: boolean | null;
+            /** Bank Holiday Region */
+            bank_holiday_region?: ("england-and-wales" | "scotland" | "northern-ireland") | null;
+            /** Changed Name Last 5 Years */
+            changed_name_last_5_years?: boolean | null;
+            /** Contact Email */
+            contact_email?: string | null;
+            /** Contact Phone */
+            contact_phone?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Penalty Illegal Working Last 3 Years */
+            penalty_illegal_working_last_3_years?: boolean | null;
+            /** Penalty Illegal Working Status */
+            penalty_illegal_working_status?: string | null;
+            /** Previous Company Name */
+            previous_company_name?: string | null;
+            /** Registered Number */
+            registered_number?: string | null;
+            /** Sector */
+            sector?: string | null;
+            /** Timezone */
+            timezone?: string | null;
+            /** Trading Name */
+            trading_name?: string | null;
+            /** Trading Period */
+            trading_period?: string | null;
+            /** Type Of Organisation */
+            type_of_organisation?: string | null;
+            /** Website */
+            website?: string | null;
         };
         /**
          * DownloadOut
@@ -613,6 +832,16 @@ export interface components {
          */
         ErrorEnvelope: {
             error: components["schemas"]["ErrorBody"];
+        };
+        /**
+         * Features
+         * @description What this server can do, so the screen shows only what works.
+         */
+        Features: {
+            /** Ai */
+            ai: boolean;
+            /** Companies House Lookup */
+            companies_house_lookup: boolean;
         };
         /** FileOut */
         FileOut: {
@@ -754,6 +983,13 @@ export interface components {
             otpauth_uri: string;
             /** Secret */
             secret: string;
+        };
+        /** Option */
+        Option: {
+            /** Label */
+            label: string;
+            /** Value */
+            value: string;
         };
         /**
          * ReadyResponse
@@ -1678,6 +1914,279 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LoginResponse"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_get_company: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyOverview"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_update_company: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompanyUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyDetails"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_companies_house_lookup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                number: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompaniesHouseRecord"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_get_logo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": unknown;
+                    "image/png": unknown;
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_upload_logo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_company_upload_logo"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_remove_logo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_company_options: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyOptions"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

@@ -95,6 +95,18 @@ class Storage:
 
         await self._call(run)
 
+    async def read(self, key: str) -> bytes:
+        """The whole object. For small files only (a logo); big ones go by presigned link."""
+
+        def run() -> bytes:
+            body = self._client.get_object(Bucket=self._bucket, Key=key)["Body"]
+            try:
+                return bytes(body.read())
+            finally:
+                body.close()
+
+        return await self._call(run)
+
     async def delete(self, key: str) -> None:
         await self._call(lambda: self._client.delete_object(Bucket=self._bucket, Key=key))
 

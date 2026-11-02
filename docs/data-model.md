@@ -53,6 +53,7 @@ Checks:
 | `leave_year_start_month_day` | VARCHAR(5) | no | `01-01` |  |
 | `allow_negative_leave_balance` | BOOLEAN | no | `false` |  |
 | `mfa_policy` | VARCHAR(10) | no | `optional` |  |
+| `ai_features_enabled` | BOOLEAN | no | `true` |  |
 | `changed_name_last_5_years` | BOOLEAN | no | `false` |  |
 | `previous_company_name` | VARCHAR(200) | yes |  |  |
 | `penalty_illegal_working_last_3_years` | BOOLEAN | no | `false` |  |
@@ -79,7 +80,10 @@ Checks:
 - `mfa_policy in ('optional', 'admins', 'all')`
 - `plan in ('free', 'annual', 'ten_year')`
 - `region in ('uk', 'us', 'au')`
+- `sector in ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U')`
 - `status in ('active', 'suspended', 'pending_deletion', 'deleted')`
+- `trading_period in ('0_6_months', '6_12_months', '12_18_months', '18_36_months', 'over_36_months')`
+- `type_of_organisation in ('private_limited_by_shares', 'charitable_incorporated_organisation', 'industrial_provident_society', 'general_partnership', 'limited_liability_partnership', 'scottish_limited_partnership', 'limited_partnership', 'community_interest_company', 'private_limited_by_guarantee', 'public_limited_company', 'sole_proprietorship', 'other')`
 - `week_starts_on between 1 and 7`
 
 ## `email_outbox`

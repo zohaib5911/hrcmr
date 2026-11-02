@@ -5,10 +5,26 @@ from __future__ import annotations
 import uuid  # noqa: TC003  (SQLAlchemy resolves the Mapped[...] annotations at runtime)
 from datetime import datetime  # noqa: TC003
 
-from sqlalchemy import Boolean, CheckConstraint, DateTime, SmallInteger, String, Text, Uuid, false
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    SmallInteger,
+    String,
+    Text,
+    Uuid,
+    false,
+    true,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, RecordMixin
+from app.modules.companies.reference import (
+    LEGAL_STRUCTURES,
+    SECTORS,
+    TRADING_PERIODS,
+    check_sql,
+)
 
 COMPANY_STATUSES = ("active", "suspended", "pending_deletion", "deleted")
 COMPANY_PLANS = ("free", "annual", "ten_year")
@@ -34,6 +50,11 @@ class Company(Base, RecordMixin):
             _in("bank_holiday_region", BANK_HOLIDAY_REGIONS), name="bank_holiday_region"
         ),
         CheckConstraint(_in("region", REGIONS), name="region"),
+        CheckConstraint(
+            check_sql("type_of_organisation", LEGAL_STRUCTURES), name="type_of_organisation"
+        ),
+        CheckConstraint(check_sql("trading_period", TRADING_PERIODS), name="trading_period"),
+        CheckConstraint(check_sql("sector", SECTORS), name="sector"),
         CheckConstraint("week_starts_on between 1 and 7", name="week_starts_on"),
         CheckConstraint(
             r"leave_year_start_month_day ~ '^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$'",
@@ -41,8 +62,7 @@ class Company(Base, RecordMixin):
         ),
     )
 
-    # Identity. The legal-structure, trading-period, sector and size lists belong to the company
-    # settings task (plan 8.15), which adds their CHECK constraints.
+    # Identity. The legal-structure, trading-period and sector lists are in ``reference.py``.
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     trading_name: Mapped[str | None] = mapped_column(String(200))
     slug: Mapped[str] = mapped_column(String(80), nullable=False, unique=True)
@@ -79,6 +99,10 @@ class Company(Base, RecordMixin):
 
     # Security.
     mfa_policy: Mapped[str] = mapped_column(String(10), nullable=False, server_default="optional")
+    # The company's own switch for the AI features (they also need the server's API key).
+    ai_features_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=true()
+    )
 
     # Sponsor history.
     changed_name_last_5_years: Mapped[bool] = mapped_column(

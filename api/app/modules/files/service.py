@@ -83,6 +83,12 @@ STORE_DOWN = Rejection(
 )
 
 
+def _too_large(limit: int) -> Rejection:
+    return Rejection(
+        "PAYLOAD_TOO_LARGE", f"That file is larger than {limit // (1024 * 1024)} MB.", 413
+    )
+
+
 def _digest(stream: BinaryIO) -> str:
     stream.seek(0)
     sha = hashlib.sha256()
@@ -129,8 +135,15 @@ class FileService:
         owner_type: str | None = None,
         owner_id: uuid.UUID | None = None,
         category: str | None = None,
+        kinds: frozenset[str] | None = None,
+        max_bytes: int = MAX_BYTES,
+        commit: bool = True,
     ) -> File:
-        """Check ``stream`` and, if it passes everything, store it. Commits on success."""
+        """Check ``stream`` and, if it passes everything, store it. Commits on success.
+
+        ``kinds`` narrows what is accepted (a logo is a picture) and ``max_bytes`` lowers the size
+        limit. With ``commit=False`` the caller finishes the transaction (to change another row
+        together with the file), and must commit it."""
         if self.storage is None:
             raise AppError(NOT_CONFIGURED.code, NOT_CONFIGURED.message, status_code=503)
         await self._check_owner(access, owner_type, owner_id)
@@ -138,11 +151,16 @@ class FileService:
         size = await asyncio.to_thread(_size, stream)
         if size == 0:
             raise await self._refuse(access, EMPTY, name=name, size=size)
-        if size > MAX_BYTES:
-            raise await self._refuse(access, TOO_LARGE, name=name, size=size)
+        if size > max_bytes:
+            raise await self._refuse(
+                access,
+                _too_large(max_bytes) if max_bytes != MAX_BYTES else TOO_LARGE,
+                name=name,
+                size=size,
+            )
 
         extension = extension_of(name)
-        if extension not in ALLOWED:
+        if extension not in ALLOWED or (kinds is not None and ALLOWED[extension][0] not in kinds):
             raise await self._refuse(access, BAD_TYPE, name=name, size=size, detail=extension[:10])
         kind, mime = ALLOWED[extension]
         if await asyncio.to_thread(sniff, stream) != kind:
@@ -188,7 +206,8 @@ class FileService:
         except Exception:
             await access.db.rollback()
             raise AppError(STORE_DOWN.code, STORE_DOWN.message, status_code=503) from None
-        await access.db.commit()
+        if commit:
+            await access.db.commit()
         return record
 
     async def download_url(self, access: Access, file_id: uuid.UUID) -> tuple[str, File]:

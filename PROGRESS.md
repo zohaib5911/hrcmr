@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** T4.1 Company overview, details and logo
+- **Current task:** T4.2 Locations, departments, designations
 
 ---
 
@@ -107,6 +107,7 @@ marked `UNVERIFIED` and listed here with its location.
 59. **Sign-in screens (T3.1):** the sign-up link points to `/setup`, which T3.2 builds next (until then it is a 404, and the link is not prefetched). The screens call the API straight from the browser (cookie plus CSRF header), never through a Next.js route. Screenshots of these screens are taken at the Phase 3 gate, with the flow test.
 60. **Gates (T3.3):** the layout only acts on what the API says; with no session cookie, or an API that cannot be reached, it does nothing, and redirecting to `/login` is T3.4. Recovery codes are shown once and cannot be fetched again (a new set replaces the old). The API session cookie name `brand_session` is a constant in `web/lib/auth/server.ts`; change both if `SESSION_COOKIE_NAME` ever changes.
 61. **Session (T3.4):** the browser tests need Postgres (`postgres-test`), Redis and Mailpit up (`docker compose up -d --wait postgres-test redis mailpit`); CI starts the same. Hiding a page from the menu is convenience only: the API checks every request. A person with several companies and none chosen sees a "Which company?" page first. The Company Admin's demo data is not seeded: each browser run signs up its own company.
+62. **Company details (T4.1):** the overview lists only the pages that exist; each later task adds its row (Locations, Departments, Designations, Key personnel, Compliance documents, Working pattern, Trading hours, pay settings). The Companies House lookup fills the name, number and legal structure; its address is held back until Locations exists (T4.2) and will fill the default location. The AI switch shows only where the server has an `ANTHROPIC_API_KEY`. Only a Company Admin can change details; others with access to the company page see it read-only.
 
 ---
 
@@ -219,7 +220,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **Phase 3 gate** — 2026-11-02, summary under *Phase summaries*. — includes the Playwright E2E journey in plan Phase 3
 
 ### Phase 4 — Company settings
-- [ ] **T4.1** Company overview, Details, Companies House lookup, logo upload
+- [x] **T4.1** Company overview, details and logo — 2026-11-02. `/company` is now the overview (company card with logo or initials, status and plan; inset grouped rows for Details, User access with a head count, Billing); Details opens in a sheet with every field in plan 8.15 (logo, name, trading name, Companies House number with optional lookup, legal structure, trading period, the 21 SIC sections, the two sponsor-history questions, contact, time zone, bank-holiday region, AI switch) and saves only what changed. API: `GET/PATCH /company`, `GET /company/options`, logo upload/show/remove (PNG or JPG up to 2 MB, scanned like every file, shown from our own server), `GET /company/companies-house/{number}` (off until `COMPANIES_HOUSE_API_KEY` is set); the lists get database CHECK constraints; every change is audited. **Verified:** 12 API tests (read, change, refuse bad values with the field, Company Admin only, other company untouched, logo against real storage and ClamAV, lookup against a faked Companies House), 3 unit tests, 15 browser checks (axe in both themes, sheet, save and cancel). Owner: optionally set `COMPANIES_HOUSE_API_KEY` in your own `.env` to switch the lookup on.
 - [ ] **T4.2** Locations, departments, designations
 - [ ] **T4.3** Key personnel
 - [ ] **T4.4** Compliance documents

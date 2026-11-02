@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.core.body_limit import UPLOAD_LIMIT, BodyLimitMiddleware
+from app.core.body_limit import LOGO_LIMIT, UPLOAD_LIMIT, BodyLimitMiddleware
 from app.core.config import Settings, get_settings
 from app.core.csrf import CsrfMiddleware
 from app.core.errors import ErrorEnvelope, register_exception_handlers
@@ -22,6 +22,7 @@ from app.core.middleware import RequestContextMiddleware
 from app.core.redis import create_redis, ping_redis
 from app.db.engine import create_engine, ping_database
 from app.integrations.clamav import ClamAV
+from app.integrations.companies_house import CompaniesHouse
 from app.integrations.email import LoggingMailer, Mailer, transport_from_settings
 from app.integrations.storage import Storage
 from app.integrations.turnstile import Turnstile
@@ -29,6 +30,7 @@ from app.jobs.queue import open_queue
 from app.modules.audit.router import router as audit_router
 from app.modules.auth.container import build_container
 from app.modules.auth.router import router as auth_router
+from app.modules.companies.router import router as company_router
 from app.modules.email.outbox import OutboxMailer
 from app.modules.files.router import router as files_router
 from app.modules.files.service import FileService
@@ -100,6 +102,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
         app.state.auth = build_container(
             settings, redis, sender or LoggingMailer(), Turnstile(settings.turnstile_secret_key)
         )
+        app.state.companies_house = CompaniesHouse.from_settings(settings)
         app.state.files = FileService(
             Storage.from_settings(settings), ClamAV.from_settings(settings)
         )
@@ -132,7 +135,10 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.state.probes = {}
 
     # Added first so it sits inside the request-id middleware and its refusals carry the request id.
-    app.add_middleware(BodyLimitMiddleware, limits={f"{API_PREFIX}/files": UPLOAD_LIMIT})
+    app.add_middleware(
+        BodyLimitMiddleware,
+        limits={f"{API_PREFIX}/files": UPLOAD_LIMIT, f"{API_PREFIX}/company/logo": LOGO_LIMIT},
+    )
     app.add_middleware(
         CsrfMiddleware,
         secure=settings.app_env.is_deployed,
@@ -155,5 +161,6 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(auth_router, prefix=API_PREFIX)
     app.include_router(audit_router, prefix=API_PREFIX)
     app.include_router(files_router, prefix=API_PREFIX)
+    app.include_router(company_router, prefix=API_PREFIX)
     _install_openapi(app)
     return app
