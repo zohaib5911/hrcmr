@@ -243,3 +243,48 @@ async def test_roles_other_companies_and_the_audit_trail(rig: dict[str, Any]) ->
             {"c": rig["a"]},
         )
         assert [r[0] for r in rows] == ["company_holiday.added"]
+
+
+async def test_trading_hours_save_one_day_at_a_time_with_roles_isolation_and_audit(
+    rig: dict[str, Any],
+) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    start = (await admin.get("/api/v1/trading-hours")).json()["days"]
+    assert [d["weekday"] for d in start] == [1, 2, 3, 4, 5, 6, 7]
+    assert not any(d["is_open"] for d in start)  # nothing is invented before it is set
+
+    opened = {"is_open": True, "opens_at": "09:00", "closes_at": "17:30"}
+    saved = await admin.put("/api/v1/trading-hours/1", json=opened)
+    assert saved.status_code == 200, saved.text
+    assert (await admin.put("/api/v1/trading-hours/1", json=opened)).status_code == 200  # no audit
+    day = (await admin.get("/api/v1/trading-hours")).json()["days"][0]
+    assert (day["is_open"], day["opens_at"], day["closes_at"]) == (True, "09:00:00", "17:30:00")
+    closed = await admin.put(
+        "/api/v1/trading-hours/1",
+        json={"is_open": False, "opens_at": "09:00", "closes_at": "10:00"},
+    )
+    assert closed.json()["opens_at"] is None  # a closed day keeps no times
+
+    for weekday, body in (
+        (8, opened),
+        (2, {"is_open": True}),
+        (2, {"is_open": True, "opens_at": "17:00", "closes_at": "09:00"}),
+        (2, {**opened, "extra": 1}),
+    ):
+        assert (await admin.put(f"/api/v1/trading-hours/{weekday}", json=body)).status_code == 422
+
+    hr = await rig["person"]("hr_admin", rig["a"])
+    assert (await hr.get("/api/v1/trading-hours")).status_code == 200
+    assert (await hr.put("/api/v1/trading-hours/2", json=opened)).status_code == 403
+    other = await rig["person"]("company_admin", rig["b"])
+    assert not any(d["is_open"] for d in (await other.get("/api/v1/trading-hours")).json()["days"])
+
+    async with rig["owner"].connect() as c:
+        rows = await c.execute(
+            text(
+                "select action from audit_events where company_id = :c "
+                "and action like 'trading_hours%' order by created_at"
+            ),
+            {"c": rig["a"]},
+        )
+        assert [r[0] for r in rows] == ["trading_hours.updated"] * 2  # opened, then closed

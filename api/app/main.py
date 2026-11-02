@@ -35,6 +35,7 @@ from app.modules.companies.compliance_documents import router as compliance_rout
 from app.modules.companies.key_personnel_router import router as key_personnel_router
 from app.modules.companies.router import router as company_router
 from app.modules.companies.structure_router import router as structure_router
+from app.modules.companies.trading_hours import router as trading_hours_router
 from app.modules.email.outbox import OutboxMailer
 from app.modules.files.router import router as files_router
 from app.modules.files.service import FileService
@@ -176,6 +177,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(key_personnel_router, prefix=API_PREFIX)
     app.include_router(compliance_router, prefix=API_PREFIX)
     app.include_router(holidays_router, prefix=API_PREFIX)
+    app.include_router(trading_hours_router, prefix=API_PREFIX)
     app.include_router(structure_router, prefix=API_PREFIX)
     _install_openapi(app)
     return app

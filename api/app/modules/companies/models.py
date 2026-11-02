@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid  # noqa: TC003  (SQLAlchemy resolves the Mapped[...] annotations at runtime)
-from datetime import date, datetime  # noqa: TC003
+from datetime import date, datetime, time  # noqa: TC003
 
 from sqlalchemy import (
     Boolean,
@@ -15,6 +15,8 @@ from sqlalchemy import (
     SmallInteger,
     String,
     Text,
+    Time,
+    UniqueConstraint,
     Uuid,
     and_,
     column,
@@ -278,3 +280,27 @@ class ComplianceDocument(Base, RecordMixin, TenantMixin):
     expires_on: Mapped[date | None] = mapped_column(Date)
     notes: Mapped[str | None] = mapped_column(Text)
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class TradingHoursDay(Base, RecordMixin, TenantMixin):
+    """When the business is open on one weekday (1 = Monday ... 7 = Sunday). A day with no row has
+    not been set yet and is shown as closed."""
+
+    __tablename__ = "trading_hours_days"
+    __table_args__ = (
+        CheckConstraint("weekday between 1 and 7", name="weekday"),
+        CheckConstraint(
+            "(is_open and opens_at is not null and closes_at is not null and opens_at < closes_at)"
+            " or (not is_open and opens_at is null and closes_at is null)",
+            name="times",
+        ),
+        UniqueConstraint("company_id", "weekday", name="uq_trading_hours_days_company_id_weekday"),
+    )
+
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    weekday: Mapped[int] = mapped_column(SmallInteger, nullable=False)
+    is_open: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=false())
+    opens_at: Mapped[time | None] = mapped_column(Time)
+    closes_at: Mapped[time | None] = mapped_column(Time)

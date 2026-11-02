@@ -32,6 +32,28 @@ test("the working pattern starts as Monday to Friday and saves a change", async 
   ).not.toBeChecked();
 });
 
+test("trading hours start unset and each row saves by itself", async ({ page }) => {
+  await open(page, "/company/trading-hours", "Trading hours");
+  await expect(page.getByText("Not set yet")).toBeVisible();
+  await page.getByRole("switch", { name: "Monday" }).click();
+  await expect(page.getByText("Saved").first()).toBeVisible();
+  const closes = page.getByLabel("Monday closes", { exact: true });
+  await closes.fill("5:30pm");
+  await closes.blur();
+  await expect(page.getByText("Saved").first()).toBeVisible();
+  await page.getByLabel("Monday opens", { exact: true }).fill("18:00");
+  await page.getByLabel("Monday opens", { exact: true }).blur();
+  await expect(page.getByText("It must open before it closes.")).toBeVisible();
+  await page.getByLabel("Monday opens", { exact: true }).fill("08:30");
+  await page.getByLabel("Monday opens", { exact: true }).blur();
+  await expect(page.getByText("Saved").first()).toBeVisible();
+  await page.reload();
+  await expect(page.getByLabel("Monday opens", { exact: true })).toHaveValue("08:30");
+  await expect(page.getByLabel("Monday closes", { exact: true })).toHaveValue("17:30");
+  await expect(page.getByText("Open 1 day a week")).toBeVisible();
+  await audit(page, "trading hours");
+});
+
 test("holiday types and closures: add, use, and a used type cannot be archived", async ({
   page,
 }) => {

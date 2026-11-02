@@ -4,6 +4,7 @@ import {
   BadgeCheck,
   Building2,
   CalendarDays,
+  Clock,
   CreditCard,
   FileCheck2,
   FileText,
@@ -136,6 +137,13 @@ export function CompanyOverview({
               title="Holidays and closures"
               icon={<Icon icon={CalendarDays} />}
               href="/holiday-management"
+            />
+          ) : null}
+          {can("company.profile.read") ? (
+            <GroupedRow
+              title="Trading hours"
+              icon={<Icon icon={Clock} />}
+              href="/company/trading-hours"
             />
           ) : null}
         </GroupedList>

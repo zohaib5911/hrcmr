@@ -834,6 +834,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/trading-hours": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** When the business is open, day by day */
+        get: operations["company_get_trading_hours"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/trading-hours/{weekday}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set one day's trading hours */
+        put: operations["company_set_trading_day"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/working-pattern": {
         parameters: {
             query?: never;
@@ -1886,6 +1920,34 @@ export interface components {
         TokenRequest: {
             /** Token */
             token: string;
+        };
+        /** TradingDay */
+        TradingDay: {
+            /** Closes At */
+            closes_at?: string | null;
+            /** Is Open */
+            is_open: boolean;
+            /** Opens At */
+            opens_at?: string | null;
+            /** Weekday */
+            weekday: number;
+        };
+        /** TradingDayIn */
+        TradingDayIn: {
+            /** Closes At */
+            closes_at?: string | null;
+            /** Is Open */
+            is_open: boolean;
+            /** Opens At */
+            opens_at?: string | null;
+        };
+        /** TradingHours */
+        TradingHours: {
+            /**
+             * Days
+             * @description Monday to Sunday, always seven.
+             */
+            days: components["schemas"]["TradingDay"][];
         };
         /** WorkingPattern */
         "WorkingPattern-Input": {
@@ -4529,6 +4591,89 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReadyResponse"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_get_trading_hours: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TradingHours"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_set_trading_day: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description 1 is Monday, 7 is Sunday. */
+                weekday: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TradingDayIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TradingDay"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

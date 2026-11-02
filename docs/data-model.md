@@ -433,6 +433,26 @@ Checks:
 | `created_by` | UUID | yes |  |  |
 | `updated_by` | UUID | yes |  |  |
 
+## `trading_hours_days`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `weekday` | SMALLINT | no |  |  |
+| `is_open` | BOOLEAN | no | `false` |  |
+| `opens_at` | TIME WITHOUT TIME ZONE | yes |  |  |
+| `closes_at` | TIME WITHOUT TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(is_open and opens_at is not null and closes_at is not null and opens_at < closes_at) or (not is_open and opens_at is null and closes_at is null)`
+- `weekday between 1 and 7`
+
 ## `users`
 
 | Column | Type | Null | Default | Notes |

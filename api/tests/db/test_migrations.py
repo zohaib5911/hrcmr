@@ -34,6 +34,7 @@ IDENTITY_TABLES = [
     "sessions",
     "terms_acceptances",
     "terms_versions",
+    "trading_hours_days",
     "users",
     "working_pattern_days",
 ]
