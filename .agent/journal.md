@@ -51,3 +51,4 @@
 2026-11-02 19:46 | Codex | Phase 6 gate | PR #11 opened (dev to main), local gate and 60 images complete | next all-green CI then merge with --merge --auto
 2026-11-02 19:52 | Codex | Phase 6 CI | patched brotli 1.2.1/pypdf 6.21.4, local audit clean/4 PDF tests pass; documented tested Jinja false-positive as email renderer does | next latest PR #11 CI
 2026-11-02 20:13 | Codex | Phase 6 gate | PR #11 merged as 6acec98 after all 12 CI checks green (API 422 pass); clean dev synced | next T7.1 baseline/model/API/UI
+2026-11-02 20:14 | Codex | relay | Phase 6 merged green; T7.1 requirements/source baseline ready (ruff/mypy and 3 tests pass), no RTW code yet | next rtw/models.py and migration 0015, then API/UI
