@@ -78,6 +78,7 @@ class CompanyOverview(BaseModel):
     departments: int
     designations: int
     key_personnel_roles: int = Field(description="How many of the 4 key roles are filled.")
+    compliance_documents: int = Field(description="How many of the 18 documents are held.")
 
 
 class CompanyUpdate(BaseModel):

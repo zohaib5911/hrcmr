@@ -4,6 +4,7 @@ import {
   BadgeCheck,
   Building2,
   CreditCard,
+  FileCheck2,
   FileText,
   MapPin,
   ShieldCheck,
@@ -36,8 +37,16 @@ export function CompanyOverview({
   overview: Overview;
   options: Options | null;
 }) {
-  const { company, features, users, locations, departments, designations, key_personnel_roles } =
-    overview;
+  const {
+    company,
+    features,
+    users,
+    locations,
+    departments,
+    designations,
+    key_personnel_roles,
+    compliance_documents,
+  } = overview;
   const can = useCan();
   const [editing, setEditing] = useState(false);
   const mayEdit = can("company.profile.write") && options !== null;
@@ -101,6 +110,14 @@ export function CompanyOverview({
               detail={`${key_personnel_roles} of 4`}
               icon={<Icon icon={ShieldCheck} />}
               href="/company/key-personnel"
+            />
+          ) : null}
+          {can("company.profile.read") ? (
+            <GroupedRow
+              title="Compliance documents"
+              detail={`${compliance_documents} of 18`}
+              icon={<Icon icon={FileCheck2} />}
+              href="/company/compliance-documents"
             />
           ) : null}
         </GroupedList>

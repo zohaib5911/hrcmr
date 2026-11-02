@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 import uuid  # noqa: TC003  (SQLAlchemy resolves the Mapped[...] annotations at runtime)
-from datetime import datetime  # noqa: TC003
+from datetime import date, datetime  # noqa: TC003
 
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
     ForeignKey,
     Index,
@@ -25,6 +26,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, RecordMixin, TenantMixin
 from app.modules.companies.reference import (
+    COMPLIANCE_DOCUMENT_TYPES,
     LEGAL_STRUCTURES,
     SECTORS,
     TRADING_PERIODS,
@@ -243,4 +245,32 @@ class KeyPerson(Base, RecordMixin, TenantMixin):
     )
     # The form asks whether the person is a British citizen or settled in the UK (yes or no).
     is_settled_or_british: Mapped[bool | None] = mapped_column(Boolean)
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class ComplianceDocument(Base, RecordMixin, TenantMixin):
+    """One of the company's licence documents. One is current per type; a new upload replaces it
+    and the old record is archived (the file itself is kept)."""
+
+    __tablename__ = "company_compliance_documents"
+    __table_args__ = (
+        CheckConstraint(check_sql("doc_type", COMPLIANCE_DOCUMENT_TYPES), name="doc_type"),
+        Index(
+            "uq_company_compliance_documents_company_id_doc_type",
+            "company_id",
+            "doc_type",
+            unique=True,
+            postgresql_where=column("archived_at").is_(None),
+        ),
+    )
+
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    doc_type: Mapped[str] = mapped_column(String(40), nullable=False)
+    file_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("files.id", ondelete="RESTRICT"), nullable=False
+    )
+    expires_on: Mapped[date | None] = mapped_column(Date)
+    notes: Mapped[str | None] = mapped_column(Text)
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

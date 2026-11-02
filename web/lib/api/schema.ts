@@ -429,6 +429,59 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/compliance-documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** The 18 compliance documents and what is held */
+        get: operations["company_list_documents"];
+        put?: never;
+        /** Add or replace a document */
+        post: operations["company_add_document"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/compliance-documents/{document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a document */
+        delete: operations["company_remove_document"];
+        options?: never;
+        head?: never;
+        /** Change the expiry date or notes */
+        patch: operations["company_update_document"];
+        trace?: never;
+    };
+    "/compliance-documents/{document_id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A 60-second link to the document */
+        get: operations["company_document_link"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/departments": {
         parameters: {
             query?: never;
@@ -794,6 +847,17 @@ export interface components {
             /** Next Cursor */
             next_cursor: string | null;
         };
+        /** Body_company_add_document */
+        Body_company_add_document: {
+            /** Doc Type */
+            doc_type: string;
+            /** Expires On */
+            expires_on?: string | null;
+            /** File */
+            file: string;
+            /** Notes */
+            notes?: string | null;
+        };
         /** Body_company_upload_logo */
         Body_company_upload_logo: {
             /** File */
@@ -935,6 +999,11 @@ export interface components {
         /** CompanyOverview */
         CompanyOverview: {
             company: components["schemas"]["CompanyDetails"];
+            /**
+             * Compliance Documents
+             * @description How many of the 18 documents are held.
+             */
+            compliance_documents: number;
             /** Departments */
             departments: number;
             /** Designations */
@@ -990,6 +1059,18 @@ export interface components {
             type_of_organisation?: string | null;
             /** Website */
             website?: string | null;
+        };
+        /** ComplianceDocuments */
+        ComplianceDocuments: {
+            /**
+             * Filled
+             * @description How many of the 18 have a current document.
+             */
+            filled: number;
+            /** Slots */
+            slots: components["schemas"]["DocumentSlot"][];
+            /** Total */
+            total: number;
         };
         /** DepartmentIn */
         DepartmentIn: {
@@ -1050,6 +1131,60 @@ export interface components {
             soc_code?: string | null;
             /** Title */
             title?: string | null;
+        };
+        /** DocumentLink */
+        DocumentLink: {
+            /** Expires In */
+            expires_in: number;
+            /** Url */
+            url: string;
+        };
+        /**
+         * DocumentPatch
+         * @description Only the fields that are sent change.
+         */
+        DocumentPatch: {
+            /** Expires On */
+            expires_on?: string | null;
+            /** Notes */
+            notes?: string | null;
+        };
+        /** DocumentRecord */
+        DocumentRecord: {
+            /** Expires On */
+            expires_on: string | null;
+            /** File Name */
+            file_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Notes */
+            notes: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "missing" | "current" | "expiring" | "expired";
+            /**
+             * Uploaded At
+             * Format: date-time
+             */
+            uploaded_at: string;
+        };
+        /** DocumentSlot */
+        DocumentSlot: {
+            /** Doc Type */
+            doc_type: string;
+            /** Label */
+            label: string;
+            record: components["schemas"]["DocumentRecord"] | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "missing" | "current" | "expiring" | "expired";
         };
         /**
          * DownloadOut
@@ -2624,6 +2759,208 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CompanyOptions"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_list_documents: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComplianceDocuments"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_add_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_company_add_document"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRecord"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_remove_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_update_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentRecord"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    company_document_link: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DocumentLink"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

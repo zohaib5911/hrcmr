@@ -31,6 +31,7 @@ from app.jobs.queue import open_queue
 from app.modules.audit.router import router as audit_router
 from app.modules.auth.container import build_container
 from app.modules.auth.router import router as auth_router
+from app.modules.companies.compliance_documents import router as compliance_router
 from app.modules.companies.key_personnel_router import router as key_personnel_router
 from app.modules.companies.router import router as company_router
 from app.modules.companies.structure_router import router as structure_router
@@ -145,6 +146,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
             f"{API_PREFIX}/files": UPLOAD_LIMIT,
             f"{API_PREFIX}/company/logo": LOGO_LIMIT,
             f"{API_PREFIX}/key-personnel": PROOF_LIMIT,
+            f"{API_PREFIX}/compliance-documents": UPLOAD_LIMIT,
         },
     )
     app.add_middleware(
@@ -171,6 +173,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(files_router, prefix=API_PREFIX)
     app.include_router(company_router, prefix=API_PREFIX)
     app.include_router(key_personnel_router, prefix=API_PREFIX)
+    app.include_router(compliance_router, prefix=API_PREFIX)
     app.include_router(structure_router, prefix=API_PREFIX)
     _install_openapi(app)
     return app

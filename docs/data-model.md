@@ -86,6 +86,26 @@ Checks:
 - `type_of_organisation in ('private_limited_by_shares', 'charitable_incorporated_organisation', 'industrial_provident_society', 'general_partnership', 'limited_liability_partnership', 'scottish_limited_partnership', 'limited_partnership', 'community_interest_company', 'private_limited_by_guarantee', 'public_limited_company', 'sole_proprietorship', 'other')`
 - `week_starts_on between 1 and 7`
 
+## `company_compliance_documents`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `doc_type` | VARCHAR(40) | no |  |  |
+| `file_id` | UUID | no |  | references `files` |
+| `expires_on` | DATE | yes |  |  |
+| `notes` | TEXT | yes |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `doc_type in ('paye_reference_letter', 'latest_rti', 'employers_liability_insurance', 'premises_proof', 'lease_or_freehold', 'bank_statement_1', 'bank_statement_2', 'bank_statement_3', 'signed_annual_accounts', 'vat_certificate', 'food_hygiene_rating', 'business_licence', 'franchise_agreement', 'governing_body_registration', 'health_safety_rating', 'audited_annual_accounts', 'regulatory_body_certificate', 'other')`
+
 ## `departments`
 
 | Column | Type | Null | Default | Notes |

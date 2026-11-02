@@ -79,3 +79,31 @@ COMPANIES_HOUSE_TYPES: Final[dict[str, str]] = {
 
 def check_sql(column: str, values: dict[str, str]) -> str:
     return f"{column} in ({', '.join(repr(v) for v in values)})"
+
+
+# The 18 documents a sponsor is expected to hold (plan.md 8.15), in the plan's order.
+COMPLIANCE_DOCUMENT_TYPES: Final[dict[str, str]] = {
+    "paye_reference_letter": "PAYE and Accounts Office reference letter from HMRC",
+    "latest_rti": "Latest RTI from accountant",
+    "employers_liability_insurance": "Employer's liability insurance certificate",
+    "premises_proof": "Proof of business premises (tenancy agreement)",
+    "lease_or_freehold": "Copy of lease or freehold",
+    "bank_statement_1": "Business bank statement month 1",
+    "bank_statement_2": "Business bank statement month 2",
+    "bank_statement_3": "Business bank statement month 3",
+    "signed_annual_accounts": "Signed annual accounts (if over 18 months old)",
+    "vat_certificate": "VAT certificate (if registered)",
+    "food_hygiene_rating": "Food hygiene rating (food businesses)",
+    "business_licence": "Registered business licence/certificate",
+    "franchise_agreement": "Franchise agreement",
+    "governing_body_registration": "Governing body registration",
+    "health_safety_rating": "Health & safety rating copy",
+    "audited_annual_accounts": "Audited annual accounts",
+    "regulatory_body_certificate": (
+        "Regulatory body certificate (e.g. ACCA, FCA, Ofcom, IATA, ARLA)"
+    ),
+    "other": "Other",
+}
+
+# A document that runs out within this many days is shown as expiring (reminders come from T7).
+EXPIRING_DAYS: Final[int] = 60

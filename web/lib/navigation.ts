@@ -327,6 +327,11 @@ export const SUB_PAGES: readonly { href: string; label: string; parent: string }
   { href: "/company/departments", label: "Departments", parent: "/company" },
   { href: "/company/designations", label: "Designations", parent: "/company" },
   { href: "/company/key-personnel", label: "Key personnel", parent: "/company" },
+  {
+    href: "/company/compliance-documents",
+    label: "Compliance documents",
+    parent: "/company",
+  },
 ];
 
 function subPage(pathname: string) {

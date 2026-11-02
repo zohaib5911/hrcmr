@@ -16,6 +16,7 @@ FUNCTIONS = {"uuid_generate_v7", "app_current_company_id", "set_updated_at"}
 IDENTITY_TABLES = [
     "audit_events",
     "companies",
+    "company_compliance_documents",
     "departments",
     "designations",
     "email_outbox",

@@ -10,7 +10,14 @@ from sqlalchemy import func, select
 
 from app.core.errors import AppError, NotFoundError
 from app.integrations.companies_house import CompaniesHouse, CompaniesHouseError, normalise_number
-from app.modules.companies.models import Company, Department, Designation, KeyPerson, Location
+from app.modules.companies.models import (
+    Company,
+    ComplianceDocument,
+    Department,
+    Designation,
+    KeyPerson,
+    Location,
+)
 from app.modules.companies.reference import (
     BANK_HOLIDAY_REGION_LABELS,
     LEGAL_STRUCTURES,
@@ -114,6 +121,13 @@ async def get_company(
         locations=await count(Location),
         departments=await count(Department),
         designations=await count(Designation),
+        compliance_documents=(
+            await access.db.execute(
+                select(func.count())
+                .select_from(ComplianceDocument)
+                .where(ComplianceDocument.archived_at.is_(None))
+            )
+        ).scalar_one(),
         key_personnel_roles=(
             await access.db.execute(
                 select(func.count(KeyPerson.role.distinct())).where(KeyPerson.archived_at.is_(None))
