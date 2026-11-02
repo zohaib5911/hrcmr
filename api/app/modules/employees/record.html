@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Employee record</title>
+    <title>{{ report_title }}</title>
     <style>
       @page {
         size: A4;
@@ -46,11 +46,8 @@
   </head>
   <body>
     <h1>{{ name }}</h1>
-    <p>Employee record · Generated {{ generated }}</p>
-    <p>
-      National Insurance, passport and bank numbers are masked. Salary is included only when the
-      requester may read compensation.
-    </p>
+    <p>{{ report_title }} · Generated {{ generated }}</p>
+    <p>{{ notice }}</p>
     {% for title, records in sections %}
     <h2>{{ title }}</h2>
     {% for record in records %}

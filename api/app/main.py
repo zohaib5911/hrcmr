@@ -53,6 +53,7 @@ from app.modules.files.service import FileService
 from app.modules.health.router import router as health_router
 from app.modules.holidays.router import router as holidays_router
 from app.modules.pay.router import router as pay_router
+from app.modules.rtw.router import router as rtw_router
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -200,6 +201,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)
     app.include_router(employee_activity_router, prefix=API_PREFIX)
+    app.include_router(rtw_router, prefix=API_PREFIX)
     app.include_router(employee_photo_router, prefix=API_PREFIX)
     app.include_router(compensation_router, prefix=API_PREFIX)
     app.include_router(structure_router, prefix=API_PREFIX)

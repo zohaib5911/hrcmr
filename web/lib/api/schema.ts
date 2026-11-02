@@ -1162,6 +1162,75 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/employees/{employee_id}/rtw-checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Checks */
+        get: operations["right-to-work_checks"];
+        put?: never;
+        /** Record Check */
+        post: operations["right-to-work_record_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/rtw-checks/{check_id}/correct": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Correct Check */
+        post: operations["right-to-work_correct_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/rtw-checks/{check_id}/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Evidence */
+        get: operations["right-to-work_evidence"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/rtw-checks/{check_id}/evidence.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Evidence Pdf */
+        get: operations["right-to-work_evidence_pdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/employees/{employee_id}/status": {
         parameters: {
             query?: never;
@@ -2270,6 +2339,109 @@ export interface components {
             /** New Password */
             new_password: string;
         };
+        /** CheckIn */
+        CheckIn: {
+            /**
+             * Check Date
+             * Format: date
+             */
+            check_date: string;
+            /**
+             * Check Type
+             * @enum {string}
+             */
+            check_type: "online_share_code" | "idsp_digital" | "manual_list_a" | "manual_list_b";
+            /**
+             * Checked By User Id
+             * Format: uuid
+             */
+            checked_by_user_id: string;
+            /** Evidence File Id */
+            evidence_file_id?: string | null;
+            /** Idsp Document */
+            idsp_document?: ("british_passport" | "irish_passport" | "irish_passport_card") | null;
+            /** Idsp Provider */
+            idsp_provider?: string | null;
+            /** List B Group */
+            list_b_group?: ("group1" | "group2") | null;
+            /**
+             * Outcome
+             * @default pending
+             * @enum {string}
+             */
+            outcome: "pending" | "verified" | "failed";
+            /**
+             * Permission Expires
+             * @default false
+             */
+            permission_expires: boolean;
+            /** Permission Expires On */
+            permission_expires_on?: string | null;
+            /** Share Code */
+            share_code?: string | null;
+        };
+        /** CheckOut */
+        CheckOut: {
+            /** Can Correct */
+            can_correct: boolean;
+            /** Check Date */
+            check_date: string | null;
+            /**
+             * Check Type
+             * @enum {string}
+             */
+            check_type: "online_share_code" | "idsp_digital" | "manual_list_a" | "manual_list_b";
+            /** Checked By User Id */
+            checked_by_user_id: string | null;
+            /** Checker Name */
+            checker_name: string | null;
+            /** Corrected From Id */
+            corrected_from_id: string | null;
+            /** Correction Reason */
+            correction_reason: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Evidence File Id */
+            evidence_file_id: string | null;
+            /** Evidence File Name */
+            evidence_file_name: string | null;
+            /** Follow Up Due On */
+            follow_up_due_on: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Idsp Document */
+            idsp_document: string | null;
+            /** Idsp Provider */
+            idsp_provider: string | null;
+            /** List B Group */
+            list_b_group: string | null;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "pending" | "verified" | "failed";
+            /** Permission Expires */
+            permission_expires: boolean;
+            /** Permission Expires On */
+            permission_expires_on: string | null;
+            /** Share Code Masked */
+            share_code_masked: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "verified" | "expiring" | "expired" | "failed" | "pending" | "evidence_missing" | "not_recorded";
+            /** Superseded At */
+            superseded_at: string | null;
+            /** Superseded By */
+            superseded_by: string | null;
+        };
         /** CodeRequest */
         CodeRequest: {
             /** Code */
@@ -2630,6 +2802,49 @@ export interface components {
              * @enum {string}
              */
             relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
+        };
+        /** CorrectionIn */
+        CorrectionIn: {
+            /**
+             * Check Date
+             * Format: date
+             */
+            check_date: string;
+            /**
+             * Check Type
+             * @enum {string}
+             */
+            check_type: "online_share_code" | "idsp_digital" | "manual_list_a" | "manual_list_b";
+            /**
+             * Checked By User Id
+             * Format: uuid
+             */
+            checked_by_user_id: string;
+            /** Evidence File Id */
+            evidence_file_id?: string | null;
+            /** Idsp Document */
+            idsp_document?: ("british_passport" | "irish_passport" | "irish_passport_card") | null;
+            /** Idsp Provider */
+            idsp_provider?: string | null;
+            /** List B Group */
+            list_b_group?: ("group1" | "group2") | null;
+            /**
+             * Outcome
+             * @default pending
+             * @enum {string}
+             */
+            outcome: "pending" | "verified" | "failed";
+            /**
+             * Permission Expires
+             * @default false
+             */
+            permission_expires: boolean;
+            /** Permission Expires On */
+            permission_expires_on?: string | null;
+            /** Reason */
+            reason: string;
+            /** Share Code */
+            share_code?: string | null;
         };
         /** DepartmentIn */
         DepartmentIn: {
@@ -3736,6 +3951,19 @@ export interface components {
             expires_in: number;
             /** Url */
             url: string;
+        };
+        /** RTWTab */
+        RTWTab: {
+            /** Checks */
+            checks: components["schemas"]["CheckOut"][];
+            current: components["schemas"]["CheckOut"] | null;
+            /** Follow Up Due On */
+            follow_up_due_on: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "verified" | "expiring" | "expired" | "failed" | "pending" | "evidence_missing" | "not_recorded";
         };
         /**
          * ReadyResponse
@@ -7692,6 +7920,217 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Revealed"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "right-to-work_checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RTWTab"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "right-to-work_record_check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "right-to-work_correct_check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+                check_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CorrectionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "right-to-work_evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+                check_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DownloadOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "right-to-work_evidence_pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+                check_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Dated, masked RTW evidence sheet */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": unknown;
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

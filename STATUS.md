@@ -10,10 +10,10 @@ State: IN PROGRESS
   - [x] Read plan T7.1, 6.4 and 8.4 requirements
   - [x] Employee/file baseline: ruff/mypy pass, employee integration 3 pass; source paths reviewed
   - [x] RTW model/migration 0015 and security-invoker status view (migration/doc checks 7 pass)
-  - [ ] API: four check types, history/correction, evidence selection/upload, evidence PDF; RBAC/isolation tests
+  - [x] API: four types, versioned/historical correction, scoped evidence and PDF; 12 RTW/PDF checks pass
   - [ ] Employee RTW tab and directory RTW pills/filters/deep links
   - [ ] Browser verification and final checks
-- Resume note: Model/migration complete, 7 migration/doc tests pass. Next RTW schemas/service/router and tests. Migration protects immutable fields, defers superseded_by FK until commit, and derives employee_rtw_status with caller RLS/company-local dates. Candidate shape is stored but candidate routes await Phase 11 validation. Correction must insert a new row; supersede current by setting lifecycle fields only, and preserve historical corrections as historical.
+- Resume note: Core RTW API verified (12 RTW/PDF tests), migration/doc checks 7 pass. Next employee RTW tab and directory integration: status chips, conditional explicit-save forms, evidence picker/upload, correction and PDF actions; list status/pills/filters/deep links and summary counts. HR Admin records but cannot correct (rbac matrix); Company Admin correction only. Historical corrections stay historical; online corrections re-enter share code rather than reveal it. Candidate routes wait for Phase 11 validation.
 
 
 ## Next tasks

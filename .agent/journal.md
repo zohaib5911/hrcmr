@@ -53,3 +53,4 @@
 2026-11-02 20:13 | Codex | Phase 6 gate | PR #11 merged as 6acec98 after all 12 CI checks green (API 422 pass); clean dev synced | next T7.1 baseline/model/API/UI
 2026-11-02 20:14 | Codex | relay | Phase 6 merged green; T7.1 requirements/source baseline ready (ruff/mypy and 3 tests pass), no RTW code yet | next rtw/models.py and migration 0015, then API/UI
 2026-11-02 20:40 | Codex | T7.1 | model/migration 0015, immutable history and caller-scoped status view; 7 migration/doc checks pass | next schemas/service/router tests
+2026-11-02 20:46 | Codex | T7.1 | scoped RTW record/history/correction/evidence/PDF API; 12 tests pass incl crypto, status edges, quarantine and tenant view | next employee/list UI integration

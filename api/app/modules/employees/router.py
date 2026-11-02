@@ -34,6 +34,7 @@ from app.modules.employees.schemas import (
     StatusChange,
 )
 from app.modules.rbac.deps import Access, require
+from app.modules.rtw.models import RTWCheck
 
 router = APIRouter(tags=["employees"])
 
@@ -239,6 +240,9 @@ async def _agreement_on_file(access: Access, employee_id: uuid.UUID) -> bool:
 async def _delete_blocker(access: Access, employee_id: uuid.UUID) -> str | None:
     """Why this record may not be deleted for good, or None. A record with history is archived."""
     history = {
+        "Right to Work checks": select(RTWCheck.id).where(
+            RTWCheck.subject_type == "employee", RTWCheck.subject_id == employee_id
+        ),
         "a role": select(EmployeeAssignment.id).where(
             EmployeeAssignment.employee_id == employee_id
         ),
