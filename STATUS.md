@@ -7,12 +7,12 @@ State: IN PROGRESS
 
 ## Current task
 - Phase 6 gate
-  - [ ] Complete deferred User Access employee linking + tests
-  - [ ] Add profile photo upload/view + tests
+  - [x] Deferred User Access employee linking API/UI; API tests pass, browser pending
+  - [x] Profile photo API/UI; real scanned upload/read test passes, browser pending
   - [ ] Full suite once; fix failures
   - [ ] Design QA screenshots at 390/1280; phase summary
   - [ ] PR dev to main; merge only on green CI
-- Resume note: finish integration gaps identified in PROGRESS/plan 8.3 before gate checks. Link/unlink must use tenant-safe employee validation, prevent duplicate links and audit changes.
+- Resume note: run Deferred employee linking Playwright test; then full suite and screenshots. Previous: finish integration gaps identified in PROGRESS/plan 8.3 before gate checks. Link/unlink must use tenant-safe employee validation, prevent duplicate links and audit changes.
 
 ## Next tasks
 - Phase 6 gate, Phase 7 (stop for audit after Phase 7)
@@ -26,6 +26,7 @@ State: IN PROGRESS
 - Remove certifi exception after 2026-11-06; Dependabot #5 pending green CI.
 
 ## Strategy / decisions taken
+- Employee links require rbac.role.assign (Company Admin), since changing a link changes self-service record reach. Admin may link their own account. Photos require full employee.profile.write, excluding contact-only write_own.
 - Leave/Attendance/Learning modules do not exist yet; named tab components are replacement points for Phases 8/9/13 and link to existing workspaces with employee_id/month. Activity already uses real audit data and includes owned-file events.
 - PDF: plan-specified WeasyPrint, escaped template, no external resources, masked numbers, permission-gated salary, private/no-store, audited.
 - Documents: existing scanned FileService, scoped employee/document associations, clean-only short-lived downloads.

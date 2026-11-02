@@ -1055,6 +1055,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/employees/{employee_id}/photo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Photo */
+        get: operations["employees_get_photo"];
+        put?: never;
+        /** Upload Photo */
+        post: operations["employees_upload_photo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/employees/{employee_id}/previous-employment": {
         parameters: {
             query?: never;
@@ -1732,6 +1750,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users/{membership_id}/employee": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Link Employee
+         * @description Linking controls self-service reach, so it needs the access-assignment permission.
+         */
+        put: operations["access_link_employee"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users/{membership_id}/reactivate": {
         parameters: {
             query?: never;
@@ -2208,6 +2246,11 @@ export interface components {
             file: string;
             /** Notes */
             notes?: string | null;
+        };
+        /** Body_employees_upload_photo */
+        Body_employees_upload_photo: {
+            /** File */
+            file: string;
         };
         /** Body_files_upload_file */
         Body_files_upload_file: {
@@ -2824,6 +2867,11 @@ export interface components {
              * @enum {string}
              */
             status: "active" | "on_leave";
+        };
+        /** EmployeeLinkIn */
+        EmployeeLinkIn: {
+            /** Employee Id */
+            employee_id: string | null;
         };
         /** EmployeeList */
         EmployeeList: {
@@ -7325,6 +7373,89 @@ export interface operations {
             };
         };
     };
+    employees_get_photo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Scanned employee photo */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": unknown;
+                    "image/png": unknown;
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_upload_photo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_employees_upload_photo"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     employees_previous_employment: {
         parameters: {
             query?: never;
@@ -9590,6 +9721,50 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccessUser"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    access_link_employee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                membership_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployeeLinkIn"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {

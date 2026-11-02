@@ -32,6 +32,7 @@ import {
 } from "@/lib/company/access";
 import { ROLE_LABELS, type Role } from "@/lib/auth/roles";
 
+import { EmployeeLinkSheet } from "./employee-link-sheet";
 import { RolesViewer } from "./roles-viewer";
 import { TwoStepPolicyCard } from "./two-step-policy";
 import { ConfirmSheet, InviteSheet, RoleSheet } from "./user-access-sheets";
@@ -110,6 +111,7 @@ const ACTION_ITEMS: Record<
 
 type Open =
   | { kind: "invite" }
+  | { kind: "employee"; user: AccessUser }
   | { kind: "role"; user: AccessUser }
   | { kind: "confirm"; action: "suspend" | "reactivate" | "reset" | "cancel"; user: AccessUser };
 
@@ -157,6 +159,28 @@ export function UserAccessPage({
     else setOpen({ kind: "confirm", action, user });
   }
 
+  const columns = COLUMNS.map((column) =>
+    column.id !== "employee" || !viewer.canAssign
+      ? column
+      : {
+          ...column,
+          cell: (user: AccessUser) => (
+            <div className="flex flex-col items-start gap-1">
+              <span>{user.employee_id ? "Linked" : "Not linked"}</span>
+              {user.status !== "invited" && (
+                <Button
+                  variant="plain"
+                  size="sm"
+                  aria-label={"Link employee for " + fullName(user)}
+                  onClick={() => setOpen({ kind: "employee", user })}
+                >
+                  {user.employee_id ? "Change link" : "Link employee"}
+                </Button>
+              )}
+            </div>
+          ),
+        },
+  );
   const hasRowMenu = list.users.some((u) => rowActions(u, viewer).length > 0);
   const invite = viewer.canInvite ? (
     <Button onClick={() => setOpen({ kind: "invite" })}>Invite user</Button>
@@ -214,7 +238,7 @@ export function UserAccessPage({
         </div>
         <DataTable
           caption="People with access"
-          columns={COLUMNS}
+          columns={columns}
           rows={shown}
           getRowId={(u) => u.id}
           defaultSort={{ column: "user", direction: "asc" }}
@@ -259,6 +283,9 @@ export function UserAccessPage({
           mayInviteAdmin={viewer.role === "company_admin"}
           onClose={() => setOpen(null)}
         />
+      ) : null}
+      {open?.kind === "employee" ? (
+        <EmployeeLinkSheet user={open.user} onClose={() => setOpen(null)} />
       ) : null}
       {open?.kind === "role" ? (
         <RoleSheet

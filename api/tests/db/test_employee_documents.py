@@ -21,6 +21,7 @@ from app.main import create_app
 from app.modules.auth.sessions import SessionStore
 from tests.db.api_support import sign_in_as, two_companies
 from tests.db.support import DatabaseUnderTest, engine_for
+from tests.db.test_company import png
 from tests.db.test_files import PDF, S3_ACCESS, S3_BUCKET, S3_ENDPOINT, S3_SECRET
 from tests.support import TEST_REDIS_URL, build_settings
 
@@ -237,3 +238,44 @@ async def test_pdf_is_dated_masked_complete_and_permission_gated(rig: dict[str, 
             ).scalars()
         )
     assert "employee.record_exported" in actions
+
+
+async def test_profile_photo_is_scanned_scoped_and_audited(rig: dict[str, Any]) -> None:
+    hr = await rig["person"]("hr_admin", rig["a"])
+    emp = await _employee(rig, rig["a"], "E1")
+    other = await _employee(rig, rig["b"], "E1")
+    base = f"{API}/employees/{emp}"
+    assert (await hr.get(f"{base}/photo")).status_code == 404
+    assert (
+        await hr.post(f"{base}/photo", files={"file": ("not-a-photo.pdf", PDF)})
+    ).status_code == 415
+    made = await hr.post(f"{base}/photo", files={"file": ("photo.png", png(), "image/png")})
+    assert made.status_code == 204, made.text
+    assert (await hr.get(base)).json()["has_photo"] is True
+    photo = await hr.get(f"{base}/photo")
+    assert photo.status_code == 200
+    assert photo.content == png()
+    assert photo.headers["content-type"] == "image/png"
+    assert photo.headers["cache-control"] == "private, no-store"
+    assert (await hr.get(f"{API}/employees/{other}/photo")).status_code == 404
+    assert (
+        await hr.post(f"{API}/employees/{other}/photo", files={"file": ("photo.png", png())})
+    ).status_code == 404
+    me = await rig["person"]("employee", rig["a"])
+    assert (await me.get(f"{base}/photo")).status_code == 404
+    assert (await me.post(f"{base}/photo", files={"file": ("photo.png", png())})).status_code == 403
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text("update memberships set employee_id=:e where company_id=:c and role='employee'"),
+            {"e": emp, "c": rig["a"]},
+        )
+    assert (await me.get(f"{base}/photo")).status_code == 200
+    async with rig["owner"].connect() as c:
+        actions = set(
+            (
+                await c.execute(
+                    text("select action from audit_events where entity_id=:e"), {"e": emp}
+                )
+            ).scalars()
+        )
+    assert "employee.photo_changed" in actions

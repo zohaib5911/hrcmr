@@ -38,3 +38,4 @@
 2026-11-02 19:08 | Codex | T6.8 | Activity API reuses audit pagination and includes owned file events; isolation/RBAC test passes | next related tab UI
 2026-11-02 19:09 | Codex | T6.8 | related shells and Activity UI built, browser journey written | next browser verification
 2026-11-02 19:11 | Codex | T6.8 | complete; Activity API 1 pass, browser/setup 2 pass, lint/types/build clean; previous CI now green | next Phase 6 gate integration gaps (link picker, Add photo)
+2026-11-02 19:15 | Codex | Phase 6 gate | deferred linking and photo API/UI built; User Access 10 tests and targeted photo/link tests pass | next combined browser check

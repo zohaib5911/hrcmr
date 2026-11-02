@@ -45,6 +45,7 @@ from app.modules.employees.compensation_router import router as compensation_rou
 from app.modules.employees.document_router import router as employee_documents_router
 from app.modules.employees.employment_router import router as employment_router
 from app.modules.employees.personal_router import router as personal_router
+from app.modules.employees.photo_router import router as employee_photo_router
 from app.modules.employees.record_pdf import router as employee_pdf_router
 from app.modules.employees.router import router as employees_router
 from app.modules.files.router import router as files_router
@@ -199,6 +200,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)
     app.include_router(employee_activity_router, prefix=API_PREFIX)
+    app.include_router(employee_photo_router, prefix=API_PREFIX)
     app.include_router(compensation_router, prefix=API_PREFIX)
     app.include_router(structure_router, prefix=API_PREFIX)
     _install_openapi(app)

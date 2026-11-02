@@ -7,7 +7,7 @@ import { useRef, useState } from "react";
 import { PageHeader } from "@/components/app/page-header";
 import { useCan } from "@/components/app/session-context";
 import { Alert } from "@/components/ui/alert";
-import { Avatar } from "@/components/ui/avatar";
+import { ProfilePhoto } from "@/components/employees/profile-photo";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Icon } from "@/components/ui/icon";
@@ -70,7 +70,7 @@ export function ProfilePage({
         }
       />
       <div className="mb-6 flex items-center gap-3">
-        <Avatar name={name} size="lg" />
+        <ProfilePhoto id={profile.id} name={name} hasPhoto={profile.has_photo} />
         <div className="min-w-0">
           <p className="text-callout text-label truncate">{profile.email}</p>
           {profile.phone ? (

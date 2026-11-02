@@ -17,6 +17,7 @@ from app.modules.access.roles import groups_for
 from app.modules.access.schemas import (
     AccessList,
     AccessUser,
+    EmployeeLinkIn,
     InviteIn,
     Role,
     RoleIn,
@@ -33,6 +34,7 @@ from app.modules.auth.invitations import create_invitation, renew_invitation
 from app.modules.auth.policy import mfa_required
 from app.modules.auth.sessions import require_step_up
 from app.modules.companies.models import Company
+from app.modules.employees.models import Employee
 from app.modules.identity.models import Invitation, Membership, User
 from app.modules.rbac.deps import Access, require
 from app.modules.rbac.rules import (
@@ -414,3 +416,67 @@ async def role_matrix(access: Reads) -> RoleMatrix:
             for role in ROLE_LABELS
         ]
     )
+
+
+@router.put("/users/{membership_id}/employee", response_model=AccessUser)
+async def link_employee(
+    membership_id: uuid.UUID, body: EmployeeLinkIn, access: Assigns
+) -> AccessUser:
+    """Linking controls self-service reach, so it needs the access-assignment permission."""
+    target = (
+        await access.db.execute(
+            select(Membership, User)
+            .join(User, User.id == Membership.user_id)
+            .where(Membership.id == membership_id)
+            .with_for_update(of=Membership)
+        )
+    ).first()
+    if target is None:
+        raise NotFoundError
+    member, user = target
+    if member.employee_id == body.employee_id:
+        return _member(member, user, you=access.caller.user_id)
+    if body.employee_id is not None:
+        employee = (
+            await access.db.execute(
+                select(Employee)
+                .where(Employee.id == body.employee_id, Employee.status != "archived")
+                .with_for_update()
+            )
+        ).scalar_one_or_none()
+        if employee is None:
+            raise NotFoundError
+        occupied = (
+            await access.db.execute(
+                select(Membership.id).where(
+                    Membership.employee_id == employee.id, Membership.id != member.id
+                )
+            )
+        ).first()
+        if occupied:
+            raise ConflictError(
+                "That employee is already linked to another user.", field="employee_id"
+            )
+    before = member.employee_id
+    if before != body.employee_id:
+        member.employee_id = body.employee_id
+        await access.audit(
+            "user.employee_link_changed",
+            entity_type="membership",
+            entity_id=member.id,
+            before={"employee_id": str(before) if before else None},
+            after={"employee_id": str(body.employee_id) if body.employee_id else None},
+        )
+        for ident, action in (
+            (before, "employee.user_unlinked"),
+            (body.employee_id, "employee.user_linked"),
+        ):
+            if ident:
+                await access.audit(
+                    action,
+                    entity_type="employee",
+                    entity_id=ident,
+                    after={"membership_id": str(member.id)},
+                )
+        await access.db.commit()
+    return _member(member, user, you=access.caller.user_id)

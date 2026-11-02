@@ -486,3 +486,75 @@ test("Related tabs preserve employee context and Activity shows saved changes", 
   await audit(page, "Employee activity");
   await context.close();
 });
+
+test("Deferred employee linking and photo selection save only explicitly", async ({ browser }) => {
+  const api = await playwrightRequest.newContext();
+  await createSignedInAdmin(api, newAccount("linkphoto"));
+  const made = await api.post(API + "/employees", {
+    headers: await csrfHeaders(api),
+    data: {
+      first_name: "Amira",
+      last_name: "Hassan",
+      email: "amira@example.com",
+      employee_number: "LP100",
+      hire_date: "2025-01-06",
+    },
+  });
+  expect(made.status(), await made.text()).toBe(201);
+  const { id } = (await made.json()) as { id: string };
+  const context = await browser.newContext({ storageState: await api.storageState() });
+  await api.dispose();
+  const page = await context.newPage();
+  await open(page, "/company/users", "User access");
+  await page.getByRole("button", { name: "Link employee for Amira Hassan", exact: true }).click();
+  let dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Employee", { exact: true }).selectOption(id);
+  let links = 0;
+  page.on("request", (req) => {
+    if (req.method() === "PUT" && req.url().endsWith("/employee")) links++;
+  });
+  await dialog.getByRole("button", { name: "Save", exact: true }).focus();
+  await dialog.getByRole("heading").click();
+  expect(links).toBe(0);
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.getByRole("button", { name: "Link employee for Amira Hassan" })).toHaveText(
+    "Change link",
+  );
+  expect(links).toBe(1);
+  await page.getByRole("button", { name: "Link employee for Amira Hassan" }).click();
+  dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Employee", { exact: true }).selectOption("");
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.getByRole("button", { name: "Link employee for Amira Hassan" })).toHaveText(
+    "Link employee",
+  );
+  const png = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jS1EAAAAASUVORK5CYII=",
+    "base64",
+  );
+  let photoUploads = 0;
+  // Real scanning and private image delivery are covered by the photo API integration test.
+  await page.route("**/employees/" + id + "/photo*", (route) => {
+    if (route.request().method() === "POST") {
+      photoUploads++;
+      return route.fulfill({ status: 204 });
+    }
+    return route.fulfill({ contentType: "image/png", body: png });
+  });
+  await open(page, "/employees/" + id, "Amira Hassan");
+  await page.getByRole("button", { name: "Add photo", exact: true }).click();
+  dialog = page.getByRole("dialog");
+  await dialog
+    .locator('input[type="file"]')
+    .setInputFiles({ name: "photo.png", mimeType: "image/png", buffer: png });
+  await dialog.getByRole("button", { name: "Save", exact: true }).focus();
+  await dialog.getByRole("heading").click();
+  expect(photoUploads).toBe(0);
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.getByRole("button", { name: "Change photo", exact: true })).toBeVisible();
+  expect(photoUploads).toBe(1);
+  await context.close();
+});

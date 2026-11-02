@@ -77,3 +77,7 @@ class RoleSummary(BaseModel):
 
 class RoleMatrix(BaseModel):
     roles: list[RoleSummary]
+
+
+class EmployeeLinkIn(RequestModel):
+    employee_id: uuid.UUID | None

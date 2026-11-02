@@ -411,3 +411,69 @@ async def test_the_role_viewer_is_built_from_the_permission_matrix(rig: dict[str
     assert (
         await (await rig["person"]("employee", rig["a"])).get(f"{API}/roles/matrix")
     ).status_code == 403
+
+
+async def test_employee_links_are_unique_scoped_and_audited(rig: dict[str, Any]) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    staff = await rig["person"]("employee", rig["a"])
+    hr = await rig["person"]("hr_admin", rig["a"])
+    other = await rig["person"]("company_admin", rig["b"])
+    made = await admin.post(
+        f"{API}/employees",
+        json={
+            "first_name": "Amira",
+            "last_name": "Hassan",
+            "email": "amira@example.com",
+            "employee_number": "LINK1",
+            "hire_date": "2025-01-06",
+        },
+    )
+    emp = made.json()["id"]
+    foreign = (
+        await other.post(
+            f"{API}/employees",
+            json={
+                "first_name": "Other",
+                "last_name": "Person",
+                "email": "other@example.com",
+                "employee_number": "LINK1",
+                "hire_date": "2025-01-06",
+            },
+        )
+    ).json()["id"]
+    members = (await admin.get(f"{API}/users")).json()["users"]
+    mine = next(u["id"] for u in members if u["is_you"])
+    target = next(u["id"] for u in members if u["role"] == "employee")
+    path = f"{API}/users/{target}/employee"
+    assert (await admin.put(path, json={"employee_id": emp})).status_code == 200
+    assert (await staff.get(f"{API}/employees/{emp}")).status_code == 200
+    assert (
+        await admin.put(f"{API}/users/{mine}/employee", json={"employee_id": emp})
+    ).status_code == 409
+    assert (await admin.put(path, json={"employee_id": foreign})).status_code == 404
+    foreign_member = (await other.get(f"{API}/users")).json()["users"][0]["id"]
+    assert (
+        await admin.put(f"{API}/users/{foreign_member}/employee", json={"employee_id": emp})
+    ).status_code == 404
+    for person in (staff, hr):
+        assert (await person.put(path, json={"employee_id": None})).status_code == 403
+    assert (await admin.put(path, json={"employee_id": None})).json()["employee_id"] is None
+    assert (await staff.get(f"{API}/employees/{emp}")).status_code == 404
+    assert (
+        await admin.put(f"{API}/users/{mine}/employee", json={"employee_id": emp})
+    ).status_code == 200
+    async with rig["owner"].connect() as c:
+        events = (
+            (
+                await c.execute(
+                    text(
+                        "select action from audit_events where entity_id=:id and action like 'employee.user_%'"
+                    ),
+                    {"id": uuid.UUID(emp)},
+                )
+            )
+            .scalars()
+            .all()
+        )
+    assert events.count("employee.user_linked") == 2
+    assert events.count("employee.user_unlinked") == 1
