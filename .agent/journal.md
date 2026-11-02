@@ -45,3 +45,4 @@
 2026-11-02 19:27 | Codex | Phase 6 gate | full Playwright running, exec 38612, /tmp/cmr-phase6-e2e.log; no failures through component checks | next inspect this run before rerunning
 2026-11-02 19:35 | Codex | Phase 6 gate | full Playwright 396 pass/144 screenshot-only skipped (11.9m); all gate checks now verified | next screenshots, summary and PR
 2026-11-02 19:38 | Codex | Phase 6 gate | captured 60 QA images; fixed role-only Overview label; screenshot helper resets scroll/focus and uses modal viewport | next verify fix and recapture
+2026-11-02 19:40 | Codex | Phase 6 gate | role-only fix API 3 pass; screenshot assertion narrowed to accessible Summary region after transition duplicate | next complete recapture

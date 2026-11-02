@@ -91,7 +91,11 @@ for (const colorScheme of ["light", "dark"] as const) {
         await shoot(page, "create-" + suffix);
         await page.goto("/employees/" + id);
         await expect(page.getByRole("heading", { level: 1, name: "Mara Rosen" })).toBeVisible();
-        await expect(page.getByText("full time", { exact: true })).toBeVisible();
+        await expect(
+          page
+            .getByRole("region", { name: "Summary", exact: true })
+            .getByText("full time", { exact: true }),
+        ).toBeVisible();
         await shoot(page, "overview-" + suffix);
         for (const tab of [
           "Personal",
