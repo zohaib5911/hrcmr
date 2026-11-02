@@ -70,6 +70,13 @@ class Transport(Protocol):
         ...
 
 
+class NoTransport:
+    """For a worker with no mail service set up: every message is refused, with a reason."""
+
+    async def send(self, message: Message) -> str | None:
+        raise TransportError("No mail service is set up.", retry=False)
+
+
 class ResendTransport:
     def __init__(self, api_key: str, *, client: httpx.AsyncClient | None = None) -> None:
         self._headers = {"Authorization": f"Bearer {api_key}"}

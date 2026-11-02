@@ -92,10 +92,12 @@ uv run ruff check . && uv run ruff format --check . && uv run mypy      # lint, 
 docker compose up -d --wait               # from the repo root: the integration tests need Postgres and Redis
 uv run pytest                             # fails with a clear message if the stack is not running
 uv run uvicorn app.main:create_app --factory --reload --port 8000       # needs a .env, see below
+uv run python -m app.jobs.worker          # the background worker: sends queued e-mail, runs the schedule
 docker build -t brand-api:dev api/        # production image: multi-stage, non-root (uid 10001), pinned digests
 ```
 
 - **Endpoints:** `GET /api/v1/health` (liveness) and `GET /api/v1/ready` (Postgres and Redis; `503` if either is down). Interactive docs at `/api/v1/docs` when `APP_ENV` is `local` or `test`; they are not served when deployed.
+- **E-mail and background jobs:** the API saves each e-mail in an outbox and the worker sends it, through Resend when `RESEND_API_KEY` is set and otherwise through Mailpit (`SMTP_HOST=localhost`, inbox at http://localhost:8025). Start the worker next to the API; `python -m app.cli email-samples` sends one of every template to Mailpit. The schedule (UTC) is in `api/app/jobs/scheduled.py`; each run is logged and recorded in the audit trail.
 - **Errors** always look like `{"error": {"code", "message", "field"?, "request_id"}}`, and every response carries `X-Request-ID`.
 - **Configuration** comes from environment variables, and locally from the git-ignored `.env` in the repo root (`app/core/config.py`). Always required: `APP_ENV` (`local`, `test`, `staging` or `production`), `DOMAIN`, `WEB_ORIGIN`, `ADMIN_ORIGIN`, `API_ORIGIN`, `DATABASE_URL`, `REDIS_URL`, `SESSION_SECRET`, `FIELD_ENCRYPTION_KEYS`, `BLIND_INDEX_KEY`. `staging` and `production` refuse to start unless every third-party setting is present, and the error names the missing variables, never their values. Generate secrets with the commands in `deployment-requirements.txt` section 3.
 - **Logs** are one JSON object per line. Keys such as `password`, `token`, `authorization`, `ni_number` and `salary` are dropped, and passwords inside URLs are masked. Access lines never include the query string.
