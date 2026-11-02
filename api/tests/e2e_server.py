@@ -59,6 +59,9 @@ def main() -> None:
             web_origin=WEB_ORIGIN,
             api_origin=f"http://127.0.0.1:{API_PORT}",
             domain="127.0.0.1",
+            # The test browser is the proxy: a helper sends X-Real-IP so each sign-up looks like a
+            # different visitor and the real limit (5 sign-ups an hour per address) stays in force.
+            trusted_proxy_cidrs="127.0.0.0/8",
         )
         Redis.from_url(REDIS_URL).flushdb()
         set_keyring(

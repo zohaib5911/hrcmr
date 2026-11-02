@@ -8,7 +8,9 @@
  */
 import path from "node:path";
 
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+
+import { expect, test } from "../support/fixtures";
 
 const OUT = path.resolve(__dirname, "../../../docs/screenshots/phase-1");
 const WIDTHS = [390, 768, 1280, 1920] as const;

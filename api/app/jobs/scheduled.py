@@ -14,6 +14,7 @@ from arq import cron as arq_cron
 from arq import func
 
 from app.jobs.audit import tracked
+from app.jobs.cloudflare import cloudflare_ranges_weekly
 from app.jobs.email import deliver_email, sweep_email_outbox
 from app.jobs.holidays import bank_holidays_weekly
 from app.modules.email.outbox import MAX_ATTEMPTS
@@ -69,6 +70,12 @@ SCHEDULE: tuple[Schedule, ...] = (
         "bank_holidays_weekly",
         bank_holidays_weekly,
         {"weekday": "mon", "hour": 3, "minute": 0},
+        "T4.5",
+    ),
+    Schedule(
+        "cloudflare_ranges_weekly",
+        cloudflare_ranges_weekly,
+        {"weekday": "mon", "hour": 3, "minute": 10},
         "T4.5",
     ),
     Schedule("register_ingest", _nothing_yet("register_ingest"), {"hour": 3, "minute": 30}, "T4.2"),

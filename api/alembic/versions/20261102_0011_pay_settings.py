@@ -60,11 +60,15 @@ def _company_index(table: str) -> None:
     op.create_index(op.f(f"ix_{table}_company_id"), table, ["company_id"], unique=False)
 
 
+# Literal SQL only: a name picked from this table is never built into a statement.
+_LOWER = {"code": sa.text("lower(code)"), "name": sa.text("lower(name)")}
+
+
 def _unique_name(table: str, name: str) -> None:
     op.create_index(
         f"uq_{table}_company_id_{name}",
         table,
-        ["company_id", sa.text(f"lower({name})")],
+        ["company_id", _LOWER[name]],
         unique=True,
         postgresql_where=sa.text("archived_at is null"),
     )

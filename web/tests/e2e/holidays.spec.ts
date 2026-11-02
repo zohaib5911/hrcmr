@@ -3,7 +3,9 @@
  * Company Admin. GOV.UK's bank holidays arrive by the weekly job (covered by the API tests), so here
  * the list is empty and the page says so; the pattern, closures and types are used for real.
  */
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+
+import { expect, test } from "../support/fixtures";
 
 import { audit } from "../support/axe";
 

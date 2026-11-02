@@ -2,7 +2,9 @@
  * The pay settings (plan T4.7), against the real API and a real signed-in Company Admin: add one of
  * each, see it listed, and check the bank account shows only masked numbers.
  */
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+
+import { expect, test } from "../support/fixtures";
 
 import { audit } from "../support/axe";
 

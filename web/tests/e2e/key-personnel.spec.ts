@@ -3,7 +3,9 @@
  * document goes through the file store and the virus scanner, which the API tests cover; here the
  * roles, "same as the Authorising Officer", the count, and the page's accessibility are checked.
  */
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+
+import { expect, test } from "../support/fixtures";
 
 import { audit } from "../support/axe";
 

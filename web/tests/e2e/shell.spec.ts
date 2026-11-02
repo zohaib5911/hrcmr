@@ -3,7 +3,9 @@
  * the four design widths in both themes, accessibility, the collapsing sidebar (including that the
  * SERVER draws it collapsed, so nothing jumps), navigation, and that every sidebar route has a page.
  */
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+
+import { expect, test } from "../support/fixtures";
 
 import { NAV_GROUPS, NAV_ITEMS } from "../../lib/navigation";
 import { audit } from "../support/axe";

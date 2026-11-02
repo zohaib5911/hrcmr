@@ -6,6 +6,7 @@ Run in container: gunicorn -c gunicorn.conf.py "app.main:create_app()"
 
 from __future__ import annotations
 
+import asyncio
 from contextlib import asynccontextmanager
 from functools import partial
 from typing import TYPE_CHECKING, Any
@@ -22,6 +23,7 @@ from app.core.middleware import RequestContextMiddleware
 from app.core.redis import create_redis, ping_redis
 from app.db.engine import create_engine, ping_database
 from app.integrations.clamav import ClamAV
+from app.integrations.cloudflare_ips import keep_cloudflare_ranges_current
 from app.integrations.companies_house import CompaniesHouse
 from app.integrations.email import LoggingMailer, Mailer, transport_from_settings
 from app.integrations.postcodes import Postcodes
@@ -119,9 +121,11 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
             "redis": partial(ping_redis, redis),
         }
         logger.info("startup", app_env=settings.app_env.value)
+        refresher = asyncio.create_task(keep_cloudflare_ranges_current(redis))
         try:
             yield
         finally:
+            refresher.cancel()
             if queue is not None:
                 await queue.close()
             await redis.aclose()

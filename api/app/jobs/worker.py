@@ -19,6 +19,7 @@ from app.db.engine import create_engine
 from app.integrations.email import NoTransport, transport_from_settings
 from app.integrations.storage import Storage
 from app.jobs.audit import JobAudit
+from app.jobs.cloudflare import cloudflare_ranges_weekly
 from app.jobs.holidays import bank_holidays_weekly
 from app.jobs.queue import redis_settings
 from app.jobs.scheduled import cron_jobs, functions
@@ -59,6 +60,7 @@ async def startup(ctx: dict[str, Any]) -> None:
     logger.info("worker_started", app_env=settings.app_env.value)
     # A new deployment has no public holidays until the weekly run: fetch them now, once.
     await bank_holidays_weekly(ctx)
+    await cloudflare_ranges_weekly(ctx)
 
 
 async def shutdown(ctx: dict[str, Any]) -> None:

@@ -123,6 +123,7 @@ SENTRY_DSN_API                  from Sentry (api project)                       
 CLAMAV_HOST                     clamav.railway.internal                            [PUBLIC]
 CLAMAV_PORT                     3310                                               [PUBLIC]
 ADMIN_IP_ALLOWLIST              optional, comma-separated IPs/CIDRs                [PUBLIC]
+TRUSTED_PROXY_CIDRS             optional, networks whose IP headers are trusted    [PUBLIC]
 HIBP_ENABLED                    true                                               [PUBLIC]
 AI_FEATURES_ENABLED             true                                               [PUBLIC]
 TZ                              Europe/London                                      [PUBLIC]

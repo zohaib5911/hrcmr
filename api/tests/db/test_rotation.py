@@ -111,7 +111,9 @@ async def test_rotation_moves_every_row_to_the_new_key_and_can_be_repeated(
 
 def test_every_encrypted_column_is_found_by_its_type() -> None:
     assert [(t.name, c.name, ctx) for t, c, ctx in encrypted_columns()] == [
-        ("users", "mfa_secret", "users.mfa_secret")
+        ("company_bank_accounts", "sort_code", "company_bank_accounts.sort_code"),
+        ("company_bank_accounts", "account_number", "company_bank_accounts.account_number"),
+        ("users", "mfa_secret", "users.mfa_secret"),
     ]
 
 

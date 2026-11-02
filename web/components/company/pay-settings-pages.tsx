@@ -138,8 +138,10 @@ function BankAccountSheet({
   const [sortCode, setSortCode] = useState("");
   const [number, setNumber] = useState("");
   const [primary, setPrimary] = useState(account?.is_primary ?? false);
-  const digits = (value: string, length: number) =>
-    new RegExp(`^\\d{${length}}$`).test(value.replace(/[\s-]/g, ""));
+  const digits = (value: string, length: number) => {
+    const plain = value.replace(/[\s-]/g, "");
+    return plain.length === length && /^\d+$/.test(plain);
+  };
 
   return (
     <PaySheet

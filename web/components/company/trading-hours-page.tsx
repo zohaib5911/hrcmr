@@ -90,14 +90,16 @@ export function TradingHoursPage({ hours }: { hours: Hours }) {
                 />
               </div>
               <TimePicker
-                label={`${name} opens`}
+                label="Opens"
+                aria-label={`${name} opens`}
                 containerClassName="w-36"
                 value={row.opens}
                 disabled={!mayEdit || !row.is_open}
                 onChange={(value) => void save({ ...row, opens: value })}
               />
               <TimePicker
-                label={`${name} closes`}
+                label="Closes"
+                aria-label={`${name} closes`}
                 containerClassName="w-36"
                 value={row.closes}
                 disabled={!mayEdit || !row.is_open}

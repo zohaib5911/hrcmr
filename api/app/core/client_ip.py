@@ -26,7 +26,9 @@ if TYPE_CHECKING:
 type Network = ipaddress.IPv4Network | ipaddress.IPv6Network
 
 # Cloudflare's published ranges, https://www.cloudflare.com/ips-v4 and /ips-v6, checked 2026-11-02.
-# Refresh them from there if Cloudflare announces a change.
+# This is the fallback: the weekly job (jobs/cloudflare.py) fetches the live lists, and the API uses
+# those (``use_cloudflare_ranges``) once it has read them, until then and whenever they are missing
+# this list applies.
 CLOUDFLARE_RANGES: tuple[Network, ...] = tuple(
     ipaddress.ip_network(cidr)
     for cidr in (
@@ -54,6 +56,22 @@ CLOUDFLARE_RANGES: tuple[Network, ...] = tuple(
         "2c0f:f248::/32",
     )
 )
+
+_live_cloudflare: tuple[Network, ...] | None = None
+
+
+def cloudflare_ranges() -> tuple[Network, ...]:
+    return _live_cloudflare or CLOUDFLARE_RANGES
+
+
+def use_cloudflare_ranges(ranges: list[str] | None) -> None:
+    """Use the fetched list; ``None`` or an unreadable list goes back to the built-in one."""
+    global _live_cloudflare
+    try:
+        _live_cloudflare = tuple(ipaddress.ip_network(cidr) for cidr in ranges) if ranges else None
+    except ValueError:
+        _live_cloudflare = None
+
 
 # Railway reaches a service from its private network: the carrier-grade NAT block for IPv4 and the
 # unique-local block for IPv6.
@@ -99,7 +117,7 @@ def resolve_client_ip(
     real = _parse(headers.get("x-real-ip"))
     if real is None:
         return peer
-    if _within(real, CLOUDFLARE_RANGES):
+    if _within(real, cloudflare_ranges()):
         visitor = _parse(headers.get("cf-connecting-ip"))
         if visitor is not None:
             return str(visitor)

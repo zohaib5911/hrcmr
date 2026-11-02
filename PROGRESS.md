@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** Phase 4 gate
+- **Current task:** T5.1 User Access list
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -24,9 +24,9 @@ unless a task notes otherwise here.
 
 | Needed by | Owner action | Source |
 |---|---|---|
-| T0.8 | ~~Create the private GitHub repository~~ — done: `zohaib5911/hrcmr`, confirmed private. Still to do: (1) turn on **Settings → Security → Private vulnerability reporting** (referenced by `SECURITY.md`); (2) after the first green CI run, protect `main` under **Settings → Branches**: require a pull request and the one status check **CI passed**. I do not change GitHub settings myself. | plan T0.8, SECURITY.md |
+| Anytime | Repository `zohaib5911/hrcmr` is private (done). Still to do: (1) turn on **Settings → Security → Private vulnerability reporting** (referenced by `SECURITY.md`); (2) protect `main` under **Settings → Branches**: require a pull request and the one status check **CI passed**. Work now happens on `dev` and reaches `main` by a pull request at each phase gate. I do not change GitHub settings myself. | plan T0.8, `AGENTS.md` |
 | T23.1 | Set the repository **variable** `STAGING_URL` (Settings → Secrets and variables → Actions → *Variables*; it is a public URL, not a secret) so the weekly ZAP scan has a target. The GitHub *secrets* stay the three in deployment-requirements §6. | `.github/workflows/security.yml` |
-| Anytime | Dependabot #3 (web dev dependencies: ESLint 9 to 10 and TypeScript) fails CI and is left open for you to decide. #1 (Redis 8) was rejected and Redis major updates are ignored; #2 (uv 0.13.6) was merged with the CI pin. | `.github/dependabot.yml` |
+| Anytime | Dependabot: #1 (Redis 8), #3 and #4 (ESLint 10, TypeScript 7) are closed and those majors are ignored; #2 (uv 0.13.6) is merged. #5 (two web dependency updates) is open and merged when CI is green. Nothing for you to do. | `.github/dependabot.yml` |
 | Before launch | Give me the non-secret business details: brand name, domain, logo files (SVG lockup + mark, 512 px PNG favicon), accent colour, legal company name, number and registered office, ICO number, support email, sender address, confirm prices, Platform Admin emails, pixel and Companies House choices, optional office IPs. `brand.config.ts` currently holds the placeholder name "Brand". | deployment-requirements §1 |
 | When I ask | Put **dev/test keys** in your own local `.env` (`cp .env.example .env`) and reply "the .env is ready": a low-limit `ANTHROPIC_API_KEY` (T14.4), Stripe **test** key and `stripe listen` webhook secret (T16.1), optional `COMPANIES_HOUSE_API_KEY` (T4.1). Turnstile uses Cloudflare's public always-pass test keys locally. | deployment-requirements §7 |
 | T13.2 | Review the 8 original courses. | plan T13.2 |
@@ -184,6 +184,21 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 **Open at the gate:** nothing blocking. Still waiting on you: protect `main`, enable private vulnerability reporting, decide Dependabot #4, and the brand details (the screens say "Brand" with no logo until then).
 
+### Phase 4 — Company settings — gate passed 2026-11-02
+
+**What exists.** `/company` overview with eleven settings pages: details and logo, locations, departments, designations, key personnel, compliance documents, working pattern, bank holidays and closures, holiday types, trading hours, and the Pay group (bank accounts, tax codes, payment types, pay bands, pay schedules). Every change is permission-checked and audited; bank sort codes and account numbers are encrypted and only ever shown masked.
+
+**Fixed at the gate.** Client address believed only through trusted proxies (Cloudflare ranges now refreshed weekly by a worker job, built-in list as fallback); lockout and new-device e-mails sent; e-mail samples dev-only; every request body refuses unknown fields; full NCSC top-100k password list. CI repaired (env-variable list, two Semgrep findings, rotation test).
+
+**Test isolation.** Each Playwright spec file signs up its own company (`tests/support/fixtures.ts`), the test API starts on a fresh database every run, and locally one worker runs. Sign-ups send their own trusted test address so the real 5-an-hour limit stays on. The earlier red runs were leftover state and that limit, not product bugs.
+
+**Regression, whole suite once:** API 384 tests; web 755 unit tests; Playwright 375 passed, 0 failed (136 skipped are the screenshot-only specs); guard scripts 32; `tsc`, ESLint, `ruff`, `mypy --strict`, `gen:api:check` clean.
+
+**Screenshots.** `docs/screenshots/phase-4/`: 14 pages in light and dark at 1280 and 390 px (56 images).
+
+**Open at the gate:** nothing blocking. Owner: protect `main`, enable private vulnerability reporting (see the table above).
+
+
 ---
 
 ## Task list
@@ -234,7 +249,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T4.5** Working pattern, bank holidays, holiday types and closures — 2026-11-02. Migration `0009`: `working_pattern_days`, `holiday_types`, `company_holidays` (tenant tables, archived not deleted), global `bank_holidays` (read by every company, written only by the weekly job), and the company-wide "bank holidays are not working days" switch. The weekly job `bank_holidays_weekly` (Mondays 03:00 UTC, and once when the worker starts) loads `https://www.gov.uk/bank-holidays.json` for the three regions, adding new dates and updating changed titles. API: `GET/PUT /working-pattern` (starts as Mon to Fri, 8 hours; every day once; a working day needs hours), `GET /holiday-management?year=` (bank holidays for the company's region, closures touching the year, types), CRUD for `/company-holidays` and `/holiday-types` (a type in use cannot be archived); all audited. Web: `/company/working-pattern` (a switch and hours per day) and `/holiday-management` (year arrows, closures, types, read-only bank holidays with when they were last fetched), linked from the Company overview. **Verified:** 5 API tests (feed parsing, import add/update/dead feed, pattern, year view, roles, other company, audit) and 13 browser checks (flows, then axe in both themes). Owner: none.
 - [x] **T4.6** Trading hours — 2026-11-02. Migration `0010` `trading_hours_days` (one row per weekday, tenant RLS, an open day needs opens before closes). API: `GET /trading-hours` (seven days; a day never set is closed, nothing invented) and `PUT /trading-hours/{weekday}` (one day, audited, unchanged saves record nothing), under `company.profile.read/write` so only Company Admins edit. Web: `/company/trading-hours` with a switch and two time fields per day that save as they change, a "Saved" tick, and the reason shown on the row when a save is refused; linked from the Company overview. **Verified:** 1 API test (save, close, bad input, roles, other company, audit) and 1 browser check with axe. Owner: none.
 - [x] **T4.7** Bank accounts, tax codes, payment types, pay bands, pay schedules — 2026-11-02. Migration `0011`: five tenant tables with row-level security, archived not deleted, names unique among live rows. API (`/bank-accounts`, `/tax-codes`, `/payment-types`, `/pay-bands`, `/pay-schedules`): list, add, change, archive, all audited. Bank sort codes and account numbers are encrypted in the database (so key rotation covers them), leave the API only as `••-••-56` and `••••4321`, and never appear in the audit trail; leaving them blank on an edit keeps them; the first account is the main one and the main one cannot be archived while others exist. A pay schedule's pay day must fit its frequency (a weekday, or a day 1 to 28 of the month, the last day, or the last working day). Bank accounts need `company.profile.read/write` (Company Admin edits, HR Admin sees them masked); the rest use their `settings.*` permissions. Web: five pages under `/company/…` and a Pay group on the overview. **Verified:** 4 API tests (masking and encryption at rest, audit with no numbers, roles, other company, validation) and 3 browser checks with axe. Owner: none.
-- [ ] **Phase 4 gate** — inset-grouped style, RBAC tests and audit events for every change
+- [x] **Phase 4 gate** — 2026-11-02, summary under *Phase summaries*. — inset-grouped style, RBAC tests and audit events for every change
 
 ### Phase 5 — Users and access
 - [ ] **T5.1** User Access list, filters, unlinked-users banner
