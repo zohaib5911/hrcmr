@@ -36,3 +36,4 @@
 2026-11-02 19:05 | Codex | T6.7 | FileDrop label lookup remains ambiguous; browser test now targets the dialog file input directly | next rerun Documents journey
 2026-11-02 19:07 | Codex | T6.7 | complete; API/PDF/security 3 pass, Documents browser/setup 2 pass, lint/types/build clean | next T6.8
 2026-11-02 19:08 | Codex | T6.8 | Activity API reuses audit pagination and includes owned file events; isolation/RBAC test passes | next related tab UI
+2026-11-02 19:09 | Codex | T6.8 | related shells and Activity UI built, browser journey written | next browser verification

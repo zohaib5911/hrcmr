@@ -14,6 +14,12 @@ import { Icon } from "@/components/ui/icon";
 import { InlineConfirm } from "@/components/ui/inline-confirm";
 import { EmploymentTab, type EmploymentData } from "@/components/employees/employment-tab";
 import { DocumentsTab, PrintRecord } from "@/components/employees/documents-tab";
+import {
+  LeaveTab,
+  AttendanceTab,
+  LearningTab,
+  ActivityTab,
+} from "@/components/employees/related-tabs";
 import { PersonalTab } from "@/components/employees/personal-tab";
 import { StatusChip } from "@/components/ui/status-chip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -49,6 +55,7 @@ export function ProfilePage({
   personal: PersonalData;
   employment: EmploymentData;
 }) {
+  const can = useCan();
   const name = `${profile.first_name} ${profile.last_name}`;
   return (
     <>
@@ -76,7 +83,11 @@ export function ProfilePage({
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="personal">Personal</TabsTrigger>
           <TabsTrigger value="employment">Employment</TabsTrigger>
+          <TabsTrigger value="leave">Leave</TabsTrigger>
+          <TabsTrigger value="attendance">Attendance</TabsTrigger>
           <TabsTrigger value="documents">Documents</TabsTrigger>
+          <TabsTrigger value="learning">Learning</TabsTrigger>
+          {can("compliance.audit.read") && <TabsTrigger value="activity">Activity</TabsTrigger>}
         </TabsList>
         <TabsContent value="overview" className="pt-6">
           <Overview profile={profile} />
@@ -90,6 +101,20 @@ export function ProfilePage({
         <TabsContent value="documents" className="pt-6">
           <DocumentsTab id={profile.id} />
         </TabsContent>
+        <TabsContent value="leave" className="pt-6">
+          <LeaveTab id={profile.id} />
+        </TabsContent>
+        <TabsContent value="attendance" className="pt-6">
+          <AttendanceTab id={profile.id} />
+        </TabsContent>
+        <TabsContent value="learning" className="pt-6">
+          <LearningTab id={profile.id} />
+        </TabsContent>
+        {can("compliance.audit.read") && (
+          <TabsContent value="activity" className="pt-6">
+            <ActivityTab id={profile.id} />
+          </TabsContent>
+        )}
       </Tabs>
     </>
   );

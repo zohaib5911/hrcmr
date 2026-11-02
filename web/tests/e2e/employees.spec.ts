@@ -427,3 +427,62 @@ test("Documents filters payslips, uploads only on Save, shows scan state and pri
   await audit(page, "Employee documents");
   await context.close();
 });
+
+test("Related tabs preserve employee context and Activity shows saved changes", async ({
+  browser,
+}) => {
+  const api = await playwrightRequest.newContext();
+  await createSignedInAdmin(api, newAccount("activity"));
+  const made = await api.post(API + "/employees", {
+    headers: await csrfHeaders(api),
+    data: {
+      first_name: "Alia",
+      last_name: "Noor",
+      email: "alia@example.com",
+      employee_number: "ACT100",
+      hire_date: "2025-01-06",
+    },
+  });
+  expect(made.status(), await made.text()).toBe(201);
+  const { id } = (await made.json()) as { id: string };
+  const added = await api.post(API + "/employees/" + id + "/responsibilities", {
+    headers: await csrfHeaders(api),
+    data: { text: "Handle enquiries" },
+  });
+  expect(added.status(), await added.text()).toBe(201);
+  const context = await browser.newContext({ storageState: await api.storageState() });
+  await api.dispose();
+  const page = await context.newPage();
+  await open(page, "/employees/" + id, "Alia Noor");
+  let writes = 0;
+  page.on("request", (req) => {
+    if (
+      req.url().includes("/employees/" + id) &&
+      ["POST", "PUT", "PATCH", "DELETE"].includes(req.method())
+    )
+      writes++;
+  });
+  await page.getByRole("tab", { name: "Leave", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Leave balances and requests" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Open Leave" })).toHaveAttribute(
+    "href",
+    "/leave?employee_id=" + id,
+  );
+  await page.getByRole("tab", { name: "Attendance", exact: true }).click();
+  await page.getByLabel("Month", { exact: true }).fill("2026-11");
+  await expect(page.getByRole("link", { name: "Open Attendance" })).toHaveAttribute(
+    "href",
+    "/attendance?employee_id=" + id + "&month=2026-11",
+  );
+  await page.getByRole("tab", { name: "Learning", exact: true }).click();
+  await expect(page.getByRole("link", { name: "Open Learning" })).toHaveAttribute(
+    "href",
+    "/learning?employee_id=" + id,
+  );
+  await page.getByRole("tab", { name: "Activity", exact: true }).click();
+  await expect(page.getByText("employee · responsibility added", { exact: true })).toBeVisible();
+  await expect(page.getByText("employee · created", { exact: true })).toBeVisible();
+  expect(writes).toBe(0);
+  await audit(page, "Employee activity");
+  await context.close();
+});
