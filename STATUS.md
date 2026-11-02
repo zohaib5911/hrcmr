@@ -7,16 +7,16 @@ State: IN PROGRESS
 
 ## Current task
 - T6.6 — Salary
-  - [ ] Salary API, permission isolation and NMW tests
+  - [x] Salary API, permission isolation and NMW tests (10 pass)
   - [ ] Hidden-until-shown salary UI and add-record sheet
   - [ ] Browser check and final validation
-- Resume note: inspect pay model lookups; add compensation_router.py and schemas; fetch salary only on Show salary. Official rates source https://www.gov.uk/national-minimum-wage-rates verified 2026-11-02.
+- Resume note: Salary API verified; next salary-section.tsx and add-record sheet in Employment. Previous: inspect pay model lookups; add compensation_router.py and schemas; fetch salary only on Show salary. Official rates source https://www.gov.uk/national-minimum-wage-rates verified 2026-11-02.
 
 ## Next tasks
 - T6.6, T6.7, T6.8, Phase 6 gate
 
 ## Health
-- CI on dev: red on ca40751 (generated data-model drift fixed in 889e1d8); e2e job still running. CI on main: previously red; not reverified.
+- CI on dev: red on ca40751 (generated data-model drift fixed in 889e1d8); all other jobs passed. CI on main: previously red; not reverified.
 - Local checks run: affected API/reporting/doc 26 pass; employee web unit 13 pass; Employment browser journey + setup 2 pass; ruff/mypy/eslint/tsc and production build pass.
 
 ## Issues / suggestions

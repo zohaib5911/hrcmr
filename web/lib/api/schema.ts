@@ -757,6 +757,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/employees/{employee_id}/compensation": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Compensation History */
+        get: operations["employees_compensation_history"];
+        put?: never;
+        /** Add Compensation */
+        post: operations["employees_add_compensation"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/compensation/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check Wage */
+        post: operations["employees_check_wage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/employees/{employee_id}/contacts": {
         parameters: {
             query?: never;
@@ -2350,6 +2385,75 @@ export interface components {
             /** Website */
             website?: string | null;
         };
+        /** CompensationHistory */
+        CompensationHistory: {
+            current: components["schemas"]["CompensationOut"] | null;
+            /** Records */
+            records: components["schemas"]["CompensationOut"][];
+        };
+        /** CompensationIn */
+        CompensationIn: {
+            /** Amount */
+            amount: number | string;
+            /** Contracted Hours Per Week */
+            contracted_hours_per_week?: number | string | null;
+            /**
+             * Effective From
+             * Format: date
+             */
+            effective_from: string;
+            /**
+             * Frequency
+             * @enum {string}
+             */
+            frequency: "annual" | "monthly" | "hourly";
+            /** Pay Band Id */
+            pay_band_id?: string | null;
+            /** Pay Schedule Id */
+            pay_schedule_id?: string | null;
+            /** Payment Type Id */
+            payment_type_id?: string | null;
+            /** Tax Code Id */
+            tax_code_id?: string | null;
+        };
+        /** CompensationOut */
+        CompensationOut: {
+            /** Amount */
+            amount: string;
+            /** Contracted Hours Per Week */
+            contracted_hours_per_week?: string | null;
+            /**
+             * Effective From
+             * Format: date
+             */
+            effective_from: string;
+            /**
+             * Frequency
+             * @enum {string}
+             */
+            frequency: "annual" | "monthly" | "hourly";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Pay Band */
+            pay_band?: string | null;
+            /** Pay Band Id */
+            pay_band_id?: string | null;
+            /** Pay Schedule */
+            pay_schedule?: string | null;
+            /** Pay Schedule Id */
+            pay_schedule_id?: string | null;
+            /** Payment Type */
+            payment_type?: string | null;
+            /** Payment Type Id */
+            payment_type_id?: string | null;
+            /** Tax Code */
+            tax_code?: string | null;
+            /** Tax Code Id */
+            tax_code_id?: string | null;
+        };
         /** ComplianceDocuments */
         ComplianceDocuments: {
             /**
@@ -3733,6 +3837,22 @@ export interface components {
              * @enum {string}
              */
             policy: "optional" | "admins" | "all";
+        };
+        /** WageCheck */
+        WageCheck: {
+            /** Below Minimum */
+            below_minimum: boolean | null;
+            /** Hourly Rate */
+            hourly_rate: string | null;
+            /** Message */
+            message: string;
+            /** Minimum Rate */
+            minimum_rate: string | null;
+            /**
+             * Source
+             * @default https://www.gov.uk/national-minimum-wage-rates
+             */
+            source: string;
         };
         /** WorkingPattern */
         "WorkingPattern-Input": {
@@ -6092,6 +6212,134 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BankMasked"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_compensation_history: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompensationHistory"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_add_compensation: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompensationIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompensationOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_check_wage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompensationIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WageCheck"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
