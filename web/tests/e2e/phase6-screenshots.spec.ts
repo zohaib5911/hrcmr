@@ -113,6 +113,11 @@ for (const colorScheme of ["light", "dark"] as const) {
           if (tab === "Documents") await expect(page.getByText("No documents yet.")).toBeVisible();
           await shoot(page, tab.toLowerCase() + "-" + suffix);
           if (tab === "Employment") {
+            await expect(
+              page
+                .getByRole("region", { name: "Key responsibilities" })
+                .getByText("0", { exact: true }),
+            ).toBeVisible();
             await page.getByRole("button", { name: "Show salary", exact: true }).click();
             await expect(
               page.getByText("£42,000.00 annual", { exact: true }).first(),

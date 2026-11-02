@@ -134,7 +134,7 @@ function Facts({ rows }: { rows: [string, ReactNode][] }) {
         <div key={label} className="min-w-0">
           <dt className="text-caption text-label-secondary">{label}</dt>
           <dd className="text-body text-label break-words">
-            {value || <span className="text-label-secondary">Not set</span>}
+            {value === 0 ? 0 : value || <span className="text-label-secondary">Not set</span>}
           </dd>
         </div>
       ))}

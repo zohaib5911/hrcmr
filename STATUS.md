@@ -12,7 +12,7 @@ State: IN PROGRESS
   - [x] Full suite once: API 421 pass/1 fixture failure fixed (affected 26 pass); web 776, guards 32, Playwright 396 pass/144 screenshot-only skipped
   - [ ] Captured 60 screenshots; QA found role-only Overview label issue; fix and recapture, then phase summary
   - [ ] PR dev to main; merge only on green CI
-- Resume note: recapture screenshots after narrowing Overview assertion to Summary region; previous run had transition duplicate matches, not API/product failure. Previous: Full browser 396 pass. First 60 screenshots captured; QA found Overview incorrectly says no role when assignment lacks department/designation. Added employment_type to profile and fallback text (affected API tests running/passed). Screenshot helper resets focus/scroll and captures modal viewport. Next recapture Phase 6 screenshots, inspect, summary and PR.
+- Resume note: final screenshot review found zero facts rendered as Not set; fixed display and added capture assertion. Refresh Phase 6 images then PR. Previous: recapture screenshots after narrowing Overview assertion to Summary region; previous run had transition duplicate matches, not API/product failure. Previous: Full browser 396 pass. First 60 screenshots captured; QA found Overview incorrectly says no role when assignment lacks department/designation. Added employment_type to profile and fallback text (affected API tests running/passed). Screenshot helper resets focus/scroll and captures modal viewport. Next recapture Phase 6 screenshots, inspect, summary and PR.
 
 
 ## Next tasks

@@ -46,3 +46,4 @@
 2026-11-02 19:35 | Codex | Phase 6 gate | full Playwright 396 pass/144 screenshot-only skipped (11.9m); all gate checks now verified | next screenshots, summary and PR
 2026-11-02 19:38 | Codex | Phase 6 gate | captured 60 QA images; fixed role-only Overview label; screenshot helper resets scroll/focus and uses modal viewport | next verify fix and recapture
 2026-11-02 19:40 | Codex | Phase 6 gate | role-only fix API 3 pass; screenshot assertion narrowed to accessible Summary region after transition duplicate | next complete recapture
+2026-11-02 19:43 | Codex | Phase 6 gate | recapture 5 pass, screenshots reviewed; final QA fixes zero-valued facts rendering as Not set | next final artifact refresh and PR
