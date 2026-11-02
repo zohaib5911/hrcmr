@@ -1,11 +1,14 @@
 import type { components } from "@/lib/api/client";
 
+import { rtwMatches, type RTWFilter } from "@/lib/employees/rtw";
+
 export type EmployeeRow = components["schemas"]["EmployeeRow"];
 export type EmployeeSummary = components["schemas"]["EmployeeSummary"];
 
 export const PILLS = [
   { id: "all", label: "All" },
   { id: "active", label: "Active" },
+  { id: "needs_rtw", label: "Needs Right to Work action" },
   { id: "on_leave", label: "On leave" },
   { id: "leaver", label: "Leavers" },
 ] as const;
@@ -29,6 +32,7 @@ export interface Filters {
   pill: PillId;
   department: string;
   search: string;
+  rtw?: RTWFilter;
 }
 
 export const ALL_DEPARTMENTS = "all";
@@ -37,7 +41,11 @@ export const ALL_DEPARTMENTS = "all";
 export function filterEmployees(rows: readonly EmployeeRow[], filters: Filters): EmployeeRow[] {
   const words = filters.search.toLowerCase().split(/\s+/).filter(Boolean);
   return rows.filter((row) => {
-    if (filters.pill !== "all" && row.status !== filters.pill) return false;
+    const status = row.rtw_status ?? "not_recorded";
+    if (filters.pill === "needs_rtw") {
+      if (status === "verified") return false;
+    } else if (filters.pill !== "all" && row.status !== filters.pill) return false;
+    if (!rtwMatches(status, filters.rtw ?? "all")) return false;
     if (filters.department !== ALL_DEPARTMENTS && row.department !== filters.department) {
       return false;
     }
@@ -54,6 +62,12 @@ export function summaryLine(summary: EmployeeSummary): string {
   if (summary.on_leave > 0) parts.push(`${summary.on_leave} on leave`);
   if (summary.leavers > 0)
     parts.push(`${summary.leavers} ${summary.leavers === 1 ? "leaver" : "leavers"}`);
+  if (summary.rtw_needs_attention && summary.rtw_needs_attention > 0)
+    parts.push(
+      `${summary.rtw_needs_attention} ${summary.rtw_needs_attention === 1 ? "needs" : "need"} Right to Work action`,
+    );
+  else if (summary.total > 0 && summary.rtw_verified === summary.total)
+    parts.push("all Right to Work checks current");
   return parts.join(" · ");
 }
 

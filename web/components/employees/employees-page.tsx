@@ -7,6 +7,8 @@ import { useCallback, useMemo, useState } from "react";
 import { PageHeader } from "@/components/app/page-header";
 import { useCan } from "@/components/app/session-context";
 import { useNewShortcut } from "@/components/app/shortcut-provider";
+import { RTWChip } from "@/components/employees/rtw-chip";
+import { RTW_FILTERS, RTW_LABEL, type RTWFilter } from "@/lib/employees/rtw";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { DataTable, type Column } from "@/components/ui/data-table";
@@ -76,6 +78,13 @@ const COLUMNS: Column<EmployeeRow>[] = [
     cell: (e) => e.designation ?? <span className="text-secondary-label">Not set</span>,
   },
   {
+    id: "rtw",
+    header: "Right to Work",
+    sortValue: (e) => RTW_LABEL[e.rtw_status ?? "not_recorded"],
+    exportValue: (e) => RTW_LABEL[e.rtw_status ?? "not_recorded"],
+    cell: (e) => <RTWChip status={e.rtw_status} />,
+  },
+  {
     id: "status",
     header: "Status",
     sortValue: (e) => e.status,
@@ -89,11 +98,13 @@ export function EmployeesPage({
   summary,
   archived,
   initialPill,
+  initialRtw = "all",
 }: {
   employees: EmployeeRow[];
   summary: EmployeeSummary;
   archived: boolean;
   initialPill: PillId;
+  initialRtw?: RTWFilter;
 }) {
   const router = useRouter();
   const mayAdd = useCan()("employee.profile.write");
@@ -102,15 +113,19 @@ export function EmployeesPage({
   }, [mayAdd, router]);
   useNewShortcut(addEmployee);
   const [pill, setPill] = useState<PillId>(initialPill);
+  const [rtw, setRtw] = useState<RTWFilter>(initialRtw);
   const [department, setDepartment] = useState(ALL_DEPARTMENTS);
   const [search, setSearch] = useState("");
   const shown = useMemo(
-    () => filterEmployees(employees, { pill: archived ? "all" : pill, department, search }),
-    [employees, pill, department, search, archived],
+    () => filterEmployees(employees, { pill: archived ? "all" : pill, department, search, rtw }),
+    [employees, pill, department, search, archived, rtw],
   );
   const departments = useMemo(() => departmentsIn(employees), [employees]);
   const filtering =
-    search.trim() !== "" || department !== ALL_DEPARTMENTS || (!archived && pill !== "all");
+    rtw !== "all" ||
+    search.trim() !== "" ||
+    department !== ALL_DEPARTMENTS ||
+    (!archived && pill !== "all");
 
   return (
     <>
@@ -125,12 +140,15 @@ export function EmployeesPage({
       />
       <div className="flex flex-col gap-4">
         {archived ? null : (
-          <SegmentedControl<PillId>
-            label="Show"
-            value={pill}
-            onValueChange={setPill}
-            segments={PILLS.map((p) => ({ value: p.id, label: p.label }))}
-          />
+          <div className="max-w-full overflow-x-auto">
+            <SegmentedControl<PillId>
+              className="min-w-max"
+              label="Show"
+              value={pill}
+              onValueChange={setPill}
+              segments={PILLS.map((p) => ({ value: p.id, label: p.label }))}
+            />
+          </div>
         )}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <SearchField
@@ -154,6 +172,17 @@ export function EmployeesPage({
               ))}
             </Select>
           ) : null}
+          <Select
+            label="Right to Work"
+            value={rtw}
+            onChange={(e) => setRtw(e.target.value as RTWFilter)}
+          >
+            {RTW_FILTERS.map((f) => (
+              <option key={f.value} value={f.value}>
+                {f.label}
+              </option>
+            ))}
+          </Select>
           <Toggle
             label="Show archived"
             checked={archived}

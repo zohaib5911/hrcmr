@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-02 20:35 (Europe/London)    Agent: Codex    Branch: dev    Commit: 7aafbdb
+Updated: 2026-11-02 20:54 (Europe/London)    Agent: Codex    Branch: dev    Commit: 6f1b02e
 State: IN PROGRESS
 
 ## Last completed
@@ -11,9 +11,9 @@ State: IN PROGRESS
   - [x] Employee/file baseline: ruff/mypy pass, employee integration 3 pass; source paths reviewed
   - [x] RTW model/migration 0015 and security-invoker status view (migration/doc checks 7 pass)
   - [x] API: four types, versioned/historical correction, scoped evidence and PDF; 12 RTW/PDF checks pass
-  - [ ] Employee RTW tab and directory RTW pills/filters/deep links
+  - [x] Employee RTW tab and directory RTW pills/filters/deep links
   - [ ] Browser verification and final checks
-- Resume note: Core RTW API verified (12 RTW/PDF tests), migration/doc checks 7 pass. Next employee RTW tab and directory integration: status chips, conditional explicit-save forms, evidence picker/upload, correction and PDF actions; list status/pills/filters/deep links and summary counts. HR Admin records but cannot correct (rbac matrix); Company Admin correction only. Historical corrections stay historical; online corrections re-enter share code rather than reveal it. Candidate routes wait for Phase 11 validation.
+- Resume note: UI implemented; next add/run T7.1 browser scenario for conditional forms, explicit saves, correction/history/PDF and evidence upload auto-selection, then finish checks. API/directory/PDF 15 pass, web list 6 pass, typecheck/lint pass. Core RTW API verified (12 RTW/PDF tests), migration/doc checks 7 pass. Next employee RTW tab and directory integration: status chips, conditional explicit-save forms, evidence picker/upload, correction and PDF actions; list status/pills/filters/deep links and summary counts. HR Admin records but cannot correct (rbac matrix); Company Admin correction only. Historical corrections stay historical; online corrections re-enter share code rather than reveal it. Candidate routes wait for Phase 11 validation.
 
 
 ## Next tasks

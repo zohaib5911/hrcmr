@@ -7,6 +7,7 @@ from typing import Literal
 from pydantic import BaseModel, EmailStr, Field, field_validator
 
 from app.core.schemas import RequestModel
+from app.modules.rtw.schemas import RTWStatus  # noqa: TC001 (Pydantic resolves annotations)
 
 Status = Literal["active", "on_leave", "leaver", "archived"]
 
@@ -23,6 +24,7 @@ class EmployeeRow(BaseModel):
     department: str | None
     designation: str | None
     has_photo: bool
+    rtw_status: RTWStatus = "not_recorded"
 
 
 class EmployeeList(BaseModel):
@@ -36,6 +38,8 @@ class EmployeeSummary(BaseModel):
     on_leave: int
     leavers: int
     archived: int
+    rtw_needs_attention: int = 0
+    rtw_verified: int = 0
 
 
 def twelve_months_from(today: date) -> date:
@@ -93,6 +97,8 @@ class EmployeeProfile(BaseModel):
     designation: str | None
     employment_type: str | None = None
     has_photo: bool
+    rtw_status: RTWStatus = "not_recorded"
+    rtw_follow_up_due_on: date | None = None
     opted_out_48h_week: bool
     has_opt_out_agreement: bool
     documents: int = Field(description="Documents filed on the record.")

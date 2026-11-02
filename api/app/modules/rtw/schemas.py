@@ -104,3 +104,25 @@ class RTWTab(BaseModel):
     follow_up_due_on: date | None
     current: CheckOut | None
     checks: list[CheckOut]
+
+
+RTWFilter = Literal[
+    "NeedsAttention", "Verified", "Expiring", "EvidenceMissing", "Expired", "Pending", "NotRecorded"
+]
+
+FILTER_STATUSES: dict[str, tuple[str, ...]] = {
+    "NeedsAttention": (
+        "expiring",
+        "expired",
+        "failed",
+        "pending",
+        "evidence_missing",
+        "not_recorded",
+    ),
+    "Verified": ("verified",),
+    "Expiring": ("expiring",),
+    "EvidenceMissing": ("evidence_missing",),
+    "Expired": ("expired", "failed"),
+    "Pending": ("pending",),
+    "NotRecorded": ("not_recorded",),
+}

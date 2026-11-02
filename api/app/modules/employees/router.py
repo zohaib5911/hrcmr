@@ -13,6 +13,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.core.errors import AppError, ConflictError, NotFoundError
 from app.core.rbac_matrix import Scope
+from app.db.rtw import employee_rtw_status
 from app.modules.audit.models import AuditEvent
 from app.modules.companies.models import Department, Designation
 from app.modules.employees.models import (
@@ -35,6 +36,7 @@ from app.modules.employees.schemas import (
 )
 from app.modules.rbac.deps import Access, require
 from app.modules.rtw.models import RTWCheck
+from app.modules.rtw.schemas import FILTER_STATUSES, RTWFilter
 
 router = APIRouter(tags=["employees"])
 
@@ -66,19 +68,31 @@ async def list_employees(
     status: Annotated[Status | None, Query()] = None,
     department_id: Annotated[uuid.UUID | None, Query()] = None,
     q: Annotated[str | None, Query(max_length=100, description="Name or number contains.")] = None,
+    rtw: Annotated[RTWFilter | None, Query()] = None,
     archived: Annotated[
         bool, Query(description="Include archived records (or, with status=archived, only them).")
     ] = False,
 ) -> EmployeeList:
     reach = await _reachable(access)
     query = (
-        select(Employee, EmployeeAssignment.department_id, Department.name, Designation.title)
+        select(
+            Employee,
+            EmployeeAssignment.department_id,
+            Department.name,
+            Designation.title,
+            employee_rtw_status.c.status,
+        )
         .outerjoin(
             EmployeeAssignment,
             (EmployeeAssignment.employee_id == Employee.id) & current_assignment(),
         )
         .outerjoin(Department, Department.id == EmployeeAssignment.department_id)
         .outerjoin(Designation, Designation.id == EmployeeAssignment.designation_id)
+        .join(
+            employee_rtw_status,
+            (employee_rtw_status.c.employee_id == Employee.id)
+            & (employee_rtw_status.c.company_id == access.company_id),
+        )
     )
     if reach is not None:
         query = query.where(Employee.id.in_(reach))
@@ -88,6 +102,8 @@ async def list_employees(
         query = query.where(Employee.status != "archived")
     if department_id:
         query = query.where(EmployeeAssignment.department_id == department_id)
+    if rtw:
+        query = query.where(employee_rtw_status.c.status.in_(FILTER_STATUSES[rtw]))
     if q and q.strip():
         pattern = _like(q.strip())
         query = query.where(
@@ -121,14 +137,15 @@ async def list_employees(
                 first_name=e.first_name,
                 last_name=e.last_name,
                 email=e.email,
-                status=e.status,  # type: ignore[arg-type]
+                status=e.status,
                 hire_date=e.hire_date,
                 department_id=department_id_,
                 department=department,
                 designation=designation,
                 has_photo=e.photo_file_id is not None,
+                rtw_status=rtw_status_,
             )
-            for e, department_id_, department, designation in rows
+            for e, department_id_, department, designation, rtw_status_ in rows
         ],
         total=total,
     )
@@ -142,12 +159,23 @@ async def employee_summary(access: Reads) -> EmployeeSummary:
         query = query.where(Employee.id.in_(reach))
     counts = dict((await access.db.execute(query)).all())
     live = sum(n for status, n in counts.items() if status != "archived")
+    rtw_query = (
+        select(employee_rtw_status.c.status, func.count())
+        .join(Employee, Employee.id == employee_rtw_status.c.employee_id)
+        .where(employee_rtw_status.c.company_id == access.company_id, Employee.status != "archived")
+        .group_by(employee_rtw_status.c.status)
+    )
+    if reach is not None:
+        rtw_query = rtw_query.where(Employee.id.in_(reach))
+    rtw_counts: dict[str, int] = dict((await access.db.execute(rtw_query)).all())
     return EmployeeSummary(
         total=live,
         active=counts.get("active", 0),
         on_leave=counts.get("on_leave", 0),
         leavers=counts.get("leaver", 0),
         archived=counts.get("archived", 0),
+        rtw_verified=rtw_counts.get("verified", 0),
+        rtw_needs_attention=live - rtw_counts.get("verified", 0),
     )
 
 
@@ -282,6 +310,14 @@ async def _profile(access: Access, employee: Employee) -> EmployeeProfile:
         )
     ).scalar_one()
     blocker = await _delete_blocker(access, employee.id)
+    rtw = (
+        await access.db.execute(
+            select(employee_rtw_status.c.status, employee_rtw_status.c.follow_up_due_on).where(
+                employee_rtw_status.c.employee_id == employee.id,
+                employee_rtw_status.c.company_id == access.company_id,
+            )
+        )
+    ).one()
     return EmployeeProfile(
         id=employee.id,
         employee_number=employee.employee_number,
@@ -296,6 +332,8 @@ async def _profile(access: Access, employee: Employee) -> EmployeeProfile:
         designation=role[1] if role else None,
         employment_type=role[2] if role else None,
         has_photo=employee.photo_file_id is not None,
+        rtw_status=rtw[0],
+        rtw_follow_up_due_on=rtw[1],
         opted_out_48h_week=employee.opted_out_48h_week,
         has_opt_out_agreement=await _agreement_on_file(access, employee.id),
         documents=documents,

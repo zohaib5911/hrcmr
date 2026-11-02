@@ -3152,6 +3152,14 @@ export interface components {
             opted_out_48h_week: boolean;
             /** Phone */
             phone: string | null;
+            /** Rtw Follow Up Due On */
+            rtw_follow_up_due_on?: string | null;
+            /**
+             * Rtw Status
+             * @default not_recorded
+             * @enum {string}
+             */
+            rtw_status: "verified" | "expiring" | "expired" | "failed" | "pending" | "evidence_missing" | "not_recorded";
             /**
              * Status
              * @enum {string}
@@ -3187,6 +3195,12 @@ export interface components {
             /** Last Name */
             last_name: string;
             /**
+             * Rtw Status
+             * @default not_recorded
+             * @enum {string}
+             */
+            rtw_status: "verified" | "expiring" | "expired" | "failed" | "pending" | "evidence_missing" | "not_recorded";
+            /**
              * Status
              * @enum {string}
              */
@@ -3202,6 +3216,16 @@ export interface components {
             leavers: number;
             /** On Leave */
             on_leave: number;
+            /**
+             * Rtw Needs Attention
+             * @default 0
+             */
+            rtw_needs_attention: number;
+            /**
+             * Rtw Verified
+             * @default 0
+             */
+            rtw_verified: number;
             /**
              * Total
              * @description Everyone except archived records.
@@ -6295,6 +6319,7 @@ export interface operations {
                 department_id?: string | null;
                 /** @description Name or number contains. */
                 q?: string | null;
+                rtw?: ("NeedsAttention" | "Verified" | "Expiring" | "EvidenceMissing" | "Expired" | "Pending" | "NotRecorded") | null;
                 /** @description Include archived records (or, with status=archived, only them). */
                 archived?: boolean;
             };

@@ -1,12 +1,14 @@
 "use client";
 
-import { Briefcase, FileText } from "lucide-react";
+import { Briefcase, FileText, ShieldCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 
 import { PageHeader } from "@/components/app/page-header";
 import { useCan } from "@/components/app/session-context";
 import { Alert } from "@/components/ui/alert";
+import { RTWTab } from "@/components/employees/rtw-tab";
+import { RTWChip } from "@/components/employees/rtw-chip";
 import { ProfilePhoto } from "@/components/employees/profile-photo";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -30,6 +32,7 @@ import { attempt, type Problem } from "@/lib/auth/request";
 import { STATUS_LABEL } from "@/lib/employees/list";
 import {
   joinedLine,
+  shortDate,
   MOVES,
   type EmployeeProfile,
   type EmployeeStatus,
@@ -56,6 +59,9 @@ export function ProfilePage({
   employment: EmploymentData;
 }) {
   const can = useCan();
+  const router = useRouter();
+  const [tab, setTab] = useState("overview");
+  const mayReadRtw = can("employee.rtw.read", "employee.rtw.read_own");
   const name = `${profile.first_name} ${profile.last_name}`;
   return (
     <>
@@ -65,6 +71,12 @@ export function ProfilePage({
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <PrintRecord id={profile.id} />
+            <RTWChip status={profile.rtw_status} />
+            {mayReadRtw && profile.rtw_status !== "verified" && (
+              <Button variant="gray" size="sm" onClick={() => setTab("rtw")}>
+                Resolve Right to Work
+              </Button>
+            )}
             <StatusChip tone={TONE[profile.status]}>{STATUS_LABEL[profile.status]}</StatusChip>
           </div>
         }
@@ -78,13 +90,21 @@ export function ProfilePage({
           ) : null}
         </div>
       </div>
-      <Tabs defaultValue="overview">
+      {mayReadRtw && profile.rtw_status === "not_recorded" && (
+        <div className="mb-6">
+          <Alert tone="warning" title="No Right to Work check recorded">
+            Open Right to Work to review or record a check.
+          </Alert>
+        </div>
+      )}
+      <Tabs value={tab} onValueChange={setTab}>
         <TabsList aria-label="Employee record">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="personal">Personal</TabsTrigger>
           <TabsTrigger value="employment">Employment</TabsTrigger>
           <TabsTrigger value="leave">Leave</TabsTrigger>
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
+          {mayReadRtw && <TabsTrigger value="rtw">Right to Work</TabsTrigger>}
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="learning">Learning</TabsTrigger>
           {can("compliance.audit.read") && <TabsTrigger value="activity">Activity</TabsTrigger>}
@@ -98,6 +118,11 @@ export function ProfilePage({
         <TabsContent value="employment" className="pt-6">
           <EmploymentTab id={profile.id} employment={employment} />
         </TabsContent>
+        {mayReadRtw && (
+          <TabsContent value="rtw" className="pt-6">
+            <RTWTab id={profile.id} onChanged={() => router.refresh()} />
+          </TabsContent>
+        )}
         <TabsContent value="documents" className="pt-6">
           <DocumentsTab id={profile.id} />
         </TabsContent>
@@ -124,6 +149,16 @@ function Overview({ profile }: { profile: EmployeeProfile }) {
   return (
     <div className="flex flex-col gap-8">
       <section aria-label="Summary" className="grid gap-4 sm:grid-cols-2">
+        <SummaryCard icon={ShieldCheck} label="Right to Work">
+          <div>
+            <RTWChip status={profile.rtw_status} />
+          </div>
+          {profile.rtw_follow_up_due_on && (
+            <p className="text-callout text-label-secondary">
+              Follow-up due {shortDate(profile.rtw_follow_up_due_on)}
+            </p>
+          )}
+        </SummaryCard>
         <SummaryCard icon={Briefcase} label="Employment">
           {profile.designation || profile.department || profile.employment_type ? (
             <>

@@ -54,3 +54,4 @@
 2026-11-02 20:14 | Codex | relay | Phase 6 merged green; T7.1 requirements/source baseline ready (ruff/mypy and 3 tests pass), no RTW code yet | next rtw/models.py and migration 0015, then API/UI
 2026-11-02 20:40 | Codex | T7.1 | model/migration 0015, immutable history and caller-scoped status view; 7 migration/doc checks pass | next schemas/service/router tests
 2026-11-02 20:46 | Codex | T7.1 | scoped RTW record/history/correction/evidence/PDF API; 12 tests pass incl crypto, status edges, quarantine and tenant view | next employee/list UI integration
+2026-11-02 20:54 | Codex | T7.1 | employee/list RTW UI, filters/deep links and masked full PDF; API 15/list 6 checks pass, web lint/types pass | next conditional form/evidence/correction browser checks

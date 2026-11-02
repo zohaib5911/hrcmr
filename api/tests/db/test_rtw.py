@@ -168,6 +168,11 @@ async def test_record_replace_correct_historical_and_export_keep_codes_masked(
     assert "Right to Work evidence sheet" in output
     assert "rtw.pdf" in output
     assert CODE not in output
+    full = await hr.get(f"{API}/employees/{emp}/record.pdf")
+    assert full.status_code == 200
+    full_text = "\n".join(page.extract_text() for page in PdfReader(io.BytesIO(full.content)).pages)
+    assert "Right to Work history" in full_text
+    assert CODE not in full_text
     assert "W98765432" not in output
     async with rig["owner"].connect() as c:
         stored = (
@@ -310,6 +315,23 @@ async def test_derived_view_boundaries_and_tenant_isolation(
     assert result.status_code == 201, result.text
     assert result.json()["status"] == expected
     assert (await hr.get(f"{API}/employees/{emp}/rtw-checks")).json()["status"] == expected
+    listing = (await hr.get(f"{API}/employees")).json()
+    assert listing["employees"][0]["rtw_status"] == expected
+    link_status = {
+        "verified": "Verified",
+        "expiring": "Expiring",
+        "expired": "Expired",
+        "failed": "Expired",
+        "pending": "Pending",
+        "evidence_missing": "EvidenceMissing",
+    }[expected]
+    filtered = (await hr.get(f"{API}/employees", params={"rtw": link_status})).json()
+    assert len(filtered["employees"]) == 1
+    needs = (await hr.get(f"{API}/employees", params={"rtw": "NeedsAttention"})).json()
+    assert len(needs["employees"]) == (0 if expected == "verified" else 1)
+    summary = (await hr.get(f"{API}/employees/summary")).json()
+    assert summary["rtw_needs_attention"] == (0 if expected == "verified" else 1)
+    assert (await hr.get(f"{API}/employees/{emp}")).json()["rtw_status"] == expected
     if days is None and proof and expected == "verified":
         async with rig["owner"].begin() as c:
             await c.execute(

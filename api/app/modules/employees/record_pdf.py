@@ -27,7 +27,11 @@ def _rows(record: dict[str, Any]) -> list[tuple[str, str]]:
     """Only scalar presentation data enters the template; IDs and internal flags are omitted."""
     result = []
     for key, value in record.items():
-        if key == "id" or key.endswith("_id") or key in {"sensitive_visible", "has_photo"}:
+        if (
+            key == "id"
+            or key.endswith("_id")
+            or key in {"sensitive_visible", "has_photo", "can_correct"}
+        ):
             continue
         if isinstance(value, list):
             value = ", ".join(str(v) for v in value)
@@ -122,6 +126,16 @@ async def employee_pdf(employee_id: uuid.UUID, access: Reports) -> Response:
     if scope_for(access.role, "document.file.read") is not None:
         documents = await list_documents(employee_id, access)
         sections.append(("Documents", [d.model_dump(mode="json") for d in documents]))
+    if scope_for(access.role, "employee.rtw.read") is not None:
+        from app.modules.rtw.router import checks
+
+        rtw = await checks(employee_id, access)
+        sections.append(
+            (
+                "Right to Work history (share codes masked)",
+                [check.model_dump(mode="json") for check in rtw.checks],
+            )
+        )
     generated = datetime.now(UTC).strftime("%d %b %Y %H:%M UTC")
     html = record_html(f"{employee.first_name} {employee.last_name}", generated, sections)
     pdf = await asyncio.to_thread(render_pdf, html)
