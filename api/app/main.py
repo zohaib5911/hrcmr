@@ -22,12 +22,14 @@ from app.core.middleware import RequestContextMiddleware
 from app.core.redis import create_redis, ping_redis
 from app.db.engine import create_engine, ping_database
 from app.integrations.clamav import ClamAV
-from app.integrations.email import LoggingMailer, Mailer
+from app.integrations.email import LoggingMailer, Mailer, transport_from_settings
 from app.integrations.storage import Storage
 from app.integrations.turnstile import Turnstile
+from app.jobs.queue import open_queue
 from app.modules.audit.router import router as audit_router
 from app.modules.auth.container import build_container
 from app.modules.auth.router import router as auth_router
+from app.modules.email.outbox import OutboxMailer
 from app.modules.files.router import router as files_router
 from app.modules.files.service import FileService
 from app.modules.health.router import router as health_router
@@ -89,8 +91,14 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
         engine = create_engine(settings)
         redis = create_redis(settings)
         app.state.engine = engine
+        queue = None
+        sender = mailer
+        if sender is None and transport_from_settings(settings) is not None:
+            # A mail service is set up: messages are saved, then the worker sends them.
+            queue = await open_queue(settings)
+            sender = OutboxMailer(engine, queue)
         app.state.auth = build_container(
-            settings, redis, mailer or LoggingMailer(), Turnstile(settings.turnstile_secret_key)
+            settings, redis, sender or LoggingMailer(), Turnstile(settings.turnstile_secret_key)
         )
         app.state.files = FileService(
             Storage.from_settings(settings), ClamAV.from_settings(settings)
@@ -103,6 +111,8 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
         try:
             yield
         finally:
+            if queue is not None:
+                await queue.close()
             await redis.aclose()
             await engine.dispose()
             logger.info("shutdown")

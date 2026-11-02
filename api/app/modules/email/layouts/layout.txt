@@ -1,0 +1,30 @@
+{{ brand_name }}
+{{ "=" * (brand_name | length) }}
+
+{{ heading }}
+
+{% for line in paragraphs %}
+{{ line }}
+
+{% endfor %}
+{% if code %}
+Your code: {{ code }}
+
+{% endif %}
+{% if button_label %}
+{{ button_label }}:
+{{ button_link }}
+
+{% endif %}
+{% if secondary_label %}
+{{ secondary_label }}:
+{{ secondary_link }}
+
+{% endif %}
+{% for line in small_print %}
+{{ line }}
+{% endfor %}
+
+--
+Sent by {{ brand_name }}. Questions? Write to {{ support_email }}.
+You are getting this because of activity on your {{ brand_name }} account.

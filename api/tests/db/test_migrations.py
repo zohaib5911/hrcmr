@@ -16,6 +16,7 @@ FUNCTIONS = {"uuid_generate_v7", "app_current_company_id", "set_updated_at"}
 IDENTITY_TABLES = [
     "audit_events",
     "companies",
+    "email_outbox",
     "email_tokens",
     "files",
     "invitations",
@@ -72,8 +73,9 @@ def test_migrations_apply_roll_back_and_apply_again_cleanly() -> None:
 
         command.upgrade(config, "head")
         assert _functions(db.owner_url) == FUNCTIONS
+        head = ScriptDirectory.from_config(config).get_current_head()
         assert asyncio.run(_query(db.owner_url, "select version_num from alembic_version")) == [
-            "0003_first_terms"
+            head
         ]
         assert _tables(db.owner_url) == IDENTITY_TABLES
         assert _all_functions(db.owner_url) == FUNCTIONS | IDENTITY_FUNCTIONS

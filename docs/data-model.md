@@ -82,6 +82,30 @@ Checks:
 - `status in ('active', 'suspended', 'pending_deletion', 'deleted')`
 - `week_starts_on between 1 and 7`
 
+## `email_outbox`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `to_address` | VARCHAR(320) | no |  |  |
+| `template` | VARCHAR(40) | no |  |  |
+| `payload` | TEXT | yes |  |  |
+| `status` | VARCHAR(10) | no | `pending` |  |
+| `attempts` | INTEGER | no | `0` |  |
+| `next_attempt_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `last_error` | VARCHAR(200) | yes |  |  |
+| `sent_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `provider_id` | VARCHAR(100) | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `attempts >= 0`
+- `status in ('pending', 'sent', 'failed')`
+
 ## `email_tokens`
 
 | Column | Type | Null | Default | Notes |

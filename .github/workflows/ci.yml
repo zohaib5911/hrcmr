@@ -116,10 +116,10 @@ jobs:
         with:
           version: "0.13.6"
           enable-cache: false
-      - name: Start Postgres, Redis, the file store and the virus scanner
+      - name: Start Postgres, Redis, the file store, the mail catcher and the virus scanner
         working-directory: .
         run: |
-          docker compose up -d --wait postgres-test redis rustfs
+          docker compose up -d --wait postgres-test redis rustfs mailpit
           docker compose run --rm rustfs-init
           # ClamAV downloads its signatures on first start; it is waited for just before the tests.
           docker compose up -d clamav
@@ -141,7 +141,7 @@ jobs:
       - name: Service logs (only when something failed)
         if: failure()
         working-directory: .
-        run: docker compose logs --no-color --tail 100 postgres-test redis rustfs clamav
+        run: docker compose logs --no-color --tail 100 postgres-test redis rustfs mailpit clamav
 
   # ---------------------------------------------------------------------------------------------
   # Web: lint, types, unit tests, the generated API types, then the production build, which runs

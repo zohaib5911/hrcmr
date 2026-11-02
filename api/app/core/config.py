@@ -124,6 +124,9 @@ class Settings(BaseSettings):
     email_from: str | None = None
     email_reply_to: str | None = None
     support_email: str | None = None
+    # Local development only: with no Resend key but an SMTP host (Mailpit), mail goes there.
+    smtp_host: str | None = None
+    smtp_port: Annotated[int, Field(ge=1, le=65535)] = 1025
 
     # --- AI --------------------------------------------------------------------------------------
     anthropic_api_key: SecretStr | None = None

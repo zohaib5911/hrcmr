@@ -7,6 +7,7 @@ check-rls      Fail if any tenant table lacks Row-Level Security or an updated_a
 rotate-keys    Re-encrypt every encrypted column with the active key (after adding a new key).
 export-openapi Print (or --output) the OpenAPI document.
 export-data-model Print (or --output) docs/data-model.md, generated from the models.
+email-samples  Send one of every e-mail to the configured mail service (Mailpit on a dev machine).
 """
 
 from __future__ import annotations
@@ -130,6 +131,24 @@ async def _rotate_keys() -> int:
     return 0
 
 
+async def _email_samples() -> int:
+    from app.db.engine import create_engine
+    from app.integrations.email import transport_from_settings
+    from app.modules.email.samples import send_samples
+
+    settings = get_settings()
+    transport = transport_from_settings(settings)
+    if transport is None:
+        raise SystemExit("Set SMTP_HOST (Mailpit) or RESEND_API_KEY first.")
+    engine = create_engine(settings)
+    try:
+        sent = await send_samples(engine, transport, settings)
+    finally:
+        await engine.dispose()
+    print(f"{sent} sample e-mails sent.")  # noqa: T201
+    return 0
+
+
 def openapi_document() -> str:
     """The API's OpenAPI document as stable, sorted JSON.
 
@@ -169,6 +188,7 @@ def main(argv: list[str] | None = None) -> int:
             "export-openapi",
             "export-data-model",
             "rotate-keys",
+            "email-samples",
         ],
     )
     parser.add_argument(
@@ -191,6 +211,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "rotate-keys":
         return asyncio.run(_rotate_keys())
+    if args.command == "email-samples":
+        return asyncio.run(_email_samples())
     if args.command == "export-data-model":
         from app.db.data_model import data_model_markdown
 
