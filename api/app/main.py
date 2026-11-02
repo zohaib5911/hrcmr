@@ -41,8 +41,10 @@ from app.modules.companies.structure_router import router as structure_router
 from app.modules.companies.trading_hours import router as trading_hours_router
 from app.modules.email.outbox import OutboxMailer
 from app.modules.employees.compensation_router import router as compensation_router
+from app.modules.employees.document_router import router as employee_documents_router
 from app.modules.employees.employment_router import router as employment_router
 from app.modules.employees.personal_router import router as personal_router
+from app.modules.employees.record_pdf import router as employee_pdf_router
 from app.modules.employees.router import router as employees_router
 from app.modules.files.router import router as files_router
 from app.modules.files.service import FileService
@@ -193,6 +195,8 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(employees_router, prefix=API_PREFIX)
     app.include_router(personal_router, prefix=API_PREFIX)
     app.include_router(employment_router, prefix=API_PREFIX)
+    app.include_router(employee_documents_router, prefix=API_PREFIX)
+    app.include_router(employee_pdf_router, prefix=API_PREFIX)
     app.include_router(compensation_router, prefix=API_PREFIX)
     app.include_router(structure_router, prefix=API_PREFIX)
     _install_openapi(app)

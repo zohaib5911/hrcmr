@@ -30,3 +30,4 @@
 2026-11-02 19:02 | Codex | T6.6 | complete; salary API/unit 10 pass, browser/setup 2 pass, lint/types/build clean; CI 41504657493 pending | next T6.7 Documents/PDF
 2026-11-02 18:55 | Codex | relay | T6.5/T6.6 complete and pushed; handover at task boundary, CI 41504657493 pending without failures | next check CI then T6.7 Documents/PDF
 2026-11-02 18:57 | Codex | T6.7 | requirements/baseline pass; WeasyPrint dependency and runtime/CI libraries added | next Documents API and PDF
+2026-11-02 19:00 | Codex | T6.7 | Documents API and masked inspection PDF; 3 tests pass, lint/types clean | next Documents UI and print button

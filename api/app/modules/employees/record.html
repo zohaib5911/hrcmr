@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Employee record</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 18mm;
+        @bottom-right {
+          content: "Page " counter(page) " of " counter(pages);
+          font-size: 9pt;
+        }
+      }
+      body {
+        font-family: "DejaVu Sans", sans-serif;
+        font-size: 10pt;
+        color: #1c1c1e;
+      }
+      h1 {
+        font-size: 22pt;
+      }
+      h2 {
+        font-size: 14pt;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 5pt;
+      }
+      h2 {
+        break-after: avoid;
+      }
+      .row {
+        border-bottom: 1px solid #eee;
+        padding: 4pt 0;
+        overflow-wrap: anywhere;
+      }
+      .label {
+        font-weight: bold;
+      }
+      .record {
+        margin-bottom: 12pt;
+      }
+      p {
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>{{ name }}</h1>
+    <p>Employee record · Generated {{ generated }}</p>
+    <p>
+      National Insurance, passport and bank numbers are masked. Salary is included only when the
+      requester may read compensation.
+    </p>
+    {% for title, records in sections %}
+    <h2>{{ title }}</h2>
+    {% for record in records %}
+    <div class="record">
+      {% for label, value in record %}
+      <div class="row"><span class="label">{{ label }}:</span> {{ value }}</div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p>Nothing recorded.</p>
+    {% endfor %}{% endfor %}
+  </body>
+</html>

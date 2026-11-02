@@ -8,10 +8,10 @@ State: IN PROGRESS
 ## Current task
 - T6.7 — Documents tab and employee record PDF
   - [x] Read requirements, baseline checks; installed plan-specified WeasyPrint with runtime/CI libraries
-  - [ ] Documents API and tests
+  - [x] Documents API and tests (3 pass including parsed PDF/security tests)
   - [ ] Documents UI (All/Payslips, upload category, scan status, short-lived download)
   - [ ] Full masked employee PDF and browser verification
-- Resume note: implement document_router.py and PDF service; WeasyPrint must import lazily so OpenAPI export needs no native libraries. Previous: Check CI 41504657493 first (runs 7c99e60, includes all backend changes and T6.4 CI fix; salary UI landed later in f7199b9). If red fix it first. Then T6.7; EmployeeDocument already exists. Follow api/app/modules/files/service.py and companies/compliance_documents.py for safe upload/download. No PDF library currently in pyproject.toml. Salary UI/browser checks pass locally.
+- Resume note: backend complete; build documents-tab.tsx and Print record action, then browser check. Previous: implement document_router.py and PDF service; WeasyPrint must import lazily so OpenAPI export needs no native libraries. Previous: Check CI 41504657493 first (runs 7c99e60, includes all backend changes and T6.4 CI fix; salary UI landed later in f7199b9). If red fix it first. Then T6.7; EmployeeDocument already exists. Follow api/app/modules/files/service.py and companies/compliance_documents.py for safe upload/download. No PDF library currently in pyproject.toml. Salary UI/browser checks pass locally.
 
 ## Next tasks
 - T6.7, T6.8, Phase 6 gate (full suite once, 390/1280 screenshots, PR dev to main), then Phase 7
