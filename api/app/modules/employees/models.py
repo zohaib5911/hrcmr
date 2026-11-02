@@ -344,3 +344,10 @@ class EmployeeDocument(Base, RecordMixin, TenantMixin):
     notes: Mapped[str | None] = mapped_column(Text)
 
     __table_args__ = (CheckConstraint(_in("category", DOCUMENT_CATEGORIES), name="category"),)
+
+
+def current_assignment() -> Any:
+    """Assignments are active on [effective_from, ended_at), including scheduled changes."""
+    return (EmployeeAssignment.effective_from <= func.current_date()) & (
+        EmployeeAssignment.ended_at.is_(None) | (EmployeeAssignment.ended_at > func.current_date())
+    )

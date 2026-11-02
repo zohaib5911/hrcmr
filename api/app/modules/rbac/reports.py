@@ -14,7 +14,7 @@ from __future__ import annotations
 import uuid  # noqa: TC003
 from typing import TYPE_CHECKING, Literal
 
-from sqlalchemy import Date, Uuid, column, select, table
+from sqlalchemy import Date, Uuid, column, func, select, table
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,6 +26,7 @@ _EMPLOYEES = table(
     column("employee_id", Uuid),
     column("company_id", Uuid),
     column("ended_at", Date),
+    column("effective_from", Date),
     column("reporting_authority_employee_id", Uuid),
     column("leave_sanctioning_employee_id", Uuid),
 )
@@ -55,7 +56,11 @@ class ReportsGraph:
                 .where(
                     link == manager_id,
                     _EMPLOYEES.c.company_id == self._company_id,
-                    _EMPLOYEES.c.ended_at.is_(None),
+                    _EMPLOYEES.c.effective_from <= func.current_date(),
+                    (
+                        _EMPLOYEES.c.ended_at.is_(None)
+                        | (_EMPLOYEES.c.ended_at > func.current_date())
+                    ),
                 )
                 .cte("chain", recursive=True)
             )
@@ -65,7 +70,11 @@ class ReportsGraph:
                 select(_EMPLOYEES.c.employee_id).where(
                     link == chain.c.id,
                     _EMPLOYEES.c.company_id == self._company_id,
-                    _EMPLOYEES.c.ended_at.is_(None),
+                    _EMPLOYEES.c.effective_from <= func.current_date(),
+                    (
+                        _EMPLOYEES.c.ended_at.is_(None)
+                        | (_EMPLOYEES.c.ended_at > func.current_date())
+                    ),
                 )
             )
             rows = await self._db.execute(select(chain.c.id))

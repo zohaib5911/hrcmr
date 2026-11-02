@@ -20,6 +20,7 @@ from app.modules.employees.models import (
     EmployeeAssignment,
     EmployeeCompensation,
     EmployeeDocument,
+    current_assignment,
 )
 from app.modules.employees.schemas import (
     EmployeeIn,
@@ -73,7 +74,7 @@ async def list_employees(
         select(Employee, EmployeeAssignment.department_id, Department.name, Designation.title)
         .outerjoin(
             EmployeeAssignment,
-            (EmployeeAssignment.employee_id == Employee.id) & EmployeeAssignment.ended_at.is_(None),
+            (EmployeeAssignment.employee_id == Employee.id) & current_assignment(),
         )
         .outerjoin(Department, Department.id == EmployeeAssignment.department_id)
         .outerjoin(Designation, Designation.id == EmployeeAssignment.designation_id)
@@ -266,9 +267,7 @@ async def _profile(access: Access, employee: Employee) -> EmployeeProfile:
             .select_from(EmployeeAssignment)
             .outerjoin(Department, Department.id == EmployeeAssignment.department_id)
             .outerjoin(Designation, Designation.id == EmployeeAssignment.designation_id)
-            .where(
-                EmployeeAssignment.employee_id == employee.id, EmployeeAssignment.ended_at.is_(None)
-            )
+            .where(EmployeeAssignment.employee_id == employee.id, current_assignment())
         )
     ).first()
     documents = (
