@@ -6,7 +6,7 @@
  */
 import path from "node:path";
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "../support/fixtures";
 
 const OUT = path.resolve(__dirname, "../../../docs/screenshots/phase-4");
 const SIZES = [

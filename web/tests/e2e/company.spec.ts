@@ -4,7 +4,9 @@
  * and a save changes what the page shows. (The logo upload needs the file store and the virus scanner,
  * which the API tests cover.)
  */
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+
+import { expect, test } from "../support/fixtures";
 
 import { audit } from "../support/axe";
 

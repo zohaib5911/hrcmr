@@ -7,7 +7,9 @@
  * placeholder pages do not have yet; they are covered by data-table.test.tsx and
  * shortcut-provider.test.tsx, and in a browser by design-components.spec.ts.
  */
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+
+import { expect, test } from "../support/fixtures";
 
 import { GO_TARGETS, SHORTCUT_GROUPS } from "../../lib/shortcuts";
 import { audit } from "../support/axe";

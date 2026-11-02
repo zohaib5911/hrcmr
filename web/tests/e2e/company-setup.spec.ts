@@ -3,7 +3,9 @@
  * Company Admin. The tests run in order, because each builds on what the one before made; the postcode
  * lookup (a public service) is covered by the API tests, not clicked here.
  */
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+
+import { expect, test } from "../support/fixtures";
 
 import { audit } from "../support/axe";
 

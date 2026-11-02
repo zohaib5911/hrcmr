@@ -3,7 +3,9 @@
  * are listed, the sheet asks for a document before it saves, and the page passes axe in both themes.
  * (Uploading goes through the file store and the virus scanner, which the API tests cover.)
  */
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+
+import { expect, test } from "../support/fixtures";
 
 import { audit } from "../support/axe";
 

@@ -19,6 +19,9 @@ export default defineConfig({
   // development server reload every page under test, which timed out the whole "design" project.
   outputDir: "../.playwright-results",
   fullyParallel: true,
+  // One worker locally: every spec file signs up its own company (tests/support/fixtures.ts), and the
+  // one throwaway database and Mailpit inbox stay easy to follow. CI uses Playwright's default.
+  workers: process.env.CI ? undefined : Number(process.env.E2E_WORKERS ?? 1),
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
   reporter: [["list"]],
@@ -66,7 +69,9 @@ export default defineConfig({
     {
       command: "uv run --directory ../api python -m tests.e2e_server",
       url: `http://127.0.0.1:${API_PORT}/api/v1/health`,
-      reuseExistingServer: !process.env.CI,
+      // Never reused: each run starts the API on a brand-new throwaway database (and flushed Redis),
+      // so nothing from an earlier run can change what a test sees.
+      reuseExistingServer: false,
       timeout: 90_000,
       env: {
         E2E_API_PORT: String(API_PORT),
