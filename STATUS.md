@@ -13,18 +13,18 @@ State: IN PROGRESS
   - [x] 60 screenshots at 390/1280, light/dark; five-line phase summary
   - [x] Open PR #11 dev to main
   - [ ] Merge only on all-green CI
-- Resume note: Phase 6 PR #11 is open: https://github.com/zohaib5911/hrcmr/pull/11 . Wait for every CI check on the latest head to be green; fix any red on dev. Then gh pr merge 11 --merge --auto (no admin/bypass), sync clean dev and start T7.1. Local gate/evidence complete; no full-suite repeat needed.
+- Resume note: PR #11 CI found vulnerable brotli/pypdf and a Flask-specific direct-Jinja rule. Patched brotli to 1.2.1 and pypdf to 6.21.4 with narrow temporary cooldown exceptions; local pip-audit reports no known vulnerabilities, 4 PDF/file tests pass. Escaping remains explicit/tested; same single-line Semgrep annotation as existing email renderer. Push/check latest PR CI, merge only on all-green checks, sync dev then T7.1.
 
 
 ## Next tasks
 - Phase 6 PR/merge, T7.1 through T7.6, Phase 7 gate then BLOCKED — audit requested
 
 ## Health
-- CI on dev: prior run 41504657493 green; PR #11 CI pending. CI on main: previous run red (fix included on dev).
+- CI on dev: prior run 41504657493 green; PR #11 audit/SAST/API-image red on b0e66bf; fixes ready for next head. CI on main: previous run red (fix included on dev).
 - Local checks run: API full 421 pass/1 destructive fixture failure fixed, affected RBAC/User Access 26 pass; Overview QA API 3 pass. Web 776 pass, guards 32 pass, full Playwright 396 pass/144 screenshot-only skipped; final screenshots 5 pass (60 images). Ruff/mypy/eslint/tsc/generated API/build clean.
 
 ## Issues / suggestions
-- Remove certifi exception after 2026-11-06; Dependabot #5 pending green CI.
+- Remove security cooldown exceptions: certifi after 2026-11-06, brotli after 2026-11-05, pypdf after 2026-11-12; Dependabot #5 pending green CI.
 
 ## Strategy / decisions taken
 - Link/unlink requires rbac.role.assign (Company Admin): it changes self-service reach. Own account linking allowed; duplicate employee links refused. Photos require full employee.profile.write, excluding contact-only own writes.

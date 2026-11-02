@@ -49,3 +49,4 @@
 2026-11-02 19:43 | Codex | Phase 6 gate | recapture 5 pass, screenshots reviewed; final QA fixes zero-valued facts rendering as Not set | next final artifact refresh and PR
 2026-11-02 19:46 | Codex | Phase 6 gate | final screenshots 5 pass/60 images, spot-reviewed; phase summary written; hierarchy deferral corrected to T12.1 | next PR and green CI merge
 2026-11-02 19:46 | Codex | Phase 6 gate | PR #11 opened (dev to main), local gate and 60 images complete | next all-green CI then merge with --merge --auto
+2026-11-02 19:52 | Codex | Phase 6 CI | patched brotli 1.2.1/pypdf 6.21.4, local audit clean/4 PDF tests pass; documented tested Jinja false-positive as email renderer does | next latest PR #11 CI

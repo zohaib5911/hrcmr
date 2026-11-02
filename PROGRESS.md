@@ -188,7 +188,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 ### Phase 6 — Employees — local gate passed 2026-11-02; PR/CI pending
 - Scope: directory/create, lifecycle, Personal, dated Employment/Salary, scanned Documents, inspection PDF, related tabs and real Activity; deferred employee linking and photos completed.
-- Security: scoped endpoints, step-up masked-data reveal, compensation permission, clean-only downloads, escaped PDFs without external resources and audited changes.
+- Security: scoped endpoints, step-up masked-data reveal, compensation permission, clean-only downloads and escaped PDFs; CI findings patched (brotli 1.2.1, pypdf 6.21.4), local pip-audit clean and 4 affected tests pass.
 - Regression: API 421 passed plus one shared-schema fixture failure fixed (affected 26 passed); role-only QA fix 3 passed; web 776, guards 32, full Playwright 396 passed/144 screenshot-only skipped; lint/types/generated API clean.
 - Design QA: 60 images in docs/screenshots/phase-6, light/dark at 390/1280; capture 5 passed. Fixed role-only Overview and zero-value display; spot-reviewed pages and sheets.
 - Deferred by plan: RTW in Phase 7; Leave/Attendance/Learning data in Phases 8/9/13; hierarchy labels CRUD in T12.1. Next: green CI and dev-to-main merge.

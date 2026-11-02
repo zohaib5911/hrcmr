@@ -42,6 +42,9 @@ def _rows(record: dict[str, Any]) -> list[tuple[str, str]]:
 
 
 def record_html(name: str, generated: str, sections: list[tuple[str, list[dict[str, Any]]]]) -> str:
+    # FastAPI has no Flask render_template. Record values are escaped (test_employee_pdf.py);
+    # this trusted local template cannot fetch resources in the PDF renderer.
+    # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
     template = Environment(autoescape=True).from_string(
         Path(__file__).with_name("record.html").read_text()
     )

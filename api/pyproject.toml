@@ -35,13 +35,16 @@ exclude-newer = "14 days"
 # Exception: the certifi release that fixes PYSEC-2026-4320 (2026.10.18 or later) is younger than the
 # window. A cooldown must never hold back a security fix. Remove this line after 2026-11-06, when the
 # locked certifi (2026.10.23) is 14 days old and the cooldown covers it.
-exclude-newer-package = { certifi = "2026-11-01T00:00:00Z" }
+# Phase 6 pip-audit security fixes: brotli 1.2.1 (PYSEC-2026-4322), pypdf 6.21.4
+# (CVE-2026-119203/119205/119204 and earlier fixes). Remove these two exceptions
+# after 2026-11-05 (brotli) and 2026-11-12 (pypdf), once the releases clear the cooldown.
+exclude-newer-package = { certifi = "2026-11-01T00:00:00Z", brotli = "2026-11-03T00:00:00Z", pypdf = "2026-11-03T00:00:00Z" }
 
 [dependency-groups]
 dev = [
     "asgi-lifespan>=2.1.0",
     "mypy>=2.4.0",
-    "pypdf>=6.21.1",
+    "pypdf>=6.21.4",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
     "ruff==0.17.1",
