@@ -9,10 +9,10 @@ State: IN PROGRESS
 - Phase 6 gate
   - [x] Deferred User Access employee linking API/UI; API and browser tests pass
   - [x] Profile photo API/UI; real scanned upload/read and browser tests pass
-  - [ ] Full suite once; fix failures
+  - [ ] Full suite: API 421 passed, 1 shared-schema fixture failure fixed; affected RBAC/User Access 26 pass; web/browser next
   - [ ] Design QA screenshots at 390/1280; phase summary
   - [ ] PR dev to main; merge only on green CI
-- Resume note: integration gaps verified. Run full API, web/guards, then full Playwright once, sequentially. Screenshot spec phase6-screenshots.spec.ts ready (SCREENSHOTS=1). Previous: run Deferred employee linking Playwright test; then full suite and screenshots. Previous: finish integration gaps identified in PROGRESS/plan 8.3 before gate checks. Link/unlink must use tenant-safe employee validation, prevent duplicate links and audit changes.
+- Resume note: API gate done; fixture fix verified by 26 affected tests. Next full web, guards and Playwright. Previous: integration gaps verified. Run full API, web/guards, then full Playwright once, sequentially. Screenshot spec phase6-screenshots.spec.ts ready (SCREENSHOTS=1). Previous: run Deferred employee linking Playwright test; then full suite and screenshots. Previous: finish integration gaps identified in PROGRESS/plan 8.3 before gate checks. Link/unlink must use tenant-safe employee validation, prevent duplicate links and audit changes.
 
 ## Next tasks
 - Phase 6 gate, Phase 7 (stop for audit after Phase 7)
