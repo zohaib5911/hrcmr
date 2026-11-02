@@ -7,14 +7,14 @@ State: IN PROGRESS
 
 ## Current task
 - T6.5 — Employment tab (hire date change with reason, effective-dated assignments + history, responsibilities, previous employment, education, training, memberships)
-  - [ ] Read requirements and run baseline checks
+  - [x] Read requirements; API lint/types and web lint/types pass; DB baseline running with local service access
   - [ ] Employment API and tests
   - [ ] Employment tab UI
   - [ ] Employment e2e and final checks
 - Resume note: add tab in web/components/employees/profile-page.tsx (follow personal-tab.tsx: Section, useSubmit, FormSheet); API goes in a new api/app/modules/employees/employment_router.py registered in app/main.py like personal_router. Tables already exist (migration 0013). Salary is T6.6, not here.
 
 ## Next tasks
-- T6.6, then Phase 6 gate
+- T6.6, T6.7, T6.8, then Phase 6 gate
 
 ## Health
 - CI on dev: latest run green; T6.4 commit not yet run    CI on main: RED (flaky audit-export test, fixed on dev in the T6.1 branch; goes green when dev merges)

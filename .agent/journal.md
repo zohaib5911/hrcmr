@@ -19,3 +19,4 @@
 2026-11-02 23:20 | Claude Code | T6.4 | API: personal details, address, contacts, identity, bank, reveal + 3 tests | next: web Personal tab
 2026-11-02 23:35 | Claude Code | T6.4 | web Personal tab (personal-tab.tsx, mounted on profile) lint/types/unit clean | next: e2e in employees.spec.ts
 2026-11-02 23:50 | Claude Code | T6.4 | done: API + web + e2e verified | next: T6.5
+2026-11-02 20:05 | Codex | T6.5 | synced dev, dispatched CI 41502580515; read requirements, lint/types clean | next employment API and tests
