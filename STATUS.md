@@ -3,15 +3,15 @@ Updated: 2026-11-02 15:30 (Europe/London)    Agent: Claude Code    Branch: dev  
 State: IN PROGRESS
 
 ## Last completed
-- T6.2 — create page /employees/new, POST /employees, unique number rule
+- T6.3 — employee profile header and Overview tab, lifecycle, 48 h opt-out, guarded delete
 
 ## Current task
-- T6.3 — profile header, Overview tab, lifecycle status, 48 h opt-out, guarded permanent delete
-  - [ ] read plan 8.3 profile section and 6.3   <- start here
-- Resume note: employee code is api/app/modules/employees/ and web/components/employees/.
+- T6.4 — Personal tab (details, address with postcode lookup, emergency contacts, NI/passport and bank masked with step-up reveal)
+  - [ ] read plan 8.3 Personal tab and 6.3   <- start here
+- Resume note: profile is web/components/employees/profile-page.tsx (tabs: add Personal there); API in api/app/modules/employees/router.py.
 
 ## Next tasks
-- T6.4, T6.5
+- T6.5
 
 ## Health
 - CI on dev: not yet run for T6.1    CI on main: RED (flaky audit-export test, fixed on dev in the T6.1 branch; goes green when dev merges)

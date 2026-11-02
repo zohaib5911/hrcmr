@@ -156,6 +156,7 @@ export function EmployeesPage({
           columns={COLUMNS}
           rows={shown}
           getRowId={(e) => e.id}
+          onRowOpen={(e) => router.push(`/employees/${e.id}`)}
           defaultSort={{ column: "employee", direction: "asc" }}
           empty={
             <EmptyState

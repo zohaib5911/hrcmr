@@ -89,3 +89,32 @@ for (const colorScheme of ["light", "dark"] as const) {
     }
   });
 }
+
+test("a profile opens from the list, moves through the lifecycle, and then can only be archived", async ({
+  page,
+}) => {
+  await open(page);
+  await page.getByRole("button", { name: "New employee" }).click();
+  await page.getByLabel("First name", { exact: true }).fill("Cara");
+  await page.getByLabel("Last name", { exact: true }).fill("Doyle");
+  await page.getByLabel("Work email", { exact: true }).fill("cara@example.com");
+  await page.getByLabel("Employee number", { exact: true }).fill("E500");
+  await page.getByLabel("Hire date", { exact: true }).fill("6 Jan 2025");
+  await page.getByRole("button", { name: "Add employee" }).click();
+  await page.getByRole("grid", { name: "Employees" }).getByText("Cara Doyle").dblclick();
+
+  await expect(page.getByRole("heading", { level: 1, name: "Cara Doyle" })).toBeVisible();
+  await expect(page.getByText("E500 · Joined 6 Jan 2025")).toBeVisible();
+  await expect(page.getByText("Upload the signed agreement first.")).toBeVisible();
+  await expect(page.getByRole("switch", { name: /Opted out of the 48-hour week/ })).toBeDisabled();
+  await audit(page, "employee profile");
+
+  await page.getByRole("button", { name: "Set to on leave" }).click();
+  await page.getByRole("button", { name: "Set to on leave" }).last().click();
+  await expect(page.getByText("Currently on leave")).toBeVisible();
+
+  await page.getByText("Advanced: permanently delete this record").click();
+  // The move above is history now, so the record can only be archived.
+  await expect(page.getByText("This record cannot be deleted")).toBeVisible();
+  await expect(page.getByText(/Archive it instead/)).toBeVisible();
+});
