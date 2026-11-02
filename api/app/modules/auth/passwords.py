@@ -79,7 +79,12 @@ def is_common(password: str) -> bool:
 
 async def is_breached(password: str, client: httpx.AsyncClient | None = None) -> bool | None:
     """True if the password appears in a known breach, False if not, None if we could not tell."""
-    digest = hashlib.sha1(password.encode("utf-8"), usedforsecurity=False).hexdigest().upper()
+    # Not a security use of SHA-1: the Have I Been Pwned range API is keyed by SHA-1, and only the
+    # first five characters of the digest ever leave this server (k-anonymity).
+    digest = (
+        # nosemgrep: python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-sha1
+        hashlib.sha1(password.encode("utf-8"), usedforsecurity=False).hexdigest().upper()
+    )
     prefix, suffix = digest[:5], digest[5:]
     owns_client = client is None
     http = client or httpx.AsyncClient(timeout=HIBP_TIMEOUT_SECONDS)

@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 import { expect, test } from "@playwright/test";
 
 import { createApiClient } from "../../lib/api/client";
@@ -41,5 +43,10 @@ test("the API serves the same contract the types were generated from", async () 
     paths: Record<string, unknown>;
   };
   expect(served.servers).toEqual([{ url: "/api/v1" }]);
-  expect(Object.keys(served.paths).sort()).toEqual(["/health", "/ready"]);
+  // The paths the generated file declares, read from its text: `paths` is a type, gone at run time.
+  const generated = [
+    ...readFileSync("lib/api/schema.ts", "utf8").matchAll(/^ {4}"(\/[^"]*)": \{$/gm),
+  ].map((match) => match[1]);
+  expect(generated).toContain("/health");
+  expect(Object.keys(served.paths).sort()).toEqual([...generated].sort());
 });
