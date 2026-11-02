@@ -9,10 +9,10 @@ State: IN PROGRESS
 - Phase 6 gate
   - [x] Deferred User Access employee linking API/UI; API and browser tests pass
   - [x] Profile photo API/UI; real scanned upload/read and browser tests pass
-  - [ ] Full suite: API 421 passed, 1 shared-schema fixture failure fixed; affected RBAC/User Access 26 pass; web 776 + guards 32 pass; full browser next
+  - [x] Full suite once: API 421 pass/1 fixture failure fixed (affected 26 pass); web 776, guards 32, Playwright 396 pass/144 screenshot-only skipped
   - [ ] Design QA screenshots at 390/1280; phase summary
   - [ ] PR dev to main; merge only on green CI
-- Resume note: Full Playwright is RUNNING (exec session 38612), log /tmp/cmr-phase6-e2e.log. Check the log/process before rerunning: full suite must run once. API gate: 421 pass/1 destructive-fixture failure fixed, affected RBAC/User Access 26 pass; web 776 pass and guards 32 pass. Next after browser result: fix failures with affected tests only; capture SCREENSHOTS=1 phase6-screenshots.spec.ts; inspect 390/1280 screenshots, write 5-line phase summary, PR dev to main and merge on green CI.
+- Resume note: All gate checks finished: API fixture fix verified by 26 affected tests; web/guards/Playwright pass. Run SCREENSHOTS=1 phase6-screenshots.spec.ts, inspect 390/1280 light/dark images, write 5-line summary and open dev-to-main PR; merge only once every CI check is green.
 
 
 ## Next tasks
