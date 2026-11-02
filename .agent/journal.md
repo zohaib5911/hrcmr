@@ -23,3 +23,4 @@
 2026-11-02 20:15 | Codex | T6.5 | employment API, audited CRUD, role history and date-aware readers; 9 integration tests pass | next Employment tab UI
 2026-11-02 20:25 | Codex | T6.4 CI | API job failed on stale generated data-model doc; regenerated and drift test passes | next push fix and verify Employment UI
 2026-11-02 18:46 | Codex | T6.5 | Employment UI and explicit-save e2e written; lint/types clean | next run affected Playwright and API tests
+2026-11-02 18:48 | Codex | T6.5 | initial checks found outdated reporting fixture and duplicate history locator; corrected both; whitespace is now 422 | next rerun affected tests

@@ -313,7 +313,7 @@ async def _employees(database: DatabaseUnderTest) -> tuple[uuid.UUID, uuid.UUID]
             text(
                 "create table employee_assignments (employee_id uuid, company_id uuid not null, "
                 "reporting_authority_employee_id uuid, leave_sanctioning_employee_id uuid, "
-                "ended_at date)"
+                "ended_at date, effective_from date not null default '2000-01-01')"
             )
         )
         for statement in tenant_rls_statements("employee_assignments", privileges=("SELECT",)):
@@ -342,9 +342,21 @@ async def test_reports_are_found_at_any_depth_per_chain_and_never_across_compani
     async with owner.begin() as c:
         for row in rows:
             await c.execute(
-                text("insert into employee_assignments values (:i, :c, :r, :l)"),
+                text(
+                    "insert into employee_assignments (employee_id, company_id, reporting_authority_employee_id, leave_sanctioning_employee_id) values (:i, :c, :r, :l)"
+                ),
                 {"i": row[0], "c": row[1], "r": row[2], "l": row[3]},
             )
+        # A planned future report and an ended report must not grant access today.
+        await c.execute(
+            text(
+                "insert into employee_assignments (employee_id, company_id, "
+                "reporting_authority_employee_id, effective_from, ended_at) values "
+                "(:future, :company, :ceo, '2099-01-01', null), "
+                "(:past, :company, :ceo, '2000-01-01', '2001-01-01')"
+            ),
+            {"future": uuid7(), "past": uuid7(), "company": company_a, "ceo": ceo},
+        )
     await owner.dispose()
 
     app_engine = engine_for(database.app_url, poolclass=NullPool)

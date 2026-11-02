@@ -93,7 +93,7 @@ async def test_roles_hire_date_history_and_audit(rig: dict[str, Any]) -> None:
     ).status_code == 409
     assert (
         await hr.put(f"{base}/hire-date", json={"hire_date": "2025-01-01", "reason": " "})
-    ).status_code == 409
+    ).status_code == 422
     assert (
         await hr.put(
             f"{base}/hire-date", json={"hire_date": "2025-01-01", "reason": "Contract corrected"}

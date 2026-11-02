@@ -240,7 +240,10 @@ test("Employment saves explicitly and keeps role history and supporting records"
   await dialog.getByRole("button", { name: "Save", exact: true }).click();
   await expect(dialog).not.toBeVisible();
   await expect(
-    page.getByRole("region", { name: "Current role" }).getByText("full time", { exact: true }),
+    page
+      .getByRole("region", { name: "Current role" })
+      .getByText("full time", { exact: true })
+      .first(),
   ).toBeVisible();
   await page.getByRole("button", { name: "Change role" }).click();
   dialog = page.getByRole("dialog");
@@ -250,7 +253,10 @@ test("Employment saves explicitly and keeps role history and supporting records"
   await expect(dialog).not.toBeVisible();
   await page.getByText("Role history", { exact: true }).click();
   await expect(
-    page.getByRole("region", { name: "Current role" }).getByText("full time", { exact: true }),
+    page
+      .getByRole("region", { name: "Current role" })
+      .getByText("full time", { exact: true })
+      .first(),
   ).toBeVisible();
   for (const [section, field, value] of [
     ["Key responsibilities", "Responsibility", "Look after customers"],
