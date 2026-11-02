@@ -405,7 +405,7 @@ test("Documents filters payslips, uploads only on Save, shows scan state and pri
   await page.getByRole("button", { name: "Upload document", exact: true }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByLabel("Category", { exact: true })).toHaveValue("payslip");
-  await dialog.getByLabel("Document", { exact: true }).setInputFiles({
+  await dialog.getByLabel(/^Document Drag files/).setInputFiles({
     name: "november.pdf",
     mimeType: "application/pdf",
     buffer: Buffer.from("%PDF-1.4\n%%EOF\n"),

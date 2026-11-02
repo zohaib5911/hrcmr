@@ -32,3 +32,4 @@
 2026-11-02 18:57 | Codex | T6.7 | requirements/baseline pass; WeasyPrint dependency and runtime/CI libraries added | next Documents API and PDF
 2026-11-02 19:00 | Codex | T6.7 | Documents API and masked inspection PDF; 3 tests pass, lint/types clean | next Documents UI and print button
 2026-11-02 19:02 | Codex | T6.7 | Documents UI and Print record implemented, browser test written | next browser verification
+2026-11-02 19:04 | Codex | T6.7 | browser upload locator corrected to FileDrop full accessible label | next rerun Documents journey
