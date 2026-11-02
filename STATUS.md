@@ -10,8 +10,8 @@ State: IN PROGRESS
   - [x] Read requirements; API lint/types and web lint/types pass; DB baseline running with local service access
   - [x] Employment API and tests (9 employee integration tests pass)
   - [x] Employment tab UI (lint/types pass)
-  - [ ] Employment e2e and final checks
-- Resume note: UI implemented; next Employment e2e. T6.4 CI doc drift fixed. Older note: API complete; next build employment-tab.tsx, mount and fetch in profile page. Previous note: add tab in web/components/employees/profile-page.tsx (follow personal-tab.tsx: Section, useSubmit, FormSheet); API goes in a new api/app/modules/employees/employment_router.py registered in app/main.py like personal_router. Tables already exist (migration 0013). Salary is T6.6, not here.
+  - [ ] Employment e2e written; run Playwright and final API checks
+- Resume note: run employees.spec.ts Employment test, then finish T6.5. Older note: UI implemented; next Employment e2e. T6.4 CI doc drift fixed. Older note: API complete; next build employment-tab.tsx, mount and fetch in profile page. Previous note: add tab in web/components/employees/profile-page.tsx (follow personal-tab.tsx: Section, useSubmit, FormSheet); API goes in a new api/app/modules/employees/employment_router.py registered in app/main.py like personal_router. Tables already exist (migration 0013). Salary is T6.6, not here.
 
 ## Next tasks
 - T6.6, T6.7, T6.8, then Phase 6 gate

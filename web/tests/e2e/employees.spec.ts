@@ -189,3 +189,91 @@ test("the Personal tab saves details, an address and a contact, and shows identi
   await audit(page, "personal tab");
   await context.close();
 });
+
+test("Employment saves explicitly and keeps role history and supporting records", async ({
+  browser,
+}) => {
+  const api = await playwrightRequest.newContext();
+  await createSignedInAdmin(api, newAccount("employment"));
+  const made = await api.post(API + "/employees", {
+    headers: await csrfHeaders(api),
+    data: {
+      first_name: "Emil",
+      last_name: "Shah",
+      email: "emil@example.com",
+      employee_number: "EMP100",
+      hire_date: "2025-01-06",
+    },
+  });
+  expect(made.status(), await made.text()).toBe(201);
+  const { id } = (await made.json()) as { id: string };
+  const context = await browser.newContext({ storageState: await api.storageState() });
+  await api.dispose();
+  const page = await context.newPage();
+  await open(page, "/employees/" + id, "Emil Shah");
+  await page.getByRole("tab", { name: "Employment", exact: true }).click();
+  let writes = 0;
+  page.on("request", (request) => {
+    if (
+      request.url().includes("/employees/" + id + "/") &&
+      ["POST", "PUT", "DELETE"].includes(request.method())
+    )
+      writes++;
+  });
+  await page.getByRole("button", { name: "Edit hire date" }).click();
+  let dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Hire date", { exact: true }).fill("1 Jan 2025");
+  await dialog.getByLabel("Reason", { exact: true }).fill("Corrected contract date");
+  await dialog.getByRole("button", { name: "Save", exact: true }).focus();
+  await dialog.getByRole("heading").click();
+  expect(writes).toBe(0);
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  expect(writes).toBe(1);
+  await page.getByRole("button", { name: "Change role" }).click();
+  dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Effective from", { exact: true }).fill("6 Jan 2025");
+  await dialog.getByRole("switch", { name: "Works different days from the company" }).click();
+  await dialog.getByLabel("Hours a day", { exact: true }).fill("7.5");
+  await dialog.getByRole("heading").click();
+  expect(writes).toBe(1);
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(
+    page.getByRole("region", { name: "Current role" }).getByText("full time", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Change role" }).click();
+  dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Effective from", { exact: true }).fill("1 Feb 2025");
+  await dialog.getByLabel("Employment type", { exact: true }).selectOption("part_time");
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await page.getByText("Role history", { exact: true }).click();
+  await expect(
+    page.getByRole("region", { name: "Current role" }).getByText("full time", { exact: true }),
+  ).toBeVisible();
+  for (const [section, field, value] of [
+    ["Key responsibilities", "Responsibility", "Look after customers"],
+    ["Previous employment", "Job title", "Adviser"],
+    ["Education", "Qualification", "BSc"],
+    ["Training", "Title", "First aid"],
+    ["Certified memberships", "Licence title", "Professional member"],
+  ] as const) {
+    const region = page.getByRole("region", { name: section, exact: true });
+    await region.getByRole("button", { name: "Add", exact: true }).click();
+    dialog = page.getByRole("dialog");
+    await dialog.getByLabel(field, { exact: true }).fill(value);
+    const before = writes;
+    await dialog.getByRole("button", { name: "Save", exact: true }).focus();
+    await dialog.getByRole("heading").click();
+    expect(writes).toBe(before);
+    await dialog.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(dialog).not.toBeVisible();
+    await expect(region.getByText(value, { exact: true })).toBeVisible();
+  }
+  await page.reload();
+  await page.getByRole("tab", { name: "Employment", exact: true }).click();
+  await expect(page.getByText("Professional member", { exact: true })).toBeVisible();
+  await audit(page, "Employment tab");
+  await context.close();
+});

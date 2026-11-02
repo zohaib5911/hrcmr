@@ -10,12 +10,13 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const { id } = await params;
   const client = await serverApi();
   const request = { params: { path: { employee_id: id } } };
-  const [profile, personal] = client
+  const [profile, personal, employment] = client
     ? await Promise.all([
         client.GET("/employees/{employee_id}", request).then((r) => r.data),
         client.GET("/employees/{employee_id}/personal", request).then((r) => r.data),
+        client.GET("/employees/{employee_id}/employment", request).then((r) => r.data),
       ])
     : [];
-  if (!profile || !personal) notFound();
-  return <ProfilePage profile={profile} personal={personal} />;
+  if (!profile || !personal || !employment) notFound();
+  return <ProfilePage profile={profile} personal={personal} employment={employment} />;
 }

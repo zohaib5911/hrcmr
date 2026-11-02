@@ -1865,8 +1865,12 @@ export interface components {
         AssignmentOut: {
             /** Custom Working Days */
             custom_working_days?: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] | null;
+            /** Department */
+            department?: string | null;
             /** Department Id */
             department_id?: string | null;
+            /** Designation */
+            designation?: string | null;
             /** Designation Id */
             designation_id?: string | null;
             /**
@@ -1888,12 +1892,18 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /** Leave Sanctioning Authority */
+            leave_sanctioning_authority?: string | null;
             /** Leave Sanctioning Employee Id */
             leave_sanctioning_employee_id?: string | null;
+            /** Location */
+            location?: string | null;
             /** Location Id */
             location_id?: string | null;
             /** Organogram Level Id */
             organogram_level_id?: string | null;
+            /** Reporting Authority */
+            reporting_authority?: string | null;
             /** Reporting Authority Employee Id */
             reporting_authority_employee_id?: string | null;
         };

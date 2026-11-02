@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Icon } from "@/components/ui/icon";
 import { InlineConfirm } from "@/components/ui/inline-confirm";
+import { EmploymentTab, type EmploymentData } from "@/components/employees/employment-tab";
 import { PersonalTab } from "@/components/employees/personal-tab";
 import { StatusChip } from "@/components/ui/status-chip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -41,9 +42,11 @@ const today = () => new Date().toISOString().slice(0, 10);
 export function ProfilePage({
   profile,
   personal,
+  employment,
 }: {
   profile: EmployeeProfile;
   personal: PersonalData;
+  employment: EmploymentData;
 }) {
   const name = `${profile.first_name} ${profile.last_name}`;
   return (
@@ -68,12 +71,16 @@ export function ProfilePage({
         <TabsList aria-label="Employee record">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="personal">Personal</TabsTrigger>
+          <TabsTrigger value="employment">Employment</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="pt-6">
           <Overview profile={profile} />
         </TabsContent>
         <TabsContent value="personal" className="pt-6">
           <PersonalTab id={profile.id} personal={personal} />
+        </TabsContent>
+        <TabsContent value="employment" className="pt-6">
+          <EmploymentTab id={profile.id} employment={employment} />
         </TabsContent>
       </Tabs>
     </>

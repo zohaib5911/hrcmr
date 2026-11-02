@@ -55,6 +55,34 @@ async def _locked_employee(access: Access, employee_id: uuid.UUID) -> Employee:
     ).scalar_one()
 
 
+async def _assignment_out(access: Access, row: EmployeeAssignment) -> AssignmentOut:
+    result = AssignmentOut.model_validate(row)
+    for field, model, ident, column in (
+        ("department", Department, row.department_id, Department.name),
+        ("designation", Designation, row.designation_id, Designation.title),
+        ("location", Location, row.location_id, Location.name),
+    ):
+        if ident:
+            setattr(
+                result,
+                field,
+                (
+                    await access.db.execute(select(column).where(model.id == ident))
+                ).scalar_one_or_none(),
+            )
+    for field, ident in (
+        ("reporting_authority", row.reporting_authority_employee_id),
+        ("leave_sanctioning_authority", row.leave_sanctioning_employee_id),
+    ):
+        if ident:
+            person = (
+                await access.db.execute(select(Employee).where(Employee.id == ident))
+            ).scalar_one_or_none()
+            if person:
+                setattr(result, field, f"{person.first_name} {person.last_name}")
+    return result
+
+
 @router.get("/employees/{employee_id}/employment", response_model=EmploymentTab)
 async def employment_tab(employee_id: uuid.UUID, access: Reads) -> EmploymentTab:
     employee = await reachable_employee(access, employee_id)
@@ -102,7 +130,7 @@ async def employment_tab(employee_id: uuid.UUID, access: Reads) -> EmploymentTab
     ).scalars()
     return EmploymentTab(
         hire_date=employee.hire_date,
-        assignments=[AssignmentOut.model_validate(r) for r in assignments],
+        assignments=[await _assignment_out(access, r) for r in assignments],
         responsibilities=[ResponsibilityOut.model_validate(r) for r in responsibilities],
         previous_employment=PreviousEmploymentOut.model_validate(previous) if previous else None,
         education=[EducationOut.model_validate(r) for r in education],
@@ -229,7 +257,7 @@ async def change_role(employee_id: uuid.UUID, body: AssignmentIn, access: Writes
         after=body.model_dump(mode="json"),
     )
     await access.db.commit()
-    return AssignmentOut.model_validate(row)
+    return await _assignment_out(access, row)
 
 
 @router.put("/employees/{employee_id}/previous-employment", response_model=PreviousEmploymentOut)

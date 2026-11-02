@@ -7,17 +7,24 @@ from datetime import date  # noqa: TC003
 from decimal import Decimal  # noqa: TC003
 from typing import Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.core.schemas import RequestModel
 
 
-class HireDateIn(RequestModel):
+class EmploymentRequest(RequestModel):
+    @field_validator("*", mode="before")
+    @classmethod
+    def trim_strings(cls, value: object) -> object:
+        return value.strip() if isinstance(value, str) else value
+
+
+class HireDateIn(EmploymentRequest):
     hire_date: date
     reason: str = Field(min_length=1, max_length=1000)
 
 
-class AssignmentIn(RequestModel):
+class AssignmentIn(EmploymentRequest):
     department_id: uuid.UUID | None = None
     designation_id: uuid.UUID | None = None
     location_id: uuid.UUID | None = None
@@ -46,9 +53,14 @@ class AssignmentOut(AssignmentIn):
     model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
     ended_at: date | None
+    department: str | None = None
+    designation: str | None = None
+    location: str | None = None
+    reporting_authority: str | None = None
+    leave_sanctioning_authority: str | None = None
 
 
-class ResponsibilityIn(RequestModel):
+class ResponsibilityIn(EmploymentRequest):
     text: str = Field(min_length=1, max_length=5000)
     sort: int = Field(default=0, ge=0)
 
@@ -58,7 +70,7 @@ class ResponsibilityOut(ResponsibilityIn):
     id: uuid.UUID
 
 
-class PreviousEmploymentIn(RequestModel):
+class PreviousEmploymentIn(EmploymentRequest):
     job_title: str | None = Field(default=None, max_length=120)
     started_on: date | None = None
     left_on: date | None = None
@@ -77,7 +89,7 @@ class PreviousEmploymentOut(PreviousEmploymentIn):
     id: uuid.UUID
 
 
-class EducationIn(RequestModel):
+class EducationIn(EmploymentRequest):
     qualification: str = Field(min_length=1, max_length=120)
     subject: str | None = Field(default=None, max_length=120)
     institution: str | None = Field(default=None, max_length=120)
@@ -92,7 +104,7 @@ class EducationOut(EducationIn):
     id: uuid.UUID
 
 
-class TrainingIn(RequestModel):
+class TrainingIn(EmploymentRequest):
     title: str = Field(min_length=1, max_length=160)
     started_on: date | None = None
     ended_on: date | None = None
@@ -110,7 +122,7 @@ class TrainingOut(TrainingIn):
     id: uuid.UUID
 
 
-class MembershipIn(RequestModel):
+class MembershipIn(EmploymentRequest):
     licence_title: str = Field(min_length=1, max_length=160)
     licence_number: str | None = Field(default=None, max_length=80)
     started_on: date | None = None
