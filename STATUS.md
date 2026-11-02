@@ -3,18 +3,20 @@ Updated: 2026-11-02 15:30 (Europe/London)    Agent: Claude Code    Branch: dev  
 State: IN PROGRESS
 
 ## Last completed
-- Phase 5 gate (T5.1 to T5.3): full suites green, summary written, PR dev -> main opened
+- T6.1 — employee tables, list, summary, archived list (RTW column/pill/filter deferred to T7.1)
 
 ## Current task
-- T6.1 — Employee model + migrations (plan 6.3), list page with pills, filters, deep links, keyboard nav, summary line, archived list
-  - [ ] read plan 6.3 and 8.x employees section   <- start here
-- Resume note: add the link/unlink-employee picker to User Access (api/app/modules/access, web/components/company/user-access-page.tsx) once employees exist; Membership.employee_id has no foreign key yet (add it in the employees migration).
+- T6.2 — create page `/employees/new` (essentials) and the unique-number rule
+  - [ ] read plan 8.3 create section and 6.3   <- start here
+  - [ ] API: POST /employees (audit, unique number ignoring case and spaces, hire date <= 12 months ahead)
+  - [ ] Web: form, "New" button on the list + N shortcut, NSC side note; e2e can now create employees
+- Resume note: list code is api/app/modules/employees/router.py and web/components/employees/employees-page.tsx. After T6.2 extend e2e employees.spec with a created employee.
 
 ## Next tasks
-- T6.2, T6.3, T6.4
+- T6.3, T6.4, T6.5
 
 ## Health
-- CI on dev: not yet run for T5.1    CI on main: green (PR #7 merged)
+- CI on dev: not yet run for T6.1    CI on main: RED (flaky audit-export test, fixed on dev in the T6.1 branch; goes green when dev merges)
 - Local checks run: API 380 pass, web unit 755 pass, ruff/mypy/eslint/tsc clean (before the last edits)
 
 ## Issues / suggestions

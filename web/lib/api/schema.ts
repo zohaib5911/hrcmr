@@ -625,6 +625,40 @@ export interface paths {
         patch: operations["company_update_designation"];
         trace?: never;
     };
+    "/employees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Employees */
+        get: operations["employees_list_employees"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Employee Summary */
+        get: operations["employees_employee_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/files": {
         parameters: {
             query?: never;
@@ -1916,6 +1950,66 @@ export interface components {
             email: string;
             /** Turnstile Token */
             turnstile_token?: string | null;
+        };
+        /** EmployeeList */
+        EmployeeList: {
+            /** Employees */
+            employees: components["schemas"]["EmployeeRow"][];
+            /**
+             * Total
+             * @description Matches before the 2000-row cap.
+             */
+            total: number;
+        };
+        /** EmployeeRow */
+        EmployeeRow: {
+            /** Department */
+            department: string | null;
+            /** Department Id */
+            department_id: string | null;
+            /** Designation */
+            designation: string | null;
+            /** Email */
+            email: string;
+            /** Employee Number */
+            employee_number: string;
+            /** First Name */
+            first_name: string;
+            /** Has Photo */
+            has_photo: boolean;
+            /**
+             * Hire Date
+             * Format: date
+             */
+            hire_date: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Name */
+            last_name: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "active" | "on_leave" | "leaver" | "archived";
+        };
+        /** EmployeeSummary */
+        EmployeeSummary: {
+            /** Active */
+            active: number;
+            /** Archived */
+            archived: number;
+            /** Leavers */
+            leavers: number;
+            /** On Leave */
+            on_leave: number;
+            /**
+             * Total
+             * @description Everyone except archived records.
+             */
+            total: number;
         };
         /** ErrorBody */
         ErrorBody: {
@@ -4593,6 +4687,89 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DesignationOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_list_employees: {
+        parameters: {
+            query?: {
+                status?: ("active" | "on_leave" | "leaver" | "archived") | null;
+                department_id?: string | null;
+                /** @description Name or number contains. */
+                q?: string | null;
+                /** @description Include archived records (or, with status=archived, only them). */
+                archived?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeList"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_employee_summary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeSummary"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

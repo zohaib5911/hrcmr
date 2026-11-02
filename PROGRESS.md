@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** T6.1 Employee model, list page, archived list
+- **Current task:** T6.2 Employee create page and the unique-number rule
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -116,6 +116,7 @@ marked `UNVERIFIED` and listed here with its location.
 66. **Holidays (T4.5):** `working_pattern_days` has one row per weekday, and the "bank holidays are not working days" switch sits on `companies` (the plan puts both in one `working_pattern` table; splitting them keeps each table one shape). Holiday type colours are the five design colours (blue, green, orange, red, gray) because the design has no more. "Take these days from annual leave" is stored now and applied when the leave ledger exists (T9). Bank holidays that GOV.UK stops listing are not deleted from our copy.
 67. **Pay settings (T4.7):** a bank account stores UK sort code and account number only (no IBAN or overseas details yet); pay bands accept GBP, EUR and USD in the page. A monthly "day of the month" stops at the 28th so it exists every month. Nothing here moves money or feeds payroll: they are lists other screens will choose from.
 68. **Role changes are Company Admin only (T5.2):** the permission matrix gives `rbac.role.assign` to the Company Admin alone, so an HR Admin can invite (everyone except a Company Admin) but cannot change, suspend or reset anyone. Cancelling an invitation deletes the row (the audit trail keeps it), so `app_user` was granted DELETE on `invitations`. Link/unlink employee waits for the employees table (T6.1).
+69. **Reporting chain reads the current assignment (T6.1):** plan 6.3 puts the line manager and leave sanctioner on the effective-dated `employee_assignments` row, but `rbac/reports.py` (T2.5) assumed columns on `employees`. The recursive query now reads the assignment with no end date; the test table was updated to match. Employee-relationship values (spouse, partner, parent, child, sibling, relative, friend, other) are my choice: the plan only says "enum".
 
 ---
 
@@ -271,7 +272,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **Phase 5 gate** — 2026-11-02, summary under *Phase summaries*.
 
 ### Phase 6 — Employees
-- [ ] **T6.1** Employee model, list page, archived list
+- [x] **T6.1** Employee model, list page, archived list — 2026-11-02. Migration `0013`: every 6.3 table (`employees` with encrypted NI and passport numbers and an NI blind index, addresses, emergency contacts, bank details, effective-dated assignments and compensation, responsibilities, previous employment, education, training, memberships, documents), all with row-level security; the employee number is unique per company ignoring case and spaces; `memberships.employee_id` is now a real foreign key. The reporting chain used for "reports" permissions now reads the CURRENT assignment (decision 69). API: `GET /employees` (status, department, search by name or number, `archived`) and `GET /employees/summary`, limited to what the role reaches (everyone / own reports / themselves). Web: `/employees` with All · Active · On leave · Leavers pills, search, department filter, the summary line and "Show archived"; `/employees/archived`; `?status=` deep links. Verified: 2 API tests, 5 unit tests, 74 browser tests (employees + shell). **Left for later tasks:** the Right to Work column, pill, filter and `?rtw=` links need the RTW status view (T7.1); the New button and N shortcut come with `/employees/new` (T6.2); row open comes with the profile (T6.3); the User Access link picker needs the employee picker (see T6.3). Owner: none.
 - [ ] **T6.2** Create page and unique-number rule
 - [ ] **T6.3** Profile header, Overview tab, lifecycle status, 48 h opt-out, guarded permanent delete
 - [ ] **T6.4** Personal tab

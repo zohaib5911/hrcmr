@@ -406,7 +406,8 @@ async def test_the_export_is_a_safe_spreadsheet_and_is_itself_recorded(api: dict
         assert "attachment" in response.headers["content-disposition"]
         rows = list(csv.reader(io.StringIO(response.content.decode("utf-8-sig"))))
         assert rows[0][:3] == ["Time (UTC)", "Who", "Action"]
-        assert [r[2] for r in rows[1:]] == ["export.test.2", "export.test.1", "export.test.0"]
+        # Events written in one transaction share a timestamp, so their order among themselves is not fixed.
+        assert sorted(r[2] for r in rows[1:]) == ["export.test.0", "export.test.1", "export.test.2"]
         listed = (await admin.get("/api/v1/audit-events?action=audit.exported")).json()["items"]
         assert listed[0]["summary"] == "Exported 3 events"
         assert listed[0]["actor_name"] == "Ann company_admin"

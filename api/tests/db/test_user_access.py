@@ -102,9 +102,18 @@ async def test_the_list_filters_and_counts_unlinked_users(rig: dict[str, Any]) -
 
     async with rig["owner"].begin() as c:
         await c.execute(text("update memberships set status = 'suspended' where role = 'employee'"))
+        employee = uuid.uuid4()
+        await c.execute(
+            text(
+                "insert into employees (id, company_id, employee_number, first_name, last_name, "
+                "email, hire_date) values (:e, :c, 'E1', 'Hazel', 'Admin', 'h@example.com', "
+                "'2025-01-06')"
+            ),
+            {"e": employee, "c": rig["a"]},
+        )
         await c.execute(
             text("update memberships set employee_id = :e where role = 'hr_admin'"),
-            {"e": uuid.uuid4()},
+            {"e": employee},
         )
     suspended = (await admin.get(f"{API}/users", params={"status": "suspended"})).json()
     assert [u["role"] for u in suspended["users"]] == ["employee"]

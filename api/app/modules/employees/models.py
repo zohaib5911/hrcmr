@@ -28,7 +28,7 @@ from sqlalchemy import (
     column,
     false,
     func,
-    text,
+    literal_column,
     true,
 )
 from sqlalchemy.dialects.postgresql import JSONB
@@ -118,7 +118,14 @@ class Employee(Base, RecordMixin, TenantMixin):
         Index(
             "uq_employees_company_id_employee_number",
             "company_id",
-            func.lower(func.regexp_replace(column("employee_number"), text("'\\s'"), "", "g")),
+            func.lower(
+                func.regexp_replace(
+                    column("employee_number"),
+                    literal_column("'\\s'"),
+                    literal_column("''"),
+                    literal_column("'g'"),
+                )
+            ),
             unique=True,
         ),
         Index("ix_employees_company_id_status", "company_id", "status"),
