@@ -1,6 +1,6 @@
 "use client";
 
-import { CreditCard, FileText, Users } from "lucide-react";
+import { BadgeCheck, Building2, CreditCard, FileText, MapPin, Users } from "lucide-react";
 import { useState } from "react";
 
 import { PageHeader } from "@/components/app/page-header";
@@ -28,7 +28,7 @@ export function CompanyOverview({
   overview: Overview;
   options: Options | null;
 }) {
-  const { company, features, users } = overview;
+  const { company, features, users, locations, departments, designations } = overview;
   const can = useCan();
   const [editing, setEditing] = useState(false);
   const mayEdit = can("company.profile.write") && options !== null;
@@ -62,6 +62,30 @@ export function CompanyOverview({
             icon={<Icon icon={FileText} />}
             {...(mayEdit ? { onClick: () => setEditing(true) } : {})}
           />
+          {can("company.location.read") ? (
+            <GroupedRow
+              title="Locations"
+              detail={String(locations)}
+              icon={<Icon icon={MapPin} />}
+              href="/company/locations"
+            />
+          ) : null}
+          {can("company.department.read") ? (
+            <GroupedRow
+              title="Departments"
+              detail={String(departments)}
+              icon={<Icon icon={Building2} />}
+              href="/company/departments"
+            />
+          ) : null}
+          {can("settings.designation.read") ? (
+            <GroupedRow
+              title="Designations"
+              detail={String(designations)}
+              icon={<Icon icon={BadgeCheck} />}
+              href="/company/designations"
+            />
+          ) : null}
         </GroupedList>
 
         <GroupedList heading="Access and billing">

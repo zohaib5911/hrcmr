@@ -124,3 +124,16 @@ describe("breadcrumbs", () => {
     expect(breadcrumbsFor("/nonsense")).toEqual([]);
   });
 });
+
+describe("the company set-up pages", () => {
+  it("sit under Company in the breadcrumbs and have their own heading", async () => {
+    const { breadcrumbsFor, titleFor } = await import("./navigation");
+    expect(breadcrumbsFor("/company/locations")).toEqual([
+      { label: "Company" },
+      { label: "Company", href: "/company" },
+      { label: "Locations" },
+    ]);
+    expect(titleFor("/company/designations")).toBe("Designations");
+    expect(titleFor("/company")).toBe("Company");
+  });
+});

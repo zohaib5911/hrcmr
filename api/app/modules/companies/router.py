@@ -10,7 +10,7 @@ from sqlalchemy import func, select
 
 from app.core.errors import AppError, NotFoundError
 from app.integrations.companies_house import CompaniesHouse, CompaniesHouseError, normalise_number
-from app.modules.companies.models import Company
+from app.modules.companies.models import Company, Department, Designation, Location
 from app.modules.companies.reference import (
     BANK_HOLIDAY_REGION_LABELS,
     LEGAL_STRUCTURES,
@@ -99,7 +99,22 @@ async def get_company(
             .where(Membership.company_id == access.company_id, Membership.status == "active")
         )
     ).scalar_one()
-    return CompanyOverview(company=_details(company), features=_features(request), users=users)
+
+    async def count(model: type[Location] | type[Department] | type[Designation]) -> int:
+        return (
+            await access.db.execute(
+                select(func.count()).select_from(model).where(model.archived_at.is_(None))
+            )
+        ).scalar_one()
+
+    return CompanyOverview(
+        company=_details(company),
+        features=_features(request),
+        users=users,
+        locations=await count(Location),
+        departments=await count(Department),
+        designations=await count(Designation),
+    )
 
 
 @router.patch("/company", summary="Change the company's details")

@@ -7,7 +7,15 @@ import uuid  # noqa: TC003  (pydantic resolves the annotations at runtime)
 from typing import Annotated, Literal
 from zoneinfo import available_timezones
 
-from pydantic import AfterValidator, BaseModel, EmailStr, Field, field_validator, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 from app.modules.companies.reference import LEGAL_STRUCTURES, SECTORS, TRADING_PERIODS
 
@@ -66,10 +74,15 @@ class CompanyOverview(BaseModel):
     company: CompanyDetails
     features: Features
     users: int = Field(description="People who can sign in to this company.")
+    locations: int
+    departments: int
+    designations: int
 
 
 class CompanyUpdate(BaseModel):
     """Only the fields that are sent change. ``null`` empties an optional field."""
+
+    model_config = ConfigDict(extra="forbid")
 
     name: Annotated[str, Field(min_length=1, max_length=200)] | None = None
     trading_name: Annotated[str, Field(max_length=200)] | None = None

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { IconButton } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Tooltip } from "@/components/ui/tooltip";
-import { breadcrumbsFor, findNavItem } from "@/lib/navigation";
+import { breadcrumbsFor, titleFor } from "@/lib/navigation";
 import { keyLabel } from "@/lib/platform";
 import { OPEN_PALETTE, OPEN_SHORTCUTS, announce } from "@/lib/shell-events";
 import type { ThemeChoice } from "@/lib/theme";
@@ -29,14 +29,14 @@ interface ToolbarProps {
  */
 export function Toolbar({ user, theme, notificationCount }: ToolbarProps) {
   const pathname = usePathname();
-  const item = findNavItem(pathname);
+  const title = titleFor(pathname);
   const apple = useApple();
   const hint = apple ? "⌘K" : `${keyLabel("Mod", false)} K`;
   return (
     <header className="material-chrome border-separator sticky top-0 z-20 flex h-14 items-center gap-3 border-b px-4 md:px-8">
       <div className="min-w-0 flex-1 lg:flex-none lg:basis-80">
         <Breadcrumbs crumbs={breadcrumbsFor(pathname)} />
-        {item ? <p className="text-title-3 text-label truncate leading-6">{item.label}</p> : null}
+        {title ? <p className="text-title-3 text-label truncate leading-6">{title}</p> : null}
       </div>
 
       <div className="hidden min-w-0 flex-1 justify-center lg:flex">

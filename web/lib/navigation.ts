@@ -318,6 +318,26 @@ export function isActive(item: NavItem, pathname: string): boolean {
   return findNavItem(pathname)?.id === item.id;
 }
 
+/**
+ * Pages inside a sidebar page that are not in the sidebar themselves (the company's set-up pages).
+ * Each names the sidebar page it sits under, which is where the breadcrumb leads back to.
+ */
+export const SUB_PAGES: readonly { href: string; label: string; parent: string }[] = [
+  { href: "/company/locations", label: "Locations", parent: "/company" },
+  { href: "/company/departments", label: "Departments", parent: "/company" },
+  { href: "/company/designations", label: "Designations", parent: "/company" },
+];
+
+function subPage(pathname: string) {
+  const path = clean(pathname);
+  return SUB_PAGES.find((page) => path === page.href || path.startsWith(`${page.href}/`));
+}
+
+/** The heading of the page at this address: a set-up page's own, else its sidebar page's. */
+export function titleFor(pathname: string): string | undefined {
+  return subPage(pathname)?.label ?? findNavItem(pathname)?.label;
+}
+
 export interface Crumb {
   label: string;
   /** Missing for the group (it has no page of its own) and for the current page. */
@@ -326,6 +346,16 @@ export interface Crumb {
 
 /** "People / Employees", or "Compliance / Sponsor compliance / Reminders". */
 export function breadcrumbsFor(pathname: string): Crumb[] {
+  const sub = subPage(pathname);
+  if (sub) {
+    const parent = NAV_ITEMS.find((candidate) => candidate.href === sub.parent);
+    const group = NAV_GROUPS.find((g) => g.id === parent?.group)?.label ?? "";
+    return [
+      { label: group },
+      ...(parent ? [{ label: parent.label, href: parent.href }] : []),
+      { label: sub.label },
+    ];
+  }
   const item = findNavItem(pathname);
   if (!item) return [];
   const groupLabel = NAV_GROUPS.find((g) => g.id === item.group)?.label ?? "";

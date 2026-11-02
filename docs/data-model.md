@@ -86,6 +86,38 @@ Checks:
 - `type_of_organisation in ('private_limited_by_shares', 'charitable_incorporated_organisation', 'industrial_provident_society', 'general_partnership', 'limited_liability_partnership', 'scottish_limited_partnership', 'limited_partnership', 'community_interest_company', 'private_limited_by_guarantee', 'public_limited_company', 'sole_proprietorship', 'other')`
 - `week_starts_on between 1 and 7`
 
+## `departments`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `name` | VARCHAR(100) | no |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+## `designations`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `department_id` | UUID | no |  | references `departments` |
+| `title` | VARCHAR(120) | no |  |  |
+| `soc_code` | VARCHAR(4) | yes |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `soc_code ~ '^[0-9]{4}$'`
+
 ## `email_outbox`
 
 | Column | Type | Null | Default | Notes |
@@ -176,6 +208,27 @@ Checks:
 Checks:
 
 - `role in ('company_admin', 'hr_admin', 'people_manager', 'recruiter', 'employee', 'read_only_auditor')`
+
+## `locations`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `name` | VARCHAR(120) | no |  |  |
+| `postcode` | VARCHAR(10) | no |  |  |
+| `address_line1` | VARCHAR(120) | no |  |  |
+| `address_line2` | VARCHAR(120) | yes |  |  |
+| `address_line3` | VARCHAR(120) | yes |  |  |
+| `city` | VARCHAR(80) | no |  |  |
+| `county` | VARCHAR(80) | yes |  |  |
+| `country` | VARCHAR(60) | no | `United Kingdom` |  |
+| `is_default` | BOOLEAN | no | `false` |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
 
 ## `memberships`
 

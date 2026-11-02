@@ -9,16 +9,21 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
+    ForeignKey,
+    Index,
     SmallInteger,
     String,
     Text,
     Uuid,
+    and_,
+    column,
     false,
+    func,
     true,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.base import Base, RecordMixin
+from app.db.base import Base, RecordMixin, TenantMixin
 from app.modules.companies.reference import (
     LEGAL_STRUCTURES,
     SECTORS,
@@ -124,3 +129,79 @@ class Company(Base, RecordMixin):
     stripe_customer_id: Mapped[str | None] = mapped_column(String(80), unique=True)
     stripe_subscription_id: Mapped[str | None] = mapped_column(String(80), unique=True)
     setup_checklist_dismissed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Location(Base, RecordMixin, TenantMixin):
+    """A place the company works from. At most one is the default (its main address)."""
+
+    __tablename__ = "locations"
+    __table_args__ = (
+        # One default per company among the locations still in use.
+        Index(
+            "uq_locations_company_id_default",
+            "company_id",
+            unique=True,
+            postgresql_where=and_(column("is_default").is_(True), column("archived_at").is_(None)),
+        ),
+    )
+
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    name: Mapped[str] = mapped_column(String(120), nullable=False)
+    postcode: Mapped[str] = mapped_column(String(10), nullable=False)
+    address_line1: Mapped[str] = mapped_column(String(120), nullable=False)
+    address_line2: Mapped[str | None] = mapped_column(String(120))
+    address_line3: Mapped[str | None] = mapped_column(String(120))
+    city: Mapped[str] = mapped_column(String(80), nullable=False)
+    county: Mapped[str | None] = mapped_column(String(80))
+    country: Mapped[str] = mapped_column(
+        String(60), nullable=False, server_default="United Kingdom"
+    )
+    is_default: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=false())
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Department(Base, RecordMixin, TenantMixin):
+    __tablename__ = "departments"
+    __table_args__ = (
+        Index(
+            "uq_departments_company_id_name",
+            "company_id",
+            func.lower(column("name")),
+            unique=True,
+            postgresql_where=column("archived_at").is_(None),
+        ),
+    )
+
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Designation(Base, RecordMixin, TenantMixin):
+    """A job title in a department, optionally tied to a SOC (occupation) code."""
+
+    __tablename__ = "designations"
+    __table_args__ = (
+        CheckConstraint(r"soc_code ~ '^[0-9]{4}$'", name="soc_code"),
+        Index(
+            "uq_designations_department_id_title",
+            "department_id",
+            func.lower(column("title")),
+            unique=True,
+            postgresql_where=column("archived_at").is_(None),
+        ),
+    )
+
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    department_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("departments.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    title: Mapped[str] = mapped_column(String(120), nullable=False)
+    soc_code: Mapped[str | None] = mapped_column(String(4))
+    archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
