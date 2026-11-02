@@ -1,11 +1,11 @@
 "use client";
 
-import { Monitor, Moon, Sun, UserRound } from "lucide-react";
+import { LogOut, Monitor, Moon, Sun, UserRound } from "lucide-react";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Avatar } from "@/components/ui/avatar";
+import { avatarClassName } from "@/components/ui/avatar";
 import { IconButton } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import {
@@ -18,6 +18,9 @@ import {
   MenuSeparator,
   MenuTrigger,
 } from "@/components/ui/menu";
+import { attempt } from "@/lib/auth/request";
+import { initials } from "@/lib/ui/avatar";
+import { cn } from "@/lib/utils";
 import { parseTheme, type ThemeChoice } from "@/lib/theme";
 import { applyTheme } from "@/lib/theme-dom";
 
@@ -31,7 +34,20 @@ export function AvatarMenu({ user, theme }: { user: ShellUser | null; theme: The
     <Menu>
       <MenuTrigger asChild>
         <IconButton label="Account menu" className="size-auto! p-1">
-          {user ? <Avatar name={user.name} size="sm" decorative /> : <Icon icon={UserRound} />}
+          {user ? (
+            // The initials are drawn by CSS, not written as text, so the button's name ("Account
+            // menu") is the whole of what it says to assistive technology and to axe.
+            <span
+              aria-hidden="true"
+              data-initials={initials(user.name)}
+              className={cn(
+                avatarClassName(user.name, "sm"),
+                "after:content-[attr(data-initials)]",
+              )}
+            />
+          ) : (
+            <Icon icon={UserRound} />
+          )}
         </IconButton>
       </MenuTrigger>
       <MenuContent>
@@ -49,6 +65,17 @@ export function AvatarMenu({ user, theme }: { user: ShellUser | null; theme: The
           onSelect={() => router.push("/profile" as Route)}
         >
           My profile
+        </MenuItem>
+        <MenuItem
+          icon={<Icon icon={LogOut} size={16} />}
+          onSelect={() => {
+            void attempt((client) => client.POST("/auth/logout")).then(() => {
+              router.push("/login");
+              router.refresh();
+            });
+          }}
+        >
+          Sign out
         </MenuItem>
         <MenuSeparator />
         <MenuLabel>Appearance</MenuLabel>

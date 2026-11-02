@@ -8,9 +8,11 @@ import { saveSidebarState } from "@/lib/sidebar-dom";
 import type { ThemeChoice } from "@/lib/theme";
 
 import { MobileTabBar } from "./mobile-tab-bar";
+import { PlanBanner } from "./plan-banner";
 import { ShortcutProvider } from "./shortcut-provider";
 import type { ShellSession } from "./shell-types";
 import { Sidebar } from "./sidebar";
+import { UpgradeSheet } from "./upgrade-sheet";
 import { Toolbar } from "./toolbar";
 
 interface AppShellProps {
@@ -73,10 +75,12 @@ export function AppShell({
                 tabIndex={-1}
                 className="page-app w-full flex-1 pt-6 pb-28 outline-none md:pb-10"
               >
+                <PlanBanner />
                 {children}
               </main>
             </div>
             <MobileTabBar />
+            <UpgradeSheet />
           </div>
         </ShortcutProvider>
       </ToastProvider>

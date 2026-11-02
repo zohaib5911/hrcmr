@@ -28,6 +28,15 @@ export const avatarSize = cva(
   },
 );
 
+/** The classes of an avatar's circle, for the rare place that has to draw one itself. */
+export function avatarClassName(
+  name: string,
+  size?: "xs" | "sm" | "md" | "lg",
+  className?: string,
+) {
+  return cn(avatarSize({ size }), TONES[avatarTone(name)], className);
+}
+
 interface AvatarProps {
   name: string;
   src?: string;
@@ -41,7 +50,7 @@ interface AvatarProps {
 export function Avatar({ name, src, size, className, decorative = false }: AvatarProps) {
   return (
     <RadixAvatar.Root
-      className={cn(avatarSize({ size }), TONES[avatarTone(name)], className)}
+      className={avatarClassName(name, size, className)}
       {...(decorative
         ? { "aria-hidden": true }
         : { role: "img", "aria-label": name.trim() || "Unknown person" })}

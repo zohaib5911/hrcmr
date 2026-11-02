@@ -9,6 +9,9 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { audit } from "../support/axe";
 
+// These are the screens for someone who is not signed in.
+test.use({ storageState: { cookies: [], origins: [] } });
+
 const WIDTHS = [390, 768, 1280, 1920] as const;
 
 interface Screen {

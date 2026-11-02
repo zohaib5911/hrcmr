@@ -8,8 +8,10 @@ import { useState } from "react";
 
 import { Icon } from "@/components/ui/icon";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { MOBILE_TABS, NAV_GROUPS, findNavItem, isActive } from "@/lib/navigation";
+import { MOBILE_TABS, findNavItem, isActive } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
+
+import { useNavGroups } from "./session-context";
 
 const TAB =
   "text-caption flex min-h-14 w-full flex-col items-center justify-center gap-0.5 font-medium transition-colors motion-micro";
@@ -19,6 +21,7 @@ const TAB =
  * "More" sheet for everything else (plan 5.6). Every target is at least 44 px.
  */
 export function MobileTabBar() {
+  const groups = useNavGroups();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const group = findNavItem(pathname)?.group;
@@ -63,7 +66,7 @@ export function MobileTabBar() {
             </SheetTrigger>
             <SheetContent title="More" description="Everywhere in the app.">
               <nav aria-label="All pages" className="flex flex-col gap-4 pb-2">
-                {NAV_GROUPS.map((g) => (
+                {groups.map((g) => (
                   <section key={g.id} aria-labelledby={`more-${g.id}`}>
                     <h3
                       id={`more-${g.id}`}

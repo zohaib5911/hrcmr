@@ -15,23 +15,25 @@ import {
 
 import { CommandPalette, type CommandItem } from "@/components/ui/command-palette";
 import { KeyboardShortcutsSheet } from "@/components/ui/shortcuts-sheet";
-import { NAV_GROUPS, NAV_ITEMS, findNavItem } from "@/lib/navigation";
+import { NAV_ITEMS, findNavItem, type NavGroup } from "@/lib/navigation";
 import { RECENT_PAGES_KEY, parseRecent, pushRecent, serialiseRecent } from "@/lib/recent-pages";
 import { OPEN_PALETTE, OPEN_SHORTCUTS } from "@/lib/shell-events";
 import { interpretKey, type SequenceState } from "@/lib/shortcuts";
 
+import { useNavGroups } from "./session-context";
 import { useApple } from "./use-apple";
 
-/** Every page the palette can open, with its group's name. */
-const PAGE_ITEMS: readonly CommandItem[] = NAV_GROUPS.flatMap((group) =>
-  group.items.map((item) => ({
-    id: item.id,
-    label: item.label,
-    group: group.label,
-    icon: item.icon,
-    href: item.href,
-  })),
-);
+/** Every page the palette can open (the ones this person can use), with its group's name. */
+const pageItems = (groups: readonly NavGroup[]): readonly CommandItem[] =>
+  groups.flatMap((group) =>
+    group.items.map((item) => ({
+      id: item.id,
+      label: item.label,
+      group: group.label,
+      icon: item.icon,
+      href: item.href,
+    })),
+  );
 const KNOWN_PAGES = NAV_ITEMS.map((item) => item.href);
 
 interface ShortcutRegistry {
@@ -193,12 +195,14 @@ export function ShortcutProvider({ onToggleSidebar, children }: ShortcutProvider
     };
   }, [openPalette]);
 
+  const groups = useNavGroups();
+  const pages = useMemo(() => pageItems(groups), [groups]);
   const recentItems = useMemo(
     () =>
       recent
         .filter((href) => href !== findNavItem(pathname)?.href)
-        .flatMap((href) => PAGE_ITEMS.filter((item) => item.href === href)),
-    [recent, pathname],
+        .flatMap((href) => pages.filter((item) => item.href === href)),
+    [recent, pathname, pages],
   );
 
   return (
@@ -207,7 +211,7 @@ export function ShortcutProvider({ onToggleSidebar, children }: ShortcutProvider
       <CommandPalette
         open={paletteOpen}
         onOpenChange={setPaletteOpen}
-        items={PAGE_ITEMS}
+        items={pages}
         recent={recentItems}
         onSelect={(item) => router.push(item.href as Route)}
       />

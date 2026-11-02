@@ -214,9 +214,9 @@ jobs:
         with:
           version: "0.13.6"
           enable-cache: false
-      - name: Start Postgres and Redis
+      - name: Start Postgres, Redis and the mail catcher
         working-directory: .
-        run: docker compose up -d --wait postgres-test redis
+        run: docker compose up -d --wait postgres-test redis mailpit
       - name: Install dependencies
         run: |
           corepack enable
@@ -231,7 +231,7 @@ jobs:
       - name: Service logs (only when something failed)
         if: failure()
         working-directory: .
-        run: docker compose logs --no-color --tail 100 postgres-test redis
+        run: docker compose logs --no-color --tail 100 postgres-test redis mailpit
 
   # ---------------------------------------------------------------------------------------------
   # Known-vulnerability audits of the locked dependencies, development tools included.

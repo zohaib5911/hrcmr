@@ -561,6 +561,11 @@ export interface components {
             /** Company Name */
             company_name: string;
             /**
+             * Plan
+             * @enum {string}
+             */
+            plan: "free" | "annual" | "ten_year";
+            /**
              * Role
              * @enum {string}
              */

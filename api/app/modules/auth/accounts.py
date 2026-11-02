@@ -307,6 +307,7 @@ async def build_me(db: GlobalSession, caller: Caller) -> MeResponse:
         CompanyMembership(
             company_id=company.id,
             company_name=company.name,
+            plan=company.plan,  # type: ignore[arg-type]
             role=membership.role,  # type: ignore[arg-type]
             status=membership.status,  # type: ignore[arg-type]
         )

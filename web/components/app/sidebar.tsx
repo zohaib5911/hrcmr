@@ -8,10 +8,11 @@ import { usePathname } from "next/navigation";
 import { IconButton } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Tooltip } from "@/components/ui/tooltip";
-import { NAV_GROUPS, isActive, type NavItem } from "@/lib/navigation";
+import { isActive, type NavItem } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
 
 import { CompanySwitcher } from "./company-switcher";
+import { useNavGroups } from "./session-context";
 import type { ShellSession } from "./shell-types";
 import { UserCard } from "./user-card";
 
@@ -67,6 +68,7 @@ interface SidebarProps {
  */
 export function Sidebar({ collapsed, onToggle, session, badges }: SidebarProps) {
   const pathname = usePathname();
+  const groups = useNavGroups();
   return (
     <aside
       id="app-sidebar"
@@ -77,7 +79,7 @@ export function Sidebar({ collapsed, onToggle, session, badges }: SidebarProps) 
     >
       <CompanySwitcher session={session} />
       <nav aria-label="Main" className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 pb-3">
-        {NAV_GROUPS.map((group) => (
+        {groups.map((group) => (
           <div key={group.id} className="pt-3">
             <h2 className="text-caption text-label-secondary px-3 pb-1 font-medium tracking-wider uppercase group-data-[collapsed=true]/shell:sr-only">
               {group.label}

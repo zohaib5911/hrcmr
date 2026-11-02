@@ -36,6 +36,7 @@ export function api(): ApiClient {
     }),
   });
   shared.use(enrolmentRedirect());
+  shared.use(planRequired());
   return shared;
 }
 
@@ -94,4 +95,33 @@ export async function attempt<T>(
   }
   if (result.response.ok) return { ok: true, data: result.data as T };
   return { ok: false, problem: problemFrom(result.error, result.response) };
+}
+
+/** Announced on `window` when the API says the action needs a paid plan (HTTP 402). */
+export const PLAN_REQUIRED_EVENT = "app:plan-required";
+
+export interface PlanRequiredDetail {
+  message: string;
+}
+
+/**
+ * A write the free plan does not allow comes back as 402 PLAN_REQUIRED. The screen that asked shows
+ * its own error, and this also opens the upgrade sheet, which explains and points to billing.
+ */
+export function planRequired(target: Pick<Window, "dispatchEvent"> | null = null): Middleware {
+  return {
+    async onResponse({ response }) {
+      if (response.status !== 402) return undefined;
+      const body = (await response
+        .clone()
+        .json()
+        .catch(() => null)) as { error?: { code?: string; message?: string } } | null;
+      if (body?.error?.code !== "PLAN_REQUIRED") return undefined;
+      const detail: PlanRequiredDetail = {
+        message: body.error.message ?? "This needs a paid plan.",
+      };
+      (target ?? window).dispatchEvent(new CustomEvent(PLAN_REQUIRED_EVENT, { detail }));
+      return undefined;
+    },
+  };
 }

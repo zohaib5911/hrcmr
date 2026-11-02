@@ -1,18 +1,21 @@
 "use client";
 
 import { Check, ChevronsUpDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Icon } from "@/components/ui/icon";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuTrigger } from "@/components/ui/menu";
 import { SkeletonPerson } from "@/components/ui/skeleton";
 import { StatusChip } from "@/components/ui/status-chip";
+import { attempt } from "@/lib/auth/request";
 import { cn } from "@/lib/utils";
 
 import { PLAN_LABELS, type ShellSession } from "./shell-types";
 
 /** The company at the top of the sidebar: logo, name and plan, and a menu to switch (plan 5.6). */
 export function CompanySwitcher({ session }: { session: ShellSession | null }) {
+  const router = useRouter();
   if (!session) {
     return (
       <div className="px-4 py-4">
@@ -54,7 +57,12 @@ export function CompanySwitcher({ session }: { session: ShellSession | null }) {
           {companies.map((other) => (
             <MenuItem
               key={other.id}
-              disabled={other.id !== company.id}
+              onSelect={() => {
+                if (other.id === company.id) return;
+                void attempt((client) =>
+                  client.POST("/auth/switch-company", { body: { company_id: other.id } }),
+                ).then((outcome) => outcome.ok && router.refresh());
+              }}
               icon={
                 other.id === company.id ? (
                   <Icon icon={Check} size={16} />

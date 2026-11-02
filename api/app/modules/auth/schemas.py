@@ -83,6 +83,7 @@ class AcceptInvitationRequest(BaseModel):
 class CompanyMembership(BaseModel):
     company_id: uuid.UUID
     company_name: str
+    plan: Literal["free", "annual", "ten_year"]
     role: Role
     status: Literal["active", "suspended"]
 
