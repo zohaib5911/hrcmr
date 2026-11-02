@@ -28,3 +28,4 @@
 2026-11-02 18:55 | Codex | T6.6 | salary history/preview API with permissions, tenant references and dated GOV.UK rates; 10 tests pass, lint/types clean | next hidden salary UI
 2026-11-02 18:59 | Codex | T6.6 | salary UI fetches on Show only; explicit Save, preview warning and lookups; browser test written | next run Salary journey
 2026-11-02 19:02 | Codex | T6.6 | complete; salary API/unit 10 pass, browser/setup 2 pass, lint/types/build clean; CI 41504657493 pending | next T6.7 Documents/PDF
+2026-11-02 18:55 | Codex | relay | T6.5/T6.6 complete and pushed; handover at task boundary, CI 41504657493 pending without failures | next check CI then T6.7 Documents/PDF
