@@ -6,12 +6,11 @@ State: IN PROGRESS
 - T6.5 — Employment tab: audited hire date, dated roles/history, responsibilities, previous employment, education, training and memberships
 
 ## Current task
-- T6.5 — Employment tab
-  - [x] Requirements and baseline checks
-  - [x] API and tenant/RBAC tests
-  - [x] UI with explicit Save sheets
-  - [x] Browser explicit-save journey and final checks
-- Resume note: T6.5 complete. Start T6.6 salary in Employment tab. Check CI run 41502580515 (T6.4 baseline), then dispatch current dev once it finishes.
+- T6.6 — Salary
+  - [ ] Salary API, permission isolation and NMW tests
+  - [ ] Hidden-until-shown salary UI and add-record sheet
+  - [ ] Browser check and final validation
+- Resume note: inspect pay model lookups; add compensation_router.py and schemas; fetch salary only on Show salary. Official rates source https://www.gov.uk/national-minimum-wage-rates verified 2026-11-02.
 
 ## Next tasks
 - T6.6, T6.7, T6.8, Phase 6 gate
