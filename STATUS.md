@@ -1,37 +1,35 @@
 # STATUS
-Updated: 2026-11-02 19:11 (Europe/London)    Agent: Codex    Branch: dev    Commit: d3efa8e
+Updated: 2026-11-02 19:46 (Europe/London)    Agent: Codex    Branch: dev    Commit: da06829
 State: IN PROGRESS
 
 ## Last completed
-- T6.8 — Related tab shells and live employee Activity feed
+- T6.8 plus Phase 6 integration/QA — employee linking, photos, role-only Overview and zero values
 
 ## Current task
 - Phase 6 gate
-  - [x] Deferred User Access employee linking API/UI; API and browser tests pass
-  - [x] Profile photo API/UI; real scanned upload/read and browser tests pass
-  - [x] Full suite once: API 421 pass/1 fixture failure fixed (affected 26 pass); web 776, guards 32, Playwright 396 pass/144 screenshot-only skipped
-  - [ ] Captured 60 screenshots; QA found role-only Overview label issue; fix and recapture, then phase summary
-  - [ ] PR dev to main; merge only on green CI
-- Resume note: final screenshot review found zero facts rendered as Not set; fixed display and added capture assertion. Refresh Phase 6 images then PR. Previous: recapture screenshots after narrowing Overview assertion to Summary region; previous run had transition duplicate matches, not API/product failure. Previous: Full browser 396 pass. First 60 screenshots captured; QA found Overview incorrectly says no role when assignment lacks department/designation. Added employment_type to profile and fallback text (affected API tests running/passed). Screenshot helper resets focus/scroll and captures modal viewport. Next recapture Phase 6 screenshots, inspect, summary and PR.
-
+  - [x] Deferred User Access employee linking and tests
+  - [x] Scanned profile photo upload/view and tests
+  - [x] Full suite once and affected failure/QA checks
+  - [x] 60 screenshots at 390/1280, light/dark; five-line phase summary
+  - [ ] Open dev-to-main PR and merge only on all-green CI
+- Resume note: Open PR dev to main (body prepared at /tmp/cmr-phase6-pr.md). Local gate done; no need to repeat full suites. Inspect PR checks and fix any red; merge using gh pr merge --merge --auto only once all checks green, then sync clean dev and start T7.1.
 
 ## Next tasks
-- Phase 6 gate, Phase 7 (stop for audit after Phase 7)
+- Phase 6 PR/merge, T7.1 through T7.6, Phase 7 gate then BLOCKED — audit requested
 
 ## Health
-- CI on dev: green 41504657493 (7c99e60); current Documents/Activity changes not yet in CI. CI on main: red (earlier audit-export fix on dev).
-- Local checks run: T6.7 API/PDF/security 3 pass, browser/setup 2 pass; T6.8 Activity API 1 pass, browser/setup 2 pass; ruff/mypy/eslint/tsc, generated types and builds pass. No Phase 6 full-suite run yet.
+- CI on dev: prior run 41504657493 green; new phase PR CI not yet started. CI on main: previous run red (fix included on dev).
+- Local checks run: API full 421 pass/1 destructive fixture failure fixed, affected RBAC/User Access 26 pass; Overview QA API 3 pass. Web 776 pass, guards 32 pass, full Playwright 396 pass/144 screenshot-only skipped; final screenshots 5 pass (60 images). Ruff/mypy/eslint/tsc/generated API/build clean.
 
 ## Issues / suggestions
-- Deferred employee/user linking and Add photo must be completed before Phase 6 gate.
 - Remove certifi exception after 2026-11-06; Dependabot #5 pending green CI.
 
 ## Strategy / decisions taken
-- Employee links require rbac.role.assign (Company Admin), since changing a link changes self-service record reach. Admin may link their own account. Photos require full employee.profile.write, excluding contact-only write_own.
-- Leave/Attendance/Learning modules do not exist yet; named tab components are replacement points for Phases 8/9/13 and link to existing workspaces with employee_id/month. Activity already uses real audit data and includes owned-file events.
-- PDF: plan-specified WeasyPrint, escaped template, no external resources, masked numbers, permission-gated salary, private/no-store, audited.
-- Documents: existing scanned FileService, scoped employee/document associations, clean-only short-lived downloads.
-- Roles append by effective date; hierarchy waits for Phase 9. Salary fetches only on Show salary.
+- Link/unlink requires rbac.role.assign (Company Admin): it changes self-service reach. Own account linking allowed; duplicate employee links refused. Photos require full employee.profile.write, excluding contact-only own writes.
+- T6.8 shells preserve workspace employee/month context; later modules replace named components. Activity includes direct employee and owned-file events.
+- PDF uses plan-specified WeasyPrint, lazy import, escaped text, blocked resources, masked numbers and scoped salary. Native libraries/fonts installed in runtime and CI.
+- Documents/photos reuse scanned FileService with employee associations; clean-only delivery.
+- Hierarchy CRUD is T12.1 (corrected old Phase 9 comments); roles use effective dates. Salary fetches only on Show salary.
 - AI hidden without ANTHROPIC_API_KEY; Ask Mady deferred.
 
 ## Owner actions needed

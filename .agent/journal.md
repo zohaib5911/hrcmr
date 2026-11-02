@@ -47,3 +47,4 @@
 2026-11-02 19:38 | Codex | Phase 6 gate | captured 60 QA images; fixed role-only Overview label; screenshot helper resets scroll/focus and uses modal viewport | next verify fix and recapture
 2026-11-02 19:40 | Codex | Phase 6 gate | role-only fix API 3 pass; screenshot assertion narrowed to accessible Summary region after transition duplicate | next complete recapture
 2026-11-02 19:43 | Codex | Phase 6 gate | recapture 5 pass, screenshots reviewed; final QA fixes zero-valued facts rendering as Not set | next final artifact refresh and PR
+2026-11-02 19:46 | Codex | Phase 6 gate | final screenshots 5 pass/60 images, spot-reviewed; phase summary written; hierarchy deferral corrected to T12.1 | next PR and green CI merge

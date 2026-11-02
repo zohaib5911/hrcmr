@@ -171,7 +171,7 @@ async def change_role(employee_id: uuid.UUID, body: AssignmentIn, access: Writes
     employee = await _locked_employee(access, employee_id)
     if body.effective_from < employee.hire_date:
         raise ConflictError("The role cannot start before the hire date.", field="effective_from")
-    # Hierarchy levels are introduced in Phase 9. Never accept an unvalidated identifier.
+    # Hierarchy levels are introduced in T12.1. Never accept an unvalidated identifier.
     if body.organogram_level_id is not None:
         raise ConflictError("Hierarchy levels are not available yet.", field="organogram_level_id")
     for model, ident in (
