@@ -344,3 +344,86 @@ test("Salary stays unfetched until shown, warns on low pay and saves only explic
   await expect(section.getByText("£10.00 hourly", { exact: true })).toHaveCount(0);
   await context.close();
 });
+
+test("Documents filters payslips, uploads only on Save, shows scan state and prints a PDF", async ({
+  browser,
+}) => {
+  const api = await playwrightRequest.newContext();
+  await createSignedInAdmin(api, newAccount("documents"));
+  const made = await api.post(API + "/employees", {
+    headers: await csrfHeaders(api),
+    data: {
+      first_name: "Dana",
+      last_name: "Chen",
+      email: "dana@example.com",
+      employee_number: "DOC100",
+      hire_date: "2025-01-06",
+    },
+  });
+  expect(made.status(), await made.text()).toBe(201);
+  const { id } = (await made.json()) as { id: string };
+  const context = await browser.newContext({ storageState: await api.storageState() });
+  await api.dispose();
+  const page = await context.newPage();
+  // Storage/scanning is exercised against real services in test_employee_documents.py.
+  // Keep this browser check independent of the e2e server's optional object-store configuration.
+  let uploads = 0;
+  const documents = [
+    {
+      id: "11111111-1111-4111-8111-111111111111",
+      file_id: "22222222-2222-4222-8222-222222222222",
+      file_name: "contract.pdf",
+      category: "employment_contract",
+      notes: null,
+      size: 100,
+      scan_status: "pending",
+      uploaded_at: "2026-11-02T12:00:00Z",
+    },
+  ];
+  await page.route("**/employees/" + id + "/documents", async (route) => {
+    if (route.request().method() === "POST") {
+      uploads++;
+      expect(route.request().postData()).toContain("payslip");
+      const document = {
+        ...documents[0]!,
+        id: "33333333-3333-4333-8333-333333333333",
+        file_name: "november.pdf",
+        category: "payslip",
+        scan_status: "clean",
+      };
+      documents.push(document);
+      return route.fulfill({ status: 201, json: document });
+    }
+    return route.fulfill({ json: documents });
+  });
+  await open(page, "/employees/" + id, "Dana Chen");
+  await page.getByRole("tab", { name: "Documents", exact: true }).click();
+  await expect(page.getByText("Scan pending", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Download", exact: true })).toBeDisabled();
+  await page.getByRole("radio", { name: "Payslips", exact: true }).click();
+  await expect(page.getByText("No payslips yet.")).toBeVisible();
+  await page.getByRole("button", { name: "Upload document", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByLabel("Category", { exact: true })).toHaveValue("payslip");
+  await dialog.getByLabel("Document", { exact: true }).setInputFiles({
+    name: "november.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("%PDF-1.4\n%%EOF\n"),
+  });
+  await dialog.getByRole("button", { name: "Save", exact: true }).focus();
+  await dialog.getByRole("heading").click();
+  expect(uploads).toBe(0);
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(page.getByText("november.pdf", { exact: true })).toBeVisible();
+  await expect(page.getByText("contract.pdf", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("Scan clean", { exact: true })).toBeVisible();
+  expect(uploads).toBe(1);
+  await page.getByRole("radio", { name: "All", exact: true }).click();
+  await expect(page.getByText("contract.pdf", { exact: true })).toBeVisible();
+  const downloaded = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Print record", exact: true }).click();
+  expect((await downloaded).suggestedFilename()).toBe("employee-" + id + ".pdf");
+  await audit(page, "Employee documents");
+  await context.close();
+});

@@ -13,6 +13,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { Icon } from "@/components/ui/icon";
 import { InlineConfirm } from "@/components/ui/inline-confirm";
 import { EmploymentTab, type EmploymentData } from "@/components/employees/employment-tab";
+import { DocumentsTab, PrintRecord } from "@/components/employees/documents-tab";
 import { PersonalTab } from "@/components/employees/personal-tab";
 import { StatusChip } from "@/components/ui/status-chip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -55,7 +56,10 @@ export function ProfilePage({
         title={name}
         description={`${profile.employee_number} · ${joinedLine(profile.hire_date, today())}`}
         actions={
-          <StatusChip tone={TONE[profile.status]}>{STATUS_LABEL[profile.status]}</StatusChip>
+          <div className="flex flex-wrap items-center gap-2">
+            <PrintRecord id={profile.id} />
+            <StatusChip tone={TONE[profile.status]}>{STATUS_LABEL[profile.status]}</StatusChip>
+          </div>
         }
       />
       <div className="mb-6 flex items-center gap-3">
@@ -72,6 +76,7 @@ export function ProfilePage({
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="personal">Personal</TabsTrigger>
           <TabsTrigger value="employment">Employment</TabsTrigger>
+          <TabsTrigger value="documents">Documents</TabsTrigger>
         </TabsList>
         <TabsContent value="overview" className="pt-6">
           <Overview profile={profile} />
@@ -81,6 +86,9 @@ export function ProfilePage({
         </TabsContent>
         <TabsContent value="employment" className="pt-6">
           <EmploymentTab id={profile.id} employment={employment} />
+        </TabsContent>
+        <TabsContent value="documents" className="pt-6">
+          <DocumentsTab id={profile.id} />
         </TabsContent>
       </Tabs>
     </>
