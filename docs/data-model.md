@@ -776,6 +776,49 @@ Checks:
 | `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 
+## `sponsor_documents`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `doc_type` | VARCHAR(11) | no |  |  |
+| `reference_number` | TEXT | yes |  |  |
+| `issuing_country` | VARCHAR(2) | yes |  |  |
+| `visa_route` | VARCHAR(24) | yes |  |  |
+| `cos_number` | TEXT | yes |  |  |
+| `soc_code` | VARCHAR(4) | yes |  |  |
+| `sponsored_salary` | NUMERIC(12, 2) | yes |  |  |
+| `issue_date` | DATE | yes |  |  |
+| `expiry_date` | DATE | yes |  |  |
+| `review_date` | DATE | yes |  |  |
+| `evidence_file_id` | UUID | yes |  | references `files` |
+| `remarks` | TEXT | yes |  |  |
+| `version` | INTEGER | no |  |  |
+| `superseded_by` | UUID | yes |  | references `sponsor_documents` |
+| `withdrawn_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `withdraw_reason` | TEXT | yes |  |  |
+| `renewal_date` | DATE | yes |  |  |
+| `renewal_notes` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(doc_type = 'visa' and visa_route is not null) or (doc_type <> 'visa' and visa_route is null and cos_number is null and soc_code is null and sponsored_salary is null)`
+- `(withdrawn_at is null and withdraw_reason is null) or (withdrawn_at is not null and withdraw_reason is not null and length(trim(withdraw_reason)) > 0 and superseded_by is null)`
+- `doc_type in ('visa', 'passport', 'dbs', 'euss', 'national_id', 'other')`
+- `issue_date is null or expiry_date is null or expiry_date >= issue_date`
+- `issuing_country is null or issuing_country ~ '^[A-Z]{2}$'`
+- `renewal_date is not null or renewal_notes is null`
+- `soc_code is null or soc_code ~ '^[0-9]{4}$'`
+- `sponsored_salary is null or sponsored_salary >= 0`
+- `version > 0`
+- `visa_route is null or visa_route in ('skilled_worker', 'health_care_worker', 'global_business_mobility', 'scale_up', 'temporary_worker', 'graduate', 'student', 'euss_settled', 'euss_pre_settled', 'family', 'other')`
+
 ## `tax_codes`
 
 | Column | Type | Null | Default | Notes |

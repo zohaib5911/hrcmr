@@ -14,4 +14,5 @@ import app.modules.holidays.models
 import app.modules.identity.models
 import app.modules.notifications.models
 import app.modules.pay.models
-import app.modules.rtw.models  # noqa: F401
+import app.modules.rtw.models
+import app.modules.sponsor_documents.models  # noqa: F401
