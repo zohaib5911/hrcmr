@@ -1,12 +1,12 @@
 # STATUS
-Updated: 2026-11-02 18:55 (Europe/London)    Agent: Codex    Branch: dev    Commit: 0d2ab23
-State: HANDED OVER
+Updated: 2026-11-02 18:56 (Europe/London)    Agent: Codex    Branch: dev    Commit: b512566
+State: IN PROGRESS
 
 ## Last completed
 - T6.6 — Salary: hidden until shown, permission-gated history and explicit add-record sheet with age-band minimum-wage preview
 
 ## Current task
-- T6.7 — Documents tab and employee record PDF (not started)
+- T6.7 — Documents tab and employee record PDF
   - [ ] Read plan 8.3 Documents + Print/PDF and existing file service
   - [ ] Documents API and tests
   - [ ] Documents UI (All/Payslips, upload category, scan status, short-lived download)
@@ -17,7 +17,7 @@ State: HANDED OVER
 - T6.7, T6.8, Phase 6 gate (full suite once, 390/1280 screenshots, PR dev to main), then Phase 7
 
 ## Health
-- CI on dev: pending 41504657493 on 7c99e60; no failures at last check. Earlier ca40751 failed only generated data-model drift, fixed in 889e1d8; all its other jobs passed.
+- CI on dev: pending 41504657493 on 7c99e60; API and all other checks green; only e2e pending. Earlier ca40751 failed only generated data-model drift, fixed in 889e1d8; all its other jobs passed.
 - CI on main: red (41436835247; previous relay reports audit-export fix already on dev).
 - Local checks run: Employment affected API/reporting/doc 26 pass, employee web unit 13 pass, Employment browser/setup 2 pass; Salary API/unit 10 pass, Salary browser/setup 2 pass. Ruff/mypy/eslint/tsc, generated types and production builds pass. No phase gate full-suite run yet.
 
