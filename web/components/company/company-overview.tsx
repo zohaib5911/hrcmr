@@ -2,15 +2,20 @@
 
 import {
   BadgeCheck,
+  Banknote,
+  Calendar,
   Building2,
   CalendarDays,
   Clock,
   CreditCard,
   FileCheck2,
   FileText,
+  Landmark,
   MapPin,
+  Percent,
   ShieldCheck,
   Users,
+  Wallet,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -144,6 +149,44 @@ export function CompanyOverview({
               title="Trading hours"
               icon={<Icon icon={Clock} />}
               href="/company/trading-hours"
+            />
+          ) : null}
+        </GroupedList>
+
+        <GroupedList heading="Pay">
+          {can("company.profile.read") ? (
+            <GroupedRow
+              title="Bank accounts"
+              icon={<Icon icon={Landmark} />}
+              href="/company/bank-accounts"
+            />
+          ) : null}
+          {can("settings.tax_code.read") ? (
+            <GroupedRow
+              title="Tax codes"
+              icon={<Icon icon={Percent} />}
+              href="/company/tax-codes"
+            />
+          ) : null}
+          {can("settings.payment_type.read") ? (
+            <GroupedRow
+              title="Payment types"
+              icon={<Icon icon={Wallet} />}
+              href="/company/payment-types"
+            />
+          ) : null}
+          {can("settings.pay_band.read") ? (
+            <GroupedRow
+              title="Pay bands"
+              icon={<Icon icon={Banknote} />}
+              href="/company/pay-bands"
+            />
+          ) : null}
+          {can("settings.pay_schedule.read") ? (
+            <GroupedRow
+              title="Pay schedules"
+              icon={<Icon icon={Calendar} />}
+              href="/company/pay-schedules"
             />
           ) : null}
         </GroupedList>

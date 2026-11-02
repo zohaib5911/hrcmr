@@ -11,4 +11,5 @@ import app.modules.email.models
 import app.modules.files.models
 import app.modules.holidays.models
 import app.modules.identity.models
-import app.modules.notifications.models  # noqa: F401
+import app.modules.notifications.models
+import app.modules.pay.models  # noqa: F401

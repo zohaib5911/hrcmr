@@ -106,6 +106,24 @@ Checks:
 - `type_of_organisation in ('private_limited_by_shares', 'charitable_incorporated_organisation', 'industrial_provident_society', 'general_partnership', 'limited_liability_partnership', 'scottish_limited_partnership', 'limited_partnership', 'community_interest_company', 'private_limited_by_guarantee', 'public_limited_company', 'sole_proprietorship', 'other')`
 - `week_starts_on between 1 and 7`
 
+## `company_bank_accounts`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `label` | VARCHAR(80) | no |  |  |
+| `bank_name` | VARCHAR(120) | no |  |  |
+| `account_holder` | VARCHAR(120) | no |  |  |
+| `sort_code` | TEXT | no |  |  |
+| `account_number` | TEXT | no |  |  |
+| `is_primary` | BOOLEAN | no | `false` |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
 ## `company_compliance_documents`
 
 | Column | Type | Null | Default | Notes |
@@ -372,6 +390,67 @@ Checks:
 | `created_by` | UUID | yes |  |  |
 | `updated_by` | UUID | yes |  |  |
 
+## `pay_bands`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `name` | VARCHAR(80) | no |  |  |
+| `min_annual` | NUMERIC(12, 2) | no |  |  |
+| `max_annual` | NUMERIC(12, 2) | no |  |  |
+| `currency` | VARCHAR(3) | no | `GBP` |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `currency ~ '^[A-Z]{3}$'`
+- `min_annual >= 0 and max_annual >= min_annual`
+
+## `pay_schedules`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `name` | VARCHAR(80) | no |  |  |
+| `frequency` | VARCHAR(12) | no |  |  |
+| `pay_day_kind` | VARCHAR(20) | no |  |  |
+| `pay_day_value` | SMALLINT | yes |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(pay_day_kind = 'weekday' and pay_day_value between 1 and 7) or (pay_day_kind = 'day_of_month' and pay_day_value between 1 and 28) or (pay_day_kind in ('last_day', 'last_working_day') and pay_day_value is null)`
+- `frequency in ('weekly', 'fortnightly', 'four_weekly', 'monthly')`
+- `pay_day_kind in ('weekday', 'day_of_month', 'last_day', 'last_working_day')`
+
+## `payment_types`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `name` | VARCHAR(80) | no |  |  |
+| `min_hourly_rate` | NUMERIC(8, 2) | no |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `min_hourly_rate >= 0`
+
 ## `platform_admins`
 
 | Column | Type | Null | Default | Notes |
@@ -405,6 +484,25 @@ Checks:
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 | `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+
+## `tax_codes`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `code` | VARCHAR(12) | no |  |  |
+| `reference` | VARCHAR(80) | yes |  |  |
+| `deduction_percentage` | NUMERIC(5, 2) | no |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `deduction_percentage between 0 and 100`
 
 ## `terms_acceptances`
 
