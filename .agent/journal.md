@@ -16,3 +16,4 @@
 2026-11-02 22:39 | Claude Code | T6.2 | verified (API 3, e2e 8, lint/types clean), ticked | next: T6.3
 2026-11-02 22:41 | Claude Code | T6.3 | API: profile, status, opt-out+agreement, guarded delete + 4 tests | next: web profile page /employees/[id]
 2026-11-02 22:46 | Claude Code | T6.3 | web profile + e2e done, verified | next: T6.4
+2026-11-02 23:20 | Claude Code | T6.4 | API: personal details, address, contacts, identity, bank, reveal + 3 tests | next: web Personal tab

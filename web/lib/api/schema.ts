@@ -625,6 +625,23 @@ export interface paths {
         patch: operations["company_update_designation"];
         trace?: never;
     };
+    "/employee-lookups/postcode/{postcode}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Town and county for a postcode */
+        get: operations["employees_look_up_postcode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/employees": {
         parameters: {
             query?: never;
@@ -686,6 +703,95 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/employees/{employee_id}/address": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Save Address */
+        put: operations["employees_save_address"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/bank": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save Bank
+         * @description A new account replaces the current one, which is kept as history.
+         */
+        put: operations["employees_save_bank"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Contact */
+        post: operations["employees_add_contact"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/contacts/{contact_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Change Contact */
+        put: operations["employees_change_contact"];
+        post?: never;
+        /** Remove Contact */
+        delete: operations["employees_remove_contact"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/identity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Save Identity */
+        put: operations["employees_save_identity"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/employees/{employee_id}/opt-out-48h": {
         parameters: {
             query?: never;
@@ -717,6 +823,44 @@ export interface paths {
         put?: never;
         /** Upload Agreement */
         post: operations["employees_upload_agreement"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/personal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Personal */
+        get: operations["employees_get_personal"];
+        /** Save Personal */
+        put: operations["employees_save_personal"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/reveal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reveal
+         * @description Show the full values. Needs a recent password or code check, and is recorded.
+         */
+        post: operations["employees_reveal"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1465,20 +1609,20 @@ export interface components {
              */
             user_id: string | null;
         };
-        /** AddressOut */
-        AddressOut: {
-            /** City */
-            city: string | null;
+        /** AddressIn */
+        AddressIn: {
+            /** City County */
+            city_county?: string | null;
             /** Country */
-            country: string | null;
-            /** County */
-            county: string | null;
+            country?: string | null;
             /** Line1 */
-            line1: string | null;
+            line1: string;
             /** Line2 */
-            line2: string | null;
+            line2?: string | null;
+            /** Line3 */
+            line3?: string | null;
             /** Postcode */
-            postcode: string | null;
+            postcode?: string | null;
         };
         /** AuditEventOut */
         AuditEventOut: {
@@ -1611,6 +1755,35 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** BankIn */
+        BankIn: {
+            /** Account Holder */
+            account_holder: string;
+            /** Account Number */
+            account_number: string;
+            /** Bank Name */
+            bank_name: string;
+            /** Sort Code */
+            sort_code: string;
+        };
+        /** BankMasked */
+        BankMasked: {
+            /** Account Holder */
+            account_holder: string;
+            /** Account Number */
+            account_number: string;
+            /** Bank Name */
+            bank_name: string;
+            /** Sort Code */
+            sort_code: string;
+        };
+        /** BankRevealed */
+        BankRevealed: {
+            /** Account Number */
+            account_number: string;
+            /** Sort Code */
+            sort_code: string;
+        };
         /** Body_company_add_document */
         Body_company_add_document: {
             /** Doc Type */
@@ -1662,7 +1835,7 @@ export interface components {
         };
         /** CompaniesHouseRecord */
         CompaniesHouseRecord: {
-            address: components["schemas"]["AddressOut"];
+            address: components["schemas"]["app__modules__companies__schemas__AddressOut"];
             /** Legal Structure */
             legal_structure: string | null;
             /** Name */
@@ -1905,6 +2078,47 @@ export interface components {
             slots: components["schemas"]["DocumentSlot"][];
             /** Total */
             total: number;
+        };
+        /** ContactIn */
+        ContactIn: {
+            /** Address */
+            address?: string | null;
+            /** Details */
+            details?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /**
+             * Relationship
+             * @enum {string}
+             */
+            relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
+        };
+        /** ContactOut */
+        ContactOut: {
+            /** Address */
+            address: string | null;
+            /** Details */
+            details: string | null;
+            /** Email */
+            email: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /**
+             * Relationship
+             * @enum {string}
+             */
+            relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
         };
         /** DepartmentIn */
         DepartmentIn: {
@@ -2305,6 +2519,41 @@ export interface components {
             id: string;
             /** Name */
             name: string;
+        };
+        /**
+         * IdentityIn
+         * @description Leave a field empty to clear it.
+         */
+        IdentityIn: {
+            /** Ni Number */
+            ni_number?: string | null;
+            /** Passport Country */
+            passport_country?: string | null;
+            /** Passport Expiry */
+            passport_expiry?: string | null;
+            /** Passport Number */
+            passport_number?: string | null;
+        };
+        /** IdentityMasked */
+        IdentityMasked: {
+            /**
+             * Ni Number
+             * @description Masked, for example '•• •• •• 56 C'.
+             */
+            ni_number: string | null;
+            /** Passport Country */
+            passport_country: string | null;
+            /** Passport Expiry */
+            passport_expiry: string | null;
+            /** Passport Number */
+            passport_number: string | null;
+        };
+        /** IdentityRevealed */
+        IdentityRevealed: {
+            /** Ni Number */
+            ni_number: string | null;
+            /** Passport Number */
+            passport_number: string | null;
         };
         /** InvitationDetails */
         InvitationDetails: {
@@ -2719,6 +2968,79 @@ export interface components {
              */
             confirm_name: string;
         };
+        /** PersonalDetails */
+        PersonalDetails: {
+            /** Alt Phone */
+            alt_phone: string | null;
+            /** Date Of Birth */
+            date_of_birth: string | null;
+            /** Email */
+            email: string;
+            /** First Name */
+            first_name: string;
+            /**
+             * Gender
+             * @enum {string}
+             */
+            gender: "not_specified" | "male" | "female" | "non_binary" | "prefer_not_to_say" | "other";
+            /** Last Name */
+            last_name: string;
+            /**
+             * Marital Status
+             * @enum {string}
+             */
+            marital_status: "not_specified" | "single" | "married" | "civil_partnership" | "separated" | "divorced" | "widowed" | "prefer_not_to_say";
+            /** Nationality */
+            nationality: string | null;
+            /** Phone */
+            phone: string | null;
+        };
+        /** PersonalDetailsIn */
+        PersonalDetailsIn: {
+            /** Alt Phone */
+            alt_phone?: string | null;
+            /** Date Of Birth */
+            date_of_birth?: string | null;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** First Name */
+            first_name: string;
+            /**
+             * Gender
+             * @default not_specified
+             * @enum {string}
+             */
+            gender: "not_specified" | "male" | "female" | "non_binary" | "prefer_not_to_say" | "other";
+            /** Last Name */
+            last_name: string;
+            /**
+             * Marital Status
+             * @default not_specified
+             * @enum {string}
+             */
+            marital_status: "not_specified" | "single" | "married" | "civil_partnership" | "separated" | "divorced" | "widowed" | "prefer_not_to_say";
+            /** Nationality */
+            nationality?: string | null;
+            /** Phone */
+            phone?: string | null;
+        };
+        /** PersonalTab */
+        PersonalTab: {
+            address: components["schemas"]["app__modules__employees__personal_schemas__AddressOut"] | null;
+            bank: components["schemas"]["BankMasked"] | null;
+            /** Contacts */
+            contacts: components["schemas"]["ContactOut"][];
+            details: components["schemas"]["PersonalDetails"];
+            identity: components["schemas"]["IdentityMasked"] | null;
+            /**
+             * Sensitive Visible
+             * @description False when the caller may not see these at all.
+             */
+            sensitive_visible: boolean;
+        };
         /** PostcodeOut */
         PostcodeOut: {
             /** City */
@@ -2763,6 +3085,19 @@ export interface components {
             new_password: string;
             /** Token */
             token: string;
+        };
+        /** RevealIn */
+        RevealIn: {
+            /**
+             * Field
+             * @enum {string}
+             */
+            field: "identity" | "bank";
+        };
+        /** Revealed */
+        Revealed: {
+            bank?: components["schemas"]["BankRevealed"] | null;
+            identity?: components["schemas"]["IdentityRevealed"] | null;
         };
         /** RoleAction */
         RoleAction: {
@@ -2951,6 +3286,36 @@ export interface components {
             bank_holidays_non_working: boolean;
             /** Days */
             days: components["schemas"]["PatternDay-Output"][];
+        };
+        /** AddressOut */
+        app__modules__companies__schemas__AddressOut: {
+            /** City */
+            city: string | null;
+            /** Country */
+            country: string | null;
+            /** County */
+            county: string | null;
+            /** Line1 */
+            line1: string | null;
+            /** Line2 */
+            line2: string | null;
+            /** Postcode */
+            postcode: string | null;
+        };
+        /** AddressOut */
+        app__modules__employees__personal_schemas__AddressOut: {
+            /** City County */
+            city_county: string | null;
+            /** Country */
+            country: string | null;
+            /** Line1 */
+            line1: string;
+            /** Line2 */
+            line2: string | null;
+            /** Line3 */
+            line3: string | null;
+            /** Postcode */
+            postcode: string | null;
         };
     };
     responses: never;
@@ -4909,6 +5274,46 @@ export interface operations {
             };
         };
     };
+    employees_look_up_postcode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                postcode: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostcodeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     employees_list_employees: {
         parameters: {
             query?: {
@@ -5116,6 +5521,266 @@ export interface operations {
             };
         };
     };
+    employees_save_address: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddressIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__modules__employees__personal_schemas__AddressOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_save_bank: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BankIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BankMasked"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_add_contact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_change_contact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+                contact_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_remove_contact: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+                contact_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_save_identity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IdentityIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdentityMasked"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     employees_set_opt_out: {
         parameters: {
             query?: never;
@@ -5181,6 +5846,134 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_get_personal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonalTab"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_save_personal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PersonalDetailsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PersonalTab"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_reveal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RevealIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Revealed"];
+                };
             };
             /** @description The request could not be completed. `error.code` says why. */
             "4XX": {

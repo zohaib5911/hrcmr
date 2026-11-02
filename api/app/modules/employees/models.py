@@ -38,7 +38,18 @@ from app.db.base import Base, RecordMixin, TenantMixin
 from app.db.types import EncryptedString
 
 STATUSES = ("active", "on_leave", "leaver", "archived")
-RELATIONSHIPS = ("spouse", "partner", "parent", "child", "sibling", "relative", "friend", "other")
+RELATIONSHIPS = (
+    "spouse",
+    "civil_partner",
+    "partner",
+    "parent",
+    "child",
+    "sibling",
+    "guardian",
+    "other_relative",
+    "friend",
+    "other",
+)
 EMPLOYMENT_TYPES = (
     "full_time",
     "part_time",
