@@ -713,8 +713,14 @@ test.describe("other controls", () => {
   test("a tooltip appears on keyboard focus", async ({ page }) => {
     const button = page.getByRole("button", { name: "Hover or focus me" });
     await button.scrollIntoViewIfNeeded();
-    await button.focus();
-    await expect(page.getByText("Shown on hover and on keyboard focus").first()).toBeVisible();
+    // A focus that arrives before the page has hydrated is missed, so focus again until it shows.
+    await expect(async () => {
+      await button.blur();
+      await button.focus();
+      await expect(page.getByText("Shown on hover and on keyboard focus").first()).toBeVisible({
+        timeout: 1000,
+      });
+    }).toPass({ timeout: 10_000 });
     await page.keyboard.press("Escape");
     await expect(page.getByText("Shown on hover and on keyboard focus")).toHaveCount(0);
   });

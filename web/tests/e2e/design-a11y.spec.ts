@@ -104,8 +104,14 @@ for (const colorScheme of ["light", "dark"] as const) {
       const button = page.getByRole("button", { name: "Hover or focus me" });
       // Scroll first: Radix closes a tooltip on any scroll, and focus() on an off-screen button scrolls.
       await button.scrollIntoViewIfNeeded();
-      await button.focus();
-      await expect(page.getByText("Shown on hover and on keyboard focus").first()).toBeVisible();
+      // A focus that arrives before the page has hydrated is missed, so focus again until it shows.
+      await expect(async () => {
+        await button.blur();
+        await button.focus();
+        await expect(page.getByText("Shown on hover and on keyboard focus").first()).toBeVisible({
+          timeout: 1000,
+        });
+      }).toPass({ timeout: 10_000 });
       await audit(page, "tooltip", { overlay: true });
     });
   });
