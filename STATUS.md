@@ -6,12 +6,11 @@ State: IN PROGRESS
 - T6.7 — Documents tab and masked employee inspection PDF
 
 ## Current task
-- T6.7 — Documents tab and employee record PDF
-  - [x] Requirements and baseline checks
-  - [x] Documents API, scanned upload/download and isolation tests
-  - [x] All/Payslips UI with explicit upload
-  - [x] Masked multi-page PDF; browser journey passes
-- Resume note: Start T6.8. Add Leave/Attendance/Learning shells linked to workspace routes; Activity uses existing audit events. Earlier CI 41504657493 still has only e2e pending, all other jobs green.
+- T6.8 — Leave, Attendance, Learning and Activity tabs
+  - [ ] Activity API with existing audit data and permission/isolation tests
+  - [ ] Related-tab shells linked to workspaces; Activity UI
+  - [ ] Browser journey and final checks
+- Resume note: Implement /employees/{id}/activity using existing audit pagination/output helpers, scoped to employee and owned file events. Other three modules do not exist yet; shells must explain what will appear without fake balances or records.
 
 ## Next tasks
 - T6.8, Phase 6 gate, Phase 7
