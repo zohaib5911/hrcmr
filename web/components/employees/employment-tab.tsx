@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { useCan } from "@/components/app/session-context";
+import { SalarySection } from "@/components/employees/salary-section";
 import { FormSheet } from "@/components/company/form-sheet";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -234,6 +235,7 @@ export function EmploymentTab({ id, employment }: { id: string; employment: Empl
           </details>
         )}
       </Section>
+      <SalarySection id={id} hireDate={employment.hire_date} />
       {(Object.keys(SECTIONS) as Kind[]).map((kind) => {
         const config = SECTIONS[kind];
         const records =

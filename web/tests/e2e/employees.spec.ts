@@ -283,3 +283,64 @@ test("Employment saves explicitly and keeps role history and supporting records"
   await audit(page, "Employment tab");
   await context.close();
 });
+
+test("Salary stays unfetched until shown, warns on low pay and saves only explicitly", async ({
+  browser,
+}) => {
+  const api = await playwrightRequest.newContext();
+  await createSignedInAdmin(api, newAccount("salary"));
+  const made = await api.post(API + "/employees", {
+    headers: await csrfHeaders(api),
+    data: {
+      first_name: "Sara",
+      last_name: "Jamal",
+      email: "sara@example.com",
+      employee_number: "SAL100",
+      hire_date: "2025-01-06",
+    },
+  });
+  expect(made.status(), await made.text()).toBe(201);
+  const { id } = (await made.json()) as { id: string };
+  const personal = await api.get(API + "/employees/" + id + "/personal");
+  await api.put(API + "/employees/" + id + "/personal", {
+    headers: await csrfHeaders(api),
+    data: { ...(await personal.json()).details, date_of_birth: "1990-01-01" },
+  });
+  const context = await browser.newContext({ storageState: await api.storageState() });
+  await api.dispose();
+  const page = await context.newPage();
+  let salaryReads = 0;
+  let salarySaves = 0;
+  page.on("request", (req) => {
+    if (req.url().endsWith("/employees/" + id + "/compensation")) {
+      if (req.method() === "GET") salaryReads++;
+      if (req.method() === "POST") salarySaves++;
+    }
+  });
+  await open(page, "/employees/" + id, "Sara Jamal");
+  await page.getByRole("tab", { name: "Employment", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Show salary", exact: true })).toBeVisible();
+  expect(salaryReads).toBe(0);
+  await page.getByRole("button", { name: "Show salary", exact: true }).click();
+  const section = page.getByRole("region", { name: "Salary", exact: true });
+  await expect(section.getByText("No current salary recorded.")).toBeVisible();
+  expect(salaryReads).toBe(1);
+  await section.getByRole("button", { name: "Add salary record", exact: true }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Amount (£)", { exact: true }).fill("10");
+  await dialog.getByLabel("Frequency", { exact: true }).selectOption("hourly");
+  await dialog.getByLabel("Effective from", { exact: true }).fill("1 Apr 2026");
+  await expect(
+    dialog.getByText(/Basic hourly pay is below the age-band minimum wage/),
+  ).toBeVisible();
+  await dialog.getByRole("button", { name: "Save", exact: true }).focus();
+  await dialog.getByRole("heading").click();
+  expect(salarySaves).toBe(0);
+  await dialog.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(dialog).not.toBeVisible();
+  expect(salarySaves).toBe(1);
+  await expect(section.getByText("£10.00 hourly", { exact: true }).first()).toBeVisible();
+  await section.getByRole("button", { name: "Hide salary", exact: true }).click();
+  await expect(section.getByText("£10.00 hourly", { exact: true })).toHaveCount(0);
+  await context.close();
+});

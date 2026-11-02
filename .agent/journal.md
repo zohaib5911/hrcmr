@@ -26,3 +26,4 @@
 2026-11-02 18:48 | Codex | T6.5 | initial checks found outdated reporting fixture and duplicate history locator; corrected both; whitespace is now 422 | next rerun affected tests
 2026-11-02 18:50 | Codex | T6.5 | Employment complete; affected API/reporting/doc 26 pass, web unit 13 pass, browser 2 pass; lint/types/build clean | next T6.6 salary
 2026-11-02 18:55 | Codex | T6.6 | salary history/preview API with permissions, tenant references and dated GOV.UK rates; 10 tests pass, lint/types clean | next hidden salary UI
+2026-11-02 18:59 | Codex | T6.6 | salary UI fetches on Show only; explicit Save, preview warning and lookups; browser test written | next run Salary journey

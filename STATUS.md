@@ -8,9 +8,9 @@ State: IN PROGRESS
 ## Current task
 - T6.6 — Salary
   - [x] Salary API, permission isolation and NMW tests (10 pass)
-  - [ ] Hidden-until-shown salary UI and add-record sheet
+  - [x] Hidden-until-shown salary UI and add-record sheet (lint/types pass)
   - [ ] Browser check and final validation
-- Resume note: Salary API verified; next salary-section.tsx and add-record sheet in Employment. Previous: inspect pay model lookups; add compensation_router.py and schemas; fetch salary only on Show salary. Official rates source https://www.gov.uk/national-minimum-wage-rates verified 2026-11-02.
+- Resume note: salary UI and browser test ready; run Salary journey. Previous: Salary API verified; next salary-section.tsx and add-record sheet in Employment. Previous: inspect pay model lookups; add compensation_router.py and schemas; fetch salary only on Show salary. Official rates source https://www.gov.uk/national-minimum-wage-rates verified 2026-11-02.
 
 ## Next tasks
 - T6.6, T6.7, T6.8, Phase 6 gate
