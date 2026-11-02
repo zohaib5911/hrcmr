@@ -2,6 +2,8 @@
  * Calling the API from a form. Every outcome comes back as data or as one plain problem a form can
  * show: the API's own error (its message is written for people), or a network failure.
  */
+import type { Middleware } from "openapi-fetch";
+
 import { browserApiBaseUrl, createApiClient, type ApiClient } from "@/lib/api/client";
 
 export interface Problem {
@@ -24,15 +26,42 @@ const NETWORK: Problem = {
 let shared: ApiClient | undefined;
 /** One client for the browser. Built on first use, so a missing API address fails where it is used. */
 export function api(): ApiClient {
+  if (shared) return shared;
   // Next.js puts a NEXT_PUBLIC_* value into the browser bundle only where it is written out in full
   // (`process.env.NEXT_PUBLIC_API_URL`), never where `process.env` is passed around as an object.
-  shared ??= createApiClient({
+  shared = createApiClient({
     baseUrl: browserApiBaseUrl({
       NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
       NODE_ENV: process.env.NODE_ENV,
     }),
   });
+  shared.use(enrolmentRedirect());
   return shared;
+}
+
+/** Where a person goes when the API says their company requires two-step verification (plan 8.1). */
+export const ENROL_PATH = "/mfa/enrol";
+
+/**
+ * The API refuses every request from someone who must set up two-step verification and has not
+ * (the "next request" after a policy is switched on). Whatever they were doing, they are taken to
+ * the set-up screen; the page they came from cannot do anything useful until they have.
+ */
+export function enrolmentRedirect(
+  go: (path: string) => void = (path) => window.location.assign(path),
+  here: () => string = () => window.location.pathname,
+): Middleware {
+  return {
+    async onResponse({ response }) {
+      if (response.status !== 403) return undefined;
+      const body = (await response
+        .clone()
+        .json()
+        .catch(() => null)) as { error?: { code?: string } } | null;
+      if (body?.error?.code === "MFA_ENROLMENT_REQUIRED" && here() !== ENROL_PATH) go(ENROL_PATH);
+      return undefined;
+    },
+  };
 }
 
 interface Result<T> {

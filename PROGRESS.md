@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** T3.3 Terms gate and MFA enrolment
+- **Current task:** T3.4 Session bootstrap
 
 ---
 
@@ -105,6 +105,7 @@ marked `UNVERIFIED` and listed here with its location.
 57. **E-mail (T2.8):** with no mail service configured (`RESEND_API_KEY` and `SMTP_HOST` both empty) the API logs that a message was asked for and sends nothing, so tests and a bare checkout still work. With `SMTP_HOST` set, messages wait in `email_outbox` until the worker (T2.9) runs `deliver_email`; T2.9 must also register `sweep_email_outbox` (every minute) so a message whose job was lost is picked up. The brand is the text "Brand" until the owner gives the real name and logo (email header has no logo image yet).
 58. **Worker (T2.9):** the worker needs `DATABASE_URL_OWNER` for job audit events and the orphan clean-up (platform events have no company, so the API role cannot write them); without it jobs still run and are logged but not audited. Schedule times are UTC. `sweep_email_outbox` is registered, as T2.8 required.
 59. **Sign-in screens (T3.1):** the sign-up link points to `/setup`, which T3.2 builds next (until then it is a 404, and the link is not prefetched). The screens call the API straight from the browser (cookie plus CSRF header), never through a Next.js route. Screenshots of these screens are taken at the Phase 3 gate, with the flow test.
+60. **Gates (T3.3):** the layout only acts on what the API says; with no session cookie, or an API that cannot be reached, it does nothing, and redirecting to `/login` is T3.4. Recovery codes are shown once and cannot be fetched again (a new set replaces the old). The API session cookie name `brand_session` is a constant in `web/lib/auth/server.ts`; change both if `SESSION_COOKIE_NAME` ever changes.
 
 ---
 
@@ -196,7 +197,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 ### Phase 3 — Auth UI and onboarding
 - [x] **T3.1** Sign-in screens — 2026-11-02. `/login` (UK/USA/AU region switch with the two not-yet regions disabled, show/hide password, Turnstile after 3 failures or when the API asks), `/login/mfa` (6-digit code or recovery code), `/forgot-password`, `/reset-password`, `/verify-email` (signs in on load, spends the token once, offers a fresh link if it fails) and `/accept-invite` (company, role, name, password with strength hint, terms), all on one calm panel in `app/(auth)`; Turnstile shows only where `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is set. **Verified:** 49 browser checks (6 screens x 2 themes x 4 widths: no sideways scroll, no console errors, axe clean; keyboard order) and 9 unit tests; the web build for the e2e run now gets `NEXT_PUBLIC_API_URL` and the API address is read in a way that reaches the browser bundle. Owner: none.
 - [x] **T3.2** Setup wizard — 2026-11-02. `/setup`: step 1 company name and bank-holiday region, step 2 name, work email, password (with strength hint), terms and Turnstile, with a "Your choices so far" disclosure; then "Check your inbox" with resend after 60 s (also Turnstile-checked) and a way back if the address was wrong. Errors from the API land on the field they are about (a company error returns to step 1). **Verified:** 4 component tests; the browser spec now covers the three set-up screens too (73 checks in all, 2 themes x 4 widths, axe clean). Owner: none.
-- [ ] **T3.3** Terms gate, MFA enrolment flow and MFA policy enforcement
+- [x] **T3.3** Terms gate and MFA enrolment — 2026-11-02. The app layout asks the API who is signed in (cookie passed on) and sends someone who has not done the second step to `/login/mfa`, and someone whose company requires two-step verification to `/mfa/enrol`; terms not yet accepted appear as a full-screen dialog that Esc cannot close (accept, or sign out). `/mfa/enrol`: QR code (made in the browser, white ground for scanning) plus a copyable key, one confirming code, then the 10 recovery codes with Download and "I've saved them". Any API call refused with `MFA_ENROLMENT_REQUIRED` (the policy is switched on mid-session) takes the person to `/mfa/enrol`. **Verified:** 7 unit tests; the browser spec covers both set-up screens (2 themes x 4 widths, axe clean), and the 83 shell checks still pass. Owner: none.
 - [ ] **T3.4** Signed-in session bootstrap, permission-aware sidebar, free-plan banner, 402 upgrade sheet
 - [ ] **Phase 3 gate** — includes the Playwright E2E journey in plan Phase 3
 

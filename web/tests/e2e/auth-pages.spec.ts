@@ -49,6 +49,23 @@ const PAGES: readonly Screen[] = [
     then: "Check your inbox",
   },
   {
+    name: "two-step set-up, scan",
+    path: "/mfa/enrol",
+    heading: "Set up two-step verification",
+    prepare: scanned,
+  },
+  {
+    name: "two-step set-up, recovery codes",
+    path: "/mfa/enrol",
+    heading: "Set up two-step verification",
+    prepare: async (page) => {
+      await scanned(page);
+      await page.getByLabel("6-digit code", { exact: true }).fill("123456");
+      await page.getByRole("button", { name: "Confirm" }).click();
+      await expect(page.getByRole("list", { name: "Recovery codes" })).toBeVisible();
+    },
+  },
+  {
     name: "accept invitation",
     path: "/accept-invite?token=example",
     heading: "Accept your invitation",
@@ -74,7 +91,7 @@ async function answer(page: Page, pattern: string, status: number, body: unknown
   });
 }
 
-async function answerInvitation(page: Page) {
+async function answerApi(page: Page) {
   await answer(page, "**/auth/invitations/example", 200, {
     company_name: "Harbourside Care Ltd",
     email: "tom@example.com",
@@ -83,6 +100,17 @@ async function answerInvitation(page: Page) {
     has_account: false,
   });
   await answer(page, "**/auth/signup", 202, { status: "check_your_inbox" });
+  await answer(page, "**/auth/mfa/setup", 200, {
+    secret: "JBSWY3DPEHPK3PXP",
+    otpauth_uri: "otpauth://totp/Brand:amira@example.com?secret=JBSWY3DPEHPK3PXP&issuer=Brand",
+  });
+  await answer(page, "**/auth/mfa/verify", 200, {
+    recovery_codes: Array.from({ length: 10 }, (_, index) => `rc${index}ab-${index}cdef`),
+  });
+}
+
+async function scanned(page: Page) {
+  await expect(page.getByAltText("QR code for your authenticator app")).toBeVisible();
 }
 
 async function firstStep(page: Page) {
@@ -124,7 +152,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         }) => {
           await page.setViewportSize({ width, height: 900 });
           await page.goto("/login"); // any page on the site, so the mock knows the page's origin
-          await answerInvitation(page);
+          await answerApi(page);
           const problems = await open(page, screen.path, screen.heading);
           if (screen.prepare) await screen.prepare(page);
           if (screen.then) {
