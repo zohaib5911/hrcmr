@@ -1,6 +1,6 @@
 # STATUS
-Updated: 2026-11-02 20:14 (Europe/London)    Agent: Codex    Branch: dev    Commit: 24ea81b
-State: HANDED OVER
+Updated: 2026-11-02 20:35 (Europe/London)    Agent: Codex    Branch: dev    Commit: 7aafbdb
+State: IN PROGRESS
 
 ## Last completed
 - Phase 6 gate — PR #11 merged to main as 6acec98 after all 12 CI checks passed; clean dev synced
@@ -20,7 +20,7 @@ State: HANDED OVER
 - T7.1, T7.2, T7.3, T7.4, T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
 
 ## Health
-- CI on dev: green 41514098397 on 0878319; all 12 PR checks passed. CI on main: post-merge run 41516923634 pending; previous red audit-export fix is included.
+- CI on dev: green 41514098397 on 0878319; all 12 PR checks passed. CI on main: green 41516923634; previous red audit-export fix is included.
 - Local/CI checks: API CI 422 pass; web 776 pass, guards 32 pass, full local Playwright 396 pass/144 screenshot-only skipped; final QA capture 5 pass/60 images. All lint/types/generated API/build/security/image checks green. Patched dependency local pip-audit clean, four PDF/file checks pass.
 
 ## Issues / suggestions
