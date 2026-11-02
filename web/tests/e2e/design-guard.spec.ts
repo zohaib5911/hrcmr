@@ -23,8 +23,16 @@ test.describe("the design page does not exist in production", () => {
 
   test("the production build has no design route and none of its code", async () => {
     const next = path.resolve(__dirname, "../../.next");
-    const routes = readFileSync(path.join(next, "app-path-routes-manifest.json"), "utf8");
-    expect(routes).not.toContain("/design");
+    const routes = Object.values(
+      JSON.parse(readFileSync(path.join(next, "app-path-routes-manifest.json"), "utf8")) as Record<
+        string,
+        string
+      >,
+    );
+    // Only the design page itself: a page such as /company/designations is a different route.
+    expect(routes.filter((route) => route === "/design" || route.startsWith("/design/"))).toEqual(
+      [],
+    );
     expect(existsSync(path.join(next, "server/app/design"))).toBe(false);
   });
 });

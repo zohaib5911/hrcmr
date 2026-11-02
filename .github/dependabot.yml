@@ -29,6 +29,13 @@ updates:
       day: monday
     cooldown:
       default-days: 14
+    # TypeScript 7 and ESLint 10 are major moves that need a planned migration (owner decision,
+    # 2026-11-02); minor and patch updates still come through.
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
     groups:
       web-dependencies:
         patterns: ["*"]

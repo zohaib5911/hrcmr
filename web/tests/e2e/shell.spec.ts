@@ -295,13 +295,19 @@ test.describe("the toolbar", () => {
   });
 });
 
+// Pages that have been built: they still have their heading, title and place in the menu, but no
+// longer the "on its way" empty state of a page that has not been built yet.
+const BUILT = new Set(["company"]);
+
 test.describe("every page in the sidebar", () => {
   for (const item of NAV_ITEMS) {
     test(`${item.href} serves a page headed "${item.label}", in the frame`, async ({ page }) => {
       const response = await page.goto(item.href);
       expect(response?.status()).toBe(200);
       await expect(page.getByRole("heading", { level: 1 })).toHaveText(item.label);
-      await expect(page.getByRole("heading", { level: 2, name: item.emptyTitle })).toBeVisible();
+      if (!BUILT.has(item.id)) {
+        await expect(page.getByRole("heading", { level: 2, name: item.emptyTitle })).toBeVisible();
+      }
       await expect(page).toHaveTitle(`${item.label} | Brand`);
       await expect(
         page
