@@ -17,3 +17,4 @@
 2026-11-02 22:41 | Claude Code | T6.3 | API: profile, status, opt-out+agreement, guarded delete + 4 tests | next: web profile page /employees/[id]
 2026-11-02 22:46 | Claude Code | T6.3 | web profile + e2e done, verified | next: T6.4
 2026-11-02 23:20 | Claude Code | T6.4 | API: personal details, address, contacts, identity, bank, reveal + 3 tests | next: web Personal tab
+2026-11-02 23:35 | Claude Code | T6.4 | web Personal tab (personal-tab.tsx, mounted on profile) lint/types/unit clean | next: e2e in employees.spec.ts
