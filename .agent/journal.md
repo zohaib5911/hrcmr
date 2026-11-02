@@ -10,3 +10,4 @@
 2026-11-02 16:06 | Claude Code | T5.2 | web invite sheet, row menu, e2e | next: T5.3
 2026-11-02 16:10 | Claude Code | T5.3 | policy + role viewer, API+web+e2e | next: Phase 5 gate
 2026-11-02 16:25 | Claude Code | Phase 5 gate | suites green, summary, PR | next: T6.1
+2026-11-02 16:29 | Claude Code | T6.1 | migration 0013 + models for all 6.3 tables; reports graph now reads current assignments | next: GET /employees, /employees/summary, list page

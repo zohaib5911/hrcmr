@@ -113,6 +113,10 @@ def test_every_encrypted_column_is_found_by_its_type() -> None:
     assert [(t.name, c.name, ctx) for t, c, ctx in encrypted_columns()] == [
         ("company_bank_accounts", "sort_code", "company_bank_accounts.sort_code"),
         ("company_bank_accounts", "account_number", "company_bank_accounts.account_number"),
+        ("employee_bank_details", "sort_code", "employee_bank_details.sort_code"),
+        ("employee_bank_details", "account_number", "employee_bank_details.account_number"),
+        ("employees", "ni_number", "employees.ni_number"),
+        ("employees", "passport_number", "employees.passport_number"),
         ("users", "mfa_secret", "users.mfa_secret"),
     ]
 

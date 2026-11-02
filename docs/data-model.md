@@ -241,6 +241,252 @@ Checks:
 
 - `purpose in ('verify', 'reset', 'deletion_code', 'login_alert')`
 
+## `emergency_contacts`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `name` | VARCHAR(120) | no |  |  |
+| `relationship` | VARCHAR(20) | no |  |  |
+| `phone` | VARCHAR(40) | no |  |  |
+| `email` | VARCHAR(254) | yes |  |  |
+| `address` | TEXT | yes |  |  |
+| `details` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `relationship in ('spouse', 'partner', 'parent', 'child', 'sibling', 'relative', 'friend', 'other')`
+
+## `employee_addresses`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `postcode` | VARCHAR(12) | yes |  |  |
+| `line1` | VARCHAR(120) | no |  |  |
+| `line2` | VARCHAR(120) | yes |  |  |
+| `line3` | VARCHAR(120) | yes |  |  |
+| `city_county` | VARCHAR(120) | yes |  |  |
+| `country` | VARCHAR(80) | yes |  |  |
+| `is_current` | BOOLEAN | no | `true` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+## `employee_assignments`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `department_id` | UUID | yes |  | references `departments` |
+| `designation_id` | UUID | yes |  | references `designations` |
+| `location_id` | UUID | yes |  | references `locations` |
+| `reporting_authority_employee_id` | UUID | yes |  | references `employees` |
+| `leave_sanctioning_employee_id` | UUID | yes |  | references `employees` |
+| `organogram_level_id` | UUID | yes |  |  |
+| `employment_type` | VARCHAR(12) | no |  |  |
+| `custom_working_days` | JSONB | yes |  |  |
+| `hours_per_day` | NUMERIC(4, 2) | yes |  |  |
+| `effective_from` | DATE | no |  |  |
+| `ended_at` | DATE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `employment_type in ('full_time', 'part_time', 'fixed_term', 'zero_hours', 'casual', 'apprentice', 'agency')`
+
+## `employee_bank_details`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `account_holder` | VARCHAR(120) | no |  |  |
+| `bank_name` | VARCHAR(120) | no |  |  |
+| `sort_code` | TEXT | no |  |  |
+| `account_number` | TEXT | no |  |  |
+| `is_current` | BOOLEAN | no | `true` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+## `employee_compensation`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `amount` | NUMERIC(12, 2) | no |  |  |
+| `frequency` | VARCHAR(10) | no |  |  |
+| `contracted_hours_per_week` | NUMERIC(5, 2) | yes |  |  |
+| `tax_code_id` | UUID | yes |  | references `tax_codes` |
+| `payment_type_id` | UUID | yes |  | references `payment_types` |
+| `pay_band_id` | UUID | yes |  | references `pay_bands` |
+| `pay_schedule_id` | UUID | yes |  | references `pay_schedules` |
+| `effective_from` | DATE | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `amount >= 0`
+- `frequency in ('annual', 'monthly', 'hourly')`
+
+## `employee_documents`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `file_id` | UUID | no |  | references `files` |
+| `category` | VARCHAR(24) | no |  |  |
+| `notes` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `category in ('employment_contract', 'letter', 'hr_record', 'id_document', 'rtw_evidence', 'certificate', 'payslip', 'other')`
+
+## `employee_education`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `qualification` | VARCHAR(120) | no |  |  |
+| `subject` | VARCHAR(120) | yes |  |  |
+| `institution` | VARCHAR(120) | yes |  |  |
+| `awarding_body` | VARCHAR(120) | yes |  |  |
+| `year` | SMALLINT | yes |  |  |
+| `percentage` | NUMERIC(5, 2) | yes |  |  |
+| `grade` | VARCHAR(40) | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+## `employee_memberships`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `licence_title` | VARCHAR(160) | no |  |  |
+| `licence_number` | VARCHAR(80) | yes |  |  |
+| `started_on` | DATE | yes |  |  |
+| `ended_on` | DATE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+## `employee_previous_employment`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `job_title` | VARCHAR(120) | yes |  |  |
+| `started_on` | DATE | yes |  |  |
+| `left_on` | DATE | yes |  |  |
+| `total_experience_years` | NUMERIC(4, 1) | yes |  |  |
+| `description` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+## `employee_responsibilities`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `text` | TEXT | no |  |  |
+| `sort` | INTEGER | no | `0` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+## `employee_training_records`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `title` | VARCHAR(160) | no |  |  |
+| `started_on` | DATE | yes |  |  |
+| `ended_on` | DATE | yes |  |  |
+| `description` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+## `employees`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_number` | VARCHAR(50) | no |  |  |
+| `first_name` | VARCHAR(100) | no |  |  |
+| `last_name` | VARCHAR(100) | no |  |  |
+| `email` | VARCHAR(254) | no |  |  |
+| `phone` | VARCHAR(40) | yes |  |  |
+| `alt_phone` | VARCHAR(40) | yes |  |  |
+| `date_of_birth` | DATE | yes |  |  |
+| `gender` | VARCHAR(30) | yes |  |  |
+| `marital_status` | VARCHAR(30) | yes |  |  |
+| `nationality` | VARCHAR(80) | yes |  |  |
+| `photo_file_id` | UUID | yes |  | references `files` |
+| `hire_date` | DATE | no |  |  |
+| `status` | VARCHAR(10) | no | `active` |  |
+| `leave_date` | DATE | yes |  |  |
+| `opted_out_48h_week` | BOOLEAN | no | `false` |  |
+| `ni_number` | TEXT | yes |  |  |
+| `ni_number_index` | VARCHAR(64) | yes |  |  |
+| `passport_number` | TEXT | yes |  |  |
+| `passport_country` | VARCHAR(80) | yes |  |  |
+| `passport_expiry` | DATE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `status in ('active', 'on_leave', 'leaver', 'archived')`
+
 ## `files`
 
 | Column | Type | Null | Default | Notes |
@@ -363,7 +609,7 @@ Checks:
 | `company_id` | UUID | no |  | references `companies` |
 | `role` | VARCHAR(20) | no |  |  |
 | `status` | VARCHAR(10) | no | `active` |  |
-| `employee_id` | UUID | yes |  |  |
+| `employee_id` | UUID | yes |  | references `employees` |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 | `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |

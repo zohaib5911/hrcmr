@@ -304,18 +304,19 @@ def test_no_real_endpoint_skips_authorisation() -> None:
 
 
 async def _employees(database: DatabaseUnderTest) -> tuple[uuid.UUID, uuid.UUID]:
-    """A table with the columns Phase 4 will give `employees`, and two companies' worth of rows."""
+    """The columns of the current-assignment table the graph reads, and two companies' rows."""
     owner = engine_for(database.owner_url, poolclass=NullPool)
     company_a, company_b = uuid7(), uuid7()
     async with owner.begin() as c:
-        await c.execute(text("drop table if exists employees"))
+        await c.execute(text("drop table if exists employee_assignments cascade"))
         await c.execute(
             text(
-                "create table employees (id uuid primary key, company_id uuid not null, "
-                "reporting_authority_employee_id uuid, leave_sanctioning_employee_id uuid)"
+                "create table employee_assignments (employee_id uuid, company_id uuid not null, "
+                "reporting_authority_employee_id uuid, leave_sanctioning_employee_id uuid, "
+                "ended_at date)"
             )
         )
-        for statement in tenant_rls_statements("employees", privileges=("SELECT",)):
+        for statement in tenant_rls_statements("employee_assignments", privileges=("SELECT",)):
             await c.execute(text(statement))
     await owner.dispose()
     return company_a, company_b
@@ -341,7 +342,7 @@ async def test_reports_are_found_at_any_depth_per_chain_and_never_across_compani
     async with owner.begin() as c:
         for row in rows:
             await c.execute(
-                text("insert into employees values (:i, :c, :r, :l)"),
+                text("insert into employee_assignments values (:i, :c, :r, :l)"),
                 {"i": row[0], "c": row[1], "r": row[2], "l": row[3]},
             )
     await owner.dispose()
@@ -351,7 +352,7 @@ async def test_reports_are_found_at_any_depth_per_chain_and_never_across_compani
 
     @event.listens_for(app_engine.sync_engine, "before_cursor_execute")
     def count(conn: Any, cursor: Any, statement: str, *args: Any) -> None:
-        if "employees" in statement:
+        if "employee_assignments" in statement:
             queries.append(statement)
 
     try:
