@@ -6,7 +6,7 @@ import ipaddress
 
 import pytest
 
-from app.core.client_ip import RAILWAY_PRIVATE_RANGES, resolve_client_ip
+from app.core.client_ip import CLOUDFLARE_RANGES, RAILWAY_PRIVATE_RANGES, resolve_client_ip
 
 RAILWAY = "100.64.0.7"
 CLOUDFLARE_EDGE = "172.69.10.20"
@@ -58,3 +58,18 @@ def test_ipv6_is_matched_against_ipv6_ranges_only() -> None:
 @pytest.mark.parametrize("peer", [None, "garbage"])
 def test_an_unreadable_peer_is_returned_as_is(peer: str | None) -> None:
     assert resolve_client_ip(peer, {"x-real-ip": VISITOR}, RAILWAY_PRIVATE_RANGES) == peer
+
+
+def test_the_fetched_cloudflare_list_replaces_the_built_in_one_and_can_be_dropped() -> None:
+    from app.core.client_ip import cloudflare_ranges, use_cloudflare_ranges
+
+    trusted = (ipaddress.ip_network("100.64.0.0/10"),)
+    headers = {"x-real-ip": "203.0.113.9", "cf-connecting-ip": "198.51.100.7"}
+    try:
+        assert resolve_client_ip("100.64.0.2", headers, trusted) == "203.0.113.9"
+        use_cloudflare_ranges(["203.0.113.0/24"])  # now "Cloudflare"
+        assert resolve_client_ip("100.64.0.2", headers, trusted) == "198.51.100.7"
+        use_cloudflare_ranges(["not a network"])  # unreadable: back to the built-in list
+        assert cloudflare_ranges() == CLOUDFLARE_RANGES
+    finally:
+        use_cloudflare_ranges(None)

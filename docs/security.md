@@ -13,7 +13,7 @@ Decisions about the security design that are not obvious from the code. The full
 `X-Real-IP` and `CF-Connecting-IP` are believed only when the connection comes from a trusted proxy
 (`api/app/core/client_ip.py`). In production that is Railway's private network (override with
 `TRUSTED_PROXY_CIDRS`); `CF-Connecting-IP` counts only when Railway reports that the connection to
-it came from one of Cloudflare's published ranges (copied into that file, checked 2026-11-02).
+it came from one of Cloudflare's published ranges (the weekly worker job fetches cloudflare.com/ips-v4 and /ips-v6 into Redis and the API rereads them hourly; a reply that does not look like the list is refused; the copy in `core/client_ip.py`, checked 2026-11-02, is the fallback).
 Everywhere else, including a developer machine, the socket address is used and the headers are
 ignored, so a forged header cannot dodge a rate limit or poison the audit trail.
 
