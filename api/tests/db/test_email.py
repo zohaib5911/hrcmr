@@ -22,8 +22,8 @@ from app.core.crypto import KeyRing, set_keyring
 from app.integrations.email import Message, SmtpTransport, TransportError
 from app.jobs.email import deliver_email
 from app.modules.email.outbox import BACKOFF, MAX_ATTEMPTS, EmailDelivery, OutboxMailer
-from app.modules.email.samples import SAMPLES, send_samples
 from app.modules.email.templates import TEMPLATES, TemplateError, render
+from seed.email_samples import SAMPLES, send_samples
 from tests.db.support import DatabaseUnderTest, engine_for
 from tests.support import build_settings
 

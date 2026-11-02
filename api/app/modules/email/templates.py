@@ -135,6 +135,20 @@ TEMPLATES: dict[str, Template] = {
         button=("Secure my account", "link"),
         fields=_fields("first_name", "when", "device", "link"),
     ),
+    "account_locked": Template(
+        subject="Sign-in paused on your account",
+        heading="Sign-in paused on your account",
+        preheader="Too many wrong passwords were tried.",
+        paragraphs=(
+            "Hi {first_name},",
+            "Someone entered the wrong password for your {brand_name} account several times in a "
+            "row, so we have paused sign-in for {minutes}. This protects your account.",
+            "If it was you, wait and try again, or reset your password now. If it was not, "
+            "reset your password so that nobody else can get in.",
+        ),
+        button=("Reset my password", "link"),
+        fields=_fields("first_name", "minutes", "link"),
+    ),
     "notifications_digest": Template(
         subject="You have new notifications",
         heading="You have new notifications",

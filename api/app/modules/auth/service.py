@@ -87,22 +87,36 @@ class InvalidMfaCodeError(AppError):
 
 
 class AuthNotifier(Protocol):
-    """Tells a person about something that happened to their account. The e-mail implementation
-    arrives with the e-mail service (T2.8); until then nothing is sent."""
+    """Tells a person about something that happened to their account (``MailNotifier`` sends the
+    e-mail). It must never raise: a failed notice cannot be allowed to fail a sign-in."""
 
-    async def account_locked(self, user_id: uuid.UUID, email: str, retry_after: int) -> None: ...
+    async def account_locked(
+        self, user_id: uuid.UUID, email: str, first_name: str, retry_after: int
+    ) -> None: ...
 
     async def new_device_login(
-        self, user_id: uuid.UUID, email: str, ip: str | None, user_agent: str | None
+        self,
+        user_id: uuid.UUID,
+        email: str,
+        first_name: str,
+        ip: str | None,
+        user_agent: str | None,
     ) -> None: ...
 
 
 class SilentNotifier:
-    async def account_locked(self, user_id: uuid.UUID, email: str, retry_after: int) -> None:
+    async def account_locked(
+        self, user_id: uuid.UUID, email: str, first_name: str, retry_after: int
+    ) -> None:
         return None
 
     async def new_device_login(
-        self, user_id: uuid.UUID, email: str, ip: str | None, user_agent: str | None
+        self,
+        user_id: uuid.UUID,
+        email: str,
+        first_name: str,
+        ip: str | None,
+        user_agent: str | None,
     ) -> None:
         return None
 
@@ -171,7 +185,9 @@ class AuthService:
                 user.locked_until = datetime.now(UTC).replace(microsecond=0) + timedelta(
                     seconds=seconds
                 )
-                await self._notifier.account_locked(user.id, str(user.email), seconds)
+                await self._notifier.account_locked(
+                    user.id, str(user.email), user.first_name, seconds
+                )
 
     async def failure_count(self, email: str) -> int:
         """Wrong passwords in a row for this address (whether or not it has an account)."""
@@ -260,7 +276,9 @@ class AuthService:
         await self._redis.sadd(key, device)
         await self._redis.expire(key, _DEVICE_TTL)
         if is_new:  # the very first sign-in has nothing to compare with, so it is not an alert
-            await self._notifier.new_device_login(user.id, str(user.email), ip, user_agent)
+            await self._notifier.new_device_login(
+                user.id, str(user.email), user.first_name, ip, user_agent
+            )
 
     # --- second step -------------------------------------------------------------------
 

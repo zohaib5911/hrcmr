@@ -7,6 +7,7 @@ import hmac
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from app.modules.auth.notifier import MailNotifier
 from app.modules.auth.service import AuthNotifier, AuthService
 from app.modules.auth.sessions import SessionStore
 
@@ -41,7 +42,12 @@ def build_container(
     recovery_key = hmac.new(
         settings.session_secret.get_secret_value().encode(), b"recovery-codes", hashlib.sha256
     ).digest()
-    auth = AuthService(redis=redis, sessions=sessions, recovery_key=recovery_key, notifier=notifier)
+    auth = AuthService(
+        redis=redis,
+        sessions=sessions,
+        recovery_key=recovery_key,
+        notifier=notifier or MailNotifier(mailer, settings),
+    )
     return AuthContainer(
         settings=settings,
         redis=redis,

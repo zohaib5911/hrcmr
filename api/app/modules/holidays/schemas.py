@@ -7,7 +7,9 @@ from datetime import date, datetime  # noqa: TC003
 from decimal import Decimal  # noqa: TC003
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
+
+from app.core.schemas import RequestModel
 
 Colour = Literal["blue", "green", "orange", "red", "gray"]
 Region = Literal["england-and-wales", "scotland", "northern-ireland"]
@@ -17,20 +19,16 @@ def _clean(value: object) -> object:
     return value.strip() or None if isinstance(value, str) else value
 
 
-class _Strict(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-
 # --- working pattern ----------------------------------------------------------------------------
 
 
-class PatternDay(_Strict):
+class PatternDay(RequestModel):
     weekday: Annotated[int, Field(ge=1, le=7, description="1 is Monday, 7 is Sunday.")]
     is_working: bool
     hours: Annotated[Decimal, Field(ge=0, le=24, max_digits=4, decimal_places=2)]
 
 
-class WorkingPattern(_Strict):
+class WorkingPattern(RequestModel):
     days: Annotated[list[PatternDay], Field(min_length=7, max_length=7)]
     bank_holidays_non_working: bool
 
@@ -58,7 +56,7 @@ class HolidayTypeOut(BaseModel):
     colour: Colour
 
 
-class HolidayTypeIn(_Strict):
+class HolidayTypeIn(RequestModel):
     name: Annotated[str, Field(min_length=1, max_length=80)]
     colour: Colour = "blue"
 
@@ -75,7 +73,7 @@ class CompanyHolidayOut(BaseModel):
     deduct_from_annual_leave: bool
 
 
-class CompanyHolidayIn(_Strict):
+class CompanyHolidayIn(RequestModel):
     name: Annotated[str, Field(min_length=1, max_length=120)]
     start_date: date
     end_date: date
@@ -92,7 +90,7 @@ class CompanyHolidayIn(_Strict):
         return self
 
 
-class CompanyHolidayPatch(_Strict):
+class CompanyHolidayPatch(RequestModel):
     name: Annotated[str, Field(min_length=1, max_length=120)] | None = None
     start_date: date | None = None
     end_date: date | None = None

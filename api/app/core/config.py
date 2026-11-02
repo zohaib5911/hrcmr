@@ -91,6 +91,9 @@ class Settings(BaseSettings):
     admin_origin: Origin
     api_origin: Origin
     tz: str = "Europe/London"
+    # Comma-separated networks whose forwarded headers are believed (see core/client_ip.py). Empty
+    # means Railway's private network when deployed and nobody on a developer machine.
+    trusted_proxy_cidrs: str | None = None
 
     # --- Database and cache --------------------------------------------------------------------
     database_url: SecretStr
@@ -158,6 +161,21 @@ class Settings(BaseSettings):
     def _split_allowlist(cls, value: object) -> object:
         if isinstance(value, str):
             return [item.strip() for item in value.split(",") if item.strip()]
+        return value
+
+    @field_validator("trusted_proxy_cidrs")
+    @classmethod
+    def _valid_cidrs(cls, value: str | None) -> str | None:
+        import ipaddress
+
+        for part in (value or "").split(","):
+            if part.strip():
+                try:
+                    ipaddress.ip_network(part.strip(), strict=False)
+                except ValueError as exc:
+                    raise ValueError(
+                        "must be comma-separated IP networks, e.g. 100.64.0.0/10"
+                    ) from exc
         return value
 
     @field_validator("tz")

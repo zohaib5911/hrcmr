@@ -134,7 +134,11 @@ async def _rotate_keys() -> int:
 async def _email_samples() -> int:
     from app.db.engine import create_engine
     from app.integrations.email import transport_from_settings
-    from app.modules.email.samples import send_samples
+
+    try:
+        from seed.email_samples import send_samples
+    except ModuleNotFoundError:
+        raise SystemExit("email-samples is for development: seed/ is not in this image.") from None
 
     settings = get_settings()
     transport = transport_from_settings(settings)

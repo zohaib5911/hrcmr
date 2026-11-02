@@ -12,11 +12,12 @@ from typing import TYPE_CHECKING, Annotated, Literal
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Form, Request, UploadFile
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 from sqlalchemy import select
 
 from app.core.errors import AppError, ForbiddenError, NotFoundError
 from app.core.rbac_matrix import Scope
+from app.core.schemas import RequestModel
 from app.integrations.storage import PRESIGN_SECONDS
 from app.modules.companies.models import Company, ComplianceDocument
 from app.modules.companies.reference import COMPLIANCE_DOCUMENT_TYPES, EXPIRING_DAYS
@@ -56,10 +57,8 @@ class ComplianceDocuments(BaseModel):
     total: int
 
 
-class DocumentPatch(BaseModel):
+class DocumentPatch(RequestModel):
     """Only the fields that are sent change."""
-
-    model_config = ConfigDict(extra="forbid")
 
     expires_on: date | None = None
     notes: Annotated[str, Field(max_length=1000)] | None = None

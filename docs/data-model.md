@@ -266,7 +266,7 @@ Checks:
 
 Checks:
 
-- `colour in ('blue', 'green', 'orange', 'red', 'purple', 'teal', 'gray')`
+- `colour in ('blue', 'green', 'orange', 'red', 'gray')`
 
 ## `invitations`
 

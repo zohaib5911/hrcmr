@@ -1,4 +1,6 @@
-"""One example of every e-mail, for looking at in Mailpit (``python -m app.cli email-samples``)."""
+"""One example of every e-mail, for looking at in Mailpit (``python -m app.cli email-samples``).
+
+Development only: this file lives in ``seed/``, which the production image does not contain."""
 
 from __future__ import annotations
 
@@ -37,6 +39,11 @@ SAMPLES: dict[str, dict[str, str]] = {
         "first_name": "Amira",
         "when": "2 November 2026 at 09:42 UTC",
         "device": "Firefox on Linux",
+        "link": f"{SAMPLE_BASE}/forgot-password",
+    },
+    "account_locked": {
+        "first_name": "Amira",
+        "minutes": "15 minutes",
         "link": f"{SAMPLE_BASE}/forgot-password",
     },
     "notifications_digest": {

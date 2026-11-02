@@ -6,7 +6,9 @@ import re
 import uuid  # noqa: TC003  (pydantic resolves the annotations at runtime)
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator
+
+from app.core.schemas import RequestModel
 
 Role = Literal["authorising_officer", "key_contact", "level1_user", "level2_user"]
 Name = Annotated[str, Field(min_length=1, max_length=100)]
@@ -42,9 +44,7 @@ class KeyPersonnel(BaseModel):
     roles_filled: int = Field(description="How many of the 4 roles have someone in them.")
 
 
-class KeyPersonIn(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
+class KeyPersonIn(RequestModel):
     role: Role
     # Left out when the person is the same as the Authorising Officer (their details are copied).
     first_name: Name | None = None
@@ -61,10 +61,8 @@ class KeyPersonIn(BaseModel):
     _check_phone = field_validator("phone")(_phone)
 
 
-class KeyPersonPatch(BaseModel):
+class KeyPersonPatch(RequestModel):
     """Only the fields that are sent change."""
-
-    model_config = ConfigDict(extra="forbid")
 
     first_name: Name | None = None
     last_name: Name | None = None

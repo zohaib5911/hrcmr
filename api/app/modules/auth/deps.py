@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Annotated
 from fastapi import Depends, Request
 from sqlalchemy import select
 
+from app.core.client_ip import client_ip_of
 from app.core.errors import AppError
 from app.db.session import GlobalDb  # noqa: TC001  (FastAPI reads the annotation at run time)
 from app.modules.auth.container import AuthContainer
@@ -33,13 +34,8 @@ Auth = Annotated[AuthContainer, Depends(container)]
 
 
 def client_ip(request: Request) -> str | None:
-    # Behind Cloudflare and Railway the real address is in these headers; Cloudflare's wins because
-    # it is set by Cloudflare itself. Locally there is no proxy and the socket address is used.
-    for header in ("cf-connecting-ip", "x-real-ip"):
-        value = request.headers.get(header)
-        if value:
-            return value.strip()[:45]
-    return request.client.host if request.client else None
+    """The visitor's address; forwarded headers count only from a trusted proxy (core/client_ip)."""
+    return client_ip_of(request)
 
 
 def user_agent(request: Request) -> str | None:

@@ -160,3 +160,25 @@ def test_the_served_document_matches_the_exported_one() -> None:
                 return document
 
     assert asyncio.run(fetch()) == json.loads(openapi_document())
+
+
+def _request_body_schemas(schema: dict[str, Any]) -> set[str]:
+    names: set[str] = set()
+    for _, _, op in operations(schema):
+        content = op.get("requestBody", {}).get("content", {})
+        # File uploads (multipart) are form fields FastAPI describes itself; only JSON has models.
+        for media in (content["application/json"],) if "application/json" in content else ():
+            ref = media.get("schema", {}).get("$ref")
+            if ref:
+                names.add(ref.rsplit("/", 1)[-1])
+    return names
+
+
+def test_every_request_body_refuses_fields_it_does_not_know(schema: dict[str, Any]) -> None:
+    schemas = schema["components"]["schemas"]
+    bodies = _request_body_schemas(schema)
+    assert bodies, "no request bodies found"
+    open_bodies = [
+        name for name in bodies if schemas[name].get("additionalProperties") is not False
+    ]
+    assert open_bodies == [], f"inherit from app.core.schemas.RequestModel: {open_bodies}"

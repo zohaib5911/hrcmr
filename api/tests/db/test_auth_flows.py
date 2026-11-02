@@ -73,11 +73,18 @@ class Notes:
         self.locked: list[str] = []
         self.new_devices: list[str] = []
 
-    async def account_locked(self, user_id: uuid.UUID, email: str, retry_after: int) -> None:
+    async def account_locked(
+        self, user_id: uuid.UUID, email: str, first_name: str, retry_after: int
+    ) -> None:
         self.locked.append(email)
 
     async def new_device_login(
-        self, user_id: uuid.UUID, email: str, ip: str | None, user_agent: str | None
+        self,
+        user_id: uuid.UUID,
+        email: str,
+        first_name: str,
+        ip: str | None,
+        user_agent: str | None,
     ) -> None:
         self.new_devices.append(f"{ip}|{user_agent}")
 

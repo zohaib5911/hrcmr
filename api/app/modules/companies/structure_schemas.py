@@ -6,8 +6,9 @@ import re
 import uuid  # noqa: TC003  (pydantic resolves the annotations at runtime)
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, Field, field_validator
 
+from app.core.schemas import RequestModel
 from app.integrations.postcodes import normalise_postcode
 
 Text120 = Annotated[str, Field(min_length=1, max_length=120)]
@@ -16,12 +17,6 @@ OptionalText120 = Annotated[str, Field(max_length=120)] | None
 
 def _clean(value: object) -> object:
     return value.strip() or None if isinstance(value, str) else value
-
-
-class _Strict(BaseModel):
-    """Fields we do not know are refused, not ignored (a form cannot slip in an extra field)."""
-
-    model_config = ConfigDict(extra="forbid")
 
 
 # --- locations -----------------------------------------------------------------------------------
@@ -40,7 +35,7 @@ class LocationOut(BaseModel):
     is_default: bool
 
 
-class LocationIn(_Strict):
+class LocationIn(RequestModel):
     name: Text120
     postcode: str
     address_line1: Text120
@@ -71,7 +66,7 @@ class LocationIn(_Strict):
         return postcode
 
 
-class LocationPatch(_Strict):
+class LocationPatch(RequestModel):
     """Only the fields that are sent change."""
 
     name: Text120 | None = None
@@ -122,7 +117,7 @@ class DepartmentOut(BaseModel):
     designations: int = Field(description="How many job titles it has.")
 
 
-class DepartmentIn(_Strict):
+class DepartmentIn(RequestModel):
     name: Annotated[str, Field(min_length=1, max_length=100)]
 
     _trim = field_validator("name", mode="before")(_clean)
@@ -139,7 +134,7 @@ class DesignationOut(BaseModel):
 _SOC = re.compile(r"[0-9]{4}")
 
 
-class DesignationIn(_Strict):
+class DesignationIn(RequestModel):
     title: Text120
     department_id: uuid.UUID
     soc_code: str | None = None
@@ -154,7 +149,7 @@ class DesignationIn(_Strict):
         return value
 
 
-class DesignationPatch(_Strict):
+class DesignationPatch(RequestModel):
     title: Text120 | None = None
     department_id: uuid.UUID | None = None
     soc_code: str | None = None

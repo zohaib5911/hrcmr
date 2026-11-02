@@ -8,6 +8,8 @@ from typing import Literal
 
 from pydantic import BaseModel, EmailStr, Field
 
+from app.core.schemas import RequestModel
+
 BankHolidayRegion = Literal["england-and-wales", "scotland", "northern-ireland"]
 Role = Literal[
     "company_admin", "hr_admin", "people_manager", "recruiter", "employee", "read_only_auditor"
@@ -20,7 +22,7 @@ class Accepted(BaseModel):
     status: Literal["check_your_inbox"] = "check_your_inbox"
 
 
-class SignupRequest(BaseModel):
+class SignupRequest(RequestModel):
     company_name: str = Field(min_length=1, max_length=200)
     bank_holiday_region: BankHolidayRegion = "england-and-wales"
     first_name: str = Field(min_length=1, max_length=100)
@@ -31,49 +33,49 @@ class SignupRequest(BaseModel):
     turnstile_token: str | None = Field(default=None, max_length=4096)
 
 
-class TokenRequest(BaseModel):
+class TokenRequest(RequestModel):
     token: str = Field(min_length=1, max_length=200)
 
 
-class EmailRequest(BaseModel):
+class EmailRequest(RequestModel):
     email: EmailStr
     turnstile_token: str | None = Field(default=None, max_length=4096)
 
 
-class LoginRequest(BaseModel):
+class LoginRequest(RequestModel):
     email: EmailStr
     password: str = Field(min_length=1, max_length=1000)
     turnstile_token: str | None = Field(default=None, max_length=4096)
 
 
-class ResetPasswordRequest(BaseModel):
+class ResetPasswordRequest(RequestModel):
     token: str = Field(min_length=1, max_length=200)
     new_password: str = Field(max_length=1000)
 
 
-class ChangePasswordRequest(BaseModel):
+class ChangePasswordRequest(RequestModel):
     current_password: str = Field(min_length=1, max_length=1000)
     new_password: str = Field(max_length=1000)
 
 
-class CodeRequest(BaseModel):
+class CodeRequest(RequestModel):
     code: str = Field(min_length=1, max_length=32)
 
 
-class StepUpRequest(BaseModel):
+class StepUpRequest(RequestModel):
     password: str | None = Field(default=None, max_length=1000)
     code: str | None = Field(default=None, max_length=32)
 
 
-class AcceptTermsRequest(BaseModel):
+class AcceptTermsRequest(RequestModel):
     version: str = Field(min_length=1, max_length=40)
 
 
-class SwitchCompanyRequest(BaseModel):
+class SwitchCompanyRequest(RequestModel):
     company_id: uuid.UUID
 
 
-class AcceptInvitationRequest(BaseModel):
+class AcceptInvitationRequest(RequestModel):
     first_name: str = Field(min_length=1, max_length=100)
     last_name: str = Field(min_length=1, max_length=100)
     password: str | None = Field(default=None, max_length=1000)

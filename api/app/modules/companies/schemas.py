@@ -10,13 +10,13 @@ from zoneinfo import available_timezones
 from pydantic import (
     AfterValidator,
     BaseModel,
-    ConfigDict,
     EmailStr,
     Field,
     field_validator,
     model_validator,
 )
 
+from app.core.schemas import RequestModel
 from app.modules.companies.reference import LEGAL_STRUCTURES, SECTORS, TRADING_PERIODS
 
 
@@ -81,10 +81,8 @@ class CompanyOverview(BaseModel):
     compliance_documents: int = Field(description="How many of the 18 documents are held.")
 
 
-class CompanyUpdate(BaseModel):
+class CompanyUpdate(RequestModel):
     """Only the fields that are sent change. ``null`` empties an optional field."""
-
-    model_config = ConfigDict(extra="forbid")
 
     name: Annotated[str, Field(min_length=1, max_length=200)] | None = None
     trading_name: Annotated[str, Field(max_length=200)] | None = None
