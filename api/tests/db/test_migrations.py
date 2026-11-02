@@ -47,6 +47,7 @@ IDENTITY_TABLES = [
     "pay_schedules",
     "payment_types",
     "platform_admins",
+    "rtw_checks",
     "sessions",
     "tax_codes",
     "terms_acceptances",
@@ -55,7 +56,7 @@ IDENTITY_TABLES = [
     "users",
     "working_pattern_days",
 ]
-IDENTITY_FUNCTIONS = {"app_current_user_id", "audit_events_append_only"}
+IDENTITY_FUNCTIONS = {"app_current_user_id", "audit_events_append_only", "rtw_checks_immutable"}
 
 
 async def _query(url: str, sql: str) -> list[str]:

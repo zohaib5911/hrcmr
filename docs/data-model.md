@@ -715,6 +715,49 @@ Checks:
 
 - `level in ('support', 'owner')`
 
+## `rtw_checks`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `subject_type` | VARCHAR(9) | no |  |  |
+| `subject_id` | UUID | no |  |  |
+| `check_type` | VARCHAR(24) | no |  |  |
+| `share_code` | TEXT | yes |  |  |
+| `idsp_provider` | VARCHAR(160) | yes |  |  |
+| `idsp_document` | VARCHAR(24) | yes |  |  |
+| `list_b_group` | VARCHAR(6) | yes |  |  |
+| `permission_expires` | BOOLEAN | no | `false` |  |
+| `permission_expires_on` | DATE | yes |  |  |
+| `follow_up_due_on` | DATE | yes |  |  |
+| `check_date` | DATE | yes |  |  |
+| `checked_by_user_id` | UUID | yes |  | references `users` |
+| `outcome` | VARCHAR(8) | no |  |  |
+| `evidence_file_id` | UUID | yes |  | references `files` |
+| `superseded_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `superseded_by` | UUID | yes |  | references `rtw_checks` |
+| `corrected_from_id` | UUID | yes |  | references `rtw_checks`, unique |
+| `correction_reason` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(check_type = 'idsp_digital' and idsp_provider is not null and idsp_document is not null and idsp_document in ('british_passport', 'irish_passport', 'irish_passport_card')) or (check_type <> 'idsp_digital' and idsp_provider is null and idsp_document is null)`
+- `(check_type = 'manual_list_b' and list_b_group is not null and list_b_group in ('group1', 'group2') and permission_expires) or (check_type <> 'manual_list_b' and list_b_group is null)`
+- `(check_type = 'online_share_code' and share_code is not null) or (check_type <> 'online_share_code' and share_code is null)`
+- `(corrected_from_id is null and correction_reason is null) or (corrected_from_id is not null and correction_reason is not null and length(trim(correction_reason)) > 0)`
+- `(permission_expires and permission_expires_on is not null) or (not permission_expires and permission_expires_on is null)`
+- `(superseded_at is null and superseded_by is null) or superseded_at is not null`
+- `check_type in ('online_share_code', 'idsp_digital', 'manual_list_a', 'manual_list_b')`
+- `check_type not in ('idsp_digital', 'manual_list_a') or not permission_expires`
+- `outcome in ('pending', 'verified', 'failed')`
+- `subject_type <> 'employee' or (check_date is not null and checked_by_user_id is not null)`
+- `subject_type in ('employee', 'candidate')`
+
 ## `sessions`
 
 | Column | Type | Null | Default | Notes |

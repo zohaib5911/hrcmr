@@ -9,11 +9,11 @@ State: IN PROGRESS
 - T7.1 — Right to Work checks
   - [x] Read plan T7.1, 6.4 and 8.4 requirements
   - [x] Employee/file baseline: ruff/mypy pass, employee integration 3 pass; source paths reviewed
-  - [ ] RTW model/migration and derived-status view
+  - [x] RTW model/migration 0015 and security-invoker status view (migration/doc checks 7 pass)
   - [ ] API: four check types, history/correction, evidence selection/upload, evidence PDF; RBAC/isolation tests
   - [ ] Employee RTW tab and directory RTW pills/filters/deep links
   - [ ] Browser verification and final checks
-- Resume note: T7.1 requirements/baseline ready; no RTW code written. Start api/app/modules/rtw/models.py and migration 0015 after api/alembic/versions/20261102_0014_emergency_relationships.py. Copy employee model/migration conventions, app/db/types.py EncryptedString, RecordMixin/TenantMixin and tenant RLS. Plan 6.4/8.4 define four check types, reasoned versioned correction, evidence and derived-status view; encrypted share code must never enter audit/PDF in full. Reuse employee scanned documents and record_pdf.py safeguards. Wire RTW profile tab and deferred employee-list RTW pills/filters/deep links. Candidate subject support must integrate with Phase 11 validation. Check main post-merge CI 41516923634 if it has finished; PR #11 checks already all passed.
+- Resume note: Model/migration complete, 7 migration/doc tests pass. Next RTW schemas/service/router and tests. Migration protects immutable fields, defers superseded_by FK until commit, and derives employee_rtw_status with caller RLS/company-local dates. Candidate shape is stored but candidate routes await Phase 11 validation. Correction must insert a new row; supersede current by setting lifecycle fields only, and preserve historical corrections as historical.
 
 
 ## Next tasks
@@ -28,6 +28,7 @@ State: IN PROGRESS
 - Dependabot #5 pending green CI; avoid unrelated changes during T7.1.
 
 ## Strategy / decisions taken
+- T7.1: IDSP records include explicit eligible document kind; status priority is not-recorded, failed/pending, expired, missing/unclean evidence, expiring (<=60 days), verified. Dates use company timezone. Share codes encrypted; no full code in responses/audit/PDF.
 - Employee linking requires rbac.role.assign; changes self-service reach, unique per employee, audited. Full profile.write gates scanned photos; contact-only own writes cannot change photos.
 - Hierarchy levels CRUD deferred to T12.1; other related tabs are shells for Phases 8/9/13. Activity already shows real employee/owned-file events.
 - PDF: WeasyPrint, lazy native import, escaped template, blocked URL fetching, masked numbers and scoped salary. Direct-Jinja Semgrep annotation follows existing email renderer with escaping tests.
