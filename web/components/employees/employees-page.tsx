@@ -46,7 +46,16 @@ const COLUMNS: Column<EmployeeRow>[] = [
     exportValue: (e) => `${name(e)} (${e.employee_number})`,
     cell: (e) => (
       <div className="flex items-center gap-3">
-        <Avatar name={name(e)} size="sm" decorative />
+        <Avatar
+          name={name(e)}
+          size="sm"
+          decorative
+          src={
+            e.has_photo
+              ? `${process.env.NEXT_PUBLIC_API_URL ?? ""}/employees/${e.id}/photo`
+              : undefined
+          }
+        />
         <div className="min-w-0">
           <p className="text-body text-label truncate">{name(e)}</p>
           <p className="text-footnote text-secondary-label truncate">{e.employee_number}</p>

@@ -39,3 +39,4 @@
 2026-11-02 19:09 | Codex | T6.8 | related shells and Activity UI built, browser journey written | next browser verification
 2026-11-02 19:11 | Codex | T6.8 | complete; Activity API 1 pass, browser/setup 2 pass, lint/types/build clean; previous CI now green | next Phase 6 gate integration gaps (link picker, Add photo)
 2026-11-02 19:15 | Codex | Phase 6 gate | deferred linking and photo API/UI built; User Access 10 tests and targeted photo/link tests pass | next combined browser check
+2026-11-02 19:18 | Codex | Phase 6 gate | link/photo browser 2 pass; list now shows uploaded avatars; screenshot spec ready, lint/types pass | next full-suite gate sequentially
