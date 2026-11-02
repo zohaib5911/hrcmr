@@ -2,9 +2,12 @@
 
 import { Users } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/app/page-header";
+import { useCan } from "@/components/app/session-context";
+import { useNewShortcut } from "@/components/app/shortcut-provider";
+import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -84,6 +87,11 @@ export function EmployeesPage({
   initialPill: PillId;
 }) {
   const router = useRouter();
+  const mayAdd = useCan()("employee.profile.write");
+  const addEmployee = useCallback(() => {
+    if (mayAdd) router.push("/employees/new");
+  }, [mayAdd, router]);
+  useNewShortcut(addEmployee);
   const [pill, setPill] = useState<PillId>(initialPill);
   const [department, setDepartment] = useState(ALL_DEPARTMENTS);
   const [search, setSearch] = useState("");
@@ -98,6 +106,7 @@ export function EmployeesPage({
   return (
     <>
       <PageHeader
+        actions={mayAdd ? <Button onClick={addEmployee}>New employee</Button> : null}
         title={archived ? "Archived employees" : "Employees"}
         description={
           archived
@@ -163,7 +172,9 @@ export function EmployeesPage({
                   ? "Try a different search or clear the filters."
                   : archived
                     ? "Records you archive will be kept here."
-                    : "Employees you add will appear here."
+                    : mayAdd
+                      ? "Add your first employee to get started."
+                      : "Employees you add will appear here."
               }
             />
           }

@@ -6,6 +6,7 @@ from __future__ import annotations
 import os
 import uuid
 from collections.abc import AsyncIterator, Iterator
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
@@ -170,3 +171,67 @@ async def test_each_role_sees_only_what_its_permission_reaches(rig: dict[str, An
     assert (await manager.get(f"{API}/employees/summary")).json()["total"] == 2
     recruiter = await rig["person"]("recruiter", rig["a"])
     assert (await recruiter.get(f"{API}/employees")).status_code == 403
+
+
+NEW = {
+    "first_name": "Amira",
+    "last_name": "Hassan",
+    "email": "Amira@Example.com",
+    "phone": "07700 900123",
+    "employee_number": "E 001",
+    "hire_date": "2025-01-06",
+}
+
+
+async def test_creating_an_employee_checks_the_number_the_date_and_who_may(
+    rig: dict[str, Any],
+) -> None:
+    hr = await rig["person"]("hr_admin", rig["a"])
+    made = await hr.post(f"{API}/employees", json=NEW)
+    assert made.status_code == 201, made.text
+    assert (made.json()["email"], made.json()["status"]) == ("amira@example.com", "active")
+
+    # The number is unique ignoring case and spaces, but only within the company.
+    for clash in ("e001", "E  001", " e 001 "):
+        again = await hr.post(f"{API}/employees", json={**NEW, "employee_number": clash})
+        assert again.status_code == 409, clash
+        assert again.json()["error"]["field"] == "employee_number"
+    other = await rig["person"]("hr_admin", rig["b"])
+    assert (await other.post(f"{API}/employees", json=NEW)).status_code == 201
+
+    soon = (datetime.now(UTC).date() + timedelta(days=300)).isoformat()
+    later = (datetime.now(UTC).date() + timedelta(days=400)).isoformat()
+    ok = await hr.post(f"{API}/employees", json={**NEW, "employee_number": "E2", "hire_date": soon})
+    assert ok.status_code == 201
+    too_far = await hr.post(
+        f"{API}/employees", json={**NEW, "employee_number": "E3", "hire_date": later}
+    )
+    assert too_far.status_code == 422
+    for bad in (
+        {"first_name": "  "},
+        {"email": "nope"},
+        {"employee_number": ""},
+        {"status": "archived"},
+        {"surprise": 1},
+    ):
+        refused = await hr.post(f"{API}/employees", json={**NEW, "employee_number": "E9", **bad})
+        assert refused.status_code == 422, bad
+
+    manager = await rig["person"]("people_manager", rig["a"])
+    assert (
+        await manager.post(f"{API}/employees", json={**NEW, "employee_number": "E7"})
+    ).status_code == 403
+    async with rig["owner"].connect() as c:
+        events = (
+            await c.execute(
+                text(
+                    "select action, after from audit_events "
+                    "where company_id = :c and action = 'employee.created'"
+                ),
+                {"c": rig["a"]},
+            )
+        ).all()
+    assert len(events) == 2
+    assert events[0][1]["employee_number"] in ("E 001", "E2")
+    listed = (await hr.get(f"{API}/employees")).json()
+    assert [e["employee_number"] for e in listed["employees"]] == ["E 001", "E2"]

@@ -635,7 +635,12 @@ export interface paths {
         /** List Employees */
         get: operations["employees_list_employees"];
         put?: never;
-        post?: never;
+        /**
+         * Create Employee
+         * @description A new record with the essentials. The number must be unique in the company, ignoring case
+         *     and spaces ("E 001" and "e001" are the same).
+         */
+        post: operations["employees_create_employee"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1950,6 +1955,36 @@ export interface components {
             email: string;
             /** Turnstile Token */
             turnstile_token?: string | null;
+        };
+        /**
+         * EmployeeIn
+         * @description The essentials for a new record; the rest is added on the profile.
+         */
+        EmployeeIn: {
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Employee Number */
+            employee_number: string;
+            /** First Name */
+            first_name: string;
+            /**
+             * Hire Date
+             * Format: date
+             */
+            hire_date: string;
+            /** Last Name */
+            last_name: string;
+            /** Phone */
+            phone?: string | null;
+            /**
+             * Status
+             * @default active
+             * @enum {string}
+             */
+            status: "active" | "on_leave";
         };
         /** EmployeeList */
         EmployeeList: {
@@ -4732,6 +4767,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["EmployeeList"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    employees_create_employee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployeeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployeeRow"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

@@ -1,8 +1,8 @@
 /**
- * The employee list (plan T6.1), against the real API and a real signed-in Company Admin. There is no
- * way to add an employee until T6.2, so this checks the empty company: the summary line, the pills,
- * the filters, the archived list and the accessibility check. Rows, filters and what each role may
- * see are covered by the API tests and lib/employees/list.test.ts.
+ * The employee list and the new-employee form (plan T6.1 and T6.2), against the real API and a real
+ * signed-in Company Admin: the empty company first (summary line, pills, archived list), then adding
+ * an employee and the unique-number rule, then the accessibility check. Filters and what each role
+ * may see are covered by the API tests and lib/employees/list.test.ts.
  */
 import { audit } from "../support/axe";
 import { expect, test } from "../support/fixtures";
@@ -40,6 +40,36 @@ test("a deep link chooses the pill, and the archived list is one toggle away", a
   await expect(page.getByText("No archived employees")).toBeVisible();
   await page.getByRole("switch", { name: "Show archived" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Employees" })).toBeVisible();
+});
+
+test("N opens the form; an employee is added and listed; a repeated number is refused", async ({
+  page,
+}) => {
+  await open(page);
+  await page.keyboard.press("n");
+  await expect(page.getByRole("heading", { level: 1, name: "New employee" })).toBeVisible();
+  await page.getByRole("button", { name: "Add employee" }).click();
+  await expect(page.getByText("Enter their first name.")).toBeVisible();
+  await expect(page.getByText("Choose the hire date.")).toBeVisible();
+  await audit(page, "new employee");
+
+  async function fill(number: string) {
+    await page.getByLabel("First name", { exact: true }).fill("Ben");
+    await page.getByLabel("Last name", { exact: true }).fill("Okafor");
+    await page.getByLabel("Work email", { exact: true }).fill("ben@example.com");
+    await page.getByLabel("Employee number", { exact: true }).fill(number);
+    await page.getByLabel("Hire date", { exact: true }).fill("6 Jan 2025");
+    await page.getByRole("button", { name: "Add employee" }).click();
+  }
+  await fill("E 001");
+  await expect(page.getByRole("heading", { level: 1, name: "Employees" })).toBeVisible();
+  const grid = page.getByRole("grid", { name: "Employees" });
+  await expect(grid.getByText("Ben Okafor")).toBeVisible();
+  await expect(page.getByText("1 employee · 1 active", { exact: true })).toBeVisible();
+
+  await page.getByRole("button", { name: "New employee" }).click();
+  await fill("e001");
+  await expect(page.getByText("That employee number is already in use.")).toBeVisible();
 });
 
 for (const colorScheme of ["light", "dark"] as const) {
