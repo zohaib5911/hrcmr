@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** T6.8 Related tabs and Activity
+- **Current task:** Phase 6 gate
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -279,7 +279,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T6.5** Employment tab — 2026-11-02. Audited hire-date correction, append-only role assignments and history (future roles take effect on their date), validated tenant references/reporting loops, responsibilities, previous employment, education, training and memberships. Explicit Save sheets; org-assignment write permission. Verified: affected API/reporting/doc 26 pass, employee web unit 13 pass, browser journey + setup 2 pass, lint/types/build clean. Hierarchy levels wait for Phase 9. Fixed T6.4 CI data-model document drift.
 - [x] **T6.6** Salary — 2026-11-02. Permission-gated compensation history fetched only on Show salary, explicit add-record sheet, tenant-validated pay lookups, effective-date/hire-date checks and age-band minimum-wage preview using verified GOV.UK rates. Unknown age/hours/rate gives no pass; apprentice eligibility and deductions remain separate. Verified: 10 API/unit tests, Salary browser journey + setup 2 pass, lint/types/build clean.
 - [x] **T6.7** Documents tab and employee record PDF — 2026-11-02. Scoped scanned uploads with categories/notes, All/Payslips views, scan status, clean-only 60-second downloads; Print record generates a dated multi-page WeasyPrint PDF with identity/bank masked and salary permission-gated. Escaped text, no external resources, audited exports. Runtime/CI PDF libraries installed. Verified: 3 API/PDF/security tests, browser journey + setup 2 pass, lint/types/build clean.
-- [ ] **T6.8** Leave, Attendance, Learning and Activity tab shells
+- [x] **T6.8** Leave, Attendance, Learning and Activity tab shells — 2026-11-02. Workspace links preserve employee context, Attendance month filter; no fabricated balances/history before later modules exist. Activity shows real paginated employee/owned-file audit events, requires compliance.audit.read. Verified: Activity API isolation/RBAC/pagination test, Related tabs browser/setup 2 pass, lint/types/build clean.
 - [ ] **Phase 6 gate** — no inline auto-save; RBAC and isolation tests for every endpoint
 
 ### Phase 7 — Right to Work and sponsor compliance
