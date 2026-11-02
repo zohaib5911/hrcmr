@@ -7,10 +7,10 @@ State: IN PROGRESS
 
 ## Current task
 - T6.8 — Leave, Attendance, Learning and Activity tabs
-  - [ ] Activity API with existing audit data and permission/isolation tests
+  - [x] Activity API with existing audit data and permission/isolation tests (1 pass)
   - [ ] Related-tab shells linked to workspaces; Activity UI
   - [ ] Browser journey and final checks
-- Resume note: Implement /employees/{id}/activity using existing audit pagination/output helpers, scoped to employee and owned file events. Other three modules do not exist yet; shells must explain what will appear without fake balances or records.
+- Resume note: implement related-tabs.tsx with shell links and real Activity feed. Previous: Implement /employees/{id}/activity using existing audit pagination/output helpers, scoped to employee and owned file events. Other three modules do not exist yet; shells must explain what will appear without fake balances or records.
 
 ## Next tasks
 - T6.8, Phase 6 gate, Phase 7
