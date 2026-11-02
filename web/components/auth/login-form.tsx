@@ -1,6 +1,5 @@
 "use client";
 
-import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
@@ -136,8 +135,7 @@ export function LoginForm() {
       <p className="text-callout text-label-secondary text-center">
         New here?{" "}
         <Link
-          href={"/setup" as Route}
-          prefetch={false}
+          href="/setup"
           className="text-accent-text font-semibold underline-offset-4 hover:underline"
         >
           Create your company account

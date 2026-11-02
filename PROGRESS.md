@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** T3.2 Setup wizard
+- **Current task:** T3.3 Terms gate and MFA enrolment
 
 ---
 
@@ -195,7 +195,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 ### Phase 3 — Auth UI and onboarding
 - [x] **T3.1** Sign-in screens — 2026-11-02. `/login` (UK/USA/AU region switch with the two not-yet regions disabled, show/hide password, Turnstile after 3 failures or when the API asks), `/login/mfa` (6-digit code or recovery code), `/forgot-password`, `/reset-password`, `/verify-email` (signs in on load, spends the token once, offers a fresh link if it fails) and `/accept-invite` (company, role, name, password with strength hint, terms), all on one calm panel in `app/(auth)`; Turnstile shows only where `NEXT_PUBLIC_TURNSTILE_SITE_KEY` is set. **Verified:** 49 browser checks (6 screens x 2 themes x 4 widths: no sideways scroll, no console errors, axe clean; keyboard order) and 9 unit tests; the web build for the e2e run now gets `NEXT_PUBLIC_API_URL` and the API address is read in a way that reaches the browser bundle. Owner: none.
-- [ ] **T3.2** Setup wizard, "Check your inbox" screen and Turnstile
+- [x] **T3.2** Setup wizard — 2026-11-02. `/setup`: step 1 company name and bank-holiday region, step 2 name, work email, password (with strength hint), terms and Turnstile, with a "Your choices so far" disclosure; then "Check your inbox" with resend after 60 s (also Turnstile-checked) and a way back if the address was wrong. Errors from the API land on the field they are about (a company error returns to step 1). **Verified:** 4 component tests; the browser spec now covers the three set-up screens too (73 checks in all, 2 themes x 4 widths, axe clean). Owner: none.
 - [ ] **T3.3** Terms gate, MFA enrolment flow and MFA policy enforcement
 - [ ] **T3.4** Signed-in session bootstrap, permission-aware sidebar, free-plan banner, 402 upgrade sheet
 - [ ] **Phase 3 gate** — includes the Playwright E2E journey in plan Phase 3

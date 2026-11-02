@@ -11,7 +11,19 @@ import { audit } from "../support/axe";
 
 const WIDTHS = [390, 768, 1280, 1920] as const;
 
-const PAGES = [
+interface Screen {
+  name: string;
+  path: string;
+  heading: string;
+  /** What to do on the page to reach the state under test. */
+  prepare?: (page: Page) => Promise<void>;
+  /** A field that shows once `prepare` is done. */
+  ready?: string;
+  /** The heading once `prepare` is done, when it changes. */
+  then?: string;
+}
+
+const PAGES: readonly Screen[] = [
   { name: "sign in", path: "/login", heading: "Sign in" },
   { name: "two-step verification", path: "/login/mfa", heading: "Two-step verification" },
   { name: "forgot password", path: "/forgot-password", heading: "Forgot your password?" },
@@ -21,31 +33,72 @@ const PAGES = [
     heading: "Choose a new password",
   },
   { name: "link not usable", path: "/verify-email", heading: "Confirm your email address" },
+  { name: "set up, company step", path: "/setup", heading: "Create your company account" },
+  {
+    name: "set up, account step",
+    path: "/setup",
+    heading: "Create your company account",
+    prepare: firstStep,
+    ready: "Work email",
+  },
+  {
+    name: "set up, check your inbox",
+    path: "/setup",
+    heading: "Create your company account",
+    prepare: createAccount,
+    then: "Check your inbox",
+  },
   {
     name: "accept invitation",
     path: "/accept-invite?token=example",
     heading: "Accept your invitation",
   },
-] as const;
+];
+
+/** Answers one API request from the page (and the browser's permission check before a POST). */
+async function answer(page: Page, pattern: string, status: number, body: unknown) {
+  await page.route(pattern, (route) => {
+    const request = route.request();
+    const headers = {
+      "access-control-allow-origin": new URL(page.url()).origin,
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers": "content-type, x-csrf-token, x-request-id",
+    };
+    if (request.method() === "OPTIONS") return route.fulfill({ status: 204, headers });
+    return route.fulfill({
+      status,
+      contentType: "application/json",
+      headers,
+      body: JSON.stringify(body),
+    });
+  });
+}
 
 async function answerInvitation(page: Page) {
-  await page.route("**/auth/invitations/example", (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      headers: {
-        "access-control-allow-origin": new URL(page.url() || "http://127.0.0.1:3100").origin,
-        "access-control-allow-credentials": "true",
-      },
-      body: JSON.stringify({
-        company_name: "Harbourside Care Ltd",
-        email: "tom@example.com",
-        role: "hr_admin",
-        expires_at: "2030-01-01T00:00:00Z",
-        has_account: false,
-      }),
-    }),
-  );
+  await answer(page, "**/auth/invitations/example", 200, {
+    company_name: "Harbourside Care Ltd",
+    email: "tom@example.com",
+    role: "hr_admin",
+    expires_at: "2030-01-01T00:00:00Z",
+    has_account: false,
+  });
+  await answer(page, "**/auth/signup", 202, { status: "check_your_inbox" });
+}
+
+async function firstStep(page: Page) {
+  await page.getByLabel("Company name", { exact: true }).fill("Harbourside Care Ltd");
+  await page.getByRole("button", { name: "Continue" }).click();
+  await expect(page.getByLabel("Work email", { exact: true })).toBeVisible();
+}
+
+async function createAccount(page: Page) {
+  await firstStep(page);
+  await page.getByLabel("First name", { exact: true }).fill("Amira");
+  await page.getByLabel("Last name", { exact: true }).fill("Hassan");
+  await page.getByLabel("Work email", { exact: true }).fill("amira@example.com");
+  await page.getByLabel("Password", { exact: true }).fill("a long enough password");
+  await page.getByRole("checkbox").click();
+  await page.getByRole("button", { name: "Create account" }).click();
 }
 
 async function open(page: Page, path: string, heading: string) {
@@ -73,6 +126,10 @@ for (const colorScheme of ["light", "dark"] as const) {
           await page.goto("/login"); // any page on the site, so the mock knows the page's origin
           await answerInvitation(page);
           const problems = await open(page, screen.path, screen.heading);
+          if (screen.prepare) await screen.prepare(page);
+          if (screen.then) {
+            await expect(page.getByRole("heading", { level: 1, name: screen.then })).toBeVisible();
+          }
           if (screen.name === "accept invitation") {
             await expect(
               page.getByRole("button", { name: "Join Harbourside Care Ltd" }),
