@@ -12,3 +12,5 @@
 2026-11-02 16:25 | Claude Code | Phase 5 gate | suites green, summary, PR | next: T6.1
 2026-11-02 16:29 | Claude Code | T6.1 | migration 0013 + models for all 6.3 tables; reports graph now reads current assignments | next: GET /employees, /employees/summary, list page
 2026-11-02 17:01 | Claude Code | T6.1 | list, summary, archived, tests | next: T6.2
+2026-11-02 22:38 | Claude Code | T6.2 | recovered uncommitted T6.2 work as wip commit c9ac8c3 | next: review, run tests, finish
+2026-11-02 22:39 | Claude Code | T6.2 | verified (API 3, e2e 8, lint/types clean), ticked | next: T6.3

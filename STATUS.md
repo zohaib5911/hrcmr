@@ -3,17 +3,15 @@ Updated: 2026-11-02 15:30 (Europe/London)    Agent: Claude Code    Branch: dev  
 State: IN PROGRESS
 
 ## Last completed
-- T6.1 — employee tables, list, summary, archived list (RTW column/pill/filter deferred to T7.1)
+- T6.2 — create page /employees/new, POST /employees, unique number rule
 
 ## Current task
-- T6.2 — create page `/employees/new` (essentials) and the unique-number rule
-  - [ ] read plan 8.3 create section and 6.3   <- start here
-  - [ ] API: POST /employees (audit, unique number ignoring case and spaces, hire date <= 12 months ahead)
-  - [ ] Web: form, "New" button on the list + N shortcut, NSC side note; e2e can now create employees
-- Resume note: list code is api/app/modules/employees/router.py and web/components/employees/employees-page.tsx. After T6.2 extend e2e employees.spec with a created employee.
+- T6.3 — profile header, Overview tab, lifecycle status, 48 h opt-out, guarded permanent delete
+  - [ ] read plan 8.3 profile section and 6.3   <- start here
+- Resume note: employee code is api/app/modules/employees/ and web/components/employees/.
 
 ## Next tasks
-- T6.3, T6.4, T6.5
+- T6.4, T6.5
 
 ## Health
 - CI on dev: not yet run for T6.1    CI on main: RED (flaky audit-export test, fixed on dev in the T6.1 branch; goes green when dev merges)

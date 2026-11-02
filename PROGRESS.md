@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** T6.2 Employee create page and the unique-number rule
+- **Current task:** T6.3 Profile header, Overview tab, lifecycle status
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -273,7 +273,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 ### Phase 6 — Employees
 - [x] **T6.1** Employee model, list page, archived list — 2026-11-02. Migration `0013`: every 6.3 table (`employees` with encrypted NI and passport numbers and an NI blind index, addresses, emergency contacts, bank details, effective-dated assignments and compensation, responsibilities, previous employment, education, training, memberships, documents), all with row-level security; the employee number is unique per company ignoring case and spaces; `memberships.employee_id` is now a real foreign key. The reporting chain used for "reports" permissions now reads the CURRENT assignment (decision 69). API: `GET /employees` (status, department, search by name or number, `archived`) and `GET /employees/summary`, limited to what the role reaches (everyone / own reports / themselves). Web: `/employees` with All · Active · On leave · Leavers pills, search, department filter, the summary line and "Show archived"; `/employees/archived`; `?status=` deep links. Verified: 2 API tests, 5 unit tests, 74 browser tests (employees + shell). **Left for later tasks:** the Right to Work column, pill, filter and `?rtw=` links need the RTW status view (T7.1); the New button and N shortcut come with `/employees/new` (T6.2); row open comes with the profile (T6.3); the User Access link picker needs the employee picker (see T6.3). Owner: none.
-- [ ] **T6.2** Create page and unique-number rule
+- [x] **T6.2** Create page and unique-number rule — 2026-11-02. `POST /employees` (essentials, audited; number unique ignoring case and spaces; hire date at most 12 months ahead; Company Admin and HR Admin only), `/employees/new` form, New button and N shortcut on the list. **Verified:** API tests for number, date and roles; browser spec adds an employee, sees it listed, and is refused a repeated number (axe clean).
 - [ ] **T6.3** Profile header, Overview tab, lifecycle status, 48 h opt-out, guarded permanent delete
 - [ ] **T6.4** Personal tab
 - [ ] **T6.5** Employment tab
