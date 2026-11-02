@@ -6,11 +6,13 @@ State: IN PROGRESS
 - T6.8 — Related tab shells and live employee Activity feed
 
 ## Current task
-- T6.8 — Leave, Attendance, Learning and Activity tabs
-  - [x] Real Activity API with permission/isolation/pagination test
-  - [x] Related tab shells linked to workspaces
-  - [x] Browser journey and lint/types/build
-- Resume note: Start Phase 6 gate. Review found deferred User Access employee-link picker still unbuilt (PROGRESS T5.2/T6.1), and header Add photo from plan 8.3 missing. Complete these integration requirements before full-suite/screenshot gate.
+- Phase 6 gate
+  - [ ] Complete deferred User Access employee linking + tests
+  - [ ] Add profile photo upload/view + tests
+  - [ ] Full suite once; fix failures
+  - [ ] Design QA screenshots at 390/1280; phase summary
+  - [ ] PR dev to main; merge only on green CI
+- Resume note: finish integration gaps identified in PROGRESS/plan 8.3 before gate checks. Link/unlink must use tenant-safe employee validation, prevent duplicate links and audit changes.
 
 ## Next tasks
 - Phase 6 gate, Phase 7 (stop for audit after Phase 7)
