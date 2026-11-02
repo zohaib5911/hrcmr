@@ -50,8 +50,9 @@ export function MfaEnrolment({ onDone, onSignOut }: MfaEnrolmentProps) {
       return;
     }
     const qr = await QRCode.toDataURL(outcome.data.otpauth_uri, {
-      width: 192,
-      margin: 1,
+      width: 208,
+      // The image carries its own white ground and quiet zone, which scanners need in dark mode too.
+      margin: 4,
       errorCorrectionLevel: "M",
     });
     setSetup({ secret: outcome.data.secret, qr });
@@ -173,14 +174,13 @@ export function MfaEnrolment({ onDone, onSignOut }: MfaEnrolmentProps) {
         1Password, and scan this code.
       </p>
       <div className="flex justify-center">
-        {/* A QR code needs a white ground to scan, in dark mode too. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={setup.qr}
           alt="QR code for your authenticator app"
-          width={192}
-          height={192}
-          className="rounded-control bg-white p-2"
+          width={208}
+          height={208}
+          className="rounded-control"
         />
       </div>
       <div className="bg-fill-secondary rounded-control flex items-center justify-between gap-3 p-3">

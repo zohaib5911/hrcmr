@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** Phase 3 gate
+- **Current task:** T4.1 Company overview, details and logo
 
 ---
 
@@ -162,6 +162,22 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 ---
 
+### Phase 3 — Auth UI and onboarding — gate passed 2026-11-02
+
+**What exists.** Every sign-in screen on one calm panel: sign in (region switch, show/hide password, Turnstile after 3 failures), two-step code or recovery code, forgot and reset password, e-mail confirmation, invitation acceptance, and the two-step company set-up with its check-your-inbox screen. Terms gate, two-step enrolment (QR code, key, 10 recovery codes) and the redirect when a company switches the policy on. The signed-in app now reads who you are from the API: signed-out visitors go to sign in, menus show only what the role may use, the company and person are named, free-plan banner, 402 upgrade sheet, company switching and Sign out.
+
+**The phase test.** `auth-flow.spec.ts` drives the real screens and the real API: sign up, confirm from the e-mail in Mailpit, dashboard, set up two-step, sign out, sign in with the app code, sign out, sign in with a recovery code, forgot password, reset from the e-mailed link, old password refused, new password reaches the second step. It passes.
+
+**Regression, whole suite once:** API 330 tests; web 741 unit tests; 317 Playwright tests passed, 0 failed (80 skipped are the screenshot-only specs, which run only with `SCREENSHOTS=1`); guard scripts 32; `tsc`, ESLint, `ruff`, `mypy --strict` clean.
+
+**Screenshots.** `docs/screenshots/phase-3/`: each screen in light and dark, desktop (1280) and phone (390), plus the signed-in dashboard with the free-plan banner. The terms gate is covered by its component test only (making a user with unaccepted terms needs a new terms version in the database; it gets a screenshot when T17 publishes terms).
+
+**Bugs the real flow found and fixed:** a visitor's first request to the API was a POST with no CSRF cookie, so sign-up and sign-in were refused (the page now makes one harmless GET first); the browser bundle did not receive the API address; the account button's initials failed the label-in-name accessibility rule; a QR code's white ground needed to be part of the image.
+
+**Open at the gate:** nothing blocking. Still waiting on you: protect `main`, enable private vulnerability reporting, decide Dependabot #4, and the brand details (the screens say "Brand" with no logo until then).
+
+---
+
 ## Task list
 
 ### Phase 0 — Foundations and guard-rails
@@ -200,7 +216,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T3.2** Setup wizard — 2026-11-02. `/setup`: step 1 company name and bank-holiday region, step 2 name, work email, password (with strength hint), terms and Turnstile, with a "Your choices so far" disclosure; then "Check your inbox" with resend after 60 s (also Turnstile-checked) and a way back if the address was wrong. Errors from the API land on the field they are about (a company error returns to step 1). **Verified:** 4 component tests; the browser spec now covers the three set-up screens too (73 checks in all, 2 themes x 4 widths, axe clean). Owner: none.
 - [x] **T3.3** Terms gate and MFA enrolment — 2026-11-02. The app layout asks the API who is signed in (cookie passed on) and sends someone who has not done the second step to `/login/mfa`, and someone whose company requires two-step verification to `/mfa/enrol`; terms not yet accepted appear as a full-screen dialog that Esc cannot close (accept, or sign out). `/mfa/enrol`: QR code (made in the browser, white ground for scanning) plus a copyable key, one confirming code, then the 10 recovery codes with Download and "I've saved them". Any API call refused with `MFA_ENROLMENT_REQUIRED` (the policy is switched on mid-session) takes the person to `/mfa/enrol`. **Verified:** 7 unit tests; the browser spec covers both set-up screens (2 themes x 4 widths, axe clean), and the 83 shell checks still pass. Owner: none.
 - [x] **T3.4** Session bootstrap — 2026-11-02. The app layout reads `/auth/me` on the server and gives it to the whole app (`SessionProvider`, `useMe`, `useCan`): nobody signed in is sent to `/login`; the sidebar, tab bar and palette list only the pages the role's permissions allow; the company and person show in the sidebar (switching company works), the avatar menu has Sign out; a free-plan banner with Subscribe (only for people who can bill; can be put away for the visit, but not on a screen where something is being filled in); any API refusal with 402 `PLAN_REQUIRED` opens the upgrade sheet. `/auth/me` now says each company's plan. The browser tests now run against a real API (`api/tests/e2e_server.py`: throwaway database, e-mail straight to Mailpit) and start from a real signed-in Company Admin (sign-up and e-mail confirmation in `auth.setup.ts`). **Verified:** 14 new unit tests, 5 browser checks (shell, banner, sign-out, signed-out redirect), and all 213 production browser checks still pass signed in. Owner: none.
-- [ ] **Phase 3 gate** — includes the Playwright E2E journey in plan Phase 3
+- [x] **Phase 3 gate** — 2026-11-02, summary under *Phase summaries*. — includes the Playwright E2E journey in plan Phase 3
 
 ### Phase 4 — Company settings
 - [ ] **T4.1** Company overview, Details, Companies House lookup, logo upload

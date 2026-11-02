@@ -30,3 +30,22 @@ describe("planRequired", () => {
     expect(dispatchEvent).not.toHaveBeenCalled();
   });
 });
+
+describe("ensureCsrfCookie", () => {
+  it("makes a first request only when the browser has no CSRF cookie yet", async () => {
+    const { ensureCsrfCookie } = await import("./request");
+    const get = vi.fn(async () => new Response("{}"));
+    await ensureCsrfCookie(
+      () => "https://api.test/api/v1",
+      () => "csrf=abc; other=1",
+      get,
+    );
+    expect(get).not.toHaveBeenCalled();
+    await ensureCsrfCookie(
+      () => "https://api.test/api/v1",
+      () => "other=1",
+      get,
+    );
+    expect(get).toHaveBeenCalledWith("https://api.test/api/v1/health", { credentials: "include" });
+  });
+});

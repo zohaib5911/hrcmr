@@ -4,7 +4,13 @@
  */
 import type { Middleware } from "openapi-fetch";
 
-import { browserApiBaseUrl, createApiClient, type ApiClient } from "@/lib/api/client";
+import {
+  browserApiBaseUrl,
+  createApiClient,
+  CSRF_COOKIE,
+  readCookie,
+  type ApiClient,
+} from "@/lib/api/client";
 
 export interface Problem {
   /** The API's `error.code` (for example `INVALID_CREDENTIALS`), or `NETWORK`. */
@@ -25,16 +31,18 @@ const NETWORK: Problem = {
 
 let shared: ApiClient | undefined;
 /** One client for the browser. Built on first use, so a missing API address fails where it is used. */
-export function api(): ApiClient {
-  if (shared) return shared;
+function baseUrl(): string {
   // Next.js puts a NEXT_PUBLIC_* value into the browser bundle only where it is written out in full
   // (`process.env.NEXT_PUBLIC_API_URL`), never where `process.env` is passed around as an object.
-  shared = createApiClient({
-    baseUrl: browserApiBaseUrl({
-      NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
-      NODE_ENV: process.env.NODE_ENV,
-    }),
+  return browserApiBaseUrl({
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NODE_ENV: process.env.NODE_ENV,
   });
+}
+
+export function api(): ApiClient {
+  if (shared) return shared;
+  shared = createApiClient({ baseUrl: baseUrl() });
   shared.use(enrolmentRedirect());
   shared.use(planRequired());
   return shared;
@@ -83,12 +91,29 @@ function problemFrom(error: unknown, response: Response): Problem {
   };
 }
 
+/**
+ * The API issues the CSRF cookie on the first response a browser gets from it, and every
+ * state-changing request must send it back. A visitor's very first request to the API is often one
+ * of those (signing up, signing in), so if the cookie is missing a harmless GET is made first.
+ */
+export async function ensureCsrfCookie(
+  base: () => string = () => baseUrl(),
+  cookies: () => string = () => document.cookie,
+  get: typeof fetch = (...args) => fetch(...args),
+): Promise<void> {
+  if (readCookie(CSRF_COOKIE, cookies())) return;
+  const response = await get(`${base()}/health`, { credentials: "include" });
+  // Read the (tiny) body so the browser can finish the request.
+  await response.text();
+}
+
 /** Runs one API call. A successful call with no body (204, 202) comes back as `data: undefined`. */
 export async function attempt<T>(
   run: (client: ApiClient) => Promise<Result<T>>,
 ): Promise<Outcome<T>> {
   let result: Result<T>;
   try {
+    await ensureCsrfCookie();
     result = await run(api());
   } catch {
     return { ok: false, problem: NETWORK };
