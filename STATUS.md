@@ -1,23 +1,23 @@
 # STATUS
-Updated: 2026-11-02 18:50 (Europe/London)    Agent: Codex    Branch: dev    Commit: dfb5578
+Updated: 2026-11-02 19:02 (Europe/London)    Agent: Codex    Branch: dev    Commit: f7199b9
 State: IN PROGRESS
 
 ## Last completed
-- T6.5 — Employment tab: audited hire date, dated roles/history, responsibilities, previous employment, education, training and memberships
+- T6.6 — Hidden salary, compensation history, explicit add record and age-band minimum-wage preview
 
 ## Current task
 - T6.6 — Salary
-  - [x] Salary API, permission isolation and NMW tests (10 pass)
-  - [x] Hidden-until-shown salary UI and add-record sheet (lint/types pass)
-  - [ ] Browser check and final validation
-- Resume note: salary UI and browser test ready; run Salary journey. Previous: Salary API verified; next salary-section.tsx and add-record sheet in Employment. Previous: inspect pay model lookups; add compensation_router.py and schemas; fetch salary only on Show salary. Official rates source https://www.gov.uk/national-minimum-wage-rates verified 2026-11-02.
+  - [x] Salary API and minimum-wage tests (10 pass)
+  - [x] Hidden salary UI and add-record sheet
+  - [x] Browser journey (2 pass including setup), lint/types/build
+- Resume note: T6.6 complete. Next T6.7 Documents and employee PDF. CI 41504657493 runs 7c99e60; check results before proceeding if red.
 
 ## Next tasks
-- T6.6, T6.7, T6.8, Phase 6 gate
+- T6.7, T6.8, Phase 6 gate
 
 ## Health
-- CI on dev: red on ca40751 (generated data-model drift fixed in 889e1d8); all other jobs passed. CI on main: previously red; not reverified.
-- Local checks run: affected API/reporting/doc 26 pass; employee web unit 13 pass; Employment browser journey + setup 2 pass; ruff/mypy/eslint/tsc and production build pass.
+- CI on dev: run 41504657493 pending on 7c99e60; previous generated-doc drift fixed. CI on main: previously red; not reverified.
+- Local checks run: salary API/unit 10 pass and browser/setup 2 pass; salary lint/types/build clean. Earlier: affected API/reporting/doc 26 pass; employee web unit 13 pass; Employment browser journey + setup 2 pass; ruff/mypy/eslint/tsc and production build pass.
 
 ## Issues / suggestions
 - Remove certifi exception after 2026-11-06; Dependabot #5 pending green CI.
