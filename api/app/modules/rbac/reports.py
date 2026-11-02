@@ -2,7 +2,7 @@
 
 A person with a ``_reports`` permission acts on their direct and indirect reports. Two chains exist:
 the Reporting Authority (line manager) and the Leave Sanctioning Authority. Both are columns on the
-employee's CURRENT assignment (``employee_assignments`` with no end date, plan 6.3), and are walked
+employee's assignment effective today (plan 6.3), and are walked
 here with one recursive query.
 
 The query is written against the columns by name rather than the model. Row-Level Security applies

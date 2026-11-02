@@ -1,35 +1,34 @@
 # STATUS
-Updated: 2026-11-02 18:48 (Europe/London)    Agent: Codex    Branch: dev    Commit: 1fd6f11
+Updated: 2026-11-02 18:50 (Europe/London)    Agent: Codex    Branch: dev    Commit: dfb5578
 State: IN PROGRESS
 
 ## Last completed
-- T6.4 — Personal tab: details, address with postcode lookup, emergency contacts, NI/passport/bank masked with password-check reveal
+- T6.5 — Employment tab: audited hire date, dated roles/history, responsibilities, previous employment, education, training and memberships
 
 ## Current task
-- T6.5 — Employment tab (hire date change with reason, effective-dated assignments + history, responsibilities, previous employment, education, training, memberships)
-  - [x] Read requirements; API lint/types and web lint/types pass; DB baseline running with local service access
-  - [x] Employment API and tests (9 employee integration tests pass)
-  - [x] Employment tab UI (lint/types pass)
-  - [ ] Employment e2e written; run Playwright and final API checks
-- Resume note: run employees.spec.ts Employment test, then finish T6.5. Older note: UI implemented; next Employment e2e. T6.4 CI doc drift fixed. Older note: API complete; next build employment-tab.tsx, mount and fetch in profile page. Previous note: add tab in web/components/employees/profile-page.tsx (follow personal-tab.tsx: Section, useSubmit, FormSheet); API goes in a new api/app/modules/employees/employment_router.py registered in app/main.py like personal_router. Tables already exist (migration 0013). Salary is T6.6, not here.
+- T6.5 — Employment tab
+  - [x] Requirements and baseline checks
+  - [x] API and tenant/RBAC tests
+  - [x] UI with explicit Save sheets
+  - [x] Browser explicit-save journey and final checks
+- Resume note: T6.5 complete. Start T6.6 salary in Employment tab. Check CI run 41502580515 (T6.4 baseline), then dispatch current dev once it finishes.
 
 ## Next tasks
-- T6.6, T6.7, T6.8, then Phase 6 gate
+- T6.6, T6.7, T6.8, Phase 6 gate
 
 ## Health
-- CI on dev: RED on ca40751: data-model doc drift; regenerated, drift test passes    CI on main: RED (flaky audit-export test, fixed on dev in the T6.1 branch; goes green when dev merges)
-- Local checks run: employee integration 9 pass; employment ruff/mypy clean; baseline web lint/types clean
+- CI on dev: red on ca40751 (generated data-model drift fixed in 889e1d8); e2e job still running. CI on main: previously red; not reverified.
+- Local checks run: affected API/reporting/doc 26 pass; employee web unit 13 pass; Employment browser journey + setup 2 pass; ruff/mypy/eslint/tsc and production build pass.
 
 ## Issues / suggestions
-- Remove the certifi exception after 2026-11-06
-- Dependabot #5 open: merge when CI is green
+- Remove certifi exception after 2026-11-06; Dependabot #5 pending green CI.
 
 ## Strategy / decisions taken
-- T6.4: employees edit own details (profile.write_own) but not identity/bank; reveal and identity edit need a password check (step-up); NI example in forms is AB 12 34 56 C because QQ is not an issued prefix
-- Relay mode; AI features hidden unless ANTHROPIC_API_KEY is set; Ask Mady deferred
-- style-src-attr 'unsafe-inline' accepted (animation library)
-- e2e: API server never reused locally; sign-ups send X-Real-IP (test API trusts 127.0.0.0/8) so the 5/hour sign-up limit stays on
+- Roles append in increasing effective-date order; ended_at is exclusive. List, summary and reporting access use today's effective role, including scheduled changes.
+- Org assignment write permission gates Employment edits; profile read scope gates views. Role names are supplied for readers without company settings permissions.
+- Hierarchy level selection waits for the Phase 9 organogram table; arbitrary IDs refused meanwhile.
+- Employees may edit own Personal details, not identity/bank. Reveal needs step-up and is audited.
+- Relay mode; AI features hidden without ANTHROPIC_API_KEY; Ask Mady deferred.
 
 ## Owner actions needed
-- None blocking. Protect `main` (require PR + CI passed); enable private vulnerability reporting.
-
+- None blocking. Protect main and enable private vulnerability reporting.
