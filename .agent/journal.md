@@ -185,3 +185,4 @@
 2026-11-03 17:49 | Codex | T9.4 | shift/late/day-off schema and validation ready; tenant composite references and live uniqueness; migration7/rota typing pass | next scoped audited settings CRUD/tests
 2026-11-03 17:52 | Codex | T9.4 | scoped audited rota CRUD complete; tenant/prerequisite/duplicate-race/archive/overnight/rollback/RBAC/doc34 pass, migration7 and mypy272 clean | next settings UI and browser
 2026-11-03 17:55 | Codex | T9.4 | settings tabs/forms/prerequisites/archive UI and browser scenario ready; API34/migration7/mypy273/web types/lint/nav22 pass | next production rota-settings browser
+2026-11-03 17:57 | Codex | T9.4 | complete: rota settings production browser/setup2 passes overnight shift, scoped rules, mobile axe and archives; API/static green | next T9.5 rota week/shift schema and APIs

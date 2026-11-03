@@ -1,26 +1,25 @@
 # STATUS
-Updated: 2026-11-03 17:55, Europe/London    Agent: Codex    Branch: dev    Commit: d743206
+Updated: 2026-11-03 17:57, Europe/London    Agent: Codex    Branch: dev    Commit: 3e616d4
 State: IN PROGRESS
 
 ## Last completed
-- T9.3 — clock/PWA, optional consented location and reviewed report timesheet approvals; API/browser/static pass
+- T9.4 — rota settings schema/API/forms, overnight validation, prerequisites and archives; API34/migration7/static/browser2 pass
 
 ## Current task
-- T9.4 — shift types, late policies and day off patterns
-  - [x] Models/migration and validation schemas
-  - [x] Scoped audited settings APIs and affected tests
-  - [x] Settings tabs/forms and prerequisite empty states
-  - [ ] Production browser/static checks
-- Resume note: /rota/settings tabs/forms, shift suggestions/live paid hours/overnight breaks, scoped late/day-off forms, prerequisites/links and archive confirmation written. API34/migration7, Python mypy273, web types/lint/nav22 pass. Browser scenario ready for overnight shift + scoped rules + mobile axe + blocked archive and cleanup. Next production rota-settings browser then finish T9.4.
+- T9.5 — rota grid, publish, print and My Shifts
+  - [ ] Week/shift schema and scoped grid/write APIs
+  - [ ] Copy/clear actions, warnings and publish notifications/PDF/own projection
+  - [ ] Rota workspace/cell forms/menus and My Shifts
+  - [ ] Affected API/browser checks
+- Resume note: T9.4 complete. Implement T9.5 from plan 6.6/8.8/Phase9 and endpoint list. Preserve manager report scope, local overnight times and draft/publish behavior; approved leave/company holidays/48h opt-out/11h rest warnings. Connect leave-request shift conflicts when shifts exist. No full suite/screenshots until Phase 9 gate.
 
 ## Next tasks
-- T9.5 — rota grid, publish, print and My Shifts
 - T9.6 — Work Log
 - Phase 9 gate — full suite/screenshots/green PR
 
 ## Health
 - CI on dev: current head not rechecked; last confirmed gate all 12 green (41640316888). CI on main: not rechecked.
-- Local checks run: T9.2 affected API31/browser4/static/web25 pass. T9.3 API39 + attendance27 + migration7/doc1, Python lint/format/mypy268, web type/lint/client/nav25 and production browser/setup2 (PWA/location/mobile axe) pass.
+- Local checks run: T9.2 API31/browser4/static; T9.3 API39+attendance27/migration7/doc1/static/web25/browser2; T9.4 rota/RBAC/doc34/migration7, mypy273, web types/lint/nav22 and browser/setup2 (mobile axe) — pass.
 
 ## Issues / suggestions
 - Focused pytest invocation must group all tests/db paths before tests outside that directory; interleaving caused a missing database fixture, grouped rerun115 and notification alone1 pass.

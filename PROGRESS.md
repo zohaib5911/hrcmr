@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-03
-- **Current task:** T9.4 Rota settings (T9.3 complete)
+- **Current task:** T9.5 Rota grid, publish and My Shifts (T9.4 complete)
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -320,7 +320,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T9.1** Attendance records and workspace — 2026-11-03. Scoped paged/own records and selected-day summary; serialized audited upsert with company-zone overnight/break/DST calculation, explicit repeated-hour choice, clock-only own-write and leave-sync guards; KPI/day/week/month/custom workspace, employee/status filters, record sheet and profile history. Verified: attendance/RBAC36, baseline leave/RBAC47, production browser/setup5 including mobile axe, Python/web lint/types and generated client pass.
 - [x] **T9.2** Import, bulk grid, exports, absences report — 2026-11-03. Scanned XLSX/CSV templates, bounded row-error preview and stale-safe atomic commit; scoped status grid preserving worked instants/notes, XLSX/PDF exports and monthly absences. API31, static/contract, web25 and production browser/setup4 pass including mobile axe and real scanned uploads.
 - [x] **T9.3** Clock in/out and timesheet approval — 2026-11-03. Serialized own server-timed clocking, overnight/break hours, retry guards, default-off company location with per-action consent; PWA manifest/icons/install prompt and online-only offline fallback; scoped weekly report review/approval with self/stale/incomplete guards and changed-record invalidation. Verified API39 plus attendance27/migration7/doc1, static/client/web25, production browser/setup2 including real location consent, PWA assets and mobile axe.
-- [ ] **T9.4** Shift types, late policies, day-off patterns
+- [x] **T9.4** Shift types, late policies, day-off patterns — 2026-11-03. Tenant-safe archived settings CRUD, unique live scopes, overnight break and deduction validation, audited changes; settings tabs/forms with prerequisite links and shift suggestions/live hours. Verified rota/RBAC/doc34, migration7, mypy273, web types/lint/nav22 and production browser/setup2 including mobile axe and archive dependencies.
 - [ ] **T9.5** Rota week grid, publish, print, My Shifts
 - [ ] **T9.6** Work Log
 - [ ] **Phase 9 gate**
