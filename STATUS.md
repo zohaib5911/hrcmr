@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 02:56    Agent: Codex    Branch: dev    Commit: 97fd20b
+Updated: 2026-11-03 02:57    Agent: Codex    Branch: dev    Commit: 51a3cac
 State: IN PROGRESS
 
 ## Last completed
@@ -7,12 +7,12 @@ State: IN PROGRESS
 
 ## Current task
 - T7.5 — Compliance hub and dossier
-  - [ ] Requirements/patterns and affected baseline checks
+  - [x] Requirements/patterns and affected baseline checks: company/audit/document 27 pass; lint/types pass
   - [ ] Scoped hub overview, urgency/coverage/readiness/expiry and audit CSV APIs/tests
   - [ ] Official dossier links, editable platform store and original RTW checklist PDF/tests
   - [ ] Hub/dossier UI matching existing components and static checks
   - [ ] Affected browser verification
-- Resume note: Start with company profile/key personnel/doc readiness, RTW status view and audit export patterns. Implement T7.5 only; preserve existing employee/change/reminder modules.
+- Resume note: Baseline 27 pass, lint/types pass. Implement hub overview and matching activity/CSV category filters using existing audit cursor/export style. Dossier needs a global editable reference table; platform MFA/owner permission guard must stay separate from tenant access (platform UI/auth expanded in Phase 17).
 
 ## Next tasks
 - T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
@@ -27,6 +27,7 @@ State: IN PROGRESS
 - Dependabot #5 pending green CI; avoid unrelated changes.
 
 ## Strategy / decisions taken
+- T7.5 readiness: profile needs legal/contact/sector/default address plus conditional sponsor-history details; company documents means at least one current clean upload (18 types are optional by applicability). Coverage valid = verified or expiring; recorded-check readiness is separate. No reportable changes is Not applicable; prompt-report replacements carry no invented deadline.
 - Reviewed sends require a linked active verified account and use that account email; message is readable in own My Documents. The closest outstanding threshold controls Due now, including source snooze; sending it cancels older unsent thresholds as covered. Own-profile contact permission cannot reach HR create/lifecycle/48h endpoints.
 - T7.4: human review/send only; email outbox, notification and sent/audit state commit together, generic existing reminder_nudge email. Add RTW target to reminder schema for explicit phase scenario. Daily owner job may refresh unreported derived deadline/calendar fields while entered snapshots and reported records stay immutable.
 - T7.3 verified sources: GOV.UK sponsor Part 3 (C1.13/C2.3), glossary and bank-holidays page, checked 2026-11-03. AO/Key Contact replacements get prompt-report status, other org changes standard 20 working days. Regional calendar data must cover the requested dates; do not silently ignore missing bank holidays.
