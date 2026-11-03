@@ -1,9 +1,9 @@
 # STATUS
-Updated: 2026-11-03 03:15    Agent: Codex    Branch: dev    Commit: 95e9195
+Updated: 2026-11-03 03:17    Agent: Codex    Branch: dev    Commit: c3b3f60
 State: IN PROGRESS
 
 ## Last completed
-- T7.4 — Reviewed reminders, daily reconciliation, register/history and own received messages
+- T7.5 — Compliance hub, matching audit CSV, editable official dossier and original checklist
 
 ## Current task
 - T7.5 — Compliance hub and dossier
@@ -11,8 +11,8 @@ State: IN PROGRESS
   - [x] Scoped hub overview, urgency/coverage/readiness/expiry and audit CSV APIs/tests: 3 hub scenarios + audit 11 pass; architecture JSON-default violation fixed
   - [x] Official dossier links, editable platform store and original RTW checklist PDF/tests: 19 dossier/migration/doc/identity pass; 16 RBAC checks verified
   - [x] Hub/dossier UI and separate platform editor, query-tab action links; web types/lint pass
-  - [ ] Affected browser verification
-- Resume note: Hub browser workflow written and static checked. Next run production Playwright compliance-hub.spec.ts plus adjacent compliance-changes and rtw scenarios (query-tab handling changed). Verify action destinations, coverage filters, expiry buckets, matching CSV, dossier checklist and mobile axe. Full suite/screenshots only at gate.
+  - [x] Production hub/changes/RTW browsers + setup: 5 pass, including mobile/axe
+- Resume note: T7.5 complete. Browser hub/changes/RTW/setup 5 pass; API hub 3, audit 11, dossier/migration/doc/identity 19 and RBAC 16 verified; web/static/generated types pass. Next T7.6 employee sponsor record PDF and notifications bell Needs attention feed. Reuse existing safe masked PDF renderer; use live compliance actions and preserve personal notification privacy. Phase 7 full suite/screenshots/PR gate follows, then audit stop.
 
 ## Next tasks
 - T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
