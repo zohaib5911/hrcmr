@@ -137,7 +137,7 @@ export function LeaveSettingsPage({ settings, types }: { settings: Settings; typ
         <Button
           variant="plain"
           onClick={() => setGuidance(row)}
-          aria-label={`Guidance for ${row.name}`}
+          aria-label={`View guidance for ${row.name}`}
         >
           View guidance
         </Button>

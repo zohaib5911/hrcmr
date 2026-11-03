@@ -12,7 +12,7 @@ State: IN PROGRESS
   - [x] Scoped API/settings validation, audit and regression tests
   - [x] Leave settings UI, CRUD sheets and navigation
   - [ ] Affected browser/API/static checks and task completion
-- Resume note: First production browser run reached settings; test selector also matched the field clear button. Narrowed year-start label to exact match. Rerun leave-settings spec next; API50/schema21/web777 and static checks pass.
+- Resume note: Production workflow passed seeded guidance, date validation/persistence and type add/edit/archive. Mobile axe found guidance buttons aria-label missing visible word View; fixed accessible names and corresponding locator. Rerun focused browser next.
 
 ## Next tasks
 

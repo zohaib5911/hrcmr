@@ -17,7 +17,7 @@ test("verified defaults, saved settings and type add/edit/archive are usable", a
   await expect(page.getByRole("heading", { level: 1, name: "Leave settings" })).toBeVisible();
   await expect(page.getByText("12 rows", { exact: true })).toBeVisible();
   await expect(page.getByLabel("Leave year starts (MM-DD)", { exact: true })).toHaveValue("01-01");
-  await page.getByRole("button", { name: "Guidance for Annual Leave", exact: true }).click();
+  await page.getByRole("button", { name: "View guidance for Annual Leave", exact: true }).click();
   const guidance = page.getByRole("dialog", { name: "Annual Leave guidance" });
   await expect(guidance.getByText(/5.6 weeks/)).toBeVisible();
   await expect(guidance.getByRole("link", { name: "GOV.UK source" })).toHaveAttribute(
