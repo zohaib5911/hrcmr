@@ -82,14 +82,15 @@ export function NotificationsBell({ count = 0 }: { count?: number }) {
     else setProblem(result.problem);
   }
   const badge = data ? data.unread + data.attention_count : count;
+  const badgeText = badge > 99 ? "99+" : String(badge);
   const label = data
     ? [
-        "Notifications",
+        `Notifications${badge > 0 ? `, ${badgeText} total` : ""}`,
         ...(data.attention_count ? [`${data.attention_count} need attention`] : []),
         ...(data.unread ? [`${data.unread} unread`] : []),
       ].join(", ")
     : count > 0
-      ? `Notifications, ${count} unread`
+      ? `Notifications, ${badgeText} total, ${count} unread`
       : "Notifications";
   const empty = !data || (data.attention_count === 0 && data.items.length === 0);
   return (
@@ -103,7 +104,7 @@ export function NotificationsBell({ count = 0 }: { count?: number }) {
                 aria-hidden="true"
                 className="bg-danger text-on-accent text-caption rounded-pill absolute top-1 right-1 min-w-4 px-1 text-center leading-4 font-semibold tabular-nums"
               >
-                {badge > 99 ? "99+" : badge}
+                {badgeText}
               </span>
             )}
           </IconButton>

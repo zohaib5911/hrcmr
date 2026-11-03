@@ -145,3 +145,4 @@
 2026-11-03 12:08 | Codex | T8.4 | workspace/self-service/profile UI and request/decision/balance sheets implemented; scoped labels/self flag; API71/static pass, web types/lint and nav22 pass | next production leave-workspace browser workflow then T8.5
 2026-11-03 12:09 | Codex | T8.4 | browser submits on-behalf request successfully; narrowed status assertion to grid to avoid select option; API71 clean | next browser rerun through approval/profile/self-service
 2026-11-03 12:10 | Codex | T8.4 | browser reaches approval inspector; decision-note exact accessible-name selector fixed; manager workspace starts on available Balances segment | next browser rerun
+2026-11-03 12:12 | Codex | T8.4 | browser completes submission/approval/calendar/grant/deduct/set/own cancellation; mobile axe caught notification count name mismatch, fixed total badge label | next focused browser final and finish T8.4

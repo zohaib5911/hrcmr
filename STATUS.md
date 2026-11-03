@@ -12,7 +12,7 @@ State: IN PROGRESS
   - [x] Leave Calendar/Requests/Balances, My Leave, My Approvals
   - [x] Employee Leave tab and balance action sheet
   - [ ] Affected checks and browser workflows
-- Resume note: UI and browser workflow written; API/request/RBAC71 pass, Python static clean, web types/lint pass; unit776 pass then sentence-case nav fixed and targeted22 pass. Browser reaches approval inspector; exact note-field selector fixed. Rerun through approval/profile/self-service. No screenshots until Phase 8 gate.
+- Resume note: UI and browser workflow written; API/request/RBAC71 pass, Python static clean, web types/lint pass; unit776 pass then sentence-case nav fixed and targeted22 pass. Browser completes all functional steps; mobile axe found notification badge total absent from accessible name, fixed. Run focused browser final. No screenshots until Phase 8 gate.
 
 ## Next tasks
 - T8.4 — leave workspaces and employee tab
