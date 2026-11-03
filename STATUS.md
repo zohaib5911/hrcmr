@@ -15,7 +15,16 @@ State: BLOCKED — audit requested
 - Resume note: PR https://github.com/zohaib5911/hrcmr/pull/13 merged f17ef67. CI run 41595489940 all 12 checks green. Do not start Phase 8 until owner audit findings arrive; record them under Next tasks. Screenshots: docs/screenshots/phase-7. Migration SQL static-analysis findings fixed with equivalent literal SQL; affected migration/dossier/reporting 14 pass.
 
 ## Next tasks
-- Owner high-level Phase 7 audit; implement supplied findings before Phase 8.
+
+F7.1 Step-up on role change, admin/HR-admin invite, and two-step policy change (+ tests)   [high]
+F7.2 Audit events for login success/fail, logout, reset, step-up, recovery codes, switch company, signup   [medium]
+F7.3 Full RBAC route test: every real route × 6 roles vs rbac_matrix   [medium]
+F7.4 Cross-company 404 tests: sponsor PDF, employee record PDF, dossier   [medium]
+F7.5 Test: Python status_of == SQL employee_rtw_status on the same data   [low]
+F7.6 Replace waitForTimeout in 4 functional specs; stub Redis in test_errors_and_request_id   [low]
+F7.7 Update PROGRESS header and T7.4–T7.6 entries   [low]
+(Ongoing, not a task: move shared helpers into employees/access.py and core/dates.py only when a task already touches that code.)
+ implement supplied findings before Phase 8.
 
 ## Health
 - CI on dev/PR: green (41595489940, b6d99d1). CI on main: post-merge run 41597645539 pending; merged change passed all PR checks.
