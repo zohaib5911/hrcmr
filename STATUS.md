@@ -13,7 +13,7 @@ State: IN PROGRESS
   - [x] Publish notifications/PDF/own projection
   - [x] Rota workspace/cell forms/menus and My Shifts
   - [ ] Affected API/browser checks
-- Resume note: Rota weekly grid/quick-add/cell editor/reassign/search/warnings/totals and copy-clear/publication confirmations plus My Shifts implemented; employee sidebar now points to My Shifts. Backend affected61 pass; migration7/static/mypy282 clean, web types/lint/nav22 pass. Browser workflow ready; run production rota-workspace + rota-settings, fix findings, then finish T9.5 and T9.6.
+- Resume note: Browser passes quick-add/reassign/edit/PDF/publish/own snapshot/draft copy menus; rota mobile axe found paid-hours label contrast, corrected to primary text. Settings browser passes. Added no-linked-reports manager week guard; isolated rota API9 passes. API tests must never overlap Playwright because fixture provisioning rotates shared cluster role passwords. Rerun rota-workspace only through final clears, then finish T9.5.
 
 ## Next tasks
 - T9.6 — Work Log
@@ -24,6 +24,7 @@ State: IN PROGRESS
 - Local checks run: T9.2 API31/browser4/static; T9.3 API39+attendance27/migration7/doc1/static/web25/browser2; T9.4 rota/RBAC/doc34/migration7, mypy273, web types/lint/nav22 and browser/setup2 (mobile axe) — pass.
 
 ## Issues / suggestions
+- Never run database pytest alongside Playwright: both provision shared PostgreSQL roles with random passwords, so concurrent setup causes app_owner authentication failures. Run them sequentially.
 - Focused pytest invocation must group all tests/db paths before tests outside that directory; interleaving caused a missing database fixture, grouped rerun115 and notification alone1 pass.
 - Remove dependency cooldown exceptions when due: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.
 - docs/audits/phase7.md absent from synced dev; F7.1–F7.7 queued findings were implemented and confirmed green in CI.

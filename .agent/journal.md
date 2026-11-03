@@ -190,3 +190,4 @@
 2026-11-03 18:04 | Codex | T9.5 | scoped versioned grid/shift writes, overnight/DST/overlap, warnings and atomic copy/clear implemented; API/RBAC26/migration7/mypy280 pass | next action tests result, publish/notifications/PDF/own and UI
 2026-11-03 18:09 | Codex | T9.5 | scoped publish snapshots/digests/own/PDF and day-off/leave/late integration ready; API45 plus corrected clock/email12 pass, static282 clean | next rota workspace/cell/actions/My Shifts UI and browser
 2026-11-03 18:16 | Codex | T9.5 | rota grid/cell/quick-add/actions/warnings/print and My Shifts UI ready; API61/static/web types/lint/nav22 pass | next production rota-workspace/settings browser and T9.6
+2026-11-03 18:20 | Codex | T9.5 | browser planning/publish/draft/copy passes to mobile axe; fixed paid-hours contrast, no-report manager guard isolated API9 pass | next browser final through clears; keep pytest and Playwright sequential (shared role passwords)

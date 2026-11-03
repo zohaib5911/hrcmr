@@ -68,6 +68,13 @@ async def test_grid_read_only_versioned_crud_overlap_and_overnight(ready: dict[s
 
 
 async def test_report_writes_foreign_ids_and_employment_dates(ready: dict[str, Any]) -> None:
+    unlinked = await ready["person"]("people_manager", ready["a"])
+    assert (
+        await unlinked.post(API + "/weeks/2026-01-05/clear", json={"version": 0})
+    ).status_code == 403
+    assert (
+        await unlinked.post(API + "/weeks/2026-01-05/publish", json={"version": 0})
+    ).status_code == 403
     manager = await manager_for(ready)
     response = await manager.post(API + "/scheduled-shifts", json=payload(ready))
     assert response.status_code == 201, response.text

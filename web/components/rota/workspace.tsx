@@ -498,7 +498,7 @@ export function RotaWorkspace({ initialWeek }: { initialWeek?: string }) {
                                   <span>
                                     {shift.starts_local}–{shift.ends_local}
                                   </span>
-                                  <span className="text-caption text-label-secondary">
+                                  <span className="text-caption text-label">
                                     {shift.hours}h paid
                                   </span>
                                 </Button>

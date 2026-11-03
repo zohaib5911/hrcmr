@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 
 from sqlalchemy import select
 
-from app.core.errors import AppError, ConflictError, NotFoundError
+from app.core.errors import AppError, ConflictError, ForbiddenError, NotFoundError
 from app.core.rbac_matrix import Scope, scope_for
 from app.modules.attendance.router import _company
 from app.modules.attendance.service import _wall
@@ -51,6 +51,8 @@ async def write_ids(access: Access) -> frozenset[uuid.UUID] | None:
 
 async def lock_week(access: Access, start: date, version: int) -> RotaWeek:
     check_monday(start)
+    if access.scope is Scope.REPORTS and not await write_ids(access):
+        raise ForbiddenError("Your account needs linked reports to change their rota.")
     await access.db.execute(
         select(Company.id).where(Company.id == access.company_id).with_for_update()
     )
