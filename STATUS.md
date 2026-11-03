@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 01:23    Agent: Codex    Branch: dev    Commit: 8c93bc6
+Updated: 2026-11-03 01:24    Agent: Codex    Branch: dev    Commit: 0bbd9aa
 State: IN PROGRESS
 
 ## Last completed
@@ -8,12 +8,12 @@ State: IN PROGRESS
 ## Current task
 - T7.3 — Working-day calculator, change of circumstances and organisation changes
   - [x] Requirements and GOV.UK Part 3/glossary/calendar checked 2026-11-03; holiday baseline 6 tests, ruff/mypy pass
-  - [ ] Working-day calculator with GOV.UK bank-holiday examples
+  - [x] Working-day calculator with GOV.UK bank-holiday examples; 12 unit checks pass
   - [ ] Change/org-change models, migration and immutable snapshots
   - [ ] Scoped APIs, deadlines and mark-reported tests
   - [ ] Employee change form/log and company-wide pages
   - [ ] Affected browser checks and final verification
-- Resume note: T7.3 sources verified and holiday baseline checked. Next pure working-day calculator + unit examples from official bank-holiday dates, then changes/org-change models/migration/API. Use Monday-Friday excluding regional bank holidays; start counting after event date. Part 3 C2.3 excludes AO/Key Contact replacements from normal 20 days, so represent that exception as prompt reporting rather than invent a fixed legal deadline. No T7.3 code yet.
+- Resume note: Working-day calculator in compliance/working_days.py verified by 12 dated examples/tests (ruff/mypy pass). Next changes/org-change models and migration 0017. Keep immutable employee/document snapshots, use regional bank-holiday coverage, 10/20 days and explicit prompt AO/Key Contact exception. Sources checked 2026-11-03.
 
 
 ## Next tasks
