@@ -300,6 +300,7 @@ test.describe("the toolbar", () => {
 // Pages that have been built: they still have their heading, title and place in the menu, but no
 // longer the "on its way" empty state of a page that has not been built yet.
 const BUILT = new Set([
+  "documents",
   "company",
   "users",
   "employees",

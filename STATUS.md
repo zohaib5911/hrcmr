@@ -10,9 +10,9 @@ State: IN PROGRESS
   - [x] Read relevant plan and verify existing document/file/RBAC baseline34
   - [x] Model, tenant migration and contracts
   - [x] Scoped audited scanned CRUD/download API and affected tests
-  - [ ] Documents workspace, upload/edit/archive and review flags
+  - [x] Documents workspace, upload/edit/archive and review flags
   - [ ] Production browser verification, static checks and completion log
-- Resume note: Documents API/scanning/full-scope RBAC/demoted-uploader guards and paged filters ready; review boundaries/archive/idempotence/audit rollback5 plus related49 pass, migration7, app ruff/format/mypy212 and generated client pass. Next documents workspace/upload/edit/archive/review indicators, then focused production browser. Keep DB pytest and browser sequential.
+- Resume note: Documents UI upload/edit/archive/filter/review/scan/download ready; web types/affected lint pass. Browser spec company-documents.spec.ts covers actual scanned file/download, filters, metadata and archive with mobile axe. Next production browser plus documents shell case, then completion. API5+related49/migration7/static/client green; DB pytest finished.
 
 ## Next tasks
 - T10.2 — reports
