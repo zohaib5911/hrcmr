@@ -167,7 +167,7 @@ async def own_responsibilities(access: Reads) -> list[OwnResponsibility]:
             .order_by(EmployeeResponsibility.sort, EmployeeResponsibility.id)
         )
     ).scalars()
-    return [OwnResponsibility(id=r.id, text=r.text) for r in rows]
+    return [OwnResponsibility.model_validate(r) for r in rows]
 
 
 @router.post("/own", response_model=WorkLogOut, status_code=201)

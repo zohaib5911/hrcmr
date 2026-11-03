@@ -15,7 +15,7 @@ from app.core.rbac_matrix import scope_for
 from app.modules.attendance.router import _company
 from app.modules.employees.models import Employee, EmployeeResponsibility
 from app.modules.work_log.models import WorkLogEntry
-from app.modules.work_log.schemas import WorkLogIn, WorkLogOut
+from app.modules.work_log.schemas import OwnResponsibility, WorkLogIn, WorkLogOut
 
 if TYPE_CHECKING:
     from app.modules.rbac.deps import Access
@@ -134,7 +134,9 @@ async def apply(
         ).scalar_one_or_none()
         if responsibility is None:
             raise NotFoundError
-        responsibility_text = responsibility.text
+        responsibility_text = str(
+            OwnResponsibility.model_validate(responsibility).model_dump()["text"]
+        )
     else:
         responsibility_text = body.responsibility_text or ""
     if row is None:

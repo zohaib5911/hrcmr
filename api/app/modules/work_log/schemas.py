@@ -7,7 +7,7 @@ from datetime import date, datetime, time  # noqa: TC003
 from decimal import Decimal  # noqa: TC003
 from typing import Any, Self
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from app.core.schemas import RequestModel
 
@@ -92,5 +92,6 @@ class WorkLogPage(BaseModel):
 
 
 class OwnResponsibility(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: uuid.UUID
     text: str

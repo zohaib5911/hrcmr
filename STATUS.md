@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [ ] Full web/unit/script/browser suite (sequentially)
   - [ ] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: All T9.1–T9.6 complete. Prepare phase9 screenshot spec using existing phase8 pattern, then full API and full web/browser sequentially. Never overlap database pytest and Playwright (shared role passwords). Save/review screenshots, five-line PROGRESS summary, PR and all-green merge, clean sync and T10.1. Audit stop is Phase14, not Phase9.
+- Resume note: Full API gate active in /tmp/phase9-api-full.txt; lint/format321/mypy288 pass. New phase9 screenshot spec prepares isolated data for 19 views at 390/1280 light/dark (76 images), static typecheck clean. Finish API result, full web/unit/scripts then full Playwright sequentially; SCREENSHOTS=1 targeted spec after full browser. Do not overlap API pytest and browser setup. Then visual review/summary/green PR and T10.1.
 
 ## Next tasks
 - T10.1 — company documents

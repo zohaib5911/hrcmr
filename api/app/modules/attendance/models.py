@@ -20,7 +20,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     Uuid,
-    text,
+    column,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
@@ -36,7 +36,9 @@ class AttendanceRecord(Base, RecordMixin, TenantMixin):
             "company_id",
             "employee_id",
             unique=True,
-            postgresql_where=text("source='clock' and clock_in is not null and clock_out is null"),
+            postgresql_where=(column("source") == "clock")
+            & column("clock_in").is_not(None)
+            & column("clock_out").is_(None),
         ),
         UniqueConstraint(
             "company_id", "employee_id", "date", name="uq_attendance_records_company_employee_date"
