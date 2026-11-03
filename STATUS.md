@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Full web/unit/script/browser suite (sequentially)
   - [x] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: All four screenshot variants pass across final run3+retry3; 76 images reviewed, axe/overflow clean. Five-line phase summary written. Open dev→main PR and merge only after all CI checks green, then T10.1. Local full API658+corrected19, web777/scripts32, full browser413+retry8 and static/contract/build green.
+- Resume note: All four screenshot variants pass across final run3+retry3; 76 images reviewed, axe/overflow clean. Five-line phase summary written. PR #15 opened; inspect current head checks and merge only after all CI checks green using gh pr merge 15 --merge --auto. Then sync dev and start T10.1 (baseline document/file/RBAC34 pass). Local full API658+corrected19, web777/scripts32, full browser413+retry8 and static/contract/build green.
 
 ## Next tasks
 - T10.1 — company documents
