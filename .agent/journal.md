@@ -103,3 +103,4 @@
 2026-11-03 06:54 | Codex | relay | T7.6 complete and pushed; Phase 7 gate outstanding, no gate suites started | next sequential full checks, screenshots and PR then audit stop
 2026-11-03 07:00 | Codex | Phase 7 gate | ruff/format pass; fixed three reminder test typing errors, mypy 225 files passes | next full API suite then web/browser sequentially
 2026-11-03 07:03 | Codex | Phase 7 gate | screenshot spec prepared for 390/1280 light/dark (9 views each), targeted lint passes; full API running session 96032 log /tmp/cmr-phase7-api.log | next inspect API then web gate
+2026-11-03 07:07 | Codex | Phase 7 gate | API full 479 pass/2 fail; normalized hyphenated operation IDs and updated encrypted-field inventory; affected 15 pass, lint/types/gen pass | next full web checks then Playwright

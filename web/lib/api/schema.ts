@@ -9,10 +9,10 @@ export interface paths {
             cookie?: never;
         };
         /** Admin Links */
-        get: operations["compliance-dossier_admin_links"];
+        get: operations["compliance_dossier_admin_links"];
         put?: never;
         /** Add Link */
-        post: operations["compliance-dossier_add_link"];
+        post: operations["compliance_dossier_add_link"];
         delete?: never;
         options?: never;
         head?: never;
@@ -28,7 +28,7 @@ export interface paths {
         };
         get?: never;
         /** Update Link */
-        put: operations["compliance-dossier_update_link"];
+        put: operations["compliance_dossier_update_link"];
         post?: never;
         delete?: never;
         options?: never;
@@ -439,7 +439,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Mark Reported */
-        post: operations["compliance-changes_mark_reported"];
+        post: operations["compliance_changes_mark_reported"];
         delete?: never;
         options?: never;
         head?: never;
@@ -613,7 +613,7 @@ export interface paths {
             cookie?: never;
         };
         /** Activity */
-        get: operations["compliance-hub_activity"];
+        get: operations["compliance_hub_activity"];
         put?: never;
         post?: never;
         delete?: never;
@@ -630,7 +630,7 @@ export interface paths {
             cookie?: never;
         };
         /** Export Activity */
-        get: operations["compliance-hub_export_activity"];
+        get: operations["compliance_hub_export_activity"];
         put?: never;
         post?: never;
         delete?: never;
@@ -647,7 +647,7 @@ export interface paths {
             cookie?: never;
         };
         /** Changes */
-        get: operations["compliance-changes_changes"];
+        get: operations["compliance_changes_changes"];
         put?: never;
         post?: never;
         delete?: never;
@@ -664,7 +664,7 @@ export interface paths {
             cookie?: never;
         };
         /** Dossier */
-        get: operations["compliance-dossier_dossier"];
+        get: operations["compliance_dossier_dossier"];
         put?: never;
         post?: never;
         delete?: never;
@@ -681,10 +681,10 @@ export interface paths {
             cookie?: never;
         };
         /** Org Changes */
-        get: operations["compliance-changes_org_changes"];
+        get: operations["compliance_changes_org_changes"];
         put?: never;
         /** Add Org Change */
-        post: operations["compliance-changes_add_org_change"];
+        post: operations["compliance_changes_add_org_change"];
         delete?: never;
         options?: never;
         head?: never;
@@ -699,12 +699,12 @@ export interface paths {
             cookie?: never;
         };
         /** Org Change */
-        get: operations["compliance-changes_org_change"];
+        get: operations["compliance_changes_org_change"];
         /** Update Org Change */
-        put: operations["compliance-changes_update_org_change"];
+        put: operations["compliance_changes_update_org_change"];
         post?: never;
         /** Archive Org Change */
-        delete: operations["compliance-changes_archive_org_change"];
+        delete: operations["compliance_changes_archive_org_change"];
         options?: never;
         head?: never;
         patch?: never;
@@ -720,7 +720,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Mark Org Reported */
-        post: operations["compliance-changes_mark_org_reported"];
+        post: operations["compliance_changes_mark_org_reported"];
         delete?: never;
         options?: never;
         head?: never;
@@ -735,7 +735,7 @@ export interface paths {
             cookie?: never;
         };
         /** Overview */
-        get: operations["compliance-hub_overview"];
+        get: operations["compliance_hub_overview"];
         put?: never;
         post?: never;
         delete?: never;
@@ -803,7 +803,7 @@ export interface paths {
             cookie?: never;
         };
         /** Preview Deadline */
-        get: operations["compliance-changes_preview_deadline"];
+        get: operations["compliance_changes_preview_deadline"];
         put?: never;
         post?: never;
         delete?: never;
@@ -820,7 +820,7 @@ export interface paths {
             cookie?: never;
         };
         /** Checklist */
-        get: operations["compliance-dossier_checklist"];
+        get: operations["compliance_dossier_checklist"];
         put?: never;
         post?: never;
         delete?: never;
@@ -837,7 +837,7 @@ export interface paths {
             cookie?: never;
         };
         /** Sponsored Employees */
-        get: operations["sponsor-documents_sponsored_employees"];
+        get: operations["sponsor_documents_sponsored_employees"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1075,10 +1075,10 @@ export interface paths {
             cookie?: never;
         };
         /** Employee Changes */
-        get: operations["compliance-changes_employee_changes"];
+        get: operations["compliance_changes_employee_changes"];
         put?: never;
         /** Add Change */
-        post: operations["compliance-changes_add_change"];
+        post: operations["compliance_changes_add_change"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1093,7 +1093,7 @@ export interface paths {
             cookie?: never;
         };
         /** Change Defaults */
-        get: operations["compliance-changes_change_defaults"];
+        get: operations["compliance_changes_change_defaults"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1498,10 +1498,10 @@ export interface paths {
             cookie?: never;
         };
         /** Checks */
-        get: operations["right-to-work_checks"];
+        get: operations["right_to_work_checks"];
         put?: never;
         /** Record Check */
-        post: operations["right-to-work_record_check"];
+        post: operations["right_to_work_record_check"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1518,7 +1518,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Correct Check */
-        post: operations["right-to-work_correct_check"];
+        post: operations["right_to_work_correct_check"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1533,7 +1533,7 @@ export interface paths {
             cookie?: never;
         };
         /** Evidence */
-        get: operations["right-to-work_evidence"];
+        get: operations["right_to_work_evidence"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1550,7 +1550,7 @@ export interface paths {
             cookie?: never;
         };
         /** Evidence Pdf */
-        get: operations["right-to-work_evidence_pdf"];
+        get: operations["right_to_work_evidence_pdf"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1567,10 +1567,10 @@ export interface paths {
             cookie?: never;
         };
         /** Documents */
-        get: operations["sponsor-documents_documents"];
+        get: operations["sponsor_documents_documents"];
         put?: never;
         /** Add Document */
-        post: operations["sponsor-documents_add_document"];
+        post: operations["sponsor_documents_add_document"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1585,7 +1585,7 @@ export interface paths {
             cookie?: never;
         };
         /** Sponsor Pdf */
-        get: operations["compliance-records_sponsor_pdf"];
+        get: operations["compliance_records_sponsor_pdf"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2172,7 +2172,7 @@ export interface paths {
             cookie?: never;
         };
         /** Evidence */
-        get: operations["sponsor-documents_evidence"];
+        get: operations["sponsor_documents_evidence"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2191,7 +2191,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Plan Renewal */
-        post: operations["sponsor-documents_plan_renewal"];
+        post: operations["sponsor_documents_plan_renewal"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2208,7 +2208,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Update Document */
-        post: operations["sponsor-documents_update_document"];
+        post: operations["sponsor_documents_update_document"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2225,7 +2225,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Withdraw Document */
-        post: operations["sponsor-documents_withdraw_document"];
+        post: operations["sponsor_documents_withdraw_document"];
         delete?: never;
         options?: never;
         head?: never;
@@ -5601,7 +5601,7 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    "compliance-dossier_admin_links": {
+    compliance_dossier_admin_links: {
         parameters: {
             query?: never;
             header?: never;
@@ -5639,7 +5639,7 @@ export interface operations {
             };
         };
     };
-    "compliance-dossier_add_link": {
+    compliance_dossier_add_link: {
         parameters: {
             query?: never;
             header?: never;
@@ -5681,7 +5681,7 @@ export interface operations {
             };
         };
     };
-    "compliance-dossier_update_link": {
+    compliance_dossier_update_link: {
         parameters: {
             query?: never;
             header?: never;
@@ -6750,7 +6750,7 @@ export interface operations {
             };
         };
     };
-    "compliance-changes_mark_reported": {
+    compliance_changes_mark_reported: {
         parameters: {
             query?: never;
             header?: never;
@@ -7393,7 +7393,7 @@ export interface operations {
             };
         };
     };
-    "compliance-hub_activity": {
+    compliance_hub_activity: {
         parameters: {
             query?: {
                 category?: "all" | "rtw" | "employees" | "attendance" | "documents" | "changes";
@@ -7437,7 +7437,7 @@ export interface operations {
             };
         };
     };
-    "compliance-hub_export_activity": {
+    compliance_hub_export_activity: {
         parameters: {
             query?: {
                 category?: "all" | "rtw" | "employees" | "attendance" | "documents" | "changes";
@@ -7477,7 +7477,7 @@ export interface operations {
             };
         };
     };
-    "compliance-changes_changes": {
+    compliance_changes_changes: {
         parameters: {
             query?: {
                 state?: "all" | "unreported" | "overdue";
@@ -7518,7 +7518,7 @@ export interface operations {
             };
         };
     };
-    "compliance-dossier_dossier": {
+    compliance_dossier_dossier: {
         parameters: {
             query?: never;
             header?: never;
@@ -7556,7 +7556,7 @@ export interface operations {
             };
         };
     };
-    "compliance-changes_org_changes": {
+    compliance_changes_org_changes: {
         parameters: {
             query?: {
                 state?: "all" | "unreported" | "overdue";
@@ -7596,7 +7596,7 @@ export interface operations {
             };
         };
     };
-    "compliance-changes_add_org_change": {
+    compliance_changes_add_org_change: {
         parameters: {
             query?: never;
             header?: never;
@@ -7638,7 +7638,7 @@ export interface operations {
             };
         };
     };
-    "compliance-changes_org_change": {
+    compliance_changes_org_change: {
         parameters: {
             query?: never;
             header?: never;
@@ -7678,7 +7678,7 @@ export interface operations {
             };
         };
     };
-    "compliance-changes_update_org_change": {
+    compliance_changes_update_org_change: {
         parameters: {
             query?: never;
             header?: never;
@@ -7722,7 +7722,7 @@ export interface operations {
             };
         };
     };
-    "compliance-changes_archive_org_change": {
+    compliance_changes_archive_org_change: {
         parameters: {
             query?: never;
             header?: never;
@@ -7766,7 +7766,7 @@ export interface operations {
             };
         };
     };
-    "compliance-changes_mark_org_reported": {
+    compliance_changes_mark_org_reported: {
         parameters: {
             query?: never;
             header?: never;
@@ -7810,7 +7810,7 @@ export interface operations {
             };
         };
     };
-    "compliance-hub_overview": {
+    compliance_hub_overview: {
         parameters: {
             query?: never;
             header?: never;
@@ -7962,7 +7962,7 @@ export interface operations {
             };
         };
     };
-    "compliance-changes_preview_deadline": {
+    compliance_changes_preview_deadline: {
         parameters: {
             query: {
                 change_date: string;
@@ -8003,7 +8003,7 @@ export interface operations {
             };
         };
     };
-    "compliance-dossier_checklist": {
+    compliance_dossier_checklist: {
         parameters: {
             query?: never;
             header?: never;
@@ -8041,7 +8041,7 @@ export interface operations {
             };
         };
     };
-    "sponsor-documents_sponsored_employees": {
+    sponsor_documents_sponsored_employees: {
         parameters: {
             query?: never;
             header?: never;
@@ -8826,7 +8826,7 @@ export interface operations {
             };
         };
     };
-    "compliance-changes_employee_changes": {
+    compliance_changes_employee_changes: {
         parameters: {
             query?: never;
             header?: never;
@@ -8866,7 +8866,7 @@ export interface operations {
             };
         };
     };
-    "compliance-changes_add_change": {
+    compliance_changes_add_change: {
         parameters: {
             query?: never;
             header?: never;
@@ -8910,7 +8910,7 @@ export interface operations {
             };
         };
     };
-    "compliance-changes_change_defaults": {
+    compliance_changes_change_defaults: {
         parameters: {
             query?: never;
             header?: never;
@@ -10222,7 +10222,7 @@ export interface operations {
             };
         };
     };
-    "right-to-work_checks": {
+    right_to_work_checks: {
         parameters: {
             query?: never;
             header?: never;
@@ -10262,7 +10262,7 @@ export interface operations {
             };
         };
     };
-    "right-to-work_record_check": {
+    right_to_work_record_check: {
         parameters: {
             query?: never;
             header?: never;
@@ -10306,7 +10306,7 @@ export interface operations {
             };
         };
     };
-    "right-to-work_correct_check": {
+    right_to_work_correct_check: {
         parameters: {
             query?: never;
             header?: never;
@@ -10351,7 +10351,7 @@ export interface operations {
             };
         };
     };
-    "right-to-work_evidence": {
+    right_to_work_evidence: {
         parameters: {
             query?: never;
             header?: never;
@@ -10392,7 +10392,7 @@ export interface operations {
             };
         };
     };
-    "right-to-work_evidence_pdf": {
+    right_to_work_evidence_pdf: {
         parameters: {
             query?: never;
             header?: never;
@@ -10433,7 +10433,7 @@ export interface operations {
             };
         };
     };
-    "sponsor-documents_documents": {
+    sponsor_documents_documents: {
         parameters: {
             query?: never;
             header?: never;
@@ -10473,7 +10473,7 @@ export interface operations {
             };
         };
     };
-    "sponsor-documents_add_document": {
+    sponsor_documents_add_document: {
         parameters: {
             query?: never;
             header?: never;
@@ -10517,7 +10517,7 @@ export interface operations {
             };
         };
     };
-    "compliance-records_sponsor_pdf": {
+    compliance_records_sponsor_pdf: {
         parameters: {
             query?: never;
             header?: never;
@@ -12521,7 +12521,7 @@ export interface operations {
             };
         };
     };
-    "sponsor-documents_evidence": {
+    sponsor_documents_evidence: {
         parameters: {
             query?: never;
             header?: never;
@@ -12561,7 +12561,7 @@ export interface operations {
             };
         };
     };
-    "sponsor-documents_plan_renewal": {
+    sponsor_documents_plan_renewal: {
         parameters: {
             query?: never;
             header?: never;
@@ -12605,7 +12605,7 @@ export interface operations {
             };
         };
     };
-    "sponsor-documents_update_document": {
+    sponsor_documents_update_document: {
         parameters: {
             query?: never;
             header?: never;
@@ -12649,7 +12649,7 @@ export interface operations {
             };
         };
     };
-    "sponsor-documents_withdraw_document": {
+    sponsor_documents_withdraw_document: {
         parameters: {
             query?: never;
             header?: never;

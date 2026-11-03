@@ -12,7 +12,7 @@ State: IN PROGRESS
   - [ ] Save/review Phase 7 screenshots at 390 and 1280 px
   - [ ] Write five-line phase summary, open dev → main PR, merge only with all CI green
   - [ ] Set BLOCKED — audit requested and stop
-- Resume note: T7.6 complete. Recovered UI committed, web types/affected lint and shell 19 pass; reminder/setup browser 2 pass incl own bell message/mark-all/live actions/link; sponsor/setup browser 2 pass incl PDF download. Sponsor filter selector now scopes visible controls during streamed page transition. API lint/format pass; fixed reminder test typing errors and mypy 225 files passes. Full API running (session 96032, /tmp/cmr-phase7-api.log); screenshot spec phase7-screenshots.spec.ts prepared/linted. Web/browser full suites not yet run; do it once sequentially, add screenshot spec following phase6-screenshots.spec.ts, review artifacts, then PR and mandatory audit stop.
+- Resume note: T7.6 complete. Recovered UI committed, web types/affected lint and shell 19 pass; reminder/setup browser 2 pass incl own bell message/mark-all/live actions/link; sponsor/setup browser 2 pass incl PDF download. Sponsor filter selector now scopes visible controls during streamed page transition. API lint/format pass; fixed reminder test typing errors and mypy 225 files passes. Full API 479 pass/2 failures fixed (encrypted-field inventory and readable operation IDs), affected 15 pass; lint/format/mypy/generated types pass; screenshot spec phase7-screenshots.spec.ts prepared/linted. Web/browser full suites not yet run; do it once sequentially, add screenshot spec following phase6-screenshots.spec.ts, review artifacts, then PR and mandatory audit stop.
 
 ## Next tasks
 - T7.6; Phase 7 gate then BLOCKED — audit requested

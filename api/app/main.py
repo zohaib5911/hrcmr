@@ -87,7 +87,8 @@ logger = get_logger("app.main")
 
 def operation_id(route: APIRoute) -> str:
     """Readable, stable operation ids (`health_ready`) for the generated TypeScript client."""
-    return f"{route.tags[0]}_{route.name}" if route.tags else route.name
+    tag = str(route.tags[0]).replace("-", "_") if route.tags else None
+    return f"{tag}_{route.name}" if tag else route.name
 
 
 def _install_openapi(app: FastAPI) -> None:
