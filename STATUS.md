@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [ ] Full web/unit/script/browser suite (sequentially)
   - [ ] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: Full API658 pass/sole architecture failure corrected; targeted architecture/migration/WorkLog19 pass. Python lint/format321/mypy288 and generated contract clean. New phase9 screenshot spec ready (19 views × four states =76). Next full web/unit/scripts then full Playwright sequentially; SCREENSHOTS=1 targeted screenshot spec, visual review/summary and all-green PR merge. Full API logs /tmp/phase9-api-full.txt and /tmp/phase9-api-corrected.txt.
+- Resume note: Full API658 + corrected architecture/migration/WorkLog19 pass. Full web static/client and unit777 pass; root guard scripts32 pass (child-process test requires normal host execution). Next full Playwright once, then SCREENSHOTS=1 phase9 screenshots (76), visual review/summary/all-green PR. Keep DB pytest and Playwright sequential. Logs: /tmp/phase9-api-full.txt, /tmp/phase9-api-corrected.txt, /tmp/phase9-web-unit.txt, /tmp/phase9-scripts.txt.
 
 ## Next tasks
 - T10.1 — company documents
