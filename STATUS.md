@@ -8,10 +8,10 @@ State: IN PROGRESS
 ## Current task
 - Phase 8 gate — leave and holidays
   - [x] Full API/static checks
-  - [ ] Full web/unit/browser checks
+  - [x] Full web/unit/browser checks
   - [ ] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line summary, CI-green PR dev → main and merge
-- Resume note: Full API590 pass/one generated-doc ordering failure fixed by sorting foreign-key reference notes; targeted doc1 pass. Static clean. Web full lint/types/contract pass; full unit776 pass/one stale bell-name expectation updated, targeted shell19 and guard scripts32 pass. Full browser407 pass/152 gated screenshots skipped/four stale shell assertions: profile Leave placeholder removed, built-route set updated, My leave/approvals headings/metadata normalized to sentence case. Targeted shell3 pass; profile check exposed unsaved company working-pattern mismatch now fixed to Time settings defaults; explicit all-off returns actionable issue. Leave affected55 pass, static clean. Screenshot calendar contrast/visible-name defects fixed and month input selector narrowed. Profile/shell four cases now pass, calendar contrast passes; replaced overriding cell labels with hidden date context plus the visible text to satisfy accessible-name matching. Rerun screenshot spec, then visual review. Then five-line summary and green PR merge; continue T9.1.
+- Resume note: Full API590 + corrected doc1; affected55 after default-week fix pass. Full web776 + shell19; scripts32/static pass. Full browser407 + four corrected cases pass; screenshot/setup5 pass, 48 saved. Visual review found year-end breadcrumb parent must be sidebar /leave (fixed); rerun screenshot spec to refresh this evidence, then visual review, summary and green PR merge.
 
 ## Next tasks
 - Phase 8 gate
