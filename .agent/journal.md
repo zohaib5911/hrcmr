@@ -88,3 +88,4 @@
 2026-11-03 02:56 | Codex | T7.4 | complete: reminder/setup production browser 2 pass incl explicit saves/snooze/send, history, own message and mobile axe | next T7.5 compliance hub/dossier
 2026-11-03 02:56 | Codex | T7.5 | started compliance hub/dossier requirements and nearest patterns | next affected baseline then scoped hub APIs
 2026-11-03 02:57 | Codex | T7.5 | baseline company/audit/doc 27 pass; lint/types pass; readiness and separate platform-content guard choices recorded | next scoped hub overview/activity APIs and tests
+2026-11-03 03:03 | Codex | T7.5 | scoped hub overview/activity CSV implemented; 3 hub + 11 audit cases pass, generated types pass; fixed existing raw-SQL JSON default guard | next editable dossier store and original checklist PDF

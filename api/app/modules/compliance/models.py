@@ -16,7 +16,6 @@ from sqlalchemy import (
     Text,
     Uuid,
     false,
-    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
@@ -45,9 +44,7 @@ class ReportingMixin:
     change_date: Mapped[date] = mapped_column(Date, nullable=False)
     calendar_region: Mapped[str] = mapped_column(String(20), nullable=False)
     calendar_checked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    calendar_holidays: Mapped[list[str]] = mapped_column(
-        JSONB, nullable=False, server_default=text("'[]'::jsonb")
-    )
+    calendar_holidays: Mapped[list[str]] = mapped_column(JSONB, nullable=False, server_default="[]")
     reported_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     reported_by_user_id: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("users.id", ondelete="RESTRICT")
@@ -77,7 +74,7 @@ class ChangeOfCircumstances(Base, RecordMixin, ReportingMixin, TenantMixin):
         Boolean, nullable=False, server_default=false()
     )
     documents_snapshot: Mapped[list[str]] = mapped_column(
-        JSONB, nullable=False, server_default=text("'[]'::jsonb")
+        JSONB, nullable=False, server_default="[]"
     )
     __table_args__ = (
         CheckConstraint(EMPLOYEE_TYPES_CHECK, name="change_type"),

@@ -570,6 +570,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/compliance/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Activity */
+        get: operations["compliance-hub_activity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/compliance/activity.csv": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Activity */
+        get: operations["compliance-hub_export_activity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/compliance/changes": {
         parameters: {
             query?: never;
@@ -635,6 +669,23 @@ export interface paths {
         put?: never;
         /** Mark Org Reported */
         post: operations["compliance-changes_mark_org_reported"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/compliance/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Overview */
+        get: operations["compliance-hub_overview"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2486,6 +2537,23 @@ export interface components {
             /** Reporting Authority Employee Id */
             reporting_authority_employee_id?: string | null;
         };
+        /** AttentionItem */
+        AttentionItem: {
+            /** Action */
+            action: string;
+            /** Detail */
+            detail: string;
+            /** Due On */
+            due_on: string | null;
+            /** Href */
+            href: string;
+            /** Id */
+            id: string;
+            /** Priority */
+            priority: number;
+            /** Title */
+            title: string;
+        };
         /** AuditEventOut */
         AuditEventOut: {
             /** Action */
@@ -3278,6 +3346,21 @@ export interface components {
             /** Total */
             total: number;
         };
+        /** ComplianceOverview */
+        ComplianceOverview: {
+            /** Attention */
+            attention: components["schemas"]["AttentionItem"][];
+            coverage: components["schemas"]["Coverage"];
+            /** Expiring */
+            expiring: components["schemas"]["ExpiringItem"][];
+            /** Readiness */
+            readiness: components["schemas"]["ReadinessCheck"][];
+            /**
+             * Today
+             * Format: date
+             */
+            today: string;
+        };
         /** ContactIn */
         ContactIn: {
             /** Address */
@@ -3361,6 +3444,26 @@ export interface components {
             reason: string;
             /** Share Code */
             share_code?: string | null;
+        };
+        /** Coverage */
+        Coverage: {
+            /** Counts */
+            counts: components["schemas"]["CoverageCount"][];
+            /** Total */
+            total: number;
+            /** Valid */
+            valid: number;
+        };
+        /** CoverageCount */
+        CoverageCount: {
+            /** Count */
+            count: number;
+            /** Href */
+            href: string;
+            /** Label */
+            label: string;
+            /** Status */
+            status: string;
         };
         /** DeadlineOut */
         DeadlineOut: {
@@ -3795,6 +3898,31 @@ export interface components {
          */
         ErrorEnvelope: {
             error: components["schemas"]["ErrorBody"];
+        };
+        /** ExpiringItem */
+        ExpiringItem: {
+            /**
+             * Bucket
+             * @enum {string}
+             */
+            bucket: "overdue" | "next_30" | "31_60" | "61_90";
+            /** Days Left */
+            days_left: number;
+            /** Document Label */
+            document_label: string;
+            /** Document Type */
+            document_type: string;
+            /** Employee Name */
+            employee_name: string;
+            /**
+             * Expires On
+             * Format: date
+             */
+            expires_on: string;
+            /** Href */
+            href: string;
+            /** Id */
+            id: string;
         };
         /**
          * Features
@@ -4589,6 +4717,22 @@ export interface components {
              * @enum {string}
              */
             status: "verified" | "expiring" | "expired" | "failed" | "pending" | "evidence_missing" | "not_recorded";
+        };
+        /** ReadinessCheck */
+        ReadinessCheck: {
+            /** Detail */
+            detail: string;
+            /** Href */
+            href: string;
+            /** Id */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "complete" | "incomplete" | "not_applicable";
+            /** Title */
+            title: string;
         };
         /**
          * ReadyResponse
@@ -6875,6 +7019,90 @@ export interface operations {
             };
         };
     };
+    "compliance-hub_activity": {
+        parameters: {
+            query?: {
+                category?: "all" | "rtw" | "employees" | "attendance" | "documents" | "changes";
+                since?: string | null;
+                until?: string | null;
+                cursor?: string | null;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditPage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "compliance-hub_export_activity": {
+        parameters: {
+            query?: {
+                category?: "all" | "rtw" | "employees" | "attendance" | "documents" | "changes";
+                since?: string | null;
+                until?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     "compliance-changes_changes": {
         parameters: {
             query?: {
@@ -7148,6 +7376,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OrgChangeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "compliance-hub_overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ComplianceOverview"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

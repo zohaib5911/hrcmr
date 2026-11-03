@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 02:57    Agent: Codex    Branch: dev    Commit: 51a3cac
+Updated: 2026-11-03 03:03    Agent: Codex    Branch: dev    Commit: 6c7e91a
 State: IN PROGRESS
 
 ## Last completed
@@ -8,11 +8,11 @@ State: IN PROGRESS
 ## Current task
 - T7.5 — Compliance hub and dossier
   - [x] Requirements/patterns and affected baseline checks: company/audit/document 27 pass; lint/types pass
-  - [ ] Scoped hub overview, urgency/coverage/readiness/expiry and audit CSV APIs/tests
+  - [x] Scoped hub overview, urgency/coverage/readiness/expiry and audit CSV APIs/tests: 3 hub scenarios + audit 11 pass; architecture JSON-default violation fixed
   - [ ] Official dossier links, editable platform store and original RTW checklist PDF/tests
   - [ ] Hub/dossier UI matching existing components and static checks
   - [ ] Affected browser verification
-- Resume note: Baseline 27 pass, lint/types pass. Implement hub overview and matching activity/CSV category filters using existing audit cursor/export style. Dossier needs a global editable reference table; platform MFA/owner permission guard must stay separate from tenant access (platform UI/auth expanded in Phase 17).
+- Resume note: Hub overview/activity/CSV APIs implemented and scenario tests pass. Replaced T7.3 JSON default text() calls with literal defaults to satisfy raw-SQL architecture guard (no DB change). Next editable global dossier reference model/migration, platform-only MFA-protected API, original RTW checklist PDF. Official GOV.UK sources checked 2026-11-03. UI later needs query-tab handling for action links.
 
 ## Next tasks
 - T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
