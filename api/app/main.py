@@ -61,6 +61,7 @@ from app.modules.holidays.router import router as holidays_router
 from app.modules.leave.request_router import router as leave_requests_router
 from app.modules.leave.router import router as leave_router
 from app.modules.leave.workspace_router import router as leave_workspace_router
+from app.modules.leave.year_end_router import router as leave_year_end_router
 from app.modules.notifications.router import router as notifications_router
 from app.modules.pay.router import router as pay_router
 from app.modules.rtw.router import router as rtw_router
@@ -207,6 +208,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(leave_router, prefix=API_PREFIX)
     app.include_router(leave_requests_router, prefix=API_PREFIX)
     app.include_router(leave_workspace_router, prefix=API_PREFIX)
+    app.include_router(leave_year_end_router, prefix=API_PREFIX)
     app.include_router(trading_hours_router, prefix=API_PREFIX)
     app.include_router(pay_router, prefix=API_PREFIX)
     app.include_router(access_router, prefix=API_PREFIX)

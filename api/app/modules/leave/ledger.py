@@ -28,6 +28,7 @@ from app.modules.leave.calculations import (
     year_bounds,
 )
 from app.modules.leave.models import LeaveLedger, LeaveType
+from app.modules.leave.year_end_models import LeaveYearEndRun
 
 if TYPE_CHECKING:
     import uuid
@@ -62,6 +63,16 @@ async def leave_type(db: TenantSession, type_id: uuid.UUID) -> LeaveType:
     if row is None:
         raise NotFoundError
     return row
+
+
+async def ensure_open(db: TenantSession, year: date) -> None:
+    closed = (
+        await db.execute(select(LeaveYearEndRun.id).where(LeaveYearEndRun.from_year == year))
+    ).scalar_one_or_none()
+    if closed is not None:
+        raise ConflictError(
+            "This leave year is closed. Record any reviewed correction in the open year."
+        )
 
 
 async def balance(
@@ -109,6 +120,7 @@ async def move(
     key: uuid.UUID,
 ) -> LeaveLedger | None:
     employee = await lock_employee(db, employee_id)
+    await ensure_open(db, year)
     await leave_type(db, type_id)
     validate_days(days, positive=operation != "set")
     if not reason.strip() or len(reason) > 1000:
@@ -249,6 +261,7 @@ async def reconcile(
     employee = await lock_employee(db, employee_id)
     kind = await leave_type(db, type_id)
     calculated = await calculate(db, employee, kind, on)
+    await ensure_open(db, calculated.year_start)
     result = []
     for bucket, target in (
         ("entitlement", calculated.entitlement),

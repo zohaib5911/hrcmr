@@ -17,7 +17,7 @@ from app.modules.companies.models import Company
 from app.modules.employees.models import Employee, EmployeeAssignment
 from app.modules.holidays.models import BankHoliday, CompanyHoliday
 from app.modules.leave.calculations import dates, hours_on, standard_day, year_bounds
-from app.modules.leave.ledger import working_pattern
+from app.modules.leave.ledger import ensure_open, working_pattern
 from app.modules.leave.request_models import LeaveRequest
 from app.modules.leave.request_schemas import LeaveConflict
 
@@ -127,6 +127,8 @@ async def plan_request(db: TenantSession, employee: Employee, body: LeaveDatesIn
     for day, quantity in quantities.items():
         year = year_bounds(day, company.leave_year_start_month_day)[0]
         totals[year] = totals.get(year, Fraction(0)) + quantity
+    for year in totals:
+        await ensure_open(db, year)
     return RequestPlan(
         quantities, {year: Decimal(ceil(amount * 100)) / 100 for year, amount in totals.items()}
     )

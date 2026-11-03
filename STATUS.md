@@ -7,10 +7,10 @@ State: IN PROGRESS
 
 ## Current task
 - T8.5 — year-end carry-over
-  - [ ] Run model/migration and closed-year safeguards
-  - [ ] Preview, reasoned overrides and atomic audited commit API
+  - [x] Run model/migration and closed-year safeguards
+  - [x] Preview, reasoned overrides and atomic audited commit API
   - [ ] Year-end UI and affected API/browser checks
-- Resume note: Implement year-end run/migration, immutable snapshots, stale-preview protection, one commit per company/year and closed-source-year guards. Then preview/override/commit UI; Phase 8 gate follows.
+- Resume note: Migration/projections12 pass, lint/types clean. Year-end API and regression scenarios written; tests running (year_end/workspace/requests). Next fix failures, build year-end settings UI with review/overrides/commit, then affected browser and Phase 8 gate.
 
 ## Next tasks
 - T8.4 — leave workspaces and employee tab
@@ -26,7 +26,7 @@ State: IN PROGRESS
 - docs/audits/phase7.md absent from synced dev; F7.1–F7.7 queued findings were implemented and confirmed green in CI.
 
 ## Strategy / decisions taken
-- T8.5: preview is read-only; commit only after year ends and pending requests resolve. Reconcile closing allowance, carry nonnegative remaining up to type limit (reasoned override may exceed limit up to remaining), expire positive source balances and freeze source-year mutations. Negative source debt stays visible and requires a reviewed adjustment before closing; no automatic debt forgiveness.
+- T8.5: preview is read-only; commit only after year ends and pending requests resolve. Reconcile closing allowance, carry nonnegative remaining up to type limit (reasoned override may exceed limit up to remaining), expire positive source balances and freeze source-year mutations. Negative fixed-allowance debt requires a reviewed adjustment before closing; unbounded types retain usage history without treating it as allowance debt.
 - T8.4: add missing leave.balance.read to plan/matrix so Company Admin/HR/Auditor can read company balances; existing own/reports remain scoped. Read projections combine immutable ledger with current managed allowance/calendar deltas; GET never writes. Manual actions reconcile and audit atomically.
 - T8.2: balances are sums of signed immutable movements. Corrections append deltas; manual movements survive standard reconciliation. Employee row serializes writers; operation keys preserve retries, including no-op Set. Caller owns audit/commit transaction.
 - Units are standard company days (weekly company hours / working weekdays). Personal shorter days reduce both entitlement and charge. Personal days inherit weekday hours unless overridden; new working weekdays use the company average. Exact fractions avoid rounding drift; entitlement/calendar totals round up once to 0.01 day.

@@ -4,9 +4,6 @@ from __future__ import annotations
 
 import uuid  # noqa: TC003
 from datetime import date, datetime
-from decimal import Decimal
-from fractions import Fraction
-from math import ceil
 from typing import Annotated, Literal
 from zoneinfo import ZoneInfo
 
@@ -18,12 +15,12 @@ from app.core.rbac_matrix import Scope
 from app.modules.companies.models import Company
 from app.modules.employees.models import Employee, EmployeeAssignment
 from app.modules.leave.calculations import year_bounds
-from app.modules.leave.ledger import balance, calculate, lock_employee, move, reconcile
+from app.modules.leave.ledger import balance, lock_employee, move, reconcile
 from app.modules.leave.models import LeaveLedger, LeaveType
+from app.modules.leave.projections import projected_balances
 from app.modules.leave.request_models import LeaveRequest
 from app.modules.leave.workspace_schemas import (
     BalanceMoveIn,
-    BalanceOut,
     BalancePage,
     CalendarEntry,
     CalendarOut,
@@ -67,105 +64,6 @@ async def _people(
     return rows
 
 
-async def _balances(access: Access, employee: Employee, on: date) -> list[BalanceOut]:
-    company = (
-        await access.db.execute(select(Company).where(Company.id == access.company_id))
-    ).scalar_one()
-    start, end = year_bounds(on, company.leave_year_start_month_day)
-    kinds = list((await access.db.execute(select(LeaveType).order_by(LeaveType.name))).scalars())
-    movements = list(
-        (
-            await access.db.execute(
-                select(LeaveLedger).where(
-                    LeaveLedger.employee_id == employee.id, LeaveLedger.leave_year_start == start
-                )
-            )
-        ).scalars()
-    )
-    pending = list(
-        (
-            await access.db.execute(
-                select(LeaveRequest).where(
-                    LeaveRequest.employee_id == employee.id,
-                    LeaveRequest.status == "pending",
-                    LeaveRequest.start_date < end,
-                    LeaveRequest.end_date >= start,
-                )
-            )
-        ).scalars()
-    )
-    # The request snapshot retains exact fractions; use the same rounding as request planning.
-    result = []
-    for kind in kinds:
-        entries = [r for r in movements if r.leave_type_id == kind.id]
-        if kind.archived_at is not None and not entries:
-            continue
-        current = sum((r.days for r in entries), Decimal(0))
-        available: Decimal | None = current
-        entitlement: Decimal | None = None
-        calendar_days: Decimal | None = None
-        issue: str | None = None
-        if kind.archived_at is None:
-            try:
-                calculated = await calculate(access.db, employee, kind, on)
-                entitlement = calculated.entitlement
-                calendar_days = calculated.calendar_days
-                for bucket, target in (("entitlement", entitlement), ("calendar", -calendar_days)):
-                    if target is not None:
-                        available = (
-                            (available or Decimal(0))
-                            + target
-                            - sum((r.days for r in entries if r.bucket == bucket), Decimal(0))
-                        )
-            except AppError as error:
-                issue = error.message
-                if error.code != "IRREGULAR_HOURS":
-                    available = None
-        requested = sum(
-            (
-                Decimal(
-                    ceil(
-                        sum(
-                            (
-                                Fraction(q)
-                                for day, q in r.working_dates.items()
-                                if start.isoformat() <= day < end.isoformat()
-                            ),
-                            Fraction(0),
-                        )
-                        * 100
-                    )
-                )
-                / 100
-                for r in pending
-                if r.leave_type_id == kind.id
-            ),
-            Decimal(0),
-        )
-        result.append(
-            BalanceOut(
-                employee_id=employee.id,
-                employee_name=f"{employee.first_name} {employee.last_name}",
-                leave_type_id=kind.id,
-                leave_type_name=kind.name,
-                colour=kind.colour,
-                leave_year_start=start,
-                ledger_balance=current.quantize(Decimal("0.01")),
-                available=available.quantize(Decimal("0.01")) if available is not None else None,
-                entitlement=entitlement.quantize(Decimal("0.01"))
-                if entitlement is not None
-                else None,
-                calendar_days=calendar_days.quantize(Decimal("0.01"))
-                if calendar_days is not None
-                else None,
-                taken=-sum((r.days for r in entries if r.entry_type == "taken"), Decimal(0)),
-                pending=requested,
-                calculation_issue=issue,
-            )
-        )
-    return result
-
-
 @router.get("/leave-balances", response_model=BalancePage)
 async def balances(
     access: Balances,
@@ -176,7 +74,9 @@ async def balances(
 ) -> BalancePage:
     people = await _people(access, employee_id, own=False, offset=offset, limit=limit + 1)
     day = await _today(access, on)
-    items = [row for person in people[:limit] for row in await _balances(access, person, day)]
+    items = [
+        row for person in people[:limit] for row in await projected_balances(access.db, person, day)
+    ]
     return BalancePage(items=items, next_offset=offset + limit if len(people) > limit else None)
 
 
@@ -185,7 +85,8 @@ async def own_balances(access: Balances, on: date | None = None) -> BalancePage:
     people = await _people(access, None, own=True, offset=0, limit=1)
     day = await _today(access, on)
     return BalancePage(
-        items=await _balances(access, people[0], day) if people else [], next_offset=None
+        items=await projected_balances(access.db, people[0], day) if people else [],
+        next_offset=None,
     )
 
 
@@ -195,7 +96,8 @@ async def employee_balances(
 ) -> BalancePage:
     people = await _people(access, employee_id, own=False, offset=0, limit=1)
     return BalancePage(
-        items=await _balances(access, people[0], await _today(access, on)), next_offset=None
+        items=await projected_balances(access.db, people[0], await _today(access, on)),
+        next_offset=None,
     )
 
 
@@ -248,7 +150,9 @@ async def _move(
             reason=body.reason.strip(),
         )
     await access.db.commit()
-    return BalancePage(items=await _balances(access, employee, body.on), next_offset=None)
+    return BalancePage(
+        items=await projected_balances(access.db, employee, body.on), next_offset=None
+    )
 
 
 @router.post("/employees/{employee_id}/leave-balances/grant", response_model=BalancePage)

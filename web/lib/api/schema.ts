@@ -2153,6 +2153,40 @@ export interface paths {
         patch: operations["leave_update_type"];
         trace?: never;
     };
+    "/leave/year-end/commit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Commit */
+        post: operations["leave_commit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/leave/year-end/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Preview */
+        post: operations["leave_preview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/locations": {
         parameters: {
             query?: never;
@@ -3330,6 +3364,50 @@ export interface components {
             items: components["schemas"]["CalendarEntry"][];
             /** Month */
             month: string;
+        };
+        /** CarryOverride */
+        CarryOverride: {
+            /** Days */
+            days: number | string;
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /**
+             * Leave Type Id
+             * Format: uuid
+             */
+            leave_type_id: string;
+            /** Reason */
+            reason: string;
+        };
+        /** CarryRow */
+        CarryRow: {
+            /** Carry */
+            carry: string;
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Employee Name */
+            employee_name: string;
+            /** Expire */
+            expire: string;
+            /**
+             * Leave Type Id
+             * Format: uuid
+             */
+            leave_type_id: string;
+            /** Leave Type Name */
+            leave_type_name: string;
+            /** Limit */
+            limit: string;
+            /** Override Reason */
+            override_reason: string | null;
+            /** Remaining */
+            remaining: string | null;
         };
         /** ChangeDefaults */
         ChangeDefaults: {
@@ -6275,6 +6353,49 @@ export interface components {
             bank_holidays_non_working: boolean;
             /** Days */
             days: components["schemas"]["PatternDay-Output"][];
+        };
+        /** YearEndCommitIn */
+        YearEndCommitIn: {
+            /**
+             * From Year
+             * Format: date
+             */
+            from_year: string;
+            /** Overrides */
+            overrides?: components["schemas"]["CarryOverride"][];
+            /** Preview Token */
+            preview_token: string;
+        };
+        /** YearEndIn */
+        YearEndIn: {
+            /**
+             * From Year
+             * Format: date
+             */
+            from_year: string;
+            /** Overrides */
+            overrides?: components["schemas"]["CarryOverride"][];
+        };
+        /** YearEndPreview */
+        YearEndPreview: {
+            /** Blockers */
+            blockers: string[];
+            /** Committed Run Id */
+            committed_run_id?: string | null;
+            /**
+             * From Year
+             * Format: date
+             */
+            from_year: string;
+            /** Preview Token */
+            preview_token: string;
+            /** Rows */
+            rows: components["schemas"]["CarryRow"][];
+            /**
+             * To Year
+             * Format: date
+             */
+            to_year: string;
         };
         /** AddressOut */
         app__modules__companies__schemas__AddressOut: {
@@ -13061,6 +13182,90 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LeaveTypeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_commit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["YearEndCommitIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["YearEndPreview"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["YearEndIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["YearEndPreview"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

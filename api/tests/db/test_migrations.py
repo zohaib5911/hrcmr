@@ -46,6 +46,7 @@ IDENTITY_TABLES = [
     "leave_ledger",
     "leave_requests",
     "leave_types",
+    "leave_year_end_runs",
     "locations",
     "memberships",
     "notifications",
@@ -73,6 +74,7 @@ IDENTITY_FUNCTIONS = {
     "compliance_changes_immutable",
     "reminders_immutable",
     "leave_ledger_immutable",
+    "leave_year_end_immutable",
 }
 
 
