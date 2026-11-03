@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import uuid  # noqa: TC003
 from datetime import UTC, date, datetime, timedelta
-from typing import TYPE_CHECKING, Annotated
+from typing import Annotated
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -19,9 +19,10 @@ from app.modules.companies.models import Company
 from app.modules.email.models import EmailOutbox
 from app.modules.email.outbox import PAYLOAD_CONTEXT
 from app.modules.email.templates import check
+from app.modules.employees.models import Employee
 from app.modules.identity.models import Membership, User
 from app.modules.leave.ledger import balance, leave_type, lock_employee, reconcile
-from app.modules.leave.models import LeaveLedger
+from app.modules.leave.models import LeaveLedger, LeaveType
 from app.modules.leave.request_models import LeaveRequest
 from app.modules.leave.request_schemas import (
     LeaveDatesIn,
@@ -33,9 +34,6 @@ from app.modules.leave.request_schemas import (
 from app.modules.leave.requests import RequestPlan, conflicts, plan_request
 from app.modules.notifications.models import Notification
 from app.modules.rbac.deps import Access, require
-
-if TYPE_CHECKING:
-    from app.modules.employees.models import Employee
 
 router = APIRouter(prefix="/leave", tags=["leave"])
 Reads = Annotated[Access, Depends(require("leave.request.read"))]
@@ -82,7 +80,12 @@ async def preview_own(body: LeaveDatesIn, access: Creates) -> LeavePreview:
 async def _list(
     access: Access, *, own: bool = False, approvals: bool = False, status: str | None = None
 ) -> list[LeaveRequestOut]:
-    query = select(LeaveRequest).order_by(LeaveRequest.start_date.desc(), LeaveRequest.id.desc())
+    query = (
+        select(LeaveRequest, Employee, LeaveType)
+        .join(Employee, Employee.id == LeaveRequest.employee_id)
+        .join(LeaveType, LeaveType.id == LeaveRequest.leave_type_id)
+        .order_by(LeaveRequest.start_date.desc(), LeaveRequest.id.desc())
+    )
     if own or access.scope is Scope.OWN:
         if access.employee_id is None:
             return []
@@ -101,8 +104,14 @@ async def _list(
     elif status is not None:
         query = query.where(LeaveRequest.status == status)
     return [
-        LeaveRequestOut.model_validate(row)
-        for row in (await access.db.execute(query.limit(200))).scalars()
+        LeaveRequestOut.model_validate(row).model_copy(
+            update={
+                "employee_name": f"{employee.first_name} {employee.last_name}",
+                "leave_type_name": kind.name,
+                "colour": kind.colour,
+            }
+        )
+        for row, employee, kind in (await access.db.execute(query.limit(200))).all()
     ]
 
 

@@ -1293,6 +1293,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/employees/{employee_id}/leave-balances": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Employee Balances */
+        get: operations["leave_employee_balances"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/leave-balances/deduct": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Deduct */
+        post: operations["leave_deduct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/leave-balances/grant": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Grant */
+        post: operations["leave_grant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/leave-balances/set": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set Balance */
+        post: operations["leave_set_balance"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/employees/{employee_id}/memberships": {
         parameters: {
             query?: never;
@@ -1824,6 +1892,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/leave-balances": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Balances */
+        get: operations["leave_balances"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/leave-balances/own": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Own Balances */
+        get: operations["leave_own_balances"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/leave/approvals/own": {
         parameters: {
             query?: never;
@@ -1850,6 +1952,23 @@ export interface paths {
         };
         /** Approval Preview */
         get: operations["leave_approval_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/leave/calendar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Calendar */
+        get: operations["leave_calendar"];
         put?: never;
         post?: never;
         delete?: never;
@@ -2954,6 +3073,73 @@ export interface components {
             /** Next Cursor */
             next_cursor: string | null;
         };
+        /** BalanceMoveIn */
+        BalanceMoveIn: {
+            /** Days */
+            days: number | string;
+            /**
+             * Idempotency Key
+             * Format: uuid
+             */
+            idempotency_key: string;
+            /**
+             * Leave Type Id
+             * Format: uuid
+             */
+            leave_type_id: string;
+            /**
+             * On
+             * Format: date
+             */
+            on: string;
+            /** Reason */
+            reason: string;
+        };
+        /** BalanceOut */
+        BalanceOut: {
+            /** Available */
+            available: string | null;
+            /** Calculation Issue */
+            calculation_issue?: string | null;
+            /** Calendar Days */
+            calendar_days: string | null;
+            /** Colour */
+            colour: string;
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Employee Name */
+            employee_name: string;
+            /** Entitlement */
+            entitlement: string | null;
+            /**
+             * Leave Type Id
+             * Format: uuid
+             */
+            leave_type_id: string;
+            /** Leave Type Name */
+            leave_type_name: string;
+            /**
+             * Leave Year Start
+             * Format: date
+             */
+            leave_year_start: string;
+            /** Ledger Balance */
+            ledger_balance: string;
+            /** Pending */
+            pending: string;
+            /** Taken */
+            taken: string;
+        };
+        /** BalancePage */
+        BalancePage: {
+            /** Items */
+            items: components["schemas"]["BalanceOut"][];
+            /** Next Offset */
+            next_offset: number | null;
+        };
         /** BankAccountIn */
         BankAccountIn: {
             /** Account Holder */
@@ -3114,6 +3300,36 @@ export interface components {
             owner_id?: string | null;
             /** Owner Type */
             owner_type?: string | null;
+        };
+        /** CalendarEntry */
+        CalendarEntry: {
+            /** Colour */
+            colour: string;
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Employee Name */
+            employee_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Leave Type Name */
+            leave_type_name: string;
+            /** Status */
+            status: string;
+            /** Working Dates */
+            working_dates: string[];
+        };
+        /** CalendarOut */
+        CalendarOut: {
+            /** Items */
+            items: components["schemas"]["CalendarEntry"][];
+            /** Month */
+            month: string;
         };
         /** ChangeDefaults */
         ChangeDefaults: {
@@ -4692,6 +4908,11 @@ export interface components {
         /** LeaveRequestOut */
         LeaveRequestOut: {
             /**
+             * Colour
+             * @default blue
+             */
+            colour: string;
+            /**
              * Created At
              * Format: date-time
              */
@@ -4707,6 +4928,11 @@ export interface components {
              * Format: uuid
              */
             employee_id: string;
+            /**
+             * Employee Name
+             * @default
+             */
+            employee_name: string;
             /**
              * End Date
              * Format: date
@@ -4726,6 +4952,11 @@ export interface components {
              * Format: uuid
              */
             leave_type_id: string;
+            /**
+             * Leave Type Name
+             * @default
+             */
+            leave_type_name: string;
             /** Note */
             note: string | null;
             /**
@@ -10063,6 +10294,180 @@ export interface operations {
             };
         };
     };
+    leave_employee_balances: {
+        parameters: {
+            query?: {
+                on?: string | null;
+            };
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BalancePage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_deduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BalanceMoveIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BalancePage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_grant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BalanceMoveIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BalancePage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_set_balance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BalanceMoveIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BalancePage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     employees_add_membership: {
         parameters: {
             query?: never;
@@ -11813,6 +12218,89 @@ export interface operations {
             };
         };
     };
+    leave_balances: {
+        parameters: {
+            query?: {
+                on?: string | null;
+                employee_id?: string | null;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BalancePage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_own_balances: {
+        parameters: {
+            query?: {
+                on?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BalancePage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     leave_own_approvals: {
         parameters: {
             query?: never;
@@ -11869,6 +12357,47 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LeavePreview"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_calendar: {
+        parameters: {
+            query: {
+                month: string;
+                department_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

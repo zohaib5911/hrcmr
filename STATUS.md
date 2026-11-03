@@ -7,12 +7,12 @@ State: IN PROGRESS
 
 ## Current task
 - T8.4 — leave workspaces and employee Leave tab
-  - [ ] Scoped balance/calendar APIs and audited Grant/Deduct/Set
+  - [x] Scoped balance/calendar APIs and audited Grant/Deduct/Set
   - [ ] API/security tests and generated client
   - [ ] Leave Calendar/Requests/Balances, My Leave, My Approvals
   - [ ] Employee Leave tab and balance action sheet
   - [ ] Affected checks and browser workflows
-- Resume note: Start scoped balance/calendar router around ledger.py, then API checks and UI using existing leave requests endpoints.
+- Resume note: Workspace endpoints/client ready; baseline45 pass, new API/RBAC46 had one test keyring fixture issue corrected; combined workspace/request/RBAC rerun active. Next leave workspace and request/decision sheets.
 
 ## Next tasks
 - T8.4 — leave workspaces and employee tab
@@ -28,6 +28,7 @@ State: IN PROGRESS
 - docs/audits/phase7.md absent from synced dev; F7.1–F7.7 queued findings were implemented and confirmed green in CI.
 
 ## Strategy / decisions taken
+- T8.4: add missing leave.balance.read to plan/matrix so Company Admin/HR/Auditor can read company balances; existing own/reports remain scoped. Read projections combine immutable ledger with current managed allowance/calendar deltas; GET never writes. Manual actions reconcile and audit atomically.
 - T8.2: balances are sums of signed immutable movements. Corrections append deltas; manual movements survive standard reconciliation. Employee row serializes writers; operation keys preserve retries, including no-op Set. Caller owns audit/commit transaction.
 - Units are standard company days (weekly company hours / working weekdays). Personal shorter days reduce both entitlement and charge. Personal days inherit weekday hours unless overridden; new working weekdays use the company average. Exact fractions avoid rounding drift; entitlement/calendar totals round up once to 0.01 day.
 - Regular-pattern entitlement uses inclusive employment calendar days; assignment end is exclusive. Monthly posts completed leave-months, with partial employment months pro-rata. Null allowances are not zero. Regular automatic calculation rejects zero-hours/casual assignments; reviewed manual grants are available. Sources/policy: data/leave/SOURCES.md.
