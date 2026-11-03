@@ -10,7 +10,7 @@ from openpyxl import load_workbook
 from pypdf import PdfReader
 from sqlalchemy import text
 
-from tests.db.test_attendance import body, put
+from tests.db.test_attendance import put
 from tests.db.test_compliance_hub import rig as rig
 from tests.db.test_leave_requests import BASE, linked, submit
 from tests.db.test_leave_requests import ready as ready
@@ -61,7 +61,16 @@ async def test_grid_reads_are_scoped_and_worked_status_does_not_invent_hours(
     me = await linked(ready, "employee", ready["employee"])
     mine = await me.get(API + "/grid?start=2026-01-05")
     assert {p["id"] for p in mine.json()["people"]} == {str(ready["employee"])}
-    assert (await me.put(API + "/grid", json={"rows": [body(ready)]})).status_code == 403
+    assert (
+        await me.put(
+            API + "/grid",
+            json={
+                "rows": [
+                    {"employee_id": str(ready["employee"]), "date": "2026-01-05", "status": "late"}
+                ]
+            },
+        )
+    ).status_code == 403
     foreign = await ready["person"]("company_admin", ready["b"])
     assert (await foreign.get(API + "/grid?start=2026-01-05")).json()["records"] == []
 
