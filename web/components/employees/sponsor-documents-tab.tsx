@@ -76,6 +76,24 @@ export function SponsorDocumentsTab({ id, onChanged }: { id: string; onChanged: 
     link.rel = "noreferrer";
     link.click();
   }
+  async function printRecord() {
+    setDownloading("record");
+    setProblem(null);
+    const result = await attempt((c) =>
+      c.GET("/employees/{employee_id}/sponsor-record.pdf", {
+        params: { path: { employee_id: id } },
+        parseAs: "blob",
+      }),
+    );
+    setDownloading(null);
+    if (!result.ok) return setProblem(result.problem);
+    const url = URL.createObjectURL(result.data);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "sponsor-record-" + id + ".pdf";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
   const saved = () => {
     setRefresh((v) => v + 1);
     onChanged();
@@ -150,7 +168,18 @@ export function SponsorDocumentsTab({ id, onChanged }: { id: string; onChanged: 
   }
   return (
     <div className="flex flex-col gap-6">
-      <h2 className="text-headline text-label">Sponsor documents</h2>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-headline text-label">Sponsor documents</h2>
+        {can("document.report.generate") && (
+          <Button
+            variant="gray"
+            loading={downloading === "record"}
+            onClick={() => void printRecord()}
+          >
+            Sponsor compliance record PDF
+          </Button>
+        )}
+      </div>
       {problem && <Alert tone="danger" title={problem.message} />}
       {!records && !problem && (
         <p role="status" className="text-body text-label-secondary">
