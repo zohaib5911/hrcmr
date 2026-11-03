@@ -1,29 +1,28 @@
 # STATUS
-Updated: 2026-11-03 01:50    Agent: Codex    Branch: dev    Commit: da45abc
+Updated: 2026-11-03 01:52    Agent: Codex    Branch: dev    Commit: 7ef0ae7
 State: IN PROGRESS
 
 ## Last completed
-- T7.2 — Sponsor document model/API/forms/history, renewal/withdrawal and sponsored employees register
+- T7.3 — Working-day calculator, worker/org change records, reporting lifecycle and UI
 
 ## Current task
-- T7.3 — Working-day calculator, change of circumstances and organisation changes
-  - [x] Requirements and GOV.UK Part 3/glossary/calendar checked 2026-11-03; holiday baseline 6 tests, ruff/mypy pass
-  - [x] Working-day calculator with GOV.UK bank-holiday examples; 12 unit checks pass
-  - [x] Change/org-change models and migration 0017; immutable worker/reported records, unreported org CRUD; 7 migration/doc checks pass
-  - [x] Scoped APIs, deadlines and mark-reported tests; 7 integration + 12 working-day checks pass
-  - [x] Official 2026/2027 test calendar seeded for browser API; retained document version labels; reporting/holiday API 13 tests pass
-  - [x] Employee change form/log and company-wide Workers/Organisation register; web types/lint pass
-  - [x] Worker/org browser scenarios prepared; test TypeScript/lint pass
-  - [ ] Affected browser checks and final verification
-- Resume note: Production build + 14 existing holiday/setup browser checks pass. Worker scenario stopped at checkbox name (includes status description); fixed prefix match. Org scenario found inspector holding stale row after router refresh; inspector now looks up current record, and test waits for Reported status before reopening. Next rerun only compliance-changes.spec.ts. UI TypeScript/lint and API checks green.
+- T7.4 — Reminders engine and register
+  - [ ] Read reminder requirements and existing notifications/email/job patterns; baseline checks
+  - [ ] Threshold/reminder model and migration
+  - [ ] Daily reconciliation job and version/withdrawal cancellation
+  - [ ] Scoped register/review/edit/snooze/send API with audited who/when and in-app/email delivery
+  - [ ] Reminders page/register/history/review drawer (template until Phase 14)
+  - [ ] Affected API/browser verification
+- Resume note: T7.3 complete; reporting browser scenarios 3 pass and holiday/setup 14 pass. Next T7.4: 90/60/30 thresholds, daily engine and register/review drawer, 7-day snooze, explicit send with actor/time, in-app message and generic email nudge. Phase 7 scenario also requires RTW follow-up due in 21 days to have a 30-day reminder due; support RTW as well as sponsor-document expiry. No T7.4 code yet.
 
 
 ## Next tasks
-- T7.3, T7.4, T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
+- T7.4, T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
 
 ## Health
 - CI on dev: green 41514098397 (Phase 6); T7.1 not yet run in CI. CI on main: green 41516923634.
-- Local checks: T7.2 migration/doc 7, sponsor API 14, sponsor/setup browser 2 and adjacent RTW/setup 2 pass; lint/types/generated API/build pass. Previous  T7.1 migration/doc 7, API/PDF/directory 15, list unit 6, employee/setup browser 15 and RTW/setup 2 pass. Ruff/mypy, web types/lint, generated API and production build pass. Phase 6 full gate passed before PR #11 merged.
+- Local checks: T7.3 calculator 12, reporting/holiday API 13 and migration/doc 7 pass; reporting/setup browser 3 and holiday/setup browser 14 pass. T7.2 migration/doc 7, sponsor API 14, sponsor/setup browser 2 and adjacent RTW/setup 2 pass. All affected lint/types/generated API/production builds pass. Full suite/screenshots next at Phase 7 gate.
+
 
 ## Issues / suggestions
 - Remove cooldown exceptions once safe: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.

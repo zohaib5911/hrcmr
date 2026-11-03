@@ -77,3 +77,4 @@
 2026-11-03 01:45 | Codex | T7.3 | employee log/forms, live official-calendar preview and company Workers/Organisation register built; web types/lint pass | next browser scenario and holiday regression
 2026-11-03 01:47 | Codex | T7.3 | worker/org browser scenarios prepared and statically checked | next affected compliance-changes + holidays Playwright run
 2026-11-03 01:50 | Codex | T7.3 | holiday/setup browsers 14 pass; fixed described-checkbox selector and inspector stale-row state after report refresh | next rerun compliance-changes browser scenarios only
+2026-11-03 01:52 | Codex | T7.3 | complete: calculator 12, reporting/holiday API 13, migration/doc 7; reporting browser/setup 3 and holiday/setup 14 pass | next T7.4 reminders engine/register
