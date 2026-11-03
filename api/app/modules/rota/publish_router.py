@@ -179,8 +179,8 @@ async def print_week(week_start: date, access: Reads) -> Response:
         await access.db.execute(select(RotaWeek).where(RotaWeek.week_start == week_start))
     ).scalar_one_or_none()
     # Trusted local template; all company, employee and note values are escaped.
-    # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
     html = (
+        # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
         Environment(autoescape=True)
         .from_string(Path(__file__).with_name("week.html").read_text())
         .render(

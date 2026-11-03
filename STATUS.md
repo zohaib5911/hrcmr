@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Full web/unit/script/browser suite (sequentially)
   - [x] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: All four screenshot variants pass across final run3+retry3; 76 images reviewed, axe/overflow clean. Five-line phase summary written. PR #15 opened; inspect current head checks and merge only after all CI checks green using gh pr merge 15 --merge --auto. Then sync dev and start T10.1 (baseline document/file/RBAC34 pass). Local full API658+corrected19, web777/scripts32, full browser413+retry8 and static/contract/build green.
+- Resume note: PR15 CI found one Semgrep false positive: existing suppression was above the html assignment rather than the Jinja Environment line. Moved it beside the autoescape=True call (no runtime change). Push fix and wait for all checks green; merge15 then T10.1. Screenshot76 and all local full checks complete; T10 document baseline34 pass.
 
 ## Next tasks
 - T10.1 — company documents
@@ -19,7 +19,7 @@ State: IN PROGRESS
 - T10.3 — policies and sign-offs
 
 ## Health
-- CI on dev: current head not rechecked; last confirmed gate all 12 green (41640316888). CI on main: not rechecked.
+- CI on dev: red (Semgrep suppression placement, fixed locally; PR15). CI on main: not rechecked.
 - Local checks run: T9.2 API31/browser4/static; T9.3 API39+attendance27/migration7/doc1/static/web25/browser2; T9.4 API34/migration7/static/web22/browser2; T9.5 affected61+isolated rota9/clock-email12/migration7/static/web22/browser3; T9.6 Work Log10+related26/migration7/mypy288/static/web22/browser2 — pass.
 
 ## Issues / suggestions
