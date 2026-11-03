@@ -1,9 +1,9 @@
 # STATUS
-Updated: 2026-11-03 02:55    Agent: Codex    Branch: dev    Commit: 56f9dea
+Updated: 2026-11-03 02:56    Agent: Codex    Branch: dev    Commit: a0b5fc5
 State: IN PROGRESS
 
 ## Last completed
-- T7.3 — Working-day calculator, worker/org change records, reporting lifecycle and UI
+- T7.4 — Reviewed reminders, daily reconciliation, register/history and own received messages
 
 ## Current task
 - T7.4 — Reminders engine and register
@@ -12,15 +12,15 @@ State: IN PROGRESS
   - [x] Threshold/source hooks and daily job, cancellation/restore/snooze and derived-calendar refresh; 34 reminder/source/worker checks pass, final engine 5 pass
   - [x] Register/review/edit/snooze/send + own received API, atomic notification/encrypted outbox/audit; 20 affected API cases verified
   - [x] Reminder due/register/history page and explicit review drawer, plus own My Documents messages; web types/lint pass
-  - [ ] Affected API/browser verification
-- Resume note: Browser workflow written in web/tests/e2e/reminders.spec.ts; static checks pass. Next run its production Playwright project, fix failures, then complete T7.4. Covers unlinked/linked recipient, explicit draft/snooze/send, history, own received message and mobile accessibility. No screenshots until Phase 7 gate.
+  - [x] Affected API/browser verification: production reminder/setup 2 pass, including mobile/axe
+- Resume note: T7.4 complete. Production browser/setup 2 pass; affected API checks, lint/types/generated API pass. Next start T7.5 compliance hub and dossier per plan 8.5. Read nearest company/audit/admin content patterns; no full suite or screenshots until Phase 7 gate.
 
 
 ## Next tasks
 - T7.4, T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
 
 ## Health
-- CI on dev: green 41514098397 (Phase 6); T7.1 not yet run in CI. CI on main: green 41516923634.
+- CI on dev: green 41514098397 (Phase 6); Phase 7 not yet run in CI. CI on main: green 41516923634.
 - Local checks: T7.3 calculator 12, reporting/holiday API 13 and migration/doc 7 pass; reporting/setup browser 3 and holiday/setup browser 14 pass. T7.2 migration/doc 7, sponsor API 14, sponsor/setup browser 2 and adjacent RTW/setup 2 pass. All affected lint/types/generated API/production builds pass. Full suite/screenshots next at Phase 7 gate.
 
 
