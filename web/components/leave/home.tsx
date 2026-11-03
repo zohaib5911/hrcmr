@@ -374,18 +374,13 @@ function LeaveCalendar({ refresh }: { refresh: number }) {
             return (
               <button
                 key={day}
-                aria-label={`${formatUkLong(day)}, ${entries.length} leave requests${
-                  entries.length
-                    ? `, ${entries
-                        .slice(0, 2)
-                        .map((r) => r.employee_name)
-                        .join(", ")}`
-                    : ""
-                }${entries.length > 2 ? `, +${entries.length - 2}` : ""}`}
                 aria-pressed={selected === day}
                 onClick={() => setSelected(day)}
                 className={`border-separator min-h-20 min-w-0 border-t p-1 text-left focus-visible:outline-accent focus-visible:outline-2 focus-visible:-outline-offset-2 md:min-h-28 md:p-2 ${selected === day ? "bg-accent-tint" : ""} ${day.startsWith(month) ? "text-label" : "text-label-secondary"}`}
               >
+                <span className="sr-only">
+                  {formatUkLong(day)}, {entries.length} leave requests.{" "}
+                </span>
                 <span className="text-caption">{Number(day.slice(-2))}</span>
                 {entries.slice(0, 2).map((r) => (
                   <span key={r.id} className="mt-1 flex min-w-0 items-center gap-1 text-caption">

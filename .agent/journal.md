@@ -158,3 +158,4 @@
 2026-11-03 12:45 | Codex | Phase 8 gate | full browser407 pass/152 skipped/four shell assertions updated for implemented leave pages and sentence-case headings | next targeted four browser cases plus 48 Phase 8 screenshots
 2026-11-03 12:49 | Codex | Phase 8 gate | target exposed initial-company zero-pattern 500, fixed to existing Mon–Fri/8h Time defaults; explicit all-off issue handled; affected55/static pass. Calendar contrast/name fixed; screenshot selector narrowed | next profile/shell/screenshots rerun
 2026-11-03 12:51 | Codex | Phase 8 gate | profile/shell corrected cases pass; calendar contrast pass; accessible cell names now derive visible names/text with hidden date context | next screenshot-only rerun and visual review
+2026-11-03 12:52 | Codex | Phase 8 gate | correction: previous edit script missed formatted cell block; applied calendar hidden-context fix directly and lint passed | next screenshot-only run
