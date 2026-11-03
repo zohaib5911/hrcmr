@@ -65,7 +65,12 @@ for (const colorScheme of ["light", "dark"] as const) {
           await expect(
             page.getByRole("heading", { level: 1, name: heading, exact: true }),
           ).toBeVisible();
-          await expect(page.getByRole("main").getByRole("status")).toHaveCount(0);
+          await expect(
+            page
+              .getByRole("main")
+              .getByRole("status")
+              .filter({ hasText: /Loading/ }),
+          ).toHaveCount(0);
           await shoot(page, name + "-" + suffix);
         }
         await page.goto("/employees/" + id + "?tab=rtw");

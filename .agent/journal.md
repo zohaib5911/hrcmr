@@ -106,3 +106,4 @@
 2026-11-03 07:07 | Codex | Phase 7 gate | API full 479 pass/2 fail; normalized hyphenated operation IDs and updated encrypted-field inventory; affected 15 pass, lint/types/gen pass | next full web checks then Playwright
 2026-11-03 07:13 | Codex | Phase 7 gate | full web unit/static/generated-contract and node guard checks pass; screenshot tuple type fixed | next full Playwright once, then screenshot capture/review
 2026-11-03 07:29 | Codex | Phase 7 gate | full Playwright 398 pass/148 screenshot skips/4 stale shell assertions (built hub/My Documents and reminder title); expectations updated | next shell rerun plus Phase 7 screenshots
+2026-11-03 07:34 | Codex | Phase 7 gate | affected shell/setup 68 pass; screenshot wait mistakenly matched persistent status, narrowed to Loading messages | next screenshot-only capture and review

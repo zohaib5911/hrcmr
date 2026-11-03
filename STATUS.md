@@ -10,7 +10,8 @@ State: IN PROGRESS
   - [x] T7.1–T7.6 implementation and affected checks complete
   - [x] Full API (479 pass, two failures fixed/15 affected pass) and web static/unit/guard checks
   - [x] Full browser suite: 398 pass/148 skips; four stale shell assertions updated
-  - [ ] Verify affected shell tests and capture screenshots
+  - [x] Affected shell/setup 68 pass
+  - [ ] Screenshot capture (Loading-status wait corrected)
   - [ ] Save/review Phase 7 screenshots at 390 and 1280 px
   - [ ] Write five-line phase summary, open dev → main PR, merge only with all CI green
   - [ ] Set BLOCKED — audit requested and stop
