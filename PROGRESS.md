@@ -327,7 +327,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
   - Delivered scoped attendance recording, scanned imports, bulk grids, exports and monthly absence reporting.
   - Added employee clocking/PWA and optional consented location, with stale-safe report timesheet review.
   - Built rota templates/policies, weekly planning/warnings, retained publication snapshots, notifications, PDF and My Shifts.
-  - Added own/admin Work Log with original corrections and reasoned soft removal; full API658+corrected19, web777/scripts32, browser413+corrected8 and static/contract/build pass.
+  - Added own/admin Work Log with original corrections and reasoned soft removal; full API658+corrected19, web777/scripts32, browser413+corrected8 plus UTC CI-regression4 and static/contract/build pass.
   - Captured 76 views at 390/1280 light/dark with axe/overflow checks; corrected mobile long-policy actions and reviewed attendance/import/clock/rota/log sheets.
 
 ### Phase 10 — Documents, policies and reports

@@ -213,3 +213,4 @@
 2026-11-03 22:48 | Codex | Phase9 gate | PR15 opened with76 reviewed screenshots; T10 document/file/RBAC baseline34 pass | next all-green CI merge then T10.1
 2026-11-03 22:53 | Codex | Phase9 gate | CI Semgrep false positive from misplaced suppression for autoescaped Jinja call; moved beside flagged line | next push/all-green CI then merge15/T10.1
 2026-11-03 23:10 | Codex | Phase9 gate | CI browser417 pass, DST readiness failure and two streaming flakes corrected in affected specs; other11 checks green | next targeted browser then push/green merge15
+2026-11-03 23:11 | Codex | Phase9 gate | UTC targeted browser4 pass: DST attendance and compliance/leave streaming cases; PR15 awaiting final-head CI | next all-green merge15 then T10.1
