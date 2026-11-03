@@ -143,6 +143,7 @@ async def test_sign_up_creates_a_free_company_and_admin_then_the_link_signs_them
     assert PASSWORD not in user[0]
     assert user[1] is None
     assert (await world.sql("select role from memberships"))[0][0] == "company_admin"
+    assert (await world.sql("select count(*) from leave_types"))[0][0] == 12
     assert (await world.sql("select count(*) from terms_acceptances"))[0][0] == 1
     assert [r[0] for r in await world.sql(AUDIT_ACTIONS)] == ["company.created", "auth.signup"]
 

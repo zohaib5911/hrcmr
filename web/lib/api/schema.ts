@@ -1824,6 +1824,61 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/leave/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Settings */
+        get: operations["leave_settings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Settings */
+        patch: operations["leave_update_settings"];
+        trace?: never;
+    };
+    "/leave/types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Types */
+        get: operations["leave_list_types"];
+        put?: never;
+        /** Create Type */
+        post: operations["leave_create_type"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/leave/types/{type_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Type */
+        get: operations["leave_read_type"];
+        put?: never;
+        post?: never;
+        /** Archive Type */
+        delete: operations["leave_archive_type"];
+        options?: never;
+        head?: never;
+        /** Update Type */
+        patch: operations["leave_update_type"];
+        trace?: never;
+    };
     "/locations": {
         parameters: {
             query?: never;
@@ -4390,6 +4445,125 @@ export interface components {
              * @description How many of the 4 roles have someone in them.
              */
             roles_filled: number;
+        };
+        /** LeaveSettingsOut */
+        LeaveSettingsOut: {
+            /** Allow Negative Leave Balance */
+            allow_negative_leave_balance: boolean;
+            /** Leave Year Start Month Day */
+            leave_year_start_month_day: string;
+        };
+        /** LeaveSettingsPatch */
+        LeaveSettingsPatch: {
+            /** Allow Negative Leave Balance */
+            allow_negative_leave_balance?: boolean | null;
+            /** Leave Year Start Month Day */
+            leave_year_start_month_day?: string | null;
+        };
+        /** LeaveTypeIn */
+        LeaveTypeIn: {
+            /**
+             * Accrual Method
+             * @default front_loaded
+             * @enum {string}
+             */
+            accrual_method: "front_loaded" | "monthly";
+            /**
+             * Carry Over Limit Days
+             * @default 0
+             */
+            carry_over_limit_days: number | string;
+            /**
+             * Colour
+             * @default blue
+             * @enum {string}
+             */
+            colour: "blue" | "green" | "orange" | "red" | "gray";
+            /**
+             * Counts Toward Statutory
+             * @default false
+             */
+            counts_toward_statutory: boolean;
+            /** Days Per Year */
+            days_per_year?: number | string | null;
+            /**
+             * Is Paid
+             * @default true
+             */
+            is_paid: boolean;
+            /** Name */
+            name: string;
+            /**
+             * Requires Approval
+             * @default true
+             */
+            requires_approval: boolean;
+            /**
+             * Rule Text
+             * @default
+             */
+            rule_text: string;
+        };
+        /** LeaveTypeOut */
+        LeaveTypeOut: {
+            /**
+             * Accrual Method
+             * @enum {string}
+             */
+            accrual_method: "front_loaded" | "monthly";
+            /** Archived At */
+            archived_at: string | null;
+            /** Carry Over Limit Days */
+            carry_over_limit_days: string;
+            /** Checked On */
+            checked_on: string | null;
+            /**
+             * Colour
+             * @enum {string}
+             */
+            colour: "blue" | "green" | "orange" | "red" | "gray";
+            /** Counts Toward Statutory */
+            counts_toward_statutory: boolean;
+            /** Days Per Year */
+            days_per_year: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Paid */
+            is_paid: boolean;
+            /** Name */
+            name: string;
+            /** Requires Approval */
+            requires_approval: boolean;
+            /** Rule Text */
+            rule_text: string;
+            /** Seed Key */
+            seed_key: string | null;
+            /** Source Url */
+            source_url: string | null;
+        };
+        /** LeaveTypePatch */
+        LeaveTypePatch: {
+            /** Accrual Method */
+            accrual_method?: ("front_loaded" | "monthly") | null;
+            /** Carry Over Limit Days */
+            carry_over_limit_days?: number | string | null;
+            /** Colour */
+            colour?: ("blue" | "green" | "orange" | "red" | "gray") | null;
+            /** Counts Toward Statutory */
+            counts_toward_statutory?: boolean | null;
+            /** Days Per Year */
+            days_per_year?: number | string | null;
+            /** Is Paid */
+            is_paid?: boolean | null;
+            /** Name */
+            name?: string | null;
+            /** Requires Approval */
+            requires_approval?: boolean | null;
+            /** Rule Text */
+            rule_text?: string | null;
         };
         /** LocationIn */
         LocationIn: {
@@ -11314,6 +11488,290 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeaveSettingsOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_update_settings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeaveSettingsPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeaveSettingsOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_list_types: {
+        parameters: {
+            query?: {
+                include_archived?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeaveTypeOut"][];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_create_type: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeaveTypeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeaveTypeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_read_type: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeaveTypeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_archive_type: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    leave_update_type: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                type_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LeaveTypePatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LeaveTypeOut"];
+                };
             };
             /** @description The request could not be completed. `error.code` says why. */
             "4XX": {

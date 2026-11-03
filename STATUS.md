@@ -9,10 +9,10 @@ State: IN PROGRESS
 - T8.1 — leave types and settings
   - [x] Verify twelve seed rules against GOV.UK; baseline settings/RBAC checks
   - [x] Models, frozen migration/backfill and signup seeds
-  - [ ] Scoped API/settings validation, audit and regression tests
+  - [x] Scoped API/settings validation, audit and regression tests
   - [ ] Leave settings UI, CRUD sheets and navigation
   - [ ] Affected browser/API/static checks and task completion
-- Resume note: T8.1 model/seed migration complete; 9 migration/doc/signup tests pass, ruff/mypy pass. Implement schemas, scoped APIs, audit and regression checks next. Data sources in data/leave/SOURCES.md.
+- Resume note: Leave CRUD/settings API and generated web contract complete; affected leave/RBAC/auth 50 pass, ruff/mypy pass. Implement /leave/settings UI, guidance and CRUD sheets; add discoverable link from Leave. Then targeted browser checks.
 
 ## Next tasks
 
