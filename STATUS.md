@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Serialized self-service clock API and scoped stale-safe approval API
   - [x] Clock/PWA and manager approval UI
   - [ ] Affected API/browser checks
-- Resume note: Clock/PWA manifest/icons/no-cache offline fallback, Home/Attendance entry links, per-action optional location and break/note forms, report week review/confirm/reload UI implemented. API clock/RBAC/company39, prior attendance27, migration7/doc1, mypy268, web types/lint/nav25 pass. Run production attendance-clock browser then finish T9.3; no phase screenshots/full suite yet.
+- Resume note: Production clock browser reaches enabled location toggle; manifest/192+512 PNG assets and service worker registration pass. Toggle accessible name includes its description; browser selector corrected to prefix match. Rerun attendance-clock then finish T9.3. Prior API39/attendance27/migration7/doc1/static/web25 pass.
 
 ## Next tasks
 - T9.4 — rota settings

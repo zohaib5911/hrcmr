@@ -45,7 +45,7 @@ test("clock from Home, consent to location, clock out and approve a report's com
   await page.getByRole("link", { name: "Clock in or out", exact: true }).click();
   await expect(page.getByText("You are clocked out.", { exact: true })).toBeVisible();
   await expect(
-    page.getByRole("switch", { name: "Share my location for this action", exact: true }),
+    page.getByRole("switch", { name: /^Share my location for this action/ }),
   ).toHaveCount(0);
   expect((await (await api.get(`${API}/attendance/clock`)).json()).active).toBeNull();
   const manifest = await context.request.get("http://127.0.0.1:3100/clock/manifest.webmanifest");
@@ -69,14 +69,12 @@ test("clock from Home, consent to location, clock out and approve a report's com
   });
   expect(enabled.status(), await enabled.text()).toBe(200);
   await page.reload();
-  await page
-    .getByRole("switch", { name: "Share my location for this action", exact: true })
-    .click();
+  await page.getByRole("switch", { name: /^Share my location for this action/ }).click();
   await page.getByLabel("Clock note (optional)", { exact: true }).fill("Reception cover");
   await page.getByRole("button", { name: "Clock in", exact: true }).click();
   await expect(page.getByRole("button", { name: "Clock out", exact: true })).toBeVisible();
   await expect(
-    page.getByRole("switch", { name: "Share my location for this action", exact: true }),
+    page.getByRole("switch", { name: /^Share my location for this action/ }),
   ).not.toBeChecked();
   await page.reload();
   await expect(page.getByRole("button", { name: "Clock out", exact: true })).toBeVisible();
