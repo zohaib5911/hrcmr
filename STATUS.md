@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Working-day counter and scoped request/approval API
   - [x] Booking ledger, attendance and transactional decision notifications
   - [ ] Affected API/security/static checks
-- Resume note: Migration8 checks pass, request API/counter/booking/notification code written and strict static checks clean. API scenario tests not yet added/run: highest priority. API schema regenerated. No UI changes for requests yet. Types with requires_approval=false auto-book by configured policy with no human decider; explicit approvals always forbid self. Pending cancellation only.
+- Resume note: Request scenario suite initially22 pass/one fixture permission mismatch, fixed to Company Admin for foreign cancellation; added staffing and negative/missing-calendar cases. Run combined request/ledger/RBAC/notification tests next. Strict typing clean. Role matrix gives HR approve but no request.create; on-behalf creation stays Company Admin, own creation Employee/Company Admin.
 
 ## Next tasks
 - T8.3 — requests, working-days counter, conflicts, approvals, notifications, attendance sync

@@ -35,7 +35,7 @@ class RequestPlan:
 
     @property
     def total(self) -> Decimal:
-        return sum(self.by_year.values(), Decimal(0))
+        return sum(self.by_year.values(), Decimal(0)).quantize(Decimal("0.01"))
 
     def snapshot(self) -> dict[str, str]:
         return {day.isoformat(): str(amount) for day, amount in self.quantities.items()}
