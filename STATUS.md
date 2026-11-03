@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 01:47    Agent: Codex    Branch: dev    Commit: 8c76f13
+Updated: 2026-11-03 01:50    Agent: Codex    Branch: dev    Commit: da45abc
 State: IN PROGRESS
 
 ## Last completed
@@ -15,7 +15,7 @@ State: IN PROGRESS
   - [x] Employee change form/log and company-wide Workers/Organisation register; web types/lint pass
   - [x] Worker/org browser scenarios prepared; test TypeScript/lint pass
   - [ ] Affected browser checks and final verification
-- Resume note: T7.3 UI and worker/org scenarios ready. Next run Playwright compliance-changes.spec.ts plus holidays.spec.ts with UV_CACHE_DIR=/tmp/cmr-uv-cache, inspect failures before rerunning. New tests cover Friday/bank holiday 10/20-day targets, snapshot/document version, reported actor/reference, company filters/mobile/axe and unreported org edit/archive/prompt exception. All API/unit/migration and web static checks passed.
+- Resume note: Production build + 14 existing holiday/setup browser checks pass. Worker scenario stopped at checkbox name (includes status description); fixed prefix match. Org scenario found inspector holding stale row after router refresh; inspector now looks up current record, and test waits for Reported status before reopening. Next rerun only compliance-changes.spec.ts. UI TypeScript/lint and API checks green.
 
 
 ## Next tasks

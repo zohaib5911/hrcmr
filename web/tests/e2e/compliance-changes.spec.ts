@@ -68,7 +68,7 @@ test("Worker changes keep a snapshot, count the bank holiday and record who repo
       exact: true,
     })
     .check();
-  await dialog.getByRole("checkbox", { name: "Passport · version 1", exact: true }).check();
+  await dialog.getByRole("checkbox", { name: /^Passport · version 1 / }).check();
   await dialog.getByRole("button", { name: "Save", exact: true }).focus();
   await dialog.getByRole("heading").click();
   expect(saves).toBe(0);
@@ -176,6 +176,7 @@ test("Organisation changes calculate twenty days, retain reports and handle prom
   await dialog.getByRole("button", { name: "Save", exact: true }).click();
   await expect(dialog).not.toBeVisible();
   expect(saves).toBe(3);
+  await expect(grid.getByText("Reported", { exact: true })).toBeVisible();
   await grid.getByText("Ownership changed", { exact: true }).dblclick();
   await expect(details.getByText("Reported after the deadline", { exact: true })).toBeVisible();
   await expect(details.getByRole("button", { name: "Edit entry", exact: true })).toHaveCount(0);

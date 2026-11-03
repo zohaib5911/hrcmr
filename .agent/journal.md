@@ -76,3 +76,4 @@
 2026-11-03 01:40 | Codex | T7.3 | retained document version labels + shared official 2026/27 calendar fixture seeded in e2e API; reporting/holiday API 13 pass | next employee/company change UI, browser + holiday regression
 2026-11-03 01:45 | Codex | T7.3 | employee log/forms, live official-calendar preview and company Workers/Organisation register built; web types/lint pass | next browser scenario and holiday regression
 2026-11-03 01:47 | Codex | T7.3 | worker/org browser scenarios prepared and statically checked | next affected compliance-changes + holidays Playwright run
+2026-11-03 01:50 | Codex | T7.3 | holiday/setup browsers 14 pass; fixed described-checkbox selector and inspector stale-row state after report refresh | next rerun compliance-changes browser scenarios only

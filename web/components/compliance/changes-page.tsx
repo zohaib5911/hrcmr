@@ -109,6 +109,10 @@ export function ChangesPage({
             .includes(word),
         ),
   );
+  const inspected =
+    dialog?.kind === "inspect"
+      ? ([...changes, ...organisation].find((row) => row.id === dialog.record.id) ?? dialog.record)
+      : null;
   const saved = () => router.refresh();
   return (
     <>
@@ -193,47 +197,45 @@ export function ChangesPage({
       {dialog?.kind === "report" && (
         <ReportedSheet record={dialog.record} onClose={() => setDialog(null)} onSaved={saved} />
       )}
-      {dialog?.kind === "inspect" && (
+      {dialog?.kind === "inspect" && inspected && (
         <Sheet open onOpenChange={(open) => !open && setDialog(null)}>
           <SheetContent
             title="Change details"
             description={
-              "employee_id" in dialog.record ? dialog.record.employee_name : "Organisation change"
+              "employee_id" in inspected ? inspected.employee_name : "Organisation change"
             }
             readOnly
           >
             <div className="flex flex-col gap-4">
-              <ChangeSummary record={dialog.record} />
-              {"employee_id" in dialog.record && (
+              <ChangeSummary record={inspected} />
+              {"employee_id" in inspected && (
                 <Button
                   variant="gray"
                   onClick={() => {
-                    if ("employee_id" in dialog.record)
-                      router.push("/employees/" + dialog.record.employee_id);
+                    if ("employee_id" in inspected)
+                      router.push("/employees/" + inspected.employee_id);
                   }}
                 >
                   Open employee
                 </Button>
               )}
-              {mayWrite && !dialog.record.reported_at && (
+              {mayWrite && !inspected.reported_at && (
                 <>
-                  <Button onClick={() => setDialog({ kind: "report", record: dialog.record })}>
+                  <Button onClick={() => setDialog({ kind: "report", record: inspected })}>
                     Mark as reported
                   </Button>
-                  {!("employee_id" in dialog.record) && (
+                  {!("employee_id" in inspected) && (
                     <>
                       <Button
                         variant="gray"
-                        onClick={() =>
-                          setDialog({ kind: "org", record: dialog.record as OrgChange })
-                        }
+                        onClick={() => setDialog({ kind: "org", record: inspected as OrgChange })}
                       >
                         Edit entry
                       </Button>
                       <Button
                         variant="plain"
                         onClick={() =>
-                          setDialog({ kind: "archive", record: dialog.record as OrgChange })
+                          setDialog({ kind: "archive", record: inspected as OrgChange })
                         }
                       >
                         Archive entry
