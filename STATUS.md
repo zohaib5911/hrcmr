@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 17:57, Europe/London    Agent: Codex    Branch: dev    Commit: 3e616d4
+Updated: 2026-11-03 17:59, Europe/London    Agent: Codex    Branch: dev    Commit: c25c466
 State: IN PROGRESS
 
 ## Last completed
@@ -7,11 +7,12 @@ State: IN PROGRESS
 
 ## Current task
 - T9.5 — rota grid, publish, print and My Shifts
-  - [ ] Week/shift schema and scoped grid/write APIs
+  - [x] Week/shift schema and optimistic edit/projection contracts
+  - [ ] Scoped grid and shift write APIs
   - [ ] Copy/clear actions, warnings and publish notifications/PDF/own projection
   - [ ] Rota workspace/cell forms/menus and My Shifts
   - [ ] Affected API/browser checks
-- Resume note: T9.4 complete. Implement T9.5 from plan 6.6/8.8/Phase9 and endpoint list. Preserve manager report scope, local overnight times and draft/publish behavior; approved leave/company holidays/48h opt-out/11h rest warnings. Connect leave-request shift conflicts when shifts exist. No full suite/screenshots until Phase 9 gate.
+- Resume note: Rota week/shift models and migration plus versioned API contracts added. Weeks retain last published snapshot while drafts change. Migration7 (apply/rollback/model/RLS) passes; generated data model refreshed. Next scoped grid/write service, actions/warnings/publish/PDF/own API, then UI. Connect leave-request shift conflicts and late detection once shifts exist.
 
 ## Next tasks
 - T9.6 — Work Log
@@ -27,6 +28,7 @@ State: IN PROGRESS
 - docs/audits/phase7.md absent from synced dev; F7.1–F7.7 queued findings were implemented and confirmed green in CI.
 
 ## Strategy / decisions taken
+- T9.5: preserve last published shifts in a weekly snapshot while draft edits change current rows; manager publication merges only their reports and preserves other employees. Version checks prevent stale destructive actions. Times are UTC instants derived from explicit company-local wall times/fold choices.
 - T9.4: follow existing settings archive conventions; one active late policy/day-off pattern per department/designation/shift, overnight breaks validated within the shift. Deduction settings are stored configuration; no automatic payroll deduction is introduced.
 - T9.3: weekly review uses a deterministic employee/week identifier for read-only projections; only approval writes a stamp with the reviewed record fingerprint. Changed records show review needed again. Location defaults off and requires employee consent per clock action; location/note text never enters audit events.
 - T9.2: scanned import files use attendance_import ownership and require current company-wide attendance read even for their uploader after demotion. Preview/commit is all-or-nothing with per-row errors and stale-record checks. Grid may save worked status with unknown times/hours; it must not invent clock times. Workbook XML hardening follows https://openpyxl.readthedocs.io/en/stable/#security (defusedxml installed); parser limits and formula rejection follow next.

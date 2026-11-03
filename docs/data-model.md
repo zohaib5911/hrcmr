@@ -1059,6 +1059,28 @@ Checks:
 - `status in ('scheduled', 'due', 'sent', 'snoozed', 'cancelled')`
 - `threshold_days in (90, 60, 30)`
 
+## `rota_weeks`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `week_start` | DATE | no |  |  |
+| `status` | VARCHAR(10) | no | `draft` |  |
+| `version` | INTEGER | no | `0` |  |
+| `published_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `published_by` | UUID | yes |  |  |
+| `published_shifts` | JSONB | no | `[]` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `extract(isodow from week_start)=1`
+- `status in ('draft','published') AND version>=0`
+
 ## `rtw_checks`
 
 | Column | Type | Null | Default | Notes |
@@ -1101,6 +1123,29 @@ Checks:
 - `outcome in ('pending', 'verified', 'failed')`
 - `subject_type <> 'employee' or (check_date is not null and checked_by_user_id is not null)`
 - `subject_type in ('employee', 'candidate')`
+
+## `scheduled_shifts`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `employees`, references `rota_weeks`, references `shift_types` |
+| `rota_week_id` | UUID | no |  | references `rota_weeks` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `date` | DATE | no |  |  |
+| `starts_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `ends_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `unpaid_break_minutes` | INTEGER | no | `0` |  |
+| `shift_type_id` | UUID | yes |  | references `shift_types` |
+| `note` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `ends_at > starts_at AND unpaid_break_minutes >= 0 AND unpaid_break_minutes * interval '1 minute' <= ends_at-starts_at`
 
 ## `sessions`
 

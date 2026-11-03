@@ -22,5 +22,6 @@ import app.modules.leave.year_end_models
 import app.modules.notifications.models
 import app.modules.pay.models
 import app.modules.rota.models
+import app.modules.rota.week_models
 import app.modules.rtw.models
 import app.modules.sponsor_documents.models  # noqa: F401
