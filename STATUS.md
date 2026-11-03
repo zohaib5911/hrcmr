@@ -1,18 +1,14 @@
 # STATUS
-Updated: 2026-11-03 07:38, Europe/London    Agent: Codex    Branch: dev    Commit: 085576b
-State: BLOCKED — audit requested
+Updated: 2026-11-03 08:45, Europe/London    Agent: Codex    Branch: dev    Commit: 05b9960
+State: IN PROGRESS
 
 ## Last completed
 - Phase 7 gate — PR #13 merged as f17ef67 after all 12 CI checks green (41595489940)
 
 ## Current task
-- Phase 7 gate — complete; required owner audit
-  - [x] T7.1–T7.6 implementation and affected checks
-  - [x] Full API/web/browser gate; discovered failures fixed and affected checks pass
-  - [x] 36 reviewed screenshots, 390/1280 px light/dark; mobile queue layout fixed
-  - [x] Five-line phase summary, PR #13 and all-green CI merge; dev synced
-  - [x] Stop for required owner audit
-- Resume note: PR https://github.com/zohaib5911/hrcmr/pull/13 merged f17ef67. CI run 41595489940 all 12 checks green. Do not start Phase 8 until owner audit findings arrive; record them under Next tasks. Screenshots: docs/screenshots/phase-7. Migration SQL static-analysis findings fixed with equivalent literal SQL; affected migration/dossier/reporting 14 pass.
+- F7.1 — step-up on role changes, privileged invitations and two-step policy
+  - [ ] Implement guards and affected regression tests (one commit)
+- Resume note: Synced clean dev. Audit file docs/audits/phase7.md absent; requested contents, using queued STATUS findings meanwhile. Complete F7.1–F7.7 one commit each, then T8.1.
 
 ## Next tasks
 
@@ -48,5 +44,5 @@ F7.7 Update PROGRESS header and T7.4–T7.6 entries   [low]
 - AI hidden without ANTHROPIC_API_KEY; Ask Mady deferred.
 
 ## Owner actions needed
-- Run the required Phase 7 audit with a high-level model and supply findings under Next tasks.
+- Supply missing docs/audits/phase7.md contents or correct path (requested).
 - Existing non-blocking setup: protect main and enable private vulnerability reporting.
