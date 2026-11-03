@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 07:38, Europe/London    Agent: Codex    Branch: dev    Commit: b6d99d1
+Updated: 2026-11-03 07:38, Europe/London    Agent: Codex    Branch: dev    Commit: 085576b
 State: BLOCKED — audit requested
 
 ## Last completed
@@ -18,7 +18,7 @@ State: BLOCKED — audit requested
 - Owner high-level Phase 7 audit; implement supplied findings before Phase 8.
 
 ## Health
-- CI on dev/PR: green (41595489940, b6d99d1). CI on main: post-merge run pending; merged change passed all PR checks.
+- CI on dev/PR: green (41595489940, b6d99d1). CI on main: post-merge run 41597645539 pending; merged change passed all PR checks.
 - Local checks: API full 479 pass/two failures fixed/15 affected pass; API lint/format/mypy pass. Web 777, guards 32, lint/types/generated API pass. Browser full 398 pass/four stale shell assertions fixed/68 affected pass; final hub/screenshots 6 pass. Migration/dossier/reporting 14 pass after CI fix.
 
 ## Issues / suggestions

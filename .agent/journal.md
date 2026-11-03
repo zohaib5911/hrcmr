@@ -113,3 +113,4 @@
 2026-11-03 07:21 | Codex | Phase 7 CI | Semgrep flagged fixed-constant migration SQL; replaced assembly with literal identical statements; migrations/dossier/reporting 14 pass, ruff pass | next new CI run all green then merge/audit stop
 2026-11-03 07:38 | Codex | Phase 7 gate | PR #13 merged f17ef67 after all 12 checks green (41595489940); dev synced; 36 reviewed screenshots saved | next mandatory owner audit, do not start Phase 8
 2026-11-03 07:38 | Codex | journal correction | intermediate gate timestamps were manually estimated; git commit/run times determine exact chronology | next use clock-derived London time
+2026-11-03 07:38 | Codex | relay | Phase 7 completed/merged; State BLOCKED audit requested; post-merge main CI 41597645539 pending | next owner audit findings, no Phase 8 work
