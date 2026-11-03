@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [ ] Full web/unit/browser checks
   - [ ] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line summary, CI-green PR dev → main and merge
-- Resume note: T8.1–T8.5 complete. Screenshot spec ready (phase8-screenshots, gated by SCREENSHOTS=1). Run full API once, then full web/browser sequentially; fix any failures with targeted reruns. Phase 8 has no audit stop; continue T9.1 after green merge.
+- Resume note: T8.1–T8.5 complete. Screenshot spec ready (phase8-screenshots, gated by SCREENSHOTS=1). Full API active (/tmp/phase8-api-full.txt), one failure so far; generated data-model reference refreshed for leave/attendance/year-end tables. Then full web/browser sequentially; fix failures with targeted reruns. Phase 8 has no audit stop; continue T9.1 after green merge.
 
 ## Next tasks
 - Phase 8 gate

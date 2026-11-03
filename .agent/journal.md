@@ -151,3 +151,4 @@
 2026-11-03 12:20 | Codex | T8.5 | preview/override/commit UI and real browser scenario written; year-end/workspace/requests34 plus migration/projections12 pass, static clean | next production year-end browser then Phase 8 gate
 2026-11-03 12:22 | Codex | T8.5 | complete: affected API34/migration12/browser2 plus mobile axe pass; immutable snapshot/override/carry/expiry and closed-year guards ready | next Phase 8 full gate/screenshots/green PR then T9.1
 2026-11-03 12:23 | Codex | Phase 8 gate | T8.1–T8.5 complete; 48-image light/dark 390/1280 screenshot spec ready with axe checks | next full API, web/browser sequentially, visual review, green PR then T9.1
+2026-11-03 12:25 | Codex | Phase 8 gate | lint/format/mypy254 pass; full API active; refreshed generated data-model reference for leave ledger/requests/attendance/year-end | next inspect full API result then web gate
