@@ -3,14 +3,14 @@ Updated: 2026-11-03 12:20, Europe/London    Agent: Codex    Branch: dev    Commi
 State: IN PROGRESS
 
 ## Last completed
-- T8.4 — leave workspaces, self-service, employee balance actions and scoped APIs
+- T8.5 — audited reviewed carry-over, immutable closes and closed-year guards
 
 ## Current task
 - T8.5 — year-end carry-over
   - [x] Run model/migration and closed-year safeguards
   - [x] Preview, reasoned overrides and atomic audited commit API
-  - [ ] Year-end UI and affected API/browser checks
-- Resume note: Year-end/workspace/requests34 and migration/projections12 pass; static clean. Year-end UI and browser scenario ready. Run leave-year-end production browser, fix any issues, finish T8.5 then Phase 8 full gate/screenshots/CI PR.
+  - [x] Year-end UI and affected API/browser checks
+- Resume note: T8.5 complete; affected API34/migration12/browser2 pass. Start Phase 8 gate: full API then web/static/browser checks; 390/1280 light/dark screenshots; five-line summary; PR dev→main, green CI and merge; then T9.1 without stopping.
 
 ## Next tasks
 - T8.4 — leave workspaces and employee tab

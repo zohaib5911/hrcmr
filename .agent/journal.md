@@ -149,3 +149,4 @@
 2026-11-03 12:13 | Codex | T8.4 | complete: API71, browser/setup2 including mobile axe, Python/web static and contract pass; nav22 pass after sentence-case fix | next T8.5 carry-over
 2026-11-03 12:18 | Codex | T8.5 | immutable run schema and closed-year guards complete; shared read projection, stale-preview-safe transactional carry/expiry API written; migration/projections12 pass, static clean | next year-end scenarios and UI
 2026-11-03 12:20 | Codex | T8.5 | preview/override/commit UI and real browser scenario written; year-end/workspace/requests34 plus migration/projections12 pass, static clean | next production year-end browser then Phase 8 gate
+2026-11-03 12:22 | Codex | T8.5 | complete: affected API34/migration12/browser2 plus mobile axe pass; immutable snapshot/override/carry/expiry and closed-year guards ready | next Phase 8 full gate/screenshots/green PR then T9.1

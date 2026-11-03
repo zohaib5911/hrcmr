@@ -81,7 +81,15 @@ export function YearEndPage({ startMonthDay }: { startMonthDay: string }) {
             id: "action",
             header: "Review",
             cell: (r: Row) => (
-              <Button variant="gray" size="sm" onClick={() => setEditing(r)}>
+              <Button
+                variant="gray"
+                size="sm"
+                disabled={busy}
+                onClick={() => {
+                  setProblem(null);
+                  setEditing(r);
+                }}
+              >
                 Override {r.leave_type_name}
               </Button>
             ),
@@ -111,6 +119,7 @@ export function YearEndPage({ startMonthDay }: { startMonthDay: string }) {
           <TextField
             type="date"
             label="Leave year starts"
+            disabled={busy}
             required
             value={from}
             onChange={(e) => {
@@ -184,6 +193,7 @@ export function YearEndPage({ startMonthDay }: { startMonthDay: string }) {
           <OverrideSheet
             key={rowId(editing)}
             row={editing}
+            problem={problem}
             busy={busy}
             save={(amount, reason) =>
               preview([
@@ -206,11 +216,13 @@ export function YearEndPage({ startMonthDay }: { startMonthDay: string }) {
 
 function OverrideSheet({
   row,
+  problem,
   busy,
   save,
   reset,
 }: {
   row: Row;
+  problem: Problem | null;
   busy: boolean;
   save: (amount: string, reason: string) => Promise<void>;
   reset: () => Promise<void>;
@@ -227,6 +239,7 @@ function OverrideSheet({
       description={`${row.employee_name} · ${days(row.remaining)} days remaining`}
     >
       <form onSubmit={submit} className="flex flex-col gap-4">
+        {problem && <Alert tone="danger" title={problem.message} />}
         <TextField
           label="Carry-over days"
           type="number"
