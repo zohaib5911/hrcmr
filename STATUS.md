@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-02 21:07 (Europe/London)    Agent: Codex    Branch: dev    Commit: b9de2e9
+Updated: 2026-11-03 01:08 (Europe/London)    Agent: Codex    Branch: dev    Commit: e2269e4
 State: IN PROGRESS
 
 ## Last completed
@@ -12,7 +12,8 @@ State: IN PROGRESS
   - [ ] Scoped API, visa routes and sponsored employees query/tests
   - [ ] Employee document forms and sponsored employees table
   - [ ] Affected browser checks and final verification
-- Resume note: Model/migration 0016 ready, 7 migration/doc checks and ruff/mypy pass. Next sponsor_documents schemas/router and scoped API tests. T7.1 complete. Next T7.2 model/API/UI in plan order; read relevant sections and copy employees/RTW patterns. Sponsor Compliance tab/PDF itself is T7.6; T7.2 needs document management reachable to use now. No T7.2 code yet. Use document.file.read/write plus employee reach; sponsored register requires compliance.overview.read. Renewal records target date/notes, does not change expiry or imply renewed. References encrypted and masked; updates preserve stored reference/CoS if fields left blank.
+- Resume note: Clean dev synced; latest CI is green (Phase 6). T7.2 model/reference/migration 0016 committed and verified (7 migration/doc checks). Next implement sponsor_documents schemas/router and scoped API tests, then UI and browser flow. No API/UI code yet. Sponsor Compliance PDF and CoC tab integration arrive in T7.6. Renewal records a target date/notes without changing expiry. References stay masked; new versions preserve reference/CoS when left blank.
+
 
 ## Next tasks
 - T7.2, T7.3, T7.4, T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
