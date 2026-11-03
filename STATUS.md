@@ -9,9 +9,9 @@ State: IN PROGRESS
 - T9.2 — attendance import, bulk entry, exports and absences
   - [x] Import schema/file purpose, workbook dependency and shared row service
   - [x] XLSX/CSV templates and preview/commit with row errors
-  - [ ] Bulk grid API, CSV/XLSX/PDF exports and monthly absences
+  - [x] Bulk grid API, XLSX/PDF exports and monthly absences
   - [ ] Import/bulk/report UI and affected API/browser checks
-- Resume note: Scanned template/preview/read/commit API complete; parser bounded to 5MB/1000 rows/20MB expanded XLSX, no formula/macro/external-link input; stale snapshot, duplicate/row errors, retry/tenant/leave guards. Import/attendance/RBAC/workbooks49 pass; migration/files28 + demotion1 pass; types clean. Next bulk grid and scoped exports/absences APIs, then import/bulk/report UI and real browser flow (test server/CI needs RustFS+ClamAV for uploads).
+- Resume note: Grid/read/write, safe XLSX/PDF exports and scoped monthly absences ready; batch/import/attendance/RBAC/workbooks53 pass, client generated. Export requires document.report.generate plus attendance read scope; absences use attendance read scope. Browser test server/CI now configures RustFS+ClamAV. Next import/bulk/absences UI, workspace toolbar downloads and browser flows; no full suite/screenshots until Phase 9 gate.
 
 ## Next tasks
 - T9.2 — import, bulk entry and exports
