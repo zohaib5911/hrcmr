@@ -120,9 +120,15 @@ test("Sponsor documents save explicitly, retain versions, plan renewals and with
   await page.goto("/sponsor-compliance/migrant-employees");
   await expect(page.getByRole("heading", { level: 1, name: "Sponsored employees" })).toBeVisible();
   await expect(page.getByRole("grid").getByText("Sophie Khan", { exact: true })).toBeVisible();
-  await page.getByLabel("Visa route", { exact: true }).selectOption("scale_up");
+  await page
+    .getByLabel("Visa route", { exact: true })
+    .filter({ visible: true })
+    .selectOption("scale_up");
   await expect(page.getByText("Nobody matches", { exact: true })).toBeVisible();
-  await page.getByLabel("Visa route", { exact: true }).selectOption("all");
+  await page
+    .getByLabel("Visa route", { exact: true })
+    .filter({ visible: true })
+    .selectOption("all");
   await page.getByRole("searchbox").fill("6135");
   await expect(page.getByRole("grid").getByText("Sophie Khan", { exact: true })).toBeVisible();
   await page.setViewportSize({ width: 390, height: 844 });
