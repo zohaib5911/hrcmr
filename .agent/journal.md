@@ -110,3 +110,4 @@
 2026-11-03 07:38 | Codex | Phase 7 gate | screenshot/setup 5 pass/36 images; visual review caught narrow mobile hub title beside long CTA; stacked mobile queue rows | next affected hub browser and recapture
 2026-11-03 07:42 | Codex | Phase 7 gate | final hub/screenshots 6 pass, 36 images refreshed/reviewed; mobile queue readable; five-line phase summary recorded | next dev-main PR, all-green CI merge, mandatory audit stop
 2026-11-03 07:44 | Codex | Phase 7 gate | PR #13 opened dev to main, local gate/screenshots complete | next inspect all CI, fix failures then merge green and mandatory audit stop
+2026-11-03 07:21 | Codex | Phase 7 CI | Semgrep flagged fixed-constant migration SQL; replaced assembly with literal identical statements; migrations/dossier/reporting 14 pass, ruff pass | next new CI run all green then merge/audit stop

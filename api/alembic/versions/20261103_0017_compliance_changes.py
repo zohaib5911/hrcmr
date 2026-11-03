@@ -149,10 +149,12 @@ def upgrade() -> None:
       END IF;
       RETURN NEW;
     END $$""")
-    for table in ("change_of_circumstances", "org_changes"):
-        op.execute(
-            f"CREATE TRIGGER compliance_changes_immutable BEFORE UPDATE OR DELETE ON {table} FOR EACH ROW EXECUTE FUNCTION compliance_changes_immutable()"
-        )
+    op.execute(
+        "CREATE TRIGGER compliance_changes_immutable BEFORE UPDATE OR DELETE ON change_of_circumstances FOR EACH ROW EXECUTE FUNCTION compliance_changes_immutable()"
+    )
+    op.execute(
+        "CREATE TRIGGER compliance_changes_immutable BEFORE UPDATE OR DELETE ON org_changes FOR EACH ROW EXECUTE FUNCTION compliance_changes_immutable()"
+    )
 
 
 def downgrade() -> None:

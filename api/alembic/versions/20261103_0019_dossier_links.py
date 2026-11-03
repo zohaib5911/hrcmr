@@ -58,7 +58,6 @@ LINKS = (
         "government/publications/multi-factor-authentication-for-uk-visa-sponsors-sms-manual-13",
     ),
 )
-ADMIN = "EXISTS (SELECT 1 FROM platform_admins WHERE user_id = app_current_user_id())"
 
 
 def upgrade() -> None:
@@ -90,29 +89,18 @@ def upgrade() -> None:
         "CREATE POLICY public_reference ON dossier_links FOR SELECT TO app_user USING (true)"
     )
     op.execute(
-        f"CREATE POLICY platform_content_insert ON dossier_links FOR INSERT TO app_user WITH CHECK ({ADMIN})"
+        "CREATE POLICY platform_content_insert ON dossier_links FOR INSERT TO app_user WITH CHECK (EXISTS (SELECT 1 FROM platform_admins WHERE user_id = app_current_user_id()))"
     )
     op.execute(
-        f"CREATE POLICY platform_content_update ON dossier_links FOR UPDATE TO app_user USING ({ADMIN}) WITH CHECK ({ADMIN})"
+        "CREATE POLICY platform_content_update ON dossier_links FOR UPDATE TO app_user USING (EXISTS (SELECT 1 FROM platform_admins WHERE user_id = app_current_user_id())) WITH CHECK (EXISTS (SELECT 1 FROM platform_admins WHERE user_id = app_current_user_id()))"
     )
     op.execute("GRANT SELECT, INSERT, UPDATE ON dossier_links TO app_user")
     # Platform content edits have no company. Tenant events remain confined by the existing policy.
-    audit_scope = (
-        "company_id IS NULL AND actor_type = 'platform_admin' "
-        "AND actor_user_id = app_current_user_id() "
-        "AND action IN ('platform.dossier_link_added', 'platform.dossier_link_updated') AND "
-        + ADMIN
+    op.execute(
+        "CREATE POLICY platform_content_audit ON audit_events FOR INSERT TO app_user WITH CHECK (company_id IS NULL AND actor_type = 'platform_admin' AND actor_user_id = app_current_user_id() AND action IN ('platform.dossier_link_added', 'platform.dossier_link_updated') AND EXISTS (SELECT 1 FROM platform_admins WHERE user_id = app_current_user_id()))"
     )
     op.execute(
-        "CREATE POLICY platform_content_audit ON audit_events FOR INSERT TO app_user WITH CHECK ("
-        + audit_scope
-        + ")"
-    )
-    # INSERT ... RETURNING also requires SELECT visibility, confined to the actor's content events.
-    op.execute(
-        "CREATE POLICY platform_content_audit_read ON audit_events FOR SELECT TO app_user USING ("
-        + audit_scope
-        + ")"
+        "CREATE POLICY platform_content_audit_read ON audit_events FOR SELECT TO app_user USING (company_id IS NULL AND actor_type = 'platform_admin' AND actor_user_id = app_current_user_id() AND action IN ('platform.dossier_link_added', 'platform.dossier_link_updated') AND EXISTS (SELECT 1 FROM platform_admins WHERE user_id = app_current_user_id()))"
     )
     table = sa.table(
         "dossier_links",
