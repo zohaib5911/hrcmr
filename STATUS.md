@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 03:23    Agent: Codex    Branch: dev    Commit: b430bb8
+Updated: 2026-11-03 06:44    Agent: Codex    Branch: dev    Commit: dff2a72
 State: IN PROGRESS
 
 ## Last completed
@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Masked sponsor PDF including document versions/RTW/change snapshots; API scenario passes
   - [x] Compliance bell feed, own unread/read state and recipient/company/role isolation; 2 API/route checks pass
   - [ ] Sponsor PDF download and bell UI; affected static/unit/browser checks
-- Resume note: Sponsor PDF and compliance notification APIs complete; PDF scenario 1 and bell/privacy/route checks 2 pass, generated types and API/web static checks pass. PDF generation is Company/HR Admin only by existing document.report.generate (Auditor may read records but cannot generate). Bell returns own compliance messages plus top 5 live actions/count only to overview readers; mark-all never clears live obligations. Next PDF button and bell UI; affected unit/browser checks.
+- Resume note: Sponsor PDF and compliance notification APIs complete; PDF scenario 1 and bell/privacy/route checks 2 pass, generated types and API/web static checks pass. PDF generation is Company/HR Admin only by existing document.report.generate (Auditor may read records but cannot generate). Bell returns own compliance messages plus top 5 live actions/count only to overview readers; mark-all never clears live obligations. Recovered PDF button and bell UI saved in dff2a72; next affected static/unit checks and browser verification.
 
 ## Next tasks
 - T7.6; Phase 7 gate then BLOCKED — audit requested
