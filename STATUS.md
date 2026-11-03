@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 01:57    Agent: Codex    Branch: dev    Commit: 84a218d
+Updated: 2026-11-03 01:59    Agent: Codex    Branch: dev    Commit: 701157a
 State: IN PROGRESS
 
 ## Last completed
@@ -7,7 +7,7 @@ State: IN PROGRESS
 
 ## Current task
 - T7.4 — Reminders engine and register
-  - [x] Reminder requirements and email/notification/job patterns reviewed; baseline lint/types and 12 email/worker tests pass
+  - [x] Reminder requirements and email/notification/job patterns reviewed; baseline lint/types and 11 email/worker tests pass; queue-test minute-boundary flake fixed
   - [ ] Threshold/reminder model and migration
   - [ ] Daily reconciliation job and version/withdrawal cancellation
   - [ ] Scoped register/review/edit/snooze/send API with audited who/when and in-app/email delivery

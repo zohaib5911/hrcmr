@@ -79,3 +79,4 @@
 2026-11-03 01:50 | Codex | T7.3 | holiday/setup browsers 14 pass; fixed described-checkbox selector and inspector stale-row state after report refresh | next rerun compliance-changes browser scenarios only
 2026-11-03 01:52 | Codex | T7.3 | complete: calculator 12, reporting/holiday API 13, migration/doc 7; reporting browser/setup 3 and holiday/setup 14 pass | next T7.4 reminders engine/register
 2026-11-03 01:57 | Codex | T7.4 | reminders/email/notifications/job requirements reviewed; baseline lint/types and email/worker tests pass | next model/migration 0018 and threshold service
+2026-11-03 01:59 | Codex | T7.4 baseline | fixed existing worker queue-test cron minute-boundary flake; email/worker 11 pass, lint/types pass | next reminders model/migration 0018

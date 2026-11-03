@@ -76,8 +76,14 @@ async def rig(database: DatabaseUnderTest) -> AsyncIterator[dict[str, Any]]:
 
     async def run(*, extra: list[Any] | None = None) -> Worker:
         worker = Worker(
-            functions=[*functions(), *(extra or [])],
-            cron_jobs=cron_jobs(),
+            functions=[
+                *functions(),
+                *(func(tracked(s.job, name=s.name, quiet=s.quiet), name=s.name) for s in SCHEDULE),
+                *(extra or []),
+            ],
+            # Queue-focused tests must not start unrelated jobs at a wall-clock minute boundary.
+            # The schedule and registered cron names are checked separately below.
+            cron_jobs=[],
             redis_pool=queue._pool,
             burst=True,
             handle_signals=False,
