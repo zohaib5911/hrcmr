@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Full web/unit/script/browser suite (sequentially)
   - [x] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: PR15 CI found one Semgrep false positive: existing suppression was above the html assignment rather than the Jinja Environment line. Moved it beside the autoescape=True call (no runtime change). Push fix and wait for all checks green; merge15 then T10.1. Screenshot76 and all local full checks complete; T10 document baseline34 pass.
+- Resume note: CI41734730073: all non-browser checks green; browser417 pass, DST attendance failure and compliance/leave-settings two retry flakes. DST date set before hydrated filters reset; await employee data, use visible textbox. Compliance assertion scoped to live main; leave axe awaits streamed duplicate heading removal. Run those three affected specs, push fixes then all-green CI/merge15/T10.1. Screenshot76/local full gate already done.
 
 ## Next tasks
 - T10.1 — company documents
@@ -19,7 +19,7 @@ State: IN PROGRESS
 - T10.3 — policies and sign-offs
 
 ## Health
-- CI on dev: red (Semgrep suppression placement, fixed locally; PR15). CI on main: not rechecked.
+- CI on dev: red (browser DST readiness; Semgrep fixed and green; PR15). CI on main: not rechecked.
 - Local checks run: T9.2 API31/browser4/static; T9.3 API39+attendance27/migration7/doc1/static/web25/browser2; T9.4 API34/migration7/static/web22/browser2; T9.5 affected61+isolated rota9/clock-email12/migration7/static/web22/browser3; T9.6 Work Log10+related26/migration7/mypy288/static/web22/browser2 — pass.
 
 ## Issues / suggestions

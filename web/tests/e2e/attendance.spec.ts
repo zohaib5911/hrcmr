@@ -133,7 +133,12 @@ test("a repeated clock-change hour is reviewed explicitly", async ({ page, conte
   expect(person.status(), await person.text()).toBe(201);
   const id = (await person.json()).id as string;
   await page.goto("/attendance");
-  await page.getByLabel("Selected day", { exact: true }).fill("2026-10-25");
+  await expect(
+    page
+      .getByRole("region", { name: "Attendance workspace", exact: true })
+      .getByLabel("Employee", { exact: true }),
+  ).toContainText("Rory Clock");
+  await page.getByRole("textbox", { name: "Selected day", exact: true }).fill("2026-10-25");
   await page.getByRole("button", { name: "Record attendance", exact: true }).click();
   const form = page.getByRole("dialog", { name: "Record attendance", exact: true });
   await form.getByLabel("Employee", { exact: true }).selectOption(id);
