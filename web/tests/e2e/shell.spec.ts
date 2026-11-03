@@ -309,6 +309,7 @@ const BUILT = new Set([
   "leave",
   "my-leave",
   "my-approvals",
+  "attendance",
 ]);
 
 test.describe("every page in the sidebar", () => {

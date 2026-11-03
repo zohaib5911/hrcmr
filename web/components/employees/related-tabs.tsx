@@ -1,15 +1,15 @@
 "use client";
 
-import { BookOpen, Clock } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { AttendanceWorkspace } from "@/components/attendance/workspace";
 import { BalancePanel } from "@/components/leave/balances";
 import { RequestList } from "@/components/leave/home";
 import { useCan } from "@/components/app/session-context";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/schema";
 import { attempt, type Problem } from "@/lib/auth/request";
 
@@ -27,37 +27,11 @@ export function LeaveTab({ id }: { id: string }) {
   );
 }
 
-/** Phase 9 replaces this shell with the month-filtered attendance table. */
 export function AttendanceTab({ id }: { id: string }) {
   const can = useCan();
-  const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
-  return (
-    <div className="bg-elevated rounded-card shadow-e1 p-4">
-      <div className="max-w-xs">
-        <TextField
-          label="Month"
-          name="month"
-          type="month"
-          value={month}
-          onChange={(e) => setMonth(e.target.value)}
-        />
-      </div>
-      <EmptyState
-        icon={Clock}
-        title="Attendance history"
-        description="Recorded attendance will appear here when Attendance is available."
-        action={
-          can("attendance.record.read", "attendance.record.read_own") ? (
-            <Button asChild variant="gray">
-              <Link href={"/attendance?employee_id=" + id + "&month=" + encodeURIComponent(month)}>
-                Open Attendance
-              </Link>
-            </Button>
-          ) : undefined
-        }
-      />
-    </div>
-  );
+  return can("attendance.record.read", "attendance.record.read_own") ? (
+    <AttendanceWorkspace employeeId={id} profile />
+  ) : null;
 }
 
 /** Phase 13 replaces this shell with assignments and certificates from Learning. */

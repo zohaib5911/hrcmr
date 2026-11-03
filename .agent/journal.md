@@ -164,3 +164,4 @@
 2026-11-03 12:58 | Codex | Phase 8 gate | PR #14 opened dev→main; all local evidence pushed | next wait CI latest head all green, merge --merge --auto, sync clean dev and T9.1
 2026-11-03 13:20 | Codex | Phase 8 gate | PR #14 merged 2d1394e after all 12 checks green (41640316888); initial GitHub 504 resolved on retry, dev synced clean | next T9.1 attendance APIs/record sheet/workspace
 2026-11-03 13:26 | Codex | T9.1 | scoped paged reads/summary and audited serialized manual upsert complete; leave-sync/own-clock guards, overnight/DST/break validation; attendance/RBAC36 and baseline47 pass, types clean; client generated | next workspace/record sheet/profile UI
+2026-11-03 13:34 | Codex | T9.1 | workspace KPIs/ranges/employee-status filters, paged records, manual sheet/repeated-hour choice and profile tab written; web types/lint pass; two browser scenarios ready | next production attendance/profile/shell checks

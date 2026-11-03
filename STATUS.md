@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 13:20, Europe/London    Agent: Codex    Branch: dev    Commit: d778afc
+Updated: 2026-11-03 13:34, Europe/London    Agent: Codex    Branch: dev    Commit: dade98e
 State: IN PROGRESS
 
 ## Last completed
@@ -9,9 +9,9 @@ State: IN PROGRESS
 - T9.1 — attendance records, record sheet and workspace
   - [x] Scoped list/own/summary APIs and validated audited upsert
   - [x] API validation, scopes, concurrency and leave-sync safeguards
-  - [ ] Day/week/month/custom workspace, KPIs, filters and record sheet
+  - [x] Day/week/month/custom workspace, KPIs, filters and record sheet
   - [ ] Employee Attendance tab and affected browser/static checks
-- Resume note: Attendance list/own/summary/upsert and scenarios ready; attendance/RBAC36 pass, baseline47 and Python lint/types pass; client generated. Next workspace KPI/range/filter UI, record sheet with conditional repeated-hour choice, employee Attendance tab and browser checks.
+- Resume note: Attendance UI/profile tab and two production browser scenarios ready; API36/baseline47 and static/client pass. Run attendance spec plus existing Related tabs and /attendance shell cases; fix failures, then complete T9.1. No screenshots/full suites until Phase 9 gate.
 
 ## Next tasks
 - T9.1 — attendance workspace, records and filters

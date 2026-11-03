@@ -472,10 +472,8 @@ test("Related tabs preserve employee context and Activity shows saved changes", 
   await expect(page.getByRole("region", { name: "Leave requests", exact: true })).toBeVisible();
   await page.getByRole("tab", { name: "Attendance", exact: true }).click();
   await page.getByLabel("Month", { exact: true }).fill("2026-11");
-  await expect(page.getByRole("link", { name: "Open Attendance" })).toHaveAttribute(
-    "href",
-    "/attendance?employee_id=" + id + "&month=2026-11",
-  );
+  await expect(page.getByRole("region", { name: "Attendance history", exact: true })).toBeVisible();
+  await expect(page.getByLabel("Month", { exact: true })).toHaveValue("2026-11");
   await page.getByRole("tab", { name: "Learning", exact: true }).click();
   await expect(page.getByRole("link", { name: "Open Learning" })).toHaveAttribute(
     "href",
