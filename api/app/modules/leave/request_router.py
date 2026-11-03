@@ -106,6 +106,7 @@ async def _list(
     return [
         LeaveRequestOut.model_validate(row).model_copy(
             update={
+                "is_own": employee.id == access.employee_id,
                 "employee_name": f"{employee.first_name} {employee.last_name}",
                 "leave_type_name": kind.name,
                 "colour": kind.colour,

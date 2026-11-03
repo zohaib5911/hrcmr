@@ -142,3 +142,4 @@
 2026-11-03 11:55 | Codex | T8.3 | complete: combined requests/ledger/RBAC/notifications/calculations115 pass, static/types/contract clean; grouped DB paths resolves focused pytest fixture collection | next T8.4 balance/calendar APIs and leave workspaces
 2026-11-03 11:56 | Codex | relay | T8.3 completed and pushed; clean handover at task boundary | next T8.4 scoped balance/calendar API then workspace/self-service/profile UI
 2026-11-03 12:03 | Codex | T8.4 | scoped balance projections/calendar and audited idempotent actions written, client generated; baseline45 pass; new regression pending after test keyring correction | next UI workspace/request sheets and profile balance actions
+2026-11-03 12:08 | Codex | T8.4 | workspace/self-service/profile UI and request/decision/balance sheets implemented; scoped labels/self flag; API71/static pass, web types/lint and nav22 pass | next production leave-workspace browser workflow then T8.5

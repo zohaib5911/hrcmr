@@ -8,11 +8,11 @@ State: IN PROGRESS
 ## Current task
 - T8.4 — leave workspaces and employee Leave tab
   - [x] Scoped balance/calendar APIs and audited Grant/Deduct/Set
-  - [ ] API/security tests and generated client
-  - [ ] Leave Calendar/Requests/Balances, My Leave, My Approvals
-  - [ ] Employee Leave tab and balance action sheet
+  - [x] API/security tests and generated client
+  - [x] Leave Calendar/Requests/Balances, My Leave, My Approvals
+  - [x] Employee Leave tab and balance action sheet
   - [ ] Affected checks and browser workflows
-- Resume note: Workspace endpoints/client ready; baseline45 pass, new API/RBAC46 had one test keyring fixture issue corrected; combined workspace/request/RBAC rerun active. Next leave workspace and request/decision sheets.
+- Resume note: UI and browser workflow written; API/request/RBAC71 pass, Python static clean, web types/lint pass; unit776 pass then sentence-case nav fixed and targeted22 pass. Run production leave-workspace browser spec; verify API URL /users, fix any selectors/flows. No screenshots until Phase 8 gate.
 
 ## Next tasks
 - T8.4 — leave workspaces and employee tab

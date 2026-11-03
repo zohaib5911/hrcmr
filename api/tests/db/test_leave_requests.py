@@ -141,7 +141,10 @@ async def test_own_request_approval_books_and_notifies_without_health_details(
         assert "leave_type" not in data
         audit = (
             await c.execute(
-                text("select after from audit_events where action='leave.request_approved'")
+                text(
+                    "select after from audit_events where action='leave.request_approved' and company_id=:c"
+                ),
+                {"c": ready["a"]},
             )
         ).scalar_one()
         assert audit["status"] == "approved"

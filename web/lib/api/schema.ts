@@ -4948,6 +4948,11 @@ export interface components {
              */
             id: string;
             /**
+             * Is Own
+             * @default false
+             */
+            is_own: boolean;
+            /**
              * Leave Type Id
              * Format: uuid
              */

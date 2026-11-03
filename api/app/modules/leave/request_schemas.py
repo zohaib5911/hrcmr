@@ -70,6 +70,7 @@ class LeaveRequestOut(BaseModel):
     decided_at: datetime | None
     decision_note: str | None
     created_at: datetime
+    is_own: bool = False
     employee_name: str = ""
     leave_type_name: str = ""
     colour: str = "blue"
