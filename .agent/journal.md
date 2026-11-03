@@ -96,3 +96,5 @@
 2026-11-03 03:17 | Codex | T7.6 | started sponsor record PDF and bell feed; general notification preferences/digests remain Phase 14 | next affected baseline and masked scoped PDF
 2026-11-03 03:19 | Codex | T7.6 | baseline PDF/sponsor 15 and shell 19 pass; scoped design reviewed | next masked sponsor PDF with versions and change snapshots
 2026-11-03 03:23 | Codex | T7.6 | sponsor PDF scenario 1 and own bell/privacy/route checks 2 pass; APIs/static/generated types complete | next PDF download button and live bell UI
+
+2026-11-03 06:46 | Codex | T7.6 | recovered PDF/bell UI; web types/lint and shell 19 pass; browser assertions added | next sponsor/reminder Playwright

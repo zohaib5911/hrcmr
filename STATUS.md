@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Masked sponsor PDF including document versions/RTW/change snapshots; API scenario passes
   - [x] Compliance bell feed, own unread/read state and recipient/company/role isolation; 2 API/route checks pass
   - [ ] Sponsor PDF download and bell UI; affected static/unit/browser checks
-- Resume note: Sponsor PDF and compliance notification APIs complete; PDF scenario 1 and bell/privacy/route checks 2 pass, generated types and API/web static checks pass. PDF generation is Company/HR Admin only by existing document.report.generate (Auditor may read records but cannot generate). Bell returns own compliance messages plus top 5 live actions/count only to overview readers; mark-all never clears live obligations. Recovered PDF button and bell UI saved in dff2a72; next affected static/unit checks and browser verification.
+- Resume note: Sponsor PDF and compliance notification APIs complete; PDF scenario 1 and bell/privacy/route checks 2 pass, generated types and API/web static checks pass. PDF generation is Company/HR Admin only by existing document.report.generate (Auditor may read records but cannot generate). Bell returns own compliance messages plus top 5 live actions/count only to overview readers; mark-all never clears live obligations. Recovered PDF button and bell UI saved in dff2a72; web types/lint and shell 19 pass; sponsor download and bell read/live-action browser assertions added. Next run sponsor/reminder Playwright.
 
 ## Next tasks
 - T7.6; Phase 7 gate then BLOCKED — audit requested

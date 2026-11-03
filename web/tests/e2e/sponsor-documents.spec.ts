@@ -175,6 +175,11 @@ test("Sponsor documents save explicitly, retain versions, plan renewals and with
   await expect(dialog.getByLabel("Visa route", { exact: true })).toHaveCount(0);
   await expect(dialog.getByLabel("Sponsored annual salary", { exact: true })).toHaveCount(0);
   await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
+  const download = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Sponsor compliance record PDF", exact: true }).click();
+  const pdf = await download;
+  expect(pdf.suggestedFilename()).toBe("sponsor-record-" + id + ".pdf");
+  expect(await pdf.failure()).toBeNull();
   await audit(page, "Sponsor document history");
   await context.close();
 });

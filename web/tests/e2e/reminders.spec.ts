@@ -121,6 +121,17 @@ test("Reminder review saves and snoozes explicitly, sends once and keeps receive
     dialog.getByText("Please share your updated passport with HR.", { exact: true }),
   ).toBeVisible();
   await dialog.getByRole("button", { name: "Close review", exact: true }).click();
+  await page.getByRole("button", { name: /^Notifications/ }).click();
+  const bell = page.getByRole("dialog", { name: "Notifications", exact: true });
+  await expect(bell.getByRole("region", { name: "Needs attention" })).toBeVisible();
+  await expect(
+    bell.getByText("Please share your updated passport with HR.", { exact: true }),
+  ).toBeVisible();
+  await bell.getByRole("button", { name: "Mark all read", exact: true }).click();
+  await expect(bell.getByText("· Unread", { exact: true })).toHaveCount(0);
+  await expect(bell.getByRole("region", { name: "Needs attention" })).toBeVisible();
+  await bell.getByRole("link", { name: /Open message/ }).click();
+  await expect(page).toHaveURL("/my-documents?reminder=" + sentRecord.id);
   await page.goto("/my-documents?reminder=" + sentRecord.id);
   await expect(page.getByRole("heading", { level: 1, name: "My documents" })).toBeVisible();
   const received = page.getByRole("article", { name: "Passport reminder", exact: true });
