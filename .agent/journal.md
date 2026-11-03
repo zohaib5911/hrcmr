@@ -116,3 +116,4 @@
 2026-11-03 07:38 | Codex | relay | Phase 7 completed/merged; State BLOCKED audit requested; post-merge main CI 41597645539 pending | next owner audit findings, no Phase 8 work
 2026-11-03 08:48 | Codex | F7.1 | guards and UI confirmation complete; access 12 pass, ruff/mypy/web lint/types pass | next F7.2 auth audit events
 2026-11-03 08:53 | Codex | F7.2 | transactional authentication audit events with private pre-tenant inserts and no credentials; auth endpoints 18 pass; auth flows and migrations 30 pass; ruff/mypy pass | next F7.3 — every registered route against all six roles
+2026-11-03 08:54 | Codex | F7.3 | exercise every effective route guard for six roles; prevent deferred-router enumeration from passing vacuously; RBAC 22 pass; ruff/mypy pass | next F7.4 — cross-company PDF and dossier isolation tests

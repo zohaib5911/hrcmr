@@ -6,13 +6,14 @@ from __future__ import annotations
 import os
 import uuid
 from collections.abc import AsyncIterator
+from contextlib import AsyncExitStack
 from typing import Any
 
 import httpx
 import pytest
 from asgi_lifespan import LifespanManager
-from fastapi import APIRouter, Depends, FastAPI
-from fastapi.routing import APIRoute
+from fastapi import APIRouter, Depends, FastAPI, Request
+from fastapi.dependencies.utils import solve_dependencies
 from redis.asyncio import Redis
 from sqlalchemy import event, text
 from sqlalchemy.pool import NullPool
@@ -24,7 +25,7 @@ from app.db.ids import uuid7
 from app.db.session import GlobalSession, TenantSession
 from app.main import create_app
 from app.modules.auth.sessions import SessionStore
-from app.modules.rbac.deps import PERMISSION_ATTRIBUTE, Access, require
+from app.modules.rbac.deps import Access, require
 from app.modules.rbac.reports import ReportsGraph
 from app.modules.rbac.rules import (
     LastCompanyAdminError,
@@ -35,6 +36,7 @@ from app.modules.rbac.rules import (
 )
 from tests.db.api_support import two_companies
 from tests.db.support import DatabaseUnderTest, engine_for
+from tests.route_support import permissions, registered_routes
 from tests.support import TEST_REDIS_URL, build_settings
 
 CSRF = "a-test-csrf-token"
@@ -278,26 +280,109 @@ def test_no_real_endpoint_skips_authorisation() -> None:
         "/api/v1/ready",
     )
 
-    def permissions(route: APIRoute) -> list[str]:
-        found: list[str] = []
-        stack = list(route.dependant.dependencies)
-        while stack:
-            dep = stack.pop()
-            permission = getattr(dep.call, PERMISSION_ATTRIBUTE, None)
-            if permission:
-                found.append(permission)
-            stack.extend(dep.dependencies)
-        return found
-
     app: FastAPI = create_app(build_settings())
+    routes = registered_routes(app)
+    actual = {
+        (path.removeprefix("/api/v1"), method.lower())
+        for path, methods, _ in routes
+        for method in methods
+    }
+    documented = {
+        (path, method)
+        for path, item in app.openapi()["paths"].items()
+        for method in item
+        if method in {"get", "post", "put", "patch", "delete"}
+    }
+    assert actual == documented  # never silently test zero deferred routes
+    assert len(routes) > 100
     unprotected = [
-        f"{sorted(route.methods or [])} {route.path}"
-        for route in app.routes
-        if isinstance(route, APIRoute)
-        and not route.path.startswith(allowed_prefixes)
-        and not permissions(route)
+        f"{sorted(methods)} {path}"
+        for path, methods, dep in routes
+        if not path.startswith(allowed_prefixes) and not permissions(dep)
     ]
     assert unprotected == []
+
+
+@pytest.mark.parametrize("role", ROLES)
+async def test_every_real_routes_permission_dependencies_match_the_matrix(
+    setup: Setup, role: str
+) -> None:
+    """Resolve each real route's entire guard graph, stopping before validation/business effects.
+
+    Missing bodies/IDs can produce validation errors after guards resolve; admitted Access objects
+    must still carry exactly the matrix scope. Resource reach and handler rules have separate tests.
+    """
+    app = setup.client._transport.app  # type: ignore[attr-defined]
+    browser = await setup.person(role)
+    checked = 0
+    async with browser:
+        for path, methods, dependant in registered_routes(app):
+            if path.startswith("/api/v1/probe/"):
+                continue
+            required = permissions(dependant)
+            if not required:
+                assert path.startswith(("/api/v1/auth/", "/api/v1/health", "/api/v1/ready")), path
+                continue
+            expected = {permission: scope_for(role, permission) for permission in required}
+            admitted = all(scope is not None for scope in expected.values())
+            for method in methods:
+                async with AsyncExitStack() as stack:
+                    request = Request(
+                        {
+                            "type": "http",
+                            "app": app,
+                            "method": method,
+                            "path": path,
+                            "query_string": b"",
+                            "path_params": {},
+                            "headers": [
+                                (
+                                    b"cookie",
+                                    f"brand_session={browser.cookies.get('brand_session')}".encode(),
+                                )
+                            ],
+                            "client": ("127.0.0.1", 1234),
+                            "scheme": "http",
+                            "server": ("test", 80),
+                            "fastapi_inner_astack": stack,
+                            "fastapi_function_astack": stack,
+                        }
+                    )
+                    if admitted:
+                        solved = await solve_dependencies(
+                            request=request,
+                            dependant=dependant,
+                            async_exit_stack=stack,
+                            embed_body_fields=False,
+                            dependency_overrides_provider=app,
+                        )
+                        accesses = [
+                            value
+                            for value in solved.dependency_cache.values()
+                            if isinstance(value, Access)
+                        ]
+                        assert {value.permission: value.scope for value in accesses} == expected, (
+                            method,
+                            path,
+                            role,
+                        )
+                    else:
+                        with pytest.raises(AppError) as raised:
+                            await solve_dependencies(
+                                request=request,
+                                dependant=dependant,
+                                async_exit_stack=stack,
+                                embed_body_fields=False,
+                                dependency_overrides_provider=app,
+                            )
+                        assert raised.value.code == "FORBIDDEN", (
+                            method,
+                            path,
+                            role,
+                            raised.value.code,
+                        )
+                    checked += 1
+    assert checked > 150
 
 
 # --- the reports chain ------------------------------------------------------------------------------

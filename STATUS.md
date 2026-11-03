@@ -1,19 +1,18 @@
 # STATUS
-Updated: 2026-11-03 08:53, Europe/London    Agent: Codex    Branch: dev    Commit: a7c32d7
+Updated: 2026-11-03 08:54, Europe/London    Agent: Codex    Branch: dev    Commit: 346885c
 State: IN PROGRESS
 
 ## Last completed
-- F7.2 — transactional authentication audit events with private pre-tenant inserts and no credentials
+- F7.3 — exercise every effective route guard for six roles; prevent deferred-router enumeration from passing vacuously
 
 ## Current task
-- F7.3 — every registered route against all six roles
+- F7.4 — cross-company PDF and dossier isolation tests
   - [ ] Implement and verify (one commit per audit fix)
-- Resume note: F7.2 complete. Next: F7.3 — every registered route against all six roles. Audit file docs/audits/phase7.md absent from synced dev; user asked for contents, using queued STATUS findings.
+- Resume note: F7.3 complete. Next: F7.4 — cross-company PDF and dossier isolation tests. Audit file docs/audits/phase7.md absent from synced dev; user asked for contents, using queued STATUS findings.
 
 ## Next tasks
 
 F7.1 Step-up on role change, admin/HR-admin invite, and two-step policy change (+ tests)   [high]
-F7.3 Full RBAC route test: every real route × 6 roles vs rbac_matrix   [medium]
 F7.4 Cross-company 404 tests: sponsor PDF, employee record PDF, dossier   [medium]
 F7.5 Test: Python status_of == SQL employee_rtw_status on the same data   [low]
 F7.6 Replace waitForTimeout in 4 functional specs; stub Redis in test_errors_and_request_id   [low]
@@ -22,9 +21,10 @@ F7.7 Update PROGRESS header and T7.4–T7.6 entries   [low]
  implement supplied findings before Phase 8.
 
 
+
 ## Health
 - CI on dev: last Phase 7 PR green; no dev push workflow. CI on main: previously pending, not rechecked.
-- Local checks run: auth endpoints 18 pass; auth flows and migrations 30 pass; ruff/mypy pass
+- Local checks run: RBAC 22 pass; ruff/mypy pass
 
 ## Issues / suggestions
 - Remove cooldown exceptions once safe: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.
