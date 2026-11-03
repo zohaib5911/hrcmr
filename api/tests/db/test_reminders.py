@@ -112,7 +112,7 @@ async def _rows(rig: dict[str, Any], emp: uuid.UUID) -> list[dict[str, Any]]:
                     {"e": emp},
                 )
             ).mappings()
-        )  # type: ignore[return-value]
+        )
 
 
 async def test_rtw_21_days_is_expiring_and_30_day_reminder_due_idempotently(
@@ -345,7 +345,7 @@ async def test_daily_due_dates_use_each_company_timezone(rig: dict[str, Any]) ->
 
 
 async def _linked(rig: dict[str, Any], emp: uuid.UUID, company: uuid.UUID) -> httpx.AsyncClient:
-    client = await rig["person"]("employee", company)
+    client: httpx.AsyncClient = await rig["person"]("employee", company)
     me = (await client.get(f"{API}/auth/me")).json()["user"]
     async with rig["owner"].begin() as c:
         await c.execute(
@@ -536,7 +536,9 @@ async def test_atomic_send_rollback_and_concurrent_send_deduplicate(
     hr, emp, reminder = await _due_passport(rig)
     await _linked(rig, emp, rig["a"])
     path = f"{API}/reminders/{reminder['id']}/send"
-    real = reminder_router.Notification
+    from app.modules.notifications.models import Notification
+
+    real = Notification
 
     def fail_notification(*args: Any, **kwargs: Any) -> Any:
         raise RuntimeError("synthetic notification failure")
