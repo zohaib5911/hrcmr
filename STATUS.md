@@ -6,15 +6,14 @@ State: IN PROGRESS
 - T9.1 — attendance APIs, manual record sheet, KPIs/ranges/filters and employee history
 
 ## Current task
-- T9.1 — attendance records, record sheet and workspace
-  - [x] Scoped list/own/summary APIs and validated audited upsert
-  - [x] API validation, scopes, concurrency and leave-sync safeguards
-  - [x] Day/week/month/custom workspace, KPIs, filters and record sheet
-  - [x] Employee Attendance tab and affected browser/static checks
-- Resume note: T9.1 complete: API36/baseline47/browser5 including mobile axe and static/client pass. Start T9.2 attendance import model/file-purpose integration, XLSX/CSV template/preview/commit, bulk grid, exports and monthly absences report.
+- T9.2 — attendance import, bulk entry, exports and absences
+  - [ ] Import schema/file purpose, workbook dependency and shared row service
+  - [ ] XLSX/CSV templates and preview/commit with row errors
+  - [ ] Bulk grid API, CSV/XLSX/PDF exports and monthly absences
+  - [ ] Import/bulk/report UI and affected API/browser checks
+- Resume note: Read existing file upload/scan/download support before adding attendance_import purpose. Reuse T9.1 time/scoping/audit protections for imports and bulk. Plan 8.7 and 12 define template fields/API paths. Add bounded workbook parsing and reviewed preview commit; continue autonomously.
 
 ## Next tasks
-- T9.1 — attendance workspace, records and filters
 - T9.2 — import, bulk entry and exports
 - T9.3 — clock in/out and timesheet approvals
 
