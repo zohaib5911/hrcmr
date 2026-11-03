@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 18:31, Europe/London    Agent: Codex    Branch: dev    Commit: 90e0b6c
+Updated: 2026-11-03 18:34, Europe/London    Agent: Codex    Branch: dev    Commit: fe52d8a
 State: IN PROGRESS
 
 ## Last completed
@@ -9,8 +9,9 @@ State: IN PROGRESS
 - T9.6 — My Work Log and admin corrections/removal
   - [x] Entry schema/migration and same-day own-write service
   - [x] Scoped list/KPIs/search, audited correction/removal and tests
-  - [ ] Own/admin workspace/forms and browser checks
-- Resume note: Work Log APIs implemented, including own responsibilities, range/search/employee/removed/archived filters and totals, same-day own edits and reasoned stale-safe corrections/soft removal. Work Log10 and related employment/RBAC/doc25 pass; migration7, mypy288 and lint clean, client generated. Corrected fixture role to hr_admin. Next own/admin workspaces/forms and production browser; then Phase9 gate.
+  - [x] Own/admin workspace/forms
+  - [ ] Production browser checks
+- Resume note: Own/admin Work Log workspaces, responsibility/free-text and reasoned forms, retained-original inspector, search/date/employee/removed/archived filters and KPIs written; sidebar separates My Work Log from admin view. API10+related25/migration7/mypy288, web type/lint/nav22 pass. Browser scenario ready; run work-log production through own edit/admin correction/removal/mobile axe. Then T9.6 completion and Phase9 full gate. Keep database pytest and Playwright sequential.
 
 ## Next tasks
 - Phase 9 gate — full suite/screenshots/green PR

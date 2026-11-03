@@ -232,6 +232,16 @@ export const NAV_GROUPS: readonly NavGroup[] = [
   ]),
   group("me", "Me", [
     {
+      id: "my-work-log",
+      label: "My work log",
+      purpose: "Your daily work and responsibilities.",
+      href: "/my-work-log",
+      icon: NotebookPen,
+      emptyTitle: "No work logged yet",
+      emptyDescription:
+        "Add a daily entry to record the responsibilities and work you have completed.",
+    },
+    {
       id: "my-shifts",
       label: "My shifts",
       purpose: "Your published working schedule.",
