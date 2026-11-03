@@ -3,7 +3,7 @@ Updated: 2026-11-03 11:57, Europe/London    Agent: Codex    Branch: dev    Commi
 State: IN PROGRESS
 
 ## Last completed
-- T8.3 — scoped requests/previews/LSA approvals, atomic ledger/attendance/notifications and security regressions
+- T8.4 — leave workspaces, self-service, employee balance actions and scoped APIs
 
 ## Current task
 - T8.4 — leave workspaces and employee Leave tab
@@ -11,8 +11,8 @@ State: IN PROGRESS
   - [x] API/security tests and generated client
   - [x] Leave Calendar/Requests/Balances, My Leave, My Approvals
   - [x] Employee Leave tab and balance action sheet
-  - [ ] Affected checks and browser workflows
-- Resume note: UI and browser workflow written; API/request/RBAC71 pass, Python static clean, web types/lint pass; unit776 pass then sentence-case nav fixed and targeted22 pass. Browser completes all functional steps; mobile axe found notification badge total absent from accessible name, fixed. Run focused browser final. No screenshots until Phase 8 gate.
+  - [x] Affected checks and browser workflows
+- Resume note: T8.4 complete; browser/setup2 pass including own/on-behalf/approval/calendar/profile Grant/Deduct/Set and own cancellation/mobile axe. Start T8.5 year-end run model/migration, preview/override/commit service/API, UI and checks.
 
 ## Next tasks
 - T8.4 — leave workspaces and employee tab
