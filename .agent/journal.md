@@ -67,3 +67,4 @@
 2026-11-03 01:14 | Codex | T7.2 | sponsor document forms/history, renewal/withdrawal and sponsored table; web types/lint pass; browser scenario ready | next affected sponsor/RTW Playwright checks
 2026-11-03 01:16 | Codex | T7.2 | sponsor production browser scenario passes incl mobile/axe; corrected adjacent RTW mobile locator (grid to list) | next rerun RTW only and finish T7.2
 2026-11-03 01:18 | Codex | T7.2 | RTW mobile list assertion now matches exact name, avoiding hidden Open label; sponsor scenario remains green | next rerun RTW only
+2026-11-03 01:20 | Codex | T7.2 | narrowed RTW Verified assertion to accessible heading after filter state (text locator hit hidden streamed heading) | next rerun RTW then finish T7.2

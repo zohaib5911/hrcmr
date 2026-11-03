@@ -123,7 +123,8 @@ test("Right to Work conditionals, explicit saves, evidence selection, correction
     .poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth))
     .toBe(true);
   await page.goto("/employees?rtw=Verified");
-  await expect(page.getByText("Nobody matches", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Right to Work", { exact: true })).toHaveValue("Verified");
+  await expect(page.getByRole("heading", { name: "Nobody matches", exact: true })).toBeVisible();
   await page.goto("/employees?rtw=NeedsAttention");
   await expect(
     page
