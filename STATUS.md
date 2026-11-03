@@ -11,14 +11,14 @@ State: IN PROGRESS
   - [x] Full API (479 pass, two failures fixed/15 affected pass) and web static/unit/guard checks
   - [x] Full browser suite: 398 pass/148 skips; four stale shell assertions updated
   - [x] Affected shell/setup 68 pass
-  - [ ] Screenshot capture 5 pass/36 images; mobile queue fix awaiting verification/recapture
-  - [ ] Save/review Phase 7 screenshots at 390 and 1280 px
+  - [x] Final hub/screenshots 6 pass; 36 images reviewed; mobile queue fixed
+  - [x] Save/review 36 Phase 7 screenshots at 390 and 1280 px
   - [ ] Write five-line phase summary, open dev → main PR, merge only with all CI green
   - [ ] Set BLOCKED — audit requested and stop
-- Resume note: T7.6 complete. Recovered UI committed, web types/affected lint and shell 19 pass; reminder/setup browser 2 pass incl own bell message/mark-all/live actions/link; sponsor/setup browser 2 pass incl PDF download. Sponsor filter selector now scopes visible controls during streamed page transition. API lint/format pass; fixed reminder test typing errors and mypy 225 files passes. Full API 479 pass/2 failures fixed (encrypted-field inventory and readable operation IDs), affected 15 pass; lint/format/mypy/generated types pass; screenshot spec phase7-screenshots.spec.ts prepared/linted. Web/browser full suites not yet run; do it once sequentially, add screenshot spec following phase6-screenshots.spec.ts, review artifacts, then PR and mandatory audit stop.
+- Resume note: Local Phase 7 gate complete. API full 479 pass/two failures fixed with 15 affected pass; lint/format/mypy clean. Web 777 + node guards 32 pass; types/lint/generated client pass. Full Playwright 398 pass/148 screenshot skips/four stale shell expectations fixed, shell/setup rerun 68 pass. Final hub/screenshots 6 pass, 36 images reviewed. Next create dev → main PR, wait for ALL CI green, merge with --merge --auto, sync dev and set BLOCKED — audit requested; do not start Phase 8.
 
 ## Next tasks
-- T7.6; Phase 7 gate then BLOCKED — audit requested
+- Phase 7 PR/CI/merge; mandatory owner audit before Phase 8
 
 ## Health
 - CI on dev: green 41514098397 (Phase 6); Phase 7 not yet run in CI. CI on main: green 41516923634.

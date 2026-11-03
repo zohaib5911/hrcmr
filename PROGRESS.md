@@ -296,7 +296,12 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T7.4** Reminders engine and register page — reviewed explicit sends, atomic in-app/encrypted email nudge, daily scheduling and sent history; affected API and browser checks pass.
 - [x] **T7.5** Compliance hub — urgency queue, coverage/readiness, expiry buckets, matching activity CSV, tools, editable official dossier and checklist; affected API/browser checks pass.
 - [x] **T7.6** Employee Sponsor Compliance tab, sponsor record PDF, "Needs attention" feed
-- [ ] **Phase 7 gate** — scenario tests from plan Phase 7
+- [ ] **Phase 7 gate** — local verification complete; PR/green CI merge pending.
+  - Built RTW history/corrections/evidence PDF, versioned sponsor records and scoped inspection PDF.
+  - Added official-calendar worker/org reporting, threshold reminders, reviewed atomic delivery and private bell.
+  - Added compliance hub/readiness/activity CSV and editable official dossier; AI drafting remains Phase 14.
+  - Verified API full 479 pass, two failures fixed/15 affected pass; web 777 and guards 32 pass; browser 398 pass, four stale shell assertions fixed/68 affected pass.
+  - Saved 36 reviewed images at 390/1280 light/dark; fixed mobile queue layout; final hub/screenshots 6 pass. Mandatory audit follows green-CI merge.
 
 ### Phase 8 — Leave and holidays
 - [ ] **T8.1** Leave types and leave settings
