@@ -154,3 +154,4 @@
 2026-11-03 12:25 | Codex | Phase 8 gate | lint/format/mypy254 pass; full API active; refreshed generated data-model reference for leave ledger/requests/attendance/year-end | next inspect full API result then web gate
 2026-11-03 12:28 | Codex | Phase 8 gate | full API590 pass, sole generated-doc failure fixed (foreign-key set ordering sorted); targeted doc1 pass; static clean | next web full unit/browser, screenshots and green PR
 2026-11-03 12:30 | Codex | Phase 8 gate | web lint/types/contract pass, full unit776 pass with one stale notification-name assertion updated | next targeted shell/scripts result, full browser and screenshots
+2026-11-03 12:36 | Codex | Phase 8 gate | shell19/scripts32 pass after sandbox-independent CLI checks; full Playwright active /tmp/phase8-browser-full.txt (design checks green so far) | next finish browser, screenshots, summary and green PR

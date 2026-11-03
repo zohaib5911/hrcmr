@@ -629,7 +629,7 @@ Define these as CSS variables in `web/app/globals.css`, with light and dark valu
 
 Store the permissions in `api/app/core/rbac_matrix.py` as a constant, with one source of truth. The UI reads `GET /auth/me.permissions`.
 
-### 7.1 Full permission list (Company Admin has all 109 + the new ones marked ★)
+### 7.1 Full permission list (Company Admin has all 110 + the new ones marked ★)
 ```
 attendance.record.read | attendance.record.read_own | attendance.record.write | attendance.record.write_own
 attendance.timesheet.approve_reports

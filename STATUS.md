@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [ ] Full web/unit/browser checks
   - [ ] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line summary, CI-green PR dev → main and merge
-- Resume note: Full API590 pass/one generated-doc ordering failure fixed by sorting foreign-key reference notes; targeted doc1 pass. Static clean. Web full lint/types/contract pass; full unit776 pass/one stale bell-name expectation updated, targeted shell rerun active. Guard scripts also running; next full browser then screenshots/visual review. Then five-line summary and green PR merge; continue T9.1.
+- Resume note: Full API590 pass/one generated-doc ordering failure fixed by sorting foreign-key reference notes; targeted doc1 pass. Static clean. Web full lint/types/contract pass; full unit776 pass/one stale bell-name expectation updated, targeted shell19 and guard scripts32 pass. Full browser active (/tmp/phase8-browser-full.txt), no failures so far; inspect process/log before repeating. Next SCREENSHOTS=1 phase8-screenshots and visual review. Then five-line summary and green PR merge; continue T9.1.
 
 ## Next tasks
 - Phase 8 gate
