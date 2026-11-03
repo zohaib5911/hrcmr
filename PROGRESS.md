@@ -296,7 +296,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T7.4** Reminders engine and register page — reviewed explicit sends, atomic in-app/encrypted email nudge, daily scheduling and sent history; affected API and browser checks pass.
 - [x] **T7.5** Compliance hub — urgency queue, coverage/readiness, expiry buckets, matching activity CSV, tools, editable official dossier and checklist; affected API/browser checks pass.
 - [x] **T7.6** Employee Sponsor Compliance tab, sponsor record PDF, "Needs attention" feed
-- [ ] **Phase 7 gate** — local verification complete; PR/green CI merge pending.
+- [x] **Phase 7 gate** — PR #13 merged as f17ef67 after all 12 CI checks passed (run 41595489940); mandatory owner audit requested.
   - Built RTW history/corrections/evidence PDF, versioned sponsor records and scoped inspection PDF.
   - Added official-calendar worker/org reporting, threshold reminders, reviewed atomic delivery and private bell.
   - Added compliance hub/readiness/activity CSV and editable official dossier; AI drafting remains Phase 14.

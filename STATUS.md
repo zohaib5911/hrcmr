@@ -1,29 +1,25 @@
 # STATUS
-Updated: 2026-11-03 06:48    Agent: Codex    Branch: dev    Commit: 2a2ab62
-State: IN PROGRESS
+Updated: 2026-11-03 07:38, Europe/London    Agent: Codex    Branch: dev    Commit: b6d99d1
+State: BLOCKED — audit requested
 
 ## Last completed
-- T7.6 — Sponsor record PDF download and live compliance bell with private messages/read actions
+- Phase 7 gate — PR #13 merged as f17ef67 after all 12 CI checks green (41595489940)
 
 ## Current task
-- Phase 7 gate — full verification and review
-  - [x] T7.1–T7.6 implementation and affected checks complete
-  - [x] Full API (479 pass, two failures fixed/15 affected pass) and web static/unit/guard checks
-  - [x] Full browser suite: 398 pass/148 skips; four stale shell assertions updated
-  - [x] Affected shell/setup 68 pass
-  - [x] Final hub/screenshots 6 pass; 36 images reviewed; mobile queue fixed
-  - [x] Save/review 36 Phase 7 screenshots at 390 and 1280 px
-  - [ ] Write five-line phase summary, open dev → main PR, merge only with all CI green
-  - [ ] Set BLOCKED — audit requested and stop
-- Resume note: Local Phase 7 gate complete. API full 479 pass/two failures fixed with 15 affected pass; lint/format/mypy clean. Web 777 + node guards 32 pass; types/lint/generated client pass. Full Playwright 398 pass/148 screenshot skips/four stale shell expectations fixed, shell/setup rerun 68 pass. Final hub/screenshots 6 pass, 36 images reviewed. PR #13 https://github.com/zohaib5911/hrcmr/pull/13 open. CI Semgrep flagged fixed-constant migration SQL; changed to identical literals, migrations/dossier/reporting 14 pass. Next wait for ALL CI green, merge with --merge --auto, sync dev and set BLOCKED — audit requested; do not start Phase 8.
+- Phase 7 gate — complete; required owner audit
+  - [x] T7.1–T7.6 implementation and affected checks
+  - [x] Full API/web/browser gate; discovered failures fixed and affected checks pass
+  - [x] 36 reviewed screenshots, 390/1280 px light/dark; mobile queue layout fixed
+  - [x] Five-line phase summary, PR #13 and all-green CI merge; dev synced
+  - [x] Stop for required owner audit
+- Resume note: PR https://github.com/zohaib5911/hrcmr/pull/13 merged f17ef67. CI run 41595489940 all 12 checks green. Do not start Phase 8 until owner audit findings arrive; record them under Next tasks. Screenshots: docs/screenshots/phase-7. Migration SQL static-analysis findings fixed with equivalent literal SQL; affected migration/dossier/reporting 14 pass.
 
 ## Next tasks
-- Phase 7 PR/CI/merge; mandatory owner audit before Phase 8
+- Owner high-level Phase 7 audit; implement supplied findings before Phase 8.
 
 ## Health
-- CI on dev: green 41514098397 (Phase 6); Phase 7 not yet run in CI. CI on main: green 41516923634.
-- Local checks: T7.3 calculator 12, reporting/holiday API 13 and migration/doc 7 pass; reporting/setup browser 3 and holiday/setup browser 14 pass. T7.2 migration/doc 7, sponsor API 14, sponsor/setup browser 2 and adjacent RTW/setup 2 pass. All affected lint/types/generated API/production builds pass. Full suite/screenshots next at Phase 7 gate.
-
+- CI on dev/PR: green (41595489940, b6d99d1). CI on main: post-merge run pending; merged change passed all PR checks.
+- Local checks: API full 479 pass/two failures fixed/15 affected pass; API lint/format/mypy pass. Web 777, guards 32, lint/types/generated API pass. Browser full 398 pass/four stale shell assertions fixed/68 affected pass; final hub/screenshots 6 pass. Migration/dossier/reporting 14 pass after CI fix.
 
 ## Issues / suggestions
 - Remove cooldown exceptions once safe: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.
@@ -43,4 +39,5 @@ State: IN PROGRESS
 - AI hidden without ANTHROPIC_API_KEY; Ask Mady deferred.
 
 ## Owner actions needed
-- None blocking. Protect main and enable private vulnerability reporting.
+- Run the required Phase 7 audit with a high-level model and supply findings under Next tasks.
+- Existing non-blocking setup: protect main and enable private vulnerability reporting.
