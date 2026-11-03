@@ -1,19 +1,18 @@
 # STATUS
-Updated: 2026-11-03 08:58, Europe/London    Agent: Codex    Branch: dev    Commit: 024625f
+Updated: 2026-11-03 09:01, Europe/London    Agent: Codex    Branch: dev    Commit: 3c531a4
 State: IN PROGRESS
 
 ## Last completed
-- F7.6 — remove fixed waits from all five functional specs (audit already awaits animations); stub Redis in error tests
+- F7.7 — refresh progress header and complete T7.4–T7.6 implementation/verification entries
 
 ## Current task
-- F7.7 — refresh PROGRESS header and T7.4–T7.6 entries after affected browser run
+- T8.1 — source verification; models/migration; service/API; UI; affected checks
   - [ ] Implement and verify (one commit per audit fix)
-- Resume note: F7.6 complete. Next: F7.7 — refresh PROGRESS header and T7.4–T7.6 entries after affected browser run. Audit file docs/audits/phase7.md absent from synced dev; user asked for contents, using queued STATUS findings.
+- Resume note: F7.7 complete. Next: T8.1 — source verification; models/migration; service/API; UI; affected checks. Audit file docs/audits/phase7.md absent from synced dev; user asked for contents, using queued STATUS findings.
 
 ## Next tasks
 
 F7.1 Step-up on role change, admin/HR-admin invite, and two-step policy change (+ tests)   [high]
-F7.7 Update PROGRESS header and T7.4–T7.6 entries   [low]
 (Ongoing, not a task: move shared helpers into employees/access.py and core/dates.py only when a task already touches that code.)
  implement supplied findings before Phase 8.
 
@@ -22,9 +21,10 @@ F7.7 Update PROGRESS header and T7.4–T7.6 entries   [low]
 
 
 
+
 ## Health
 - CI on dev: last Phase 7 PR green; no dev push workflow. CI on main: previously pending, not rechecked.
-- Local checks run: error tests 24 pass; ruff/mypy and web lint/types pass; affected Playwright next
+- Local checks run: affected browser/setup 63 pass; F7.1–F7.6 API/static checks pass; progress entries reviewed
 
 ## Issues / suggestions
 - Remove cooldown exceptions once safe: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.

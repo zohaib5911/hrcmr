@@ -4,8 +4,8 @@ Build log for the platform described in [`plan.md`](plan.md). Tasks are done str
 order. After every task: tick it, add one line saying what was done and anything the owner
 must do, and commit. Never record secret values in this file.
 
-- **Last updated:** 2026-11-02
-- **Current task:** T7.1 Right to Work checks
+- **Last updated:** 2026-11-03
+- **Current task:** T8.1 Leave types and leave settings (after Phase 7 audit fixes F7.1–F7.7)
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -293,10 +293,10 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T7.1** Right to Work checks — 2026-11-02. Four conditional types; encrypted/masked codes; clean evidence picker/upload/download; immutable history and reasoned corrections; company-timezone status view, directory filters/deep links/counts, profile tab/cards and masked PDFs. Verified: migration/doc 7, API/PDF 15, list unit 6, employee/setup browser 15 and RTW/setup 2 pass; lint/types/generated API/build pass.
 - [x] **T7.2** Sponsor documents and sponsored employees page — 2026-11-03. Six document types and eleven visa routes; encrypted/masked reference/CoS; immutable versions, reasoned withdrawal, renewal target/notes, scoped clean evidence and salary; sponsored-route register excludes EUSS and withdrawn/superseded visas. Profile document forms/history and searchable/filterable responsive table. Verified: migration/doc 7, API 14, sponsor browser/setup 2 and adjacent RTW browser/setup 2 pass; lint/types/generated API/production build pass.
 - [x] **T7.3** Working-day calculator, change of circumstances, org changes — 2026-11-03. Regional GOV.UK bank holidays; 10/20 working-day targets, prompt AO/Key Contact exception; immutable worker/document snapshots; recorded SMS reporter/date/reference; audited unreported org edit/archive. Employee form/log and company Workers/Organisation register with filters/search. Verified: calculator 12, reporting/holiday API 13, migration/doc 7; holiday/setup browsers 14 and reporting/setup 3 pass; lint/types/generated API/build clean.
-- [x] **T7.4** Reminders engine and register page — reviewed explicit sends, atomic in-app/encrypted email nudge, daily scheduling and sent history; affected API and browser checks pass.
-- [x] **T7.5** Compliance hub — urgency queue, coverage/readiness, expiry buckets, matching activity CSV, tools, editable official dossier and checklist; affected API/browser checks pass.
-- [x] **T7.6** Employee Sponsor Compliance tab, sponsor record PDF, "Needs attention" feed
-- [x] **Phase 7 gate** — PR #13 merged as f17ef67 after all 12 CI checks passed (run 41595489940); mandatory owner audit requested.
+- [x] **T7.4** Reminders engine and register page — 2026-11-03. Thresholds 90/60/30, daily refresh, explicit review/save/snooze/send, sent history and recorded sender/time; atomic in-app message and encrypted email nudge. Verified: affected API/static checks and reminder/setup browser 2 pass (including mobile axe and own message).
+- [x] **T7.5** Compliance hub and dossier — 2026-11-03. Urgency queue, coverage/readiness, expiry buckets, filtered activity CSV, tools, official links and original checklist; mandatory-MFA platform editor and isolated content audit. Verified: hub/audit 14, dossier/migration/doc/identity 19 and hub/adjacent browser 5 pass; web lint/types pass.
+- [x] **T7.6** Employee Sponsor Compliance tab, sponsor record PDF and "Needs attention" feed — 2026-11-03. Masked scoped PDF includes versions and reporting snapshots; bell supports live actions and read state. Verified: PDF scenario 1, bell/privacy/routes 2, shell unit 19, sponsor/setup browser 2 and reminder/setup browser 2 pass; lint/types pass.
+- [x] **Phase 7 gate** — PR #13 merged as f17ef67 after all 12 CI checks passed (run 41595489940); owner audit findings queued as F7.1–F7.7 and implemented before Phase 8.
   - Built RTW history/corrections/evidence PDF, versioned sponsor records and scoped inspection PDF.
   - Added official-calendar worker/org reporting, threshold reminders, reviewed atomic delivery and private bell.
   - Added compliance hub/readiness/activity CSV and editable official dossier; AI drafting remains Phase 14.
@@ -458,3 +458,4 @@ Do not start until the owner says so: US site, Australia, native wrapper, passke
 - [x] F7.4 — foreign PDF IDs match missing-record 404s without render/audit; shared global dossier and tenant download audit verified; PDF/dossier isolation and related tests 8 pass; ruff/mypy pass.
 - [x] F7.5 — Python and SQL RTW status parity for 225 identical outcome/expiry/evidence cases in three timezones plus absent checks; RTW parity 3 pass (225 combinations); ruff/mypy pass.
 - [x] F7.6 — remove fixed waits from all five functional specs (audit already awaits animations); stub Redis in error tests; error tests 24 pass; ruff/mypy and web lint/types pass; affected Playwright next.
+- [x] F7.7 — refresh progress header and complete T7.4–T7.6 implementation/verification entries; affected browser/setup 63 pass; F7.1–F7.6 API/static checks pass; progress entries reviewed.
