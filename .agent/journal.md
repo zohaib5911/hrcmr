@@ -160,3 +160,4 @@
 2026-11-03 12:51 | Codex | Phase 8 gate | profile/shell corrected cases pass; calendar contrast pass; accessible cell names now derive visible names/text with hidden date context | next screenshot-only rerun and visual review
 2026-11-03 12:52 | Codex | Phase 8 gate | correction: previous edit script missed formatted cell block; applied calendar hidden-context fix directly and lint passed | next screenshot-only run
 2026-11-03 12:55 | Codex | Phase 8 gate | screenshot/setup5 pass, 48 saved, calendar a11y fixed; visual review caught year-end parent referencing non-sidebar settings, corrected to /leave | next refreshed screenshots and visual review, summary/PR
+2026-11-03 12:58 | Codex | Phase 8 gate | local checks complete, refreshed screenshot/setup5 pass and 48 images visually reviewed; five-line phase summary recorded | next PR dev→main, all-green CI merge, clean sync and T9.1

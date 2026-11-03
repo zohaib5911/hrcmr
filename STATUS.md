@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 12:20, Europe/London    Agent: Codex    Branch: dev    Commit: f4a8c2c
+Updated: 2026-11-03 12:58, Europe/London    Agent: Codex    Branch: dev    Commit: 279467e
 State: IN PROGRESS
 
 ## Last completed
@@ -9,9 +9,9 @@ State: IN PROGRESS
 - Phase 8 gate — leave and holidays
   - [x] Full API/static checks
   - [x] Full web/unit/browser checks
-  - [ ] 390/1280 light/dark screenshots and visual review
+  - [x] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line summary, CI-green PR dev → main and merge
-- Resume note: Full API590 + corrected doc1; affected55 after default-week fix pass. Full web776 + shell19; scripts32/static pass. Full browser407 + four corrected cases pass; screenshot/setup5 pass, 48 saved. Visual review found year-end breadcrumb parent must be sidebar /leave (fixed); rerun screenshot spec to refresh this evidence, then visual review, summary and green PR merge.
+- Resume note: Local gate complete. Full API590+doc1/affected55; web776+shell19/nav22; scripts32; browser407+corrected four cases; screenshot/setup5 (48 images reviewed); static/build/contract pass. Five-line summary recorded. Open PR dev→main, update checkpoint with PR/run then wait all CI green, merge with --merge --auto, sync clean dev and continue T9.1.
 
 ## Next tasks
 - Phase 8 gate
@@ -19,8 +19,8 @@ State: IN PROGRESS
 - T9.2 — import, bulk entry and exports
 
 ## Health
-- CI on dev: last run green (41610450677, audit fixes/T8.1); T8.2/T8.3 phase gate CI pending. CI on main: not rechecked.
-- Local checks run: combined requests/ledger/RBAC/notifications/calculations 115 pass; notifications alone1 pass; API ruff/format/mypy (246 files), web typecheck and generated API contract pass. Prior T8.3 migration8 pass.
+- CI on dev: Phase 8 PR CI pending; prior audit/T8.1 green (41610450677). CI on main: not rechecked.
+- Local checks run: API590 plus corrected generated-doc1/affected55 pass; web776 plus corrected shell19/nav22, guard scripts32 pass; browser407 plus four corrected cases and screenshot/setup5 pass. Python/web static, production build and generated contract clean. 48 screenshots saved/reviewed.
 
 ## Issues / suggestions
 - Focused pytest invocation must group all tests/db paths before tests outside that directory; interleaving caused a missing database fixture, grouped rerun115 and notification alone1 pass.

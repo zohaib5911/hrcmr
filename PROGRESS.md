@@ -309,7 +309,12 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T8.3** Requests, conflicts, approvals, attendance sync — 2026-11-03. Own/on-behalf submission and working-day/conflict previews; LSA-scoped decisions with no self-approval; serialized atomic taken ledger/attendance and private notification/outbox delivery; calendar/pattern-change guards, negative-policy handling and rollback/concurrency tests. Verified: combined requests/ledger/RBAC/notifications/calculations115 pass; API ruff/format/mypy, web types and generated contract pass; migration8 previously passed. Shift conflicts connect in Phase 9.
 - [x] **T8.4** Leave workspaces — 2026-11-03. Scoped read-only balance projections and working-date calendar; audited retry-safe Grant/Deduct/Set; Calendar/Requests/Balances, My Leave, My Approvals and employee Leave tab with live duration/conflict previews and decision sheets. Verified: affected API/request/RBAC71, production workflow/setup2 and mobile axe pass; Python lint/format/types and web lint/types/contract pass; web776 plus corrected navigation22 pass. Notification badge accessible name includes its visible total.
 - [x] **T8.5** Year-end carry-over — 2026-11-03. Immutable tenant run snapshots, read-only closing projections, reasoned overrides, stale-review detection and atomic audited carry/expiry posting; repeat/concurrent commits reuse one run, source years reject further bookings/adjustments, unresolved requests and fixed-allowance debts block close. Settings-linked year-end UI supports preview/review/history. Verified: year-end/workspace/requests34, migration/projections12, production browser/setup2 and mobile axe pass; Python/web lint/types/contract pass.
-- [ ] **Phase 8 gate**
+- [ ] **Phase 8 gate** — local gate complete; PR/green CI merge next.
+  - Seeded twelve source-verified leave types with audited company settings and scoped configuration.
+  - Added immutable ledger, exact pro-rata/personal-pattern/calendar computation and atomic request/attendance/notification decisions.
+  - Delivered Calendar/Requests/Balances, self-service, employee balance actions and reviewed immutable year-end closes.
+  - Verified full API590 plus corrected doc1/affected55; web776 plus shell19/nav22, guard scripts32; browser407 plus corrected four cases and screenshot/setup5; static/build/contract clean.
+  - Saved and visually reviewed 48 screenshots at 390/1280 light/dark; calendar/bell accessibility, initial working-week defaults and year-end breadcrumb corrected.
 
 ### Phase 9 — Attendance, Rota, Work Log
 - [ ] **T9.1** Attendance records and workspace
