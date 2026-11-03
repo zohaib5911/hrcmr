@@ -62,7 +62,7 @@ test("leave request, approval, calendar, profile adjustments and own cancellatio
   await page.goto("/my-approvals");
   await page.getByRole("button", { name: "Review request", exact: true }).click();
   const review = page.getByRole("dialog", { name: "Review leave request" });
-  await review.getByLabel("Decision note (optional)").fill("Coverage checked");
+  await review.getByLabel("Decision note (optional)", { exact: true }).fill("Coverage checked");
   await expect(review.getByRole("button", { name: "Approve", exact: true })).toBeEnabled();
   await review.getByRole("button", { name: "Approve", exact: true }).click();
   await expect(review).toBeHidden();

@@ -24,7 +24,9 @@ import { RequestSheet, DecisionSheet, type LeaveRequest } from "./request-sheet"
 type Mode = "workspace" | "own" | "approvals";
 export function LeaveHome({ mode = "workspace" }: { mode?: Mode }) {
   const can = useCan();
-  const [view, setView] = useState<"calendar" | "requests" | "balances">("calendar");
+  const [view, setView] = useState<"calendar" | "requests" | "balances">(
+    can("leave.request.read", "leave.request.read_own") ? "calendar" : "balances",
+  );
   const [creating, setCreating] = useState(false);
   const [version, setVersion] = useState(0);
   const mayRead = can("leave.request.read", "leave.request.read_own");
