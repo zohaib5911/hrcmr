@@ -42,6 +42,7 @@ IDENTITY_TABLES = [
     "holiday_types",
     "invitations",
     "key_persons",
+    "leave_types",
     "locations",
     "memberships",
     "notifications",
@@ -156,3 +157,48 @@ def test_upgrade_works_on_a_database_that_was_provisioned_but_never_migrated() -
     with temporary_database(migrate=False) as db:
         command.upgrade(alembic_config(db.owner_url), "head")
         command.upgrade(alembic_config(db.owner_url), "head")  # running it twice is harmless
+
+
+def test_leave_defaults_backfill_existing_companies_without_changing_settings() -> None:
+    async def seed(url: str) -> None:
+        engine = engine_for(url, poolclass=NullPool)
+        try:
+            async with engine.begin() as connection:
+                await connection.execute(
+                    text(
+                        "insert into companies (name,slug,leave_year_start_month_day,allow_negative_leave_balance) values ('Existing','existing','04-06',true)"
+                    )
+                )
+        finally:
+            await engine.dispose()
+
+    async def verify(url: str) -> None:
+        engine = engine_for(url, poolclass=NullPool)
+        try:
+            async with engine.connect() as connection:
+                rows = (
+                    await connection.execute(
+                        text("select name,source_url,checked_on from leave_types")
+                    )
+                ).all()
+                assert len(rows) == 12
+                assert all(
+                    str(row[1]).startswith("https://www.gov.uk/") and str(row[2]) == "2026-11-03"
+                    for row in rows
+                )
+                assert (
+                    await connection.execute(
+                        text(
+                            "select leave_year_start_month_day,allow_negative_leave_balance from companies"
+                        )
+                    )
+                ).one() == ("04-06", True)
+        finally:
+            await engine.dispose()
+
+    with temporary_database(migrate=False) as db:
+        config = alembic_config(db.owner_url)
+        command.upgrade(config, "0020_auth_audit")
+        asyncio.run(seed(db.owner_url))
+        command.upgrade(config, "head")
+        asyncio.run(verify(db.owner_url))

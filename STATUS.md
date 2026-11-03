@@ -8,11 +8,11 @@ State: IN PROGRESS
 ## Current task
 - T8.1 — leave types and settings
   - [x] Verify twelve seed rules against GOV.UK; baseline settings/RBAC checks
-  - [ ] Models, frozen migration/backfill and signup seeds
+  - [x] Models, frozen migration/backfill and signup seeds
   - [ ] Scoped API/settings validation, audit and regression tests
   - [ ] Leave settings UI, CRUD sheets and navigation
   - [ ] Affected browser/API/static checks and task completion
-- Resume note: F7.1–F7.7 each committed/pushed. T8.1 verified GOV.UK rules; implement models/seed migration first. Sources include SSP first-full-day rule effective 6 April 2026; pay remains eligibility-dependent, no payroll calculations.
+- Resume note: T8.1 model/seed migration complete; 9 migration/doc/signup tests pass, ruff/mypy pass. Implement schemas, scoped APIs, audit and regression checks next. Data sources in data/leave/SOURCES.md.
 
 ## Next tasks
 

@@ -122,3 +122,4 @@
 2026-11-03 08:58 | Codex | F7.6 | remove fixed waits from all five functional specs (audit already awaits animations); stub Redis in error tests; error tests 24 pass; ruff/mypy and web lint/types pass; affected Playwright next | next F7.7 — refresh PROGRESS header and T7.4–T7.6 entries after affected browser run
 2026-11-03 09:01 | Codex | F7.7 | refresh progress header and complete T7.4–T7.6 implementation/verification entries; affected browser/setup 63 pass; F7.1–F7.6 API/static checks pass; progress entries reviewed | next T8.1 — source verification; models/migration; service/API; UI; affected checks
 2026-11-03 09:03 | Codex | T8.1 | GOV.UK seed rules checked; baseline running; model/seed strategy recorded | next frozen migration and signup seeding
+2026-11-03 09:06 | Codex | T8.1 | leave model, frozen backfill/sign-up seeds and source record complete; migration/doc/signup 9 pass, ruff/mypy pass | next scoped API and tests

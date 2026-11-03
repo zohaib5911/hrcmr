@@ -641,6 +641,38 @@ Checks:
 
 - `role in ('authorising_officer', 'key_contact', 'level1_user', 'level2_user')`
 
+## `leave_types`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `seed_key` | VARCHAR(24) | yes |  |  |
+| `name` | VARCHAR(80) | no |  |  |
+| `is_paid` | BOOLEAN | no | `true` |  |
+| `counts_toward_statutory` | BOOLEAN | no | `false` |  |
+| `days_per_year` | NUMERIC(6, 2) | yes |  |  |
+| `carry_over_limit_days` | NUMERIC(6, 2) | no | `0` |  |
+| `accrual_method` | VARCHAR(12) | no | `front_loaded` |  |
+| `requires_approval` | BOOLEAN | no | `true` |  |
+| `colour` | VARCHAR(10) | no | `blue` |  |
+| `rule_text` | TEXT | no | `` |  |
+| `source_url` | VARCHAR(500) | yes |  |  |
+| `checked_on` | DATE | yes |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `accrual_method in ('front_loaded','monthly')`
+- `carry_over_limit_days >= 0`
+- `colour in ('blue','green','orange','red','gray')`
+- `days_per_year IS NULL OR days_per_year >= 0`
+- `length(trim(name)) > 0`
+
 ## `locations`
 
 | Column | Type | Null | Default | Notes |

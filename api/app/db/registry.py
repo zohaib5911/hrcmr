@@ -15,6 +15,7 @@ import app.modules.employees.models
 import app.modules.files.models
 import app.modules.holidays.models
 import app.modules.identity.models
+import app.modules.leave.models
 import app.modules.notifications.models
 import app.modules.pay.models
 import app.modules.rtw.models
