@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Scoped list/KPIs/search, audited correction/removal and tests
   - [x] Own/admin workspace/forms
   - [ ] Production browser checks
-- Resume note: Own/admin Work Log workspaces, responsibility/free-text and reasoned forms, retained-original inspector, search/date/employee/removed/archived filters and KPIs written; sidebar separates My Work Log from admin view. API10+related25/migration7/mypy288, web type/lint/nav22 pass. Browser scenario ready; run work-log production through own edit/admin correction/removal/mobile axe. Then T9.6 completion and Phase9 full gate. Keep database pytest and Playwright sequential.
+- Resume note: Production browser completes own create/edit and admin correction; inspector assertion used single click while shared desktop DataTable opens by double-click/Enter, selector corrected to dblclick. Rerun work-log through retained-original/removal/filters/mobile axe, then T9.6 completion and Phase9 gate. API/static green; keep database pytest and Playwright sequential.
 
 ## Next tasks
 - Phase 9 gate — full suite/screenshots/green PR

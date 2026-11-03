@@ -195,3 +195,4 @@
 2026-11-03 18:26 | Codex | T9.6 | work log schema/service and responsibility-history preservation ready; registry side-effect imports explicitly exempted, migration7 and typing pass | next scoped API/KPIs/correct/remove/tests then UI
 2026-11-03 18:31 | Codex | T9.6 | scoped Work Log API/KPIs/own/admin correction-removal ready; Work Log10 plus related25/migration7/static/mypy288 pass; client generated | next own/admin UI and production browser
 2026-11-03 18:34 | Codex | T9.6 | own/admin Work Log UI and real browser workflow ready; API10/related25/migration7/mypy288/web type/lint/nav22 pass | next production browser then Phase9 gate
+2026-11-03 18:36 | Codex | T9.6 | browser own create/edit/admin correction passes; corrected desktop inspector activation to shared table double-click | next work-log browser final then Phase9 gate

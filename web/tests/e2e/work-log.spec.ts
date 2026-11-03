@@ -76,7 +76,7 @@ test("record daily work, edit today, correct with a reason and retain removed hi
   await correct.getByRole("button", { name: "Save correction", exact: true }).click();
   await expect(correct).toBeHidden();
   const table = page.getByRole("grid", { name: "Work log entries", exact: true });
-  await table.getByText("Reviewed reception checks", { exact: true }).click();
+  await table.getByText("Reviewed reception checks", { exact: true }).dblclick();
   const view = page.getByRole("dialog", { name: "Work log entry", exact: true });
   await expect(
     view
