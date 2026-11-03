@@ -208,3 +208,4 @@
 2026-11-03 22:40 | Codex | Phase9 gate | mobile overflow fixed; screenshot final inspector selector corrected to existing Open control | next final screenshots/review/PR
 2026-11-03 22:45 | Codex | Phase9 gate | final capture exposed hidden Sick option selector; scoped to records and awaited loaded employee filter | next screenshot rerun/review/PR
 2026-11-03 22:43 | Codex | Phase9 gate | scoped attendance screenshot employee readiness wait away from hidden record form | next final screenshots/review/PR
+2026-11-03 22:49 | Codex | Phase9 gate | all76 screenshots captured; date selector uses visible textbox role to exclude retained hidden input | next final screenshot verification/review/PR

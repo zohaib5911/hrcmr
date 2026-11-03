@@ -257,7 +257,7 @@ for (const colorScheme of ["light", "dark"] as const) {
             .getByRole("region", { name: "Attendance workspace", exact: true })
             .getByLabel("Employee", { exact: true }),
         ).toContainText("Ben Patel");
-        await page.getByLabel("Selected day", { exact: true }).fill(day);
+        await page.getByRole("textbox", { name: "Selected day", exact: true }).fill(day);
         await expect(
           page
             .getByRole(width === 390 ? "list" : "grid", { name: "Attendance records", exact: true })

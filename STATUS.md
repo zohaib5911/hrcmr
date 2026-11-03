@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Full web/unit/script/browser suite (sequentially)
   - [ ] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: Visual evidence mostly captured; mobile policy overflow fixed and reviewed. Final attendance screenshot wait now scopes Employee to Attendance workspace (hidden record form shares label). Run final phase9 screenshot spec, review 76 images then summary/PR. Previous full gate API/web/browser checks green.
+- Resume note: Visual evidence mostly captured; mobile policy overflow fixed and reviewed. Final attendance screenshot wait now scopes Employee to Attendance workspace (hidden record form shares label). All 76 views captured across runs. Use visible textbox role for Selected day (transition retains hidden input); final screenshot rerun, visual review then summary/PR. Previous full gate API/web/browser checks green.
 
 ## Next tasks
 - T10.1 — company documents
