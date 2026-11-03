@@ -84,3 +84,4 @@
 2026-11-03 02:15 | Codex | T7.4 | threshold/source hooks + daily job, admin notice dedupe, snooze/restore/cancellation and unreported deadline refresh; 34 checks pass, final engine 5 pass | next scoped review/send API with atomic delivery
 2026-11-03 02:36 | Codex | T7.4 | reviewed/received reminder API and atomic nudge+notification+audit; 20 affected cases verified incl concurrent dedupe/rollback and self-service guards; types/lint/gen pass | next register/review and My Documents UI
 2026-11-03 02:48 | Codex | T7.4 | due/register/history UI, explicit review drawer and own received messages; optional snooze draft API test passes, web types/lint pass | next browser reminder workflow
+2026-11-03 02:55 | Codex | T7.4 | browser reminder workflow written; web types and targeted lint pass | next production Playwright reminders scenario

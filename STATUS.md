@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 02:48    Agent: Codex    Branch: dev    Commit: 658f14d
+Updated: 2026-11-03 02:55    Agent: Codex    Branch: dev    Commit: 56f9dea
 State: IN PROGRESS
 
 ## Last completed
@@ -13,7 +13,7 @@ State: IN PROGRESS
   - [x] Register/review/edit/snooze/send + own received API, atomic notification/encrypted outbox/audit; 20 affected API cases verified
   - [x] Reminder due/register/history page and explicit review drawer, plus own My Documents messages; web types/lint pass
   - [ ] Affected API/browser verification
-- Resume note: Reminder UI built and static checks pass. Next browser scenario: unlinked account disables send; explicit draft edit then link active account; snooze saves draft; review/send once; history who/when + queued email; received message in own My Documents; scheduled chip disabled send; mobile/axe register. Add web/tests/e2e/reminders.spec.ts. Source test helper can link current Company Admin to employee via PUT /users/{membership_id}/employee for own received flow. API snooze now accepts optional reviewed message and persists atomically; targeted API test passes. No screenshots until Phase 7 gate.
+- Resume note: Browser workflow written in web/tests/e2e/reminders.spec.ts; static checks pass. Next run its production Playwright project, fix failures, then complete T7.4. Covers unlinked/linked recipient, explicit draft/snooze/send, history, own received message and mobile accessibility. No screenshots until Phase 7 gate.
 
 
 ## Next tasks
