@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Full web/unit/browser checks
   - [x] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line summary, CI-green PR dev → main and merge
-- Resume note: Local gate complete. Full API590+doc1/affected55; web776+shell19/nav22; scripts32; browser407+corrected four cases; screenshot/setup5 (48 images reviewed); static/build/contract pass. Five-line summary recorded. Open PR dev→main, update checkpoint with PR/run then wait all CI green, merge with --merge --auto, sync clean dev and continue T9.1.
+- Resume note: Local gate complete. Full API590+doc1/affected55; web776+shell19/nav22; scripts32; browser407+corrected four cases; screenshot/setup5 (48 images reviewed); static/build/contract pass. Five-line summary recorded. PR #14 open (https://github.com/zohaib5911/hrcmr/pull/14). Wait all CI checks green on latest head, fix any failures; merge with gh pr merge 14 --merge --auto, sync clean dev and continue T9.1.
 
 ## Next tasks
 - Phase 8 gate
@@ -19,7 +19,7 @@ State: IN PROGRESS
 - T9.2 — import, bulk entry and exports
 
 ## Health
-- CI on dev: Phase 8 PR CI pending; prior audit/T8.1 green (41610450677). CI on main: not rechecked.
+- CI on dev: Phase 8 PR #14 CI pending; prior audit/T8.1 green (41610450677). CI on main: not rechecked.
 - Local checks run: API590 plus corrected generated-doc1/affected55 pass; web776 plus corrected shell19/nav22, guard scripts32 pass; browser407 plus four corrected cases and screenshot/setup5 pass. Python/web static, production build and generated contract clean. 48 screenshots saved/reviewed.
 
 ## Issues / suggestions

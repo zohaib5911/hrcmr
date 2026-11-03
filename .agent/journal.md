@@ -161,3 +161,4 @@
 2026-11-03 12:52 | Codex | Phase 8 gate | correction: previous edit script missed formatted cell block; applied calendar hidden-context fix directly and lint passed | next screenshot-only run
 2026-11-03 12:55 | Codex | Phase 8 gate | screenshot/setup5 pass, 48 saved, calendar a11y fixed; visual review caught year-end parent referencing non-sidebar settings, corrected to /leave | next refreshed screenshots and visual review, summary/PR
 2026-11-03 12:58 | Codex | Phase 8 gate | local checks complete, refreshed screenshot/setup5 pass and 48 images visually reviewed; five-line phase summary recorded | next PR dev→main, all-green CI merge, clean sync and T9.1
+2026-11-03 12:58 | Codex | Phase 8 gate | PR #14 opened dev→main; all local evidence pushed | next wait CI latest head all green, merge --merge --auto, sync clean dev and T9.1
