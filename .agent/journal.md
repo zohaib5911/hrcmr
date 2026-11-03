@@ -131,3 +131,4 @@
 2026-11-03 09:17 | Codex | relay | F7.1–F7.7 each committed; T8.1 complete and pushed, all affected checks pass | next T8.2 ledger; absent audit document noted in STATUS
 2026-11-03 09:22 | Codex | CI before T8.2 | clean dev synced; gh run list shows no audit/T8.1 run; dispatched 41610450677 at 0d3b86d | next fix red or confirm green before T8.2
 2026-11-03 09:41 | Codex | T8.2 | all twelve CI jobs green for audit fixes/T8.1 at 0d3b86d (41610450677); start ledger/calculations | next pure calculations/unit tests
+2026-11-03 09:44 | Codex | T8.2 | pure calculations and 27 cases pass; ruff/mypy clean; standard-day units and exact fraction arithmetic | next append-only ledger/view migration

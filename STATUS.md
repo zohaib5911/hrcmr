@@ -9,11 +9,11 @@ State: IN PROGRESS
 ## Current task
 - T8.2 — ledger and balance computation
   - [x] Confirm audit fixes/T8.1 CI green (41610450677, all twelve checks)
-  - [ ] Pure entitlement/year/personal-pattern/calendar calculations and unit tests
+  - [x] Pure entitlement/year/personal-pattern/calendar calculations and unit tests
   - [ ] Append-only tenant ledger, balance view and migration
   - [ ] Transactional grant/deduct/set and standard reconciliation service; DB tests
   - [ ] Affected lint/types/tests and completion
-- Resume note: No T8.2 code yet. CI green for 0d3b86d covers all implementation before T8.2. Implement calculations first, then durable ledger and services; UI belongs to T8.4.
+- Resume note: Pure calculations/tests done (27 pass; mypy clean). Next ledger model/migration and transactional services. CI green for 0d3b86d covers all implementation before T8.2. Implement calculations first, then durable ledger and services; UI belongs to T8.4.
 
 ## Next tasks
 - T8.2 — ledger and balance computation
@@ -45,3 +45,5 @@ State: IN PROGRESS
 ## Owner actions needed
 - docs/audits/phase7.md was absent from synced dev; queued findings in STATUS were implemented. Missing file contents/correct path requested; supply it if it contains additional acceptance details.
 - Existing non-blocking setup: protect main and enable private vulnerability reporting.
+
+- T8.2 calculation policy: ledger units are average company-day hours; personal shorter days are charged proportionally, as is entitlement. Calendar-day pro-rata and rounding up once to 0.01; completed leave-month accrual, partial starter/leaver months pro-rata. Assignment ends exclusive, employee leave date inclusive. Regular patterns only; irregular hours require explicit manual grants until hours-based accrual exists.
