@@ -13,12 +13,14 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     ForeignKeyConstraint,
+    Index,
     Integer,
     Numeric,
     String,
     Text,
     UniqueConstraint,
     Uuid,
+    text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
@@ -29,6 +31,13 @@ from app.db.base import Base, RecordMixin, TenantMixin
 class AttendanceRecord(Base, RecordMixin, TenantMixin):
     __tablename__ = "attendance_records"
     __table_args__ = (
+        Index(
+            "uq_attendance_open_clock",
+            "company_id",
+            "employee_id",
+            unique=True,
+            postgresql_where=text("source='clock' and clock_in is not null and clock_out is null"),
+        ),
         UniqueConstraint(
             "company_id", "employee_id", "date", name="uq_attendance_records_company_employee_date"
         ),
@@ -105,3 +114,30 @@ class AttendanceImport(Base, RecordMixin, TenantMixin):
     timezone: Mapped[str] = mapped_column(String(64), nullable=False)
     status: Mapped[str] = mapped_column(String(10), nullable=False, server_default="previewed")
     committed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class TimesheetApproval(Base, RecordMixin, TenantMixin):
+    """One current weekly approval; the audit trail retains every prior decision."""
+
+    __tablename__ = "timesheet_approvals"
+    __table_args__ = (
+        UniqueConstraint(
+            "company_id", "employee_id", "period_start", name="uq_timesheet_employee_week"
+        ),
+        ForeignKeyConstraint(
+            ["company_id", "employee_id"],
+            ["employees.company_id", "employees.id"],
+            name="fk_timesheet_company_employee",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint("period_end = period_start + 6", name="period"),
+    )
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    employee_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    period_start: Mapped[date] = mapped_column(Date, nullable=False)
+    period_end: Mapped[date] = mapped_column(Date, nullable=False)
+    fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+    approved_by: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    approved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)

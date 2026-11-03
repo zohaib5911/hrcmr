@@ -176,3 +176,5 @@
 2026-11-03 17:38 | Codex | T9.2 | browser import/commit/grid preserves times and notes; mobile tab bar contrast over grid corrected with primary labels | next browser rerun through reports
 2026-11-03 17:33 | Codex | T9.2 | mobile grid axe and manual browser2 pass; absence report returns correct two rows as responsive cards, selector corrected | next import/bulk/report browser final
 2026-11-03 17:34 | Codex | T9.2 | complete: affected API31, static/contract/web25, production import/setup2 and manual browser2 pass with mobile axe | next T9.3 schema, clock and report approvals
+2026-11-03 17:36 | Codex | T9.3 | weekly approval schema, unique open-clock index and default-off company geo flag added; migration7/static pass | next serialized clock and scoped revision-checked approval API
+2026-11-03 17:38 | Codex | T9.3 | schema/migration7 and serialized clock/revision-checked report approval APIs ready; mypy268/API27 pass, corrected rollback test response expectation | next clock/PWA/timesheet UI and browser

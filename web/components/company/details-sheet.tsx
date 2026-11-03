@@ -418,6 +418,13 @@ function DetailsForm({
           </Select>
         </fieldset>
 
+        <Toggle
+          label="Allow optional clock location"
+          description="Employees may share their location when clocking in or out. Each action needs their consent."
+          checked={form.clock_geolocation_enabled}
+          onCheckedChange={(checked) => set("clock_geolocation_enabled", checked)}
+        />
+
         {features.ai ? (
           <Toggle
             label="AI features"

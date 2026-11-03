@@ -63,6 +63,7 @@ IDENTITY_TABLES = [
     "tax_codes",
     "terms_acceptances",
     "terms_versions",
+    "timesheet_approvals",
     "trading_hours_days",
     "users",
     "working_pattern_days",

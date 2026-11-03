@@ -66,6 +66,7 @@ class CompanyDetails(BaseModel):
     penalty_illegal_working_last_3_years: bool
     penalty_illegal_working_status: str | None
     ai_features_enabled: bool
+    clock_geolocation_enabled: bool = False
     status: Literal["active", "suspended", "pending_deletion", "deleted"]
     plan: Plan
 
@@ -100,6 +101,14 @@ class CompanyUpdate(RequestModel):
     penalty_illegal_working_last_3_years: bool | None = None
     penalty_illegal_working_status: Annotated[str, Field(max_length=2000)] | None = None
     ai_features_enabled: bool | None = None
+    clock_geolocation_enabled: bool | None = None
+
+    @field_validator("clock_geolocation_enabled")
+    @classmethod
+    def _geo_switch(cls, value: bool | None) -> bool:
+        if value is None:
+            raise ValueError("Choose whether clock location is enabled.")
+        return value
 
     @field_validator("name", "trading_name", "previous_company_name", mode="before")
     @classmethod

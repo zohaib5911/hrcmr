@@ -117,6 +117,10 @@ class Company(Base, RecordMixin):
         Boolean, nullable=False, server_default=true()
     )
 
+    clock_geolocation_enabled: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default=false()
+    )
+
     # Sponsor history.
     changed_name_last_5_years: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default=false()

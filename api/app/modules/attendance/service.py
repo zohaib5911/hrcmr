@@ -128,6 +128,8 @@ async def save_record(
         raise ConflictError(
             "This attendance comes from approved leave and cannot be replaced by a manual record."
         )
+    if row is not None and row.source == "clock" and row.clock_out is None and source != "manual":
+        raise ConflictError("Clock out before changing this record through bulk entry or import.")
     status_only = source == "grid" and not (
         {"clock_in", "clock_out", "unpaid_break_minutes"} & body.model_fields_set
     )

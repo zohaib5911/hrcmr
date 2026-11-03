@@ -105,6 +105,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/attendance/clock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Clock State */
+        get: operations["attendance_clock_state"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/attendance/clock-in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Clock In */
+        post: operations["attendance_clock_in"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/attendance/clock-out": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Clock Out */
+        post: operations["attendance_clock_out"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/attendance/export.pdf": {
         parameters: {
             query?: never;
@@ -236,6 +287,40 @@ export interface paths {
         put?: never;
         /** Commit */
         post: operations["attendance_commit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/attendance/timesheets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Timesheets */
+        get: operations["attendance_timesheets"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/attendance/timesheets/{timesheet_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Approve */
+        post: operations["attendance_approve"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4024,6 +4109,57 @@ export interface components {
             /** Superseded By */
             superseded_by: string | null;
         };
+        /** ClockIn */
+        ClockIn: {
+            location?: components["schemas"]["ClockLocation"] | null;
+            /**
+             * Location Consent
+             * @default false
+             */
+            location_consent: boolean;
+            /** Note */
+            note?: string | null;
+        };
+        /** ClockLocation */
+        ClockLocation: {
+            /** Accuracy */
+            accuracy: number;
+            /** Latitude */
+            latitude: number;
+            /** Longitude */
+            longitude: number;
+        };
+        /** ClockOut */
+        ClockOut: {
+            location?: components["schemas"]["ClockLocation"] | null;
+            /**
+             * Location Consent
+             * @default false
+             */
+            location_consent: boolean;
+            /** Note */
+            note?: string | null;
+            /**
+             * Record Id
+             * Format: uuid
+             */
+            record_id: string;
+            /**
+             * Unpaid Break Minutes
+             * @default 0
+             */
+            unpaid_break_minutes: number;
+        };
+        /** ClockState */
+        ClockState: {
+            active: components["schemas"]["AttendanceOut"] | null;
+            /** Employee Name */
+            employee_name: string | null;
+            /** Location Enabled */
+            location_enabled: boolean;
+            /** Timezone */
+            timezone: string;
+        };
         /** CodeRequest */
         CodeRequest: {
             /** Code */
@@ -4052,6 +4188,11 @@ export interface components {
             bank_holiday_region: "england-and-wales" | "scotland" | "northern-ireland";
             /** Changed Name Last 5 Years */
             changed_name_last_5_years: boolean;
+            /**
+             * Clock Geolocation Enabled
+             * @default false
+             */
+            clock_geolocation_enabled: boolean;
             /** Contact Email */
             contact_email: string | null;
             /** Contact Phone */
@@ -4236,6 +4377,8 @@ export interface components {
             bank_holiday_region?: ("england-and-wales" | "scotland" | "northern-ireland") | null;
             /** Changed Name Last 5 Years */
             changed_name_last_5_years?: boolean | null;
+            /** Clock Geolocation Enabled */
+            clock_geolocation_enabled?: boolean | null;
             /** Contact Email */
             contact_email?: string | null;
             /** Contact Phone */
@@ -6678,6 +6821,65 @@ export interface components {
             /** Reference */
             reference: string | null;
         };
+        /** TimesheetApprove */
+        TimesheetApprove: {
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Fingerprint */
+            fingerprint: string;
+            /**
+             * Period Start
+             * Format: date
+             */
+            period_start: string;
+        };
+        /** TimesheetOut */
+        TimesheetOut: {
+            /** Approved At */
+            approved_at: string | null;
+            /** Approved By */
+            approved_by: string | null;
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Employee Name */
+            employee_name: string;
+            /** Fingerprint */
+            fingerprint: string;
+            /** Hours */
+            hours: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Incomplete */
+            incomplete: boolean;
+            /**
+             * Period End
+             * Format: date
+             */
+            period_end: string;
+            /**
+             * Period Start
+             * Format: date
+             */
+            period_start: string;
+            /** Records */
+            records: components["schemas"]["AttendanceOut"][];
+        };
+        /** TimesheetPage */
+        TimesheetPage: {
+            /** Items */
+            items: components["schemas"]["TimesheetOut"][];
+            /** Next Offset */
+            next_offset: number | null;
+        };
         /** TokenRequest */
         TokenRequest: {
             /** Token */
@@ -7212,6 +7414,128 @@ export interface operations {
             };
         };
     };
+    attendance_clock_state: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClockState"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    attendance_clock_in: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClockIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ClockState"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    attendance_clock_out: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClockOut"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     attendance_export_pdf: {
         parameters: {
             query: {
@@ -7560,6 +7884,92 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AttendanceImportOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    attendance_timesheets: {
+        parameters: {
+            query: {
+                start: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimesheetPage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    attendance_approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                timesheet_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TimesheetApprove"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TimesheetOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

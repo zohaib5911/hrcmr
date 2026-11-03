@@ -7,11 +7,11 @@ State: IN PROGRESS
 
 ## Current task
 - T9.3 — clock in/out and timesheet approvals
-  - [ ] Timesheet schema/migration and company geolocation switch
-  - [ ] Serialized self-service clock API and scoped stale-safe approval API
+  - [x] Timesheet schema/migration and company geolocation switch
+  - [x] Serialized self-service clock API and scoped stale-safe approval API
   - [ ] Clock/PWA and manager approval UI
   - [ ] Affected API/browser checks
-- Resume note: Implement T9.3 per plan 8.7 and Phase 9. Clock uses server time and linked employee only, optional consented company-enabled location. Weekly approvals exclude self and follow reporting chain; changes invalidate approval. Baseline attendance API31/static and browser green.
+- Resume note: Clock and weekly report approval APIs implemented; server UTC time/company date, own employee locking, no overwrite, consent/default-off geo, exact hours, report-chain/no-self/end-week/stale guards and changed-record invalidation. Migration7, regression/API27 and mypy268 pass; rollback assertion corrected to structured HTTP500, affected clock/RBAC/company rerun active. Client generated. Next clock/PWA and timesheet UI, production browser scenario.
 
 ## Next tasks
 - T9.4 — rota settings
@@ -28,6 +28,7 @@ State: IN PROGRESS
 - docs/audits/phase7.md absent from synced dev; F7.1–F7.7 queued findings were implemented and confirmed green in CI.
 
 ## Strategy / decisions taken
+- T9.3: weekly review uses a deterministic employee/week identifier for read-only projections; only approval writes a stamp with the reviewed record fingerprint. Changed records show review needed again. Location defaults off and requires employee consent per clock action; location/note text never enters audit events.
 - T9.2: scanned import files use attendance_import ownership and require current company-wide attendance read even for their uploader after demotion. Preview/commit is all-or-nothing with per-row errors and stale-record checks. Grid may save worked status with unknown times/hours; it must not invent clock times. Workbook XML hardening follows https://openpyxl.readthedocs.io/en/stable/#security (defusedxml installed); parser limits and formula rejection follow next.
 - T9.1: manual writes require full attendance.record.write; own-write is clock-only for T9.3. Employee row serializes upserts with leave booking. Leave-sync records cannot be overwritten. Company-local times become UTC instants; overnight clock-out rolls to next day, hours deduct unpaid break. Nonexistent wall times fail; repeated-hour entries require an explicit first/second occurrence. Audit excludes note text.
 - T8.5: preview is read-only; commit only after year ends and pending requests resolve. Reconcile closing allowance, carry nonnegative remaining up to type limit (reasoned override may exceed limit up to remaining), expire positive source balances and freeze source-year mutations. Negative fixed-allowance debt requires a reviewed adjustment before closing; unbounded types retain usage history without treating it as allowance debt.

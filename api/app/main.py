@@ -32,6 +32,7 @@ from app.integrations.turnstile import Turnstile
 from app.jobs.queue import open_queue
 from app.modules.access.router import router as access_router
 from app.modules.attendance.batch_router import router as attendance_batch_router
+from app.modules.attendance.clock_router import router as attendance_clock_router
 from app.modules.attendance.import_router import router as attendance_import_router
 from app.modules.attendance.router import router as attendance_router
 from app.modules.audit.router import router as audit_router
@@ -215,6 +216,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(attendance_router, prefix=API_PREFIX)
     app.include_router(attendance_import_router, prefix=API_PREFIX)
     app.include_router(attendance_batch_router, prefix=API_PREFIX)
+    app.include_router(attendance_clock_router, prefix=API_PREFIX)
     app.include_router(trading_hours_router, prefix=API_PREFIX)
     app.include_router(pay_router, prefix=API_PREFIX)
     app.include_router(access_router, prefix=API_PREFIX)
