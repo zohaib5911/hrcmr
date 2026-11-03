@@ -1,27 +1,24 @@
 # STATUS
-Updated: 2026-11-03 18:16, Europe/London    Agent: Codex    Branch: dev    Commit: fac4c48
+Updated: 2026-11-03 18:22, Europe/London    Agent: Codex    Branch: dev    Commit: 5805cc2
 State: IN PROGRESS
 
 ## Last completed
-- T9.4 — rota settings schema/API/forms, overnight validation, prerequisites and archives; API34/migration7/static/browser2 pass
+- T9.5 — rota grid/actions/warnings/publish/PDF/My Shifts complete; API/static/production browser/mobile axe pass
 
 ## Current task
-- T9.5 — rota grid, publish, print and My Shifts
-  - [x] Week/shift schema and optimistic edit/projection contracts
-  - [x] Scoped grid and shift write APIs
-  - [x] Copy/clear actions and advisory warning APIs
-  - [x] Publish notifications/PDF/own projection
-  - [x] Rota workspace/cell forms/menus and My Shifts
-  - [ ] Affected API/browser checks
-- Resume note: Browser passes quick-add/reassign/edit/PDF/publish/own snapshot/draft copy menus; rota mobile axe found paid-hours label contrast, corrected to primary text. Settings browser passes. Added no-linked-reports manager week guard; isolated rota API9 passes. API tests must never overlap Playwright because fixture provisioning rotates shared cluster role passwords. Rerun rota-workspace only through final clears, then finish T9.5.
+- T9.6 — My Work Log and admin corrections/removal
+  - [ ] Entry schema/migration and same-day own-write service
+  - [ ] Scoped list/KPIs/search, audited correction/removal and tests
+  - [ ] Own/admin workspace/forms and browser checks
+- Resume note: Implement T9.6 from plan 6.6/8.9/Phase9/API list. Own daily entry with responsibility selection/free text; own edits same company-local day. Admin range/search/employee/removed/archived filters, KPIs, correction keeps original and removal is soft, both reasoned/audited. Preserve history if a profile responsibility is removed. Then Phase9 gate.
 
 ## Next tasks
-- T9.6 — Work Log
 - Phase 9 gate — full suite/screenshots/green PR
+- T10.1 — company documents
 
 ## Health
 - CI on dev: current head not rechecked; last confirmed gate all 12 green (41640316888). CI on main: not rechecked.
-- Local checks run: T9.2 API31/browser4/static; T9.3 API39+attendance27/migration7/doc1/static/web25/browser2; T9.4 rota/RBAC/doc34/migration7, mypy273, web types/lint/nav22 and browser/setup2 (mobile axe) — pass.
+- Local checks run: T9.2 API31/browser4/static; T9.3 API39+attendance27/migration7/doc1/static/web25/browser2; T9.4 API34/migration7/static/web22/browser2; T9.5 affected61 + isolated rota9/clock-email12, migration7/mypy282/client, web types/lint/nav22 and browser workspace/setup2/settings1 (mobile axe) — pass.
 
 ## Issues / suggestions
 - Never run database pytest alongside Playwright: both provision shared PostgreSQL roles with random passwords, so concurrent setup causes app_owner authentication failures. Run them sequentially.
