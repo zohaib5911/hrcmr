@@ -252,7 +252,11 @@ for (const colorScheme of ["light", "dark"] as const) {
         await expect(
           page.getByRole("button", { name: "Record attendance", exact: true }),
         ).toBeVisible();
-        await expect(page.getByLabel("Employee", { exact: true })).toContainText("Ben Patel");
+        await expect(
+          page
+            .getByRole("region", { name: "Attendance workspace", exact: true })
+            .getByLabel("Employee", { exact: true }),
+        ).toContainText("Ben Patel");
         await page.getByLabel("Selected day", { exact: true }).fill(day);
         await expect(
           page
