@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Full web/unit/script/browser suite (sequentially)
   - [ ] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: Retry log confirms setup+seven previously failed browser cases pass (8/8). Full API658+corrected19, web777/scripts32/static green. Next SCREENSHOTS=1 phase9 spec (76 views), visual review/summary/all-green PR. Never overlap DB pytest and Playwright.
+- Resume note: Screenshot run /tmp/phase9-screenshots.txt exposed 19px overflow in long rota policy action labels on mobile. Wrapping fix in settings.tsx passes eslint/types. Finish active screenshot run, rerun screenshot spec against rebuilt production, review 76 images then summary/PR. Full prior validation green.
 
 ## Next tasks
 - T10.1 — company documents

@@ -203,3 +203,4 @@
 2026-11-03 18:56 | Codex | Phase9 gate | full browser active, design green; two attendance readiness races corrected with loaded-data waits/visible role selector; screenshot waits hardened | next finish full run then targeted failures and 76 screenshot evidence
 2026-11-03 19:02 | Codex | Phase9 gate | full browser413 pass/156 skipped/seven failures; attendance readiness and four built-page/More selectors corrected | next targeted seven browser cases then screenshots/review/PR
 2026-11-04 05:05 | Codex | Phase9 gate | recovered successful targeted browser retry log:8 pass, all seven full-run failures resolved | next 76 screenshots and visual review/green PR
+2026-11-03 22:38 | Codex | Phase9 gate | screenshot mobile check exposed long rota action overflow; scoped wrapping fix passes eslint/types | next rebuilt screenshots and visual review

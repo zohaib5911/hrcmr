@@ -131,7 +131,12 @@ export function RotaSettings() {
       id: "edit",
       header: "Open",
       cell: (r) => (
-        <Button variant="gray" size="sm" onClick={() => setOpened({ row: r })}>
+        <Button
+          variant="gray"
+          size="sm"
+          className="h-auto min-h-11 whitespace-normal"
+          onClick={() => setOpened({ row: r })}
+        >
           {writable ? "Edit" : "View"} {r.title}
         </Button>
       ),
@@ -140,14 +145,16 @@ export function RotaSettings() {
       id: "archive",
       header: "Archive",
       cell: (r) => (
-        <InlineConfirm
-          label={`Archive ${r.title}`}
-          prompt={`Archive ${r.title}?`}
-          confirmLabel="Archive setting"
-          destructive
-          disabled={busy}
-          onConfirm={() => archive(r)}
-        />
+        <div className="[&_button]:h-auto [&_button]:min-h-11 [&_button]:whitespace-normal">
+          <InlineConfirm
+            label={`Archive ${r.title}`}
+            prompt={`Archive ${r.title}?`}
+            confirmLabel="Archive setting"
+            destructive
+            disabled={busy}
+            onConfirm={() => archive(r)}
+          />
+        </div>
       ),
     },
   ];
