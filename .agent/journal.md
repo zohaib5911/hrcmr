@@ -206,3 +206,4 @@
 2026-11-03 22:38 | Codex | Phase9 gate | screenshot mobile check exposed long rota action overflow; scoped wrapping fix passes eslint/types | next rebuilt screenshots and visual review
 2026-11-03 22:39 | Codex | Phase9 gate | desktop screenshot review complete; attendance screenshot selects seeded company day explicitly | next final four screenshot variants then PR
 2026-11-03 22:40 | Codex | Phase9 gate | mobile overflow fixed; screenshot final inspector selector corrected to existing Open control | next final screenshots/review/PR
+2026-11-03 22:45 | Codex | Phase9 gate | final capture exposed hidden Sick option selector; scoped to records and awaited loaded employee filter | next screenshot rerun/review/PR
