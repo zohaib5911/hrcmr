@@ -20,7 +20,7 @@ from app.core.rbac_matrix import Scope, scope_for
 from app.modules.attendance.batch_schemas import AbsenceOut, GridIn, GridOut, GridPerson, GridSaved
 from app.modules.attendance.models import AttendanceRecord
 from app.modules.attendance.router import Reads, Writes, _company, _ids, _out
-from app.modules.attendance.schemas import AttendanceStatus  # noqa: TC001
+from app.modules.attendance.schemas import AttendanceIn, AttendanceStatus
 from app.modules.attendance.service import save_record
 from app.modules.attendance.workbooks import xlsx_bytes
 from app.modules.employees.models import Employee
@@ -116,7 +116,7 @@ async def save_grid(body: GridIn, access: Writes) -> GridSaved:
     if found != ids:
         raise NotFoundError
     for row in body.rows:
-        await save_record(access, row, source="grid")
+        await save_record(access, AttendanceIn.model_validate(row.model_dump()), source="grid")
     await access.audit("attendance.grid_saved", after={"rows": len(body.rows)})
     await access.db.commit()
     return GridSaved(count=len(body.rows))

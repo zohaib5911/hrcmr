@@ -117,16 +117,6 @@ async def save_record(
     company = (
         await access.db.execute(select(Company).where(Company.id == access.company_id))
     ).scalar_one()
-    if (
-        source == "grid"
-        and body.status in WORKED
-        and body.clock_in is None
-        and body.clock_out is None
-        and body.unpaid_break_minutes == 0
-    ):
-        start, end, hours = None, None, None
-    else:
-        start, end, hours = times(body, ZoneInfo(company.timezone))
     row = (
         await access.db.execute(
             select(AttendanceRecord)
@@ -138,6 +128,19 @@ async def save_record(
         raise ConflictError(
             "This attendance comes from approved leave and cannot be replaced by a manual record."
         )
+    status_only = source == "grid" and not (
+        {"clock_in", "clock_out", "unpaid_break_minutes"} & body.model_fields_set
+    )
+    if source == "grid" and row is not None and "note" not in body.model_fields_set:
+        body = body.model_copy(update={"note": row.note})
+    if status_only and body.status in WORKED:
+        # Keep the latest recorded instants, including overnight/DST clock entries.
+        start, end, hours = (row.clock_in, row.clock_out, row.hours) if row else (None, None, None)
+        body = body.model_copy(
+            update={"unpaid_break_minutes": row.unpaid_break_minutes if row else 0}
+        )
+    else:
+        start, end, hours = times(body, ZoneInfo(company.timezone))
     before = snapshot(row) if row else None
     old_note = row.note if row else None
     if row is None:

@@ -10,7 +10,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.core.schemas import RequestModel
-from app.modules.attendance.schemas import AttendanceIn, AttendanceOut  # noqa: TC001
+from app.modules.attendance.schemas import AttendanceOut, AttendanceStatus  # noqa: TC001
 
 
 class ImportRowOut(BaseModel):
@@ -33,8 +33,14 @@ class AttendanceImportOut(BaseModel):
     committed_at: datetime | None
 
 
+class GridRow(RequestModel):
+    employee_id: uuid.UUID
+    date: date
+    status: AttendanceStatus
+
+
 class GridIn(RequestModel):
-    rows: list[AttendanceIn] = Field(min_length=1, max_length=500)
+    rows: list[GridRow] = Field(min_length=1, max_length=500)
 
 
 class GridPerson(BaseModel):

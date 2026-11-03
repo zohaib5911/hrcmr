@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Clock } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/app/page-header";
@@ -18,6 +19,7 @@ import type { components } from "@/lib/api/client";
 import { STATUS, type Attendance, type Person, type Status } from "@/lib/attendance";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { addDays, addMonths, formatUk, parseIso, startOfWeek, todayIso } from "@/lib/ui/dates";
+import { AttendanceExports } from "./exports";
 import { RecordSheet } from "./record-sheet";
 
 type Page = components["schemas"]["AttendancePage"];
@@ -294,6 +296,29 @@ export function AttendanceWorkspace({
           ))}
         </Select>
       </div>
+      {!profile && (
+        <div className="flex flex-wrap items-center gap-2" aria-label="Attendance tools">
+          {mayWrite && (
+            <>
+              <Button asChild variant="gray">
+                <Link href="/attendance/import">Import</Link>
+              </Button>
+              <Button asChild variant="gray">
+                <Link href="/attendance/bulk">Bulk entry</Link>
+              </Button>
+            </>
+          )}
+          <AttendanceExports
+            start={dates.start}
+            end={dates.end}
+            employeeId={selectedEmployee || undefined}
+            status={status === "all" ? undefined : status}
+          />
+          <Button asChild variant="gray">
+            <Link href={`/attendance/absences?month=${on.slice(0, 7)}`}>Absences this month</Link>
+          </Button>
+        </div>
+      )}
       {problem && <Alert tone="danger" title={problem.message} />}
       {!profile && summary && dataKey === key && (
         <div>

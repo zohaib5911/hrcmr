@@ -23,7 +23,7 @@ API = "/api/v1/attendance"
 async def test_grid_reads_are_scoped_and_worked_status_does_not_invent_hours(
     ready: dict[str, Any],
 ) -> None:
-    assert (await put(ready)).status_code == 200
+    assert (await put(ready, note="Keep this note")).status_code == 200
     grid = await ready["admin"].get(API + "/grid?start=2026-01-05&limit=1")
     assert grid.status_code == 200, grid.text
     assert grid.json()["next_offset"] == 1
@@ -42,6 +42,22 @@ async def test_grid_reads_are_scoped_and_worked_status_does_not_invent_hours(
     records = await ready["admin"].get("/api/v1/attendance-records?start=2026-01-06&end=2026-01-06")
     assert len(records.json()["items"]) == 2
     assert all(r["source"] == "grid" and r["hours"] is None for r in records.json()["items"])
+    preserved = await ready["admin"].put(
+        API + "/grid",
+        json={
+            "rows": [
+                {"employee_id": str(ready["employee"]), "date": "2026-01-05", "status": "late"}
+            ]
+        },
+    )
+    assert preserved.status_code == 200, preserved.text
+    existing = (
+        await ready["admin"].get("/api/v1/attendance-records?start=2026-01-05&end=2026-01-05")
+    ).json()["items"][0]
+    assert existing["status"] == "late"
+    assert existing["hours"] == "7.50"
+    assert existing["unpaid_break_minutes"] == 30
+    assert existing["note"] == "Keep this note"
     me = await linked(ready, "employee", ready["employee"])
     mine = await me.get(API + "/grid?start=2026-01-05")
     assert {p["id"] for p in mine.json()["people"]} == {str(ready["employee"])}

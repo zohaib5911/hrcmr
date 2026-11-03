@@ -341,6 +341,9 @@ export function isActive(item: NavItem, pathname: string): boolean {
  * Each names the sidebar page it sits under, which is where the breadcrumb leads back to.
  */
 export const SUB_PAGES: readonly { href: string; label: string; parent: string }[] = [
+  { href: "/attendance/import", label: "Import attendance", parent: "/attendance" },
+  { href: "/attendance/bulk", label: "Bulk attendance", parent: "/attendance" },
+  { href: "/attendance/absences", label: "Absences this month", parent: "/attendance" },
   { href: "/company/locations", label: "Locations", parent: "/company" },
   { href: "/company/departments", label: "Departments", parent: "/company" },
   { href: "/company/designations", label: "Designations", parent: "/company" },

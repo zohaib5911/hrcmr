@@ -5030,7 +5030,7 @@ export interface components {
         /** GridIn */
         GridIn: {
             /** Rows */
-            rows: components["schemas"]["AttendanceIn"][];
+            rows: components["schemas"]["GridRow"][];
         };
         /** GridOut */
         GridOut: {
@@ -5071,6 +5071,24 @@ export interface components {
             leave_date: string | null;
             /** Name */
             name: string;
+        };
+        /** GridRow */
+        GridRow: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "present" | "absent" | "late" | "half_day" | "on_leave" | "sick";
         };
         /** GridSaved */
         GridSaved: {
