@@ -1,14 +1,18 @@
 # STATUS
-Updated: 2026-11-03 09:01, Europe/London    Agent: Codex    Branch: dev    Commit: 3c531a4
+Updated: 2026-11-03 09:03, Europe/London    Agent: Codex    Branch: dev    Commit: 3c531a4
 State: IN PROGRESS
 
 ## Last completed
 - F7.7 — refresh progress header and complete T7.4–T7.6 implementation/verification entries
 
 ## Current task
-- T8.1 — source verification; models/migration; service/API; UI; affected checks
-  - [ ] Implement and verify (one commit per audit fix)
-- Resume note: F7.7 complete. Next: T8.1 — source verification; models/migration; service/API; UI; affected checks. Audit file docs/audits/phase7.md absent from synced dev; user asked for contents, using queued STATUS findings.
+- T8.1 — leave types and settings
+  - [x] Verify twelve seed rules against GOV.UK; baseline settings/RBAC checks
+  - [ ] Models, frozen migration/backfill and signup seeds
+  - [ ] Scoped API/settings validation, audit and regression tests
+  - [ ] Leave settings UI, CRUD sheets and navigation
+  - [ ] Affected browser/API/static checks and task completion
+- Resume note: F7.1–F7.7 each committed/pushed. T8.1 verified GOV.UK rules; implement models/seed migration first. Sources include SSP first-full-day rule effective 6 April 2026; pay remains eligibility-dependent, no payroll calculations.
 
 ## Next tasks
 
@@ -31,6 +35,7 @@ F7.1 Step-up on role change, admin/HR-admin invite, and two-step policy change (
 - Dependabot #5 pending green CI; avoid unrelated changes.
 
 ## Strategy / decisions taken
+- T8.1: seed existing companies in migration and new signups in their creation transaction. Store seed identity, source URL/date and original rule text. Annual 28 days includes bank holidays; carry-over 5 is a configurable company default, with statutory exceptions stated separately. Paid flags indicate paid provision subject to eligibility, not guaranteed full salary. Settings use real MM-DD dates (exclude Feb 29 for annual recurrence).
 - Dossier: 8 GOV.UK publication/service links checked 2026-11-03; official HTTPS host only, no server fetch of edited URLs. Global reference links have platform-only writes, own content audit visibility and mandatory MFA; other platform permission policies deferred to Phase 17. Original checklist uses current official guide with source/date attribution.
 - T7.5 readiness: profile needs legal/contact/sector/default address plus conditional sponsor-history details; company documents means at least one current clean upload (18 types are optional by applicability). Coverage valid = verified or expiring; recorded-check readiness is separate. No reportable changes is Not applicable; prompt-report replacements carry no invented deadline.
 - Reviewed sends require a linked active verified account and use that account email; message is readable in own My Documents. The closest outstanding threshold controls Due now, including source snooze; sending it cancels older unsent thresholds as covered. Own-profile contact permission cannot reach HR create/lifecycle/48h endpoints.
