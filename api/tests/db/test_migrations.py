@@ -60,6 +60,7 @@ IDENTITY_TABLES = [
     "payment_types",
     "platform_admins",
     "reminders",
+    "report_jobs",
     "rota_weeks",
     "rtw_checks",
     "scheduled_shifts",

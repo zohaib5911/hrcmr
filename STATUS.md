@@ -7,11 +7,11 @@ State: IN PROGRESS
 
 ## Current task
 - T10.2 — Worker-generated XLSX reports
-  - [ ] Existing worker baseline and report schema/contracts
+  - [x] Existing worker baseline and report schema/contracts
   - [ ] Seven scoped report projections and safe XLSX generation
   - [ ] Durable queue, worker/API status/download and affected tests
   - [ ] Reports workspace and real worker/browser verification
-- Resume note: Read plan8.10/T10.2. Build Employee Directory/Detail/Archived, Company, Sponsor Workers, Leave Taken and Training Completion reports. Existing ARQ queue/scheduled worker, TenantSession, scanned File storage and short-lived downloads are available. No reports code yet. Keep DB pytest and browser sequential.
+- Resume note: ReportJob tenant model/contracts and frozen migration0031 ready; worker baseline4, migration7, report lint/types pass. Next seven tenant projections/safe XLSX generation, then durable enqueue/recovery worker + scoped report API. No API/worker/UI wired yet. No report content, pay or sensitive identifiers may enter logs/audit.
 
 ## Next tasks
 - T10.3 — policies and sign-offs
