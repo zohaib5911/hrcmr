@@ -348,8 +348,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         ).toBeVisible();
         await shoot(page, `work-log-correct-${suffix}`, true);
         await page.keyboard.press("Escape");
-        if (width === 390)
-          await page.getByRole("button", { name: "Open Mina Patel", exact: true }).click();
+        if (width === 390) await page.getByRole("button", { name: /^Open / }).click();
         else
           await page
             .getByRole("grid", { name: "Work log entries", exact: true })
