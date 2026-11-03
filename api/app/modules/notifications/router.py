@@ -1,0 +1,137 @@
+"""Own compliance messages and a live, permission-gated company attention feed (T7.6)."""
+
+from __future__ import annotations
+
+import uuid  # noqa: TC003
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Annotated
+
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func, select, tuple_, update
+
+from app.core.errors import NotFoundError
+from app.core.rbac_matrix import scope_for
+from app.modules.audit.router import _decode, _encode
+from app.modules.compliance.hub_router import overview
+from app.modules.notifications.models import Notification
+from app.modules.notifications.schemas import (
+    NotificationOut,
+    NotificationPage,
+    NotificationReadIn,
+    NotificationsReadOut,
+)
+from app.modules.rbac.deps import Access, require
+
+if TYPE_CHECKING:
+    from sqlalchemy import Select
+
+router = APIRouter(tags=["notifications"])
+Own = Annotated[Access, Depends(require("company.overview.read"))]
+
+
+def _may_read_compliance(access: Access) -> bool:
+    return scope_for(access.role, "compliance.overview.read") is not None
+
+
+def _kinds(access: Access) -> tuple[str, ...]:
+    # Other personal notification kinds, preferences and digests arrive in T14.2.
+    return (
+        ("compliance.reminder_received", "compliance.reminders_due")
+        if _may_read_compliance(access)
+        else ("compliance.reminder_received",)
+    )
+
+
+def _query(access: Access) -> Select[Notification]:
+    return select(Notification).where(
+        Notification.user_id == access.caller.user_id,
+        Notification.company_id == access.company_id,
+        Notification.kind.in_(_kinds(access)),
+    )
+
+
+def _out(row: Notification) -> NotificationOut:
+    return NotificationOut(
+        id=row.id,
+        kind=row.kind,
+        title=row.title,
+        body=row.body,
+        link=row.link,
+        read_at=row.read_at,
+        created_at=row.created_at,
+    )
+
+
+@router.get("/notifications", response_model=NotificationPage)
+async def notifications(
+    access: Own,
+    cursor: Annotated[str | None, Query(max_length=200)] = None,
+    limit: Annotated[int, Query(ge=1, le=100)] = 20,
+) -> NotificationPage:
+    query = _query(access)
+    unread = (
+        await access.db.execute(
+            select(func.count()).select_from(query.where(Notification.read_at.is_(None)).subquery())
+        )
+    ).scalar_one()
+    if cursor:
+        stamp, ident = _decode(cursor)
+        query = query.where(tuple_(Notification.created_at, Notification.id) < (stamp, ident))
+    rows = list(
+        (
+            await access.db.execute(
+                query.order_by(Notification.created_at.desc(), Notification.id.desc()).limit(
+                    limit + 1
+                )
+            )
+        ).scalars()
+    )
+    page = rows[:limit]
+    attention = (await overview(access)).attention if _may_read_compliance(access) else []
+    last = page[-1] if page else None
+    return NotificationPage(
+        items=[_out(row) for row in page],
+        next_cursor=_encode(last.created_at, last.id) if last and len(rows) > limit else None,
+        unread=unread,
+        needs_attention=attention[:5],
+        attention_count=len(attention),
+    )
+
+
+@router.post("/notifications/read-all", response_model=NotificationsReadOut)
+async def read_all(access: Own) -> NotificationsReadOut:
+    ids = _query(access).with_only_columns(Notification.id).where(Notification.read_at.is_(None))
+    marked = list(
+        (
+            await access.db.execute(
+                update(Notification)
+                .where(Notification.id.in_(ids))
+                .values(read_at=datetime.now(UTC), updated_by=access.caller.user_id)
+                .returning(Notification.id)
+            )
+        ).scalars()
+    )
+    if marked:
+        await access.audit(
+            "notification.read_all", entity_type="notification", after={"marked": len(marked)}
+        )
+    await access.db.commit()
+    return NotificationsReadOut(marked=len(marked))
+
+
+@router.patch("/notifications/{notification_id}", response_model=NotificationOut)
+async def read_notification(
+    notification_id: uuid.UUID, body: NotificationReadIn, access: Own
+) -> NotificationOut:
+    row = (
+        await access.db.execute(
+            _query(access).where(Notification.id == notification_id).with_for_update()
+        )
+    ).scalar_one_or_none()
+    if row is None:
+        raise NotFoundError
+    if row.read_at is None:
+        row.read_at = datetime.now(UTC)
+        await access.audit("notification.read", entity_type="notification", entity_id=row.id)
+        await access.db.commit()
+    return _out(row)

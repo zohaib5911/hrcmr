@@ -44,6 +44,7 @@ from app.modules.compliance.dossier_router import router as dossier_router
 from app.modules.compliance.hub_router import router as compliance_hub_router
 from app.modules.compliance.reminder_router import router as reminders_router
 from app.modules.compliance.router import router as compliance_changes_router
+from app.modules.compliance.sponsor_pdf import router as sponsor_pdf_router
 from app.modules.email.outbox import OutboxMailer
 from app.modules.employees.activity_router import router as employee_activity_router
 from app.modules.employees.compensation_router import router as compensation_router
@@ -57,6 +58,7 @@ from app.modules.files.router import router as files_router
 from app.modules.files.service import FileService
 from app.modules.health.router import router as health_router
 from app.modules.holidays.router import router as holidays_router
+from app.modules.notifications.router import router as notifications_router
 from app.modules.pay.router import router as pay_router
 from app.modules.rtw.router import router as rtw_router
 from app.modules.sponsor_documents.router import router as sponsor_documents_router
@@ -211,6 +213,8 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(compliance_changes_router, prefix=API_PREFIX)
     app.include_router(compliance_hub_router, prefix=API_PREFIX)
     app.include_router(dossier_router, prefix=API_PREFIX)
+    app.include_router(sponsor_pdf_router, prefix=API_PREFIX)
+    app.include_router(notifications_router, prefix=API_PREFIX)
     app.include_router(compliance_activity_router, prefix=API_PREFIX)
     app.include_router(reminders_router, prefix=API_PREFIX)
     app.include_router(sponsor_documents_router, prefix=API_PREFIX)

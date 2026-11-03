@@ -95,3 +95,4 @@
 2026-11-03 03:17 | Codex | T7.5 | complete: production hub/changes/RTW/setup 5 pass incl destinations/CSV/PDF/mobile axe; affected API and static checks pass | next T7.6 sponsor PDF and bell Needs attention
 2026-11-03 03:17 | Codex | T7.6 | started sponsor record PDF and bell feed; general notification preferences/digests remain Phase 14 | next affected baseline and masked scoped PDF
 2026-11-03 03:19 | Codex | T7.6 | baseline PDF/sponsor 15 and shell 19 pass; scoped design reviewed | next masked sponsor PDF with versions and change snapshots
+2026-11-03 03:23 | Codex | T7.6 | sponsor PDF scenario 1 and own bell/privacy/route checks 2 pass; APIs/static/generated types complete | next PDF download button and live bell UI

@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 03:19    Agent: Codex    Branch: dev    Commit: 68a05b9
+Updated: 2026-11-03 03:23    Agent: Codex    Branch: dev    Commit: b430bb8
 State: IN PROGRESS
 
 ## Last completed
@@ -8,10 +8,10 @@ State: IN PROGRESS
 ## Current task
 - T7.6 — Employee sponsor record PDF and bell Needs attention
   - [x] Affected baseline: PDF/sponsor API 15 pass, shell unit 19 pass; prior area lint/types pass
-  - [ ] Masked sponsor PDF including document versions/RTW/change snapshots; API checks
-  - [ ] Compliance bell feed and own received-notification privacy; API checks
+  - [x] Masked sponsor PDF including document versions/RTW/change snapshots; API scenario passes
+  - [x] Compliance bell feed, own unread/read state and recipient/company/role isolation; 2 API/route checks pass
   - [ ] Sponsor PDF download and bell UI; affected static/unit/browser checks
-- Resume note: Baseline PDF/sponsor 15 and shell 19 pass. Build sponsor PDF through existing record_html/render_pdf and scoped sponsor/RTW/change serializers. Bell shows live company compliance actions only to overview readers, plus own received compliance messages; general notification preferences/digests remain T14.2. Then Phase 7 full suite/screenshots/CI PR gate and audit stop.
+- Resume note: Sponsor PDF and compliance notification APIs complete; PDF scenario 1 and bell/privacy/route checks 2 pass, generated types and API/web static checks pass. PDF generation is Company/HR Admin only by existing document.report.generate (Auditor may read records but cannot generate). Bell returns own compliance messages plus top 5 live actions/count only to overview readers; mark-all never clears live obligations. Next PDF button and bell UI; affected unit/browser checks.
 
 ## Next tasks
 - T7.6; Phase 7 gate then BLOCKED — audit requested
