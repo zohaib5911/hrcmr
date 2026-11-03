@@ -62,7 +62,7 @@ Checks:
 | `address` | TEXT | yes |  |  |
 | `ack_inform_hr` | BOOLEAN | no | `false` |  |
 | `ack_home_office_interview` | BOOLEAN | no | `false` |  |
-| `documents_snapshot` | JSONB | no | `'[]'::jsonb` |  |
+| `documents_snapshot` | JSONB | no | `[]` |  |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 | `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
@@ -71,7 +71,7 @@ Checks:
 | `change_date` | DATE | no |  |  |
 | `calendar_region` | VARCHAR(20) | no |  |  |
 | `calendar_checked_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
-| `calendar_holidays` | JSONB | no | `'[]'::jsonb` |  |
+| `calendar_holidays` | JSONB | no | `[]` |  |
 | `reported_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `reported_by_user_id` | UUID | yes |  | references `users` |
 | `reported_reference` | VARCHAR(160) | yes |  |  |
@@ -236,6 +236,28 @@ Checks:
 Checks:
 
 - `soc_code ~ '^[0-9]{4}$'`
+
+## `dossier_links`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `section` | VARCHAR(10) | no |  |  |
+| `title` | VARCHAR(160) | no |  |  |
+| `url` | VARCHAR(1000) | no |  |  |
+| `checked_on` | DATE | no |  |  |
+| `position` | INTEGER | no | `0` |  |
+| `active` | BOOLEAN | no | `true` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `position >= 0`
+- `section in ('licence', 'rtw', 'sms')`
+- `url ~ '^https://www[.]gov[.]uk/[^[:space:]]+$'`
 
 ## `email_outbox`
 
@@ -694,7 +716,7 @@ Checks:
 | `change_date` | DATE | no |  |  |
 | `calendar_region` | VARCHAR(20) | no |  |  |
 | `calendar_checked_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
-| `calendar_holidays` | JSONB | no | `'[]'::jsonb` |  |
+| `calendar_holidays` | JSONB | no | `[]` |  |
 | `reported_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `reported_by_user_id` | UUID | yes |  | references `users` |
 | `reported_reference` | VARCHAR(160) | yes |  |  |

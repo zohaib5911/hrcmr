@@ -40,6 +40,7 @@ from app.modules.companies.router import router as company_router
 from app.modules.companies.structure_router import router as structure_router
 from app.modules.companies.trading_hours import router as trading_hours_router
 from app.modules.compliance.activity_router import router as compliance_activity_router
+from app.modules.compliance.dossier_router import router as dossier_router
 from app.modules.compliance.hub_router import router as compliance_hub_router
 from app.modules.compliance.reminder_router import router as reminders_router
 from app.modules.compliance.router import router as compliance_changes_router
@@ -209,6 +210,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(rtw_router, prefix=API_PREFIX)
     app.include_router(compliance_changes_router, prefix=API_PREFIX)
     app.include_router(compliance_hub_router, prefix=API_PREFIX)
+    app.include_router(dossier_router, prefix=API_PREFIX)
     app.include_router(compliance_activity_router, prefix=API_PREFIX)
     app.include_router(reminders_router, prefix=API_PREFIX)
     app.include_router(sponsor_documents_router, prefix=API_PREFIX)

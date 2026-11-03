@@ -23,6 +23,7 @@ IDENTITY_TABLES = [
     "company_holidays",
     "departments",
     "designations",
+    "dossier_links",
     "email_outbox",
     "email_tokens",
     "emergency_contacts",

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import app.modules.audit.models
 import app.modules.companies.models
+import app.modules.compliance.dossier_models
 import app.modules.compliance.models
 import app.modules.compliance.reminder_models
 import app.modules.email.models

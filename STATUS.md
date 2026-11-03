@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 03:03    Agent: Codex    Branch: dev    Commit: 6c7e91a
+Updated: 2026-11-03 03:09    Agent: Codex    Branch: dev    Commit: 3383d37
 State: IN PROGRESS
 
 ## Last completed
@@ -9,10 +9,10 @@ State: IN PROGRESS
 - T7.5 — Compliance hub and dossier
   - [x] Requirements/patterns and affected baseline checks: company/audit/document 27 pass; lint/types pass
   - [x] Scoped hub overview, urgency/coverage/readiness/expiry and audit CSV APIs/tests: 3 hub scenarios + audit 11 pass; architecture JSON-default violation fixed
-  - [ ] Official dossier links, editable platform store and original RTW checklist PDF/tests
+  - [x] Official dossier links, editable platform store and original RTW checklist PDF/tests: 19 dossier/migration/doc/identity pass; 16 RBAC checks verified
   - [ ] Hub/dossier UI matching existing components and static checks
   - [ ] Affected browser verification
-- Resume note: Hub overview/activity/CSV APIs implemented and scenario tests pass. Replaced T7.3 JSON default text() calls with literal defaults to satisfy raw-SQL architecture guard (no DB change). Next editable global dossier reference model/migration, platform-only MFA-protected API, original RTW checklist PDF. Official GOV.UK sources checked 2026-11-03. UI later needs query-tab handling for action links.
+- Resume note: Dossier model/migration 0019/API/PDF implemented; 19 dossier/migration/doc/identity cases pass, prior RBAC 16 pass, static/gen checks pass. Platform content guard requires verified account, current terms and mandatory MFA; only content policy enabled pending Phase 17. Global reference RLS blocks tenant writes; own content audit events alone allowed for INSERT/RETURNING, hidden from tenant feed. Next hub/dossier UI, platform link editor and working query-tab action links, then browser checks.
 
 ## Next tasks
 - T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
@@ -27,6 +27,7 @@ State: IN PROGRESS
 - Dependabot #5 pending green CI; avoid unrelated changes.
 
 ## Strategy / decisions taken
+- Dossier: 8 GOV.UK publication/service links checked 2026-11-03; official HTTPS host only, no server fetch of edited URLs. Global reference links have platform-only writes, own content audit visibility and mandatory MFA; other platform permission policies deferred to Phase 17. Original checklist uses current official guide with source/date attribution.
 - T7.5 readiness: profile needs legal/contact/sector/default address plus conditional sponsor-history details; company documents means at least one current clean upload (18 types are optional by applicability). Coverage valid = verified or expiring; recorded-check readiness is separate. No reportable changes is Not applicable; prompt-report replacements carry no invented deadline.
 - Reviewed sends require a linked active verified account and use that account email; message is readable in own My Documents. The closest outstanding threshold controls Due now, including source snooze; sending it cancels older unsent thresholds as covered. Own-profile contact permission cannot reach HR create/lifecycle/48h endpoints.
 - T7.4: human review/send only; email outbox, notification and sent/audit state commit together, generic existing reminder_nudge email. Add RTW target to reminder schema for explicit phase scenario. Daily owner job may refresh unreported derived deadline/calendar fields while entered snapshots and reported records stay immutable.
