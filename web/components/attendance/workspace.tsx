@@ -297,7 +297,11 @@ export function AttendanceWorkspace({
         </Select>
       </div>
       {!profile && (
-        <div className="flex flex-wrap items-center gap-2" aria-label="Attendance tools">
+        <div
+          role="group"
+          className="flex flex-wrap items-center gap-2"
+          aria-label="Attendance tools"
+        >
           {mayWrite && (
             <>
               <Button asChild variant="gray">

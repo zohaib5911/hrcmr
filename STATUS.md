@@ -12,7 +12,7 @@ State: IN PROGRESS
   - [x] Bulk grid API, XLSX/PDF exports and monthly absences
   - [x] Import/bulk/report UI and toolbar downloads
   - [ ] Affected API/browser checks
-- Resume note: Import/bulk/absence screens and filtered downloads written, browser workflow ready. Grid status-only updates preserve latest worked instants/break/note; new status-only hours remain unknown. Recovered RBAC test payload correction saved; API lint/format/mypy265 and web type/lint/generated contract pass. Test services restarted after unreachable setup errors; affected API rerun active. Next production Playwright attendance-batches/attendance. No full suite/screenshots until Phase 9 gate.
+- Resume note: Affected API31 and static checks pass. Browser found file-picker exact-label mismatch and toolbar missing group role; corrected both. Rerun production attendance-batches/attendance. No full suite/screenshots until Phase 9 gate.
 
 ## Next tasks
 - T9.2 — import, bulk entry and exports

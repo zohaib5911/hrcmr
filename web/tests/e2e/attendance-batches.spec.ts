@@ -27,7 +27,7 @@ test("preview row errors, import a corrected file, bulk edit and export monthly 
   await page.getByRole("button", { name: "Download Excel template", exact: true }).click();
   expect((await templateDownload).suggestedFilename()).toBe("attendance-template.xlsx");
   const header = "employee_number,date,status,clock_in,clock_out,note\n";
-  await page.getByLabel("Attendance spreadsheet", { exact: true }).setInputFiles({
+  await page.getByLabel(/Attendance spreadsheet/).setInputFiles({
     name: "invalid.csv",
     mimeType: "text/csv",
     buffer: Buffer.from(header + "UNKNOWN,2026-11-03,Present,09:00,17:00,Front desk\n"),
@@ -39,7 +39,7 @@ test("preview row errors, import a corrected file, bulk edit and export monthly 
     (await (await api.get(`${API}/attendance-records?start=2026-11-03&end=2026-11-03`)).json())
       .items,
   ).toHaveLength(0);
-  await page.getByLabel("Attendance spreadsheet", { exact: true }).setInputFiles({
+  await page.getByLabel(/Attendance spreadsheet/).setInputFiles({
     name: "attendance.csv",
     mimeType: "text/csv",
     buffer: Buffer.from(
