@@ -78,13 +78,15 @@ const columns: Column<Reporting>[] = [
 export function ChangesPage({
   changes,
   organisation,
+  initialTab = "workers",
 }: {
   changes: Change[];
   organisation: OrgChange[];
+  initialTab?: string;
 }) {
   const can = useCan();
   const router = useRouter();
-  const [tab, setTab] = useState("workers");
+  const [tab, setTab] = useState(initialTab);
   const [filter, setFilter] = useState<ChangeFilter>("all");
   const [search, setSearch] = useState("");
   const [dialog, setDialog] = useState<Dialog | null>(null);

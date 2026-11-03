@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 03:09    Agent: Codex    Branch: dev    Commit: 3383d37
+Updated: 2026-11-03 03:14    Agent: Codex    Branch: dev    Commit: 993982d
 State: IN PROGRESS
 
 ## Last completed
@@ -10,9 +10,9 @@ State: IN PROGRESS
   - [x] Requirements/patterns and affected baseline checks: company/audit/document 27 pass; lint/types pass
   - [x] Scoped hub overview, urgency/coverage/readiness/expiry and audit CSV APIs/tests: 3 hub scenarios + audit 11 pass; architecture JSON-default violation fixed
   - [x] Official dossier links, editable platform store and original RTW checklist PDF/tests: 19 dossier/migration/doc/identity pass; 16 RBAC checks verified
-  - [ ] Hub/dossier UI matching existing components and static checks
+  - [x] Hub/dossier UI and separate platform editor, query-tab action links; web types/lint pass
   - [ ] Affected browser verification
-- Resume note: Dossier model/migration 0019/API/PDF implemented; 19 dossier/migration/doc/identity cases pass, prior RBAC 16 pass, static/gen checks pass. Platform content guard requires verified account, current terms and mandatory MFA; only content policy enabled pending Phase 17. Global reference RLS blocks tenant writes; own content audit events alone allowed for INSERT/RETURNING, hidden from tenant feed. Next hub/dossier UI, platform link editor and working query-tab action links, then browser checks.
+- Resume note: UI built: overview queue/coverage/readiness/expiry/tools/activity CSV; dossier download; platform editor. Employee profile accepts validated initial query tab; changes accepts organisation query. Static checks pass. Next write production browser hub scenario checking deep links, filter/export, dossier checklist and mobile/axe, then run affected tests before finishing T7.5. No screenshots until gate.
 
 ## Next tasks
 - T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested

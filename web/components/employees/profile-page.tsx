@@ -54,15 +54,28 @@ export function ProfilePage({
   profile,
   personal,
   employment,
+  initialTab = "overview",
 }: {
   profile: EmployeeProfile;
   personal: PersonalData;
   employment: EmploymentData;
+  initialTab?: string;
 }) {
   const can = useCan();
   const router = useRouter();
-  const [tab, setTab] = useState("overview");
   const mayReadRtw = can("employee.rtw.read", "employee.rtw.read_own");
+  const allowedTabs = [
+    "overview",
+    "personal",
+    "employment",
+    "leave",
+    "attendance",
+    "documents",
+    "learning",
+    ...(mayReadRtw ? ["rtw", "sponsor"] : []),
+    ...(can("compliance.audit.read") ? ["activity"] : []),
+  ];
+  const [tab, setTab] = useState(allowedTabs.includes(initialTab) ? initialTab : "overview");
   const name = `${profile.first_name} ${profile.last_name}`;
   return (
     <>
