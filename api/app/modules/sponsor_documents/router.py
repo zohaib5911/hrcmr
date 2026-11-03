@@ -196,6 +196,11 @@ async def _record(
     )
     access.db.add(row)
     await access.db.flush()
+    from app.modules.compliance.reminder_service import synchronize_employee
+
+    await synchronize_employee(
+        access.db, employee_id, access.audit_context, today=await _today(access)
+    )
     await access.audit(
         "employee.sponsor_document_versioned" if source else "employee.sponsor_document_added",
         entity_type="employee",
@@ -238,6 +243,12 @@ async def withdraw_document(
     row = await _by_id(access, document_id, lock=True)
     row.withdrawn_at = datetime.now(UTC)
     row.withdraw_reason = body.reason
+    await access.db.flush()
+    from app.modules.compliance.reminder_service import synchronize_employee
+
+    await synchronize_employee(
+        access.db, row.employee_id, access.audit_context, today=await _today(access)
+    )
     await access.audit(
         "employee.sponsor_document_withdrawn",
         entity_type="employee",

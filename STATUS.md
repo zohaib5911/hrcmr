@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 02:06    Agent: Codex    Branch: dev    Commit: 763c40b
+Updated: 2026-11-03 02:15    Agent: Codex    Branch: dev    Commit: a6bf9bc
 State: IN PROGRESS
 
 ## Last completed
@@ -9,11 +9,11 @@ State: IN PROGRESS
 - T7.4 — Reminders engine and register
   - [x] Reminder requirements and email/notification/job patterns reviewed; baseline lint/types and 11 email/worker tests pass; queue-test minute-boundary flake fixed
   - [x] Threshold/reminder model and migration 0018; 14 migration/doc/change-regression checks pass
-  - [ ] Daily reconciliation job and version/withdrawal cancellation
+  - [x] Threshold/source hooks and daily job, cancellation/restore/snooze and derived-calendar refresh; 34 reminder/source/worker checks pass, final engine 5 pass
   - [ ] Scoped register/review/edit/snooze/send API with audited who/when and in-app/email delivery
   - [ ] Reminders page/register/history/review drawer (template until Phase 14)
   - [ ] Affected API/browser verification
-- Resume note: Reminder model/migration 0018 ready; 14 migration/doc/change regression checks pass, ruff/mypy clean. Next threshold service + source record/version/withdraw hooks, daily job and owner-only unreported deadline refresh. Both sponsor and RTW targets supported, sent records immutable, 3 unique threshold rows per source version. Deliver explicit sends atomically through encrypted email_outbox + Notification + sent audit; existing reminder_nudge template. No service/API/UI yet.
+- Resume note: Reminder engine/source hooks/daily job verified: 34 reminder+RTW+sponsor+worker checks and final 5 engine checks pass, ruff/mypy clean. Next scoped reminder schemas/router + transactional reviewed send (Reminder, Notification and encrypted EmailOutbox in one transaction), received-reminder own view, then register/drawer UI. Current engine creates 3 thresholds per sponsor/RTW version, no automatic employee sends, dedupes admin notices, resumes due after 7-day snooze, refreshes only unreported calculated deadlines as owner. RTW 21-day Expiring + due30 scenario passes. APIs/UI not started.
 
 
 ## Next tasks

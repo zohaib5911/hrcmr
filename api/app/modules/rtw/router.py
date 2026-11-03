@@ -205,6 +205,11 @@ async def _record(
     )
     access.db.add(row)
     await access.db.flush()
+    from app.modules.compliance.reminder_service import synchronize_employee
+
+    await synchronize_employee(
+        access.db, employee_id, access.audit_context, today=await _today(access)
+    )
     await access.audit(
         "employee.rtw_corrected" if corrected else "employee.rtw_recorded",
         entity_type="employee",

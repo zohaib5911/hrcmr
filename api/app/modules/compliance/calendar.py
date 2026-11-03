@@ -13,6 +13,7 @@ from app.modules.compliance.working_days import add_working_days
 from app.modules.holidays.models import BankHoliday
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
     from datetime import date, datetime
 
     from app.modules.rbac.deps import Access
@@ -48,13 +49,21 @@ async def reporting_deadline(access: Access, event: date, days: int | None) -> R
         await access.db.execute(select(Company).where(Company.id == access.company_id))
     ).scalar_one()
     region = company.bank_holiday_region
-    if days is None:
-        return ReportingDeadline(None, region, None, ())
     rows = (
         (await access.db.execute(select(BankHoliday).where(BankHoliday.region == region)))
         .scalars()
         .all()
+        if days is not None
+        else []
     )
+    return deadline_for(region, event, days, rows)
+
+
+def deadline_for(
+    region: str, event: date, days: int | None, rows: Sequence[BankHoliday]
+) -> ReportingDeadline:
+    if days is None:
+        return ReportingDeadline(None, region, None, ())
     years = {row.on_date.year for row in rows}
     if event.year not in years:
         raise _unavailable()

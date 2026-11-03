@@ -81,3 +81,4 @@
 2026-11-03 01:57 | Codex | T7.4 | reminders/email/notifications/job requirements reviewed; baseline lint/types and email/worker tests pass | next model/migration 0018 and threshold service
 2026-11-03 01:59 | Codex | T7.4 baseline | fixed existing worker queue-test cron minute-boundary flake; email/worker 11 pass, lint/types pass | next reminders model/migration 0018
 2026-11-03 02:06 | Codex | T7.4 | reminder model/migration 0018 with RTW targets, sent immutability and owner-only derived deadline refresh; 14 migration/doc/change checks pass | next threshold service/source hooks/daily job
+2026-11-03 02:15 | Codex | T7.4 | threshold/source hooks + daily job, admin notice dedupe, snooze/restore/cancellation and unreported deadline refresh; 34 checks pass, final engine 5 pass | next scoped review/send API with atomic delivery
