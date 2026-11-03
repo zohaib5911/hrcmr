@@ -169,6 +169,7 @@ Checks:
 | `mfa_policy` | VARCHAR(10) | no | `optional` |  |
 | `bank_holidays_non_working` | BOOLEAN | no | `true` |  |
 | `ai_features_enabled` | BOOLEAN | no | `true` |  |
+| `clock_geolocation_enabled` | BOOLEAN | no | `false` |  |
 | `changed_name_last_5_years` | BOOLEAN | no | `false` |  |
 | `previous_company_name` | VARCHAR(200) | yes |  |  |
 | `penalty_illegal_working_last_3_years` | BOOLEAN | no | `false` |  |
@@ -1162,6 +1163,27 @@ Checks:
 | `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `created_by` | UUID | yes |  |  |
 | `updated_by` | UUID | yes |  |  |
+
+## `timesheet_approvals`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `employees` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `period_start` | DATE | no |  |  |
+| `period_end` | DATE | no |  |  |
+| `fingerprint` | VARCHAR(64) | no |  |  |
+| `approved_by` | UUID | no |  |  |
+| `approved_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `period_end = period_start + 6`
 
 ## `trading_hours_days`
 

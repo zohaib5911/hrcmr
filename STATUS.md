@@ -9,9 +9,9 @@ State: IN PROGRESS
 - T9.3 — clock in/out and timesheet approvals
   - [x] Timesheet schema/migration and company geolocation switch
   - [x] Serialized self-service clock API and scoped stale-safe approval API
-  - [ ] Clock/PWA and manager approval UI
+  - [x] Clock/PWA and manager approval UI
   - [ ] Affected API/browser checks
-- Resume note: Clock and weekly report approval APIs implemented; server UTC time/company date, own employee locking, no overwrite, consent/default-off geo, exact hours, report-chain/no-self/end-week/stale guards and changed-record invalidation. Migration7, regression/API27 and mypy268 pass; rollback assertion corrected to structured HTTP500, affected clock/RBAC/company rerun active. Client generated. Next clock/PWA and timesheet UI, production browser scenario.
+- Resume note: Clock/PWA manifest/icons/no-cache offline fallback, Home/Attendance entry links, per-action optional location and break/note forms, report week review/confirm/reload UI implemented. API clock/RBAC/company39, prior attendance27, migration7/doc1, mypy268, web types/lint/nav25 pass. Run production attendance-clock browser then finish T9.3; no phase screenshots/full suite yet.
 
 ## Next tasks
 - T9.4 — rota settings

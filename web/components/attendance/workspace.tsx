@@ -302,6 +302,16 @@ export function AttendanceWorkspace({
           className="flex flex-wrap items-center gap-2"
           aria-label="Attendance tools"
         >
+          {(can("attendance.record.write") || can("attendance.record.write_own")) && (
+            <Button asChild variant="gray">
+              <Link href="/clock">Clock in or out</Link>
+            </Button>
+          )}
+          {can("attendance.timesheet.approve_reports") && (
+            <Button asChild variant="gray">
+              <Link href="/attendance/timesheets">Timesheet approvals</Link>
+            </Button>
+          )}
           {mayWrite && (
             <>
               <Button asChild variant="gray">
