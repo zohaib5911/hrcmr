@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [ ] Full web/unit/script/browser suite (sequentially)
   - [ ] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: Full Playwright active /tmp/phase9-browser-full.txt (design checks green; two attendance tests hit hydration/filter readiness races, test selectors/waits corrected). No other failures so far. Screenshot spec also awaits template hydration and selected timesheet data. Finish full browser without restarting it, rerun only affected failures, then SCREENSHOTS=1 phase9 screenshots and visual review/summary/PR. API658+corrected19, web777/scripts32/static green.
+- Resume note: Full Playwright complete:413 pass/156 skipped/seven failures. Two attendance readiness fixes already pushed; four shell placeholder assertions updated for built rota/work-log/my-work-log/my-shifts, More Work log link now exact. Run only those seven cases (plus setup), then SCREENSHOTS=1 phase9 spec (76 views), visual review/summary/all-green PR. Full API658+corrected19, web777/scripts32/static green. Never overlap DB pytest and Playwright.
 
 ## Next tasks
 - T10.1 — company documents
