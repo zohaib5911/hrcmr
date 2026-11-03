@@ -70,7 +70,9 @@ test("upload, review, filter, download, edit and archive a company document", as
   const confirm = page.getByRole("alertdialog", { name: "Archive this document?", exact: true });
   await confirm.getByRole("button", { name: "Archive", exact: true }).click();
   await expect(edit).toBeHidden();
-  await expect(page.getByRole("heading", { name: "No documents yet", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "No matching documents", exact: true }),
+  ).toBeVisible();
   await page.getByRole("checkbox", { name: "Show archived", exact: true }).check();
   await expect(cards.getByText("Archived", { exact: true })).toBeVisible();
   await expect(

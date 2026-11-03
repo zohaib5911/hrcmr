@@ -12,7 +12,7 @@ State: IN PROGRESS
   - [x] Scoped audited scanned CRUD/download API and affected tests
   - [x] Documents workspace, upload/edit/archive and review flags
   - [ ] Production browser verification, static checks and completion log
-- Resume note: Documents UI upload/edit/archive/filter/review/scan/download ready; web types/affected lint pass. Browser spec company-documents.spec.ts covers actual scanned file/download, filters, metadata and archive with mobile axe. Next production browser plus documents shell case, then completion. API5+related49/migration7/static/client green; DB pytest finished.
+- Resume note: Production browser reaches actual upload/download/filters/edit/archive; final empty state assertion corrected for still-active insurance filter. Setup+documents shell2 pass. Rerun company-documents.spec.ts only, then final completion. API5+related49/migration7/static/client/web types/lint/nav15 green.
 
 ## Next tasks
 - T10.2 — reports
