@@ -177,8 +177,8 @@ test.describe("navigation", () => {
     const crumbs = page.getByRole("navigation", { name: "Breadcrumb" });
     await expect(crumbs).toContainText("Compliance");
     await expect(crumbs.getByRole("link", { name: "Sponsor compliance" })).toBeVisible();
-    await expect(page).toHaveTitle("Reminders | Brand");
-    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Reminders");
+    await expect(page).toHaveTitle("Compliance reminders | Brand");
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Compliance reminders");
   });
 
   test("the skip link is the first thing Tab reaches, and takes you to the content", async ({
@@ -299,18 +299,19 @@ test.describe("the toolbar", () => {
 
 // Pages that have been built: they still have their heading, title and place in the menu, but no
 // longer the "on its way" empty state of a page that has not been built yet.
-const BUILT = new Set(["company", "users", "employees"]);
+const BUILT = new Set(["company", "users", "employees", "compliance", "reminders", "my-documents"]);
 
 test.describe("every page in the sidebar", () => {
   for (const item of NAV_ITEMS) {
     test(`${item.href} serves a page headed "${item.label}", in the frame`, async ({ page }) => {
       const response = await page.goto(item.href);
       expect(response?.status()).toBe(200);
-      await expect(page.getByRole("heading", { level: 1 })).toHaveText(item.label);
+      const title = item.id === "reminders" ? "Compliance reminders" : item.label;
+      await expect(page.getByRole("heading", { level: 1 })).toHaveText(title);
       if (!BUILT.has(item.id)) {
         await expect(page.getByRole("heading", { level: 2, name: item.emptyTitle })).toBeVisible();
       }
-      await expect(page).toHaveTitle(`${item.label} | Brand`);
+      await expect(page).toHaveTitle(`${title} | Brand`);
       await expect(
         page
           .getByRole("navigation", { name: "Main" })
