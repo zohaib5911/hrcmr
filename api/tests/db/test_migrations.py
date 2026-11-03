@@ -22,6 +22,7 @@ IDENTITY_TABLES = [
     "companies",
     "company_bank_accounts",
     "company_compliance_documents",
+    "company_documents",
     "company_holidays",
     "day_off_patterns",
     "departments",

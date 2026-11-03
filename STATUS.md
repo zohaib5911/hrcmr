@@ -8,11 +8,11 @@ State: IN PROGRESS
 ## Current task
 - T10.1 — Company documents (categories and review dates)
   - [x] Read relevant plan and verify existing document/file/RBAC baseline34
-  - [ ] Model, tenant migration and contracts
+  - [x] Model, tenant migration and contracts
   - [ ] Scoped audited scanned CRUD/download API and affected tests
   - [ ] Documents workspace, upload/edit/archive and review flags
   - [ ] Production browser verification, static checks and completion log
-- Resume note: Implement company_documents per plan6.7/8.10/T10.1. Follow company compliance_documents scanned upload and employee document patterns; full document.file scope required for company records. Baseline34 passed; Phase9 full static/build green. No T10 code yet.
+- Resume note: CompanyDocument model/contracts and migration0030 ready; tenant composite file FK/RLS/triggers and ten category constraints. Migration7, document typing/ruff pass. Next documents/router.py full-scope scanned CRUD/download plus regression tests, then UI.
 
 ## Next tasks
 - T10.2 — reports
