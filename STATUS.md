@@ -8,10 +8,10 @@ State: IN PROGRESS
 ## Current task
 - T9.2 — attendance import, bulk entry, exports and absences
   - [x] Import schema/file purpose, workbook dependency and shared row service
-  - [ ] XLSX/CSV templates and preview/commit with row errors
+  - [x] XLSX/CSV templates and preview/commit with row errors
   - [ ] Bulk grid API, CSV/XLSX/PDF exports and monthly absences
   - [ ] Import/bulk/report UI and affected API/browser checks
-- Resume note: Import model/migration, composite tenant file FK and protected attendance_import file ownership ready; openpyxl/defusedxml/types installed under existing cooldown. Shared save_record extracted, grid may record status-only worked entries without inventing hours; leave guards retained. Migration/attendance/files28 pass, demotion file test running; static clean. Next bounded XLSX/CSV templates/parser and saved preview/commit.
+- Resume note: Scanned template/preview/read/commit API complete; parser bounded to 5MB/1000 rows/20MB expanded XLSX, no formula/macro/external-link input; stale snapshot, duplicate/row errors, retry/tenant/leave guards. Import/attendance/RBAC/workbooks49 pass; migration/files28 + demotion1 pass; types clean. Next bulk grid and scoped exports/absences APIs, then import/bulk/report UI and real browser flow (test server/CI needs RustFS+ClamAV for uploads).
 
 ## Next tasks
 - T9.2 — import, bulk entry and exports
