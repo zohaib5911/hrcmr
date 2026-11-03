@@ -177,6 +177,7 @@ class Location(Base, RecordMixin, TenantMixin):
 class Department(Base, RecordMixin, TenantMixin):
     __tablename__ = "departments"
     __table_args__ = (
+        UniqueConstraint("company_id", "id", name="uq_departments_company_id_id"),
         Index(
             "uq_departments_company_id_name",
             "company_id",
@@ -198,6 +199,9 @@ class Designation(Base, RecordMixin, TenantMixin):
 
     __tablename__ = "designations"
     __table_args__ = (
+        UniqueConstraint(
+            "company_id", "department_id", "id", name="uq_designations_company_department_id"
+        ),
         CheckConstraint(r"soc_code ~ '^[0-9]{4}$'", name="soc_code"),
         Index(
             "uq_designations_department_id_title",

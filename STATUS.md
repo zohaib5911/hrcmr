@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 17:47, Europe/London    Agent: Codex    Branch: dev    Commit: b0e5879
+Updated: 2026-11-03 17:49, Europe/London    Agent: Codex    Branch: dev    Commit: d8fde90
 State: IN PROGRESS
 
 ## Last completed
@@ -7,11 +7,11 @@ State: IN PROGRESS
 
 ## Current task
 - T9.4 — shift types, late policies and day off patterns
-  - [ ] Models/migration and validation schemas
+  - [x] Models/migration and validation schemas
   - [ ] Scoped audited settings APIs and affected tests
   - [ ] Settings tabs/forms and prerequisite empty states
   - [ ] Production browser/static checks
-- Resume note: Start T9.4 per plan 6.6/8.8/Phase9 and endpoint list. Copy nearby pay/structure CRUD conventions; validate department/designation/shift combinations and overnight breaks. No full suite/screenshots until Phase 9 gate.
+- Resume note: Rota shift/late/day-off models and bounded validation added; overnight break timeline, same-tenant composite references, unique live combinations and archive columns. Migration7 and rota type checks pass; generated data model refreshed. Next scoped audited CRUD endpoints/tests then /rota/settings forms and prerequisite empty states.
 
 ## Next tasks
 - T9.5 — rota grid, publish, print and My Shifts
@@ -28,6 +28,7 @@ State: IN PROGRESS
 - docs/audits/phase7.md absent from synced dev; F7.1–F7.7 queued findings were implemented and confirmed green in CI.
 
 ## Strategy / decisions taken
+- T9.4: follow existing settings archive conventions; one active late policy/day-off pattern per department/designation/shift, overnight breaks validated within the shift. Deduction settings are stored configuration; no automatic payroll deduction is introduced.
 - T9.3: weekly review uses a deterministic employee/week identifier for read-only projections; only approval writes a stamp with the reviewed record fingerprint. Changed records show review needed again. Location defaults off and requires employee consent per clock action; location/note text never enters audit events.
 - T9.2: scanned import files use attendance_import ownership and require current company-wide attendance read even for their uploader after demotion. Preview/commit is all-or-nothing with per-row errors and stale-record checks. Grid may save worked status with unknown times/hours; it must not invent clock times. Workbook XML hardening follows https://openpyxl.readthedocs.io/en/stable/#security (defusedxml installed); parser limits and formula rejection follow next.
 - T9.1: manual writes require full attendance.record.write; own-write is clock-only for T9.3. Employee row serializes upserts with leave booking. Leave-sync records cannot be overwritten. Company-local times become UTC instants; overnight clock-out rolls to next day, hours deduct unpaid break. Nonexistent wall times fail; repeated-hour entries require an explicit first/second occurrence. Audit excludes note text.

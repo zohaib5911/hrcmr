@@ -262,6 +262,27 @@ Checks:
 
 - `end_date >= start_date`
 
+## `day_off_patterns`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `departments`, references `designations`, references `shift_types` |
+| `department_id` | UUID | no |  | references `departments`, references `designations` |
+| `designation_id` | UUID | no |  | references `designations` |
+| `shift_type_id` | UUID | no |  | references `shift_types` |
+| `weekdays_off` | INTEGER[] | no |  |  |
+| `works_public_holidays` | BOOLEAN | no | `false` |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `weekdays_off <@ ARRAY[1,2,3,4,5,6,7] AND array_position(weekdays_off, NULL) IS NULL`
+
 ## `departments`
 
 | Column | Type | Null | Default | Notes |
@@ -698,6 +719,30 @@ Checks:
 
 - `role in ('authorising_officer', 'key_contact', 'level1_user', 'level2_user')`
 
+## `late_policies`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `departments`, references `designations`, references `shift_types` |
+| `department_id` | UUID | no |  | references `departments`, references `designations` |
+| `designation_id` | UUID | no |  | references `designations` |
+| `shift_type_id` | UUID | no |  | references `shift_types` |
+| `grace_minutes` | INTEGER | no |  |  |
+| `allowed_late_days_per_month` | INTEGER | no |  |  |
+| `deduction_type` | VARCHAR(20) | no |  |  |
+| `deduction_value` | NUMERIC(10, 2) | no |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `deduction_value >= 0 AND ((deduction_type='none' AND deduction_value=0) OR deduction_type='fixed' OR (deduction_type='percentage_of_day' AND deduction_value<=100))`
+- `grace_minutes between 0 and 1440 AND allowed_late_days_per_month between 0 and 31`
+
 ## `leave_ledger`
 
 | Column | Type | Null | Default | Notes |
@@ -1074,6 +1119,30 @@ Checks:
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 | `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+
+## `shift_types`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `name` | VARCHAR(80) | no |  |  |
+| `description` | TEXT | yes |  |  |
+| `starts_at` | TIME WITHOUT TIME ZONE | no |  |  |
+| `ends_at` | TIME WITHOUT TIME ZONE | no |  |  |
+| `break_start` | TIME WITHOUT TIME ZONE | yes |  |  |
+| `break_end` | TIME WITHOUT TIME ZONE | yes |  |  |
+| `colour` | VARCHAR(7) | no | `#007aff` |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(break_start is null) = (break_end is null)`
+- `starts_at <> ends_at`
 
 ## `sponsor_documents`
 

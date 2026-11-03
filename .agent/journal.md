@@ -182,3 +182,4 @@
 2026-11-03 17:44 | Codex | T9.3 | production PWA assets/registration pass; corrected location switch selector for composed accessible name | next clock/consent/report browser rerun
 2026-11-03 17:46 | Codex | T9.3 | consent/clock/reload/out browser flow passes; breadcrumb contrast over tinted chrome corrected to primary labels | next mobile axe and report approval browser rerun
 2026-11-03 17:47 | Codex | T9.3 | complete: clock/PWA/location and report approval browser/setup2 including mobile axe pass; API39/regressions/migration/static green | next T9.4 rota settings schema/API/UI
+2026-11-03 17:49 | Codex | T9.4 | shift/late/day-off schema and validation ready; tenant composite references and live uniqueness; migration7/rota typing pass | next scoped audited settings CRUD/tests
