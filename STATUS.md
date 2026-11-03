@@ -8,10 +8,10 @@ State: IN PROGRESS
 ## Current task
 - T8.3 — requests, conflicts, approvals and attendance synchronization
   - [x] Request and attendance models/migration
-  - [ ] Working-day counter and scoped request/approval API
-  - [ ] Booking ledger, attendance and transactional decision notifications
+  - [x] Working-day counter and scoped request/approval API
+  - [x] Booking ledger, attendance and transactional decision notifications
   - [ ] Affected API/security/static checks
-- Resume note: Request/attendance model and migration written; ruff/mypy clean. Migration verification next. Reuse ledger helpers with callers auditing/committing. No request code yet. Balance workspaces remain T8.4; rota entities arrive in Phase 9, when shift clashes can be evaluated.
+- Resume note: Migration8 checks pass, request API/counter/booking/notification code written and strict static checks clean. API scenario tests not yet added/run: highest priority. API schema regenerated. No UI changes for requests yet. Types with requires_approval=false auto-book by configured policy with no human decider; explicit approvals always forbid self. Pending cancellation only.
 
 ## Next tasks
 - T8.3 — requests, working-days counter, conflicts, approvals, notifications, attendance sync
@@ -31,6 +31,7 @@ State: IN PROGRESS
 - Units are standard company days (weekly company hours / working weekdays). Personal shorter days reduce both entitlement and charge. Personal days inherit weekday hours unless overridden; new working weekdays use the company average. Exact fractions avoid rounding drift; entitlement/calendar totals round up once to 0.01 day.
 - Regular-pattern entitlement uses inclusive employment calendar days; assignment end is exclusive. Monthly posts completed leave-months, with partial employment months pro-rata. Null allowances are not zero. Regular automatic calculation rejects zero-hours/casual assignments; reviewed manual grants are available. Sources/policy: data/leave/SOURCES.md.
 - Explicit bank_holidays_included flag seeded true for Annual Leave and exposed in type settings. Regional non-working bank holidays and annual-deducting closures reserve scheduled personal days across the leave year, with overlaps charged once. Missing regional calendar year coverage fails explicitly. Reconciliation may record a negative balance to reflect corrected entitlements/reservations; manual deductions/sets obey the company negative-balance policy.
+- T8.3: advisory minimum staffing warning when a proposed absence leaves nobody in the department; no blocking staffing rule is invented. Shift conflicts connect in Phase 9 once shifts exist. Request counter excludes all closures and non-working regional bank holidays, while ledger reserves annual deductions separately. Re-check snapshots before approval; changed dates/patterns require cancellation/resubmission.
 - AI hidden without ANTHROPIC_API_KEY; Ask Mady deferred.
 
 ## Owner actions needed

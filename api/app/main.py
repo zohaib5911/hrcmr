@@ -58,6 +58,7 @@ from app.modules.files.router import router as files_router
 from app.modules.files.service import FileService
 from app.modules.health.router import router as health_router
 from app.modules.holidays.router import router as holidays_router
+from app.modules.leave.request_router import router as leave_requests_router
 from app.modules.leave.router import router as leave_router
 from app.modules.notifications.router import router as notifications_router
 from app.modules.pay.router import router as pay_router
@@ -203,6 +204,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(compliance_router, prefix=API_PREFIX)
     app.include_router(holidays_router, prefix=API_PREFIX)
     app.include_router(leave_router, prefix=API_PREFIX)
+    app.include_router(leave_requests_router, prefix=API_PREFIX)
     app.include_router(trading_hours_router, prefix=API_PREFIX)
     app.include_router(pay_router, prefix=API_PREFIX)
     app.include_router(access_router, prefix=API_PREFIX)

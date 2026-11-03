@@ -167,54 +167,7 @@ async def calculate(
 ) -> Calculation:
     company = (await db.execute(select(Company).where(Company.id == db.company_id))).scalar_one()
     start, end = year_bounds(on, company.leave_year_start_month_day)
-    rows = (
-        (await db.execute(select(WorkingPatternDay).order_by(WorkingPatternDay.weekday)))
-        .scalars()
-        .all()
-    )
-    by_day = {r.weekday: r.hours if r.is_working else ZERO for r in rows}
-    default = tuple(by_day.get(i, ZERO) for i in range(1, 8))
-    assignments = (
-        (
-            await db.execute(
-                select(EmployeeAssignment)
-                .where(
-                    EmployeeAssignment.employee_id == employee.id,
-                    EmployeeAssignment.effective_from < end,
-                    (EmployeeAssignment.ended_at.is_(None) | (EmployeeAssignment.ended_at > start)),
-                )
-                .order_by(EmployeeAssignment.effective_from)
-            )
-        )
-        .scalars()
-        .all()
-    )
-    if any(a.employment_type in ("zero_hours", "casual") for a in assignments):
-        raise AppError(
-            "IRREGULAR_HOURS",
-            "Use a reviewed manual grant for irregular hours; "
-            "regular-pattern entitlement cannot be applied.",
-            status_code=422,
-        )
-    names = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
-    patterns = tuple(
-        Pattern(
-            a.effective_from,
-            a.ended_at,
-            tuple(
-                (a.hours_per_day or default[i] or standard_day(default))
-                if name in a.custom_working_days
-                else ZERO
-                for i, name in enumerate(names)
-            )
-            if a.custom_working_days is not None
-            else tuple(
-                (a.hours_per_day if a.hours_per_day is not None else h) if h > 0 else ZERO
-                for h in default
-            ),
-        )
-        for a in assignments
-    )
+    default, patterns = await working_pattern(db, employee.id, start, end)
     grant = entitlement(
         kind.days_per_year,
         start,
@@ -326,3 +279,72 @@ async def reconcile(
         result.append(row)
     await db.flush()
     return calculated, result
+
+
+async def working_pattern(
+    db: TenantSession,
+    employee_id: uuid.UUID,
+    start: date,
+    end: date,
+    *,
+    regular_only: bool = True,
+) -> tuple[tuple[Decimal, ...], tuple[Pattern, ...]]:
+    rows = (
+        (await db.execute(select(WorkingPatternDay).order_by(WorkingPatternDay.weekday)))
+        .scalars()
+        .all()
+    )
+    by_day = {r.weekday: r.hours if r.is_working else ZERO for r in rows}
+    default = tuple(by_day.get(i, ZERO) for i in range(1, 8))
+    assignments = (
+        (
+            await db.execute(
+                select(EmployeeAssignment)
+                .where(
+                    EmployeeAssignment.employee_id == employee_id,
+                    EmployeeAssignment.effective_from < end,
+                    (EmployeeAssignment.ended_at.is_(None) | (EmployeeAssignment.ended_at > start)),
+                )
+                .order_by(EmployeeAssignment.effective_from)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    if regular_only and any(a.employment_type in ("zero_hours", "casual") for a in assignments):
+        raise AppError(
+            "IRREGULAR_HOURS",
+            "Use a reviewed manual grant for irregular hours; "
+            "regular-pattern entitlement cannot be applied.",
+            status_code=422,
+        )
+    if not regular_only and any(
+        a.employment_type in ("zero_hours", "casual") and a.custom_working_days is None
+        for a in assignments
+    ):
+        raise AppError(
+            "WORKING_PATTERN_REQUIRED",
+            "Set a personal working pattern before requesting leave "
+            "for an irregular-hours employee.",
+            status_code=422,
+        )
+    names = ("mon", "tue", "wed", "thu", "fri", "sat", "sun")
+    patterns = tuple(
+        Pattern(
+            a.effective_from,
+            a.ended_at,
+            tuple(
+                (a.hours_per_day or default[i] or standard_day(default))
+                if name in a.custom_working_days
+                else ZERO
+                for i, name in enumerate(names)
+            )
+            if a.custom_working_days is not None
+            else tuple(
+                (a.hours_per_day if a.hours_per_day is not None else h) if h > 0 else ZERO
+                for h in default
+            ),
+        )
+        for a in assignments
+    )
+    return default, patterns
