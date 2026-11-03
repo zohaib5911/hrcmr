@@ -3,15 +3,15 @@ Updated: 2026-11-03 13:34, Europe/London    Agent: Codex    Branch: dev    Commi
 State: IN PROGRESS
 
 ## Last completed
-- Phase 8 — leave/settings/ledger/requests/workspaces/year-end; PR #14 merged 2d1394e after all 12 CI checks green (41640316888)
+- T9.1 — attendance APIs, manual record sheet, KPIs/ranges/filters and employee history
 
 ## Current task
 - T9.1 — attendance records, record sheet and workspace
   - [x] Scoped list/own/summary APIs and validated audited upsert
   - [x] API validation, scopes, concurrency and leave-sync safeguards
   - [x] Day/week/month/custom workspace, KPIs, filters and record sheet
-  - [ ] Employee Attendance tab and affected browser/static checks
-- Resume note: Attendance UI/profile tab and two production browser scenarios ready; API36/baseline47 and static/client pass. Run attendance spec plus existing Related tabs and /attendance shell cases; fix failures, then complete T9.1. No screenshots/full suites until Phase 9 gate.
+  - [x] Employee Attendance tab and affected browser/static checks
+- Resume note: T9.1 complete: API36/baseline47/browser5 including mobile axe and static/client pass. Start T9.2 attendance import model/file-purpose integration, XLSX/CSV template/preview/commit, bulk grid, exports and monthly absences report.
 
 ## Next tasks
 - T9.1 — attendance workspace, records and filters
