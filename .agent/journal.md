@@ -117,3 +117,4 @@
 2026-11-03 08:48 | Codex | F7.1 | guards and UI confirmation complete; access 12 pass, ruff/mypy/web lint/types pass | next F7.2 auth audit events
 2026-11-03 08:53 | Codex | F7.2 | transactional authentication audit events with private pre-tenant inserts and no credentials; auth endpoints 18 pass; auth flows and migrations 30 pass; ruff/mypy pass | next F7.3 — every registered route against all six roles
 2026-11-03 08:54 | Codex | F7.3 | exercise every effective route guard for six roles; prevent deferred-router enumeration from passing vacuously; RBAC 22 pass; ruff/mypy pass | next F7.4 — cross-company PDF and dossier isolation tests
+2026-11-03 08:55 | Codex | F7.4 | foreign PDF IDs match missing-record 404s without render/audit; shared global dossier and tenant download audit verified; PDF/dossier isolation and related tests 8 pass; ruff/mypy pass | next F7.5 — Python/SQL RTW status parity on identical data

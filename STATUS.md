@@ -1,19 +1,18 @@
 # STATUS
-Updated: 2026-11-03 08:54, Europe/London    Agent: Codex    Branch: dev    Commit: 346885c
+Updated: 2026-11-03 08:55, Europe/London    Agent: Codex    Branch: dev    Commit: f8d74b6
 State: IN PROGRESS
 
 ## Last completed
-- F7.3 — exercise every effective route guard for six roles; prevent deferred-router enumeration from passing vacuously
+- F7.4 — foreign PDF IDs match missing-record 404s without render/audit; shared global dossier and tenant download audit verified
 
 ## Current task
-- F7.4 — cross-company PDF and dossier isolation tests
+- F7.5 — Python/SQL RTW status parity on identical data
   - [ ] Implement and verify (one commit per audit fix)
-- Resume note: F7.3 complete. Next: F7.4 — cross-company PDF and dossier isolation tests. Audit file docs/audits/phase7.md absent from synced dev; user asked for contents, using queued STATUS findings.
+- Resume note: F7.4 complete. Next: F7.5 — Python/SQL RTW status parity on identical data. Audit file docs/audits/phase7.md absent from synced dev; user asked for contents, using queued STATUS findings.
 
 ## Next tasks
 
 F7.1 Step-up on role change, admin/HR-admin invite, and two-step policy change (+ tests)   [high]
-F7.4 Cross-company 404 tests: sponsor PDF, employee record PDF, dossier   [medium]
 F7.5 Test: Python status_of == SQL employee_rtw_status on the same data   [low]
 F7.6 Replace waitForTimeout in 4 functional specs; stub Redis in test_errors_and_request_id   [low]
 F7.7 Update PROGRESS header and T7.4–T7.6 entries   [low]
@@ -22,9 +21,10 @@ F7.7 Update PROGRESS header and T7.4–T7.6 entries   [low]
 
 
 
+
 ## Health
 - CI on dev: last Phase 7 PR green; no dev push workflow. CI on main: previously pending, not rechecked.
-- Local checks run: RBAC 22 pass; ruff/mypy pass
+- Local checks run: PDF/dossier isolation and related tests 8 pass; ruff/mypy pass
 
 ## Issues / suggestions
 - Remove cooldown exceptions once safe: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.
