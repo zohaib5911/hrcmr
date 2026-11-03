@@ -16,6 +16,7 @@ FUNCTIONS = {"uuid_generate_v7", "app_current_company_id", "set_updated_at"}
 IDENTITY_TABLES = [
     "audit_events",
     "bank_holidays",
+    "change_of_circumstances",
     "companies",
     "company_bank_accounts",
     "company_compliance_documents",
@@ -43,6 +44,7 @@ IDENTITY_TABLES = [
     "locations",
     "memberships",
     "notifications",
+    "org_changes",
     "pay_bands",
     "pay_schedules",
     "payment_types",
@@ -62,6 +64,7 @@ IDENTITY_FUNCTIONS = {
     "audit_events_append_only",
     "rtw_checks_immutable",
     "sponsor_documents_immutable",
+    "compliance_changes_immutable",
 }
 
 

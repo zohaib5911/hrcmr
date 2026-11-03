@@ -47,6 +47,45 @@ Checks:
 
 - `region in ('england-and-wales', 'scotland', 'northern-ireland')`
 
+## `change_of_circumstances`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `change_type` | VARCHAR(32) | no |  |  |
+| `deadline_date` | DATE | no |  |  |
+| `employment_type` | VARCHAR(12) | yes |  |  |
+| `job_title` | VARCHAR(160) | yes |  |  |
+| `nationality` | VARCHAR(80) | yes |  |  |
+| `contact_number` | VARCHAR(40) | yes |  |  |
+| `address` | TEXT | yes |  |  |
+| `ack_inform_hr` | BOOLEAN | no | `false` |  |
+| `ack_home_office_interview` | BOOLEAN | no | `false` |  |
+| `documents_snapshot` | JSONB | no | `'[]'::jsonb` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+| `change_date` | DATE | no |  |  |
+| `calendar_region` | VARCHAR(20) | no |  |  |
+| `calendar_checked_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `calendar_holidays` | JSONB | no | `'[]'::jsonb` |  |
+| `reported_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `reported_by_user_id` | UUID | yes |  | references `users` |
+| `reported_reference` | VARCHAR(160) | yes |  |  |
+| `report_recorded_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `remarks` | TEXT | yes |  |  |
+
+Checks:
+
+- `(reported_at is null and reported_by_user_id is null and reported_reference is null and report_recorded_at is null) or (reported_at is not null and reported_by_user_id is not null and reported_reference is not null and length(trim(reported_reference)) > 0 and report_recorded_at is not null)`
+- `calendar_checked_at is not null`
+- `calendar_region in ('england-and-wales', 'scotland', 'northern-ireland')`
+- `change_type in ('did_not_start', 'unauthorised_absence', 'sponsorship_stopped', 'salary_reduced', 'job_or_soc_changed', 'work_location_changed', 'working_hours_changed', 'unpaid_reduced_absence', 'other')`
+- `deadline_date > change_date`
+
 ## `companies`
 
 | Column | Type | Null | Default | Notes |
@@ -637,6 +676,38 @@ Checks:
 | `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `created_by` | UUID | yes |  |  |
 | `updated_by` | UUID | yes |  |  |
+
+## `org_changes`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `change_type` | VARCHAR(20) | no |  |  |
+| `deadline_date` | DATE | yes |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `archive_reason` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+| `change_date` | DATE | no |  |  |
+| `calendar_region` | VARCHAR(20) | no |  |  |
+| `calendar_checked_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `calendar_holidays` | JSONB | no | `'[]'::jsonb` |  |
+| `reported_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `reported_by_user_id` | UUID | yes |  | references `users` |
+| `reported_reference` | VARCHAR(160) | yes |  |  |
+| `report_recorded_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `remarks` | TEXT | yes |  |  |
+
+Checks:
+
+- `(archived_at is null and archive_reason is null) or (archived_at is not null and archive_reason is not null and length(trim(archive_reason)) > 0 and reported_at is null)`
+- `(change_type = 'ao_or_key_contact' and deadline_date is null) or (change_type <> 'ao_or_key_contact' and deadline_date is not null and deadline_date > change_date and calendar_checked_at is not null)`
+- `(reported_at is null and reported_by_user_id is null and reported_reference is null and report_recorded_at is null) or (reported_at is not null and reported_by_user_id is not null and reported_reference is not null and length(trim(reported_reference)) > 0 and report_recorded_at is not null)`
+- `calendar_region in ('england-and-wales', 'scotland', 'northern-ireland')`
+- `change_type in ('address', 'ownership', 'name', 'key_personnel', 'ao_or_key_contact', 'other')`
 
 ## `pay_bands`
 

@@ -71,3 +71,4 @@
 2026-11-03 01:21 | Codex | T7.2 | complete: migration/doc 7, sponsor API 14, sponsor browser/setup 2 and adjacent RTW browser/setup 2 pass; lint/types/build clean | next T7.3 working days/CoC/org changes
 2026-11-03 01:23 | Codex | T7.3 | official deadline/glossary/calendar sources checked; holiday baseline lint/types/tests pass; recorded AO/Key Contact exception | next pure calculator and dated examples
 2026-11-03 01:24 | Codex | T7.3 | pure working-day calculator with 12 official-date examples/edge checks passes lint/types/tests | next immutable changes/org models and migration 0017
+2026-11-03 01:29 | Codex | T7.3 | change/org models + migration 0017, tenant RLS and immutable snapshots/reporting; migration/doc 7 pass | next scoped API/calendar coverage/reporting tests

@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 01:24    Agent: Codex    Branch: dev    Commit: 0bbd9aa
+Updated: 2026-11-03 01:29    Agent: Codex    Branch: dev    Commit: ac88e1e
 State: IN PROGRESS
 
 ## Last completed
@@ -9,11 +9,11 @@ State: IN PROGRESS
 - T7.3 — Working-day calculator, change of circumstances and organisation changes
   - [x] Requirements and GOV.UK Part 3/glossary/calendar checked 2026-11-03; holiday baseline 6 tests, ruff/mypy pass
   - [x] Working-day calculator with GOV.UK bank-holiday examples; 12 unit checks pass
-  - [ ] Change/org-change models, migration and immutable snapshots
+  - [x] Change/org-change models and migration 0017; immutable worker/reported records, unreported org CRUD; 7 migration/doc checks pass
   - [ ] Scoped APIs, deadlines and mark-reported tests
   - [ ] Employee change form/log and company-wide pages
   - [ ] Affected browser checks and final verification
-- Resume note: Working-day calculator in compliance/working_days.py verified by 12 dated examples/tests (ruff/mypy pass). Next changes/org-change models and migration 0017. Keep immutable employee/document snapshots, use regional bank-holiday coverage, 10/20 days and explicit prompt AO/Key Contact exception. Sources checked 2026-11-03.
+- Resume note: Calculator 12 unit checks and model/migration 0017 checks 7 pass (ruff/mypy clean). Next compliance changes schemas/calendar loader/API and scoped tests. Worker snapshot records immutable except mark-reported. Org records allow audited correction/archive while unreported, then freeze. Regional calendar coverage required; AO/Key Contact prompt-report exception has no invented fixed date.
 
 
 ## Next tasks
