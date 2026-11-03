@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Full API (479 pass, two failures fixed/15 affected pass) and web static/unit/guard checks
   - [x] Full browser suite: 398 pass/148 skips; four stale shell assertions updated
   - [x] Affected shell/setup 68 pass
-  - [ ] Screenshot capture (Loading-status wait corrected)
+  - [ ] Screenshot capture 5 pass/36 images; mobile queue fix awaiting verification/recapture
   - [ ] Save/review Phase 7 screenshots at 390 and 1280 px
   - [ ] Write five-line phase summary, open dev → main PR, merge only with all CI green
   - [ ] Set BLOCKED — audit requested and stop

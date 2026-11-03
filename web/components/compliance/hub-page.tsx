@@ -97,7 +97,10 @@ export function HubPage({ overview }: { overview: Overview }) {
           ) : (
             <ul className="bg-elevated rounded-card shadow-e1 divide-separator divide-y">
               {overview.attention.map((item) => (
-                <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 p-4">
+                <li
+                  key={item.id}
+                  className="flex flex-col items-start justify-between gap-3 p-4 sm:flex-row sm:items-center"
+                >
                   <div className="min-w-0 flex-1">
                     <p className="text-headline text-label break-words">{item.title}</p>
                     <p className="text-callout text-label-secondary">
