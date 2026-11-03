@@ -170,3 +170,4 @@
 2026-11-03 14:06 | Codex | T9.2 | scanned XLSX/CSV templates and saved preview/read/commit complete; bounded values-only parsing, errors/stale/tenant/retry/rollback protections, private import audit names; API/workbook49 pass, client generated | next grid/export/absence APIs and UI
 2026-11-03 14:18 | Codex | T9.2 | scoped week grid/atomic status-only bulk, safe XLSX/PDF exports and absence totals ready; affected53 pass, client generated; test stack enables real scanned browser uploads | next import/bulk/report UI and browser scenarios
 2026-11-03 14:30 | Codex | T9.2 | import preview/reload/commit, weekly status grid, absence report and filtered XLSX/PDF download UI written; grid preserves existing worked times/notes, typed status-only schema | next static/affected API and real scanned-upload browser checks
+2026-11-03 17:27 | Codex | T9.2 | recovered valid grid RBAC payload test, saved and synced dev | next affected static/API and production browser checks

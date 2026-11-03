@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 14:30, Europe/London    Agent: Codex    Branch: dev    Commit: 9b86a1c
+Updated: 2026-11-03 17:27, Europe/London    Agent: Codex    Branch: dev    Commit: 8c32b97
 State: IN PROGRESS
 
 ## Last completed
@@ -12,7 +12,7 @@ State: IN PROGRESS
   - [x] Bulk grid API, XLSX/PDF exports and monthly absences
   - [x] Import/bulk/report UI and toolbar downloads
   - [ ] Affected API/browser checks
-- Resume note: Import/bulk/absence screens and filtered downloads written, browser workflow ready. Grid status-only updates preserve latest worked instants/break/note; new status-only hours remain unknown. Run static and affected batches/API checks, then production Playwright attendance-batches/attendance. No full suite/screenshots until Phase 9 gate.
+- Resume note: Import/bulk/absence screens and filtered downloads written, browser workflow ready. Grid status-only updates preserve latest worked instants/break/note; new status-only hours remain unknown. Recovered RBAC test payload correction saved; run static and affected batches/API checks, then production Playwright attendance-batches/attendance. No full suite/screenshots until Phase 9 gate.
 
 ## Next tasks
 - T9.2 — import, bulk entry and exports
