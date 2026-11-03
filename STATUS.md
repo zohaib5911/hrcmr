@@ -12,7 +12,7 @@ State: IN PROGRESS
   - [x] Bulk grid API, XLSX/PDF exports and monthly absences
   - [x] Import/bulk/report UI and toolbar downloads
   - [ ] Affected API/browser checks
-- Resume note: Affected API31 and static checks pass. Browser found file-picker exact-label mismatch and toolbar missing group role; corrected both. Rerun production attendance-batches/attendance. No full suite/screenshots until Phase 9 gate.
+- Resume note: Affected API31 and static checks pass. Browser found file-picker exact-label mismatch and toolbar missing group role; corrected both. Import/commit/bulk flow reaches mobile axe: translucent tab-bar secondary labels fail contrast over the grid; use primary labels. Rerun production attendance-batches/attendance. No full suite/screenshots until Phase 9 gate.
 
 ## Next tasks
 - T9.2 — import, bulk entry and exports
