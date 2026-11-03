@@ -1,17 +1,18 @@
 # STATUS
-Updated: 2026-11-03 11:55, Europe/London    Agent: Codex    Branch: dev    Commit: 71da003
-State: HANDED OVER
+Updated: 2026-11-03 11:57, Europe/London    Agent: Codex    Branch: dev    Commit: 6cd5a59
+State: IN PROGRESS
 
 ## Last completed
 - T8.3 — scoped requests/previews/LSA approvals, atomic ledger/attendance/notifications and security regressions
 
 ## Current task
-- T8.3 — requests, conflicts, approvals and attendance synchronization
-  - [x] Request and attendance models/migration
-  - [x] Working-day counter and scoped request/approval API
-  - [x] Booking ledger, attendance and transactional decision notifications
-  - [x] Affected API/security/static checks
-- Resume note: T8.3 complete. Start T8.4 with balance/calendar API and reasoned Grant/Deduct/Set endpoints around ledger.py; then /leave tabs, /my-leave, /my-approvals and employee Leave tab. Request endpoints already exist in request_router.py; UI shells in web/components/leave/home.tsx and employees/related-tabs.tsx. Follow plan.md Section 8 leave UX and Section 12 API paths.
+- T8.4 — leave workspaces and employee Leave tab
+  - [ ] Scoped balance/calendar APIs and audited Grant/Deduct/Set
+  - [ ] API/security tests and generated client
+  - [ ] Leave Calendar/Requests/Balances, My Leave, My Approvals
+  - [ ] Employee Leave tab and balance action sheet
+  - [ ] Affected checks and browser workflows
+- Resume note: Start scoped balance/calendar router around ledger.py, then API checks and UI using existing leave requests endpoints.
 
 ## Next tasks
 - T8.4 — leave workspaces and employee tab
