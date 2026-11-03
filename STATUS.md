@@ -1,6 +1,6 @@
 # STATUS
-Updated: 2026-11-03 09:16, Europe/London    Agent: Codex    Branch: dev    Commit: 46e5cdf
-State: IN PROGRESS
+Updated: 2026-11-03 09:17, Europe/London    Agent: Codex    Branch: dev    Commit: 3db8bc3
+State: HANDED OVER
 
 ## Last completed
 - T8.1 — verified leave defaults, tenant configuration API and settings UI
