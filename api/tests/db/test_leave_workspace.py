@@ -150,3 +150,22 @@ async def test_calendar_working_dates_scope_and_department(ready: dict[str, Any]
         await ready["admin"].get(BASE + f"/calendar?month=2026-01&department_id={uuid.uuid4()}")
     ).json()["items"] == []
     assert (await ready["admin"].get(BASE + "/calendar?month=0000-01")).status_code == 422
+
+
+async def test_unsaved_default_and_explicit_all_off_working_patterns(ready: dict[str, Any]) -> None:
+    async with ready["owner"].begin() as c:
+        await c.execute(
+            text("delete from working_pattern_days where company_id=:c"), {"c": ready["a"]}
+        )
+    url = f"/api/v1/employees/{ready['employee']}/leave-balances?on=2026-01-05"
+    assert annual(await ready["admin"].get(url), ready)["available"] == "26.00"
+    async with ready["owner"].begin() as c:
+        await c.execute(
+            text(
+                "insert into working_pattern_days (company_id,weekday,is_working,hours) select :c,d,false,0 from generate_series(1,7) d"
+            ),
+            {"c": ready["a"]},
+        )
+    row = annual(await ready["admin"].get(url), ready)
+    assert row["available"] is None
+    assert "Set at least one company working day" in row["calculation_issue"]

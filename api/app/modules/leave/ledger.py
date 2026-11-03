@@ -308,7 +308,13 @@ async def working_pattern(
         .all()
     )
     by_day = {r.weekday: r.hours if r.is_working else ZERO for r in rows}
-    default = tuple(by_day.get(i, ZERO) for i in range(1, 8))
+    default = tuple(by_day.get(i, Decimal("8.00") if i <= 5 else ZERO) for i in range(1, 8))
+    if not any(default):
+        raise AppError(
+            "WORKING_PATTERN_REQUIRED",
+            "Set at least one company working day before calculating leave.",
+            status_code=422,
+        )
     assignments = (
         (
             await db.execute(

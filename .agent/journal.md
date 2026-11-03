@@ -156,3 +156,4 @@
 2026-11-03 12:30 | Codex | Phase 8 gate | web lint/types/contract pass, full unit776 pass with one stale notification-name assertion updated | next targeted shell/scripts result, full browser and screenshots
 2026-11-03 12:36 | Codex | Phase 8 gate | shell19/scripts32 pass after sandbox-independent CLI checks; full Playwright active /tmp/phase8-browser-full.txt (design checks green so far) | next finish browser, screenshots, summary and green PR
 2026-11-03 12:45 | Codex | Phase 8 gate | full browser407 pass/152 skipped/four shell assertions updated for implemented leave pages and sentence-case headings | next targeted four browser cases plus 48 Phase 8 screenshots
+2026-11-03 12:49 | Codex | Phase 8 gate | target exposed initial-company zero-pattern 500, fixed to existing Mon–Fri/8h Time defaults; explicit all-off issue handled; affected55/static pass. Calendar contrast/name fixed; screenshot selector narrowed | next profile/shell/screenshots rerun

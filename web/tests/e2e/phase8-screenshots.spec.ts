@@ -109,7 +109,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         await expect(
           page.getByRole("heading", { level: 1, name: "Leave", exact: true }),
         ).toBeVisible();
-        await page.getByLabel("Month", { exact: true }).fill("2026-11");
+        await page.getByRole("textbox", { name: "Month", exact: true }).fill("2026-11");
         await expect(
           page.getByRole("button", { name: /Monday 9 November 2026, [1-9]/ }),
         ).toBeVisible();
