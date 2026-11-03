@@ -28,6 +28,7 @@ from app.modules.attendance.schemas import AttendanceOut
 from app.modules.attendance.service import WORKED, snapshot
 from app.modules.employees.models import Employee
 from app.modules.rbac.deps import Access, require
+from app.modules.rota.late import clock_status
 
 if TYPE_CHECKING:
     from app.modules.companies.models import Company
@@ -114,7 +115,7 @@ async def clock_in(body: ClockIn, access: Writes) -> ClockState:
             company_id=access.company_id,
             employee_id=employee.id,
             date=day,
-            status="present",
+            status=await clock_status(access, company, employee, instant),
             source="clock",
             clock_in=instant,
             unpaid_break_minutes=0,

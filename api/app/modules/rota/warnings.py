@@ -12,8 +12,10 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import select
 
 from app.modules.attendance.router import _company
+from app.modules.employees.models import EmployeeAssignment
 from app.modules.holidays.models import BankHoliday, CompanyHoliday
 from app.modules.leave.request_models import LeaveRequest
+from app.modules.rota.models import DayOffPattern
 from app.modules.rota.week_models import ScheduledShift
 from app.modules.rota.week_schemas import RotaWarning
 from app.modules.rota.weeks import paid
@@ -78,6 +80,24 @@ async def warnings(access: Access, start: date, people: list[Employee]) -> list[
         ).scalars()
     )
     result: list[RotaWarning] = []
+    assignments = list(
+        (
+            await access.db.execute(
+                select(EmployeeAssignment).where(
+                    EmployeeAssignment.employee_id.in_(ids),
+                    EmployeeAssignment.effective_from <= end + timedelta(days=1),
+                    EmployeeAssignment.ended_at.is_(None) | (EmployeeAssignment.ended_at > start),
+                )
+            )
+        ).scalars()
+    )
+    patterns = list(
+        (
+            await access.db.execute(
+                select(DayOffPattern).where(DayOffPattern.archived_at.is_(None))
+            )
+        ).scalars()
+    )
 
     def add(employee_id: uuid.UUID, shift_id: uuid.UUID | None, code: str, message: str) -> None:
         result.append(
@@ -96,6 +116,27 @@ async def warnings(access: Access, start: date, people: list[Employee]) -> list[
                 f"{total} planned hours exceeds 48 hours; no opt-out is recorded.",
             )
         for shift in this_week:
+            assignment = next(
+                (
+                    a
+                    for a in assignments
+                    if a.employee_id == employee.id
+                    and a.effective_from <= shift.date
+                    and (a.ended_at is None or shift.date < a.ended_at)
+                ),
+                None,
+            )
+            pattern = next(
+                (
+                    p
+                    for p in patterns
+                    if assignment
+                    and p.department_id == assignment.department_id
+                    and p.designation_id == assignment.designation_id
+                    and p.shift_type_id == shift.shift_type_id
+                ),
+                None,
+            )
             first = shift.starts_at.astimezone(zone).date()
             last = (shift.ends_at - timedelta(microseconds=1)).astimezone(zone).date()
             days = [first + timedelta(days=i) for i in range((last - first).days + 1)]
@@ -112,7 +153,13 @@ async def warnings(access: Access, start: date, people: list[Employee]) -> list[
                     "COMPANY_HOLIDAY",
                     "This shift overlaps a company holiday.",
                 )
-            if company.bank_holidays_non_working and bank.intersection(days):
+            if pattern and any(d.isoweekday() in pattern.weekdays_off for d in days):
+                add(employee.id, shift.id, "DAY_OFF", "This shift overlaps a regular day off.")
+            if (
+                company.bank_holidays_non_working
+                and bank.intersection(days)
+                and not (pattern and pattern.works_public_holidays)
+            ):
                 add(
                     employee.id,
                     shift.id,

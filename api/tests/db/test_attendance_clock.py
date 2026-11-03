@@ -91,7 +91,10 @@ async def test_clock_own_server_time_overnight_retries_and_private_audit(
         audits = (
             (
                 await c.execute(
-                    text("select after from audit_events where action like 'attendance.clock%'")
+                    text(
+                        "select after from audit_events where action like 'attendance.clock%' and company_id=:company"
+                    ),
+                    {"company": ready["a"]},
                 )
             )
             .scalars()
@@ -137,7 +140,10 @@ async def test_location_needs_company_switch_and_per_action_consent(
         audits = (
             (
                 await c.execute(
-                    text("select after from audit_events where action like 'attendance.clock%'")
+                    text(
+                        "select after from audit_events where action like 'attendance.clock%' and company_id=:company"
+                    ),
+                    {"company": ready["a"]},
                 )
             )
             .scalars()

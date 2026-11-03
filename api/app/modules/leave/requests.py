@@ -20,6 +20,7 @@ from app.modules.leave.calculations import dates, hours_on, standard_day, year_b
 from app.modules.leave.ledger import ensure_open, working_pattern
 from app.modules.leave.request_models import LeaveRequest
 from app.modules.leave.request_schemas import LeaveConflict
+from app.modules.rota.week_models import ScheduledShift
 
 if TYPE_CHECKING:
     import uuid
@@ -185,6 +186,23 @@ async def conflicts(
         .scalars()
         .all()
     )
+    shifts = (
+        await db.execute(
+            select(ScheduledShift.id)
+            .where(
+                ScheduledShift.employee_id == employee_id, ScheduledShift.date.in_(plan.quantities)
+            )
+            .limit(1)
+        )
+    ).first()
+    if shifts:
+        result.append(
+            LeaveConflict(
+                code="SHIFT_CONFLICT",
+                message="Scheduled shifts overlap these dates; review the rota before approval.",
+                blocking=False,
+            )
+        )
     if attendance:
         result.append(
             LeaveConflict(

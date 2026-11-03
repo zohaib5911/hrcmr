@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+import io
+from datetime import datetime
 from typing import Any
 
 import pytest
+from pypdf import PdfReader
 from sqlalchemy import text
 
+from app.modules.attendance import clock_router
 from app.modules.rbac.deps import Access
 from tests.db.test_attendance_clock import manager_for
 from tests.db.test_compliance_hub import rig as rig
-from tests.db.test_leave_requests import BASE, submit
+from tests.db.test_leave_requests import BASE, linked, submit
 from tests.db.test_leave_requests import ready as ready
 from tests.db.test_leave_settings import seeded as seeded
 from tests.db.test_reminders import _keys as _keys
@@ -234,3 +238,187 @@ async def test_copy_rollback_keeps_replaced_shifts(
     current = (await admin.get(API + "/weeks/2026-01-05")).json()
     assert current["version"] == 2
     assert any(s["id"] == original and s["starts_local"] == "10:00" for s in current["shifts"])
+
+
+async def test_publish_retains_snapshot_and_manager_only_publishes_reports(
+    ready: dict[str, Any],
+) -> None:
+    admin = ready["admin"]
+    manager = await manager_for(ready)
+    me = await linked(ready, "employee", ready["employee"])
+    first = await admin.post(API + "/scheduled-shifts", json=payload(ready))
+    second = await admin.post(
+        API + "/scheduled-shifts", json=payload(ready, employee_id=str(ready["other"]), version=1)
+    )
+    assert first.status_code == second.status_code == 201
+    own = API + "/own?start=2026-01-05&end=2026-01-11"
+    assert (await me.get(own)).json()["shifts"] == []
+    published = await admin.post(API + "/weeks/2026-01-05/publish", json={"version": 2})
+    assert published.status_code == 200, published.text
+    assert published.json() == {"count": 2, "version": 3}
+    assert len((await me.get(own)).json()["shifts"]) == 1
+    assert (
+        await me.post(API + "/weeks/2026-01-05/publish", json={"version": 3})
+    ).status_code == 403
+    assert (
+        await admin.put(
+            API + f"/scheduled-shifts/{first.json()['shift']['id']}",
+            json=payload(ready, ends_at="18:00", version=3),
+        )
+    ).status_code == 200
+    assert (
+        await admin.put(
+            API + f"/scheduled-shifts/{second.json()['shift']['id']}",
+            json=payload(ready, employee_id=str(ready["other"]), ends_at="19:00", version=4),
+        )
+    ).status_code == 200
+    assert (await me.get(own)).json()["shifts"][0]["ends_local"] == "17:00"
+    merged = await manager.post(API + "/weeks/2026-01-05/publish", json={"version": 5})
+    assert merged.status_code == 200, merged.text
+    assert merged.json()["count"] == 1
+    assert (await me.get(own)).json()["shifts"][0]["ends_local"] == "18:00"
+    assert (await manager.get(own)).json()["shifts"][0]["ends_local"] == "17:00"
+    assert (await admin.get(API + "/weeks/2026-01-05")).json()["status"] == "draft"
+    assert (await admin.post(API + "/weeks/2026-01-05/publish", json={"version": 6})).json()[
+        "count"
+    ] == 1
+    assert (await manager.get(own)).json()["shifts"][0]["ends_local"] == "19:00"
+    assert (await admin.post(API + "/weeks/2026-01-05/publish", json={"version": 7})).json()[
+        "count"
+    ] == 0
+    assert (
+        await admin.post(API + "/weeks/2026-01-05/publish", json={"version": 7})
+    ).status_code == 409
+    async with ready["owner"].connect() as c:
+        assert (
+            await c.execute(text("select count(*) from notifications where kind='rota.published'"))
+        ).scalar_one() == 4
+        assert (
+            await c.execute(
+                text("select count(*) from email_outbox where template='rota_published'")
+            )
+        ).scalar_one() == 4
+    assert (
+        await admin.delete(API + f"/scheduled-shifts/{first.json()['shift']['id']}?version=8")
+    ).status_code == 200
+    assert len((await me.get(own)).json()["shifts"]) == 1
+    assert (await admin.post(API + "/weeks/2026-01-05/publish", json={"version": 9})).json()[
+        "count"
+    ] == 1
+    assert (await me.get(own)).json()["shifts"] == []
+
+
+async def test_print_is_landscape_private_scoped_and_audit_rollback(
+    ready: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    admin = ready["admin"]
+    me = await linked(ready, "employee", ready["employee"])
+    assert (
+        await admin.post(API + "/scheduled-shifts", json=payload(ready, note="Private shift note"))
+    ).status_code == 201
+    pdf = await admin.get(API + "/weeks/2026-01-05/print.pdf")
+    assert pdf.status_code == 200, pdf.text
+    assert pdf.content.startswith(b"%PDF")
+    assert pdf.headers["cache-control"] == "private, no-store"
+    document = PdfReader(io.BytesIO(pdf.content))
+    assert document.pages[0].mediabox.width > document.pages[0].mediabox.height
+    assert "Private shift note" in (document.pages[0].extract_text() or "")
+    foreign = await ready["person"]("company_admin", ready["b"])
+    other = PdfReader(io.BytesIO((await foreign.get(API + "/weeks/2026-01-05/print.pdf")).content))
+    assert "Private shift note" not in (other.pages[0].extract_text() or "")
+    assert (await me.get(API + "/weeks/2026-01-05/print.pdf")).status_code == 403
+
+    async def fail(*args: Any, **kwargs: Any) -> None:
+        raise RuntimeError("audit failed")
+
+    monkeypatch.setattr(Access, "audit", fail)
+    assert (
+        await admin.post(API + "/weeks/2026-01-05/publish", json={"version": 1})
+    ).status_code == 500
+    assert (await me.get(API + "/own?start=2026-01-05&end=2026-01-11")).json()["shifts"] == []
+    async with ready["owner"].connect() as c:
+        assert (
+            await c.execute(text("select count(*) from notifications where kind='rota.published'"))
+        ).scalar_one() == 0
+        assert (
+            await c.execute(
+                text("select count(*) from email_outbox where template='rota_published'")
+            )
+        ).scalar_one() == 0
+
+
+async def test_day_off_leave_warning_and_lateness_uses_published_schedule(
+    ready: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    admin = ready["admin"]
+    me = await linked(ready, "employee", ready["employee"])
+    department = (await admin.post("/api/v1/departments", json={"name": "Care"})).json()["id"]
+    designation = (
+        await admin.post(
+            "/api/v1/designations", json={"department_id": department, "title": "Carer"}
+        )
+    ).json()["id"]
+    template = (
+        await admin.post(
+            API + "/shift-types", json={"name": "Day", "starts_at": "09:00", "ends_at": "17:00"}
+        )
+    ).json()["id"]
+    assignment = await admin.post(
+        f"/api/v1/employees/{ready['employee']}/assignments",
+        json={
+            "employment_type": "full_time",
+            "effective_from": "2025-01-01",
+            "department_id": department,
+            "designation_id": designation,
+        },
+    )
+    assert assignment.status_code == 201, assignment.text
+    scope = {"department_id": department, "designation_id": designation, "shift_type_id": template}
+    assert (
+        await admin.post(
+            API + "/late-policies",
+            json={
+                **scope,
+                "grace_minutes": 5,
+                "allowed_late_days_per_month": 1,
+                "deduction_type": "none",
+                "deduction_value": "0",
+            },
+        )
+    ).status_code == 201
+    assert (
+        await admin.post(API + "/day-off-patterns", json={**scope, "weekdays_off": [1]})
+    ).status_code == 201
+    created = await admin.post(
+        API + "/scheduled-shifts", json=payload(ready, shift_type_id=template)
+    )
+    assert created.status_code == 201
+    grid = (await admin.get(API + "/weeks/2026-01-05")).json()
+    assert "DAY_OFF" in {w["code"] for w in grid["warnings"]}
+    preview = await admin.post(
+        BASE + "/requests/preview",
+        json={
+            "employee_id": str(ready["employee"]),
+            "leave_type_id": ready["annual"],
+            "start_date": "2026-01-05",
+            "end_date": "2026-01-05",
+        },
+    )
+    assert preview.status_code == 200, preview.text
+    assert "SHIFT_CONFLICT" in {w["code"] for w in preview.json()["conflicts"]}
+    assert (
+        await admin.post(API + "/weeks/2026-01-05/publish", json={"version": 1})
+    ).status_code == 200
+    # An unpublished change to 10:00 must not change lateness against the published 09:00 shift.
+    assert (
+        await admin.put(
+            API + f"/scheduled-shifts/{created.json()['shift']['id']}",
+            json=payload(ready, shift_type_id=template, starts_at="10:00", version=2),
+        )
+    ).status_code == 200
+    monkeypatch.setattr(
+        clock_router, "now", lambda: datetime.fromisoformat("2026-01-05T09:06:00+00:00")
+    )
+    clock = await me.post("/api/v1/attendance/clock-in", json={})
+    assert clock.status_code == 200, clock.text
+    assert clock.json()["active"]["status"] == "late"

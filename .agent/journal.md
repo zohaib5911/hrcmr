@@ -188,3 +188,4 @@
 2026-11-03 17:57 | Codex | T9.4 | complete: rota settings production browser/setup2 passes overnight shift, scoped rules, mobile axe and archives; API/static green | next T9.5 rota week/shift schema and APIs
 2026-11-03 17:59 | Codex | T9.5 | rota week/shift models and versioned contracts ready; last-published snapshot retained, migration7 passes | next scoped grid/write APIs then actions/warnings/publish/PDF/own and UI
 2026-11-03 18:04 | Codex | T9.5 | scoped versioned grid/shift writes, overnight/DST/overlap, warnings and atomic copy/clear implemented; API/RBAC26/migration7/mypy280 pass | next action tests result, publish/notifications/PDF/own and UI
+2026-11-03 18:09 | Codex | T9.5 | scoped publish snapshots/digests/own/PDF and day-off/leave/late integration ready; API45 plus corrected clock/email12 pass, static282 clean | next rota workspace/cell/actions/My Shifts UI and browser
