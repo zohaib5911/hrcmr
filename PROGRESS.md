@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-02
-- **Current task:** Phase 6 gate
+- **Current task:** T7.1 Right to Work checks
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -186,12 +186,12 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 **Open at the gate:** nothing blocking. Still waiting on you: protect `main`, enable private vulnerability reporting, decide Dependabot #4, and the brand details (the screens say "Brand" with no logo until then).
 
-### Phase 6 — Employees — local gate passed 2026-11-02; PR/CI pending
+### Phase 6 — Employees — gate passed 2026-11-02; PR #11 merged
 - Scope: directory/create, lifecycle, Personal, dated Employment/Salary, scanned Documents, inspection PDF, related tabs and real Activity; deferred employee linking and photos completed.
 - Security: scoped endpoints, step-up masked-data reveal, compensation permission, clean-only downloads and escaped PDFs; CI findings patched (brotli 1.2.1, pypdf 6.21.4), local pip-audit clean and 4 affected tests pass.
-- Regression: API 421 passed plus one shared-schema fixture failure fixed (affected 26 passed); role-only QA fix 3 passed; web 776, guards 32, full Playwright 396 passed/144 screenshot-only skipped; lint/types/generated API clean.
+- Regression: CI API 422 passed (local shared-schema fixture failure fixed and 26 affected tests rechecked); role-only QA fix 3 passed; web 776, guards 32, full Playwright 396 passed/144 screenshot-only skipped; lint/types/generated API clean.
 - Design QA: 60 images in docs/screenshots/phase-6, light/dark at 390/1280; capture 5 passed. Fixed role-only Overview and zero-value display; spot-reviewed pages and sheets.
-- Deferred by plan: RTW in Phase 7; Leave/Attendance/Learning data in Phases 8/9/13; hierarchy labels CRUD in T12.1. Next: green CI and dev-to-main merge.
+- Deferred by plan: RTW in Phase 7; Leave/Attendance/Learning data in Phases 8/9/13; hierarchy labels CRUD in T12.1. PR #11 merged as 6acec98 after every CI check passed. Next: T7.1.
 
 ### Phase 5 — Users and access — gate passed 2026-11-02
 
@@ -287,16 +287,21 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T6.6** Salary — 2026-11-02. Permission-gated compensation history fetched only on Show salary, explicit add-record sheet, tenant-validated pay lookups, effective-date/hire-date checks and age-band minimum-wage preview using verified GOV.UK rates. Unknown age/hours/rate gives no pass; apprentice eligibility and deductions remain separate. Verified: 10 API/unit tests, Salary browser journey + setup 2 pass, lint/types/build clean.
 - [x] **T6.7** Documents tab and employee record PDF — 2026-11-02. Scoped scanned uploads with categories/notes, All/Payslips views, scan status, clean-only 60-second downloads; Print record generates a dated multi-page WeasyPrint PDF with identity/bank masked and salary permission-gated. Escaped text, no external resources, audited exports. Runtime/CI PDF libraries installed. Verified: 3 API/PDF/security tests, browser journey + setup 2 pass, lint/types/build clean.
 - [x] **T6.8** Leave, Attendance, Learning and Activity tab shells — 2026-11-02. Workspace links preserve employee context, Attendance month filter; no fabricated balances/history before later modules exist. Activity shows real paginated employee/owned-file audit events, requires compliance.audit.read. Verified: Activity API isolation/RBAC/pagination test, Related tabs browser/setup 2 pass, lint/types/build clean.
-- [ ] **Phase 6 gate** — no inline auto-save; RBAC and isolation tests for every endpoint
+- [x] **Phase 6 gate** — 2026-11-02. PR #11 merged as 6acec98 after all 12 CI checks passed; API 422, web 776, guards 32, local Playwright 396, 60 reviewed QA screenshots.
 
 ### Phase 7 — Right to Work and sponsor compliance
-- [ ] **T7.1** Right to Work checks
-- [ ] **T7.2** Sponsor documents and sponsored employees page
-- [ ] **T7.3** Working-day calculator, change of circumstances, org changes
-- [ ] **T7.4** Reminders engine and register page
-- [ ] **T7.5** Compliance hub
-- [ ] **T7.6** Employee Sponsor Compliance tab, sponsor record PDF, "Needs attention" feed
-- [ ] **Phase 7 gate** — scenario tests from plan Phase 7
+- [x] **T7.1** Right to Work checks — 2026-11-02. Four conditional types; encrypted/masked codes; clean evidence picker/upload/download; immutable history and reasoned corrections; company-timezone status view, directory filters/deep links/counts, profile tab/cards and masked PDFs. Verified: migration/doc 7, API/PDF 15, list unit 6, employee/setup browser 15 and RTW/setup 2 pass; lint/types/generated API/build pass.
+- [x] **T7.2** Sponsor documents and sponsored employees page — 2026-11-03. Six document types and eleven visa routes; encrypted/masked reference/CoS; immutable versions, reasoned withdrawal, renewal target/notes, scoped clean evidence and salary; sponsored-route register excludes EUSS and withdrawn/superseded visas. Profile document forms/history and searchable/filterable responsive table. Verified: migration/doc 7, API 14, sponsor browser/setup 2 and adjacent RTW browser/setup 2 pass; lint/types/generated API/production build pass.
+- [x] **T7.3** Working-day calculator, change of circumstances, org changes — 2026-11-03. Regional GOV.UK bank holidays; 10/20 working-day targets, prompt AO/Key Contact exception; immutable worker/document snapshots; recorded SMS reporter/date/reference; audited unreported org edit/archive. Employee form/log and company Workers/Organisation register with filters/search. Verified: calculator 12, reporting/holiday API 13, migration/doc 7; holiday/setup browsers 14 and reporting/setup 3 pass; lint/types/generated API/build clean.
+- [x] **T7.4** Reminders engine and register page — reviewed explicit sends, atomic in-app/encrypted email nudge, daily scheduling and sent history; affected API and browser checks pass.
+- [x] **T7.5** Compliance hub — urgency queue, coverage/readiness, expiry buckets, matching activity CSV, tools, editable official dossier and checklist; affected API/browser checks pass.
+- [x] **T7.6** Employee Sponsor Compliance tab, sponsor record PDF, "Needs attention" feed
+- [ ] **Phase 7 gate** — local verification complete; PR/green CI merge pending.
+  - Built RTW history/corrections/evidence PDF, versioned sponsor records and scoped inspection PDF.
+  - Added official-calendar worker/org reporting, threshold reminders, reviewed atomic delivery and private bell.
+  - Added compliance hub/readiness/activity CSV and editable official dossier; AI drafting remains Phase 14.
+  - Verified API full 479 pass, two failures fixed/15 affected pass; web 777 and guards 32 pass; browser 398 pass, four stale shell assertions fixed/68 affected pass.
+  - Saved 36 reviewed images at 390/1280 light/dark; fixed mobile queue layout; final hub/screenshots 6 pass. Mandatory audit follows green-CI merge.
 
 ### Phase 8 — Leave and holidays
 - [ ] **T8.1** Leave types and leave settings

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { EmployeesPage } from "@/components/employees/employees-page";
 import { serverApi } from "@/lib/auth/server";
+import { rtwFilterFromParam } from "@/lib/employees/rtw";
 import { pillFromParam } from "@/lib/employees/list";
 
 export const metadata: Metadata = { title: "Employees" };
@@ -26,6 +27,7 @@ export default async function Page({
       summary={summary.data}
       archived={false}
       initialPill={pillFromParam(params.status)}
+      initialRtw={rtwFilterFromParam(params.rtw)}
     />
   );
 }

@@ -39,6 +39,12 @@ from app.modules.companies.key_personnel_router import router as key_personnel_r
 from app.modules.companies.router import router as company_router
 from app.modules.companies.structure_router import router as structure_router
 from app.modules.companies.trading_hours import router as trading_hours_router
+from app.modules.compliance.activity_router import router as compliance_activity_router
+from app.modules.compliance.dossier_router import router as dossier_router
+from app.modules.compliance.hub_router import router as compliance_hub_router
+from app.modules.compliance.reminder_router import router as reminders_router
+from app.modules.compliance.router import router as compliance_changes_router
+from app.modules.compliance.sponsor_pdf import router as sponsor_pdf_router
 from app.modules.email.outbox import OutboxMailer
 from app.modules.employees.activity_router import router as employee_activity_router
 from app.modules.employees.compensation_router import router as compensation_router
@@ -52,7 +58,10 @@ from app.modules.files.router import router as files_router
 from app.modules.files.service import FileService
 from app.modules.health.router import router as health_router
 from app.modules.holidays.router import router as holidays_router
+from app.modules.notifications.router import router as notifications_router
 from app.modules.pay.router import router as pay_router
+from app.modules.rtw.router import router as rtw_router
+from app.modules.sponsor_documents.router import router as sponsor_documents_router
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -78,7 +87,8 @@ logger = get_logger("app.main")
 
 def operation_id(route: APIRoute) -> str:
     """Readable, stable operation ids (`health_ready`) for the generated TypeScript client."""
-    return f"{route.tags[0]}_{route.name}" if route.tags else route.name
+    tag = str(route.tags[0]).replace("-", "_") if route.tags else None
+    return f"{tag}_{route.name}" if tag else route.name
 
 
 def _install_openapi(app: FastAPI) -> None:
@@ -200,6 +210,15 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)
     app.include_router(employee_activity_router, prefix=API_PREFIX)
+    app.include_router(rtw_router, prefix=API_PREFIX)
+    app.include_router(compliance_changes_router, prefix=API_PREFIX)
+    app.include_router(compliance_hub_router, prefix=API_PREFIX)
+    app.include_router(dossier_router, prefix=API_PREFIX)
+    app.include_router(sponsor_pdf_router, prefix=API_PREFIX)
+    app.include_router(notifications_router, prefix=API_PREFIX)
+    app.include_router(compliance_activity_router, prefix=API_PREFIX)
+    app.include_router(reminders_router, prefix=API_PREFIX)
+    app.include_router(sponsor_documents_router, prefix=API_PREFIX)
     app.include_router(employee_photo_router, prefix=API_PREFIX)
     app.include_router(compensation_router, prefix=API_PREFIX)
     app.include_router(structure_router, prefix=API_PREFIX)

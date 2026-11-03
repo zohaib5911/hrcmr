@@ -50,3 +50,64 @@
 2026-11-02 19:46 | Codex | Phase 6 gate | final screenshots 5 pass/60 images, spot-reviewed; phase summary written; hierarchy deferral corrected to T12.1 | next PR and green CI merge
 2026-11-02 19:46 | Codex | Phase 6 gate | PR #11 opened (dev to main), local gate and 60 images complete | next all-green CI then merge with --merge --auto
 2026-11-02 19:52 | Codex | Phase 6 CI | patched brotli 1.2.1/pypdf 6.21.4, local audit clean/4 PDF tests pass; documented tested Jinja false-positive as email renderer does | next latest PR #11 CI
+2026-11-02 20:13 | Codex | Phase 6 gate | PR #11 merged as 6acec98 after all 12 CI checks green (API 422 pass); clean dev synced | next T7.1 baseline/model/API/UI
+2026-11-02 20:14 | Codex | relay | Phase 6 merged green; T7.1 requirements/source baseline ready (ruff/mypy and 3 tests pass), no RTW code yet | next rtw/models.py and migration 0015, then API/UI
+2026-11-02 20:40 | Codex | T7.1 | model/migration 0015, immutable history and caller-scoped status view; 7 migration/doc checks pass | next schemas/service/router tests
+2026-11-02 20:46 | Codex | T7.1 | scoped RTW record/history/correction/evidence/PDF API; 12 tests pass incl crypto, status edges, quarantine and tenant view | next employee/list UI integration
+2026-11-02 20:54 | Codex | T7.1 | employee/list RTW UI, filters/deep links and masked full PDF; API 15/list 6 checks pass, web lint/types pass | next conditional form/evidence/correction browser checks
+2026-11-02 20:55 | Codex | T7.1 | browser scenario prepared for all four conditionals, explicit record/upload, auto-selection, masked PDF/history and directory links | next run affected Playwright employees + rtw specs
+2026-11-02 20:57 | Codex | T7.1 | production build and 15 employee/setup browser checks pass; corrected new axe invocation to existing modal mode | next rerun rtw.spec.ts only
+2026-11-02 20:59 | Codex | T7.1 | RTW browser reached saved check; replaced ignored StatusChip aria-label with screen-reader context, updated scoped assertions | next rerun RTW only
+2026-11-02 21:01 | Codex | T7.1 | browser verified masked record/PDF/filter; resize assertion now waits for mobile table cards and responsive layout | next finish RTW scenario
+2026-11-02 21:03 | Codex | T7.1 | complete: API/PDF 15, migration/doc 7, list 6, employee browsers 15 and RTW browser/setup 2 pass | next T7.2 sponsor documents/model/API/UI
+2026-11-02 21:04 | Codex | T7.2 | requirements/patterns reviewed; API area lint/types and web types pass; 15-test baseline unchanged | next sponsor document model/migration 0016
+2026-11-02 21:07 | Codex | T7.2 | sponsor model/migration 0016 with encrypted refs, retained versions/withdrawals/renewal planning; migration/doc 7 pass | next scoped API and tests
+2026-11-03 01:08 | Codex | T7.2 | resumed clean e2269e4; dev synced and latest CI green, model checkpoint intact | next scoped sponsor document API/tests
+2026-11-03 01:11 | Codex | T7.2 | scoped document/version/renewal/withdraw/evidence/register API; 14 integration tests pass; generated types/lint/mypy pass | next employee forms and sponsored table
+2026-11-03 01:14 | Codex | T7.2 | sponsor document forms/history, renewal/withdrawal and sponsored table; web types/lint pass; browser scenario ready | next affected sponsor/RTW Playwright checks
+2026-11-03 01:16 | Codex | T7.2 | sponsor production browser scenario passes incl mobile/axe; corrected adjacent RTW mobile locator (grid to list) | next rerun RTW only and finish T7.2
+2026-11-03 01:18 | Codex | T7.2 | RTW mobile list assertion now matches exact name, avoiding hidden Open label; sponsor scenario remains green | next rerun RTW only
+2026-11-03 01:20 | Codex | T7.2 | narrowed RTW Verified assertion to accessible heading after filter state (text locator hit hidden streamed heading) | next rerun RTW then finish T7.2
+2026-11-03 01:21 | Codex | T7.2 | complete: migration/doc 7, sponsor API 14, sponsor browser/setup 2 and adjacent RTW browser/setup 2 pass; lint/types/build clean | next T7.3 working days/CoC/org changes
+2026-11-03 01:23 | Codex | T7.3 | official deadline/glossary/calendar sources checked; holiday baseline lint/types/tests pass; recorded AO/Key Contact exception | next pure calculator and dated examples
+2026-11-03 01:24 | Codex | T7.3 | pure working-day calculator with 12 official-date examples/edge checks passes lint/types/tests | next immutable changes/org models and migration 0017
+2026-11-03 01:29 | Codex | T7.3 | change/org models + migration 0017, tenant RLS and immutable snapshots/reporting; migration/doc 7 pass | next scoped API/calendar coverage/reporting tests
+2026-11-03 01:36 | Codex | T7.3 | scoped change/org CRUD, snapshot/defaults, deadline preview and reported actor/date API; 19 tests pass, generated types/lint/mypy clean | next UI + test-only e2e calendar seed
+2026-11-03 01:40 | Codex | T7.3 | retained document version labels + shared official 2026/27 calendar fixture seeded in e2e API; reporting/holiday API 13 pass | next employee/company change UI, browser + holiday regression
+2026-11-03 01:45 | Codex | T7.3 | employee log/forms, live official-calendar preview and company Workers/Organisation register built; web types/lint pass | next browser scenario and holiday regression
+2026-11-03 01:47 | Codex | T7.3 | worker/org browser scenarios prepared and statically checked | next affected compliance-changes + holidays Playwright run
+2026-11-03 01:50 | Codex | T7.3 | holiday/setup browsers 14 pass; fixed described-checkbox selector and inspector stale-row state after report refresh | next rerun compliance-changes browser scenarios only
+2026-11-03 01:52 | Codex | T7.3 | complete: calculator 12, reporting/holiday API 13, migration/doc 7; reporting browser/setup 3 and holiday/setup 14 pass | next T7.4 reminders engine/register
+2026-11-03 01:57 | Codex | T7.4 | reminders/email/notifications/job requirements reviewed; baseline lint/types and email/worker tests pass | next model/migration 0018 and threshold service
+2026-11-03 01:59 | Codex | T7.4 baseline | fixed existing worker queue-test cron minute-boundary flake; email/worker 11 pass, lint/types pass | next reminders model/migration 0018
+2026-11-03 02:06 | Codex | T7.4 | reminder model/migration 0018 with RTW targets, sent immutability and owner-only derived deadline refresh; 14 migration/doc/change checks pass | next threshold service/source hooks/daily job
+2026-11-03 02:15 | Codex | T7.4 | threshold/source hooks + daily job, admin notice dedupe, snooze/restore/cancellation and unreported deadline refresh; 34 checks pass, final engine 5 pass | next scoped review/send API with atomic delivery
+2026-11-03 02:36 | Codex | T7.4 | reviewed/received reminder API and atomic nudge+notification+audit; 20 affected cases verified incl concurrent dedupe/rollback and self-service guards; types/lint/gen pass | next register/review and My Documents UI
+2026-11-03 02:48 | Codex | T7.4 | due/register/history UI, explicit review drawer and own received messages; optional snooze draft API test passes, web types/lint pass | next browser reminder workflow
+2026-11-03 02:55 | Codex | T7.4 | browser reminder workflow written; web types and targeted lint pass | next production Playwright reminders scenario
+2026-11-03 02:56 | Codex | T7.4 | complete: reminder/setup production browser 2 pass incl explicit saves/snooze/send, history, own message and mobile axe | next T7.5 compliance hub/dossier
+2026-11-03 02:56 | Codex | T7.5 | started compliance hub/dossier requirements and nearest patterns | next affected baseline then scoped hub APIs
+2026-11-03 02:57 | Codex | T7.5 | baseline company/audit/doc 27 pass; lint/types pass; readiness and separate platform-content guard choices recorded | next scoped hub overview/activity APIs and tests
+2026-11-03 03:03 | Codex | T7.5 | scoped hub overview/activity CSV implemented; 3 hub + 11 audit cases pass, generated types pass; fixed existing raw-SQL JSON default guard | next editable dossier store and original checklist PDF
+2026-11-03 03:09 | Codex | T7.5 | global dossier migration 0019, verified official seeds, mandatory-MFA platform editor API and original checklist PDF; 19 dossier/migration/doc/identity + prior RBAC 16 verified | next hub/dossier/platform UI and query-tab links
+2026-11-03 03:14 | Codex | T7.5 | hub/dossier/platform editor UI built; employee/change query tabs work; web types/lint pass | next browser hub links/filter/export/dossier/mobile workflow
+2026-11-03 03:15 | Codex | T7.5 | hub browser workflow written and statically checked; notes checkpointed before browser run | next production hub and adjacent query-tab browser checks
+2026-11-03 03:17 | Codex | T7.5 | complete: production hub/changes/RTW/setup 5 pass incl destinations/CSV/PDF/mobile axe; affected API and static checks pass | next T7.6 sponsor PDF and bell Needs attention
+2026-11-03 03:17 | Codex | T7.6 | started sponsor record PDF and bell feed; general notification preferences/digests remain Phase 14 | next affected baseline and masked scoped PDF
+2026-11-03 03:19 | Codex | T7.6 | baseline PDF/sponsor 15 and shell 19 pass; scoped design reviewed | next masked sponsor PDF with versions and change snapshots
+2026-11-03 03:23 | Codex | T7.6 | sponsor PDF scenario 1 and own bell/privacy/route checks 2 pass; APIs/static/generated types complete | next PDF download button and live bell UI
+
+2026-11-03 06:46 | Codex | T7.6 | recovered PDF/bell UI; web types/lint and shell 19 pass; browser assertions added | next sponsor/reminder Playwright
+2026-11-03 06:50 | Codex | T7.6 | reminder/setup browser pass incl bell read/live actions; sponsor transition selector hit duplicate hidden Visa route | next visible locator and sponsor rerun
+2026-11-03 06:54 | Codex | T7.6 | complete: PDF download sponsor/setup 2 pass; reminder/setup 2 pass incl bell read/live actions; web types/lint and shell 19 pass | next Phase 7 full suite/screenshots/PR then audit stop
+2026-11-03 06:54 | Codex | relay | T7.6 complete and pushed; Phase 7 gate outstanding, no gate suites started | next sequential full checks, screenshots and PR then audit stop
+2026-11-03 07:00 | Codex | Phase 7 gate | ruff/format pass; fixed three reminder test typing errors, mypy 225 files passes | next full API suite then web/browser sequentially
+2026-11-03 07:03 | Codex | Phase 7 gate | screenshot spec prepared for 390/1280 light/dark (9 views each), targeted lint passes; full API running session 96032 log /tmp/cmr-phase7-api.log | next inspect API then web gate
+2026-11-03 07:07 | Codex | Phase 7 gate | API full 479 pass/2 fail; normalized hyphenated operation IDs and updated encrypted-field inventory; affected 15 pass, lint/types/gen pass | next full web checks then Playwright
+2026-11-03 07:13 | Codex | Phase 7 gate | full web unit/static/generated-contract and node guard checks pass; screenshot tuple type fixed | next full Playwright once, then screenshot capture/review
+2026-11-03 07:29 | Codex | Phase 7 gate | full Playwright 398 pass/148 screenshot skips/4 stale shell assertions (built hub/My Documents and reminder title); expectations updated | next shell rerun plus Phase 7 screenshots
+2026-11-03 07:34 | Codex | Phase 7 gate | affected shell/setup 68 pass; screenshot wait mistakenly matched persistent status, narrowed to Loading messages | next screenshot-only capture and review
+2026-11-03 07:38 | Codex | Phase 7 gate | screenshot/setup 5 pass/36 images; visual review caught narrow mobile hub title beside long CTA; stacked mobile queue rows | next affected hub browser and recapture
+2026-11-03 07:42 | Codex | Phase 7 gate | final hub/screenshots 6 pass, 36 images refreshed/reviewed; mobile queue readable; five-line phase summary recorded | next dev-main PR, all-green CI merge, mandatory audit stop
+2026-11-03 07:44 | Codex | Phase 7 gate | PR #13 opened dev to main, local gate/screenshots complete | next inspect all CI, fix failures then merge green and mandatory audit stop
+2026-11-03 07:21 | Codex | Phase 7 CI | Semgrep flagged fixed-constant migration SQL; replaced assembly with literal identical statements; migrations/dossier/reporting 14 pass, ruff pass | next new CI run all green then merge/audit stop

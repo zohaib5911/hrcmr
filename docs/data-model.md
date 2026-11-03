@@ -47,6 +47,45 @@ Checks:
 
 - `region in ('england-and-wales', 'scotland', 'northern-ireland')`
 
+## `change_of_circumstances`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `change_type` | VARCHAR(32) | no |  |  |
+| `deadline_date` | DATE | no |  |  |
+| `employment_type` | VARCHAR(12) | yes |  |  |
+| `job_title` | VARCHAR(160) | yes |  |  |
+| `nationality` | VARCHAR(80) | yes |  |  |
+| `contact_number` | VARCHAR(40) | yes |  |  |
+| `address` | TEXT | yes |  |  |
+| `ack_inform_hr` | BOOLEAN | no | `false` |  |
+| `ack_home_office_interview` | BOOLEAN | no | `false` |  |
+| `documents_snapshot` | JSONB | no | `[]` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+| `change_date` | DATE | no |  |  |
+| `calendar_region` | VARCHAR(20) | no |  |  |
+| `calendar_checked_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `calendar_holidays` | JSONB | no | `[]` |  |
+| `reported_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `reported_by_user_id` | UUID | yes |  | references `users` |
+| `reported_reference` | VARCHAR(160) | yes |  |  |
+| `report_recorded_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `remarks` | TEXT | yes |  |  |
+
+Checks:
+
+- `(reported_at is null and reported_by_user_id is null and reported_reference is null and report_recorded_at is null) or (reported_at is not null and reported_by_user_id is not null and reported_reference is not null and length(trim(reported_reference)) > 0 and report_recorded_at is not null)`
+- `calendar_checked_at is not null`
+- `calendar_region in ('england-and-wales', 'scotland', 'northern-ireland')`
+- `change_type in ('did_not_start', 'unauthorised_absence', 'sponsorship_stopped', 'salary_reduced', 'job_or_soc_changed', 'work_location_changed', 'working_hours_changed', 'unpaid_reduced_absence', 'other')`
+- `deadline_date > change_date`
+
 ## `companies`
 
 | Column | Type | Null | Default | Notes |
@@ -197,6 +236,28 @@ Checks:
 Checks:
 
 - `soc_code ~ '^[0-9]{4}$'`
+
+## `dossier_links`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `section` | VARCHAR(10) | no |  |  |
+| `title` | VARCHAR(160) | no |  |  |
+| `url` | VARCHAR(1000) | no |  |  |
+| `checked_on` | DATE | no |  |  |
+| `position` | INTEGER | no | `0` |  |
+| `active` | BOOLEAN | no | `true` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `position >= 0`
+- `section in ('licence', 'rtw', 'sms')`
+- `url ~ '^https://www[.]gov[.]uk/[^[:space:]]+$'`
 
 ## `email_outbox`
 
@@ -638,6 +699,38 @@ Checks:
 | `created_by` | UUID | yes |  |  |
 | `updated_by` | UUID | yes |  |  |
 
+## `org_changes`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `change_type` | VARCHAR(20) | no |  |  |
+| `deadline_date` | DATE | yes |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `archive_reason` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+| `change_date` | DATE | no |  |  |
+| `calendar_region` | VARCHAR(20) | no |  |  |
+| `calendar_checked_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `calendar_holidays` | JSONB | no | `[]` |  |
+| `reported_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `reported_by_user_id` | UUID | yes |  | references `users` |
+| `reported_reference` | VARCHAR(160) | yes |  |  |
+| `report_recorded_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `remarks` | TEXT | yes |  |  |
+
+Checks:
+
+- `(archived_at is null and archive_reason is null) or (archived_at is not null and archive_reason is not null and length(trim(archive_reason)) > 0 and reported_at is null)`
+- `(change_type = 'ao_or_key_contact' and deadline_date is null) or (change_type <> 'ao_or_key_contact' and deadline_date is not null and deadline_date > change_date and calendar_checked_at is not null)`
+- `(reported_at is null and reported_by_user_id is null and reported_reference is null and report_recorded_at is null) or (reported_at is not null and reported_by_user_id is not null and reported_reference is not null and length(trim(reported_reference)) > 0 and report_recorded_at is not null)`
+- `calendar_region in ('england-and-wales', 'scotland', 'northern-ireland')`
+- `change_type in ('address', 'ownership', 'name', 'key_personnel', 'ao_or_key_contact', 'other')`
+
 ## `pay_bands`
 
 | Column | Type | Null | Default | Notes |
@@ -715,6 +808,85 @@ Checks:
 
 - `level in ('support', 'owner')`
 
+## `reminders`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `sponsor_document_id` | UUID | yes |  | references `sponsor_documents` |
+| `rtw_check_id` | UUID | yes |  | references `rtw_checks` |
+| `threshold_days` | SMALLINT | no |  |  |
+| `expires_on` | DATE | no |  |  |
+| `due_on` | DATE | no |  |  |
+| `status` | VARCHAR(9) | no | `scheduled` |  |
+| `message_draft` | TEXT | yes |  |  |
+| `sent_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `sent_by_user_id` | UUID | yes |  | references `users` |
+| `email_outbox_id` | UUID | yes |  | references `email_outbox` |
+| `snoozed_until` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `cancel_reason` | VARCHAR(80) | yes |  |  |
+| `admin_notified_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(sponsor_document_id is not null and rtw_check_id is null) or (sponsor_document_id is null and rtw_check_id is not null)`
+- `(status = 'cancelled' and cancel_reason is not null and length(trim(cancel_reason)) > 0) or (status <> 'cancelled' and cancel_reason is null)`
+- `(status = 'sent' and sent_at is not null and sent_by_user_id is not null and email_outbox_id is not null and message_draft is not null) or (status <> 'sent' and sent_at is null and sent_by_user_id is null and email_outbox_id is null)`
+- `(status = 'snoozed' and snoozed_until is not null) or (status <> 'snoozed' and snoozed_until is null)`
+- `due_on = expires_on - threshold_days`
+- `message_draft is null or (length(trim(message_draft)) > 0 and length(message_draft) <= 2000)`
+- `status in ('scheduled', 'due', 'sent', 'snoozed', 'cancelled')`
+- `threshold_days in (90, 60, 30)`
+
+## `rtw_checks`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `subject_type` | VARCHAR(9) | no |  |  |
+| `subject_id` | UUID | no |  |  |
+| `check_type` | VARCHAR(24) | no |  |  |
+| `share_code` | TEXT | yes |  |  |
+| `idsp_provider` | VARCHAR(160) | yes |  |  |
+| `idsp_document` | VARCHAR(24) | yes |  |  |
+| `list_b_group` | VARCHAR(6) | yes |  |  |
+| `permission_expires` | BOOLEAN | no | `false` |  |
+| `permission_expires_on` | DATE | yes |  |  |
+| `follow_up_due_on` | DATE | yes |  |  |
+| `check_date` | DATE | yes |  |  |
+| `checked_by_user_id` | UUID | yes |  | references `users` |
+| `outcome` | VARCHAR(8) | no |  |  |
+| `evidence_file_id` | UUID | yes |  | references `files` |
+| `superseded_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `superseded_by` | UUID | yes |  | references `rtw_checks` |
+| `corrected_from_id` | UUID | yes |  | references `rtw_checks`, unique |
+| `correction_reason` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(check_type = 'idsp_digital' and idsp_provider is not null and idsp_document is not null and idsp_document in ('british_passport', 'irish_passport', 'irish_passport_card')) or (check_type <> 'idsp_digital' and idsp_provider is null and idsp_document is null)`
+- `(check_type = 'manual_list_b' and list_b_group is not null and list_b_group in ('group1', 'group2') and permission_expires) or (check_type <> 'manual_list_b' and list_b_group is null)`
+- `(check_type = 'online_share_code' and share_code is not null) or (check_type <> 'online_share_code' and share_code is null)`
+- `(corrected_from_id is null and correction_reason is null) or (corrected_from_id is not null and correction_reason is not null and length(trim(correction_reason)) > 0)`
+- `(permission_expires and permission_expires_on is not null) or (not permission_expires and permission_expires_on is null)`
+- `(superseded_at is null and superseded_by is null) or superseded_at is not null`
+- `check_type in ('online_share_code', 'idsp_digital', 'manual_list_a', 'manual_list_b')`
+- `check_type not in ('idsp_digital', 'manual_list_a') or not permission_expires`
+- `outcome in ('pending', 'verified', 'failed')`
+- `subject_type <> 'employee' or (check_date is not null and checked_by_user_id is not null)`
+- `subject_type in ('employee', 'candidate')`
+
 ## `sessions`
 
 | Column | Type | Null | Default | Notes |
@@ -732,6 +904,49 @@ Checks:
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 | `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+
+## `sponsor_documents`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `doc_type` | VARCHAR(11) | no |  |  |
+| `reference_number` | TEXT | yes |  |  |
+| `issuing_country` | VARCHAR(2) | yes |  |  |
+| `visa_route` | VARCHAR(24) | yes |  |  |
+| `cos_number` | TEXT | yes |  |  |
+| `soc_code` | VARCHAR(4) | yes |  |  |
+| `sponsored_salary` | NUMERIC(12, 2) | yes |  |  |
+| `issue_date` | DATE | yes |  |  |
+| `expiry_date` | DATE | yes |  |  |
+| `review_date` | DATE | yes |  |  |
+| `evidence_file_id` | UUID | yes |  | references `files` |
+| `remarks` | TEXT | yes |  |  |
+| `version` | INTEGER | no |  |  |
+| `superseded_by` | UUID | yes |  | references `sponsor_documents` |
+| `withdrawn_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `withdraw_reason` | TEXT | yes |  |  |
+| `renewal_date` | DATE | yes |  |  |
+| `renewal_notes` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(doc_type = 'visa' and visa_route is not null) or (doc_type <> 'visa' and visa_route is null and cos_number is null and soc_code is null and sponsored_salary is null)`
+- `(withdrawn_at is null and withdraw_reason is null) or (withdrawn_at is not null and withdraw_reason is not null and length(trim(withdraw_reason)) > 0 and superseded_by is null)`
+- `doc_type in ('visa', 'passport', 'dbs', 'euss', 'national_id', 'other')`
+- `issue_date is null or expiry_date is null or expiry_date >= issue_date`
+- `issuing_country is null or issuing_country ~ '^[A-Z]{2}$'`
+- `renewal_date is not null or renewal_notes is null`
+- `soc_code is null or soc_code ~ '^[0-9]{4}$'`
+- `sponsored_salary is null or sponsored_salary >= 0`
+- `version > 0`
+- `visa_route is null or visa_route in ('skilled_worker', 'health_care_worker', 'global_business_mobility', 'scale_up', 'temporary_worker', 'graduate', 'student', 'euss_settled', 'euss_pre_settled', 'family', 'other')`
 
 ## `tax_codes`
 

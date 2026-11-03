@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { rtwFilterFromParam } from "./rtw";
 
 import {
   ALL_DEPARTMENTS,
@@ -21,6 +22,7 @@ const row = (over: Partial<EmployeeRow>): EmployeeRow => ({
   department: "Care",
   designation: null,
   has_photo: false,
+  rtw_status: "not_recorded",
   ...over,
 });
 
@@ -68,15 +70,51 @@ describe("pills, summary and departments", () => {
   });
 
   it("words the summary and leaves out zeros", () => {
-    expect(summaryLine({ total: 12, active: 10, on_leave: 1, leavers: 1, archived: 4 })).toBe(
-      "12 employees · 10 active · 1 on leave · 1 leaver",
-    );
-    expect(summaryLine({ total: 1, active: 1, on_leave: 0, leavers: 0, archived: 0 })).toBe(
-      "1 employee · 1 active",
-    );
+    expect(
+      summaryLine({
+        total: 12,
+        active: 10,
+        on_leave: 1,
+        leavers: 1,
+        archived: 4,
+        rtw_needs_attention: 2,
+        rtw_verified: 10,
+      }),
+    ).toBe("12 employees · 10 active · 1 on leave · 1 leaver · 2 need Right to Work action");
+    expect(
+      summaryLine({
+        total: 1,
+        active: 1,
+        on_leave: 0,
+        leavers: 0,
+        archived: 0,
+        rtw_needs_attention: 0,
+        rtw_verified: 1,
+      }),
+    ).toBe("1 employee · 1 active · all Right to Work checks current");
   });
 
   it("lists each department once, sorted", () => {
     expect(departmentsIn(rows)).toEqual(["Care", "Kitchen"]);
   });
+});
+
+it("combines Right to Work attention, status deep links and employee filters", () => {
+  const checks = [
+    row({ id: "v", rtw_status: "verified" }),
+    row({ id: "f", rtw_status: "failed" }),
+    row({ id: "e", rtw_status: "expired" }),
+    row({ id: "m", rtw_status: "evidence_missing" }),
+  ];
+  expect(filterEmployees(checks, { ...none, pill: "needs_rtw" }).map((r) => r.id)).toEqual([
+    "f",
+    "e",
+    "m",
+  ]);
+  expect(filterEmployees(checks, { ...none, rtw: "Expired" }).map((r) => r.id)).toEqual(["f", "e"]);
+  expect(
+    filterEmployees(checks, { ...none, pill: "active", rtw: "EvidenceMissing" }).map((r) => r.id),
+  ).toEqual(["m"]);
+  expect(rtwFilterFromParam(["EvidenceMissing", "Verified"])).toBe("EvidenceMissing");
+  expect(rtwFilterFromParam("unknown")).toBe("all");
 });

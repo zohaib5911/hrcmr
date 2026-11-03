@@ -148,6 +148,8 @@ async def test_the_list_filters_searches_and_summarises(rig: dict[str, Any]) -> 
         "on_leave": 1,
         "leavers": 1,
         "archived": 1,
+        "rtw_needs_attention": 3,
+        "rtw_verified": 0,
     }
 
 

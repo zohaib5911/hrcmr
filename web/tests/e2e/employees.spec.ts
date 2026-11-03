@@ -68,7 +68,9 @@ test("N opens the form; an employee is added and listed; a repeated number is re
   await expect(page.getByRole("heading", { level: 1, name: "Employees" })).toBeVisible();
   const grid = page.getByRole("grid", { name: "Employees" });
   await expect(grid.getByText("Ben Okafor")).toBeVisible();
-  await expect(page.getByText("1 employee · 1 active", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("1 employee · 1 active · 1 needs Right to Work action", { exact: true }),
+  ).toBeVisible();
 
   await page.getByRole("button", { name: "New employee" }).click();
   await fill("e001");

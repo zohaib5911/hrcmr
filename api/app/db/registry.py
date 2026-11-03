@@ -7,10 +7,15 @@ from __future__ import annotations
 
 import app.modules.audit.models
 import app.modules.companies.models
+import app.modules.compliance.dossier_models
+import app.modules.compliance.models
+import app.modules.compliance.reminder_models
 import app.modules.email.models
 import app.modules.employees.models
 import app.modules.files.models
 import app.modules.holidays.models
 import app.modules.identity.models
 import app.modules.notifications.models
-import app.modules.pay.models  # noqa: F401
+import app.modules.pay.models
+import app.modules.rtw.models
+import app.modules.sponsor_documents.models  # noqa: F401

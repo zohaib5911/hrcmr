@@ -7,11 +7,13 @@ The test server in docker-compose.yml (``postgres-test``), Redis and Mailpit mus
 
 from __future__ import annotations
 
+import asyncio
 import os
 import secrets
 
 import uvicorn
 from redis import Redis
+from sqlalchemy.pool import NullPool
 
 from app.core.config import Settings
 from app.core.crypto import KeyRing, set_keyring
@@ -20,7 +22,8 @@ from app.integrations.email import Message, SmtpTransport
 from app.main import create_app
 from app.modules.email.outbox import sender_of
 from app.modules.email.templates import render
-from tests.db.support import temporary_database
+from tests.db.support import engine_for, temporary_database
+from tests.reporting_calendar import seed_reporting_calendar
 from tests.support import build_settings
 
 API_PORT = int(os.environ.get("E2E_API_PORT", "8100"))
@@ -50,9 +53,18 @@ class DirectMailer:
         )
 
 
+async def _calendar(owner_url: str) -> None:
+    engine = engine_for(owner_url, poolclass=NullPool)
+    try:
+        await seed_reporting_calendar(engine)
+    finally:
+        await engine.dispose()
+
+
 def main() -> None:
     configure_logging()
     with temporary_database() as database:
+        asyncio.run(_calendar(database.owner_url))
         settings = build_settings(
             database_url=database.app_url,
             redis_url=REDIS_URL,

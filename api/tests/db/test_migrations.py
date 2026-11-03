@@ -16,12 +16,14 @@ FUNCTIONS = {"uuid_generate_v7", "app_current_company_id", "set_updated_at"}
 IDENTITY_TABLES = [
     "audit_events",
     "bank_holidays",
+    "change_of_circumstances",
     "companies",
     "company_bank_accounts",
     "company_compliance_documents",
     "company_holidays",
     "departments",
     "designations",
+    "dossier_links",
     "email_outbox",
     "email_tokens",
     "emergency_contacts",
@@ -43,11 +45,15 @@ IDENTITY_TABLES = [
     "locations",
     "memberships",
     "notifications",
+    "org_changes",
     "pay_bands",
     "pay_schedules",
     "payment_types",
     "platform_admins",
+    "reminders",
+    "rtw_checks",
     "sessions",
+    "sponsor_documents",
     "tax_codes",
     "terms_acceptances",
     "terms_versions",
@@ -55,7 +61,14 @@ IDENTITY_TABLES = [
     "users",
     "working_pattern_days",
 ]
-IDENTITY_FUNCTIONS = {"app_current_user_id", "audit_events_append_only"}
+IDENTITY_FUNCTIONS = {
+    "app_current_user_id",
+    "audit_events_append_only",
+    "rtw_checks_immutable",
+    "sponsor_documents_immutable",
+    "compliance_changes_immutable",
+    "reminders_immutable",
+}
 
 
 async def _query(url: str, sql: str) -> list[str]:

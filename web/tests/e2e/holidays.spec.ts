@@ -1,7 +1,7 @@
 /**
  * The working pattern and the holiday pages (plan T4.5), against the real API and a real signed-in
- * Company Admin. GOV.UK's bank holidays arrive by the weekly job (covered by the API tests), so here
- * the list is empty and the page says so; the pattern, closures and types are used for real.
+ * Company Admin. The browser API seeds official holiday dates for reporting tests; the weekly
+ * import is covered by API tests. The pattern, closures and types are used for real.
  */
 import type { Page } from "@playwright/test";
 
@@ -60,7 +60,7 @@ test("holiday types and closures: add, use, and a used type cannot be archived",
   page,
 }) => {
   await open(page, "/holiday-management?year=2026", "Holidays");
-  await expect(page.getByText("they have not been loaded yet", { exact: false })).toBeVisible();
+  await expect(page.getByText("From GOV.UK, last updated", { exact: false })).toBeVisible();
 
   await page.getByRole("button", { name: "Add type" }).first().click();
   const typeSheet = page.getByRole("dialog", { name: "Add holiday type" });

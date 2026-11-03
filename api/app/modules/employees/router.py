@@ -11,10 +11,12 @@ from fastapi import APIRouter, Depends, Query, Request, UploadFile
 from sqlalchemy import delete, func, or_, select
 from sqlalchemy.exc import IntegrityError
 
-from app.core.errors import AppError, ConflictError, NotFoundError
+from app.core.errors import AppError, ConflictError, ForbiddenError, NotFoundError
 from app.core.rbac_matrix import Scope
+from app.db.rtw import employee_rtw_status
 from app.modules.audit.models import AuditEvent
 from app.modules.companies.models import Department, Designation
+from app.modules.compliance.models import ChangeOfCircumstances
 from app.modules.employees.models import (
     Employee,
     EmployeeAssignment,
@@ -34,6 +36,9 @@ from app.modules.employees.schemas import (
     StatusChange,
 )
 from app.modules.rbac.deps import Access, require
+from app.modules.rtw.models import RTWCheck
+from app.modules.rtw.schemas import FILTER_STATUSES, RTWFilter
+from app.modules.sponsor_documents.models import SponsorDocument
 
 router = APIRouter(tags=["employees"])
 
@@ -42,6 +47,12 @@ Writes = Annotated[Access, Depends(require("employee.profile.write"))]
 Deletes = Annotated[Access, Depends(require("employee.profile.delete"))]
 AGREEMENT_NOTE = "48-hour week opt-out agreement"
 LIMIT = 2000
+
+
+def _require_full_write(access: Access) -> None:
+    # Own profile writes cover contact details, not HR lifecycle/create/agreement operations.
+    if access.scope is not Scope.ALL:
+        raise ForbiddenError
 
 
 async def _reachable(access: Access) -> frozenset[uuid.UUID] | None:
@@ -65,19 +76,31 @@ async def list_employees(
     status: Annotated[Status | None, Query()] = None,
     department_id: Annotated[uuid.UUID | None, Query()] = None,
     q: Annotated[str | None, Query(max_length=100, description="Name or number contains.")] = None,
+    rtw: Annotated[RTWFilter | None, Query()] = None,
     archived: Annotated[
         bool, Query(description="Include archived records (or, with status=archived, only them).")
     ] = False,
 ) -> EmployeeList:
     reach = await _reachable(access)
     query = (
-        select(Employee, EmployeeAssignment.department_id, Department.name, Designation.title)
+        select(
+            Employee,
+            EmployeeAssignment.department_id,
+            Department.name,
+            Designation.title,
+            employee_rtw_status.c.status,
+        )
         .outerjoin(
             EmployeeAssignment,
             (EmployeeAssignment.employee_id == Employee.id) & current_assignment(),
         )
         .outerjoin(Department, Department.id == EmployeeAssignment.department_id)
         .outerjoin(Designation, Designation.id == EmployeeAssignment.designation_id)
+        .join(
+            employee_rtw_status,
+            (employee_rtw_status.c.employee_id == Employee.id)
+            & (employee_rtw_status.c.company_id == access.company_id),
+        )
     )
     if reach is not None:
         query = query.where(Employee.id.in_(reach))
@@ -87,6 +110,8 @@ async def list_employees(
         query = query.where(Employee.status != "archived")
     if department_id:
         query = query.where(EmployeeAssignment.department_id == department_id)
+    if rtw:
+        query = query.where(employee_rtw_status.c.status.in_(FILTER_STATUSES[rtw]))
     if q and q.strip():
         pattern = _like(q.strip())
         query = query.where(
@@ -120,14 +145,15 @@ async def list_employees(
                 first_name=e.first_name,
                 last_name=e.last_name,
                 email=e.email,
-                status=e.status,  # type: ignore[arg-type]
+                status=e.status,
                 hire_date=e.hire_date,
                 department_id=department_id_,
                 department=department,
                 designation=designation,
                 has_photo=e.photo_file_id is not None,
+                rtw_status=rtw_status_,
             )
-            for e, department_id_, department, designation in rows
+            for e, department_id_, department, designation, rtw_status_ in rows
         ],
         total=total,
     )
@@ -141,12 +167,23 @@ async def employee_summary(access: Reads) -> EmployeeSummary:
         query = query.where(Employee.id.in_(reach))
     counts = dict((await access.db.execute(query)).all())
     live = sum(n for status, n in counts.items() if status != "archived")
+    rtw_query = (
+        select(employee_rtw_status.c.status, func.count())
+        .join(Employee, Employee.id == employee_rtw_status.c.employee_id)
+        .where(employee_rtw_status.c.company_id == access.company_id, Employee.status != "archived")
+        .group_by(employee_rtw_status.c.status)
+    )
+    if reach is not None:
+        rtw_query = rtw_query.where(Employee.id.in_(reach))
+    rtw_counts: dict[str, int] = dict((await access.db.execute(rtw_query)).all())
     return EmployeeSummary(
         total=live,
         active=counts.get("active", 0),
         on_leave=counts.get("on_leave", 0),
         leavers=counts.get("leaver", 0),
         archived=counts.get("archived", 0),
+        rtw_verified=rtw_counts.get("verified", 0),
+        rtw_needs_attention=live - rtw_counts.get("verified", 0),
     )
 
 
@@ -174,6 +211,7 @@ def _number_key(number: str) -> str:
 async def create_employee(body: EmployeeIn, access: Writes) -> EmployeeRow:
     """A new record with the essentials. The number must be unique in the company, ignoring case
     and spaces ("E 001" and "e001" are the same)."""
+    _require_full_write(access)
     taken = (
         await access.db.execute(
             select(Employee.id).where(
@@ -239,6 +277,15 @@ async def _agreement_on_file(access: Access, employee_id: uuid.UUID) -> bool:
 async def _delete_blocker(access: Access, employee_id: uuid.UUID) -> str | None:
     """Why this record may not be deleted for good, or None. A record with history is archived."""
     history = {
+        "change-of-circumstances records": select(ChangeOfCircumstances.id).where(
+            ChangeOfCircumstances.employee_id == employee_id
+        ),
+        "sponsor documents": select(SponsorDocument.id).where(
+            SponsorDocument.employee_id == employee_id
+        ),
+        "Right to Work checks": select(RTWCheck.id).where(
+            RTWCheck.subject_type == "employee", RTWCheck.subject_id == employee_id
+        ),
         "a role": select(EmployeeAssignment.id).where(
             EmployeeAssignment.employee_id == employee_id
         ),
@@ -278,6 +325,14 @@ async def _profile(access: Access, employee: Employee) -> EmployeeProfile:
         )
     ).scalar_one()
     blocker = await _delete_blocker(access, employee.id)
+    rtw = (
+        await access.db.execute(
+            select(employee_rtw_status.c.status, employee_rtw_status.c.follow_up_due_on).where(
+                employee_rtw_status.c.employee_id == employee.id,
+                employee_rtw_status.c.company_id == access.company_id,
+            )
+        )
+    ).one()
     return EmployeeProfile(
         id=employee.id,
         employee_number=employee.employee_number,
@@ -292,6 +347,8 @@ async def _profile(access: Access, employee: Employee) -> EmployeeProfile:
         designation=role[1] if role else None,
         employment_type=role[2] if role else None,
         has_photo=employee.photo_file_id is not None,
+        rtw_status=rtw[0],
+        rtw_follow_up_due_on=rtw[1],
         opted_out_48h_week=employee.opted_out_48h_week,
         has_opt_out_agreement=await _agreement_on_file(access, employee.id),
         documents=documents,
@@ -310,12 +367,19 @@ async def change_status(
     employee_id: uuid.UUID, body: StatusChange, access: Writes
 ) -> EmployeeProfile:
     """Set to active, on leave, leaver or archived. A leaving date is optional."""
+    _require_full_write(access)
     employee = await _employee(access, employee_id)
     before = {"status": employee.status, "leave_date": employee.leave_date}
     employee.status = body.status
     employee.leave_date = body.leave_date if body.status in ("leaver", "on_leave") else None
     after = {"status": employee.status, "leave_date": employee.leave_date}
     if before != after:
+        from app.modules.companies.compliance_documents import _today
+        from app.modules.compliance.reminder_service import synchronize_employee
+
+        await synchronize_employee(
+            access.db, employee.id, access.audit_context, today=await _today(access)
+        )
         await access.audit(
             "employee.status_changed",
             entity_type="employee",
@@ -332,6 +396,7 @@ async def set_opt_out(
     employee_id: uuid.UUID, body: OptOutChange, access: Writes
 ) -> EmployeeProfile:
     """Record an opt-out of the 48-hour week. The signed agreement must be filed first."""
+    _require_full_write(access)
     employee = await _employee(access, employee_id)
     if body.opted_out and not await _agreement_on_file(access, employee.id):
         raise ConflictError("Upload the signed opt-out agreement first.", field="opted_out")
@@ -351,6 +416,7 @@ async def set_opt_out(
 async def upload_agreement(
     employee_id: uuid.UUID, request: Request, file: UploadFile, access: Writes
 ) -> None:
+    _require_full_write(access)
     employee = await _employee(access, employee_id)
     record = await request.app.state.files.upload(
         access,

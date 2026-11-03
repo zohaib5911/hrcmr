@@ -27,7 +27,11 @@ def _rows(record: dict[str, Any]) -> list[tuple[str, str]]:
     """Only scalar presentation data enters the template; IDs and internal flags are omitted."""
     result = []
     for key, value in record.items():
-        if key == "id" or key.endswith("_id") or key in {"sensitive_visible", "has_photo"}:
+        if (
+            key == "id"
+            or key.endswith("_id")
+            or key in {"sensitive_visible", "has_photo", "can_correct"}
+        ):
             continue
         if isinstance(value, list):
             value = ", ".join(str(v) for v in value)
@@ -41,7 +45,17 @@ def _rows(record: dict[str, Any]) -> list[tuple[str, str]]:
     return result
 
 
-def record_html(name: str, generated: str, sections: list[tuple[str, list[dict[str, Any]]]]) -> str:
+def record_html(
+    name: str,
+    generated: str,
+    sections: list[tuple[str, list[dict[str, Any]]]],
+    *,
+    report_title: str = "Employee record",
+    notice: str = (
+        "National Insurance, passport and bank numbers are masked. "
+        "Salary is included only when the requester may read compensation."
+    ),
+) -> str:
     # FastAPI has no Flask render_template. Record values are escaped (test_employee_pdf.py);
     # this trusted local template cannot fetch resources in the PDF renderer.
     # nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
@@ -50,6 +64,8 @@ def record_html(name: str, generated: str, sections: list[tuple[str, list[dict[s
     )
     return template.render(
         name=name,
+        report_title=report_title,
+        notice=notice,
         generated=generated,
         sections=[(title, [_rows(record) for record in records]) for title, records in sections],
     )
@@ -110,6 +126,16 @@ async def employee_pdf(employee_id: uuid.UUID, access: Reports) -> Response:
     if scope_for(access.role, "document.file.read") is not None:
         documents = await list_documents(employee_id, access)
         sections.append(("Documents", [d.model_dump(mode="json") for d in documents]))
+    if scope_for(access.role, "employee.rtw.read") is not None:
+        from app.modules.rtw.router import checks
+
+        rtw = await checks(employee_id, access)
+        sections.append(
+            (
+                "Right to Work history (share codes masked)",
+                [check.model_dump(mode="json") for check in rtw.checks],
+            )
+        )
     generated = datetime.now(UTC).strftime("%d %b %Y %H:%M UTC")
     html = record_html(f"{employee.first_name} {employee.last_name}", generated, sections)
     pdf = await asyncio.to_thread(render_pdf, html)

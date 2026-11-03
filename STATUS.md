@@ -1,37 +1,45 @@
 # STATUS
-Updated: 2026-11-02 19:46 (Europe/London)    Agent: Codex    Branch: dev    Commit: da06829
+Updated: 2026-11-03 06:48    Agent: Codex    Branch: dev    Commit: 2a2ab62
 State: IN PROGRESS
 
 ## Last completed
-- T6.8 plus Phase 6 integration/QA — employee linking, photos, role-only Overview and zero values
+- T7.6 — Sponsor record PDF download and live compliance bell with private messages/read actions
 
 ## Current task
-- Phase 6 gate
-  - [x] Deferred User Access employee linking and tests
-  - [x] Scanned profile photo upload/view and tests
-  - [x] Full suite once and affected failure/QA checks
-  - [x] 60 screenshots at 390/1280, light/dark; five-line phase summary
-  - [x] Open PR #11 dev to main
-  - [ ] Merge only on all-green CI
-- Resume note: PR #11 CI found vulnerable brotli/pypdf and a Flask-specific direct-Jinja rule. Patched brotli to 1.2.1 and pypdf to 6.21.4 with narrow temporary cooldown exceptions; local pip-audit reports no known vulnerabilities, 4 PDF/file tests pass. Escaping remains explicit/tested; same single-line Semgrep annotation as existing email renderer. Push/check latest PR CI, merge only on all-green checks, sync dev then T7.1.
-
+- Phase 7 gate — full verification and review
+  - [x] T7.1–T7.6 implementation and affected checks complete
+  - [x] Full API (479 pass, two failures fixed/15 affected pass) and web static/unit/guard checks
+  - [x] Full browser suite: 398 pass/148 skips; four stale shell assertions updated
+  - [x] Affected shell/setup 68 pass
+  - [x] Final hub/screenshots 6 pass; 36 images reviewed; mobile queue fixed
+  - [x] Save/review 36 Phase 7 screenshots at 390 and 1280 px
+  - [ ] Write five-line phase summary, open dev → main PR, merge only with all CI green
+  - [ ] Set BLOCKED — audit requested and stop
+- Resume note: Local Phase 7 gate complete. API full 479 pass/two failures fixed with 15 affected pass; lint/format/mypy clean. Web 777 + node guards 32 pass; types/lint/generated client pass. Full Playwright 398 pass/148 screenshot skips/four stale shell expectations fixed, shell/setup rerun 68 pass. Final hub/screenshots 6 pass, 36 images reviewed. PR #13 https://github.com/zohaib5911/hrcmr/pull/13 open. CI Semgrep flagged fixed-constant migration SQL; changed to identical literals, migrations/dossier/reporting 14 pass. Next wait for ALL CI green, merge with --merge --auto, sync dev and set BLOCKED — audit requested; do not start Phase 8.
 
 ## Next tasks
-- Phase 6 PR/merge, T7.1 through T7.6, Phase 7 gate then BLOCKED — audit requested
+- Phase 7 PR/CI/merge; mandatory owner audit before Phase 8
 
 ## Health
-- CI on dev: prior run 41504657493 green; PR #11 audit/SAST/API-image red on b0e66bf; fixes ready for next head. CI on main: previous run red (fix included on dev).
-- Local checks run: API full 421 pass/1 destructive fixture failure fixed, affected RBAC/User Access 26 pass; Overview QA API 3 pass. Web 776 pass, guards 32 pass, full Playwright 396 pass/144 screenshot-only skipped; final screenshots 5 pass (60 images). Ruff/mypy/eslint/tsc/generated API/build clean.
+- CI on dev: green 41514098397 (Phase 6); Phase 7 not yet run in CI. CI on main: green 41516923634.
+- Local checks: T7.3 calculator 12, reporting/holiday API 13 and migration/doc 7 pass; reporting/setup browser 3 and holiday/setup browser 14 pass. T7.2 migration/doc 7, sponsor API 14, sponsor/setup browser 2 and adjacent RTW/setup 2 pass. All affected lint/types/generated API/production builds pass. Full suite/screenshots next at Phase 7 gate.
+
 
 ## Issues / suggestions
-- Remove security cooldown exceptions: certifi after 2026-11-06, brotli after 2026-11-05, pypdf after 2026-11-12; Dependabot #5 pending green CI.
+- Remove cooldown exceptions once safe: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.
+- Dependabot #5 pending green CI; avoid unrelated changes.
 
 ## Strategy / decisions taken
-- Link/unlink requires rbac.role.assign (Company Admin): it changes self-service reach. Own account linking allowed; duplicate employee links refused. Photos require full employee.profile.write, excluding contact-only own writes.
-- T6.8 shells preserve workspace employee/month context; later modules replace named components. Activity includes direct employee and owned-file events.
-- PDF uses plan-specified WeasyPrint, lazy import, escaped text, blocked resources, masked numbers and scoped salary. Native libraries/fonts installed in runtime and CI.
-- Documents/photos reuse scanned FileService with employee associations; clean-only delivery.
-- Hierarchy CRUD is T12.1 (corrected old Phase 9 comments); roles use effective dates. Salary fetches only on Show salary.
+- Dossier: 8 GOV.UK publication/service links checked 2026-11-03; official HTTPS host only, no server fetch of edited URLs. Global reference links have platform-only writes, own content audit visibility and mandatory MFA; other platform permission policies deferred to Phase 17. Original checklist uses current official guide with source/date attribution.
+- T7.5 readiness: profile needs legal/contact/sector/default address plus conditional sponsor-history details; company documents means at least one current clean upload (18 types are optional by applicability). Coverage valid = verified or expiring; recorded-check readiness is separate. No reportable changes is Not applicable; prompt-report replacements carry no invented deadline.
+- Reviewed sends require a linked active verified account and use that account email; message is readable in own My Documents. The closest outstanding threshold controls Due now, including source snooze; sending it cancels older unsent thresholds as covered. Own-profile contact permission cannot reach HR create/lifecycle/48h endpoints.
+- T7.4: human review/send only; email outbox, notification and sent/audit state commit together, generic existing reminder_nudge email. Add RTW target to reminder schema for explicit phase scenario. Daily owner job may refresh unreported derived deadline/calendar fields while entered snapshots and reported records stay immutable.
+- T7.3 verified sources: GOV.UK sponsor Part 3 (C1.13/C2.3), glossary and bank-holidays page, checked 2026-11-03. AO/Key Contact replacements get prompt-report status, other org changes standard 20 working days. Regional calendar data must cover the requested dates; do not silently ignore missing bank holidays.
+- T7.2 exposes the document section of Sponsor compliance now so the feature is usable; T7.6 adds its PDF/CoC integration and notifications.
+- Sponsor metadata uses employee.rtw.read/write (own-read allowed, own-file uploads alone cannot change compliance metadata; auditors can read); register uses compliance.overview.read. Renewal target/notes never change expiry. Sponsor references/CoS masked, sponsored salary permission scoped.
+- RTW priority: not recorded, failed/pending, expired, missing/unclean evidence, expiring (<=60 days), verified; dates use company timezone. Share codes never returned/exported in full. Historical corrections stay historical; Company Admin can correct, HR Admin can record only. Candidate validation/routes arrive in Phase 11.
+- Browser file upload uses fixtures because e2e API has no storage config; real upload/scanning/binding/download tests use local services. Mobile checks wait for responsive cards after resize.
+- Employee linking requires rbac.role.assign; hierarchy CRUD deferred to T12.1. PDF HTML escaped, external resources blocked, sensitive numbers masked, salary permission scoped.
 - AI hidden without ANTHROPIC_API_KEY; Ask Mady deferred.
 
 ## Owner actions needed
