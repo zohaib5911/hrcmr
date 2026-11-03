@@ -124,3 +124,4 @@
 2026-11-03 09:03 | Codex | T8.1 | GOV.UK seed rules checked; baseline running; model/seed strategy recorded | next frozen migration and signup seeding
 2026-11-03 09:06 | Codex | T8.1 | leave model, frozen backfill/sign-up seeds and source record complete; migration/doc/signup 9 pass, ruff/mypy pass | next scoped API and tests
 2026-11-03 09:08 | Codex | T8.1 | scoped leave CRUD/settings, validation/audit and generated client complete; leave/RBAC/auth 50 pass, ruff/mypy pass | next leave settings UI and browser flow
+2026-11-03 09:12 | Codex | T8.1 | leave settings/forms/guidance UI and browser workflow ready; lint/types pass, API schema21 and web777 pass | next targeted production browser and finish

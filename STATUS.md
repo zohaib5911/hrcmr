@@ -10,9 +10,9 @@ State: IN PROGRESS
   - [x] Verify twelve seed rules against GOV.UK; baseline settings/RBAC checks
   - [x] Models, frozen migration/backfill and signup seeds
   - [x] Scoped API/settings validation, audit and regression tests
-  - [ ] Leave settings UI, CRUD sheets and navigation
+  - [x] Leave settings UI, CRUD sheets and navigation
   - [ ] Affected browser/API/static checks and task completion
-- Resume note: Leave CRUD/settings API and generated web contract complete; affected leave/RBAC/auth 50 pass, ruff/mypy pass. Implement /leave/settings UI, guidance and CRUD sheets; add discoverable link from Leave. Then targeted browser checks.
+- Resume note: UI complete at /leave/settings with discovery from Leave, typed CRUD/archive sheets and original guidance/source drawer. Browser flow prepared in web/tests/e2e/leave-settings.spec.ts; run production spec next. API 50 and schema/guards/contracts 21 pass; API static checks and web lint/types pass; web test CLI ran all 777 unit tests (pass).
 
 ## Next tasks
 
