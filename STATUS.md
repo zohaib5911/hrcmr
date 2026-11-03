@@ -1,18 +1,17 @@
 # STATUS
-Updated: 2026-11-03 09:54, Europe/London    Agent: Codex    Branch: dev    Commit: e8d2c3a
+Updated: 2026-11-03 09:54, Europe/London    Agent: Codex    Branch: dev    Commit: 6d51e12
 State: IN PROGRESS
 
 ## Last completed
 - T8.2 — immutable tenant ledger, balance view, pro-rata/pattern/calendar computation and serialized services
 
 ## Current task
-- T8.2 — complete
-  - [x] Prior audit/T8.1 implementation CI green: 41610450677 at 0d3b86d, all twelve checks
-  - [x] Pure calculation suite; exact arithmetic, leave years, starters/leavers, personal hours/history
-  - [x] Append-only ledger, composite tenant references, caller-scoped balance view, migration round-trip
-  - [x] Manual grant/deduct/set with reason/retry keys; idempotent standard/calendar reconciliation
-  - [x] Affected tests, static checks and leave-settings production browser flow
-- Resume note: Start T8.3 requests/conflicts/approvals and attendance synchronization. Ledger services in api/app/modules/leave/ledger.py do not commit; endpoint callers must audit and commit in one transaction. Reads do not implicitly grant. No T8.3 code yet. Balance endpoints and workspaces remain T8.4.
+- T8.3 — requests, conflicts, approvals and attendance synchronization
+  - [ ] Request and attendance models/migration
+  - [ ] Working-day counter and scoped request/approval API
+  - [ ] Booking ledger, attendance and transactional decision notifications
+  - [ ] Affected API/security/static checks
+- Resume note: Starting T8.3. Reuse ledger helpers with callers auditing/committing. No request code yet. Balance workspaces remain T8.4; rota entities arrive in Phase 9, when shift clashes can be evaluated.
 
 ## Next tasks
 - T8.3 — requests, working-days counter, conflicts, approvals, notifications, attendance sync
