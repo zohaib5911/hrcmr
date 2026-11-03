@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, Query, Request, UploadFile
 from sqlalchemy import delete, func, or_, select
 from sqlalchemy.exc import IntegrityError
 
-from app.core.errors import AppError, ConflictError, NotFoundError
+from app.core.errors import AppError, ConflictError, ForbiddenError, NotFoundError
 from app.core.rbac_matrix import Scope
 from app.db.rtw import employee_rtw_status
 from app.modules.audit.models import AuditEvent
@@ -47,6 +47,12 @@ Writes = Annotated[Access, Depends(require("employee.profile.write"))]
 Deletes = Annotated[Access, Depends(require("employee.profile.delete"))]
 AGREEMENT_NOTE = "48-hour week opt-out agreement"
 LIMIT = 2000
+
+
+def _require_full_write(access: Access) -> None:
+    # Own profile writes cover contact details, not HR lifecycle/create/agreement operations.
+    if access.scope is not Scope.ALL:
+        raise ForbiddenError
 
 
 async def _reachable(access: Access) -> frozenset[uuid.UUID] | None:
@@ -205,6 +211,7 @@ def _number_key(number: str) -> str:
 async def create_employee(body: EmployeeIn, access: Writes) -> EmployeeRow:
     """A new record with the essentials. The number must be unique in the company, ignoring case
     and spaces ("E 001" and "e001" are the same)."""
+    _require_full_write(access)
     taken = (
         await access.db.execute(
             select(Employee.id).where(
@@ -360,12 +367,19 @@ async def change_status(
     employee_id: uuid.UUID, body: StatusChange, access: Writes
 ) -> EmployeeProfile:
     """Set to active, on leave, leaver or archived. A leaving date is optional."""
+    _require_full_write(access)
     employee = await _employee(access, employee_id)
     before = {"status": employee.status, "leave_date": employee.leave_date}
     employee.status = body.status
     employee.leave_date = body.leave_date if body.status in ("leaver", "on_leave") else None
     after = {"status": employee.status, "leave_date": employee.leave_date}
     if before != after:
+        from app.modules.companies.compliance_documents import _today
+        from app.modules.compliance.reminder_service import synchronize_employee
+
+        await synchronize_employee(
+            access.db, employee.id, access.audit_context, today=await _today(access)
+        )
         await access.audit(
             "employee.status_changed",
             entity_type="employee",
@@ -382,6 +396,7 @@ async def set_opt_out(
     employee_id: uuid.UUID, body: OptOutChange, access: Writes
 ) -> EmployeeProfile:
     """Record an opt-out of the 48-hour week. The signed agreement must be filed first."""
+    _require_full_write(access)
     employee = await _employee(access, employee_id)
     if body.opted_out and not await _agreement_on_file(access, employee.id):
         raise ConflictError("Upload the signed opt-out agreement first.", field="opted_out")
@@ -401,6 +416,7 @@ async def set_opt_out(
 async def upload_agreement(
     employee_id: uuid.UUID, request: Request, file: UploadFile, access: Writes
 ) -> None:
+    _require_full_write(access)
     employee = await _employee(access, employee_id)
     record = await request.app.state.files.upload(
         access,

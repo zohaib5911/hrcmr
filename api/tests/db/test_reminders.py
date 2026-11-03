@@ -40,6 +40,8 @@ async def rig(database: DatabaseUnderTest) -> AsyncIterator[dict[str, Any]]:
     await redis.flushdb()
     a, b = await two_companies(database)
     owner = engine_for(database.owner_url, poolclass=NullPool)
+    async with owner.begin() as connection:
+        await connection.execute(text("truncate reminders, email_outbox, bank_holidays"))
     app = create_app(
         build_settings(
             database_url=database.app_url,
@@ -340,3 +342,276 @@ async def test_daily_due_dates_use_each_company_timezone(rig: dict[str, Any]) ->
     assert (
         next(r for r in await _rows(rig, b) if r["threshold_days"] == 90)["status"] == "scheduled"
     )
+
+
+async def _linked(rig: dict[str, Any], emp: uuid.UUID, company: uuid.UUID) -> httpx.AsyncClient:
+    client = await rig["person"]("employee", company)
+    me = (await client.get(f"{API}/auth/me")).json()["user"]
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text("update memberships set employee_id=:e where company_id=:c and user_id=:u"),
+            {"e": emp, "c": company, "u": uuid.UUID(me["id"])},
+        )
+    return client
+
+
+async def _due_passport(rig: dict[str, Any]) -> tuple[httpx.AsyncClient, uuid.UUID, dict[str, Any]]:
+    hr = await rig["person"]("hr_admin", rig["a"])
+    emp = await _employee(rig, rig["a"], "E1")
+    made = await hr.post(
+        f"{API}/employees/{emp}/sponsor-documents",
+        json={
+            "doc_type": "passport",
+            "reference_number": "PRIVATE-PASSPORT-123",
+            "expiry_date": str(datetime.now(UTC).date() + timedelta(days=21)),
+        },
+    )
+    assert made.status_code == 201, made.text
+    due = await hr.get(f"{API}/compliance/reminders/due")
+    assert due.status_code == 200, due.text
+    return hr, emp, due.json()[0]
+
+
+async def test_review_snooze_explicit_send_and_generic_atomic_delivery(rig: dict[str, Any]) -> None:
+    import json
+
+    from app.core.crypto import decrypt
+    from app.modules.email.outbox import PAYLOAD_CONTEXT, EmailDelivery
+    from tests.db.test_worker import Mailbox
+
+    hr, emp, reminder = await _due_passport(rig)
+    assert reminder["threshold_days"] == 30
+    assert reminder["recipient_available"] is False
+    assert reminder["can_send"] is False
+    path = f"{API}/reminders/{reminder['id']}"
+    assert (
+        await hr.post(path + "/send", json={"message": "Please review your passport."})
+    ).status_code == 409
+    me = await _linked(rig, emp, rig["a"])
+    recipient = (await me.get(f"{API}/auth/me")).json()["user"]
+    draft = await hr.patch(path, json={"message": " Please review your passport and contact HR. "})
+    assert draft.status_code == 200, draft.text
+    assert draft.json()["status"] == "due"
+    assert draft.json()["can_send"] is True
+    assert (await me.get(f"{API}/me/document-reminders")).json() == []
+    snoozed = await hr.post(path + "/snooze")
+    assert snoozed.status_code == 200, snoozed.text
+    assert snoozed.json()["status"] == "snoozed"
+    assert (await hr.get(f"{API}/compliance/reminders/due")).json() == []
+    until = datetime.fromisoformat(snoozed.json()["snoozed_until"])
+    assert abs((until - datetime.now(UTC)).total_seconds() - 7 * 86400) < 3601
+    sent = await hr.post(
+        path + "/send", json={"message": "Please review your passport and contact HR."}
+    )
+    assert sent.status_code == 200, sent.text
+    out = sent.json()
+    assert out["status"] == "sent"
+    assert out["sent_at"]
+    assert out["sent_by_user_id"]
+    assert out["sender_name"]
+    assert out["email_status"] == "pending"
+    assert out["snoozed_until"] is None
+    assert (await hr.post(path + "/send", json={"message": "Again"})).status_code == 409
+    assert (await hr.patch(path, json={"message": "Rewrite"})).status_code == 409
+    assert (await hr.get(f"{API}/compliance/reminders/due")).json() == []
+    history = (await hr.get(f"{API}/compliance/reminders/history")).json()
+    assert len(history) == 1
+    assert history[0]["sent_by_user_id"] == out["sent_by_user_id"]
+    received = (await me.get(f"{API}/me/document-reminders")).json()
+    assert received[0]["message"] == out["message_draft"]
+    assert received[0]["sender_name"] == out["sender_name"]
+    async with rig["owner"].connect() as c:
+        email = (
+            await c.execute(text("select id,to_address,template,payload from email_outbox"))
+        ).one()
+        notices = (
+            await c.execute(
+                text(
+                    "select user_id,kind,body from notifications where kind='compliance.reminder_received'"
+                )
+            )
+        ).all()
+        assert email.to_address == recipient["email"]
+        assert email.template == "reminder_nudge"
+        assert email.payload.startswith("v1:")
+        values = json.loads(decrypt(email.payload, context=PAYLOAD_CONTEXT))
+        assert set(values) == {"first_name", "sender_name", "link"}
+        assert "passport" not in str(values).lower()
+        assert str(reminder["id"]) in values["link"]
+        assert len(notices) == 1
+        assert notices[0].user_id == uuid.UUID(recipient["id"])
+        assert notices[0].body == out["message_draft"]
+        states = (
+            await c.execute(
+                text(
+                    "select status,cancel_reason from reminders where employee_id=:e and threshold_days>30"
+                ),
+                {"e": emp},
+            )
+        ).all()
+        assert all(row.status == "cancelled" for row in states)
+        assert all("Covered" in row.cancel_reason for row in states)
+    mailbox = Mailbox()
+    delivered = await EmailDelivery(
+        rig["app"].state.engine, mailbox, rig["app"].state.settings
+    ).deliver(email.id)
+    assert delivered.status == "sent"
+    assert len(mailbox.sent) == 1
+    message = mailbox.sent[0]
+    assert "passport" not in (message.subject + message.html + message.plain).lower()
+    assert message.subject == "You have a reminder waiting"
+    assert (await hr.get(f"{API}/compliance/reminders/history")).json()[0]["email_status"] == "sent"
+    with pytest.raises(DBAPIError, match="immutable"):
+        async with rig["owner"].begin() as c:
+            await c.execute(
+                text("update reminders set message_draft='rewrite' where id=:i"),
+                {"i": uuid.UUID(reminder["id"])},
+            )
+
+
+async def test_reminder_read_write_rbac_and_tenant_own_isolation(rig: dict[str, Any]) -> None:
+    hr, emp, reminder = await _due_passport(rig)
+    me = await _linked(rig, emp, rig["a"])
+    # Own contact writes must not create employees or archive a record to suppress reminders.
+    assert (
+        await me.post(
+            f"{API}/employees",
+            json={
+                "first_name": "Extra",
+                "last_name": "Record",
+                "email": "extra@example.com",
+                "employee_number": "E99",
+                "hire_date": "2025-01-06",
+            },
+        )
+    ).status_code == 403
+    assert (
+        await me.post(f"{API}/employees/{emp}/status", json={"status": "archived"})
+    ).status_code == 403
+    assert (
+        await me.put(f"{API}/employees/{emp}/opt-out-48h", json={"opted_out": False})
+    ).status_code == 403
+    assert (
+        await me.post(
+            f"{API}/employees/{emp}/opt-out-48h/agreement",
+            files={"file": ("agreement.pdf", PDF, "application/pdf")},
+        )
+    ).status_code == 403
+    auditor = await rig["person"]("read_only_auditor", rig["a"])
+    other_hr = await rig["person"]("hr_admin", rig["b"])
+    manager = await rig["person"]("people_manager", rig["a"])
+    path = f"{API}/reminders/{reminder['id']}"
+    assert (await auditor.get(path)).status_code == 200
+    assert (await auditor.get(path)).json()["can_send"] is False
+    for reader in (me, auditor, manager):
+        assert (await reader.patch(path, json={"message": "Changed"})).status_code == 403
+        assert (await reader.post(path + "/send", json={"message": "Changed"})).status_code == 403
+        assert (await reader.post(path + "/snooze")).status_code == 403
+    for reader in (me, manager):
+        assert (await reader.get(f"{API}/compliance/reminders")).status_code == 403
+        assert (await reader.get(path)).status_code == 403
+    assert (await other_hr.get(path)).status_code == 404
+    assert (await other_hr.patch(path, json={"message": "Changed"})).status_code == 404
+    assert (await other_hr.post(path + "/send", json={"message": "Changed"})).status_code == 404
+    assert (await other_hr.post(path + "/snooze")).status_code == 404
+    assert (await other_hr.get(f"{API}/compliance/reminders")).json() == []
+    assert (await hr.post(path + "/send", json={"message": " "})).status_code == 422
+    sent = await hr.post(path + "/send", json={"message": "Please review the record."})
+    assert sent.status_code == 200, sent.text
+    other = await _employee(rig, rig["a"], "E2")
+    unrelated = await _linked(rig, other, rig["a"])
+    assert (await unrelated.get(f"{API}/me/document-reminders")).json() == []
+    assert (await other_hr.get(f"{API}/me/document-reminders")).json() == []
+    assert len((await me.get(f"{API}/me/document-reminders")).json()) == 1
+
+
+async def test_atomic_send_rollback_and_concurrent_send_deduplicate(
+    rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import asyncio
+
+    from app.modules.compliance import reminder_router
+
+    hr, emp, reminder = await _due_passport(rig)
+    await _linked(rig, emp, rig["a"])
+    path = f"{API}/reminders/{reminder['id']}/send"
+    real = reminder_router.Notification
+
+    def fail_notification(*args: Any, **kwargs: Any) -> Any:
+        raise RuntimeError("synthetic notification failure")
+
+    monkeypatch.setattr(reminder_router, "Notification", fail_notification)
+    failed = await hr.post(path, json={"message": "Reviewed message."})
+    assert failed.status_code == 500
+    async with rig["owner"].connect() as c:
+        assert (await c.execute(text("select count(*) from email_outbox"))).scalar_one() == 0
+        assert (
+            await c.execute(
+                text("select status from reminders where id=:i"), {"i": uuid.UUID(reminder["id"])}
+            )
+        ).scalar_one() == "due"
+    monkeypatch.setattr(reminder_router, "Notification", real)
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text("update reminders set status='snoozed',snoozed_until=:u where id=:i"),
+            {"i": uuid.UUID(reminder["id"]), "u": datetime.now(UTC) - timedelta(minutes=1)},
+        )
+    second = await rig["person"]("hr_admin", rig["a"])
+    results = await asyncio.gather(
+        hr.post(path, json={"message": "Reviewed message."}),
+        second.post(path, json={"message": "Reviewed message."}),
+    )
+    assert sorted(r.status_code for r in results) == [200, 409]
+    async with rig["owner"].connect() as c:
+        assert (await c.execute(text("select count(*) from email_outbox"))).scalar_one() == 1
+        assert (
+            await c.execute(
+                text("select count(*) from notifications where kind='compliance.reminder_received'")
+            )
+        ).scalar_one() == 1
+        assert (
+            await c.execute(
+                text(
+                    "select count(*) from audit_events where action='employee.reminder_sent' and entity_id=:e"
+                ),
+                {"e": emp},
+            )
+        ).scalar_one() == 1
+
+
+async def test_future_and_replaced_sources_do_not_send_and_sent_history_survives(
+    rig: dict[str, Any],
+) -> None:
+    hr, emp, reminder = await _due_passport(rig)
+    await _linked(rig, emp, rig["a"])
+    path = f"{API}/reminders/{reminder['id']}"
+    sent = await hr.post(path + "/send", json={"message": "Reviewed message."})
+    assert sent.status_code == 200, sent.text
+    source = reminder["source_id"]
+    updated = await hr.post(
+        f"{API}/sponsor-documents/{source}/versions",
+        json={
+            "doc_type": "passport",
+            "expiry_date": str(datetime.now(UTC).date() + timedelta(days=120)),
+        },
+    )
+    assert updated.status_code == 201, updated.text
+    history = (await hr.get(f"{API}/compliance/reminders/history")).json()
+    assert history[0]["id"] == reminder["id"]
+    register = (await hr.get(f"{API}/compliance/reminders")).json()
+    assert register[0]["source_id"] == updated.json()["id"]
+    future = register[0]["reminders"][0]
+    assert future["status"] == "scheduled"
+    assert (
+        await hr.post(f"{API}/reminders/{future['id']}/send", json={"message": "Early"})
+    ).status_code == 409
+    assert (await hr.post(f"{API}/reminders/{future['id']}/snooze")).status_code == 409
+    cancelled = next(
+        row
+        for row in await _rows(rig, emp)
+        if row["threshold_days"] == 90 and row["sponsor_document_id"] == uuid.UUID(source)
+    )
+    assert (
+        await hr.post(f"{API}/reminders/{cancelled['id']}/send", json={"message": "Old source"})
+    ).status_code == 409
+    assert "PRIVATE-PASSPORT-123" not in str(history) + str(register)

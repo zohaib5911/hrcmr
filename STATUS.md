@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 02:15    Agent: Codex    Branch: dev    Commit: a6bf9bc
+Updated: 2026-11-03 02:36    Agent: Codex    Branch: dev    Commit: a578383
 State: IN PROGRESS
 
 ## Last completed
@@ -10,10 +10,10 @@ State: IN PROGRESS
   - [x] Reminder requirements and email/notification/job patterns reviewed; baseline lint/types and 11 email/worker tests pass; queue-test minute-boundary flake fixed
   - [x] Threshold/reminder model and migration 0018; 14 migration/doc/change-regression checks pass
   - [x] Threshold/source hooks and daily job, cancellation/restore/snooze and derived-calendar refresh; 34 reminder/source/worker checks pass, final engine 5 pass
-  - [ ] Scoped register/review/edit/snooze/send API with audited who/when and in-app/email delivery
+  - [x] Register/review/edit/snooze/send + own received API, atomic notification/encrypted outbox/audit; 20 affected API cases verified
   - [ ] Reminders page/register/history/review drawer (template until Phase 14)
   - [ ] Affected API/browser verification
-- Resume note: Reminder engine/source hooks/daily job verified: 34 reminder+RTW+sponsor+worker checks and final 5 engine checks pass, ruff/mypy clean. Next scoped reminder schemas/router + transactional reviewed send (Reminder, Notification and encrypted EmailOutbox in one transaction), received-reminder own view, then register/drawer UI. Current engine creates 3 thresholds per sponsor/RTW version, no automatic employee sends, dedupes admin notices, resumes due after 7-day snooze, refreshes only unreported calculated deadlines as owner. RTW 21-day Expiring + due30 scenario passes. APIs/UI not started.
+- Resume note: T7.4 API ready: register/due/history/detail, draft PATCH, 7-day snooze, reviewed send and own /me/document-reminders. Delivery/profile/email 19 cases passed + final corrected atomic/concurrency case 1 pass; engine/source/worker 34 pass. Ruff/mypy/generated API/web types pass. Next reminders register/review drawer and My Documents received-message UI, then browser checks. Linked active verified employee account required to send. Explicit send queues encrypted generic reminder_nudge email, creates notification and freezes sent record atomically; send covers older pending thresholds, future ones remain. Own profile writes now denied for HR create/status/48h operations so workers cannot archive themselves to suppress reminders. Email test fixture truncates reminders with outbox due FK; reminder fixture isolates shared global outbox/calendar; audit assertions scoped by employee because audit survives tenant reset.
 
 
 ## Next tasks
@@ -29,6 +29,7 @@ State: IN PROGRESS
 - Dependabot #5 pending green CI; avoid unrelated changes.
 
 ## Strategy / decisions taken
+- Reviewed sends require a linked active verified account and use that account email; message is readable in own My Documents. The closest outstanding threshold controls Due now, including source snooze; sending it cancels older unsent thresholds as covered. Own-profile contact permission cannot reach HR create/lifecycle/48h endpoints.
 - T7.4: human review/send only; email outbox, notification and sent/audit state commit together, generic existing reminder_nudge email. Add RTW target to reminder schema for explicit phase scenario. Daily owner job may refresh unreported derived deadline/calendar fields while entered snapshots and reported records stay immutable.
 - T7.3 verified sources: GOV.UK sponsor Part 3 (C1.13/C2.3), glossary and bank-holidays page, checked 2026-11-03. AO/Key Contact replacements get prompt-report status, other org changes standard 20 working days. Regional calendar data must cover the requested dates; do not silently ignore missing bank holidays.
 - T7.2 exposes the document section of Sponsor compliance now so the feature is usable; T7.6 adds its PDF/CoC integration and notifications.

@@ -146,6 +146,7 @@ async def synchronize_employee(
                 .where(Reminder.employee_id == employee_id)
                 .order_by(Reminder.id)
                 .with_for_update()
+                .execution_options(populate_existing=True)
             )
         ).scalars()
     )

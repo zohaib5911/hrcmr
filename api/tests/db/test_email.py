@@ -107,7 +107,7 @@ class FakeQueue:
 async def engine(database: DatabaseUnderTest) -> AsyncIterator[AsyncEngine]:
     owner = engine_for(database.owner_url, poolclass=NullPool)
     async with owner.begin() as c:
-        await c.execute(text("truncate email_outbox"))
+        await c.execute(text("truncate reminders, email_outbox"))
     await owner.dispose()
     engine = engine_for(database.app_url, poolclass=NullPool)
     yield engine
