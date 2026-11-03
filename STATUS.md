@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 17:59, Europe/London    Agent: Codex    Branch: dev    Commit: c25c466
+Updated: 2026-11-03 18:04, Europe/London    Agent: Codex    Branch: dev    Commit: e40b916
 State: IN PROGRESS
 
 ## Last completed
@@ -8,11 +8,12 @@ State: IN PROGRESS
 ## Current task
 - T9.5 — rota grid, publish, print and My Shifts
   - [x] Week/shift schema and optimistic edit/projection contracts
-  - [ ] Scoped grid and shift write APIs
-  - [ ] Copy/clear actions, warnings and publish notifications/PDF/own projection
+  - [x] Scoped grid and shift write APIs
+  - [x] Copy/clear actions and advisory warning APIs
+  - [ ] Publish notifications/PDF/own projection
   - [ ] Rota workspace/cell forms/menus and My Shifts
   - [ ] Affected API/browser checks
-- Resume note: Rota week/shift models and migration plus versioned API contracts added. Weeks retain last published snapshot while drafts change. Migration7 (apply/rollback/model/RLS) passes; generated data model refreshed. Next scoped grid/write service, actions/warnings/publish/PDF/own API, then UI. Connect leave-request shift conflicts and late detection once shifts exist.
+- Resume note: Read-only paged/search grid, write scope flags, versioned shifts/overlap and company-local DST handling, warning projections, atomic scoped copy/clear actions implemented. API/RBAC26 + migration7 and mypy280 pass; new action/rollback tests active. Client regenerated. Next publish snapshot merge/notifications/PDF/own, then workspace/cell/menus/My Shifts UI; connect leave conflicts and late detection.
 
 ## Next tasks
 - T9.6 — Work Log

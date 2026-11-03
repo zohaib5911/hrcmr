@@ -2868,6 +2868,41 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/rota/scheduled-shifts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Scheduled Shift */
+        post: operations["rota_create_scheduled_shift"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rota/scheduled-shifts/{shift_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Update Scheduled Shift */
+        put: operations["rota_update_scheduled_shift"];
+        post?: never;
+        /** Delete Shift */
+        delete: operations["rota_delete_shift"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/rota/shift-types": {
         parameters: {
             query?: never;
@@ -2899,6 +2934,108 @@ export interface paths {
         post?: never;
         /** Archive Shift */
         delete: operations["rota_archive_shift"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rota/weeks/{week_start}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Week */
+        get: operations["rota_week"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rota/weeks/{week_start}/clear": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Clear */
+        post: operations["rota_clear"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rota/weeks/{week_start}/clear-employee-week": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Clear Employee */
+        post: operations["rota_clear_employee"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rota/weeks/{week_start}/copy-day": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Copy Day */
+        post: operations["rota_copy_day"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rota/weeks/{week_start}/copy-employee-week": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Copy Employee */
+        post: operations["rota_copy_employee"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rota/weeks/{week_start}/copy-last-week": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Copy Week */
+        post: operations["rota_copy_week"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -3353,6 +3490,13 @@ export interface components {
              * @description Empty until the invitation is accepted.
              */
             user_id: string | null;
+        };
+        /** ActionOut */
+        ActionOut: {
+            /** Count */
+            count: number;
+            /** Version */
+            version: number;
         };
         /** AddressIn */
         AddressIn: {
@@ -4217,6 +4361,13 @@ export interface components {
             /** Superseded By */
             superseded_by: string | null;
         };
+        /** ClearWeek */
+        ClearWeek: {
+            /** On */
+            on?: string | null;
+            /** Version */
+            version: number;
+        };
         /** ClockIn */
         ClockIn: {
             location?: components["schemas"]["ClockLocation"] | null;
@@ -4650,6 +4801,18 @@ export interface components {
              * @enum {string}
              */
             relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
+        };
+        /** CopyDay */
+        CopyDay: {
+            /**
+             * Source
+             * Format: date
+             */
+            source: string;
+            /** Targets */
+            targets: string[];
+            /** Version */
+            version: number;
         };
         /** CorrectionIn */
         CorrectionIn: {
@@ -5228,6 +5391,16 @@ export interface components {
              * @description Everyone except archived records.
              */
             total: number;
+        };
+        /** EmployeeWeekAction */
+        EmployeeWeekAction: {
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Version */
+            version: number;
         };
         /** EmploymentTab */
         EmploymentTab: {
@@ -6847,6 +7020,128 @@ export interface components {
             /** Total */
             total: number;
         };
+        /** RotaPerson */
+        RotaPerson: {
+            /** Can Write */
+            can_write: boolean;
+            /** Employee Number */
+            employee_number: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Opted Out 48H Week */
+            opted_out_48h_week: boolean;
+        };
+        /** RotaWarning */
+        RotaWarning: {
+            /** Code */
+            code: string;
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Message */
+            message: string;
+            /** Shift Id */
+            shift_id: string | null;
+        };
+        /** ShiftIn */
+        ShiftIn: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /**
+             * Ends At
+             * Format: time
+             */
+            ends_at: string;
+            /** Ends Fold */
+            ends_fold?: (0 | 1) | null;
+            /** Note */
+            note?: string | null;
+            /** Shift Type Id */
+            shift_type_id?: string | null;
+            /**
+             * Starts At
+             * Format: time
+             */
+            starts_at: string;
+            /** Starts Fold */
+            starts_fold?: (0 | 1) | null;
+            /**
+             * Unpaid Break Minutes
+             * @default 0
+             */
+            unpaid_break_minutes: number;
+            /** Version */
+            version: number;
+        };
+        /** ShiftOut */
+        ShiftOut: {
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Employee Name */
+            employee_name: string;
+            /**
+             * Ends At
+             * Format: date-time
+             */
+            ends_at: string;
+            /** Ends Fold */
+            ends_fold: number;
+            /** Ends Local */
+            ends_local: string;
+            /** Hours */
+            hours: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Note */
+            note: string | null;
+            /** Shift Name */
+            shift_name: string | null;
+            /** Shift Type Id */
+            shift_type_id: string | null;
+            /**
+             * Starts At
+             * Format: date-time
+             */
+            starts_at: string;
+            /** Starts Fold */
+            starts_fold: number;
+            /** Starts Local */
+            starts_local: string;
+            /** Unpaid Break Minutes */
+            unpaid_break_minutes: number;
+        };
+        /** ShiftSaved */
+        ShiftSaved: {
+            shift: components["schemas"]["ShiftOut"];
+            /** Version */
+            version: number;
+        };
         /** ShiftTypeIn */
         ShiftTypeIn: {
             /** Break End */
@@ -7259,6 +7554,41 @@ export interface components {
              * @default https://www.gov.uk/national-minimum-wage-rates
              */
             source: string;
+        };
+        /** WeekOut */
+        WeekOut: {
+            /** Next Offset */
+            next_offset: number | null;
+            /** Not Scheduled */
+            not_scheduled: string[];
+            /** People */
+            people: components["schemas"]["RotaPerson"][];
+            /** Published At */
+            published_at: string | null;
+            /** Shifts */
+            shifts: components["schemas"]["ShiftOut"][];
+            /** Status */
+            status: string;
+            /** Timezone */
+            timezone: string;
+            /** Totals */
+            totals: {
+                [key: string]: string;
+            };
+            /** Version */
+            version: number;
+            /** Warnings */
+            warnings: components["schemas"]["RotaWarning"][];
+            /**
+             * Week Start
+             * Format: date
+             */
+            week_start: string;
+        };
+        /** WeekVersion */
+        WeekVersion: {
+            /** Version */
+            version: number;
         };
         /** WithdrawalIn */
         WithdrawalIn: {
@@ -16433,6 +16763,134 @@ export interface operations {
             };
         };
     };
+    rota_create_scheduled_shift: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShiftIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShiftSaved"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    rota_update_scheduled_shift: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                shift_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ShiftIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ShiftSaved"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    rota_delete_shift: {
+        parameters: {
+            query: {
+                version: number;
+            };
+            header?: never;
+            path: {
+                shift_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     rota_shift_types: {
         parameters: {
             query?: never;
@@ -16574,6 +17032,270 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    rota_week: {
+        parameters: {
+            query?: {
+                offset?: number;
+                limit?: number;
+                search?: string;
+            };
+            header?: never;
+            path: {
+                week_start: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WeekOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    rota_clear: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                week_start: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ClearWeek"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    rota_clear_employee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                week_start: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployeeWeekAction"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    rota_copy_day: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                week_start: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CopyDay"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    rota_copy_employee: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                week_start: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EmployeeWeekAction"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    rota_copy_week: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                week_start: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WeekVersion"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ActionOut"];
+                };
             };
             /** @description The request could not be completed. `error.code` says why. */
             "4XX": {

@@ -58,6 +58,7 @@ class RotaPerson(BaseModel):
     name: str
     employee_number: str
     opted_out_48h_week: bool
+    can_write: bool
 
 
 class RotaWarning(BaseModel):
@@ -101,7 +102,7 @@ class CopyDay(WeekVersion):
 
 
 class ClearWeek(WeekVersion):
-    date: date | None = None
+    on: date | None = None
 
 
 class OwnShifts(BaseModel):
