@@ -465,11 +465,11 @@ test("Related tabs preserve employee context and Activity shows saved changes", 
       writes++;
   });
   await page.getByRole("tab", { name: "Leave", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Leave balances and requests" })).toBeVisible();
-  await expect(page.getByRole("link", { name: "Open Leave" })).toHaveAttribute(
-    "href",
-    "/leave?employee_id=" + id,
-  );
+  await expect(page.getByRole("region", { name: "Leave balances", exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Adjust Annual Leave", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole("region", { name: "Leave requests", exact: true })).toBeVisible();
   await page.getByRole("tab", { name: "Attendance", exact: true }).click();
   await page.getByLabel("Month", { exact: true }).fill("2026-11");
   await expect(page.getByRole("link", { name: "Open Attendance" })).toHaveAttribute(

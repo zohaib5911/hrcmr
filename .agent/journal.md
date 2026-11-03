@@ -155,3 +155,4 @@
 2026-11-03 12:28 | Codex | Phase 8 gate | full API590 pass, sole generated-doc failure fixed (foreign-key set ordering sorted); targeted doc1 pass; static clean | next web full unit/browser, screenshots and green PR
 2026-11-03 12:30 | Codex | Phase 8 gate | web lint/types/contract pass, full unit776 pass with one stale notification-name assertion updated | next targeted shell/scripts result, full browser and screenshots
 2026-11-03 12:36 | Codex | Phase 8 gate | shell19/scripts32 pass after sandbox-independent CLI checks; full Playwright active /tmp/phase8-browser-full.txt (design checks green so far) | next finish browser, screenshots, summary and green PR
+2026-11-03 12:45 | Codex | Phase 8 gate | full browser407 pass/152 skipped/four shell assertions updated for implemented leave pages and sentence-case headings | next targeted four browser cases plus 48 Phase 8 screenshots

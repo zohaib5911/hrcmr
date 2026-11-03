@@ -43,18 +43,18 @@ export function LeaveHome({ mode = "workspace" }: { mode?: Mode }) {
   return (
     <>
       <PageHeader
-        title={mode === "own" ? "My Leave" : mode === "approvals" ? "My Approvals" : "Leave"}
+        title={mode === "own" ? "My leave" : mode === "approvals" ? "My approvals" : "Leave"}
         description="Plan time away and review your allowance."
         actions={
           <>
             {mode !== "own" && can("leave.request.read_own", "leave.request.create_own") && (
               <Button asChild variant="gray">
-                <Link href="/my-leave">My Leave</Link>
+                <Link href="/my-leave">My leave</Link>
               </Button>
             )}
             {mode !== "approvals" && mayApprove && (
               <Button asChild variant="gray">
-                <Link href="/my-approvals">My Approvals</Link>
+                <Link href="/my-approvals">My approvals</Link>
               </Button>
             )}
             {mode === "workspace" && can("leave.config.read") && (
