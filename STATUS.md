@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 01:59    Agent: Codex    Branch: dev    Commit: 701157a
+Updated: 2026-11-03 02:06    Agent: Codex    Branch: dev    Commit: 763c40b
 State: IN PROGRESS
 
 ## Last completed
@@ -8,12 +8,12 @@ State: IN PROGRESS
 ## Current task
 - T7.4 — Reminders engine and register
   - [x] Reminder requirements and email/notification/job patterns reviewed; baseline lint/types and 11 email/worker tests pass; queue-test minute-boundary flake fixed
-  - [ ] Threshold/reminder model and migration
+  - [x] Threshold/reminder model and migration 0018; 14 migration/doc/change-regression checks pass
   - [ ] Daily reconciliation job and version/withdrawal cancellation
   - [ ] Scoped register/review/edit/snooze/send API with audited who/when and in-app/email delivery
   - [ ] Reminders page/register/history/review drawer (template until Phase 14)
   - [ ] Affected API/browser verification
-- Resume note: T7.4 baseline ready; next reminder model/migration 0018. Support sponsor_document_id OR rtw_check_id (21-day RTW scenario), one row per source/version/threshold. Use existing reminder_nudge template and transactional encrypted email_outbox + Notification writes with send/audit; never send automatically from daily job. Received messages need My Documents own-read view. Version/withdraw/archive cancels unsent rows, sent history retained. Daily reconciliation uses company dates, advances thresholds/snoozes, refreshes unreported derived CoC calendars with owner-only calculated-field updates, and notifies admins. No T7.4 code yet.
+- Resume note: Reminder model/migration 0018 ready; 14 migration/doc/change regression checks pass, ruff/mypy clean. Next threshold service + source record/version/withdraw hooks, daily job and owner-only unreported deadline refresh. Both sponsor and RTW targets supported, sent records immutable, 3 unique threshold rows per source version. Deliver explicit sends atomically through encrypted email_outbox + Notification + sent audit; existing reminder_nudge template. No service/API/UI yet.
 
 
 ## Next tasks

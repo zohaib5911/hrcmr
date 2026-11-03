@@ -49,6 +49,7 @@ IDENTITY_TABLES = [
     "pay_schedules",
     "payment_types",
     "platform_admins",
+    "reminders",
     "rtw_checks",
     "sessions",
     "sponsor_documents",
@@ -65,6 +66,7 @@ IDENTITY_FUNCTIONS = {
     "rtw_checks_immutable",
     "sponsor_documents_immutable",
     "compliance_changes_immutable",
+    "reminders_immutable",
 }
 
 

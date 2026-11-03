@@ -786,6 +786,42 @@ Checks:
 
 - `level in ('support', 'owner')`
 
+## `reminders`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `sponsor_document_id` | UUID | yes |  | references `sponsor_documents` |
+| `rtw_check_id` | UUID | yes |  | references `rtw_checks` |
+| `threshold_days` | SMALLINT | no |  |  |
+| `expires_on` | DATE | no |  |  |
+| `due_on` | DATE | no |  |  |
+| `status` | VARCHAR(9) | no | `scheduled` |  |
+| `message_draft` | TEXT | yes |  |  |
+| `sent_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `sent_by_user_id` | UUID | yes |  | references `users` |
+| `email_outbox_id` | UUID | yes |  | references `email_outbox` |
+| `snoozed_until` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `cancel_reason` | VARCHAR(80) | yes |  |  |
+| `admin_notified_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(sponsor_document_id is not null and rtw_check_id is null) or (sponsor_document_id is null and rtw_check_id is not null)`
+- `(status = 'cancelled' and cancel_reason is not null and length(trim(cancel_reason)) > 0) or (status <> 'cancelled' and cancel_reason is null)`
+- `(status = 'sent' and sent_at is not null and sent_by_user_id is not null and email_outbox_id is not null and message_draft is not null) or (status <> 'sent' and sent_at is null and sent_by_user_id is null and email_outbox_id is null)`
+- `(status = 'snoozed' and snoozed_until is not null) or (status <> 'snoozed' and snoozed_until is null)`
+- `due_on = expires_on - threshold_days`
+- `message_draft is null or (length(trim(message_draft)) > 0 and length(message_draft) <= 2000)`
+- `status in ('scheduled', 'due', 'sent', 'snoozed', 'cancelled')`
+- `threshold_days in (90, 60, 30)`
+
 ## `rtw_checks`
 
 | Column | Type | Null | Default | Notes |
