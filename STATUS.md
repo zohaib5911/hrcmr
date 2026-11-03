@@ -10,8 +10,8 @@ State: IN PROGRESS
   - [x] Full API/static suite (once)
   - [x] Full web/unit/script/browser suite (sequentially)
   - [x] 390/1280 light/dark screenshots and visual review
-  - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: DST readiness plus compliance/leave streaming fixes verified with UTC targeted browser4/4 (/tmp/phase9-ci-targeted.txt). All changes pushed; PR15 now needs all-green CI at final head. Merge only green using gh pr merge 15 --merge --auto, then clean sync dev/start T10.1 (document/file/RBAC baseline34 pass). Screenshot76/local full gate complete; Semgrep already corrected/green.
+  - [x] Five-line phase summary, PR dev→main and green CI merge
+- Resume note: Phase9 gate complete: PR15 merged86c51a5 after all12 checks green (41737189830), dev synced. Start T10.1 company documents; document/file/RBAC baseline34 pass. Read plan6.7/8.10/T10.1, use scanned upload patterns and full-scope document permissions.
 
 ## Next tasks
 - T10.1 — company documents
@@ -19,7 +19,7 @@ State: IN PROGRESS
 - T10.3 — policies and sign-offs
 
 ## Health
-- CI on dev: pending (browser readiness fixes pass locally4; PR15). CI on main: not rechecked.
+- CI on dev: green (all12; 41737189830). CI on main: not rechecked.
 - Local checks run: T9.2 API31/browser4/static; T9.3 API39+attendance27/migration7/doc1/static/web25/browser2; T9.4 API34/migration7/static/web22/browser2; T9.5 affected61+isolated rota9/clock-email12/migration7/static/web22/browser3; T9.6 Work Log10+related26/migration7/mypy288/static/web22/browser2 — pass.
 
 ## Issues / suggestions
