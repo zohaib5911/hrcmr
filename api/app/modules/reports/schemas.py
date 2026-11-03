@@ -10,11 +10,13 @@ from pydantic import BaseModel
 
 from app.modules.reports.reference import ReportType  # noqa: TC001
 
+ReportStatus = Literal["queued", "ready", "failed"]
+
 
 class ReportJobOut(BaseModel):
     id: uuid.UUID
     report_type: ReportType
-    status: Literal["queued", "ready", "failed"]
+    status: ReportStatus
     created_at: datetime
     finished_at: datetime | None
     error_code: str | None

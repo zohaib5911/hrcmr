@@ -266,6 +266,11 @@ class FileService:
     @staticmethod
     async def _reaches(access: Access, record: File) -> bool:
         """Everyone with full scope; otherwise what the person uploaded or that is within reach."""
+        if record.owner_type == "report_result":
+            return (
+                scope_for(access.role, "document.report.generate") is Scope.ALL
+                and record.uploaded_by == access.caller.user_id
+            )
         if record.owner_type == "company_document":
             return scope_for(access.role, "document.file.read") is Scope.ALL
         if record.owner_type == "attendance_import":
