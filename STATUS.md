@@ -1,19 +1,18 @@
 # STATUS
-Updated: 2026-11-03 09:17, Europe/London    Agent: Codex    Branch: dev    Commit: 3db8bc3
-State: HANDED OVER
+Updated: 2026-11-03 09:22, Europe/London    Agent: Codex    Branch: dev    Commit: 0d3b86d
+State: IN PROGRESS
 
 ## Last completed
 - T8.1 — verified leave defaults, tenant configuration API and settings UI
 - F7.1–F7.7 — each completed in its own commit, pushed before T8.1
 
 ## Current task
-- T8.1 — leave types and settings complete
-  - [x] Twelve GOV.UK-verified seeds with stored source/date/original summaries
-  - [x] Model, frozen migration/backfill and transactional signup seeds
-  - [x] Scoped/audited type CRUD/archive and recurring-date/settings validation
-  - [x] /leave/settings UI, guidance, type sheets and discovery from Leave
-  - [x] Affected API, schema, static and production browser checks
-- Resume note: T8.1 complete. Next authorized plan task is T8.2 ledger and balance computation; no T8.2 work started. Sources: data/leave/SOURCES.md. Browser workflow passes date validation/persistence, guidance links, add/duplicate/edit/archive and 390/1280 light/dark axe. Phase 8 gate remains after T8.5.
+- CI verification before T8.2 (owner instruction)
+  - [x] Inspect clean dev, journal and handover; sync/push
+  - [x] Check dev runs; dispatch current untested head 0d3b86d
+  - [ ] Resolve any failures; confirm all CI green
+  - [ ] Start T8.2 ledger and balance computation
+- Resume note: CI run 41610450677 tests 0d3b86d (audit fixes and T8.1). Earlier successful Phase 7 run does not cover these commits. Do not start T8.2 until this run is green. Inspect gh run view; fix any red jobs first.
 
 ## Next tasks
 - T8.2 — ledger and balance computation
@@ -21,7 +20,7 @@ State: HANDED OVER
 - T8.4 — leave workspaces and employee tab
 
 ## Health
-- CI on dev: no push workflow; last Phase 7 PR all-green. CI on main: prior post-merge run was pending; not rechecked this session.
+- CI on dev: current-head run 41610450677 in progress; previous Phase 7 green. CI on main: not rechecked.
 - Local checks run: affected leave/RBAC/auth 50 pass; schema/guards/contracts 21 pass; API ruff/format/mypy pass (235 files); web lint/types/generated contract pass; web unit 777 pass; leave browser/setup 6 pass. Audit fixes: access12, auth18 plus flow/migrations30, RBAC22 (189 routes/168 protected operations × six roles), exports8, RTW parity3 (225 combinations), error24 and affected browser63 pass.
 
 ## Issues / suggestions
