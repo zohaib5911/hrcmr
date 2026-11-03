@@ -16,7 +16,7 @@ test("verified defaults, saved settings and type add/edit/archive are usable", a
   await page.getByRole("link", { name: "Leave settings", exact: true }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Leave settings" })).toBeVisible();
   await expect(page.getByText("12 rows", { exact: true })).toBeVisible();
-  await expect(page.getByLabel("Leave year starts (MM-DD)")).toHaveValue("01-01");
+  await expect(page.getByLabel("Leave year starts (MM-DD)", { exact: true })).toHaveValue("01-01");
   await page.getByRole("button", { name: "Guidance for Annual Leave", exact: true }).click();
   const guidance = page.getByRole("dialog", { name: "Annual Leave guidance" });
   await expect(guidance.getByText(/5.6 weeks/)).toBeVisible();
@@ -27,7 +27,7 @@ test("verified defaults, saved settings and type add/edit/archive are usable", a
   await expect(guidance.getByText(/2026-11-03/)).toBeVisible();
   await guidance.getByRole("button", { name: "Close", exact: true }).click();
 
-  const start = page.getByLabel("Leave year starts (MM-DD)");
+  const start = page.getByLabel("Leave year starts (MM-DD)", { exact: true });
   await start.fill("04-31");
   await page.getByRole("button", { name: "Save leave settings" }).click();
   await expect(page.getByText(/Use a date that occurs every year/)).toBeVisible();

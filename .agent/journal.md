@@ -125,3 +125,4 @@
 2026-11-03 09:06 | Codex | T8.1 | leave model, frozen backfill/sign-up seeds and source record complete; migration/doc/signup 9 pass, ruff/mypy pass | next scoped API and tests
 2026-11-03 09:08 | Codex | T8.1 | scoped leave CRUD/settings, validation/audit and generated client complete; leave/RBAC/auth 50 pass, ruff/mypy pass | next leave settings UI and browser flow
 2026-11-03 09:12 | Codex | T8.1 | leave settings/forms/guidance UI and browser workflow ready; lint/types pass, API schema21 and web777 pass | next targeted production browser and finish
+2026-11-03 09:13 | Codex | T8.1 | production UI reached seeded settings; narrowed ambiguous year-field browser selector | next targeted browser rerun

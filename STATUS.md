@@ -12,7 +12,7 @@ State: IN PROGRESS
   - [x] Scoped API/settings validation, audit and regression tests
   - [x] Leave settings UI, CRUD sheets and navigation
   - [ ] Affected browser/API/static checks and task completion
-- Resume note: UI complete at /leave/settings with discovery from Leave, typed CRUD/archive sheets and original guidance/source drawer. Browser flow prepared in web/tests/e2e/leave-settings.spec.ts; run production spec next. API 50 and schema/guards/contracts 21 pass; API static checks and web lint/types pass; web test CLI ran all 777 unit tests (pass).
+- Resume note: First production browser run reached settings; test selector also matched the field clear button. Narrowed year-start label to exact match. Rerun leave-settings spec next; API50/schema21/web777 and static checks pass.
 
 ## Next tasks
 
