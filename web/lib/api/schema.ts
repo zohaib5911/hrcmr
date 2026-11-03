@@ -394,6 +394,23 @@ export interface paths {
         patch: operations["pay_update_bank_account"];
         trace?: never;
     };
+    "/changes/{change_id}/mark-reported": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark Reported */
+        post: operations["compliance-changes_mark_reported"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/company": {
         parameters: {
             query?: never;
@@ -545,6 +562,94 @@ export interface paths {
         };
         /** A 60-second link to the document */
         get: operations["company_document_link"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/compliance/changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Changes */
+        get: operations["compliance-changes_changes"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/compliance/org-changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Org Changes */
+        get: operations["compliance-changes_org_changes"];
+        put?: never;
+        /** Add Org Change */
+        post: operations["compliance-changes_add_org_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/compliance/org-changes/{change_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Org Change */
+        get: operations["compliance-changes_org_change"];
+        /** Update Org Change */
+        put: operations["compliance-changes_update_org_change"];
+        post?: never;
+        /** Archive Org Change */
+        delete: operations["compliance-changes_archive_org_change"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/compliance/org-changes/{change_id}/mark-reported": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark Org Reported */
+        post: operations["compliance-changes_mark_org_reported"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/compliance/reporting-deadline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview Deadline */
+        get: operations["compliance-changes_preview_deadline"];
         put?: never;
         post?: never;
         delete?: never;
@@ -784,6 +889,41 @@ export interface paths {
          * @description A new account replaces the current one, which is kept as history.
          */
         put: operations["employees_save_bank"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Employee Changes */
+        get: operations["compliance-changes_employee_changes"];
+        put?: never;
+        /** Add Change */
+        post: operations["compliance-changes_add_change"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/employees/{employee_id}/changes/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Change Defaults */
+        get: operations["compliance-changes_change_defaults"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -2146,6 +2286,11 @@ export interface components {
             /** Postcode */
             postcode?: string | null;
         };
+        /** ArchiveChangeIn */
+        ArchiveChangeIn: {
+            /** Reason */
+            reason: string;
+        };
         /** AssignmentIn */
         AssignmentIn: {
             /** Custom Working Days */
@@ -2434,6 +2579,137 @@ export interface components {
             owner_id?: string | null;
             /** Owner Type */
             owner_type?: string | null;
+        };
+        /** ChangeDefaults */
+        ChangeDefaults: {
+            /** Address */
+            address?: string | null;
+            /** Contact Number */
+            contact_number?: string | null;
+            /** Documents */
+            documents: components["schemas"]["SponsorDocumentOut"][];
+            /** Employment Type */
+            employment_type?: ("full_time" | "part_time" | "fixed_term" | "zero_hours" | "casual" | "apprentice" | "agency") | null;
+            /** Job Title */
+            job_title?: string | null;
+            /** Nationality */
+            nationality?: string | null;
+        };
+        /** ChangeIn */
+        ChangeIn: {
+            /**
+             * Ack Home Office Interview
+             * @default false
+             */
+            ack_home_office_interview: boolean;
+            /**
+             * Ack Inform Hr
+             * @default false
+             */
+            ack_inform_hr: boolean;
+            /** Address */
+            address?: string | null;
+            /**
+             * Change Date
+             * Format: date
+             */
+            change_date: string;
+            /**
+             * Change Type
+             * @enum {string}
+             */
+            change_type: "did_not_start" | "unauthorised_absence" | "sponsorship_stopped" | "salary_reduced" | "job_or_soc_changed" | "work_location_changed" | "working_hours_changed" | "unpaid_reduced_absence" | "other";
+            /** Contact Number */
+            contact_number?: string | null;
+            /** Documents Snapshot */
+            documents_snapshot?: string[];
+            /** Employment Type */
+            employment_type?: ("full_time" | "part_time" | "fixed_term" | "zero_hours" | "casual" | "apprentice" | "agency") | null;
+            /** Job Title */
+            job_title?: string | null;
+            /** Nationality */
+            nationality?: string | null;
+            /** Remarks */
+            remarks?: string | null;
+        };
+        /** ChangeOut */
+        ChangeOut: {
+            /** Ack Home Office Interview */
+            ack_home_office_interview: boolean;
+            /** Ack Inform Hr */
+            ack_inform_hr: boolean;
+            /** Address */
+            address: string | null;
+            /** Calendar Checked At */
+            calendar_checked_at: string | null;
+            /** Calendar Holidays */
+            calendar_holidays: string[];
+            /** Calendar Region */
+            calendar_region: string;
+            /**
+             * Change Date
+             * Format: date
+             */
+            change_date: string;
+            /**
+             * Change Type
+             * @enum {string}
+             */
+            change_type: "did_not_start" | "unauthorised_absence" | "sponsorship_stopped" | "salary_reduced" | "job_or_soc_changed" | "work_location_changed" | "working_hours_changed" | "unpaid_reduced_absence" | "other";
+            /** Contact Number */
+            contact_number: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Deadline Date */
+            deadline_date: string | null;
+            /** Documents Snapshot */
+            documents_snapshot: string[];
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Employee Name */
+            employee_name: string;
+            /** Employee Number */
+            employee_number: string;
+            /** Employment Type */
+            employment_type: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Job Title */
+            job_title: string | null;
+            /** Nationality */
+            nationality: string | null;
+            /** Remarks */
+            remarks: string | null;
+            /** Report Recorded At */
+            report_recorded_at: string | null;
+            /** Reported At */
+            reported_at: string | null;
+            /** Reported By User Id */
+            reported_by_user_id: string | null;
+            /** Reported Date */
+            reported_date: string | null;
+            /** Reported On Time */
+            reported_on_time: boolean | null;
+            /** Reported Reference */
+            reported_reference: string | null;
+            /** Reporter Name */
+            reporter_name: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "unreported" | "overdue" | "reported" | "prompt";
+            /** Working Days Left */
+            working_days_left: number | null;
         };
         /** ChangePasswordRequest */
         ChangePasswordRequest: {
@@ -2948,6 +3224,17 @@ export interface components {
             reason: string;
             /** Share Code */
             share_code?: string | null;
+        };
+        /** DeadlineOut */
+        DeadlineOut: {
+            /** Bank Holidays Excluded */
+            bank_holidays_excluded: string[];
+            /** Calendar Checked At */
+            calendar_checked_at: string | null;
+            /** Calendar Region */
+            calendar_region: string;
+            /** Deadline Date */
+            deadline_date: string | null;
         };
         /** DepartmentIn */
         DepartmentIn: {
@@ -3834,6 +4121,80 @@ export interface components {
             /** Value */
             value: string;
         };
+        /** OrgChangeIn */
+        OrgChangeIn: {
+            /**
+             * Change Date
+             * Format: date
+             * @description The date the organisation became aware of the change.
+             */
+            change_date: string;
+            /**
+             * Change Type
+             * @enum {string}
+             */
+            change_type: "address" | "ownership" | "name" | "key_personnel" | "ao_or_key_contact" | "other";
+            /** Remarks */
+            remarks?: string | null;
+        };
+        /** OrgChangeOut */
+        OrgChangeOut: {
+            /** Archive Reason */
+            archive_reason: string | null;
+            /** Archived At */
+            archived_at: string | null;
+            /** Calendar Checked At */
+            calendar_checked_at: string | null;
+            /** Calendar Holidays */
+            calendar_holidays: string[];
+            /** Calendar Region */
+            calendar_region: string;
+            /**
+             * Change Date
+             * Format: date
+             */
+            change_date: string;
+            /**
+             * Change Type
+             * @enum {string}
+             */
+            change_type: "address" | "ownership" | "name" | "key_personnel" | "ao_or_key_contact" | "other";
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Deadline Date */
+            deadline_date: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Remarks */
+            remarks: string | null;
+            /** Report Recorded At */
+            report_recorded_at: string | null;
+            /** Reported At */
+            reported_at: string | null;
+            /** Reported By User Id */
+            reported_by_user_id: string | null;
+            /** Reported Date */
+            reported_date: string | null;
+            /** Reported On Time */
+            reported_on_time: boolean | null;
+            /** Reported Reference */
+            reported_reference: string | null;
+            /** Reporter Name */
+            reporter_name: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "unreported" | "overdue" | "reported" | "prompt";
+            /** Working Days Left */
+            working_days_left: number | null;
+        };
         /** PatternDay */
         "PatternDay-Input": {
             /** Hours */
@@ -4121,6 +4482,16 @@ export interface components {
              * Format: date
              */
             renewal_date: string;
+        };
+        /** ReportedIn */
+        ReportedIn: {
+            /** Reference */
+            reference: string;
+            /**
+             * Reported Date
+             * Format: date
+             */
+            reported_date: string;
         };
         /** ResetPasswordRequest */
         ResetPasswordRequest: {
@@ -5593,6 +5964,50 @@ export interface operations {
             };
         };
     };
+    "compliance-changes_mark_reported": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                change_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportedIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     company_get_company: {
         parameters: {
             query?: never;
@@ -6170,6 +6585,342 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DocumentLink"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "compliance-changes_changes": {
+        parameters: {
+            query?: {
+                state?: "all" | "unreported" | "overdue";
+                q?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeOut"][];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "compliance-changes_org_changes": {
+        parameters: {
+            query?: {
+                state?: "all" | "unreported" | "overdue";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgChangeOut"][];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "compliance-changes_add_org_change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrgChangeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgChangeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "compliance-changes_org_change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                change_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgChangeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "compliance-changes_update_org_change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                change_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OrgChangeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgChangeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "compliance-changes_archive_org_change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                change_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ArchiveChangeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgChangeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "compliance-changes_mark_org_reported": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                change_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportedIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgChangeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "compliance-changes_preview_deadline": {
+        parameters: {
+            query: {
+                change_date: string;
+                kind?: "worker" | "organisation" | "prompt";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeadlineOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -6955,6 +7706,130 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BankMasked"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "compliance-changes_employee_changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeOut"][];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "compliance-changes_add_change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangeIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "compliance-changes_change_defaults": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChangeDefaults"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

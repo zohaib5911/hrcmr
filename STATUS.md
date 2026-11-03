@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 01:29    Agent: Codex    Branch: dev    Commit: ac88e1e
+Updated: 2026-11-03 01:36    Agent: Codex    Branch: dev    Commit: 1bfced2
 State: IN PROGRESS
 
 ## Last completed
@@ -10,10 +10,10 @@ State: IN PROGRESS
   - [x] Requirements and GOV.UK Part 3/glossary/calendar checked 2026-11-03; holiday baseline 6 tests, ruff/mypy pass
   - [x] Working-day calculator with GOV.UK bank-holiday examples; 12 unit checks pass
   - [x] Change/org-change models and migration 0017; immutable worker/reported records, unreported org CRUD; 7 migration/doc checks pass
-  - [ ] Scoped APIs, deadlines and mark-reported tests
+  - [x] Scoped APIs, deadlines and mark-reported tests; 7 integration + 12 working-day checks pass
   - [ ] Employee change form/log and company-wide pages
   - [ ] Affected browser checks and final verification
-- Resume note: Calculator 12 unit checks and model/migration 0017 checks 7 pass (ruff/mypy clean). Next compliance changes schemas/calendar loader/API and scoped tests. Worker snapshot records immutable except mark-reported. Org records allow audited correction/archive while unreported, then freeze. Regional calendar coverage required; AO/Key Contact prompt-report exception has no invented fixed date.
+- Resume note: T7.3 API verified: 7 integration + 12 pure working-day tests, migration/doc 7; ruff/mypy/generated API/web types pass. Next employee change form/log, company-wide CoC/org pages and browser scenario. E2E API currently has an empty bank-holiday table: seed official fixed test dates in tests/e2e_server.py (test-only) before exercising real deadline API; runtime still uses weekly GOV.UK import, never fetch on requests. Snapshot and company-timezone reporting tested; no UI yet.
 
 
 ## Next tasks

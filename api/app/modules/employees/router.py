@@ -16,6 +16,7 @@ from app.core.rbac_matrix import Scope
 from app.db.rtw import employee_rtw_status
 from app.modules.audit.models import AuditEvent
 from app.modules.companies.models import Department, Designation
+from app.modules.compliance.models import ChangeOfCircumstances
 from app.modules.employees.models import (
     Employee,
     EmployeeAssignment,
@@ -269,6 +270,9 @@ async def _agreement_on_file(access: Access, employee_id: uuid.UUID) -> bool:
 async def _delete_blocker(access: Access, employee_id: uuid.UUID) -> str | None:
     """Why this record may not be deleted for good, or None. A record with history is archived."""
     history = {
+        "change-of-circumstances records": select(ChangeOfCircumstances.id).where(
+            ChangeOfCircumstances.employee_id == employee_id
+        ),
         "sponsor documents": select(SponsorDocument.id).where(
             SponsorDocument.employee_id == employee_id
         ),

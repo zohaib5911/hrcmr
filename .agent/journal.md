@@ -72,3 +72,4 @@
 2026-11-03 01:23 | Codex | T7.3 | official deadline/glossary/calendar sources checked; holiday baseline lint/types/tests pass; recorded AO/Key Contact exception | next pure calculator and dated examples
 2026-11-03 01:24 | Codex | T7.3 | pure working-day calculator with 12 official-date examples/edge checks passes lint/types/tests | next immutable changes/org models and migration 0017
 2026-11-03 01:29 | Codex | T7.3 | change/org models + migration 0017, tenant RLS and immutable snapshots/reporting; migration/doc 7 pass | next scoped API/calendar coverage/reporting tests
+2026-11-03 01:36 | Codex | T7.3 | scoped change/org CRUD, snapshot/defaults, deadline preview and reported actor/date API; 19 tests pass, generated types/lint/mypy clean | next UI + test-only e2e calendar seed

@@ -39,6 +39,7 @@ from app.modules.companies.key_personnel_router import router as key_personnel_r
 from app.modules.companies.router import router as company_router
 from app.modules.companies.structure_router import router as structure_router
 from app.modules.companies.trading_hours import router as trading_hours_router
+from app.modules.compliance.router import router as compliance_changes_router
 from app.modules.email.outbox import OutboxMailer
 from app.modules.employees.activity_router import router as employee_activity_router
 from app.modules.employees.compensation_router import router as compensation_router
@@ -203,6 +204,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(employee_pdf_router, prefix=API_PREFIX)
     app.include_router(employee_activity_router, prefix=API_PREFIX)
     app.include_router(rtw_router, prefix=API_PREFIX)
+    app.include_router(compliance_changes_router, prefix=API_PREFIX)
     app.include_router(sponsor_documents_router, prefix=API_PREFIX)
     app.include_router(employee_photo_router, prefix=API_PREFIX)
     app.include_router(compensation_router, prefix=API_PREFIX)
