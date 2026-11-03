@@ -8,7 +8,8 @@ State: IN PROGRESS
 ## Current task
 - Phase 7 gate — full verification and review
   - [x] T7.1–T7.6 implementation and affected checks complete
-  - [ ] Run full API, web unit and browser suites sequentially
+  - [x] Full API (479 pass, two failures fixed/15 affected pass) and web static/unit/guard checks
+  - [ ] Full browser suite
   - [ ] Save/review Phase 7 screenshots at 390 and 1280 px
   - [ ] Write five-line phase summary, open dev → main PR, merge only with all CI green
   - [ ] Set BLOCKED — audit requested and stop

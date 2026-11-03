@@ -60,7 +60,7 @@ for (const colorScheme of ["light", "dark"] as const) {
           ["/sponsor-compliance/reminders", "Compliance reminders", "reminders"],
           ["/sponsor-compliance/change-of-circumstances", "Change of circumstances", "changes"],
           ["/sponsor-compliance/dossier", "Sponsor Management Dossier", "dossier"],
-        ]) {
+        ] as const) {
           await page.goto(route);
           await expect(
             page.getByRole("heading", { level: 1, name: heading, exact: true }),
