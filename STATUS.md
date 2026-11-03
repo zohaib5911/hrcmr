@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 03:17    Agent: Codex    Branch: dev    Commit: 5a6c3a2
+Updated: 2026-11-03 03:19    Agent: Codex    Branch: dev    Commit: 68a05b9
 State: IN PROGRESS
 
 ## Last completed
@@ -7,11 +7,11 @@ State: IN PROGRESS
 
 ## Current task
 - T7.6 — Employee sponsor record PDF and bell Needs attention
-  - [ ] Affected baseline checks and scoped design
+  - [x] Affected baseline: PDF/sponsor API 15 pass, shell unit 19 pass; prior area lint/types pass
   - [ ] Masked sponsor PDF including document versions/RTW/change snapshots; API checks
   - [ ] Compliance bell feed and own received-notification privacy; API checks
   - [ ] Sponsor PDF download and bell UI; affected static/unit/browser checks
-- Resume note: T7.5 complete. Build sponsor PDF through existing record_html/render_pdf and scoped sponsor/RTW/change serializers. Bell shows live company compliance actions only to overview readers, plus own received compliance messages; general notification preferences/digests remain T14.2. Then Phase 7 full suite/screenshots/CI PR gate and audit stop.
+- Resume note: Baseline PDF/sponsor 15 and shell 19 pass. Build sponsor PDF through existing record_html/render_pdf and scoped sponsor/RTW/change serializers. Bell shows live company compliance actions only to overview readers, plus own received compliance messages; general notification preferences/digests remain T14.2. Then Phase 7 full suite/screenshots/CI PR gate and audit stop.
 
 ## Next tasks
 - T7.6; Phase 7 gate then BLOCKED — audit requested
