@@ -21,9 +21,20 @@ function useSubmit(success: string, onClose: () => void) {
   const toast = useToast();
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<Problem | null>(null);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
+  const [password, setPassword] = useState("");
   async function run(call: Call<unknown>): Promise<Problem | null> {
     setBusy(true);
     setProblem(null);
+    if (needsConfirmation) {
+      const confirmed = await attempt((api) => api.POST("/auth/step-up", { body: { password } }));
+      if (!confirmed.ok) {
+        setBusy(false);
+        setProblem(confirmed.problem);
+        return confirmed.problem;
+      }
+      setPassword("");
+    }
     const outcome = await attempt(call);
     setBusy(false);
     if (outcome.ok) {
@@ -32,10 +43,21 @@ function useSubmit(success: string, onClose: () => void) {
       onClose();
       return null;
     }
+    if (outcome.problem.code === "STEP_UP_REQUIRED") setNeedsConfirmation(true);
     setProblem(outcome.problem);
     return outcome.problem;
   }
-  return { busy, problem, setProblem, run };
+  const confirmation = needsConfirmation ? (
+    <TextField
+      label="Your password"
+      type="password"
+      autoComplete="current-password"
+      value={password}
+      onChange={(event) => setPassword(event.target.value)}
+      required
+    />
+  ) : null;
+  return { busy, problem, setProblem, run, confirmation };
 }
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -52,7 +74,7 @@ export function InviteSheet({
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<Role>("employee");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const { busy, problem, run } = useSubmit("Invitation sent", onClose);
+  const { busy, problem, run, confirmation } = useSubmit("Invitation sent", onClose);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -116,6 +138,7 @@ export function InviteSheet({
           disabled: r === "company_admin" && !mayInviteAdmin,
         }))}
       />
+      {confirmation}
     </FormSheet>
   );
 }
@@ -130,7 +153,7 @@ export function RoleSheet({
   onClose: () => void;
 }) {
   const [role, setRole] = useState<Role>(user.role);
-  const { busy, problem, run } = useSubmit("Role changed", onClose);
+  const { busy, problem, run, confirmation } = useSubmit("Role changed", onClose);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -164,11 +187,12 @@ export function RoleSheet({
           disabled: r === "company_admin" && !mayAssignAdmin && user.role !== "company_admin",
         }))}
       />
+      {confirmation}
     </FormSheet>
   );
 }
 
-type Confirmed = "suspend" | "reactivate" | "reset" | "cancel";
+type Confirmed = "suspend" | "reactivate" | "reset" | "cancel" | "resend";
 
 const COPY: Record<Confirmed, { title: string; detail: string; label: string; done: string }> = {
   suspend: {
@@ -191,6 +215,12 @@ const COPY: Record<Confirmed, { title: string; detail: string; label: string; do
     label: "Reset two-step",
     done: "Two-step verification reset",
   },
+  resend: {
+    title: "Resend invitation for",
+    detail: "Send a fresh invitation link by email.",
+    label: "Resend invitation",
+    done: "Invitation sent",
+  },
   cancel: {
     title: "Cancel the invitation for",
     detail: "The link in their email stops working. You can invite them again later.",
@@ -212,7 +242,7 @@ export function ConfirmSheet({
   const copy = COPY[action];
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | undefined>();
-  const { busy, problem, run } = useSubmit(copy.done, onClose);
+  const { busy, problem, run, confirmation } = useSubmit(copy.done, onClose);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -223,6 +253,12 @@ export function ConfirmSheet({
       const confirmed = await attempt((api) => api.POST("/auth/step-up", { body: { password } }));
       if (!confirmed.ok) return setError(confirmed.problem.message);
       await run((api) => api.POST("/users/{membership_id}/reset-two-step", { params: id }));
+    } else if (action === "resend") {
+      await run((api) =>
+        api.POST("/users/invitations/{invitation_id}/resend", {
+          params: { path: { invitation_id: user.id } },
+        }),
+      );
     } else if (action === "cancel") {
       await run((api) =>
         api.DELETE("/users/invitations/{invitation_id}", {
@@ -262,6 +298,7 @@ export function ConfirmSheet({
           autoComplete="current-password"
         />
       ) : null}
+      {confirmation}
     </FormSheet>
   );
 }

@@ -1,14 +1,14 @@
 # STATUS
-Updated: 2026-11-03 08:45, Europe/London    Agent: Codex    Branch: dev    Commit: 05b9960
+Updated: 2026-11-03 08:48, Europe/London    Agent: Codex    Branch: dev    Commit: 05b9960
 State: IN PROGRESS
 
 ## Last completed
-- Phase 7 gate — PR #13 merged as f17ef67 after all 12 CI checks green (41595489940)
+- F7.1 — fresh step-up guards plus UI confirmation for role, privileged invite/resend and policy changes
 
 ## Current task
-- F7.1 — step-up on role changes, privileged invitations and two-step policy
-  - [ ] Implement guards and affected regression tests (one commit)
-- Resume note: Synced clean dev. Audit file docs/audits/phase7.md absent; requested contents, using queued STATUS findings meanwhile. Complete F7.1–F7.7 one commit each, then T8.1.
+- F7.2 — authentication audit events
+  - [ ] Implement transaction-bound events and regression checks (one commit)
+- Resume note: F7.1 complete: API 12 pass, ruff/mypy and web lint/types pass. Continue F7.2 then F7.3–F7.7 and T8.1. Missing audit document requested; queued findings used.
 
 ## Next tasks
 

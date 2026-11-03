@@ -187,6 +187,8 @@ async def _pending(db: GlobalDb, company_id: uuid.UUID, **where: object) -> Invi
 @router.post("/users/invitations", status_code=201, response_model=AccessUser)
 async def invite_user(body: InviteIn, access: Invites, db: GlobalDb, auth: Auth) -> AccessUser:
     check_can_invite(access.role, body.role)
+    if body.role in {"company_admin", "hr_admin"}:
+        require_step_up(access.caller.session)
     email = str(body.email).strip().lower()
     already = (
         await access.db.execute(
@@ -237,6 +239,8 @@ async def resend_invitation(
     if invitation is None:
         raise NotFoundError
     check_can_invite(access.role, invitation.role)
+    if invitation.role in {"company_admin", "hr_admin"}:
+        require_step_up(access.caller.session)
     await db.scope_to_company(access.company_id)
     token = await renew_invitation(db, invitation)
     await record_audit(
@@ -278,6 +282,7 @@ async def cancel_invitation(invitation_id: uuid.UUID, access: Invites, db: Globa
 async def change_role(membership_id: uuid.UUID, body: RoleIn, access: Assigns) -> AccessUser:
     member, user = await _target(access, membership_id)
     if body.role != member.role:
+        require_step_up(access.caller.session)
         check_can_change_role(access.role, current_role=member.role, new_role=body.role)
         await ensure_company_keeps_an_admin(
             access.db, access.company_id, member.id, new_role=body.role
@@ -393,6 +398,7 @@ async def set_two_step_policy(body: TwoStepPolicyIn, access: Assigns) -> TwoStep
         await access.db.execute(select(Company).where(Company.id == access.company_id))
     ).scalar_one()
     if company.mfa_policy != body.policy:
+        require_step_up(access.caller.session)
         before, company.mfa_policy = company.mfa_policy, body.policy
         await access.audit(
             "company.mfa_policy_changed",

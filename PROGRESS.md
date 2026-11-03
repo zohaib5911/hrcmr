@@ -451,3 +451,5 @@ Needs the owner's accounts and variables (see "Owner actions needed").
 
 ### Phase 25 — Later
 Do not start until the owner says so: US site, Australia, native wrapper, passkeys, calendar-synced SMS reminders.
+
+- [x] F7.1 — fresh step-up for role, privileged invite/resend and policy changes; API 12 pass, UI lint/types pass.
