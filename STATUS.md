@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 01:16    Agent: Codex    Branch: dev    Commit: 4ec5251
+Updated: 2026-11-03 01:18    Agent: Codex    Branch: dev    Commit: ed50c27
 State: IN PROGRESS
 
 ## Last completed
@@ -13,7 +13,7 @@ State: IN PROGRESS
   - [x] Employee document forms/history and sponsored employees table; web types/lint pass
   - [x] Browser scenario prepared for explicit save/upload, version/history, renewal/withdrawal and register
   - [ ] Affected browser checks and final verification
-- Resume note: T7.2 sponsor production browser scenario passes (including mobile/axe). Adjacent RTW browser scenario failed at a desktop-grid locator while viewport was still 390px; corrected to mobile list, rerun only rtw.spec.ts. API 14 tests, web types/lint/generated API/build pass.
+- Resume note: T7.2 sponsor production browser scenario passes (including mobile/axe). Adjacent RTW browser scenario failed at a desktop-grid locator while viewport was still 390px; corrected to mobile list; second run found partial text also matched the hidden Open label, now use exact name. Rerun only rtw.spec.ts. API 14 tests, web types/lint/generated API/build pass.
 
 
 ## Next tasks

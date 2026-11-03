@@ -66,3 +66,4 @@
 2026-11-03 01:11 | Codex | T7.2 | scoped document/version/renewal/withdraw/evidence/register API; 14 integration tests pass; generated types/lint/mypy pass | next employee forms and sponsored table
 2026-11-03 01:14 | Codex | T7.2 | sponsor document forms/history, renewal/withdrawal and sponsored table; web types/lint pass; browser scenario ready | next affected sponsor/RTW Playwright checks
 2026-11-03 01:16 | Codex | T7.2 | sponsor production browser scenario passes incl mobile/axe; corrected adjacent RTW mobile locator (grid to list) | next rerun RTW only and finish T7.2
+2026-11-03 01:18 | Codex | T7.2 | RTW mobile list assertion now matches exact name, avoiding hidden Open label; sponsor scenario remains green | next rerun RTW only
