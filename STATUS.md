@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 18:39, Europe/London    Agent: Codex    Branch: dev    Commit: 9bdefc5
+Updated: 2026-11-03 18:45, Europe/London    Agent: Codex    Branch: dev    Commit: d861a75
 State: IN PROGRESS
 
 ## Last completed
@@ -7,11 +7,11 @@ State: IN PROGRESS
 
 ## Current task
 - Phase 9 gate — full validation, design evidence and green PR
-  - [ ] Full API/static suite (once)
+  - [x] Full API/static suite (once)
   - [ ] Full web/unit/script/browser suite (sequentially)
   - [ ] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: Full API gate active in /tmp/phase9-api-full.txt; lint/format321/mypy288 pass. New phase9 screenshot spec prepares isolated data for 19 views at 390/1280 light/dark (76 images), static typecheck clean. Finish API result, full web/unit/scripts then full Playwright sequentially; SCREENSHOTS=1 targeted spec after full browser. Do not overlap API pytest and browser setup. Then visual review/summary/green PR and T10.1.
+- Resume note: Full API658 pass/sole architecture failure corrected; targeted architecture/migration/WorkLog19 pass. Python lint/format321/mypy288 and generated contract clean. New phase9 screenshot spec ready (19 views × four states =76). Next full web/unit/scripts then full Playwright sequentially; SCREENSHOTS=1 targeted screenshot spec, visual review/summary and all-green PR merge. Full API logs /tmp/phase9-api-full.txt and /tmp/phase9-api-corrected.txt.
 
 ## Next tasks
 - T10.1 — company documents
