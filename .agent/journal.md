@@ -139,3 +139,4 @@
 2026-11-03 09:57 | Codex | T8.3 | request/attendance models and migration with tenant FKs; schema inventory updated; lint/types pass | next migration roundtrip then counter/API
 2026-11-03 10:05 | Codex | T8.3 | migration8 pass; counter, scoped request/approval API, self guard, atomic booking/notifications written; static clean, schema generated | next scenario/RBAC/rollback tests
 2026-11-03 10:17 | Codex | T8.3 | request scenarios22 pass; fixture role mismatch fixed; added staffing/calendar/negative-policy cases; normalized quantities, types clean | next combined affected regression
+2026-11-03 11:55 | Codex | T8.3 | complete: combined requests/ledger/RBAC/notifications/calculations115 pass, static/types/contract clean; grouped DB paths resolves focused pytest fixture collection | next T8.4 balance/calendar APIs and leave workspaces

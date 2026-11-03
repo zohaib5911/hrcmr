@@ -1,28 +1,28 @@
 # STATUS
-Updated: 2026-11-03 11:49, Europe/London    Agent: Codex    Branch: dev    Commit: b041dcf
+Updated: 2026-11-03 11:55, Europe/London    Agent: Codex    Branch: dev    Commit: 98c1ddd
 State: IN PROGRESS
 
 ## Last completed
-- T8.2 — immutable tenant ledger, balance view, pro-rata/pattern/calendar computation and serialized services
+- T8.3 — scoped requests/previews/LSA approvals, atomic ledger/attendance/notifications and security regressions
 
 ## Current task
 - T8.3 — requests, conflicts, approvals and attendance synchronization
   - [x] Request and attendance models/migration
   - [x] Working-day counter and scoped request/approval API
   - [x] Booking ledger, attendance and transactional decision notifications
-  - [ ] Affected API/security/static checks
-- Resume note: Recovered clean committed T8.3 work. Run combined request/ledger/RBAC/notification tests, lint and typing; finish T8.3 then T8.4. Strict typing clean. Role matrix gives HR approve but no request.create; on-behalf creation stays Company Admin, own creation Employee/Company Admin.
+  - [x] Affected API/security/static checks
+- Resume note: T8.3 complete. Start T8.4 with balance/calendar API and reasoned Grant/Deduct/Set endpoints around ledger.py; then /leave tabs, /my-leave, /my-approvals and employee Leave tab. Request endpoints already exist in request_router.py; UI shells in web/components/leave/home.tsx and employees/related-tabs.tsx. Follow plan.md Section 8 leave UX and Section 12 API paths.
 
 ## Next tasks
-- T8.3 — requests, working-days counter, conflicts, approvals, notifications, attendance sync
 - T8.4 — leave workspaces and employee tab
 - T8.5 — carry-over, then Phase 8 gate
 
 ## Health
-- CI on dev: pre-T8.2 implementation green (41610450677); T8.2 has affected local checks, phase CI gate pending. CI on main: not rechecked.
-- Local checks run: calculation28, ledger20, DB guards/isolation31, migration/settings17, browser/setup6 pass; API ruff/format/mypy (239 files), web types/targeted ESLint and generated API contract pass.
+- CI on dev: last run green (41610450677, audit fixes/T8.1); T8.2/T8.3 phase gate CI pending. CI on main: not rechecked.
+- Local checks run: combined requests/ledger/RBAC/notifications/calculations 115 pass; notifications alone1 pass; API ruff/format/mypy (246 files), web typecheck and generated API contract pass. Prior T8.3 migration8 pass.
 
 ## Issues / suggestions
+- Focused pytest invocation must group all tests/db paths before tests outside that directory; interleaving caused a missing database fixture, grouped rerun115 and notification alone1 pass.
 - Remove dependency cooldown exceptions when due: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.
 - docs/audits/phase7.md absent from synced dev; F7.1–F7.7 queued findings were implemented and confirmed green in CI.
 
@@ -35,4 +35,4 @@ State: IN PROGRESS
 - AI hidden without ANTHROPIC_API_KEY; Ask Mady deferred.
 
 ## Owner actions needed
-- None for T8.3. Existing non-blocking setup: protect main and enable private vulnerability reporting.
+- None. Existing non-blocking setup: protect main and enable private vulnerability reporting.
