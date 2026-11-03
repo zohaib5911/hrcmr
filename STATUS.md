@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 09:22, Europe/London    Agent: Codex    Branch: dev    Commit: 0d3b86d
+Updated: 2026-11-03 09:41, Europe/London    Agent: Codex    Branch: dev    Commit: 1219c75
 State: IN PROGRESS
 
 ## Last completed
@@ -7,12 +7,13 @@ State: IN PROGRESS
 - F7.1–F7.7 — each completed in its own commit, pushed before T8.1
 
 ## Current task
-- CI verification before T8.2 (owner instruction)
-  - [x] Inspect clean dev, journal and handover; sync/push
-  - [x] Check dev runs; dispatch current untested head 0d3b86d
-  - [ ] Resolve any failures; confirm all CI green
-  - [ ] Start T8.2 ledger and balance computation
-- Resume note: CI run 41610450677 tests 0d3b86d (audit fixes and T8.1). Earlier successful Phase 7 run does not cover these commits. Do not start T8.2 until this run is green. Inspect gh run view; fix any red jobs first.
+- T8.2 — ledger and balance computation
+  - [x] Confirm audit fixes/T8.1 CI green (41610450677, all twelve checks)
+  - [ ] Pure entitlement/year/personal-pattern/calendar calculations and unit tests
+  - [ ] Append-only tenant ledger, balance view and migration
+  - [ ] Transactional grant/deduct/set and standard reconciliation service; DB tests
+  - [ ] Affected lint/types/tests and completion
+- Resume note: No T8.2 code yet. CI green for 0d3b86d covers all implementation before T8.2. Implement calculations first, then durable ledger and services; UI belongs to T8.4.
 
 ## Next tasks
 - T8.2 — ledger and balance computation
@@ -20,7 +21,7 @@ State: IN PROGRESS
 - T8.4 — leave workspaces and employee tab
 
 ## Health
-- CI on dev: current-head run 41610450677 in progress; previous Phase 7 green. CI on main: not rechecked.
+- CI on dev: 41610450677 green (0d3b86d), all twelve checks. CI on main: not rechecked.
 - Local checks run: affected leave/RBAC/auth 50 pass; schema/guards/contracts 21 pass; API ruff/format/mypy pass (235 files); web lint/types/generated contract pass; web unit 777 pass; leave browser/setup 6 pass. Audit fixes: access12, auth18 plus flow/migrations30, RBAC22 (189 routes/168 protected operations × six roles), exports8, RTW parity3 (225 combinations), error24 and affected browser63 pass.
 
 ## Issues / suggestions
