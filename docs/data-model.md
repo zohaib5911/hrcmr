@@ -7,7 +7,7 @@ Do not edit by hand: a test fails when this file is out of date.
 
 | Column | Type | Null | Default | Notes |
 |---|---|---|---|---|
-| `company_id` | UUID | no |  | references `employees`, references `companies`, references `leave_requests` |
+| `company_id` | UUID | no |  | references `companies`, references `employees`, references `leave_requests` |
 | `employee_id` | UUID | no |  | references `employees` |
 | `date` | DATE | no |  |  |
 | `status` | VARCHAR(10) | no |  |  |
@@ -673,7 +673,7 @@ Checks:
 
 | Column | Type | Null | Default | Notes |
 |---|---|---|---|---|
-| `company_id` | UUID | no |  | references `leave_requests`, references `leave_types`, references `employees`, references `companies` |
+| `company_id` | UUID | no |  | references `companies`, references `employees`, references `leave_requests`, references `leave_types` |
 | `employee_id` | UUID | no |  | references `employees` |
 | `leave_type_id` | UUID | no |  | references `leave_types` |
 | `leave_year_start` | DATE | no |  |  |
@@ -702,7 +702,7 @@ Checks:
 
 | Column | Type | Null | Default | Notes |
 |---|---|---|---|---|
-| `company_id` | UUID | no |  | references `employees`, references `leave_types`, references `companies` |
+| `company_id` | UUID | no |  | references `companies`, references `employees`, references `leave_types` |
 | `employee_id` | UUID | no |  | references `employees` |
 | `leave_type_id` | UUID | no |  | references `leave_types` |
 | `start_date` | DATE | no |  |  |

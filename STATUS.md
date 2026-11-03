@@ -7,11 +7,11 @@ State: IN PROGRESS
 
 ## Current task
 - Phase 8 gate — leave and holidays
-  - [ ] Full API/static checks
+  - [x] Full API/static checks
   - [ ] Full web/unit/browser checks
   - [ ] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line summary, CI-green PR dev → main and merge
-- Resume note: T8.1–T8.5 complete. Screenshot spec ready (phase8-screenshots, gated by SCREENSHOTS=1). Full API active (/tmp/phase8-api-full.txt), one failure so far; generated data-model reference refreshed for leave/attendance/year-end tables. Then full web/browser sequentially; fix failures with targeted reruns. Phase 8 has no audit stop; continue T9.1 after green merge.
+- Resume note: Full API590 pass/one generated-doc ordering failure fixed by sorting foreign-key reference notes; targeted doc1 pass. Static clean. Web lint/types/contract active; next full unit/browser sequentially, screenshots and visual review. Then five-line summary and green PR merge; continue T9.1.
 
 ## Next tasks
 - Phase 8 gate
