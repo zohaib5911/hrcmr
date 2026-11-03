@@ -91,3 +91,4 @@
 2026-11-03 03:03 | Codex | T7.5 | scoped hub overview/activity CSV implemented; 3 hub + 11 audit cases pass, generated types pass; fixed existing raw-SQL JSON default guard | next editable dossier store and original checklist PDF
 2026-11-03 03:09 | Codex | T7.5 | global dossier migration 0019, verified official seeds, mandatory-MFA platform editor API and original checklist PDF; 19 dossier/migration/doc/identity + prior RBAC 16 verified | next hub/dossier/platform UI and query-tab links
 2026-11-03 03:14 | Codex | T7.5 | hub/dossier/platform editor UI built; employee/change query tabs work; web types/lint pass | next browser hub links/filter/export/dossier/mobile workflow
+2026-11-03 03:15 | Codex | T7.5 | hub browser workflow written and statically checked; notes checkpointed before browser run | next production hub and adjacent query-tab browser checks

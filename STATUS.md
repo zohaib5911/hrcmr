@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 03:14    Agent: Codex    Branch: dev    Commit: 993982d
+Updated: 2026-11-03 03:15    Agent: Codex    Branch: dev    Commit: 95e9195
 State: IN PROGRESS
 
 ## Last completed
@@ -12,7 +12,7 @@ State: IN PROGRESS
   - [x] Official dossier links, editable platform store and original RTW checklist PDF/tests: 19 dossier/migration/doc/identity pass; 16 RBAC checks verified
   - [x] Hub/dossier UI and separate platform editor, query-tab action links; web types/lint pass
   - [ ] Affected browser verification
-- Resume note: UI built: overview queue/coverage/readiness/expiry/tools/activity CSV; dossier download; platform editor. Employee profile accepts validated initial query tab; changes accepts organisation query. Static checks pass. Next write production browser hub scenario checking deep links, filter/export, dossier checklist and mobile/axe, then run affected tests before finishing T7.5. No screenshots until gate.
+- Resume note: Hub browser workflow written and static checked. Next run production Playwright compliance-hub.spec.ts plus adjacent compliance-changes and rtw scenarios (query-tab handling changed). Verify action destinations, coverage filters, expiry buckets, matching CSV, dossier checklist and mobile axe. Full suite/screenshots only at gate.
 
 ## Next tasks
 - T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
