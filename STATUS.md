@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 09:54, Europe/London    Agent: Codex    Branch: dev    Commit: 6d51e12
+Updated: 2026-11-03 11:49, Europe/London    Agent: Codex    Branch: dev    Commit: b041dcf
 State: IN PROGRESS
 
 ## Last completed
@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Working-day counter and scoped request/approval API
   - [x] Booking ledger, attendance and transactional decision notifications
   - [ ] Affected API/security/static checks
-- Resume note: Request scenario suite initially22 pass/one fixture permission mismatch, fixed to Company Admin for foreign cancellation; added staffing and negative/missing-calendar cases. Run combined request/ledger/RBAC/notification tests next. Strict typing clean. Role matrix gives HR approve but no request.create; on-behalf creation stays Company Admin, own creation Employee/Company Admin.
+- Resume note: Recovered clean committed T8.3 work. Run combined request/ledger/RBAC/notification tests, lint and typing; finish T8.3 then T8.4. Strict typing clean. Role matrix gives HR approve but no request.create; on-behalf creation stays Company Admin, own creation Employee/Company Admin.
 
 ## Next tasks
 - T8.3 — requests, working-days counter, conflicts, approvals, notifications, attendance sync
