@@ -11,8 +11,8 @@ State: IN PROGRESS
   - [x] Model, tenant migration and contracts
   - [x] Scoped audited scanned CRUD/download API and affected tests
   - [x] Documents workspace, upload/edit/archive and review flags
-  - [ ] Production browser verification, static checks and completion log
-- Resume note: Production browser reaches actual upload/download/filters/edit/archive; final empty state assertion corrected for still-active insurance filter. Setup+documents shell2 pass. Rerun company-documents.spec.ts only, then final completion. API5+related49/migration7/static/client/web types/lint/nav15 green.
+  - [x] Production browser verification, static checks and completion log
+- Resume note: T10.1 complete. Production company-documents workflow/setup2 plus shell1 pass, with mobile form/archive axe and no overflow. API5+related49/migration7, Python lint/format/mypy212, web lint/types/client/nav15 pass. Next T10.2 seven worker-generated XLSX reports; read plan8.10 and existing ARQ/outbox/tenant worker patterns.
 
 ## Next tasks
 - T10.2 — reports

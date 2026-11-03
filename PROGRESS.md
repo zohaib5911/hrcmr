@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-03
-- **Current task:** Phase 9 gate (T9.1–T9.6 complete)
+- **Current task:** T10.2 — reports (T10.1 complete)
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -331,7 +331,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
   - Captured 76 views at 390/1280 light/dark with axe/overflow checks; corrected mobile long-policy actions and reviewed attendance/import/clock/rota/log sheets.
 
 ### Phase 10 — Documents, policies and reports
-- [ ] **T10.1** Company documents
+- [x] **T10.1** Company documents — 2026-11-03. Ten categories, company-local review flags, scoped scanned PDF/image/Word uploads, filtered/paged library, metadata editing and retained archives; file download rechecks current full-scope permission after demotion. Verified API5+related49/migration7, Python/web static/client/nav15, production workflow/setup2 plus shell1, mobile form/archive axe and overflow pass.
 - [ ] **T10.2** Reports
 - [ ] **T10.3** Policies and sign-offs
 - [ ] **T10.4** "Draft with AI" UI and API contract (feature-flagged)
