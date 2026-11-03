@@ -267,7 +267,9 @@ describe("the toolbar's controls", () => {
         page
       </AppShell>,
     );
-    expect(screen.getByRole("button", { name: "Notifications, 4 unread" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Notifications, 4 total, 4 unread" }),
+    ).toBeInTheDocument();
   });
 
   it("the account menu shows who you are, goes to your profile, and changes the theme", async () => {
