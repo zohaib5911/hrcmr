@@ -1,25 +1,26 @@
 # STATUS
-Updated: 2026-11-03 18:34, Europe/London    Agent: Codex    Branch: dev    Commit: fe52d8a
+Updated: 2026-11-03 18:39, Europe/London    Agent: Codex    Branch: dev    Commit: 9bdefc5
 State: IN PROGRESS
 
 ## Last completed
-- T9.5 — rota grid/actions/warnings/publish/PDF/My Shifts complete; API/static/production browser/mobile axe pass
+- T9.6 — Work Log own/admin/API/forms complete; Work Log10+related26/migration7/static/browser2 pass
 
 ## Current task
-- T9.6 — My Work Log and admin corrections/removal
-  - [x] Entry schema/migration and same-day own-write service
-  - [x] Scoped list/KPIs/search, audited correction/removal and tests
-  - [x] Own/admin workspace/forms
-  - [ ] Production browser checks
-- Resume note: Production browser completes own create/edit and admin correction; inspector assertion used single click while shared desktop DataTable opens by double-click/Enter, selector corrected to dblclick. Rerun work-log through retained-original/removal/filters/mobile axe, then T9.6 completion and Phase9 gate. API/static green; keep database pytest and Playwright sequential.
+- Phase 9 gate — full validation, design evidence and green PR
+  - [ ] Full API/static suite (once)
+  - [ ] Full web/unit/script/browser suite (sequentially)
+  - [ ] 390/1280 light/dark screenshots and visual review
+  - [ ] Five-line phase summary, PR dev→main and green CI merge
+- Resume note: All T9.1–T9.6 complete. Prepare phase9 screenshot spec using existing phase8 pattern, then full API and full web/browser sequentially. Never overlap database pytest and Playwright (shared role passwords). Save/review screenshots, five-line PROGRESS summary, PR and all-green merge, clean sync and T10.1. Audit stop is Phase14, not Phase9.
 
 ## Next tasks
-- Phase 9 gate — full suite/screenshots/green PR
 - T10.1 — company documents
+- T10.2 — reports
+- T10.3 — policies and sign-offs
 
 ## Health
 - CI on dev: current head not rechecked; last confirmed gate all 12 green (41640316888). CI on main: not rechecked.
-- Local checks run: T9.2 API31/browser4/static; T9.3 API39+attendance27/migration7/doc1/static/web25/browser2; T9.4 API34/migration7/static/web22/browser2; T9.5 affected61 + isolated rota9/clock-email12, migration7/mypy282/client, web types/lint/nav22 and browser workspace/setup2/settings1 (mobile axe) — pass.
+- Local checks run: T9.2 API31/browser4/static; T9.3 API39+attendance27/migration7/doc1/static/web25/browser2; T9.4 API34/migration7/static/web22/browser2; T9.5 affected61+isolated rota9/clock-email12/migration7/static/web22/browser3; T9.6 Work Log10+related26/migration7/mypy288/static/web22/browser2 — pass.
 
 ## Issues / suggestions
 - Never run database pytest alongside Playwright: both provision shared PostgreSQL roles with random passwords, so concurrent setup causes app_owner authentication failures. Run them sequentially.
