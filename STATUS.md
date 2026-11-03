@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 02:36    Agent: Codex    Branch: dev    Commit: a578383
+Updated: 2026-11-03 02:48    Agent: Codex    Branch: dev    Commit: 658f14d
 State: IN PROGRESS
 
 ## Last completed
@@ -11,9 +11,9 @@ State: IN PROGRESS
   - [x] Threshold/reminder model and migration 0018; 14 migration/doc/change-regression checks pass
   - [x] Threshold/source hooks and daily job, cancellation/restore/snooze and derived-calendar refresh; 34 reminder/source/worker checks pass, final engine 5 pass
   - [x] Register/review/edit/snooze/send + own received API, atomic notification/encrypted outbox/audit; 20 affected API cases verified
-  - [ ] Reminders page/register/history/review drawer (template until Phase 14)
+  - [x] Reminder due/register/history page and explicit review drawer, plus own My Documents messages; web types/lint pass
   - [ ] Affected API/browser verification
-- Resume note: T7.4 API ready: register/due/history/detail, draft PATCH, 7-day snooze, reviewed send and own /me/document-reminders. Delivery/profile/email 19 cases passed + final corrected atomic/concurrency case 1 pass; engine/source/worker 34 pass. Ruff/mypy/generated API/web types pass. Next reminders register/review drawer and My Documents received-message UI, then browser checks. Linked active verified employee account required to send. Explicit send queues encrypted generic reminder_nudge email, creates notification and freezes sent record atomically; send covers older pending thresholds, future ones remain. Own profile writes now denied for HR create/status/48h operations so workers cannot archive themselves to suppress reminders. Email test fixture truncates reminders with outbox due FK; reminder fixture isolates shared global outbox/calendar; audit assertions scoped by employee because audit survives tenant reset.
+- Resume note: Reminder UI built and static checks pass. Next browser scenario: unlinked account disables send; explicit draft edit then link active account; snooze saves draft; review/send once; history who/when + queued email; received message in own My Documents; scheduled chip disabled send; mobile/axe register. Add web/tests/e2e/reminders.spec.ts. Source test helper can link current Company Admin to employee via PUT /users/{membership_id}/employee for own received flow. API snooze now accepts optional reviewed message and persists atomically; targeted API test passes. No screenshots until Phase 7 gate.
 
 
 ## Next tasks

@@ -289,10 +289,14 @@ async def edit_reminder(
 
 
 @router.post("/reminders/{reminder_id}/snooze", response_model=ReminderOut)
-async def snooze_reminder(reminder_id: uuid.UUID, access: Sends) -> ReminderOut:
+async def snooze_reminder(
+    reminder_id: uuid.UUID, access: Sends, body: ReminderMessageIn | None = None
+) -> ReminderOut:
     row, view = await _locked(access, reminder_id)
     if _out(access, row, view).status not in {"due", "snoozed"}:
         raise ConflictError("This reminder is not due yet.")
+    if body is not None:
+        row.message_draft = body.message
     row.status = "snoozed"
     row.snoozed_until = (view.now.astimezone(view.zone) + timedelta(days=7)).astimezone(UTC)
     await access.audit(

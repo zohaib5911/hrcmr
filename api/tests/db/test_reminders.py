@@ -394,9 +394,10 @@ async def test_review_snooze_explicit_send_and_generic_atomic_delivery(rig: dict
     assert draft.json()["status"] == "due"
     assert draft.json()["can_send"] is True
     assert (await me.get(f"{API}/me/document-reminders")).json() == []
-    snoozed = await hr.post(path + "/snooze")
+    snoozed = await hr.post(path + "/snooze", json={"message": "Updated draft before snoozing"})
     assert snoozed.status_code == 200, snoozed.text
     assert snoozed.json()["status"] == "snoozed"
+    assert snoozed.json()["message_draft"] == "Updated draft before snoozing"
     assert (await hr.get(f"{API}/compliance/reminders/due")).json() == []
     until = datetime.fromisoformat(snoozed.json()["snoozed_until"])
     assert abs((until - datetime.now(UTC)).total_seconds() - 7 * 86400) < 3601

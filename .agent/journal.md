@@ -83,3 +83,4 @@
 2026-11-03 02:06 | Codex | T7.4 | reminder model/migration 0018 with RTW targets, sent immutability and owner-only derived deadline refresh; 14 migration/doc/change checks pass | next threshold service/source hooks/daily job
 2026-11-03 02:15 | Codex | T7.4 | threshold/source hooks + daily job, admin notice dedupe, snooze/restore/cancellation and unreported deadline refresh; 34 checks pass, final engine 5 pass | next scoped review/send API with atomic delivery
 2026-11-03 02:36 | Codex | T7.4 | reviewed/received reminder API and atomic nudge+notification+audit; 20 affected cases verified incl concurrent dedupe/rollback and self-service guards; types/lint/gen pass | next register/review and My Documents UI
+2026-11-03 02:48 | Codex | T7.4 | due/register/history UI, explicit review drawer and own received messages; optional snooze draft API test passes, web types/lint pass | next browser reminder workflow
