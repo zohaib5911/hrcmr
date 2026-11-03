@@ -453,3 +453,4 @@ Needs the owner's accounts and variables (see "Owner actions needed").
 Do not start until the owner says so: US site, Australia, native wrapper, passkeys, calendar-synced SMS reminders.
 
 - [x] F7.1 — fresh step-up for role, privileged invite/resend and policy changes; API 12 pass, UI lint/types pass.
+- [x] F7.2 — transactional authentication audit events with private pre-tenant inserts and no credentials; auth endpoints 18 pass; auth flows and migrations 30 pass; ruff/mypy pass.

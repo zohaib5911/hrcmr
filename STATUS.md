@@ -1,19 +1,18 @@
 # STATUS
-Updated: 2026-11-03 08:48, Europe/London    Agent: Codex    Branch: dev    Commit: 05b9960
+Updated: 2026-11-03 08:53, Europe/London    Agent: Codex    Branch: dev    Commit: a7c32d7
 State: IN PROGRESS
 
 ## Last completed
-- F7.1 — fresh step-up guards plus UI confirmation for role, privileged invite/resend and policy changes
+- F7.2 — transactional authentication audit events with private pre-tenant inserts and no credentials
 
 ## Current task
-- F7.2 — authentication audit events
-  - [ ] Implement transaction-bound events and regression checks (one commit)
-- Resume note: F7.1 complete: API 12 pass, ruff/mypy and web lint/types pass. Continue F7.2 then F7.3–F7.7 and T8.1. Missing audit document requested; queued findings used.
+- F7.3 — every registered route against all six roles
+  - [ ] Implement and verify (one commit per audit fix)
+- Resume note: F7.2 complete. Next: F7.3 — every registered route against all six roles. Audit file docs/audits/phase7.md absent from synced dev; user asked for contents, using queued STATUS findings.
 
 ## Next tasks
 
 F7.1 Step-up on role change, admin/HR-admin invite, and two-step policy change (+ tests)   [high]
-F7.2 Audit events for login success/fail, logout, reset, step-up, recovery codes, switch company, signup   [medium]
 F7.3 Full RBAC route test: every real route × 6 roles vs rbac_matrix   [medium]
 F7.4 Cross-company 404 tests: sponsor PDF, employee record PDF, dossier   [medium]
 F7.5 Test: Python status_of == SQL employee_rtw_status on the same data   [low]
@@ -22,9 +21,10 @@ F7.7 Update PROGRESS header and T7.4–T7.6 entries   [low]
 (Ongoing, not a task: move shared helpers into employees/access.py and core/dates.py only when a task already touches that code.)
  implement supplied findings before Phase 8.
 
+
 ## Health
-- CI on dev/PR: green (41595489940, b6d99d1). CI on main: post-merge run 41597645539 pending; merged change passed all PR checks.
-- Local checks: API full 479 pass/two failures fixed/15 affected pass; API lint/format/mypy pass. Web 777, guards 32, lint/types/generated API pass. Browser full 398 pass/four stale shell assertions fixed/68 affected pass; final hub/screenshots 6 pass. Migration/dossier/reporting 14 pass after CI fix.
+- CI on dev: last Phase 7 PR green; no dev push workflow. CI on main: previously pending, not rechecked.
+- Local checks run: auth endpoints 18 pass; auth flows and migrations 30 pass; ruff/mypy pass
 
 ## Issues / suggestions
 - Remove cooldown exceptions once safe: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.
