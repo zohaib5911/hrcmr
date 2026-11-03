@@ -22,6 +22,7 @@ from app.modules.auth.sessions import SessionStore
 from tests.db.api_support import sign_in_as, two_companies
 from tests.db.support import DatabaseUnderTest, engine_for
 from tests.db.test_files import S3_ACCESS, S3_BUCKET, S3_ENDPOINT, S3_SECRET
+from tests.reporting_calendar import seed_reporting_calendar
 from tests.support import TEST_REDIS_URL, build_settings
 
 API = "/api/v1"
@@ -90,7 +91,6 @@ async def _employee(rig: dict[str, Any], company: uuid.UUID, number: str) -> uui
 
 
 TODAY = datetime(2026, 11, 3, tzinfo=UTC).date()
-D = datetime.fromisoformat
 
 
 @pytest.fixture(autouse=True)
@@ -103,30 +103,7 @@ def _clock(monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.fixture(autouse=True)
 async def _calendar(rig: dict[str, Any]) -> None:
-    # Official GOV.UK regional dates, checked 2026-11-03. Only 2027 New Year is used below.
-    common = [
-        "2026-01-01",
-        "2026-04-03",
-        "2026-05-04",
-        "2026-05-25",
-        "2026-12-25",
-        "2026-12-28",
-        "2027-01-01",
-    ]
-    regions = {
-        "england-and-wales": ["2026-04-06", "2026-08-31"],
-        "scotland": ["2026-01-02", "2026-06-15", "2026-08-03", "2026-11-30"],
-        "northern-ireland": ["2026-03-17", "2026-04-06", "2026-07-13", "2026-08-31"],
-    }
-    async with rig["owner"].begin() as c:
-        for region, extra in regions.items():
-            for value in [*common, *extra]:
-                await c.execute(
-                    text(
-                        "insert into bank_holidays (id, region, on_date, title, source, fetched_at) values (:i,:r,:d,'Official fixture','https://www.gov.uk/bank-holidays.json',now()) on conflict (region,on_date) do nothing"
-                    ),
-                    {"i": uuid.uuid4(), "r": region, "d": D(value).date()},
-                )
+    await seed_reporting_calendar(rig["owner"])
 
 
 async def test_deadline_preview_and_employee_snapshot_reporting(rig: dict[str, Any]) -> None:
@@ -189,6 +166,7 @@ async def test_deadline_preview_and_employee_snapshot_reporting(rig: dict[str, A
     assert listed["nationality"] == "British"
     assert listed["contact_number"] == "01234567890"
     assert listed["documents_snapshot"] == [doc]
+    assert listed["documents"] == [{"id": doc, "doc_type": "passport", "version": 1}]
     assert (
         len(
             (

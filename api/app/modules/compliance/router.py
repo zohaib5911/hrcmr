@@ -18,6 +18,7 @@ from app.modules.compliance.models import ChangeOfCircumstances, OrgChange
 from app.modules.compliance.schemas import (
     ArchiveChangeIn,
     ChangeDefaults,
+    ChangeDocumentOut,
     ChangeIn,
     ChangeOut,
     DeadlineOut,
@@ -102,6 +103,22 @@ async def _out(
     access: Access, row: ChangeOfCircumstances, employee: Employee | None = None
 ) -> ChangeOut:
     employee = employee or await _employee(access, row.employee_id)
+    docs: list[SponsorDocument] = (
+        list(
+            (
+                await access.db.execute(
+                    select(SponsorDocument).where(
+                        SponsorDocument.id.in_(
+                            [uuid.UUID(value) for value in row.documents_snapshot]
+                        ),
+                        SponsorDocument.employee_id == row.employee_id,
+                    )
+                )
+            ).scalars()
+        )
+        if row.documents_snapshot
+        else []
+    )
     return ChangeOut(
         **await _reporting(access, row),
         change_type=row.change_type,  # type: ignore[arg-type]
@@ -116,6 +133,10 @@ async def _out(
         ack_inform_hr=row.ack_inform_hr,
         ack_home_office_interview=row.ack_home_office_interview,
         documents_snapshot=[uuid.UUID(value) for value in row.documents_snapshot],
+        documents=[
+            ChangeDocumentOut(id=doc.id, doc_type=doc.doc_type, version=doc.version)  # type: ignore[arg-type]
+            for doc in docs
+        ],
     )
 
 

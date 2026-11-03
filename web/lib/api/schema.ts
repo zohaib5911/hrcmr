@@ -2595,6 +2595,21 @@ export interface components {
             /** Nationality */
             nationality?: string | null;
         };
+        /** ChangeDocumentOut */
+        ChangeDocumentOut: {
+            /**
+             * Doc Type
+             * @enum {string}
+             */
+            doc_type: "visa" | "passport" | "dbs" | "euss" | "national_id" | "other";
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Version */
+            version: number;
+        };
         /** ChangeIn */
         ChangeIn: {
             /**
@@ -2665,6 +2680,8 @@ export interface components {
             created_at: string;
             /** Deadline Date */
             deadline_date: string | null;
+            /** Documents */
+            documents: components["schemas"]["ChangeDocumentOut"][];
             /** Documents Snapshot */
             documents_snapshot: string[];
             /**

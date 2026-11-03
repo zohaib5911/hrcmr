@@ -9,7 +9,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, field_validator
 
 from app.core.schemas import RequestModel
-from app.modules.sponsor_documents.schemas import SponsorDocumentOut  # noqa: TC001
+from app.modules.sponsor_documents.schemas import DocumentType, SponsorDocumentOut  # noqa: TC001
 
 ChangeType = Literal[
     "did_not_start",
@@ -104,6 +104,12 @@ class ReportingOut(BaseModel):
     created_at: datetime
 
 
+class ChangeDocumentOut(BaseModel):
+    id: uuid.UUID
+    doc_type: DocumentType
+    version: int
+
+
 class ChangeOut(ReportingOut):
     change_type: ChangeType
     employee_id: uuid.UUID
@@ -117,6 +123,7 @@ class ChangeOut(ReportingOut):
     ack_inform_hr: bool
     ack_home_office_interview: bool
     documents_snapshot: list[uuid.UUID]
+    documents: list[ChangeDocumentOut]
 
 
 class OrgChangeOut(ReportingOut):

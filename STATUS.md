@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 01:36    Agent: Codex    Branch: dev    Commit: 1bfced2
+Updated: 2026-11-03 01:40    Agent: Codex    Branch: dev    Commit: 9f5224d
 State: IN PROGRESS
 
 ## Last completed
@@ -11,9 +11,10 @@ State: IN PROGRESS
   - [x] Working-day calculator with GOV.UK bank-holiday examples; 12 unit checks pass
   - [x] Change/org-change models and migration 0017; immutable worker/reported records, unreported org CRUD; 7 migration/doc checks pass
   - [x] Scoped APIs, deadlines and mark-reported tests; 7 integration + 12 working-day checks pass
+  - [x] Official 2026/2027 test calendar seeded for browser API; retained document version labels; reporting/holiday API 13 tests pass
   - [ ] Employee change form/log and company-wide pages
   - [ ] Affected browser checks and final verification
-- Resume note: T7.3 API verified: 7 integration + 12 pure working-day tests, migration/doc 7; ruff/mypy/generated API/web types pass. Next employee change form/log, company-wide CoC/org pages and browser scenario. E2E API currently has an empty bank-holiday table: seed official fixed test dates in tests/e2e_server.py (test-only) before exercising real deadline API; runtime still uses weekly GOV.UK import, never fetch on requests. Snapshot and company-timezone reporting tested; no UI yet.
+- Resume note: T7.3 API and test calendar ready. Reporting/holiday API 13, working-day 12, migration/doc 7 checks pass; lint/mypy/generated API/web types pass. Next employee change log/form and company-wide CoC/org pages, then browser scenario plus holidays.spec.ts regression. Browser API now seeds official 2026/2027 dates; holiday test expects loaded calendar. Runtime import unchanged. UI not started.
 
 
 ## Next tasks

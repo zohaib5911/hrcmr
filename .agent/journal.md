@@ -73,3 +73,4 @@
 2026-11-03 01:24 | Codex | T7.3 | pure working-day calculator with 12 official-date examples/edge checks passes lint/types/tests | next immutable changes/org models and migration 0017
 2026-11-03 01:29 | Codex | T7.3 | change/org models + migration 0017, tenant RLS and immutable snapshots/reporting; migration/doc 7 pass | next scoped API/calendar coverage/reporting tests
 2026-11-03 01:36 | Codex | T7.3 | scoped change/org CRUD, snapshot/defaults, deadline preview and reported actor/date API; 19 tests pass, generated types/lint/mypy clean | next UI + test-only e2e calendar seed
+2026-11-03 01:40 | Codex | T7.3 | retained document version labels + shared official 2026/27 calendar fixture seeded in e2e API; reporting/holiday API 13 pass | next employee/company change UI, browser + holiday regression
