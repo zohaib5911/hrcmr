@@ -7,11 +7,11 @@ State: IN PROGRESS
 
 ## Current task
 - T9.1 — attendance records, record sheet and workspace
-  - [ ] Scoped list/own/summary APIs and validated audited upsert
-  - [ ] API validation, scopes, concurrency and leave-sync safeguards
+  - [x] Scoped list/own/summary APIs and validated audited upsert
+  - [x] API validation, scopes, concurrency and leave-sync safeguards
   - [ ] Day/week/month/custom workspace, KPIs, filters and record sheet
   - [ ] Employee Attendance tab and affected browser/static checks
-- Resume note: Start attendance router/schemas around existing AttendanceRecord model (T8.3). Implement list/own/summary/upsert, company-zone times and overnight duration/break calculation; manual writes limited to full permission (employee own writes are clock-only T9.3), preserve leave_sync rows. Then UI/profile tab and affected checks. No full suite/screenshots until Phase 9 gate.
+- Resume note: Attendance list/own/summary/upsert and scenarios ready; attendance/RBAC36 pass, baseline47 and Python lint/types pass; client generated. Next workspace KPI/range/filter UI, record sheet with conditional repeated-hour choice, employee Attendance tab and browser checks.
 
 ## Next tasks
 - T9.1 — attendance workspace, records and filters
@@ -28,6 +28,7 @@ State: IN PROGRESS
 - docs/audits/phase7.md absent from synced dev; F7.1–F7.7 queued findings were implemented and confirmed green in CI.
 
 ## Strategy / decisions taken
+- T9.1: manual writes require full attendance.record.write; own-write is clock-only for T9.3. Employee row serializes upserts with leave booking. Leave-sync records cannot be overwritten. Company-local times become UTC instants; overnight clock-out rolls to next day, hours deduct unpaid break. Nonexistent wall times fail; repeated-hour entries require an explicit first/second occurrence. Audit excludes note text.
 - T8.5: preview is read-only; commit only after year ends and pending requests resolve. Reconcile closing allowance, carry nonnegative remaining up to type limit (reasoned override may exceed limit up to remaining), expire positive source balances and freeze source-year mutations. Negative fixed-allowance debt requires a reviewed adjustment before closing; unbounded types retain usage history without treating it as allowance debt.
 - T8.4: add missing leave.balance.read to plan/matrix so Company Admin/HR/Auditor can read company balances; existing own/reports remain scoped. Read projections combine immutable ledger with current managed allowance/calendar deltas; GET never writes. Manual actions reconcile and audit atomically.
 - T8.2: balances are sums of signed immutable movements. Corrections append deltas; manual movements survive standard reconciliation. Employee row serializes writers; operation keys preserve retries, including no-op Set. Caller owns audit/commit transaction.

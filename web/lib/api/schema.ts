@@ -36,6 +36,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/attendance-records": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Records */
+        get: operations["attendance_records"];
+        /** Record */
+        put: operations["attendance_record"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/attendance-records/own": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Own Records */
+        get: operations["attendance_own_records"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/attendance-records/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Summary */
+        get: operations["attendance_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/audit-events": {
         parameters: {
             query?: never;
@@ -3036,6 +3088,115 @@ export interface components {
             reporting_authority?: string | null;
             /** Reporting Authority Employee Id */
             reporting_authority_employee_id?: string | null;
+        };
+        /** AttendanceIn */
+        AttendanceIn: {
+            /** Clock In */
+            clock_in?: string | null;
+            /** Clock In Fold */
+            clock_in_fold?: (0 | 1) | null;
+            /** Clock Out */
+            clock_out?: string | null;
+            /** Clock Out Fold */
+            clock_out_fold?: (0 | 1) | null;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Note */
+            note?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "present" | "absent" | "late" | "half_day" | "on_leave" | "sick";
+            /**
+             * Unpaid Break Minutes
+             * @default 0
+             */
+            unpaid_break_minutes: number;
+        };
+        /** AttendanceOut */
+        AttendanceOut: {
+            /** Clock In */
+            clock_in: string | null;
+            /** Clock In Fold */
+            clock_in_fold: number | null;
+            /** Clock In Local */
+            clock_in_local: string | null;
+            /** Clock Out */
+            clock_out: string | null;
+            /** Clock Out Fold */
+            clock_out_fold: number | null;
+            /** Clock Out Local */
+            clock_out_local: string | null;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Employee Name */
+            employee_name: string;
+            /** Hours */
+            hours: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Leave Request Id */
+            leave_request_id: string | null;
+            /** Note */
+            note: string | null;
+            /** Source */
+            source: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "present" | "absent" | "late" | "half_day" | "on_leave" | "sick";
+            /** Unpaid Break Minutes */
+            unpaid_break_minutes: number;
+        };
+        /** AttendancePage */
+        AttendancePage: {
+            /** Items */
+            items: components["schemas"]["AttendanceOut"][];
+            /** Next Offset */
+            next_offset: number | null;
+            /** Timezone */
+            timezone: string;
+            /** Total */
+            total: number;
+        };
+        /** AttendanceSummary */
+        AttendanceSummary: {
+            /** Counts */
+            counts: {
+                [key: string]: number;
+            };
+            /** Employees */
+            employees: number;
+            /** Not Recorded */
+            not_recorded: number;
+            /**
+             * On
+             * Format: date
+             */
+            on: string;
+            /** Timezone */
+            timezone: string;
         };
         /** AttentionItem */
         AttentionItem: {
@@ -6538,6 +6699,178 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DossierLinkOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    attendance_records: {
+        parameters: {
+            query: {
+                start: string;
+                end: string;
+                employee_id?: string | null;
+                status?: ("present" | "absent" | "late" | "half_day" | "on_leave" | "sick") | null;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendancePage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    attendance_record: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttendanceIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    attendance_own_records: {
+        parameters: {
+            query: {
+                start: string;
+                end: string;
+                status?: ("present" | "absent" | "late" | "half_day" | "on_leave" | "sick") | null;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendancePage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    attendance_summary: {
+        parameters: {
+            query: {
+                on: string;
+                employee_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AttendanceSummary"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
