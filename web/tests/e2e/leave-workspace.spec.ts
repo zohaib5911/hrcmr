@@ -56,7 +56,9 @@ test("leave request, approval, calendar, profile adjustments and own cancellatio
   await expect(form.getByRole("status")).toHaveText("2 working days");
   await form.getByRole("button", { name: "Submit request" }).click();
   await expect(form).toBeHidden();
-  await expect(page.getByText("pending", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("grid", { name: "Leave requests" }).getByText("pending", { exact: true }),
+  ).toBeVisible();
   await page.goto("/my-approvals");
   await page.getByRole("button", { name: "Review request", exact: true }).click();
   const review = page.getByRole("dialog", { name: "Review leave request" });
@@ -106,7 +108,9 @@ test("leave request, approval, calendar, profile adjustments and own cancellatio
   await own.getByRole("button", { name: "Submit request" }).click();
   await expect(own).toBeHidden();
   await page.getByRole("button", { name: "Cancel request", exact: true }).click();
-  await expect(page.getByText("cancelled", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("grid", { name: "Leave requests" }).getByText("cancelled", { exact: true }),
+  ).toBeVisible();
   await page.setViewportSize({ width: 390, height: 900 });
   await audit(page, "My leave mobile");
   expect(
