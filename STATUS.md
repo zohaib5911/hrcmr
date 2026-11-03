@@ -8,10 +8,10 @@ State: IN PROGRESS
 ## Current task
 - Phase 9 gate — full validation, design evidence and green PR
   - [x] Full API/static suite (once)
-  - [ ] Full web/unit/script/browser suite (sequentially)
+  - [x] Full web/unit/script/browser suite (sequentially)
   - [ ] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: Full Playwright complete:413 pass/156 skipped/seven failures. Two attendance readiness fixes already pushed; four shell placeholder assertions updated for built rota/work-log/my-work-log/my-shifts, More Work log link now exact. Run only those seven cases (plus setup), then SCREENSHOTS=1 phase9 spec (76 views), visual review/summary/all-green PR. Full API658+corrected19, web777/scripts32/static green. Never overlap DB pytest and Playwright.
+- Resume note: Retry log confirms setup+seven previously failed browser cases pass (8/8). Full API658+corrected19, web777/scripts32/static green. Next SCREENSHOTS=1 phase9 spec (76 views), visual review/summary/all-green PR. Never overlap DB pytest and Playwright.
 
 ## Next tasks
 - T10.1 — company documents
