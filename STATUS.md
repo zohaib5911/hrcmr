@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 01:52    Agent: Codex    Branch: dev    Commit: 7ef0ae7
+Updated: 2026-11-03 01:57    Agent: Codex    Branch: dev    Commit: 84a218d
 State: IN PROGRESS
 
 ## Last completed
@@ -7,13 +7,13 @@ State: IN PROGRESS
 
 ## Current task
 - T7.4 — Reminders engine and register
-  - [ ] Read reminder requirements and existing notifications/email/job patterns; baseline checks
+  - [x] Reminder requirements and email/notification/job patterns reviewed; baseline lint/types and 12 email/worker tests pass
   - [ ] Threshold/reminder model and migration
   - [ ] Daily reconciliation job and version/withdrawal cancellation
   - [ ] Scoped register/review/edit/snooze/send API with audited who/when and in-app/email delivery
   - [ ] Reminders page/register/history/review drawer (template until Phase 14)
   - [ ] Affected API/browser verification
-- Resume note: T7.3 complete; reporting browser scenarios 3 pass and holiday/setup 14 pass. Next T7.4: 90/60/30 thresholds, daily engine and register/review drawer, 7-day snooze, explicit send with actor/time, in-app message and generic email nudge. Phase 7 scenario also requires RTW follow-up due in 21 days to have a 30-day reminder due; support RTW as well as sponsor-document expiry. No T7.4 code yet.
+- Resume note: T7.4 baseline ready; next reminder model/migration 0018. Support sponsor_document_id OR rtw_check_id (21-day RTW scenario), one row per source/version/threshold. Use existing reminder_nudge template and transactional encrypted email_outbox + Notification writes with send/audit; never send automatically from daily job. Received messages need My Documents own-read view. Version/withdraw/archive cancels unsent rows, sent history retained. Daily reconciliation uses company dates, advances thresholds/snoozes, refreshes unreported derived CoC calendars with owner-only calculated-field updates, and notifies admins. No T7.4 code yet.
 
 
 ## Next tasks
@@ -29,6 +29,7 @@ State: IN PROGRESS
 - Dependabot #5 pending green CI; avoid unrelated changes.
 
 ## Strategy / decisions taken
+- T7.4: human review/send only; email outbox, notification and sent/audit state commit together, generic existing reminder_nudge email. Add RTW target to reminder schema for explicit phase scenario. Daily owner job may refresh unreported derived deadline/calendar fields while entered snapshots and reported records stay immutable.
 - T7.3 verified sources: GOV.UK sponsor Part 3 (C1.13/C2.3), glossary and bank-holidays page, checked 2026-11-03. AO/Key Contact replacements get prompt-report status, other org changes standard 20 working days. Regional calendar data must cover the requested dates; do not silently ignore missing bank holidays.
 - T7.2 exposes the document section of Sponsor compliance now so the feature is usable; T7.6 adds its PDF/CoC integration and notifications.
 - Sponsor metadata uses employee.rtw.read/write (own-read allowed, own-file uploads alone cannot change compliance metadata; auditors can read); register uses compliance.overview.read. Renewal target/notes never change expiry. Sponsor references/CoS masked, sponsored salary permission scoped.
