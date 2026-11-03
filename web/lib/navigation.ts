@@ -232,6 +232,25 @@ export const NAV_GROUPS: readonly NavGroup[] = [
   ]),
   group("me", "Me", [
     {
+      id: "my-work-log",
+      label: "My work log",
+      purpose: "Your daily work and responsibilities.",
+      href: "/my-work-log",
+      icon: NotebookPen,
+      emptyTitle: "No work logged yet",
+      emptyDescription:
+        "Add a daily entry to record the responsibilities and work you have completed.",
+    },
+    {
+      id: "my-shifts",
+      label: "My shifts",
+      purpose: "Your published working schedule.",
+      href: "/my-shifts",
+      icon: CalendarDays,
+      emptyTitle: "No published shifts",
+      emptyDescription: "Your shifts appear here after your manager publishes the weekly rota.",
+    },
+    {
       id: "my-leave",
       label: "My leave",
       purpose: "Your allowance and time away.",
@@ -341,6 +360,12 @@ export function isActive(item: NavItem, pathname: string): boolean {
  * Each names the sidebar page it sits under, which is where the breadcrumb leads back to.
  */
 export const SUB_PAGES: readonly { href: string; label: string; parent: string }[] = [
+  { href: "/clock", label: "Clock in or out", parent: "/attendance" },
+  { href: "/rota/settings", label: "Rota settings", parent: "/rota" },
+  { href: "/attendance/timesheets", label: "Timesheet approvals", parent: "/attendance" },
+  { href: "/attendance/import", label: "Import attendance", parent: "/attendance" },
+  { href: "/attendance/bulk", label: "Bulk attendance", parent: "/attendance" },
+  { href: "/attendance/absences", label: "Absences this month", parent: "/attendance" },
   { href: "/company/locations", label: "Locations", parent: "/company" },
   { href: "/company/departments", label: "Departments", parent: "/company" },
   { href: "/company/designations", label: "Designations", parent: "/company" },

@@ -40,7 +40,7 @@ export function MobileTabBar() {
               <Link
                 href={tab.href as Route}
                 aria-current={current ? "true" : undefined}
-                className={cn(TAB, current ? "text-accent-text" : "text-label-secondary")}
+                className={cn(TAB, current ? "text-accent-text" : "text-label")}
               >
                 <Icon icon={tab.icon} />
                 {tab.label}
@@ -57,7 +57,7 @@ export function MobileTabBar() {
                 className={cn(
                   TAB,
                   "cursor-pointer",
-                  group !== undefined && !inTabs ? "text-accent-text" : "text-label-secondary",
+                  group !== undefined && !inTabs ? "text-accent-text" : "text-label",
                 )}
               >
                 <Icon icon={Ellipsis} />

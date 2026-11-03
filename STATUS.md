@@ -1,33 +1,40 @@
 # STATUS
-Updated: 2026-11-03 12:58, Europe/London    Agent: Codex    Branch: dev    Commit: 279467e
+Updated: 2026-11-03 22:47, Europe/London    Agent: Codex    Branch: dev    Commit: 37f6f06
 State: IN PROGRESS
 
 ## Last completed
-- T8.5 — audited reviewed carry-over, immutable closes and closed-year guards
+- T9.6 — Work Log own/admin/API/forms complete; Work Log10+related26/migration7/static/browser2 pass
 
 ## Current task
-- Phase 8 gate — leave and holidays
-  - [x] Full API/static checks
-  - [x] Full web/unit/browser checks
+- Phase 9 gate — full validation, design evidence and green PR
+  - [x] Full API/static suite (once)
+  - [x] Full web/unit/script/browser suite (sequentially)
   - [x] 390/1280 light/dark screenshots and visual review
-  - [ ] Five-line summary, CI-green PR dev → main and merge
-- Resume note: Local gate complete. Full API590+doc1/affected55; web776+shell19/nav22; scripts32; browser407+corrected four cases; screenshot/setup5 (48 images reviewed); static/build/contract pass. Five-line summary recorded. PR #14 open (https://github.com/zohaib5911/hrcmr/pull/14). Wait all CI checks green on latest head, fix any failures; merge with gh pr merge 14 --merge --auto, sync clean dev and continue T9.1.
+  - [ ] Five-line phase summary, PR dev→main and green CI merge
+- Resume note: DST readiness plus compliance/leave streaming fixes verified with UTC targeted browser4/4 (/tmp/phase9-ci-targeted.txt). All changes pushed; PR15 now needs all-green CI at final head. Merge only green using gh pr merge 15 --merge --auto, then clean sync dev/start T10.1 (document/file/RBAC baseline34 pass). Screenshot76/local full gate complete; Semgrep already corrected/green.
 
 ## Next tasks
-- Phase 8 gate
-- T9.1 — attendance workspace, records and filters
-- T9.2 — import, bulk entry and exports
+- T10.1 — company documents
+- T10.2 — reports
+- T10.3 — policies and sign-offs
 
 ## Health
-- CI on dev: Phase 8 PR #14 CI pending; prior audit/T8.1 green (41610450677). CI on main: not rechecked.
-- Local checks run: API590 plus corrected generated-doc1/affected55 pass; web776 plus corrected shell19/nav22, guard scripts32 pass; browser407 plus four corrected cases and screenshot/setup5 pass. Python/web static, production build and generated contract clean. 48 screenshots saved/reviewed.
+- CI on dev: pending (browser readiness fixes pass locally4; PR15). CI on main: not rechecked.
+- Local checks run: T9.2 API31/browser4/static; T9.3 API39+attendance27/migration7/doc1/static/web25/browser2; T9.4 API34/migration7/static/web22/browser2; T9.5 affected61+isolated rota9/clock-email12/migration7/static/web22/browser3; T9.6 Work Log10+related26/migration7/mypy288/static/web22/browser2 — pass.
 
 ## Issues / suggestions
+- Never run database pytest alongside Playwright: both provision shared PostgreSQL roles with random passwords, so concurrent setup causes app_owner authentication failures. Run them sequentially.
 - Focused pytest invocation must group all tests/db paths before tests outside that directory; interleaving caused a missing database fixture, grouped rerun115 and notification alone1 pass.
 - Remove dependency cooldown exceptions when due: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.
 - docs/audits/phase7.md absent from synced dev; F7.1–F7.7 queued findings were implemented and confirmed green in CI.
 
 ## Strategy / decisions taken
+- T9.6: work log duration uses the entered HH:MM interval, wrapping overnight. Own edit eligibility uses company-local work date. Responsibility wording is snapshotted; first admin correction retains the complete original, later changes remain audited. Free entry text stays out of audit events. Revision checks prevent overwriting intervening edits.
+- T9.5: preserve last published shifts in a weekly snapshot while draft edits change current rows; manager publication merges only their reports and preserves other employees. Version checks prevent stale destructive actions. Times are UTC instants derived from explicit company-local wall times/fold choices.
+- T9.4: follow existing settings archive conventions; one active late policy/day-off pattern per department/designation/shift, overnight breaks validated within the shift. Deduction settings are stored configuration; no automatic payroll deduction is introduced.
+- T9.3: weekly review uses a deterministic employee/week identifier for read-only projections; only approval writes a stamp with the reviewed record fingerprint. Changed records show review needed again. Location defaults off and requires employee consent per clock action; location/note text never enters audit events.
+- T9.2: scanned import files use attendance_import ownership and require current company-wide attendance read even for their uploader after demotion. Preview/commit is all-or-nothing with per-row errors and stale-record checks. Grid may save worked status with unknown times/hours; it must not invent clock times. Workbook XML hardening follows https://openpyxl.readthedocs.io/en/stable/#security (defusedxml installed); parser limits and formula rejection follow next.
+- T9.1: manual writes require full attendance.record.write; own-write is clock-only for T9.3. Employee row serializes upserts with leave booking. Leave-sync records cannot be overwritten. Company-local times become UTC instants; overnight clock-out rolls to next day, hours deduct unpaid break. Nonexistent wall times fail; repeated-hour entries require an explicit first/second occurrence. Audit excludes note text.
 - T8.5: preview is read-only; commit only after year ends and pending requests resolve. Reconcile closing allowance, carry nonnegative remaining up to type limit (reasoned override may exceed limit up to remaining), expire positive source balances and freeze source-year mutations. Negative fixed-allowance debt requires a reviewed adjustment before closing; unbounded types retain usage history without treating it as allowance debt.
 - T8.4: add missing leave.balance.read to plan/matrix so Company Admin/HR/Auditor can read company balances; existing own/reports remain scoped. Read projections combine immutable ledger with current managed allowance/calendar deltas; GET never writes. Manual actions reconcile and audit atomically.
 - T8.2: balances are sums of signed immutable movements. Corrections append deltas; manual movements survive standard reconciliation. Employee row serializes writers; operation keys preserve retries, including no-op Set. Caller owns audit/commit transaction.

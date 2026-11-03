@@ -31,6 +31,10 @@ from app.integrations.storage import Storage
 from app.integrations.turnstile import Turnstile
 from app.jobs.queue import open_queue
 from app.modules.access.router import router as access_router
+from app.modules.attendance.batch_router import router as attendance_batch_router
+from app.modules.attendance.clock_router import router as attendance_clock_router
+from app.modules.attendance.import_router import router as attendance_import_router
+from app.modules.attendance.router import router as attendance_router
 from app.modules.audit.router import router as audit_router
 from app.modules.auth.container import build_container
 from app.modules.auth.router import router as auth_router
@@ -64,8 +68,13 @@ from app.modules.leave.workspace_router import router as leave_workspace_router
 from app.modules.leave.year_end_router import router as leave_year_end_router
 from app.modules.notifications.router import router as notifications_router
 from app.modules.pay.router import router as pay_router
+from app.modules.rota.action_router import router as rota_action_router
+from app.modules.rota.publish_router import router as rota_publish_router
+from app.modules.rota.router import router as rota_router
+from app.modules.rota.week_router import router as rota_week_router
 from app.modules.rtw.router import router as rtw_router
 from app.modules.sponsor_documents.router import router as sponsor_documents_router
+from app.modules.work_log.router import router as work_log_router
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -209,6 +218,15 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(leave_requests_router, prefix=API_PREFIX)
     app.include_router(leave_workspace_router, prefix=API_PREFIX)
     app.include_router(leave_year_end_router, prefix=API_PREFIX)
+    app.include_router(attendance_router, prefix=API_PREFIX)
+    app.include_router(attendance_import_router, prefix=API_PREFIX)
+    app.include_router(attendance_batch_router, prefix=API_PREFIX)
+    app.include_router(attendance_clock_router, prefix=API_PREFIX)
+    app.include_router(rota_router, prefix=API_PREFIX)
+    app.include_router(rota_week_router, prefix=API_PREFIX)
+    app.include_router(rota_action_router, prefix=API_PREFIX)
+    app.include_router(rota_publish_router, prefix=API_PREFIX)
+    app.include_router(work_log_router, prefix=API_PREFIX)
     app.include_router(trading_hours_router, prefix=API_PREFIX)
     app.include_router(pay_router, prefix=API_PREFIX)
     app.include_router(access_router, prefix=API_PREFIX)

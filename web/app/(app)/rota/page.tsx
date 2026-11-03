@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-import { PlaceholderPage } from "@/components/app/placeholder-page";
+import { RotaWorkspace } from "@/components/rota/workspace";
 
 export const metadata: Metadata = { title: "Rota" };
 
-export default function Page() {
-  return <PlaceholderPage id="rota" />;
+export default async function Page({ searchParams }: { searchParams: Promise<{ week?: string }> }) {
+  return <RotaWorkspace initialWeek={(await searchParams).week} />;
 }

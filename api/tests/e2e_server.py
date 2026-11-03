@@ -2,7 +2,7 @@
 
 It gets its own throwaway database (migrated, with the app roles), random secrets, and sends every
 e-mail straight to Mailpit, so no worker has to run. Everything it creates is dropped when it stops.
-The test server in docker-compose.yml (``postgres-test``), Redis and Mailpit must be running.
+The local Postgres, Redis, Mailpit, RustFS and ClamAV test services must be running.
 """
 
 from __future__ import annotations
@@ -31,6 +31,7 @@ WEB_ORIGIN = os.environ.get("E2E_WEB_ORIGIN", "http://127.0.0.1:3100")
 REDIS_URL = os.environ.get("E2E_REDIS_URL", "redis://127.0.0.1:6379/12")
 SMTP_HOST = os.environ.get("E2E_SMTP_HOST", "127.0.0.1")
 SMTP_PORT = int(os.environ.get("E2E_SMTP_PORT", "1025"))
+S3_SECRET = os.environ.get("RUSTFS_SECRET_KEY", "rustfsadmin")
 
 
 class DirectMailer:
@@ -71,6 +72,12 @@ def main() -> None:
             web_origin=WEB_ORIGIN,
             api_origin=f"http://127.0.0.1:{API_PORT}",
             domain="127.0.0.1",
+            r2_endpoint=os.environ.get("TEST_S3_ENDPOINT", "http://localhost:9000"),
+            r2_access_key_id=os.environ.get("RUSTFS_ACCESS_KEY", "rustfsadmin"),
+            r2_secret_access_key=S3_SECRET,
+            r2_bucket_files=os.environ.get("TEST_S3_BUCKET", "files-dev"),
+            clamav_host="localhost",
+            clamav_port=int(os.environ.get("TEST_CLAMAV_PORT", "3310")),
             # The test browser is the proxy: a helper sends X-Real-IP so each sign-up looks like a
             # different visitor and the real limit (5 sign-ups an hour per address) stays in force.
             trusted_proxy_cidrs="127.0.0.0/8",

@@ -253,7 +253,7 @@ test.describe("on a phone", () => {
     await page.getByRole("button", { name: "More" }).click();
     await page
       .getByRole("dialog", { name: "More" })
-      .getByRole("link", { name: "Work log" })
+      .getByRole("link", { name: "Work log", exact: true })
       .click();
     await expect(page).toHaveURL(/\/work-log$/);
     await expect(page.getByRole("dialog", { name: "More" })).toBeHidden();
@@ -309,6 +309,11 @@ const BUILT = new Set([
   "leave",
   "my-leave",
   "my-approvals",
+  "attendance",
+  "rota",
+  "work-log",
+  "my-work-log",
+  "my-shifts",
 ]);
 
 test.describe("every page in the sidebar", () => {

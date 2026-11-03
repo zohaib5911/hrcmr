@@ -84,6 +84,8 @@ for (const colorScheme of ["light", "dark"] as const) {
         await page.setViewportSize({ width, height: 900 });
         await open(page);
         await expect(page.getByRole("heading", { name: "Leave types", exact: true })).toBeVisible();
+        // The streamed server copy must be removed before axe checks document-wide ids.
+        await expect(page.locator("#leave-types-heading")).toHaveCount(1);
         await audit(page, `${colorScheme} leave settings ${width}px`);
         expect(
           await page.evaluate(

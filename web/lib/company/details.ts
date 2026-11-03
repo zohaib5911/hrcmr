@@ -24,6 +24,7 @@ export interface DetailsForm {
   penalty_illegal_working_last_3_years: boolean;
   penalty_illegal_working_status: string;
   ai_features_enabled: boolean;
+  clock_geolocation_enabled: boolean;
 }
 
 export function formFrom(company: CompanyDetails): DetailsForm {
@@ -44,6 +45,7 @@ export function formFrom(company: CompanyDetails): DetailsForm {
     penalty_illegal_working_last_3_years: company.penalty_illegal_working_last_3_years,
     penalty_illegal_working_status: company.penalty_illegal_working_status ?? "",
     ai_features_enabled: company.ai_features_enabled,
+    clock_geolocation_enabled: company.clock_geolocation_enabled ?? false,
   };
 }
 

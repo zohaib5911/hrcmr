@@ -46,6 +46,18 @@ def _fields(*names: str) -> frozenset[str]:
 
 
 TEMPLATES: dict[str, Template] = {
+    "rota_published": Template(
+        subject="Your rota for {dates}",
+        heading="Your rota has been published",
+        preheader="Review your schedule in My Shifts.",
+        paragraphs=(
+            "Hi {first_name},",
+            "Your rota for {dates} now contains {shift_count} shifts.",
+            "Sign in to review the latest published schedule.",
+        ),
+        button=("View My Shifts", "link"),
+        fields=_fields("first_name", "dates", "shift_count", "link"),
+    ),
     "verify_email": Template(
         subject="Confirm your email address",
         heading="Confirm your email address",

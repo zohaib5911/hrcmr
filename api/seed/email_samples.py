@@ -17,6 +17,12 @@ if TYPE_CHECKING:
 SAMPLE_BASE = "http://localhost:3000"
 
 SAMPLES: dict[str, dict[str, str]] = {
+    "rota_published": {
+        "first_name": "Amina",
+        "dates": "2026-01-05 to 2026-01-11",
+        "shift_count": "5",
+        "link": "https://example.com/my-shifts",
+    },
     "verify_email": {"first_name": "Amira", "link": f"{SAMPLE_BASE}/verify-email?token=example"},
     "reset_password": {
         "first_name": "Amira",

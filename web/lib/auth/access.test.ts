@@ -30,7 +30,7 @@ describe("the permission-aware navigation", () => {
       "employee.profile.read_own",
     ]);
     expect(shown).toEqual(
-      expect.arrayContaining(["dashboard", "leave", "my-documents", "work-log", "profile"]),
+      expect.arrayContaining(["dashboard", "leave", "my-documents", "my-work-log", "profile"]),
     );
     expect(shown).not.toContain("employees");
     expect(shown).not.toContain("billing");

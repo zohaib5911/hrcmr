@@ -21,7 +21,7 @@ from sqlalchemy import select
 
 from app.core.errors import AppError, ForbiddenError, NotFoundError
 from app.core.logging import get_logger
-from app.core.rbac_matrix import Scope
+from app.core.rbac_matrix import Scope, scope_for
 from app.modules.files.models import File
 from app.modules.files.validation import (
     ALLOWED,
@@ -148,32 +148,35 @@ class FileService:
             raise AppError(NOT_CONFIGURED.code, NOT_CONFIGURED.message, status_code=503)
         await self._check_owner(access, owner_type, owner_id)
         name = safe_filename(filename)
+        audit_name = "Attendance import" if owner_type == "attendance_import" else name
         size = await asyncio.to_thread(_size, stream)
         if size == 0:
-            raise await self._refuse(access, EMPTY, name=name, size=size)
+            raise await self._refuse(access, EMPTY, name=audit_name, size=size)
         if size > max_bytes:
             raise await self._refuse(
                 access,
                 _too_large(max_bytes) if max_bytes != MAX_BYTES else TOO_LARGE,
-                name=name,
+                name=audit_name,
                 size=size,
             )
 
         extension = extension_of(name)
         if extension not in ALLOWED or (kinds is not None and ALLOWED[extension][0] not in kinds):
-            raise await self._refuse(access, BAD_TYPE, name=name, size=size, detail=extension[:10])
+            raise await self._refuse(
+                access, BAD_TYPE, name=audit_name, size=size, detail=extension[:10]
+            )
         kind, mime = ALLOWED[extension]
         if await asyncio.to_thread(sniff, stream) != kind:
-            raise await self._refuse(access, MISMATCH, name=name, size=size, detail=extension)
+            raise await self._refuse(access, MISMATCH, name=audit_name, size=size, detail=extension)
 
         stream.seek(0)
         verdict = await self.scanner.scan(stream)
         if verdict.status == "infected":
             raise await self._refuse(
-                access, INFECTED, name=name, size=size, detail=verdict.signature
+                access, INFECTED, name=audit_name, size=size, detail=verdict.signature
             )
         if verdict.status != "clean":
-            raise await self._refuse(access, SCAN_DOWN, name=name, size=size)
+            raise await self._refuse(access, SCAN_DOWN, name=audit_name, size=size)
 
         sha256 = await asyncio.to_thread(_digest, stream)
         key = f"{KEY_PREFIX}{access.company_id}/{uuid.uuid4().hex}"
@@ -197,7 +200,7 @@ class FileService:
             "file.uploaded",
             entity_type="file",
             entity_id=record.id,
-            after={"name": name, "mime": mime, "size": size, "owner_type": owner_type},
+            after={"name": audit_name, "mime": mime, "size": size, "owner_type": owner_type},
         )
         try:
             # The bytes go in before the commit: if this fails nothing is kept, and if the commit
@@ -239,6 +242,11 @@ class FileService:
         access: Access, owner_type: str | None, owner_id: uuid.UUID | None
     ) -> None:
         """What the file is attached to must be well formed, and within the person's reach."""
+        if (
+            owner_type == "attendance_import"
+            and scope_for(access.role, "attendance.record.write") is not Scope.ALL
+        ):
+            raise ForbiddenError
         if owner_type is None and owner_id is None:
             if access.scope is not Scope.ALL:
                 raise ForbiddenError
@@ -258,6 +266,8 @@ class FileService:
     @staticmethod
     async def _reaches(access: Access, record: File) -> bool:
         """Everyone with full scope; otherwise what the person uploaded or that is within reach."""
+        if record.owner_type == "attendance_import":
+            return scope_for(access.role, "attendance.record.read") is Scope.ALL
         if access.scope is Scope.ALL or record.uploaded_by == access.caller.user_id:
             return True
         return (

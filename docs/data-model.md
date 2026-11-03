@@ -3,6 +3,34 @@
 Generated from the SQLAlchemy models by `python -m app.cli export-data-model`.
 Do not edit by hand: a test fails when this file is out of date.
 
+## `attendance_imports`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `files` |
+| `file_id` | UUID | no |  | references `files` |
+| `from_date` | DATE | yes |  |  |
+| `to_date` | DATE | yes |  |  |
+| `rows_total` | INTEGER | no |  |  |
+| `rows_valid` | INTEGER | no |  |  |
+| `rows` | JSONB | no |  |  |
+| `errors` | JSONB | no |  |  |
+| `timezone` | VARCHAR(64) | no |  |  |
+| `status` | VARCHAR(10) | no | `previewed` |  |
+| `committed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(from_date is null and to_date is null) or (from_date is not null and to_date is not null and to_date >= from_date)`
+- `(status='previewed' and committed_at is null) or (status='committed' and committed_at is not null)`
+- `rows_total > 0 AND rows_valid >= 0 AND rows_valid <= rows_total`
+- `status in ('previewed','committed')`
+
 ## `attendance_records`
 
 | Column | Type | Null | Default | Notes |
@@ -141,6 +169,7 @@ Checks:
 | `mfa_policy` | VARCHAR(10) | no | `optional` |  |
 | `bank_holidays_non_working` | BOOLEAN | no | `true` |  |
 | `ai_features_enabled` | BOOLEAN | no | `true` |  |
+| `clock_geolocation_enabled` | BOOLEAN | no | `false` |  |
 | `changed_name_last_5_years` | BOOLEAN | no | `false` |  |
 | `previous_company_name` | VARCHAR(200) | yes |  |  |
 | `penalty_illegal_working_last_3_years` | BOOLEAN | no | `false` |  |
@@ -232,6 +261,27 @@ Checks:
 Checks:
 
 - `end_date >= start_date`
+
+## `day_off_patterns`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `departments`, references `designations`, references `shift_types` |
+| `department_id` | UUID | no |  | references `departments`, references `designations` |
+| `designation_id` | UUID | no |  | references `designations` |
+| `shift_type_id` | UUID | no |  | references `shift_types` |
+| `weekdays_off` | INTEGER[] | no |  |  |
+| `works_public_holidays` | BOOLEAN | no | `false` |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `weekdays_off <@ ARRAY[1,2,3,4,5,6,7] AND array_position(weekdays_off, NULL) IS NULL`
 
 ## `departments`
 
@@ -669,6 +719,30 @@ Checks:
 
 - `role in ('authorising_officer', 'key_contact', 'level1_user', 'level2_user')`
 
+## `late_policies`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `departments`, references `designations`, references `shift_types` |
+| `department_id` | UUID | no |  | references `departments`, references `designations` |
+| `designation_id` | UUID | no |  | references `designations` |
+| `shift_type_id` | UUID | no |  | references `shift_types` |
+| `grace_minutes` | INTEGER | no |  |  |
+| `allowed_late_days_per_month` | INTEGER | no |  |  |
+| `deduction_type` | VARCHAR(20) | no |  |  |
+| `deduction_value` | NUMERIC(10, 2) | no |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `deduction_value >= 0 AND ((deduction_type='none' AND deduction_value=0) OR deduction_type='fixed' OR (deduction_type='percentage_of_day' AND deduction_value<=100))`
+- `grace_minutes between 0 and 1440 AND allowed_late_days_per_month between 0 and 31`
+
 ## `leave_ledger`
 
 | Column | Type | Null | Default | Notes |
@@ -985,6 +1059,28 @@ Checks:
 - `status in ('scheduled', 'due', 'sent', 'snoozed', 'cancelled')`
 - `threshold_days in (90, 60, 30)`
 
+## `rota_weeks`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `week_start` | DATE | no |  |  |
+| `status` | VARCHAR(10) | no | `draft` |  |
+| `version` | INTEGER | no | `0` |  |
+| `published_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `published_by` | UUID | yes |  |  |
+| `published_shifts` | JSONB | no | `[]` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `extract(isodow from week_start)=1`
+- `status in ('draft','published') AND version>=0`
+
 ## `rtw_checks`
 
 | Column | Type | Null | Default | Notes |
@@ -1028,6 +1124,29 @@ Checks:
 - `subject_type <> 'employee' or (check_date is not null and checked_by_user_id is not null)`
 - `subject_type in ('employee', 'candidate')`
 
+## `scheduled_shifts`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `employees`, references `rota_weeks`, references `shift_types` |
+| `rota_week_id` | UUID | no |  | references `rota_weeks` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `date` | DATE | no |  |  |
+| `starts_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `ends_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `unpaid_break_minutes` | INTEGER | no | `0` |  |
+| `shift_type_id` | UUID | yes |  | references `shift_types` |
+| `note` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `ends_at > starts_at AND unpaid_break_minutes >= 0 AND unpaid_break_minutes * interval '1 minute' <= ends_at-starts_at`
+
 ## `sessions`
 
 | Column | Type | Null | Default | Notes |
@@ -1045,6 +1164,30 @@ Checks:
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 | `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+
+## `shift_types`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `name` | VARCHAR(80) | no |  |  |
+| `description` | TEXT | yes |  |  |
+| `starts_at` | TIME WITHOUT TIME ZONE | no |  |  |
+| `ends_at` | TIME WITHOUT TIME ZONE | no |  |  |
+| `break_start` | TIME WITHOUT TIME ZONE | yes |  |  |
+| `break_end` | TIME WITHOUT TIME ZONE | yes |  |  |
+| `colour` | VARCHAR(7) | no | `#007aff` |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(break_start is null) = (break_end is null)`
+- `starts_at <> ends_at`
 
 ## `sponsor_documents`
 
@@ -1135,6 +1278,27 @@ Checks:
 | `created_by` | UUID | yes |  |  |
 | `updated_by` | UUID | yes |  |  |
 
+## `timesheet_approvals`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `employees` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `period_start` | DATE | no |  |  |
+| `period_end` | DATE | no |  |  |
+| `fingerprint` | VARCHAR(64) | no |  |  |
+| `approved_by` | UUID | no |  |  |
+| `approved_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `period_end = period_start + 6`
+
 ## `trading_hours_days`
 
 | Column | Type | Null | Default | Notes |
@@ -1183,6 +1347,33 @@ Checks:
 
 - `failed_login_count >= 0`
 - `theme_pref in ('system', 'light', 'dark')`
+
+## `work_log_entries`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `employee_responsibilities`, references `employees` |
+| `employee_id` | UUID | no |  | references `employee_responsibilities`, references `employees` |
+| `date` | DATE | no |  |  |
+| `from_time` | TIME WITHOUT TIME ZONE | no |  |  |
+| `to_time` | TIME WITHOUT TIME ZONE | no |  |  |
+| `hours` | NUMERIC(6, 2) | no |  |  |
+| `responsibility_id` | UUID | yes |  | references `employee_responsibilities` |
+| `responsibility_text` | TEXT | no |  |  |
+| `description` | TEXT | no |  |  |
+| `removed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `removed_by` | UUID | yes |  |  |
+| `corrected_from` | JSONB | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(removed_at is null) = (removed_by is null)`
+- `from_time <> to_time AND hours>0 AND hours<=24`
 
 ## `working_pattern_days`
 

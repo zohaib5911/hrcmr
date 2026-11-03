@@ -1,0 +1,9 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><style>
+@page { size: A4 landscape; margin: 12mm; }
+body { font-family: sans-serif; font-size: 10pt; color: #111; }
+table { border-collapse: collapse; width: 100%; } th, td { border-bottom: 1px solid #bbb; padding: 6px; text-align: left; overflow-wrap: anywhere; }
+thead { display: table-header-group; } tr { break-inside: avoid; }
+</style></head><body><h1>{{ company }} — Rota</h1><p>Week starting {{ week_start }} · {{ timezone }}{% if draft %} · DRAFT — changes not published{% endif %}</p>
+<table><thead><tr><th>Employee</th><th>Date</th><th>Shift</th><th>Starts</th><th>Finishes</th><th>Break</th><th>Paid hours</th><th>Note</th></tr></thead><tbody>
+{% for s in shifts %}<tr><td>{{ s.employee_name }}</td><td>{{ s.date }}</td><td>{{ s.shift_name or "Custom" }}</td><td>{{ s.starts_local }}</td><td>{{ s.ends_local }}</td><td>{{ s.unpaid_break_minutes }} min</td><td>{{ s.hours }}</td><td>{{ s.note or "" }}</td></tr>{% endfor %}
+</tbody></table></body></html>

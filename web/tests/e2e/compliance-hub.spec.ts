@@ -81,7 +81,9 @@ test("Compliance hub actions reach their records, filters match exports and doss
   const queue = page.getByRole("region", { name: "Needs attention", exact: true });
   await expect(queue.getByText("Change past reporting deadline", { exact: true })).toBeVisible();
   await expect(queue.getByText("Right to Work expired", { exact: true })).toBeVisible();
-  await expect(page.getByText("0 of 2 hold a valid check", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("main").getByText("0 of 2 hold a valid check", { exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Every reportable change reported on time", exact: true }),
   ).toBeVisible();

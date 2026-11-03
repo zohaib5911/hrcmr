@@ -296,3 +296,36 @@ async def test_the_cleanup_removes_only_objects_no_row_points_to(
         assert not await storage.exists(stray)
         assert await storage.exists(row["storage_key"])  # it has a row, so it stays
         await storage.delete(row["storage_key"])
+
+
+async def test_attendance_import_file_is_not_kept_by_a_demoted_uploader(
+    api: dict[str, Any],
+) -> None:
+    app = api["start"](CLAMAV_PORT)
+    async with LifespanManager(app):
+        admin = await api["person"](app, "hr_admin", api["a"])
+        sent = await _upload(
+            admin,
+            "attendance.csv",
+            b"employee_number,date,status,clock_in,clock_out,note\nE1,2026-11-03,sick,,,\n",
+            owner_type="attendance_import",
+            owner_id=str(uuid.uuid4()),
+            category="attendance_import",
+        )
+        assert sent.status_code == 201, sent.text
+        ident = sent.json()["id"]
+        assert (await admin.get(f"/api/v1/files/{ident}")).status_code == 200
+        user = (await admin.get("/api/v1/auth/me")).json()["user"]["id"]
+        owner = engine_for(api["db"].owner_url, poolclass=NullPool)
+        try:
+            async with owner.begin() as c:
+                await c.execute(
+                    text(
+                        "update memberships set role='employee' where user_id=:u and company_id=:c"
+                    ),
+                    {"u": uuid.UUID(user), "c": api["a"]},
+                )
+        finally:
+            await owner.dispose()
+        assert (await admin.get(f"/api/v1/files/{ident}")).status_code == 404
+        assert (await admin.get(f"/api/v1/files/{ident}/download")).status_code == 404

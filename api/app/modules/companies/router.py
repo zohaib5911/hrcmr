@@ -69,6 +69,7 @@ def _details(company: Company) -> CompanyDetails:
         penalty_illegal_working_last_3_years=company.penalty_illegal_working_last_3_years,
         penalty_illegal_working_status=company.penalty_illegal_working_status,
         ai_features_enabled=company.ai_features_enabled,
+        clock_geolocation_enabled=company.clock_geolocation_enabled,
         status=company.status,  # type: ignore[arg-type]
         plan=company.plan,  # type: ignore[arg-type]
     )
