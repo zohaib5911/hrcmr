@@ -193,3 +193,4 @@
 2026-11-03 18:20 | Codex | T9.5 | browser planning/publish/draft/copy passes to mobile axe; fixed paid-hours contrast, no-report manager guard isolated API9 pass | next browser final through clears; keep pytest and Playwright sequential (shared role passwords)
 2026-11-03 18:22 | Codex | T9.5 | complete: final workspace/setup2 browser passes planning/publication/snapshots/copy/clear/mobile axe; API/static green | next T9.6 work log then Phase9 gate
 2026-11-03 18:26 | Codex | T9.6 | work log schema/service and responsibility-history preservation ready; registry side-effect imports explicitly exempted, migration7 and typing pass | next scoped API/KPIs/correct/remove/tests then UI
+2026-11-03 18:31 | Codex | T9.6 | scoped Work Log API/KPIs/own/admin correction-removal ready; Work Log10 plus related25/migration7/static/mypy288 pass; client generated | next own/admin UI and production browser

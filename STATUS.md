@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 18:26, Europe/London    Agent: Codex    Branch: dev    Commit: 6169f7f
+Updated: 2026-11-03 18:31, Europe/London    Agent: Codex    Branch: dev    Commit: 90e0b6c
 State: IN PROGRESS
 
 ## Last completed
@@ -8,9 +8,9 @@ State: IN PROGRESS
 ## Current task
 - T9.6 — My Work Log and admin corrections/removal
   - [x] Entry schema/migration and same-day own-write service
-  - [ ] Scoped list/KPIs/search, audited correction/removal and tests
+  - [x] Scoped list/KPIs/search, audited correction/removal and tests
   - [ ] Own/admin workspace/forms and browser checks
-- Resume note: Work log model/migration/contracts and serialized service written; retains responsibility wording/original corrections and soft removal, revision guards, same-local-day own edits. Responsibility deletion detaches links while preserving log text. Registry side-effect imports restored with explicit F401 exemption after lint removed them; migration7 and service typing pass. Next scoped list/KPIs/admin correction/removal endpoints and tests, then own/admin UI.
+- Resume note: Work Log APIs implemented, including own responsibilities, range/search/employee/removed/archived filters and totals, same-day own edits and reasoned stale-safe corrections/soft removal. Work Log10 and related employment/RBAC/doc25 pass; migration7, mypy288 and lint clean, client generated. Corrected fixture role to hr_admin. Next own/admin workspaces/forms and production browser; then Phase9 gate.
 
 ## Next tasks
 - Phase 9 gate — full suite/screenshots/green PR

@@ -74,6 +74,7 @@ from app.modules.rota.router import router as rota_router
 from app.modules.rota.week_router import router as rota_week_router
 from app.modules.rtw.router import router as rtw_router
 from app.modules.sponsor_documents.router import router as sponsor_documents_router
+from app.modules.work_log.router import router as work_log_router
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -225,6 +226,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(rota_week_router, prefix=API_PREFIX)
     app.include_router(rota_action_router, prefix=API_PREFIX)
     app.include_router(rota_publish_router, prefix=API_PREFIX)
+    app.include_router(work_log_router, prefix=API_PREFIX)
     app.include_router(trading_hours_router, prefix=API_PREFIX)
     app.include_router(pay_router, prefix=API_PREFIX)
     app.include_router(access_router, prefix=API_PREFIX)
