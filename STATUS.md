@@ -7,11 +7,11 @@ State: IN PROGRESS
 
 ## Current task
 - T9.2 — attendance import, bulk entry, exports and absences
-  - [ ] Import schema/file purpose, workbook dependency and shared row service
+  - [x] Import schema/file purpose, workbook dependency and shared row service
   - [ ] XLSX/CSV templates and preview/commit with row errors
   - [ ] Bulk grid API, CSV/XLSX/PDF exports and monthly absences
   - [ ] Import/bulk/report UI and affected API/browser checks
-- Resume note: Read existing file upload/scan/download support before adding attendance_import purpose. Reuse T9.1 time/scoping/audit protections for imports and bulk. Plan 8.7 and 12 define template fields/API paths. Add bounded workbook parsing and reviewed preview commit; continue autonomously.
+- Resume note: Import model/migration, composite tenant file FK and protected attendance_import file ownership ready; openpyxl/defusedxml/types installed under existing cooldown. Shared save_record extracted, grid may record status-only worked entries without inventing hours; leave guards retained. Migration/attendance/files28 pass, demotion file test running; static clean. Next bounded XLSX/CSV templates/parser and saved preview/commit.
 
 ## Next tasks
 - T9.2 — import, bulk entry and exports
@@ -27,6 +27,7 @@ State: IN PROGRESS
 - docs/audits/phase7.md absent from synced dev; F7.1–F7.7 queued findings were implemented and confirmed green in CI.
 
 ## Strategy / decisions taken
+- T9.2: scanned import files use attendance_import ownership and require current company-wide attendance read even for their uploader after demotion. Preview/commit is all-or-nothing with per-row errors and stale-record checks. Grid may save worked status with unknown times/hours; it must not invent clock times. Workbook XML hardening follows https://openpyxl.readthedocs.io/en/stable/#security (defusedxml installed); parser limits and formula rejection follow next.
 - T9.1: manual writes require full attendance.record.write; own-write is clock-only for T9.3. Employee row serializes upserts with leave booking. Leave-sync records cannot be overwritten. Company-local times become UTC instants; overnight clock-out rolls to next day, hours deduct unpaid break. Nonexistent wall times fail; repeated-hour entries require an explicit first/second occurrence. Audit excludes note text.
 - T8.5: preview is read-only; commit only after year ends and pending requests resolve. Reconcile closing allowance, carry nonnegative remaining up to type limit (reasoned override may exceed limit up to remaining), expire positive source balances and freeze source-year mutations. Negative fixed-allowance debt requires a reviewed adjustment before closing; unbounded types retain usage history without treating it as allowance debt.
 - T8.4: add missing leave.balance.read to plan/matrix so Company Admin/HR/Auditor can read company balances; existing own/reports remain scoped. Read projections combine immutable ledger with current managed allowance/calendar deltas; GET never writes. Manual actions reconcile and audit atomically.

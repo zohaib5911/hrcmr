@@ -21,7 +21,7 @@ from sqlalchemy import select
 
 from app.core.errors import AppError, ForbiddenError, NotFoundError
 from app.core.logging import get_logger
-from app.core.rbac_matrix import Scope
+from app.core.rbac_matrix import Scope, scope_for
 from app.modules.files.models import File
 from app.modules.files.validation import (
     ALLOWED,
@@ -239,6 +239,11 @@ class FileService:
         access: Access, owner_type: str | None, owner_id: uuid.UUID | None
     ) -> None:
         """What the file is attached to must be well formed, and within the person's reach."""
+        if (
+            owner_type == "attendance_import"
+            and scope_for(access.role, "attendance.record.write") is not Scope.ALL
+        ):
+            raise ForbiddenError
         if owner_type is None and owner_id is None:
             if access.scope is not Scope.ALL:
                 raise ForbiddenError
@@ -258,6 +263,8 @@ class FileService:
     @staticmethod
     async def _reaches(access: Access, record: File) -> bool:
         """Everyone with full scope; otherwise what the person uploaded or that is within reach."""
+        if record.owner_type == "attendance_import":
+            return scope_for(access.role, "attendance.record.read") is Scope.ALL
         if access.scope is Scope.ALL or record.uploaded_by == access.caller.user_id:
             return True
         return (

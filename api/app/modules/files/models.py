@@ -5,7 +5,16 @@ from __future__ import annotations
 import uuid  # noqa: TC003  (SQLAlchemy resolves the Mapped[...] annotations at runtime)
 from datetime import datetime  # noqa: TC003
 
-from sqlalchemy import BigInteger, CheckConstraint, DateTime, ForeignKey, Index, String, Uuid
+from sqlalchemy import (
+    BigInteger,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Index,
+    String,
+    UniqueConstraint,
+    Uuid,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, RecordMixin, TenantMixin
@@ -16,6 +25,7 @@ SCAN_STATUSES = ("pending", "clean", "infected", "error")
 class File(Base, RecordMixin, TenantMixin):
     __tablename__ = "files"
     __table_args__ = (
+        UniqueConstraint("company_id", "id", name="uq_files_company_id_id"),
         CheckConstraint(
             "scan_status in ('pending', 'clean', 'infected', 'error')", name="scan_status"
         ),

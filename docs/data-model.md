@@ -3,6 +3,34 @@
 Generated from the SQLAlchemy models by `python -m app.cli export-data-model`.
 Do not edit by hand: a test fails when this file is out of date.
 
+## `attendance_imports`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `files` |
+| `file_id` | UUID | no |  | references `files` |
+| `from_date` | DATE | yes |  |  |
+| `to_date` | DATE | yes |  |  |
+| `rows_total` | INTEGER | no |  |  |
+| `rows_valid` | INTEGER | no |  |  |
+| `rows` | JSONB | no |  |  |
+| `errors` | JSONB | no |  |  |
+| `timezone` | VARCHAR(64) | no |  |  |
+| `status` | VARCHAR(10) | no | `previewed` |  |
+| `committed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(from_date is null and to_date is null) or (from_date is not null and to_date is not null and to_date >= from_date)`
+- `(status='previewed' and committed_at is null) or (status='committed' and committed_at is not null)`
+- `rows_total > 0 AND rows_valid >= 0 AND rows_valid <= rows_total`
+- `status in ('previewed','committed')`
+
 ## `attendance_records`
 
 | Column | Type | Null | Default | Notes |

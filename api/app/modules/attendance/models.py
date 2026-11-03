@@ -66,3 +66,42 @@ class AttendanceRecord(Base, RecordMixin, TenantMixin):
     source: Mapped[str] = mapped_column(String(12), nullable=False, server_default="manual")
     geo: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     leave_request_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
+
+
+class AttendanceImport(Base, RecordMixin, TenantMixin):
+    __tablename__ = "attendance_imports"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["company_id", "file_id"],
+            ["files.company_id", "files.id"],
+            name="fk_attendance_imports_company_file",
+            ondelete="RESTRICT",
+        ),
+        CheckConstraint("status in ('previewed','committed')", name="status"),
+        CheckConstraint(
+            "rows_total > 0 AND rows_valid >= 0 AND rows_valid <= rows_total", name="rows"
+        ),
+        CheckConstraint(
+            "(from_date is null and to_date is null) or "
+            "(from_date is not null and to_date is not null and to_date >= from_date)",
+            name="dates",
+        ),
+        CheckConstraint(
+            "(status='previewed' and committed_at is null) or "
+            "(status='committed' and committed_at is not null)",
+            name="committed",
+        ),
+    )
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    file_id: Mapped[uuid.UUID] = mapped_column(Uuid, nullable=False)
+    from_date: Mapped[date | None] = mapped_column(Date)
+    to_date: Mapped[date | None] = mapped_column(Date)
+    rows_total: Mapped[int] = mapped_column(Integer, nullable=False)
+    rows_valid: Mapped[int] = mapped_column(Integer, nullable=False)
+    rows: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False)
+    errors: Mapped[list[dict[str, Any]]] = mapped_column(JSONB, nullable=False)
+    timezone: Mapped[str] = mapped_column(String(64), nullable=False)
+    status: Mapped[str] = mapped_column(String(10), nullable=False, server_default="previewed")
+    committed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
