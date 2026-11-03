@@ -8,10 +8,10 @@ State: IN PROGRESS
 ## Current task
 - T9.4 — shift types, late policies and day off patterns
   - [x] Models/migration and validation schemas
-  - [ ] Scoped audited settings APIs and affected tests
+  - [x] Scoped audited settings APIs and affected tests
   - [ ] Settings tabs/forms and prerequisite empty states
   - [ ] Production browser/static checks
-- Resume note: Rota shift/late/day-off models and bounded validation added; overnight break timeline, same-tenant composite references, unique live combinations and archive columns. Migration7 and rota type checks pass; generated data model refreshed. Next scoped audited CRUD endpoints/tests then /rota/settings forms and prerequisite empty states.
+- Resume note: Shift/late/day-off list/create/full-update/archive endpoints added with permission guards, serialized unique validation, active prerequisite checks and audit rollback. Shift archive blocks while active configs reference it. Rota/RBAC/doc34 and migration7 pass, mypy272 clean; client generated. Next settings tabs/forms/prerequisite empty states and production browser.
 
 ## Next tasks
 - T9.5 — rota grid, publish, print and My Shifts
