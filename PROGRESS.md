@@ -323,7 +323,12 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T9.4** Shift types, late policies, day-off patterns — 2026-11-03. Tenant-safe archived settings CRUD, unique live scopes, overnight break and deduction validation, audited changes; settings tabs/forms with prerequisite links and shift suggestions/live hours. Verified rota/RBAC/doc34, migration7, mypy273, web types/lint/nav22 and production browser/setup2 including mobile axe and archive dependencies.
 - [x] **T9.5** Rota week grid, publish, print, My Shifts — 2026-11-03. Scoped versioned shifts/grid and copy/clear actions; leave/holiday/day-off/48h/rest warnings and published-policy lateness; last-published snapshots, scoped transactional notifications/email digests, landscape PDF, quick-add/cell/menu workspace and My Shifts. Verified affected API61 plus isolated rota9/clock-email12, migration7/static/client/web22, production workspace/setup2 and settings1 including mobile axe, draft snapshots and destructive confirmations.
 - [x] **T9.6** Work Log — 2026-11-03. Scoped own/admin entries and filtered totals, responsibility snapshots, company-local same-day own edits, stale-safe reasoned correction retaining original and soft removal; responsibility deletion preserves log history; own/admin forms/filters/inspection. Verified Work Log10 + related employment/RBAC/doc26, migration7, mypy288/static/client, web type/lint/nav22 and production browser/setup2 including mobile axe.
-- [ ] **Phase 9 gate**
+- [ ] **Phase 9 gate** — full local validation and 76 reviewed screenshots complete; CI PR pending.
+  - Delivered scoped attendance recording, scanned imports, bulk grids, exports and monthly absence reporting.
+  - Added employee clocking/PWA and optional consented location, with stale-safe report timesheet review.
+  - Built rota templates/policies, weekly planning/warnings, retained publication snapshots, notifications, PDF and My Shifts.
+  - Added own/admin Work Log with original corrections and reasoned soft removal; full API658+corrected19, web777/scripts32, browser413+corrected8 and static/contract/build pass.
+  - Captured 76 views at 390/1280 light/dark with axe/overflow checks; corrected mobile long-policy actions and reviewed attendance/import/clock/rota/log sheets.
 
 ### Phase 10 — Documents, policies and reports
 - [ ] **T10.1** Company documents

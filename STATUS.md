@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 22:35, Europe/London    Agent: Codex    Branch: dev    Commit: f1b1b9b
+Updated: 2026-11-03 22:47, Europe/London    Agent: Codex    Branch: dev    Commit: 37f6f06
 State: IN PROGRESS
 
 ## Last completed
@@ -9,9 +9,9 @@ State: IN PROGRESS
 - Phase 9 gate — full validation, design evidence and green PR
   - [x] Full API/static suite (once)
   - [x] Full web/unit/script/browser suite (sequentially)
-  - [ ] 390/1280 light/dark screenshots and visual review
+  - [x] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: Visual evidence mostly captured; mobile policy overflow fixed and reviewed. Final attendance screenshot wait now scopes Employee to Attendance workspace (hidden record form shares label). All 76 views captured across runs. Use visible textbox role for Selected day (transition retains hidden input); final screenshot rerun, visual review then summary/PR. Previous full gate API/web/browser checks green.
+- Resume note: All four screenshot variants pass across final run3+retry3; 76 images reviewed, axe/overflow clean. Five-line phase summary written. Open dev→main PR and merge only after all CI checks green, then T10.1. Local full API658+corrected19, web777/scripts32, full browser413+retry8 and static/contract/build green.
 
 ## Next tasks
 - T10.1 — company documents
