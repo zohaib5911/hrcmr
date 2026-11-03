@@ -1,27 +1,27 @@
 # STATUS
-Updated: 2026-11-03 01:20    Agent: Codex    Branch: dev    Commit: 893a972
+Updated: 2026-11-03 01:21    Agent: Codex    Branch: dev    Commit: 962c459
 State: IN PROGRESS
 
 ## Last completed
-- T7.1 — Right to Work checks, four forms, evidence, correction/history, derived status and PDFs
+- T7.2 — Sponsor document model/API/forms/history, renewal/withdrawal and sponsored employees register
 
 ## Current task
-- T7.2 — Sponsor documents and sponsored employees page
-  - [x] Read T7.2/6.4/8.5 requirements and nearest modules; ruff/mypy/web types pass, T7.1 API baseline 15 pass
-  - [x] Sponsor document model/migration 0016, encrypted references, versions and withdrawal/renewal; 7 migration/doc tests pass
-  - [x] Scoped API, visa routes and sponsored employees query/tests; 14 sponsor integration tests pass
-  - [x] Employee document forms/history and sponsored employees table; web types/lint pass
-  - [x] Browser scenario prepared for explicit save/upload, version/history, renewal/withdrawal and register
+- T7.3 — Working-day calculator, change of circumstances and organisation changes
+  - [ ] Read task requirements and official reporting/calendar sources; baseline checks
+  - [ ] Working-day calculator with GOV.UK bank-holiday examples
+  - [ ] Change/org-change models, migration and immutable snapshots
+  - [ ] Scoped APIs, deadlines and mark-reported tests
+  - [ ] Employee change form/log and company-wide pages
   - [ ] Affected browser checks and final verification
-- Resume note: Sponsor browser scenario remains passed. RTW reruns exposed mobile/streamed-text locator ambiguity; use exact mobile name and accessible empty heading after Verified filter state. Next rerun RTW only, inspect actual DOM if another failure. API 14 pass, web lint/types/build pass.
+- Resume note: T7.2 complete and all affected checks pass. Next T7.3 in plan order. Official sponsor Part 3 and glossary found; verify working-day rules and use existing GOV.UK bank-holiday import. No T7.3 code yet. Sponsor document section already appears in profile; PDF/combined CoC integration remains T7.6.
 
 
 ## Next tasks
-- T7.2, T7.3, T7.4, T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
+- T7.3, T7.4, T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
 
 ## Health
 - CI on dev: green 41514098397 (Phase 6); T7.1 not yet run in CI. CI on main: green 41516923634.
-- Local checks: T7.1 migration/doc 7, API/PDF/directory 15, list unit 6, employee/setup browser 15 and RTW/setup 2 pass. Ruff/mypy, web types/lint, generated API and production build pass. Phase 6 full gate passed before PR #11 merged.
+- Local checks: T7.2 migration/doc 7, sponsor API 14, sponsor/setup browser 2 and adjacent RTW/setup 2 pass; lint/types/generated API/build pass. Previous  T7.1 migration/doc 7, API/PDF/directory 15, list unit 6, employee/setup browser 15 and RTW/setup 2 pass. Ruff/mypy, web types/lint, generated API and production build pass. Phase 6 full gate passed before PR #11 merged.
 
 ## Issues / suggestions
 - Remove cooldown exceptions once safe: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.

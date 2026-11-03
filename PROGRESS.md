@@ -291,7 +291,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 ### Phase 7 — Right to Work and sponsor compliance
 - [x] **T7.1** Right to Work checks — 2026-11-02. Four conditional types; encrypted/masked codes; clean evidence picker/upload/download; immutable history and reasoned corrections; company-timezone status view, directory filters/deep links/counts, profile tab/cards and masked PDFs. Verified: migration/doc 7, API/PDF 15, list unit 6, employee/setup browser 15 and RTW/setup 2 pass; lint/types/generated API/build pass.
-- [ ] **T7.2** Sponsor documents and sponsored employees page
+- [x] **T7.2** Sponsor documents and sponsored employees page — 2026-11-03. Six document types and eleven visa routes; encrypted/masked reference/CoS; immutable versions, reasoned withdrawal, renewal target/notes, scoped clean evidence and salary; sponsored-route register excludes EUSS and withdrawn/superseded visas. Profile document forms/history and searchable/filterable responsive table. Verified: migration/doc 7, API 14, sponsor browser/setup 2 and adjacent RTW browser/setup 2 pass; lint/types/generated API/production build pass.
 - [ ] **T7.3** Working-day calculator, change of circumstances, org changes
 - [ ] **T7.4** Reminders engine and register page
 - [ ] **T7.5** Compliance hub
