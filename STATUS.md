@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 01:14    Agent: Codex    Branch: dev    Commit: dd40a0c
+Updated: 2026-11-03 01:16    Agent: Codex    Branch: dev    Commit: 4ec5251
 State: IN PROGRESS
 
 ## Last completed
@@ -13,7 +13,7 @@ State: IN PROGRESS
   - [x] Employee document forms/history and sponsored employees table; web types/lint pass
   - [x] Browser scenario prepared for explicit save/upload, version/history, renewal/withdrawal and register
   - [ ] Affected browser checks and final verification
-- Resume note: Sponsor API 14 tests pass; UI/forms/register built and typechecked/linted. Next run affected Playwright sponsor-documents.spec.ts and rtw.spec.ts with UV_CACHE_DIR=/tmp/cmr-uv-cache, inspect failures before rerunning. Evidence uploads mocked only in browser; real services covered by API tests. No screenshots until Phase 7 gate.
+- Resume note: T7.2 sponsor production browser scenario passes (including mobile/axe). Adjacent RTW browser scenario failed at a desktop-grid locator while viewport was still 390px; corrected to mobile list, rerun only rtw.spec.ts. API 14 tests, web types/lint/generated API/build pass.
 
 
 ## Next tasks

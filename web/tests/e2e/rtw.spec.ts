@@ -125,7 +125,9 @@ test("Right to Work conditionals, explicit saves, evidence selection, correction
   await page.goto("/employees?rtw=Verified");
   await expect(page.getByText("Nobody matches", { exact: true })).toBeVisible();
   await page.goto("/employees?rtw=NeedsAttention");
-  await expect(page.getByRole("grid").getByText("Rita Shah")).toBeVisible();
+  await expect(
+    page.getByRole("list", { name: "Employees", exact: true }).getByText("Rita Shah"),
+  ).toBeVisible();
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto("/employees/" + id);
   await page.getByRole("tab", { name: "Right to Work", exact: true }).click();
