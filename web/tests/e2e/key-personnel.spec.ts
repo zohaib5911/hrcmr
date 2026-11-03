@@ -121,7 +121,6 @@ for (const colorScheme of ["light", "dark"] as const) {
           .first()
           .click();
         await expect(page.getByRole("dialog")).toBeVisible();
-        await page.waitForTimeout(500);
         await audit(page, `${colorScheme} key personnel sheet ${width}px`, { modal: true });
       });
     }

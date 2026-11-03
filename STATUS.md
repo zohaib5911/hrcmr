@@ -1,19 +1,18 @@
 # STATUS
-Updated: 2026-11-03 08:57, Europe/London    Agent: Codex    Branch: dev    Commit: a9fcb5f
+Updated: 2026-11-03 08:58, Europe/London    Agent: Codex    Branch: dev    Commit: 024625f
 State: IN PROGRESS
 
 ## Last completed
-- F7.5 — Python and SQL RTW status parity for 225 identical outcome/expiry/evidence cases in three timezones plus absent checks
+- F7.6 — remove fixed waits from all five functional specs (audit already awaits animations); stub Redis in error tests
 
 ## Current task
-- F7.6 — deterministic browser waits and Redis-isolated error tests
+- F7.7 — refresh PROGRESS header and T7.4–T7.6 entries after affected browser run
   - [ ] Implement and verify (one commit per audit fix)
-- Resume note: F7.5 complete. Next: F7.6 — deterministic browser waits and Redis-isolated error tests. Audit file docs/audits/phase7.md absent from synced dev; user asked for contents, using queued STATUS findings.
+- Resume note: F7.6 complete. Next: F7.7 — refresh PROGRESS header and T7.4–T7.6 entries after affected browser run. Audit file docs/audits/phase7.md absent from synced dev; user asked for contents, using queued STATUS findings.
 
 ## Next tasks
 
 F7.1 Step-up on role change, admin/HR-admin invite, and two-step policy change (+ tests)   [high]
-F7.6 Replace waitForTimeout in 4 functional specs; stub Redis in test_errors_and_request_id   [low]
 F7.7 Update PROGRESS header and T7.4–T7.6 entries   [low]
 (Ongoing, not a task: move shared helpers into employees/access.py and core/dates.py only when a task already touches that code.)
  implement supplied findings before Phase 8.
@@ -22,9 +21,10 @@ F7.7 Update PROGRESS header and T7.4–T7.6 entries   [low]
 
 
 
+
 ## Health
 - CI on dev: last Phase 7 PR green; no dev push workflow. CI on main: previously pending, not rechecked.
-- Local checks run: RTW parity 3 pass (225 combinations); ruff/mypy pass
+- Local checks run: error tests 24 pass; ruff/mypy and web lint/types pass; affected Playwright next
 
 ## Issues / suggestions
 - Remove cooldown exceptions once safe: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.

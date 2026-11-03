@@ -4,6 +4,7 @@ import json
 import re
 from collections.abc import AsyncIterator
 from typing import Any
+from unittest.mock import AsyncMock
 
 import httpx
 import pytest
@@ -16,6 +17,14 @@ from app.core.errors import ConflictError, ForbiddenError, NotFoundError, PlanRe
 from app.main import create_app
 from tests.support import build_settings
 from tests.test_config import DEPLOYED_EXTRAS
+
+
+@pytest.fixture(autouse=True)
+def _redis_without_network(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Error-envelope tests need no Redis server or background cache connection."""
+    redis = AsyncMock()
+    redis.get.return_value = None
+    monkeypatch.setattr("app.main.create_redis", lambda settings: redis)
 
 
 class Item(BaseModel):

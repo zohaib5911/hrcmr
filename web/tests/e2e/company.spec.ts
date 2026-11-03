@@ -43,7 +43,6 @@ for (const colorScheme of ["light", "dark"] as const) {
         await open(page);
         await page.getByRole("button", { name: /^Details/ }).click();
         await expect(page.getByRole("dialog", { name: "Company details" })).toBeVisible();
-        await page.waitForTimeout(500);
         await audit(page, `${colorScheme} company details ${width}px`, { modal: true });
       });
     }

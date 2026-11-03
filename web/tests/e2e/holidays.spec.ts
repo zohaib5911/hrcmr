@@ -122,7 +122,6 @@ for (const colorScheme of ["light", "dark"] as const) {
       await open(page, "/holiday-management?year=2026", "Holidays");
       await page.getByRole("button", { name: "Add closure" }).first().click();
       await expect(page.getByRole("dialog")).toBeVisible();
-      await page.waitForTimeout(500);
       await audit(page, `${colorScheme} closure sheet`, { modal: true });
     });
   });
