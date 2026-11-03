@@ -7,6 +7,7 @@ import { useRef, useState } from "react";
 import { PageHeader } from "@/components/app/page-header";
 import { useCan } from "@/components/app/session-context";
 import { Alert } from "@/components/ui/alert";
+import { SponsorDocumentsTab } from "@/components/employees/sponsor-documents-tab";
 import { RTWTab } from "@/components/employees/rtw-tab";
 import { RTWChip } from "@/components/employees/rtw-chip";
 import { ProfilePhoto } from "@/components/employees/profile-photo";
@@ -105,6 +106,7 @@ export function ProfilePage({
           <TabsTrigger value="leave">Leave</TabsTrigger>
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
           {mayReadRtw && <TabsTrigger value="rtw">Right to Work</TabsTrigger>}
+          {mayReadRtw && <TabsTrigger value="sponsor">Sponsor compliance</TabsTrigger>}
           <TabsTrigger value="documents">Documents</TabsTrigger>
           <TabsTrigger value="learning">Learning</TabsTrigger>
           {can("compliance.audit.read") && <TabsTrigger value="activity">Activity</TabsTrigger>}
@@ -121,6 +123,11 @@ export function ProfilePage({
         {mayReadRtw && (
           <TabsContent value="rtw" className="pt-6">
             <RTWTab id={profile.id} onChanged={() => router.refresh()} />
+          </TabsContent>
+        )}
+        {mayReadRtw && (
+          <TabsContent value="sponsor" className="pt-6">
+            <SponsorDocumentsTab id={profile.id} onChanged={() => router.refresh()} />
           </TabsContent>
         )}
         <TabsContent value="documents" className="pt-6">

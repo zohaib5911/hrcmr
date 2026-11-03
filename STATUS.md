@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 01:11    Agent: Codex    Branch: dev    Commit: ebed8eb
+Updated: 2026-11-03 01:14    Agent: Codex    Branch: dev    Commit: dd40a0c
 State: IN PROGRESS
 
 ## Last completed
@@ -10,9 +10,10 @@ State: IN PROGRESS
   - [x] Read T7.2/6.4/8.5 requirements and nearest modules; ruff/mypy/web types pass, T7.1 API baseline 15 pass
   - [x] Sponsor document model/migration 0016, encrypted references, versions and withdrawal/renewal; 7 migration/doc tests pass
   - [x] Scoped API, visa routes and sponsored employees query/tests; 14 sponsor integration tests pass
-  - [ ] Employee document forms and sponsored employees table
+  - [x] Employee document forms/history and sponsored employees table; web types/lint pass
+  - [x] Browser scenario prepared for explicit save/upload, version/history, renewal/withdrawal and register
   - [ ] Affected browser checks and final verification
-- Resume note: Sponsor API ready: add/new version, renewal planning, withdrawal, clean evidence and sponsored-register routes; 14 integration tests pass; ruff/mypy/generated API/web types pass. Next employee sponsor document UI and sponsored-employees page. Reference/CoS fields stay masked and blank version fields preserve stored values. Sponsor PDF/CoC integration remains T7.6.
+- Resume note: Sponsor API 14 tests pass; UI/forms/register built and typechecked/linted. Next run affected Playwright sponsor-documents.spec.ts and rtw.spec.ts with UV_CACHE_DIR=/tmp/cmr-uv-cache, inspect failures before rerunning. Evidence uploads mocked only in browser; real services covered by API tests. No screenshots until Phase 7 gate.
 
 
 ## Next tasks
@@ -27,6 +28,7 @@ State: IN PROGRESS
 - Dependabot #5 pending green CI; avoid unrelated changes.
 
 ## Strategy / decisions taken
+- T7.2 exposes the document section of Sponsor compliance now so the feature is usable; T7.6 adds its PDF/CoC integration and notifications.
 - Sponsor metadata uses employee.rtw.read/write (own-read allowed, own-file uploads alone cannot change compliance metadata; auditors can read); register uses compliance.overview.read. Renewal target/notes never change expiry. Sponsor references/CoS masked, sponsored salary permission scoped.
 - RTW priority: not recorded, failed/pending, expired, missing/unclean evidence, expiring (<=60 days), verified; dates use company timezone. Share codes never returned/exported in full. Historical corrections stay historical; Company Admin can correct, HR Admin can record only. Candidate validation/routes arrive in Phase 11.
 - Browser file upload uses fixtures because e2e API has no storage config; real upload/scanning/binding/download tests use local services. Mobile checks wait for responsive cards after resize.
