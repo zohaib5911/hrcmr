@@ -1,34 +1,28 @@
 # STATUS
-Updated: 2026-11-03 09:03, Europe/London    Agent: Codex    Branch: dev    Commit: 3c531a4
+Updated: 2026-11-03 09:16, Europe/London    Agent: Codex    Branch: dev    Commit: 46e5cdf
 State: IN PROGRESS
 
 ## Last completed
-- F7.7 — refresh progress header and complete T7.4–T7.6 implementation/verification entries
+- T8.1 — verified leave defaults, tenant configuration API and settings UI
+- F7.1–F7.7 — each completed in its own commit, pushed before T8.1
 
 ## Current task
-- T8.1 — leave types and settings
-  - [x] Verify twelve seed rules against GOV.UK; baseline settings/RBAC checks
-  - [x] Models, frozen migration/backfill and signup seeds
-  - [x] Scoped API/settings validation, audit and regression tests
-  - [x] Leave settings UI, CRUD sheets and navigation
-  - [ ] Affected browser/API/static checks and task completion
-- Resume note: Production workflow passed seeded guidance, date validation/persistence and type add/edit/archive. Mobile axe found guidance buttons aria-label missing visible word View; fixed accessible names and corresponding locator. Rerun focused browser next.
+- T8.1 — leave types and settings complete
+  - [x] Twelve GOV.UK-verified seeds with stored source/date/original summaries
+  - [x] Model, frozen migration/backfill and transactional signup seeds
+  - [x] Scoped/audited type CRUD/archive and recurring-date/settings validation
+  - [x] /leave/settings UI, guidance, type sheets and discovery from Leave
+  - [x] Affected API, schema, static and production browser checks
+- Resume note: T8.1 complete. Next authorized plan task is T8.2 ledger and balance computation; no T8.2 work started. Sources: data/leave/SOURCES.md. Browser workflow passes date validation/persistence, guidance links, add/duplicate/edit/archive and 390/1280 light/dark axe. Phase 8 gate remains after T8.5.
 
 ## Next tasks
-
-F7.1 Step-up on role change, admin/HR-admin invite, and two-step policy change (+ tests)   [high]
-(Ongoing, not a task: move shared helpers into employees/access.py and core/dates.py only when a task already touches that code.)
- implement supplied findings before Phase 8.
-
-
-
-
-
-
+- T8.2 — ledger and balance computation
+- T8.3 — leave requests/conflicts/approvals
+- T8.4 — leave workspaces and employee tab
 
 ## Health
-- CI on dev: last Phase 7 PR green; no dev push workflow. CI on main: previously pending, not rechecked.
-- Local checks run: affected browser/setup 63 pass; F7.1–F7.6 API/static checks pass; progress entries reviewed
+- CI on dev: no push workflow; last Phase 7 PR all-green. CI on main: prior post-merge run was pending; not rechecked this session.
+- Local checks run: affected leave/RBAC/auth 50 pass; schema/guards/contracts 21 pass; API ruff/format/mypy pass (235 files); web lint/types/generated contract pass; web unit 777 pass; leave browser/setup 6 pass. Audit fixes: access12, auth18 plus flow/migrations30, RBAC22 (189 routes/168 protected operations × six roles), exports8, RTW parity3 (225 combinations), error24 and affected browser63 pass.
 
 ## Issues / suggestions
 - Remove cooldown exceptions once safe: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.
@@ -49,5 +43,5 @@ F7.1 Step-up on role change, admin/HR-admin invite, and two-step policy change (
 - AI hidden without ANTHROPIC_API_KEY; Ask Mady deferred.
 
 ## Owner actions needed
-- Supply missing docs/audits/phase7.md contents or correct path (requested).
+- docs/audits/phase7.md was absent from synced dev; queued findings in STATUS were implemented. Missing file contents/correct path requested; supply it if it contains additional acceptance details.
 - Existing non-blocking setup: protect main and enable private vulnerability reporting.

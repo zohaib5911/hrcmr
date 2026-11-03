@@ -127,3 +127,4 @@
 2026-11-03 09:12 | Codex | T8.1 | leave settings/forms/guidance UI and browser workflow ready; lint/types pass, API schema21 and web777 pass | next targeted production browser and finish
 2026-11-03 09:13 | Codex | T8.1 | production UI reached seeded settings; narrowed ambiguous year-field browser selector | next targeted browser rerun
 2026-11-03 09:15 | Codex | T8.1 | production CRUD/settings workflow passes; corrected mobile guidance accessible-name mismatch from axe | next final focused browser run
+2026-11-03 09:16 | Codex | T8.1 | complete: source-backed defaults, migration/signup seeds, scoped audited settings/CRUD and UI; API50/schema21/web777/browser6 pass, static clean | next handover; T8.2 queued
