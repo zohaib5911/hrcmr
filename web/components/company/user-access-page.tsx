@@ -113,7 +113,11 @@ type Open =
   | { kind: "invite" }
   | { kind: "employee"; user: AccessUser }
   | { kind: "role"; user: AccessUser }
-  | { kind: "confirm"; action: "suspend" | "reactivate" | "reset" | "cancel"; user: AccessUser };
+  | {
+      kind: "confirm";
+      action: "suspend" | "reactivate" | "reset" | "cancel" | "resend";
+      user: AccessUser;
+    };
 
 /** `/company/users` (plan 8.15): everyone who can sign in, with filters, invitations and row actions. */
 export function UserAccessPage({
@@ -154,7 +158,9 @@ export function UserAccessPage({
   }
 
   function choose(action: RowAction, user: AccessUser) {
-    if (action === "resend") void resend(user);
+    if (action === "resend" && (user.role === "company_admin" || user.role === "hr_admin"))
+      setOpen({ kind: "confirm", action, user });
+    else if (action === "resend") void resend(user);
     else if (action === "role") setOpen({ kind: "role", user });
     else setOpen({ kind: "confirm", action, user });
   }

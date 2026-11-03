@@ -25,7 +25,7 @@ def _notes(table: Table, name: str) -> str:
     notes: list[str] = []
     if column.primary_key:
         notes.append("primary key")
-    notes += [f"references `{fk.column.table.name}`" for fk in column.foreign_keys]
+    notes += sorted(f"references `{fk.column.table.name}`" for fk in column.foreign_keys)
     if column.unique:
         notes.append("unique")
     return ", ".join(notes)

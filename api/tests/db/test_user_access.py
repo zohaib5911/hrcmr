@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import os
 import uuid
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
 from typing import Any
 
 import httpx
@@ -246,6 +246,7 @@ async def test_who_may_invite_and_whom(rig: dict[str, Any]) -> None:
         await hr.post(f"{API}/users/invitations", json={**INVITE, "role": "company_admin"})
     ).status_code == 403
     assert (await hr.post(f"{API}/users/invitations", json=INVITE)).status_code == 201
+    await _confirm(rig, admin)
     assert (
         await admin.post(f"{API}/users/invitations", json={**INVITE, "role": "company_admin"})
     ).status_code == 201
@@ -278,6 +279,7 @@ async def test_role_changes_and_the_last_admin_rule(rig: dict[str, Any]) -> None
     assert (
         await hr.patch(f"{API}/users/{emp['id']}/role", json={"role": "recruiter"})
     ).status_code == 403
+    await _confirm(rig, admin)
     # The only Company Admin cannot step down.
     stepping_down = await admin.patch(f"{API}/users/{me['id']}/role", json={"role": "hr_admin"})
     assert stepping_down.status_code == 409
@@ -294,6 +296,7 @@ async def test_role_changes_and_the_last_admin_rule(rig: dict[str, Any]) -> None
         await admin.patch(f"{API}/users/{emp['id']}/role", json={"role": "employee"})
     ).status_code == 403
     assert (await admin.get(f"{API}/users")).status_code == 200  # an HR Admin may still read
+    await _confirm(rig, hr)
     assert (
         await hr.patch(f"{API}/users/{uuid.uuid4()}/role", json={"role": "employee"})
     ).status_code == 404
@@ -366,6 +369,7 @@ async def test_the_two_step_policy_is_read_changed_audited_and_counted(rig: dict
         await admin.put(f"{API}/security/two-step", json={"policy": "bogus"})
     ).status_code == 422
 
+    await _confirm(rig, admin)
     # Not yet set up by the admin: the policy would cover them too.
     admins_only = (await admin.put(f"{API}/security/two-step", json={"policy": "admins"})).json()
     assert admins_only == {"policy": "admins", "to_set_up": 1}
@@ -477,3 +481,61 @@ async def test_employee_links_are_unique_scoped_and_audited(rig: dict[str, Any])
         )
     assert events.count("employee.user_linked") == 2
     assert events.count("employee.user_unlinked") == 1
+
+
+async def _confirm(rig: dict[str, Any], client: httpx.AsyncClient) -> None:
+    token = client.cookies.get("brand_session")
+    data = await rig["sessions"].get(token)
+    await rig["sessions"].mark_step_up(token, data)
+
+
+@pytest.mark.parametrize("expired", [False, True])
+async def test_sensitive_access_changes_require_fresh_step_up(
+    rig: dict[str, Any],
+    expired: bool,
+) -> None:
+    from dataclasses import replace
+    from datetime import timedelta
+
+    from app.modules.auth.sessions import utcnow
+
+    admin = await rig["person"]("company_admin", rig["a"])
+    await rig["person"]("employee", rig["a"])
+    target = _row((await admin.get(f"{API}/users")).json(), role="employee")["id"]
+    # Make a privileged invitation while confirmed, then remove/age that confirmation.
+    await _confirm(rig, admin)
+    invite = await admin.post(f"{API}/users/invitations", json={**INVITE, "role": "hr_admin"})
+    assert invite.status_code == 201
+    token = admin.cookies.get("brand_session")
+    data = await rig["sessions"].get(token)
+    await rig["sessions"]._save(
+        token,
+        replace(
+            data,
+            step_up_at=(utcnow() - timedelta(minutes=11)).isoformat() if expired else None,
+        ),
+    )
+    before = await _audit_actions(rig)
+    calls: list[Callable[[], Awaitable[httpx.Response]]] = [
+        lambda: admin.patch(f"{API}/users/{target}/role", json={"role": "recruiter"}),
+        lambda: admin.post(f"{API}/users/invitations/{invite.json()['id']}/resend"),
+        lambda: admin.put(f"{API}/security/two-step", json={"policy": "admins"}),
+    ]
+    for role in ("company_admin", "hr_admin"):
+        response = await admin.post(f"{API}/users/invitations", json={**INVITE, "role": role})
+        assert response.status_code == 403
+        assert response.json()["error"]["code"] == "STEP_UP_REQUIRED"
+    for call in calls:
+        response = await call()
+        assert response.status_code == 403
+        assert response.json()["error"]["code"] == "STEP_UP_REQUIRED"
+    assert await _audit_actions(rig) == before
+    assert _row((await admin.get(f"{API}/users")).json(), id=target)["role"] == "employee"
+    assert (await admin.get(f"{API}/security/two-step")).json()["policy"] == "optional"
+    # Ordinary invitations still work; a fresh confirmation allows each protected mutation.
+    assert (
+        await admin.post(f"{API}/users/invitations", json={**INVITE, "email": "normal@example.com"})
+    ).status_code == 201
+    await _confirm(rig, admin)
+    for call in calls:
+        assert (await call()).status_code == 200

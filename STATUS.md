@@ -1,46 +1,41 @@
 # STATUS
-Updated: 2026-11-03 06:48    Agent: Codex    Branch: dev    Commit: 2a2ab62
+Updated: 2026-11-03 12:58, Europe/London    Agent: Codex    Branch: dev    Commit: 279467e
 State: IN PROGRESS
 
 ## Last completed
-- T7.6 — Sponsor record PDF download and live compliance bell with private messages/read actions
+- T8.5 — audited reviewed carry-over, immutable closes and closed-year guards
 
 ## Current task
-- Phase 7 gate — full verification and review
-  - [x] T7.1–T7.6 implementation and affected checks complete
-  - [x] Full API (479 pass, two failures fixed/15 affected pass) and web static/unit/guard checks
-  - [x] Full browser suite: 398 pass/148 skips; four stale shell assertions updated
-  - [x] Affected shell/setup 68 pass
-  - [x] Final hub/screenshots 6 pass; 36 images reviewed; mobile queue fixed
-  - [x] Save/review 36 Phase 7 screenshots at 390 and 1280 px
-  - [ ] Write five-line phase summary, open dev → main PR, merge only with all CI green
-  - [ ] Set BLOCKED — audit requested and stop
-- Resume note: Local Phase 7 gate complete. API full 479 pass/two failures fixed with 15 affected pass; lint/format/mypy clean. Web 777 + node guards 32 pass; types/lint/generated client pass. Full Playwright 398 pass/148 screenshot skips/four stale shell expectations fixed, shell/setup rerun 68 pass. Final hub/screenshots 6 pass, 36 images reviewed. PR #13 https://github.com/zohaib5911/hrcmr/pull/13 open. CI Semgrep flagged fixed-constant migration SQL; changed to identical literals, migrations/dossier/reporting 14 pass. Next wait for ALL CI green, merge with --merge --auto, sync dev and set BLOCKED — audit requested; do not start Phase 8.
+- Phase 8 gate — leave and holidays
+  - [x] Full API/static checks
+  - [x] Full web/unit/browser checks
+  - [x] 390/1280 light/dark screenshots and visual review
+  - [ ] Five-line summary, CI-green PR dev → main and merge
+- Resume note: Local gate complete. Full API590+doc1/affected55; web776+shell19/nav22; scripts32; browser407+corrected four cases; screenshot/setup5 (48 images reviewed); static/build/contract pass. Five-line summary recorded. PR #14 open (https://github.com/zohaib5911/hrcmr/pull/14). Wait all CI checks green on latest head, fix any failures; merge with gh pr merge 14 --merge --auto, sync clean dev and continue T9.1.
 
 ## Next tasks
-- Phase 7 PR/CI/merge; mandatory owner audit before Phase 8
+- Phase 8 gate
+- T9.1 — attendance workspace, records and filters
+- T9.2 — import, bulk entry and exports
 
 ## Health
-- CI on dev: green 41514098397 (Phase 6); Phase 7 not yet run in CI. CI on main: green 41516923634.
-- Local checks: T7.3 calculator 12, reporting/holiday API 13 and migration/doc 7 pass; reporting/setup browser 3 and holiday/setup browser 14 pass. T7.2 migration/doc 7, sponsor API 14, sponsor/setup browser 2 and adjacent RTW/setup 2 pass. All affected lint/types/generated API/production builds pass. Full suite/screenshots next at Phase 7 gate.
-
+- CI on dev: Phase 8 PR #14 CI pending; prior audit/T8.1 green (41610450677). CI on main: not rechecked.
+- Local checks run: API590 plus corrected generated-doc1/affected55 pass; web776 plus corrected shell19/nav22, guard scripts32 pass; browser407 plus four corrected cases and screenshot/setup5 pass. Python/web static, production build and generated contract clean. 48 screenshots saved/reviewed.
 
 ## Issues / suggestions
-- Remove cooldown exceptions once safe: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.
-- Dependabot #5 pending green CI; avoid unrelated changes.
+- Focused pytest invocation must group all tests/db paths before tests outside that directory; interleaving caused a missing database fixture, grouped rerun115 and notification alone1 pass.
+- Remove dependency cooldown exceptions when due: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.
+- docs/audits/phase7.md absent from synced dev; F7.1–F7.7 queued findings were implemented and confirmed green in CI.
 
 ## Strategy / decisions taken
-- Dossier: 8 GOV.UK publication/service links checked 2026-11-03; official HTTPS host only, no server fetch of edited URLs. Global reference links have platform-only writes, own content audit visibility and mandatory MFA; other platform permission policies deferred to Phase 17. Original checklist uses current official guide with source/date attribution.
-- T7.5 readiness: profile needs legal/contact/sector/default address plus conditional sponsor-history details; company documents means at least one current clean upload (18 types are optional by applicability). Coverage valid = verified or expiring; recorded-check readiness is separate. No reportable changes is Not applicable; prompt-report replacements carry no invented deadline.
-- Reviewed sends require a linked active verified account and use that account email; message is readable in own My Documents. The closest outstanding threshold controls Due now, including source snooze; sending it cancels older unsent thresholds as covered. Own-profile contact permission cannot reach HR create/lifecycle/48h endpoints.
-- T7.4: human review/send only; email outbox, notification and sent/audit state commit together, generic existing reminder_nudge email. Add RTW target to reminder schema for explicit phase scenario. Daily owner job may refresh unreported derived deadline/calendar fields while entered snapshots and reported records stay immutable.
-- T7.3 verified sources: GOV.UK sponsor Part 3 (C1.13/C2.3), glossary and bank-holidays page, checked 2026-11-03. AO/Key Contact replacements get prompt-report status, other org changes standard 20 working days. Regional calendar data must cover the requested dates; do not silently ignore missing bank holidays.
-- T7.2 exposes the document section of Sponsor compliance now so the feature is usable; T7.6 adds its PDF/CoC integration and notifications.
-- Sponsor metadata uses employee.rtw.read/write (own-read allowed, own-file uploads alone cannot change compliance metadata; auditors can read); register uses compliance.overview.read. Renewal target/notes never change expiry. Sponsor references/CoS masked, sponsored salary permission scoped.
-- RTW priority: not recorded, failed/pending, expired, missing/unclean evidence, expiring (<=60 days), verified; dates use company timezone. Share codes never returned/exported in full. Historical corrections stay historical; Company Admin can correct, HR Admin can record only. Candidate validation/routes arrive in Phase 11.
-- Browser file upload uses fixtures because e2e API has no storage config; real upload/scanning/binding/download tests use local services. Mobile checks wait for responsive cards after resize.
-- Employee linking requires rbac.role.assign; hierarchy CRUD deferred to T12.1. PDF HTML escaped, external resources blocked, sensitive numbers masked, salary permission scoped.
+- T8.5: preview is read-only; commit only after year ends and pending requests resolve. Reconcile closing allowance, carry nonnegative remaining up to type limit (reasoned override may exceed limit up to remaining), expire positive source balances and freeze source-year mutations. Negative fixed-allowance debt requires a reviewed adjustment before closing; unbounded types retain usage history without treating it as allowance debt.
+- T8.4: add missing leave.balance.read to plan/matrix so Company Admin/HR/Auditor can read company balances; existing own/reports remain scoped. Read projections combine immutable ledger with current managed allowance/calendar deltas; GET never writes. Manual actions reconcile and audit atomically.
+- T8.2: balances are sums of signed immutable movements. Corrections append deltas; manual movements survive standard reconciliation. Employee row serializes writers; operation keys preserve retries, including no-op Set. Caller owns audit/commit transaction.
+- Units are standard company days (weekly company hours / working weekdays). Personal shorter days reduce both entitlement and charge. Personal days inherit weekday hours unless overridden; new working weekdays use the company average. Exact fractions avoid rounding drift; entitlement/calendar totals round up once to 0.01 day.
+- Regular-pattern entitlement uses inclusive employment calendar days; assignment end is exclusive. Monthly posts completed leave-months, with partial employment months pro-rata. Null allowances are not zero. Regular automatic calculation rejects zero-hours/casual assignments; reviewed manual grants are available. Sources/policy: data/leave/SOURCES.md.
+- Explicit bank_holidays_included flag seeded true for Annual Leave and exposed in type settings. Regional non-working bank holidays and annual-deducting closures reserve scheduled personal days across the leave year, with overlaps charged once. Missing regional calendar year coverage fails explicitly. Reconciliation may record a negative balance to reflect corrected entitlements/reservations; manual deductions/sets obey the company negative-balance policy.
+- T8.3: advisory minimum staffing warning when a proposed absence leaves nobody in the department; no blocking staffing rule is invented. Shift conflicts connect in Phase 9 once shifts exist. Request counter excludes all closures and non-working regional bank holidays, while ledger reserves annual deductions separately. Re-check snapshots before approval; changed dates/patterns require cancellation/resubmission.
 - AI hidden without ANTHROPIC_API_KEY; Ask Mady deferred.
 
 ## Owner actions needed
-- None blocking. Protect main and enable private vulnerability reporting.
+- None. Existing non-blocking setup: protect main and enable private vulnerability reporting.

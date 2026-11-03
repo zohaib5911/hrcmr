@@ -133,7 +133,6 @@ for (const colorScheme of ["light", "dark"] as const) {
           await audit(page, `${colorScheme} ${heading} ${width}px`);
           await page.getByRole("button", { name: /^Add / }).first().click();
           await expect(page.getByRole("dialog")).toBeVisible();
-          await page.waitForTimeout(500);
           await audit(page, `${colorScheme} ${heading} sheet ${width}px`, { modal: true });
         });
       }

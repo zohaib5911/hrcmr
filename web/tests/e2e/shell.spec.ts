@@ -299,7 +299,17 @@ test.describe("the toolbar", () => {
 
 // Pages that have been built: they still have their heading, title and place in the menu, but no
 // longer the "on its way" empty state of a page that has not been built yet.
-const BUILT = new Set(["company", "users", "employees", "compliance", "reminders", "my-documents"]);
+const BUILT = new Set([
+  "company",
+  "users",
+  "employees",
+  "compliance",
+  "reminders",
+  "my-documents",
+  "leave",
+  "my-leave",
+  "my-approvals",
+]);
 
 test.describe("every page in the sidebar", () => {
   for (const item of NAV_ITEMS) {

@@ -629,7 +629,7 @@ Define these as CSS variables in `web/app/globals.css`, with light and dark valu
 
 Store the permissions in `api/app/core/rbac_matrix.py` as a constant, with one source of truth. The UI reads `GET /auth/me.permissions`.
 
-### 7.1 Full permission list (Company Admin has all 109 + the new ones marked ★)
+### 7.1 Full permission list (Company Admin has all 110 + the new ones marked ★)
 ```
 attendance.record.read | attendance.record.read_own | attendance.record.write | attendance.record.write_own
 attendance.timesheet.approve_reports
@@ -647,7 +647,7 @@ holiday.calendar.read | holiday.calendar.write | holiday.type.read | holiday.typ
 learning.assignment.complete_own | learning.assignment.read | learning.assignment.read_own
 learning.assignment.read_reports | learning.assignment.write
 learning.certificate.read | learning.certificate.read_own | learning.course.read
-leave.accrual.write | leave.balance.read_own | leave.balance.read_reports
+leave.accrual.write | leave.balance.read | leave.balance.read_own | leave.balance.read_reports
 leave.config.read | leave.config.write
 leave.request.approve | leave.request.approve_reports | leave.request.create | leave.request.create_own
 leave.request.read | leave.request.read_own | leave.type.read | leave.type.write

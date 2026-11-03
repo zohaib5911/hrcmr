@@ -12,8 +12,8 @@ from sqlalchemy import select
 from app.core.errors import AppError, ConflictError, ForbiddenError
 from app.core.totp import generate_secret, provisioning_uri
 from app.db.session import GlobalDb  # noqa: TC001  (FastAPI reads the annotation at run time)
-from app.modules.audit.service import AuditContext, record
 from app.modules.auth import accounts
+from app.modules.auth.audit import security_event
 from app.modules.auth.deps import (
     Auth,
     Caller,
@@ -63,23 +63,14 @@ async def _audit(
     db: GlobalDb, request: Request, caller: Caller, action: str, **details: object
 ) -> None:
     """Note a security change on the company the person is working in (if they are in one)."""
-    company_id = caller.company_id
-    if company_id is None:
-        return
-    await db.company_for_this_transaction(company_id)
-    await record(
+    await security_event(
         db,
-        AuditContext(
-            company_id=company_id,
-            actor_user_id=caller.user_id,
-            ip=client_ip(request),
-            user_agent=user_agent(request),
-            request_id=str(getattr(request.state, "request_id", "")) or None,
-        ),
         action,
-        entity_type="user",
-        entity_id=caller.user_id,
-        after=dict(details) or None,
+        user_id=caller.user_id,
+        company_id=caller.company_id,
+        ip=client_ip(request),
+        user_agent=user_agent(request),
+        request_id=str(getattr(request.state, "request_id", "")) or None,
     )
 
 
@@ -155,15 +146,37 @@ async def login(
             db, email=email, password=body.password, ip=ip, user_agent=user_agent(request)
         )
     except (InvalidCredentialsError, RateLimitedError):
+        await security_event(
+            db,
+            "auth.login.failed",
+            ip=ip,
+            user_agent=user_agent(request),
+            request_id=request.state.request_id,
+        )
         await db.commit()  # keep the failure count and any lock
         raise
+    if not outcome.mfa_challenge:
+        await security_event(
+            db,
+            "auth.login.succeeded",
+            user_id=uuid.UUID(outcome.session.user_id),
+            company_id=uuid.UUID(outcome.session.company_id)
+            if outcome.session.company_id
+            else None,
+            ip=ip,
+            user_agent=user_agent(request),
+            request_id=request.state.request_id,
+        )
     await db.commit()
     return await _login_response(db, auth, response, outcome)
 
 
 @router.post("/logout", status_code=204, summary="Sign out")
-async def logout(response: Response, db: GlobalDb, auth: Auth, caller: SessionCaller) -> None:
+async def logout(
+    request: Request, response: Response, db: GlobalDb, auth: Auth, caller: SessionCaller
+) -> None:
     await auth.sessions.revoke(db, caller.token, caller.session)
+    await _audit(db, request, caller, "auth.logout")
     await db.commit()
     clear_session_cookie(response, auth.settings)
 
@@ -189,8 +202,18 @@ async def forgot_password(
 @router.post(
     "/reset-password", status_code=204, summary="Choose a new password from an e-mailed link"
 )
-async def reset_password(body: ResetPasswordRequest, db: GlobalDb, auth: Auth) -> None:
-    await accounts.reset_password(db, auth, body.token, body.new_password)
+async def reset_password(
+    body: ResetPasswordRequest, request: Request, db: GlobalDb, auth: Auth
+) -> None:
+    await accounts.reset_password(
+        db,
+        auth,
+        body.token,
+        body.new_password,
+        ip=client_ip(request),
+        user_agent=user_agent(request),
+        request_id=request.state.request_id,
+    )
 
 
 @router.post("/change-password", summary="Change your password")
@@ -284,6 +307,7 @@ async def mfa_challenge(
     auth: Auth,
     caller: SessionCaller,
 ) -> MeResponse:
+    recovery_count = len(caller.user.recovery_codes_hash)
     try:
         token, data = await auth.auth.complete_mfa(
             db,
@@ -294,8 +318,12 @@ async def mfa_challenge(
             user_agent=user_agent(request),
         )
     except AppError:
+        await _audit(db, request, caller, "auth.login.failed")
         await db.commit()  # a used recovery code or a spent attempt is kept
         raise
+    if len(caller.user.recovery_codes_hash) < recovery_count:
+        await _audit(db, request, caller, "auth.recovery_code.used")
+    await _audit(db, request, caller, "auth.login.succeeded")
     await db.commit()
     _cookie(auth, response, token, data.expires_at)
     return await _me(db, auth, token)
@@ -332,30 +360,43 @@ async def mfa_disable(request: Request, db: GlobalDb, auth: Auth, caller: Signed
 
 
 @router.post("/mfa/recovery-codes", summary="Make a new set of recovery codes")
-async def mfa_recovery_codes(db: GlobalDb, auth: Auth, caller: SignedIn) -> RecoveryCodesResponse:
+async def mfa_recovery_codes(
+    request: Request, db: GlobalDb, auth: Auth, caller: SignedIn
+) -> RecoveryCodesResponse:
     require_step_up(caller.session)
     if not caller.user.mfa_enabled:
         raise ConflictError("Turn on two-step verification first.")
     codes = auth.auth.regenerate_recovery_codes(caller.user)
+    await _audit(db, request, caller, "auth.recovery_codes.regenerated")
     await db.commit()
     return RecoveryCodesResponse(recovery_codes=codes)
 
 
 @router.post("/step-up", summary="Confirm it is you again, for a sensitive action")
 async def step_up(
-    body: StepUpRequest, response: Response, db: GlobalDb, auth: Auth, caller: SignedIn
+    body: StepUpRequest,
+    request: Request,
+    response: Response,
+    db: GlobalDb,
+    auth: Auth,
+    caller: SignedIn,
 ) -> MeResponse:
     if (body.password is None) == (body.code is None):
         raise AppError(
             "BAD_REQUEST", "Give either your password or a code.", status_code=422, field="password"
         )
+    recovery_count = len(caller.user.recovery_codes_hash)
     try:
         data = await auth.auth.step_up(
             db, token=caller.token, data=caller.session, password=body.password, code=body.code
         )
     except AppError:
+        await _audit(db, request, caller, "auth.step_up.failed")
         await db.commit()
         raise
+    if len(caller.user.recovery_codes_hash) < recovery_count:
+        await _audit(db, request, caller, "auth.recovery_code.used")
+    await _audit(db, request, caller, "auth.step_up.succeeded")
     await db.commit()
     return await accounts.build_me(db, Caller(caller.token, data, caller.user))
 
@@ -460,6 +501,15 @@ async def switch_company(
         company_id=body.company_id,
         ip=client_ip(request),
         user_agent=user_agent(request),
+    )
+    await security_event(
+        db,
+        "auth.company.switched",
+        user_id=caller.user_id,
+        company_id=body.company_id,
+        ip=client_ip(request),
+        user_agent=user_agent(request),
+        request_id=request.state.request_id,
     )
     await db.commit()
     _cookie(auth, response, token, data.expires_at)

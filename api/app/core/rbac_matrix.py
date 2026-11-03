@@ -41,7 +41,7 @@ holiday.calendar.read holiday.calendar.write holiday.type.read holiday.type.writ
 learning.assignment.complete_own learning.assignment.read learning.assignment.read_own
 learning.assignment.read_reports learning.assignment.write
 learning.certificate.read learning.certificate.read_own learning.course.read
-leave.accrual.write leave.balance.read_own leave.balance.read_reports
+leave.accrual.write leave.balance.read leave.balance.read_own leave.balance.read_reports
 leave.config.read leave.config.write
 leave.request.approve leave.request.approve_reports leave.request.create leave.request.create_own
 leave.request.read leave.request.read_own leave.type.read leave.type.write

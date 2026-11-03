@@ -14,6 +14,7 @@ from tests.db.support import engine_for, temporary_database
 FUNCTIONS = {"uuid_generate_v7", "app_current_company_id", "set_updated_at"}
 # The identity migration (T2.1) adds these tables and these two functions.
 IDENTITY_TABLES = [
+    "attendance_records",
     "audit_events",
     "bank_holidays",
     "change_of_circumstances",
@@ -42,6 +43,10 @@ IDENTITY_TABLES = [
     "holiday_types",
     "invitations",
     "key_persons",
+    "leave_ledger",
+    "leave_requests",
+    "leave_types",
+    "leave_year_end_runs",
     "locations",
     "memberships",
     "notifications",
@@ -68,6 +73,8 @@ IDENTITY_FUNCTIONS = {
     "sponsor_documents_immutable",
     "compliance_changes_immutable",
     "reminders_immutable",
+    "leave_ledger_immutable",
+    "leave_year_end_immutable",
 }
 
 
@@ -156,3 +163,48 @@ def test_upgrade_works_on_a_database_that_was_provisioned_but_never_migrated() -
     with temporary_database(migrate=False) as db:
         command.upgrade(alembic_config(db.owner_url), "head")
         command.upgrade(alembic_config(db.owner_url), "head")  # running it twice is harmless
+
+
+def test_leave_defaults_backfill_existing_companies_without_changing_settings() -> None:
+    async def seed(url: str) -> None:
+        engine = engine_for(url, poolclass=NullPool)
+        try:
+            async with engine.begin() as connection:
+                await connection.execute(
+                    text(
+                        "insert into companies (name,slug,leave_year_start_month_day,allow_negative_leave_balance) values ('Existing','existing','04-06',true)"
+                    )
+                )
+        finally:
+            await engine.dispose()
+
+    async def verify(url: str) -> None:
+        engine = engine_for(url, poolclass=NullPool)
+        try:
+            async with engine.connect() as connection:
+                rows = (
+                    await connection.execute(
+                        text("select name,source_url,checked_on from leave_types")
+                    )
+                ).all()
+                assert len(rows) == 12
+                assert all(
+                    str(row[1]).startswith("https://www.gov.uk/") and str(row[2]) == "2026-11-03"
+                    for row in rows
+                )
+                assert (
+                    await connection.execute(
+                        text(
+                            "select leave_year_start_month_day,allow_negative_leave_balance from companies"
+                        )
+                    )
+                ).one() == ("04-06", True)
+        finally:
+            await engine.dispose()
+
+    with temporary_database(migrate=False) as db:
+        config = alembic_config(db.owner_url)
+        command.upgrade(config, "0020_auth_audit")
+        asyncio.run(seed(db.owner_url))
+        command.upgrade(config, "head")
+        asyncio.run(verify(db.owner_url))

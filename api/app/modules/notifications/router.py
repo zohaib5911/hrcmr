@@ -34,12 +34,12 @@ def _may_read_compliance(access: Access) -> bool:
 
 
 def _kinds(access: Access) -> tuple[str, ...]:
-    # Other personal notification kinds, preferences and digests arrive in T14.2.
-    return (
-        ("compliance.reminder_received", "compliance.reminders_due")
-        if _may_read_compliance(access)
-        else ("compliance.reminder_received",)
-    )
+    kinds: tuple[str, ...] = ("compliance.reminder_received", "leave.decision")
+    if _may_read_compliance(access):
+        kinds += ("compliance.reminders_due",)
+    if scope_for(access.role, "leave.request.approve") is not None:
+        kinds += ("leave.request_created",)
+    return kinds
 
 
 def _query(access: Access) -> Select[Notification]:

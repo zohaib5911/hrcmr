@@ -1,8 +1,10 @@
 "use client";
 
-import { BookOpen, CalendarDays, Clock } from "lucide-react";
+import { BookOpen, Clock } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BalancePanel } from "@/components/leave/balances";
+import { RequestList } from "@/components/leave/home";
 import { useCan } from "@/components/app/session-context";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -13,23 +15,14 @@ import { attempt, type Problem } from "@/lib/auth/request";
 
 type AuditPage = components["schemas"]["AuditPage"];
 
-/** Phase 8 replaces this shell with employee balances, requests and balance actions. */
 export function LeaveTab({ id }: { id: string }) {
   const can = useCan();
   return (
-    <div className="bg-elevated rounded-card shadow-e1">
-      <EmptyState
-        icon={CalendarDays}
-        title="Leave balances and requests"
-        description="Balances and requests will appear here when Leave is available."
-        action={
-          can("leave.request.read", "leave.request.read_own") ? (
-            <Button asChild variant="gray">
-              <Link href={"/leave?employee_id=" + id}>Open Leave</Link>
-            </Button>
-          ) : undefined
-        }
-      />
+    <div className="flex flex-col gap-6">
+      {can("leave.balance.read", "leave.balance.read_own", "leave.balance.read_reports") && (
+        <BalancePanel employeeId={id} />
+      )}
+      {can("leave.request.read", "leave.request.read_own") && <RequestList employeeId={id} />}
     </div>
   );
 }

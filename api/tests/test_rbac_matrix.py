@@ -25,11 +25,11 @@ def words(text: str) -> set[str]:
     return set(text.split())
 
 
-def test_the_list_has_109_permissions_plus_the_11_new_ones() -> None:
-    assert len(BASE_PERMISSIONS) == 109
+def test_the_list_has_110_permissions_plus_the_11_new_ones() -> None:
+    assert len(BASE_PERMISSIONS) == 110
     assert len(ADDED_PERMISSIONS) == 11
     assert not BASE_PERMISSIONS & ADDED_PERMISSIONS
-    assert len(PERMISSIONS) == 120
+    assert len(PERMISSIONS) == 121
 
 
 def test_there_are_six_tenant_roles_and_platform_permissions_are_kept_apart() -> None:

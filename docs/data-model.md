@@ -3,6 +3,34 @@
 Generated from the SQLAlchemy models by `python -m app.cli export-data-model`.
 Do not edit by hand: a test fails when this file is out of date.
 
+## `attendance_records`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `employees`, references `leave_requests` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `date` | DATE | no |  |  |
+| `status` | VARCHAR(10) | no |  |  |
+| `clock_in` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `clock_out` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `unpaid_break_minutes` | INTEGER | no | `0` |  |
+| `hours` | NUMERIC(6, 2) | yes |  |  |
+| `note` | TEXT | yes |  |  |
+| `source` | VARCHAR(12) | no | `manual` |  |
+| `geo` | JSONB | yes |  |  |
+| `leave_request_id` | UUID | yes |  | references `leave_requests` |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `source in ('manual','import','grid','clock','leave_sync')`
+- `status in ('present','absent','late','half_day','on_leave','sick')`
+- `unpaid_break_minutes >= 0 AND (hours IS NULL OR hours >= 0)`
+
 ## `audit_events`
 
 | Column | Type | Null | Default | Notes |
@@ -640,6 +668,119 @@ Checks:
 Checks:
 
 - `role in ('authorising_officer', 'key_contact', 'level1_user', 'level2_user')`
+
+## `leave_ledger`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `employees`, references `leave_requests`, references `leave_types` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `leave_type_id` | UUID | no |  | references `leave_types` |
+| `leave_year_start` | DATE | no |  |  |
+| `entry_type` | VARCHAR(16) | no |  |  |
+| `days` | NUMERIC(10, 2) | no |  |  |
+| `target_days` | NUMERIC(10, 2) | yes |  |  |
+| `reason` | TEXT | no |  |  |
+| `leave_request_id` | UUID | yes |  | references `leave_requests` |
+| `bucket` | VARCHAR(16) | yes |  |  |
+| `idempotency_key` | UUID | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(days <> 0 OR entry_type = 'set') AND days <> 'NaN'::numeric`
+- `(entry_type not in ('grant','accrual','carry_over') or days > 0) and (entry_type not in ('taken','deduct','year_end_expiry') or days < 0)`
+- `bucket is null or bucket in ('entitlement','calendar')`
+- `entry_type in ('grant','accrual','carry_over','taken','adjustment','deduct','set','year_end_expiry')`
+- `length(trim(reason)) > 0`
+
+## `leave_requests`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `employees`, references `leave_types` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `leave_type_id` | UUID | no |  | references `leave_types` |
+| `start_date` | DATE | no |  |  |
+| `end_date` | DATE | no |  |  |
+| `half_day_start` | BOOLEAN | no | `false` |  |
+| `half_day_end` | BOOLEAN | no | `false` |  |
+| `working_days` | NUMERIC(8, 2) | no |  |  |
+| `working_dates` | JSONB | no |  |  |
+| `note` | TEXT | yes |  |  |
+| `status` | VARCHAR(10) | no | `pending` |  |
+| `decided_by` | UUID | yes |  |  |
+| `decided_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `decision_note` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `end_date >= start_date AND end_date - start_date <= 366`
+- `status in ('pending','approved','rejected','cancelled')`
+- `working_days > 0`
+
+## `leave_types`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `bank_holidays_included` | BOOLEAN | no | `false` |  |
+| `seed_key` | VARCHAR(24) | yes |  |  |
+| `name` | VARCHAR(80) | no |  |  |
+| `is_paid` | BOOLEAN | no | `true` |  |
+| `counts_toward_statutory` | BOOLEAN | no | `false` |  |
+| `days_per_year` | NUMERIC(6, 2) | yes |  |  |
+| `carry_over_limit_days` | NUMERIC(6, 2) | no | `0` |  |
+| `accrual_method` | VARCHAR(12) | no | `front_loaded` |  |
+| `requires_approval` | BOOLEAN | no | `true` |  |
+| `colour` | VARCHAR(10) | no | `blue` |  |
+| `rule_text` | TEXT | no | `` |  |
+| `source_url` | VARCHAR(500) | yes |  |  |
+| `checked_on` | DATE | yes |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `accrual_method in ('front_loaded','monthly')`
+- `carry_over_limit_days >= 0`
+- `colour in ('blue','green','orange','red','gray')`
+- `days_per_year IS NULL OR days_per_year >= 0`
+- `length(trim(name)) > 0`
+
+## `leave_year_end_runs`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `from_year` | DATE | no |  |  |
+| `to_year` | DATE | no |  |  |
+| `run_by` | UUID | no |  |  |
+| `overrides` | JSONB | no |  |  |
+| `preview_token` | VARCHAR(64) | no |  |  |
+| `committed_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `to_year > from_year`
 
 ## `locations`
 

@@ -31,9 +31,13 @@ export const NAV_PERMISSIONS: Readonly<Record<string, readonly string[]>> = {
   leave: [
     "leave.request.read",
     "leave.request.read_own",
+    "leave.balance.read",
+    "leave.balance.read_reports",
     "leave.balance.read_own",
     "leave.request.create_own",
   ],
+  "my-leave": ["leave.request.read_own", "leave.request.create_own"],
+  "my-approvals": ["leave.request.approve", "leave.request.approve_reports"],
   attendance: ["attendance.record.read", "attendance.record.read_own"],
   rota: ["rota.shift.read", "rota.scheduled_shift.read_own", "rota.duty_roster.read"],
   "work-log": ["work_log.entry.read", "work_log.entry.read_own"],

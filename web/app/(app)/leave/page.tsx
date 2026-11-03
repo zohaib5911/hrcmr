@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-import { PlaceholderPage } from "@/components/app/placeholder-page";
+import { LeaveHome } from "@/components/leave/home";
 
 export const metadata: Metadata = { title: "Leave" };
 
 export default function Page() {
-  return <PlaceholderPage id="leave" />;
+  return <LeaveHome />;
 }

@@ -143,8 +143,9 @@ async def test_sign_up_creates_a_free_company_and_admin_then_the_link_signs_them
     assert PASSWORD not in user[0]
     assert user[1] is None
     assert (await world.sql("select role from memberships"))[0][0] == "company_admin"
+    assert (await world.sql("select count(*) from leave_types"))[0][0] == 12
     assert (await world.sql("select count(*) from terms_acceptances"))[0][0] == 1
-    assert [r[0] for r in await world.sql(AUDIT_ACTIONS)] == ["company.created"]
+    assert [r[0] for r in await world.sql(AUDIT_ACTIONS)] == ["company.created", "auth.signup"]
 
     verified = await world.client.post(
         "/api/v1/auth/verify-email",
@@ -393,7 +394,12 @@ async def test_two_step_verification_setup_challenge_step_up_and_turning_it_off(
     assert (await browser.post("/api/v1/auth/mfa/disable")).status_code == 204
     assert (await world.sql("select mfa_enabled, mfa_secret from users"))[0][0] is False
     actions = [r[0] for r in await world.sql(AUDIT_ACTIONS + " order by created_at")]
-    assert actions[-2:] == ["auth.mfa.enabled", "auth.mfa.disabled"]
+    assert actions[-4:] == [
+        "auth.login.succeeded",
+        "auth.step_up.failed",
+        "auth.step_up.succeeded",
+        "auth.mfa.disabled",
+    ]
 
 
 async def test_a_company_that_requires_two_step_cannot_have_it_switched_off(world: World) -> None:
@@ -494,6 +500,12 @@ async def test_someone_who_already_has_an_account_is_added_but_not_signed_in(wor
     )
     assert switched.status_code == 200
     assert switched.json()["active_company_id"] == me["companies"][0]["company_id"]
+    user_id = switched.json()["user"]["id"]
+    switched_events = await world.sql(
+        "select company_id from audit_events where action='auth.company.switched' and actor_user_id=:u",
+        u=uuid.UUID(user_id),
+    )
+    assert [str(r[0]) for r in switched_events] == [me["companies"][0]["company_id"]]
     stranger = await other.post(
         "/api/v1/auth/switch-company", json={"company_id": str(uuid.uuid4())}
     )
@@ -548,3 +560,102 @@ async def test_every_auth_endpoint_is_documented_with_its_response_schema(world:
         if status != "204":
             schema = operation["responses"][status]["content"]["application/json"]["schema"]
             assert schema, (method, path)
+
+
+async def test_authentication_events_have_context_and_no_credentials(world: World) -> None:
+    await signed_up(world)
+    browser = world.new_browser()
+    browser.headers["X-Request-ID"] = "security-audit-test"
+    browser.headers["User-Agent"] = "audit-test-browser"
+    await browser.post(
+        "/api/v1/auth/login", json={"email": "unknown@example.com", "password": PASSWORD}
+    )
+    await browser.post("/api/v1/auth/login", json={"email": "ada@example.com", "password": "wrong"})
+    await browser.post(
+        "/api/v1/auth/login", json={"email": "ada@example.com", "password": PASSWORD}
+    )
+    await browser.post("/api/v1/auth/step-up", json={"password": "wrong"})
+    await browser.post("/api/v1/auth/step-up", json={"password": PASSWORD})
+    secret = (await browser.post("/api/v1/auth/mfa/setup")).json()["secret"]
+    codes = (await browser.post("/api/v1/auth/mfa/verify", json={"code": totp(secret)})).json()[
+        "recovery_codes"
+    ]
+    await browser.post("/api/v1/auth/step-up", json={"code": codes[0]})
+    regenerated = await browser.post("/api/v1/auth/mfa/recovery-codes")
+    assert regenerated.status_code == 200
+    await browser.post("/api/v1/auth/logout")
+    events = await world.sql(
+        "select action, actor_user_id, company_id, ip, user_agent, request_id, before, after from audit_events where request_id='security-audit-test' order by created_at, id"
+    )
+    actions = [r[0] for r in events]
+    assert actions == [
+        "auth.login.failed",
+        "auth.login.failed",
+        "auth.login.succeeded",
+        "auth.step_up.failed",
+        "auth.step_up.succeeded",
+        "auth.mfa.enabled",
+        "auth.recovery_code.used",
+        "auth.step_up.succeeded",
+        "auth.recovery_codes.regenerated",
+        "auth.logout",
+    ]
+    assert all(r[1] is None and r[2] is None for r in events[:2])
+    assert all(r[1] is not None and r[2] is not None for r in events[2:])
+    assert all(str(r[3]) == "127.0.0.1" and r[4] == "audit-test-browser" for r in events)
+    serialized = str(events)
+    for sensitive in [
+        PASSWORD,
+        secret,
+        *codes,
+        *regenerated.json()["recovery_codes"],
+        "unknown@example.com",
+    ]:
+        assert sensitive not in serialized
+
+
+async def test_reset_audit_commits_with_password_and_invalid_links_add_no_event(
+    world: World,
+) -> None:
+    await signed_up(world)
+    await world.client.post("/api/v1/auth/forgot-password", json={"email": "ada@example.com"})
+    token = world.mail.token("reset_password", "ada@example.com")
+    for candidate, expected in [("bad", 410), (token, 204), (token, 410)]:
+        response = await world.client.post(
+            "/api/v1/auth/reset-password", json={"token": candidate, "new_password": NEW_PASSWORD}
+        )
+        assert response.status_code == expected
+    user = (await world.sql("select id from users"))[0][0]
+    events = await world.sql(
+        "select company_id, actor_user_id, after from audit_events where action='auth.password.reset' and actor_user_id=:u",
+        u=user,
+    )
+    assert [tuple(row) for row in events] == [(None, user, None)]
+
+
+async def test_failed_reset_transaction_keeps_password_and_reset_link(
+    world: World, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.modules.auth import accounts
+
+    await signed_up(world)
+    await world.client.post("/api/v1/auth/forgot-password", json={"email": "ada@example.com"})
+    token = world.mail.token("reset_password", "ada@example.com")
+    before = (await world.sql("select password_hash from users"))[0][0]
+
+    async def unavailable(*args: Any, **kwargs: Any) -> None:
+        raise RuntimeError("audit unavailable")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(accounts, "security_event", unavailable)
+        failed = await world.client.post(
+            "/api/v1/auth/reset-password", json={"token": token, "new_password": NEW_PASSWORD}
+        )
+        assert failed.status_code == 500
+    assert (await world.sql("select password_hash from users"))[0][0] == before
+    assert (await world.sql("select used_at from email_tokens where purpose='reset'"))[0][0] is None
+    assert (
+        await world.client.post(
+            "/api/v1/auth/reset-password", json={"token": token, "new_password": NEW_PASSWORD}
+        )
+    ).status_code == 204

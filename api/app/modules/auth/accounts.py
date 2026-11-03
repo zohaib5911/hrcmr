@@ -20,6 +20,7 @@ from app.core.rate_limit import (
 from app.core.rbac_matrix import permissions_for
 from app.db.ids import uuid7
 from app.modules.audit.service import AuditContext, record
+from app.modules.auth.audit import security_event
 from app.modules.auth.invitations import accept_invitation, find_valid_invitation
 from app.modules.auth.passwords import (
     PasswordProblem,
@@ -44,6 +45,7 @@ from app.modules.identity.models import (
     TermsVersion,
     User,
 )
+from app.modules.leave.service import seed_types
 
 if TYPE_CHECKING:
     import uuid
@@ -197,6 +199,7 @@ async def sign_up(
         await db.rollback()
         return
     await db.scope_to_company(company.id)
+    await seed_types(db, company.id)
     db.add(Membership(user_id=user.id, company_id=company.id, role="company_admin"))
     db.add(TermsAcceptance(user_id=user.id, version=terms.version, ip=ip))
     token = await issue_email_token(db, user.id, "verify", VERIFY_TTL)
@@ -208,6 +211,7 @@ async def sign_up(
         entity_id=company.id,
         after={"name": company.name, "plan": "free", "admin_email": email},
     )
+    await security_event(db, "auth.signup", user_id=user.id, company_id=company.id, ip=ip)
     await db.commit()
     await auth.mailer.send_template(
         to=email,
@@ -273,7 +277,14 @@ async def forgot_password(
 
 
 async def reset_password(
-    db: GlobalSession, auth: AuthContainer, token: str, new_password: str
+    db: GlobalSession,
+    auth: AuthContainer,
+    token: str,
+    new_password: str,
+    *,
+    ip: str | None = None,
+    user_agent: str | None = None,
+    request_id: str | None = None,
 ) -> None:
     await check_password(new_password, field="new_password")
     row = await consume_email_token(db, token, "reset")
@@ -284,6 +295,14 @@ async def reset_password(
     user.locked_until = None
     await auth.auth.clear_lockout(str(user.email))
     await auth.sessions.revoke_all(db, user.id)  # a reset ends every session, wherever it was
+    await security_event(
+        db,
+        "auth.password.reset",
+        user_id=user.id,
+        ip=ip,
+        user_agent=user_agent,
+        request_id=request_id,
+    )
     await db.commit()
     await auth.mailer.send_template(
         to=str(user.email), template="password_changed", data={"first_name": user.first_name}

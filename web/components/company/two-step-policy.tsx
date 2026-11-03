@@ -1,12 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 
 import { Alert } from "@/components/ui/alert";
 import { RadioCards } from "@/components/ui/radio-cards";
+import { TextField } from "@/components/ui/text-field";
+import { FormSheet } from "./form-sheet";
 import { useToast } from "@/components/ui/toast";
-import { attempt } from "@/lib/auth/request";
+import { attempt, type Problem } from "@/lib/auth/request";
 import type { components } from "@/lib/api/client";
 
 type Policy = components["schemas"]["TwoStepPolicy"];
@@ -36,6 +38,20 @@ export function TwoStepPolicyCard({ policy, mayChange }: { policy: Policy; mayCh
   const [choice, setChoice] = useState(policy.policy);
   const [busy, setBusy] = useState(false);
 
+  const [pending, setPending] = useState<string | null>(null);
+  const [password, setPassword] = useState("");
+  const [problem, setProblem] = useState<Problem | null>(null);
+
+  async function confirm(event: FormEvent) {
+    event.preventDefault();
+    setBusy(true);
+    const confirmed = await attempt((api) => api.POST("/auth/step-up", { body: { password } }));
+    setBusy(false);
+    setPassword("");
+    if (!confirmed.ok) return setProblem(confirmed.problem);
+    if (pending) await change(pending);
+  }
+
   async function change(next: string) {
     const previous = choice;
     setChoice(next as Policy["policy"]);
@@ -46,10 +62,15 @@ export function TwoStepPolicyCard({ policy, mayChange }: { policy: Policy; mayCh
     setBusy(false);
     if (outcome.ok) {
       toast.show({ title: "Two-step policy saved", tone: "success" });
+      setPending(null);
+      setProblem(null);
       router.refresh();
     } else {
       setChoice(previous);
-      toast.show({ title: outcome.problem.message, tone: "danger" });
+      if (outcome.problem.code === "STEP_UP_REQUIRED") {
+        setPending(next);
+        setProblem(outcome.problem);
+      } else toast.show({ title: outcome.problem.message, tone: "danger" });
     }
   }
 
@@ -73,6 +94,31 @@ export function TwoStepPolicyCard({ policy, mayChange }: { policy: Policy; mayCh
         >
           They are asked to set it up the next time they open a page.
         </Alert>
+      ) : null}
+      {pending ? (
+        <FormSheet
+          open
+          onOpenChange={(open) => {
+            if (!open) {
+              setPending(null);
+              setPassword("");
+            }
+          }}
+          title="Confirm two-step policy change"
+          description="Confirm your password to change who must use two-step verification."
+          onSubmit={confirm}
+          busy={busy}
+          problem={problem}
+        >
+          <TextField
+            label="Your password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
+        </FormSheet>
       ) : null}
     </section>
   );

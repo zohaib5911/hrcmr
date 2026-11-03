@@ -50,7 +50,6 @@ for (const colorScheme of ["light", "dark"] as const) {
         await audit(page, `${colorScheme} compliance documents ${width}px`);
         await page.getByRole("region", { name: "Documents" }).getByRole("button").first().click();
         await expect(page.getByRole("dialog")).toBeVisible();
-        await page.waitForTimeout(500);
         await audit(page, `${colorScheme} compliance document sheet ${width}px`, { modal: true });
       });
     }
