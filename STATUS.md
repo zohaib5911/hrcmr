@@ -1,17 +1,18 @@
 # STATUS
-Updated: 2026-11-03 06:44    Agent: Codex    Branch: dev    Commit: dff2a72
+Updated: 2026-11-03 06:54    Agent: Codex    Branch: dev    Commit: 5df593f
 State: IN PROGRESS
 
 ## Last completed
-- T7.5 — Compliance hub, matching audit CSV, editable official dossier and original checklist
+- T7.6 — Sponsor record PDF download and live compliance bell with private messages/read actions
 
 ## Current task
-- T7.6 — Employee sponsor record PDF and bell Needs attention
-  - [x] Affected baseline: PDF/sponsor API 15 pass, shell unit 19 pass; prior area lint/types pass
-  - [x] Masked sponsor PDF including document versions/RTW/change snapshots; API scenario passes
-  - [x] Compliance bell feed, own unread/read state and recipient/company/role isolation; 2 API/route checks pass
-  - [ ] Sponsor PDF download and bell UI; affected static/unit/browser checks
-- Resume note: Sponsor PDF and compliance notification APIs complete; PDF scenario 1 and bell/privacy/route checks 2 pass, generated types and API/web static checks pass. PDF generation is Company/HR Admin only by existing document.report.generate (Auditor may read records but cannot generate). Bell returns own compliance messages plus top 5 live actions/count only to overview readers; mark-all never clears live obligations. Recovered PDF button and bell UI saved in dff2a72; web types/lint and shell 19 pass; sponsor download and bell read/live-action browser assertions added. Reminder/setup browser passes incl bell; sponsor transition locator corrected for duplicate hidden Visa route. Next rerun sponsor browser.
+- Phase 7 gate — full verification and review
+  - [x] T7.1–T7.6 implementation and affected checks complete
+  - [ ] Run full API, web unit and browser suites sequentially
+  - [ ] Save/review Phase 7 screenshots at 390 and 1280 px
+  - [ ] Write five-line phase summary, open dev → main PR, merge only with all CI green
+  - [ ] Set BLOCKED — audit requested and stop
+- Resume note: T7.6 complete. Recovered UI committed, web types/affected lint and shell 19 pass; reminder/setup browser 2 pass incl own bell message/mark-all/live actions/link; sponsor/setup browser 2 pass incl PDF download. Sponsor filter selector now scopes visible controls during streamed page transition. Phase 7 full suite has NOT run; do it once sequentially, add screenshot spec following phase6-screenshots.spec.ts, review artifacts, then PR and mandatory audit stop.
 
 ## Next tasks
 - T7.6; Phase 7 gate then BLOCKED — audit requested

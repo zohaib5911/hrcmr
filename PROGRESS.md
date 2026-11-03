@@ -295,7 +295,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T7.3** Working-day calculator, change of circumstances, org changes — 2026-11-03. Regional GOV.UK bank holidays; 10/20 working-day targets, prompt AO/Key Contact exception; immutable worker/document snapshots; recorded SMS reporter/date/reference; audited unreported org edit/archive. Employee form/log and company Workers/Organisation register with filters/search. Verified: calculator 12, reporting/holiday API 13, migration/doc 7; holiday/setup browsers 14 and reporting/setup 3 pass; lint/types/generated API/build clean.
 - [x] **T7.4** Reminders engine and register page — reviewed explicit sends, atomic in-app/encrypted email nudge, daily scheduling and sent history; affected API and browser checks pass.
 - [x] **T7.5** Compliance hub — urgency queue, coverage/readiness, expiry buckets, matching activity CSV, tools, editable official dossier and checklist; affected API/browser checks pass.
-- [ ] **T7.6** Employee Sponsor Compliance tab, sponsor record PDF, "Needs attention" feed
+- [x] **T7.6** Employee Sponsor Compliance tab, sponsor record PDF, "Needs attention" feed
 - [ ] **Phase 7 gate** — scenario tests from plan Phase 7
 
 ### Phase 8 — Leave and holidays
