@@ -90,7 +90,7 @@ test("preview row errors, import a corrected file, bulk edit and export monthly 
     ),
   ).toBeLessThanOrEqual(0);
   await page.goto("/attendance/absences?month=2026-11");
-  const table = page.getByRole("grid", { name: "Monthly absences", exact: true });
+  const table = page.getByRole("list", { name: "Monthly absences", exact: true });
   await expect(table.getByText("Sick", { exact: true })).toBeVisible();
   await expect(table.getByText("Absent", { exact: true })).toBeVisible();
   for (const kind of ["Excel", "PDF"]) {
