@@ -8,10 +8,10 @@ State: IN PROGRESS
 ## Current task
 - T10.2 — Worker-generated XLSX reports
   - [x] Existing worker baseline and report schema/contracts
-  - [ ] Seven scoped report projections and safe XLSX generation
+  - [x] Seven scoped report projections and safe XLSX generation
   - [ ] Durable queue, worker/API status/download and affected tests
   - [ ] Reports workspace and real worker/browser verification
-- Resume note: ReportJob tenant model/contracts and frozen migration0031 ready; worker baseline4, migration7, report lint/types pass. Next seven tenant projections/safe XLSX generation, then durable enqueue/recovery worker + scoped report API. No API/worker/UI wired yet. No report content, pay or sensitive identifiers may enter logs/audit.
+- Resume note: Seven report projections and bounded formula-safe XLSX ready; projection2 exercises all7 types, company sheets, tenant isolation, opaque sensitive fields, as-of assignment, leave/training cutoffs and size refusal. Reports static/types clean. Next durable enqueue/recovery worker plus scoped API/status/download/tests, then reports workspace and real worker/browser. No routes/worker wired yet.
 
 ## Next tasks
 - T10.3 — policies and sign-offs

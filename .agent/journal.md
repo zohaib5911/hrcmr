@@ -221,3 +221,4 @@
 2026-11-03 23:43 | Codex | T10.1 | production upload/download/edit/archive and mobile form axe pass through final assertion; corrected filtered empty-state expectation | next browser final and completion
 2026-11-03 23:45 | Codex | T10.1 | complete: company documents production workflow/setup2+shell1 and mobile axe/overflow pass; API/static green | next T10.2 worker-generated reports
 2026-11-03 23:48 | Codex | T10.2 | durable report jobs model/contracts and tenant migration0031 ready; worker4/migration7/static/types pass | next seven scoped safe XLSX projections
+2026-11-03 23:52 | Codex | T10.2 | all7 scoped projections and bounded formula-safe XLSX ready; projection2/privacy/tenant/as-of/size/static/types pass | next durable queue worker and scoped API/tests
