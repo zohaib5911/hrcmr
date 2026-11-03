@@ -1,22 +1,22 @@
 # STATUS
-Updated: 2026-11-03 17:27, Europe/London    Agent: Codex    Branch: dev    Commit: b06a3d2
+Updated: 2026-11-03 17:34, Europe/London    Agent: Codex    Branch: dev    Commit: 0daebc7
 State: IN PROGRESS
 
 ## Last completed
-- T9.1 — attendance APIs, manual record sheet, KPIs/ranges/filters and employee history
+- T9.2 — scanned imports, atomic bulk entry, XLSX/PDF exports and monthly absences; affected API31, browser/setup4 and static pass
 
 ## Current task
-- T9.2 — attendance import, bulk entry, exports and absences
-  - [x] Import schema/file purpose, workbook dependency and shared row service
-  - [x] XLSX/CSV templates and preview/commit with row errors
-  - [x] Bulk grid API, XLSX/PDF exports and monthly absences
-  - [x] Import/bulk/report UI and toolbar downloads
+- T9.3 — clock in/out and timesheet approvals
+  - [ ] Timesheet schema/migration and company geolocation switch
+  - [ ] Serialized self-service clock API and scoped stale-safe approval API
+  - [ ] Clock/PWA and manager approval UI
   - [ ] Affected API/browser checks
-- Resume note: Affected API31 and static checks pass. Browser found file-picker exact-label mismatch and toolbar missing group role; corrected both. Import/commit/bulk flow reaches mobile axe: translucent tab-bar secondary labels fail contrast over the grid; use primary labels. Mobile grid now passes axe; absence assertion corrected for responsive card list. Rerun attendance-batches only; manual attendance browser2 already green. No full suite/screenshots until Phase 9 gate.
+- Resume note: Implement T9.3 per plan 8.7 and Phase 9. Clock uses server time and linked employee only, optional consented company-enabled location. Weekly approvals exclude self and follow reporting chain; changes invalidate approval. Baseline attendance API31/static and browser green.
 
 ## Next tasks
-- T9.2 — import, bulk entry and exports
-- T9.3 — clock in/out and timesheet approvals
+- T9.4 — rota settings
+- T9.5 — rota grid and My Shifts
+- T9.6 — Work Log
 
 ## Health
 - CI on dev: Phase 8 all 12 green (41640316888). CI on main: post-merge run pending/not rechecked.
