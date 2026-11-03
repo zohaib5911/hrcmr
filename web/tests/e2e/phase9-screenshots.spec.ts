@@ -252,6 +252,8 @@ for (const colorScheme of ["light", "dark"] as const) {
         await expect(
           page.getByRole("button", { name: "Record attendance", exact: true }),
         ).toBeVisible();
+        await page.getByLabel("Selected day", { exact: true }).fill(day);
+        await expect(page.getByText("Sick", { exact: true }).first()).toBeVisible();
         await shoot(page, `attendance-${suffix}`);
         await page.getByRole("button", { name: "Record attendance", exact: true }).click();
         await expect(

@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Full web/unit/script/browser suite (sequentially)
   - [ ] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: Screenshot run /tmp/phase9-screenshots.txt exposed 19px overflow in long rota policy action labels on mobile. Wrapping fix in settings.tsx passes eslint/types. Finish active screenshot run, rerun screenshot spec against rebuilt production, review 76 images then summary/PR. Full prior validation green.
+- Resume note: Desktop screenshot checks pass; mobile rerun /tmp/phase9-screenshots-mobile.txt active for policy-label wrap fix. Screenshot seed now explicitly selects company-local day to avoid browser timezone showing empty attendance. Next all four screenshot variants, visual review, summary and PR.
 
 ## Next tasks
 - T10.1 — company documents
