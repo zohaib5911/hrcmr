@@ -31,3 +31,10 @@ Additional checks: [maternity pay](https://www.gov.uk/maternity-pay-leave/pay),
 [adoption pay](https://www.gov.uk/adoption-pay-leave/pay),
 [shared parental blocks](https://www.gov.uk/shared-parental-leave-and-pay/booking-blocks-of-leave),
 [annual leave carry-over and leave years](https://www.gov.uk/holiday-entitlement-rights/calculate-leave-entitlement).
+
+## T8.2 regular-pattern computation (checked 2026-11-03)
+
+- [Holiday entitlement](https://www.gov.uk/holiday-entitlement-rights): regular part-time patterns receive proportional entitlement; bank holidays may be included. The official three-day example is 16.8 days from the five-day 28-day allowance.
+- [Calculating leave entitlement](https://www.gov.uk/holiday-entitlement-rights/calculate-leave-entitlement): starters receive a proportion of the leave year, with a pro-rata first month permitted. Regular-hours accrual can use twelfths. Irregular-hours and part-year accrual requires actual hours, which these fixed-pattern calculations do not infer.
+
+Implementation policy: amounts are standard company days (company weekly working hours divided by company working days). A personal short day consumes the corresponding fraction, and entitlement uses personal weekly hours / company weekly hours, capped at full-time entitlement. Assignment history applies on its effective dates. Starter/leaver pro-rata uses inclusive employment calendar days over the actual leave year (365/366 days). Exact rational arithmetic avoids rounding drift; entitlements round upward once to 0.01 day. Monthly configuration posts completed leave months, with partial employment months pro-rated. This is a company accrual policy, not an irregular-hours statutory calculator. Missing bank-holiday year coverage is an explicit error. Year-wide scheduled bank holidays and paid closures reserve days once, only on personal working days, without overlap charges. Manual grants remain available for reviewed exceptional/irregular cases; no automatic regular-pattern grants for zero-hours/casual assignments.

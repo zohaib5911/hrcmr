@@ -17,6 +17,7 @@ type Input = components["schemas"]["LeaveTypeIn"];
 
 export function LeaveTypeSheet({ item, onClose }: { item: LeaveType | null; onClose: () => void }) {
   const [name, setName] = useState(item?.name ?? "");
+  const [bankIncluded, setBankIncluded] = useState(item?.bank_holidays_included ?? false);
   const [paid, setPaid] = useState(item?.is_paid ?? true);
   const [statutory, setStatutory] = useState(item?.counts_toward_statutory ?? false);
   const [days, setDays] = useState<number | null>(
@@ -32,6 +33,7 @@ export function LeaveTypeSheet({ item, onClose }: { item: LeaveType | null; onCl
   const body = {
     name,
     is_paid: paid,
+    bank_holidays_included: bankIncluded,
     counts_toward_statutory: statutory,
     days_per_year: days === null ? null : days.toFixed(2),
     carry_over_limit_days: (carry ?? 0).toFixed(2),
@@ -86,6 +88,12 @@ export function LeaveTypeSheet({ item, onClose }: { item: LeaveType | null; onCl
             label="Counts toward statutory annual leave minimum"
             checked={statutory}
             onCheckedChange={setStatutory}
+          />
+          <Toggle
+            label="Bank holidays included in allowance"
+            checked={bankIncluded}
+            onCheckedChange={setBankIncluded}
+            description="Deduct bank holidays that fall on the employee’s working days when the company treats them as non-working."
           />
           <NumberField
             label="Days a year"

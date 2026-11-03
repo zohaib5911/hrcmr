@@ -118,7 +118,7 @@ async def move(
             status_code=422,
             field="reason",
         )
-    company = (await db.execute(select(Company))).scalar_one()
+    company = (await db.execute(select(Company).where(Company.id == db.company_id))).scalar_one()
     if year_bounds(year, company.leave_year_start_month_day)[0] != year:
         raise AppError(
             "VALIDATION_ERROR",
@@ -165,7 +165,7 @@ async def move(
 async def calculate(
     db: TenantSession, employee: Employee, kind: LeaveType, on: date
 ) -> Calculation:
-    company = (await db.execute(select(Company))).scalar_one()
+    company = (await db.execute(select(Company).where(Company.id == db.company_id))).scalar_one()
     start, end = year_bounds(on, company.leave_year_start_month_day)
     rows = (
         (await db.execute(select(WorkingPatternDay).order_by(WorkingPatternDay.weekday)))

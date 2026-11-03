@@ -28,7 +28,7 @@ class Pattern:
     hours: tuple[Decimal, ...]  # Monday through Sunday
 
     def __post_init__(self) -> None:
-        if len(self.hours) != 7 or any(h < 0 or h > 24 or not h.is_finite() for h in self.hours):
+        if len(self.hours) != 7 or any(not h.is_finite() or h < 0 or h > 24 for h in self.hours):
             raise ValueError("A pattern needs seven finite daily hours from 0 to 24.")
         if self.end is not None and self.end <= self.start:
             raise ValueError("Pattern end must follow its start.")

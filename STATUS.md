@@ -11,9 +11,9 @@ State: IN PROGRESS
   - [x] Confirm audit fixes/T8.1 CI green (41610450677, all twelve checks)
   - [x] Pure entitlement/year/personal-pattern/calendar calculations and unit tests
   - [x] Append-only tenant ledger, balance view and migration
-  - [ ] Transactional grant/deduct/set and standard reconciliation service; DB tests
+  - [x] Transactional grant/deduct/set and standard reconciliation service; DB tests
   - [ ] Affected lint/types/tests and completion
-- Resume note: Ledger/view migration and initial transactional services written; mypy clean, DB verification pending. Sandboxed migration tests stalled networking (terminated PID 874687); rerun escalated. Need service DB tests, migration checks and generated-client/type checks. 
+- Resume note: Schema/settings17 and initial ledger15 pass; mypy clean. Expanded ledger suite and final guard/calculation checks next. New explicit bank-holiday inclusion field preserved/exposed in existing type sheet; web typecheck fixed. No T8.3 work started.
 
 ## Next tasks
 - T8.2 — ledger and balance computation
