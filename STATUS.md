@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [x] Serialized self-service clock API and scoped stale-safe approval API
   - [x] Clock/PWA and manager approval UI
   - [ ] Affected API/browser checks
-- Resume note: Production clock browser reaches enabled location toggle; manifest/192+512 PNG assets and service worker registration pass. Toggle accessible name includes its description; browser selector corrected to prefix match. Rerun attendance-clock then finish T9.3. Prior API39/attendance27/migration7/doc1/static/web25 pass.
+- Resume note: Production clock browser reaches enabled location toggle; manifest/192+512 PNG assets and service worker registration pass. Toggle accessible name includes its description; browser selector corrected to prefix match. Clock/consent/reload/out flow passes; mobile axe exposed breadcrumb contrast over translucent chrome. Use primary breadcrumb labels; rerun browser through report approval, then finish T9.3. Prior API39/attendance27/migration7/doc1/static/web25 pass.
 
 ## Next tasks
 - T9.4 — rota settings

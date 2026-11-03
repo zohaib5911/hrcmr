@@ -8,7 +8,7 @@ export function Breadcrumbs({ crumbs }: { crumbs: readonly Crumb[] }) {
   if (crumbs.length === 0) return null;
   return (
     <nav aria-label="Breadcrumb">
-      <ol className="text-footnote text-label-secondary flex items-center gap-1.5 whitespace-nowrap">
+      <ol className="text-footnote text-label flex items-center gap-1.5 whitespace-nowrap">
         {crumbs.map((crumb, index) => {
           const last = index === crumbs.length - 1;
           return (
