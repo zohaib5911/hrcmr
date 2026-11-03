@@ -80,6 +80,12 @@ class LeaveLedger(Base, RecordMixin, TenantMixin):
     __tablename__ = "leave_ledger"
     __table_args__ = (
         ForeignKeyConstraint(
+            ["company_id", "leave_request_id"],
+            ["leave_requests.company_id", "leave_requests.id"],
+            name="fk_leave_ledger_company_request",
+            ondelete="RESTRICT",
+        ),
+        ForeignKeyConstraint(
             ["company_id", "employee_id"],
             ["employees.company_id", "employees.id"],
             name="fk_leave_ledger_company_employee",
@@ -127,6 +133,6 @@ class LeaveLedger(Base, RecordMixin, TenantMixin):
     days: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     target_days: Mapped[Decimal | None] = mapped_column(Numeric(10, 2))
     reason: Mapped[str] = mapped_column(Text, nullable=False)
-    leave_request_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)  # FK added with requests T8.3
+    leave_request_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
     bucket: Mapped[str | None] = mapped_column(String(16))
     idempotency_key: Mapped[uuid.UUID | None] = mapped_column(Uuid)

@@ -7,11 +7,11 @@ State: IN PROGRESS
 
 ## Current task
 - T8.3 — requests, conflicts, approvals and attendance synchronization
-  - [ ] Request and attendance models/migration
+  - [x] Request and attendance models/migration
   - [ ] Working-day counter and scoped request/approval API
   - [ ] Booking ledger, attendance and transactional decision notifications
   - [ ] Affected API/security/static checks
-- Resume note: Starting T8.3. Reuse ledger helpers with callers auditing/committing. No request code yet. Balance workspaces remain T8.4; rota entities arrive in Phase 9, when shift clashes can be evaluated.
+- Resume note: Request/attendance model and migration written; ruff/mypy clean. Migration verification next. Reuse ledger helpers with callers auditing/committing. No request code yet. Balance workspaces remain T8.4; rota entities arrive in Phase 9, when shift clashes can be evaluated.
 
 ## Next tasks
 - T8.3 — requests, working-days counter, conflicts, approvals, notifications, attendance sync

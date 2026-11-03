@@ -14,6 +14,7 @@ from tests.db.support import engine_for, temporary_database
 FUNCTIONS = {"uuid_generate_v7", "app_current_company_id", "set_updated_at"}
 # The identity migration (T2.1) adds these tables and these two functions.
 IDENTITY_TABLES = [
+    "attendance_records",
     "audit_events",
     "bank_holidays",
     "change_of_circumstances",
@@ -43,6 +44,7 @@ IDENTITY_TABLES = [
     "invitations",
     "key_persons",
     "leave_ledger",
+    "leave_requests",
     "leave_types",
     "locations",
     "memberships",
