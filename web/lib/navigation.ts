@@ -347,6 +347,7 @@ export const SUB_PAGES: readonly { href: string; label: string; parent: string }
   { href: "/company/key-personnel", label: "Key personnel", parent: "/company" },
   { href: "/company/working-pattern", label: "Working pattern", parent: "/company" },
   { href: "/holiday-management", label: "Holidays", parent: "/leave" },
+  { href: "/leave/year-end", label: "Leave year end", parent: "/leave/settings" },
   { href: "/leave/settings", label: "Leave settings", parent: "/leave" },
   {
     href: "/company/compliance-documents",

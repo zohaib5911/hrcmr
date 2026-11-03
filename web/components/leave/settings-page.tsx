@@ -151,9 +151,16 @@ export function LeaveSettingsPage({ settings, types }: { settings: Settings; typ
         title="Leave settings"
         description="Your leave year, balance policy and leave types."
         actions={
-          <Button asChild variant="gray">
-            <Link href="/leave">Leave</Link>
-          </Button>
+          <>
+            {can("leave.accrual.write") && (
+              <Button asChild variant="gray">
+                <Link href="/leave/year-end">Year end</Link>
+              </Button>
+            )}
+            <Button asChild variant="gray">
+              <Link href="/leave">Leave</Link>
+            </Button>
+          </>
         }
       />
       <div className="flex flex-col gap-8">

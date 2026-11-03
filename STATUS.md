@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 11:57, Europe/London    Agent: Codex    Branch: dev    Commit: 6cd5a59
+Updated: 2026-11-03 12:20, Europe/London    Agent: Codex    Branch: dev    Commit: f4a8c2c
 State: IN PROGRESS
 
 ## Last completed
@@ -10,7 +10,7 @@ State: IN PROGRESS
   - [x] Run model/migration and closed-year safeguards
   - [x] Preview, reasoned overrides and atomic audited commit API
   - [ ] Year-end UI and affected API/browser checks
-- Resume note: Migration/projections12 pass, lint/types clean. Year-end API and regression scenarios written; tests running (year_end/workspace/requests). Next fix failures, build year-end settings UI with review/overrides/commit, then affected browser and Phase 8 gate.
+- Resume note: Year-end/workspace/requests34 and migration/projections12 pass; static clean. Year-end UI and browser scenario ready. Run leave-year-end production browser, fix any issues, finish T8.5 then Phase 8 full gate/screenshots/CI PR.
 
 ## Next tasks
 - T8.4 — leave workspaces and employee tab
