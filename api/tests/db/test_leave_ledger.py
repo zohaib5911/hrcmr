@@ -414,3 +414,24 @@ async def test_bad_year_reason_and_changed_idempotency_payload(ledger: dict[str,
                     key=uuid.uuid4(),
                 )
     assert await current(ledger) == 5
+
+
+async def test_personal_days_inherit_actual_company_hours_when_no_hours_override(
+    ledger: dict[str, Any],
+) -> None:
+    async with ledger["owner"].begin() as c:
+        await c.execute(
+            text("update working_pattern_days set hours=4 where company_id=:c and weekday=5"),
+            {"c": ledger["a"]},
+        )
+        await c.execute(
+            text(
+                "insert into employee_assignments (company_id,employee_id,employment_type,custom_working_days,effective_from) values (:c,:e,'part_time','[\"mon\",\"tue\",\"wed\"]','2026-01-01')"
+            ),
+            {"c": ledger["a"], "e": ledger["employee"]},
+        )
+    async with TenantSession(ledger["app"], company_id=ledger["a"]) as db:
+        calc, _ = await reconcile(db, ledger["employee"], ledger["type"], YEAR)
+        assert calc.standard_day_hours == Decimal("7.2")
+        assert calc.entitlement == Decimal("18.67")  # 28 * 24 / 36, rounded up once
+        assert calc.calendar_days == 0

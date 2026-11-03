@@ -184,3 +184,20 @@ def test_invalid_patterns_and_overlapping_history_fail_explicitly() -> None:
         amount(hire=END, leave=START)
     with pytest.raises(ValueError, match="as-of"):
         amount(method="monthly")
+
+
+def test_unequal_company_days_do_not_accumulate_decimal_rounding_drift() -> None:
+    default = tuple(map(Decimal, ("8", "8", "4", "0", "0", "0", "0")))
+    closures = frozenset({date(2026, 1, 5), date(2026, 1, 6), date(2026, 1, 7)})
+    assert calendar_deductions(
+        START,
+        END,
+        START,
+        None,
+        default,
+        (),
+        frozenset(),
+        closures,
+        bank_holidays_included=False,
+        bank_holidays_non_working=True,
+    ) == Decimal(3)

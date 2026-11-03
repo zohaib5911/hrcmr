@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-03
-- **Current task:** T8.2 Ledger and balance computation (next; T8.1 complete)
+- **Current task:** T8.3 Requests, conflicts, approvals and attendance sync (next; T8.2 complete)
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -305,7 +305,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 ### Phase 8 — Leave and holidays
 - [x] **T8.1** Leave types and leave settings — 2026-11-03. Twelve tenant defaults with verified GOV.UK sources/date/original summaries, frozen migration backfill and atomic signup seeds; audited scoped CRUD/archive and year-start/negative-balance settings; responsive settings page, guidance drawer and edit/archive sheets. Verified: leave/RBAC/auth 50, schema/guards/contract 21, web unit 777 and focused production browser/setup 6 pass (390/1280 light/dark axe); ruff/format/mypy, web lint/types and generated contract pass. Sources: `data/leave/SOURCES.md`.
-- [ ] **T8.2** Ledger and balance computation
+- [x] **T8.2** Ledger and balance computation — 2026-11-03. Immutable tenant ledger and security-invoker balance view; composite tenant foreign keys; exact starter/leaver, personal-hours/history and monthly calculations; regional bank-holiday/closure reconciliation; serialized reasoned grant/deduct/set with retry keys. Verified: calculation28, ledger20, guards/isolation31, migration/settings17 and production browser/setup6 pass; Python/static/web types/generated contract clean. Audit fixes/T8.1 first confirmed all-green in CI run 41610450677. Sources/policy: `data/leave/SOURCES.md`.
 - [ ] **T8.3** Requests, conflicts, approvals, attendance sync
 - [ ] **T8.4** `/leave` screens, My Leave, My Approvals, profile Leave tab
 - [ ] **T8.5** Year-end carry-over

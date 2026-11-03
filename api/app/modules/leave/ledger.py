@@ -202,10 +202,10 @@ async def calculate(
             a.effective_from,
             a.ended_at,
             tuple(
-                (a.hours_per_day or standard_day(default))
+                (a.hours_per_day or default[i] or standard_day(default))
                 if name in a.custom_working_days
                 else ZERO
-                for name in names
+                for i, name in enumerate(names)
             )
             if a.custom_working_days is not None
             else tuple(

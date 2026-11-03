@@ -10,7 +10,7 @@ from __future__ import annotations
 import calendar
 from dataclasses import dataclass
 from datetime import date, timedelta
-from decimal import ROUND_CEILING, Decimal
+from decimal import Decimal
 from fractions import Fraction
 from itertools import pairwise
 from math import ceil
@@ -140,11 +140,14 @@ def calendar_deductions(
     selected = closures | (
         bank_holidays if bank_holidays_included and bank_holidays_non_working else frozenset()
     )
-    return sum(
+    standard_day(default)
+    hours = sum(
         (
-            day_units(d, default, patterns)
+            Fraction(hours_on(d, default, patterns))
             for d in selected
             if start <= d < end and d >= hire_date and (leave_date is None or d <= leave_date)
         ),
-        ZERO,
-    ).quantize(CENT, rounding=ROUND_CEILING)
+        Fraction(0),
+    )
+    total = hours * sum(h > 0 for h in default) / Fraction(sum(default, ZERO))
+    return Decimal(ceil(total * 100)) / 100

@@ -134,3 +134,4 @@
 2026-11-03 09:44 | Codex | T8.2 | pure calculations and 27 cases pass; ruff/mypy clean; standard-day units and exact fraction arithmetic | next append-only ledger/view migration
 2026-11-03 09:47 | Codex | T8.2 | ledger/view migration, cross-tenant FKs, immutable movements and initial reconcile/manual services; mypy clean | next escalated migration and service DB tests
 2026-11-03 09:51 | Codex | T8.2 | schema/settings17 and initial ledger15 pass; scoped company query fixed; expanded monthly/year/stamping/validation cases; type-sheet bank inclusion toggle | next final affected tests/static/browser
+2026-11-03 09:54 | Codex | T8.2 | complete: calculations28, ledger20, guards31, migration/settings17, browser6 pass; static clean; exact deduction arithmetic covers unequal weekdays | next T8.3 requests/approvals/attendance
