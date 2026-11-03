@@ -86,3 +86,4 @@
 2026-11-03 02:48 | Codex | T7.4 | due/register/history UI, explicit review drawer and own received messages; optional snooze draft API test passes, web types/lint pass | next browser reminder workflow
 2026-11-03 02:55 | Codex | T7.4 | browser reminder workflow written; web types and targeted lint pass | next production Playwright reminders scenario
 2026-11-03 02:56 | Codex | T7.4 | complete: reminder/setup production browser 2 pass incl explicit saves/snooze/send, history, own message and mobile axe | next T7.5 compliance hub/dossier
+2026-11-03 02:56 | Codex | T7.5 | started compliance hub/dossier requirements and nearest patterns | next affected baseline then scoped hub APIs

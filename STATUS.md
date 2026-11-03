@@ -1,23 +1,21 @@
 # STATUS
-Updated: 2026-11-03 02:56    Agent: Codex    Branch: dev    Commit: a0b5fc5
+Updated: 2026-11-03 02:56    Agent: Codex    Branch: dev    Commit: 97fd20b
 State: IN PROGRESS
 
 ## Last completed
 - T7.4 — Reviewed reminders, daily reconciliation, register/history and own received messages
 
 ## Current task
-- T7.4 — Reminders engine and register
-  - [x] Reminder requirements and email/notification/job patterns reviewed; baseline lint/types and 11 email/worker tests pass; queue-test minute-boundary flake fixed
-  - [x] Threshold/reminder model and migration 0018; 14 migration/doc/change-regression checks pass
-  - [x] Threshold/source hooks and daily job, cancellation/restore/snooze and derived-calendar refresh; 34 reminder/source/worker checks pass, final engine 5 pass
-  - [x] Register/review/edit/snooze/send + own received API, atomic notification/encrypted outbox/audit; 20 affected API cases verified
-  - [x] Reminder due/register/history page and explicit review drawer, plus own My Documents messages; web types/lint pass
-  - [x] Affected API/browser verification: production reminder/setup 2 pass, including mobile/axe
-- Resume note: T7.4 complete. Production browser/setup 2 pass; affected API checks, lint/types/generated API pass. Next start T7.5 compliance hub and dossier per plan 8.5. Read nearest company/audit/admin content patterns; no full suite or screenshots until Phase 7 gate.
-
+- T7.5 — Compliance hub and dossier
+  - [ ] Requirements/patterns and affected baseline checks
+  - [ ] Scoped hub overview, urgency/coverage/readiness/expiry and audit CSV APIs/tests
+  - [ ] Official dossier links, editable platform store and original RTW checklist PDF/tests
+  - [ ] Hub/dossier UI matching existing components and static checks
+  - [ ] Affected browser verification
+- Resume note: Start with company profile/key personnel/doc readiness, RTW status view and audit export patterns. Implement T7.5 only; preserve existing employee/change/reminder modules.
 
 ## Next tasks
-- T7.4, T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
+- T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
 
 ## Health
 - CI on dev: green 41514098397 (Phase 6); Phase 7 not yet run in CI. CI on main: green 41516923634.
