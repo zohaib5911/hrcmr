@@ -42,6 +42,7 @@ IDENTITY_TABLES = [
     "holiday_types",
     "invitations",
     "key_persons",
+    "leave_ledger",
     "leave_types",
     "locations",
     "memberships",
@@ -69,6 +70,7 @@ IDENTITY_FUNCTIONS = {
     "sponsor_documents_immutable",
     "compliance_changes_immutable",
     "reminders_immutable",
+    "leave_ledger_immutable",
 }
 
 

@@ -19,6 +19,7 @@ Accrual = Literal["front_loaded", "monthly"]
 
 class LeaveTypeIn(RequestModel):
     name: Name
+    bank_holidays_included: bool = False
     is_paid: bool = True
     counts_toward_statutory: bool = False
     days_per_year: Days | None = None
@@ -36,6 +37,7 @@ class LeaveTypeIn(RequestModel):
 
 class LeaveTypePatch(RequestModel):
     name: Name | None = None
+    bank_holidays_included: bool | None = None
     is_paid: bool | None = None
     counts_toward_statutory: bool | None = None
     days_per_year: Days | None = None
@@ -56,6 +58,7 @@ class LeaveTypeOut(BaseModel):
     id: uuid.UUID
     seed_key: str | None
     name: str
+    bank_holidays_included: bool
     is_paid: bool
     counts_toward_statutory: bool
     days_per_year: Decimal | None

@@ -24,6 +24,7 @@ from sqlalchemy import (
     SmallInteger,
     String,
     Text,
+    UniqueConstraint,
     Uuid,
     column,
     false,
@@ -78,13 +79,19 @@ def _in(name: str, values: tuple[str, ...]) -> str:
 
 def _company() -> Mapped[uuid.UUID]:
     return mapped_column(
-        Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True
+        Uuid,
+        ForeignKey("companies.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
     )
 
 
 def _employee() -> Mapped[uuid.UUID]:
     return mapped_column(
-        Uuid, ForeignKey("employees.id", ondelete="CASCADE"), nullable=False, index=True
+        Uuid,
+        ForeignKey("employees.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
 
 
@@ -126,6 +133,7 @@ class Employee(Base, RecordMixin, TenantMixin):
     passport_expiry: Mapped[date | None] = mapped_column(Date)
 
     __table_args__ = (
+        UniqueConstraint("company_id", "id", name="uq_employees_company_id_id"),
         Index(
             "uq_employees_company_id_employee_number",
             "company_id",

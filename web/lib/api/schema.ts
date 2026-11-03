@@ -4469,6 +4469,11 @@ export interface components {
              */
             accrual_method: "front_loaded" | "monthly";
             /**
+             * Bank Holidays Included
+             * @default false
+             */
+            bank_holidays_included: boolean;
+            /**
              * Carry Over Limit Days
              * @default 0
              */
@@ -4513,6 +4518,8 @@ export interface components {
             accrual_method: "front_loaded" | "monthly";
             /** Archived At */
             archived_at: string | null;
+            /** Bank Holidays Included */
+            bank_holidays_included: boolean;
             /** Carry Over Limit Days */
             carry_over_limit_days: string;
             /** Checked On */
@@ -4548,6 +4555,8 @@ export interface components {
         LeaveTypePatch: {
             /** Accrual Method */
             accrual_method?: ("front_loaded" | "monthly") | null;
+            /** Bank Holidays Included */
+            bank_holidays_included?: boolean | null;
             /** Carry Over Limit Days */
             carry_over_limit_days?: number | string | null;
             /** Colour */

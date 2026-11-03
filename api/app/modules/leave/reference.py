@@ -9,6 +9,7 @@ CHECKED_ON = date(2026, 11, 3)
 DEFAULT_TYPES: tuple[dict[str, Any], ...] = (
     {
         "seed_key": "annual",
+        "bank_holidays_included": True,
         "name": "Annual Leave",
         "is_paid": True,
         "counts_toward_statutory": True,

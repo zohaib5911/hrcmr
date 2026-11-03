@@ -132,3 +132,4 @@
 2026-11-03 09:22 | Codex | CI before T8.2 | clean dev synced; gh run list shows no audit/T8.1 run; dispatched 41610450677 at 0d3b86d | next fix red or confirm green before T8.2
 2026-11-03 09:41 | Codex | T8.2 | all twelve CI jobs green for audit fixes/T8.1 at 0d3b86d (41610450677); start ledger/calculations | next pure calculations/unit tests
 2026-11-03 09:44 | Codex | T8.2 | pure calculations and 27 cases pass; ruff/mypy clean; standard-day units and exact fraction arithmetic | next append-only ledger/view migration
+2026-11-03 09:47 | Codex | T8.2 | ledger/view migration, cross-tenant FKs, immutable movements and initial reconcile/manual services; mypy clean | next escalated migration and service DB tests

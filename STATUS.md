@@ -10,10 +10,10 @@ State: IN PROGRESS
 - T8.2 — ledger and balance computation
   - [x] Confirm audit fixes/T8.1 CI green (41610450677, all twelve checks)
   - [x] Pure entitlement/year/personal-pattern/calendar calculations and unit tests
-  - [ ] Append-only tenant ledger, balance view and migration
+  - [x] Append-only tenant ledger, balance view and migration
   - [ ] Transactional grant/deduct/set and standard reconciliation service; DB tests
   - [ ] Affected lint/types/tests and completion
-- Resume note: Pure calculations/tests done (27 pass; mypy clean). Next ledger model/migration and transactional services. CI green for 0d3b86d covers all implementation before T8.2. Implement calculations first, then durable ledger and services; UI belongs to T8.4.
+- Resume note: Ledger/view migration and initial transactional services written; mypy clean, DB verification pending. Sandboxed migration tests stalled networking (terminated PID 874687); rerun escalated. Need service DB tests, migration checks and generated-client/type checks. 
 
 ## Next tasks
 - T8.2 — ledger and balance computation
