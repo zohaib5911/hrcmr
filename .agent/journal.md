@@ -93,3 +93,4 @@
 2026-11-03 03:14 | Codex | T7.5 | hub/dossier/platform editor UI built; employee/change query tabs work; web types/lint pass | next browser hub links/filter/export/dossier/mobile workflow
 2026-11-03 03:15 | Codex | T7.5 | hub browser workflow written and statically checked; notes checkpointed before browser run | next production hub and adjacent query-tab browser checks
 2026-11-03 03:17 | Codex | T7.5 | complete: production hub/changes/RTW/setup 5 pass incl destinations/CSV/PDF/mobile axe; affected API and static checks pass | next T7.6 sponsor PDF and bell Needs attention
+2026-11-03 03:17 | Codex | T7.6 | started sponsor record PDF and bell feed; general notification preferences/digests remain Phase 14 | next affected baseline and masked scoped PDF

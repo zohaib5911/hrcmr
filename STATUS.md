@@ -1,21 +1,20 @@
 # STATUS
-Updated: 2026-11-03 03:17    Agent: Codex    Branch: dev    Commit: c3b3f60
+Updated: 2026-11-03 03:17    Agent: Codex    Branch: dev    Commit: 5a6c3a2
 State: IN PROGRESS
 
 ## Last completed
 - T7.5 — Compliance hub, matching audit CSV, editable official dossier and original checklist
 
 ## Current task
-- T7.5 — Compliance hub and dossier
-  - [x] Requirements/patterns and affected baseline checks: company/audit/document 27 pass; lint/types pass
-  - [x] Scoped hub overview, urgency/coverage/readiness/expiry and audit CSV APIs/tests: 3 hub scenarios + audit 11 pass; architecture JSON-default violation fixed
-  - [x] Official dossier links, editable platform store and original RTW checklist PDF/tests: 19 dossier/migration/doc/identity pass; 16 RBAC checks verified
-  - [x] Hub/dossier UI and separate platform editor, query-tab action links; web types/lint pass
-  - [x] Production hub/changes/RTW browsers + setup: 5 pass, including mobile/axe
-- Resume note: T7.5 complete. Browser hub/changes/RTW/setup 5 pass; API hub 3, audit 11, dossier/migration/doc/identity 19 and RBAC 16 verified; web/static/generated types pass. Next T7.6 employee sponsor record PDF and notifications bell Needs attention feed. Reuse existing safe masked PDF renderer; use live compliance actions and preserve personal notification privacy. Phase 7 full suite/screenshots/PR gate follows, then audit stop.
+- T7.6 — Employee sponsor record PDF and bell Needs attention
+  - [ ] Affected baseline checks and scoped design
+  - [ ] Masked sponsor PDF including document versions/RTW/change snapshots; API checks
+  - [ ] Compliance bell feed and own received-notification privacy; API checks
+  - [ ] Sponsor PDF download and bell UI; affected static/unit/browser checks
+- Resume note: T7.5 complete. Build sponsor PDF through existing record_html/render_pdf and scoped sponsor/RTW/change serializers. Bell shows live company compliance actions only to overview readers, plus own received compliance messages; general notification preferences/digests remain T14.2. Then Phase 7 full suite/screenshots/CI PR gate and audit stop.
 
 ## Next tasks
-- T7.5, T7.6; Phase 7 gate then BLOCKED — audit requested
+- T7.6; Phase 7 gate then BLOCKED — audit requested
 
 ## Health
 - CI on dev: green 41514098397 (Phase 6); Phase 7 not yet run in CI. CI on main: green 41516923634.
