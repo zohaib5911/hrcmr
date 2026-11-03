@@ -1,21 +1,19 @@
 # STATUS
-Updated: 2026-11-03 23:33, Europe/London    Agent: Codex    Branch: dev    Commit: 09ecc9f
+Updated: 2026-11-03 23:33, Europe/London    Agent: Codex    Branch: dev    Commit: 35d703d
 State: IN PROGRESS
 
 ## Last completed
-- Phase 9 gate — PR15 merged86c51a5; all12 CI green41737189830; 76 reviewed screenshots saved.
+- T10.1 — Company document library complete; API5+related49/migration7/static/client/nav15/browser3 pass.
 
 ## Current task
-- T10.1 — Company documents (categories and review dates)
-  - [x] Read relevant plan and verify existing document/file/RBAC baseline34
-  - [x] Model, tenant migration and contracts
-  - [x] Scoped audited scanned CRUD/download API and affected tests
-  - [x] Documents workspace, upload/edit/archive and review flags
-  - [x] Production browser verification, static checks and completion log
-- Resume note: T10.1 complete. Production company-documents workflow/setup2 plus shell1 pass, with mobile form/archive axe and no overflow. API5+related49/migration7, Python lint/format/mypy212, web lint/types/client/nav15 pass. Next T10.2 seven worker-generated XLSX reports; read plan8.10 and existing ARQ/outbox/tenant worker patterns.
+- T10.2 — Worker-generated XLSX reports
+  - [ ] Existing worker baseline and report schema/contracts
+  - [ ] Seven scoped report projections and safe XLSX generation
+  - [ ] Durable queue, worker/API status/download and affected tests
+  - [ ] Reports workspace and real worker/browser verification
+- Resume note: Read plan8.10/T10.2. Build Employee Directory/Detail/Archived, Company, Sponsor Workers, Leave Taken and Training Completion reports. Existing ARQ queue/scheduled worker, TenantSession, scanned File storage and short-lived downloads are available. No reports code yet. Keep DB pytest and browser sequential.
 
 ## Next tasks
-- T10.2 — reports
 - T10.3 — policies and sign-offs
 - T10.4 — Draft with AI feature-flagged UI/API contract
 
@@ -29,7 +27,7 @@ State: IN PROGRESS
 - Browser assertions must wait for hydrated data and target visible roles: Next streaming can briefly retain hidden server copies. Audit document IDs after streamed copies are removed.
 
 ## Strategy / decisions taken
-- Company document CRUD uses archive for deletion, preserving scanned files and audit history; review flags use company-local day and include overdue dates.
+- Reports are generated fresh by the worker with full report permission rechecked at execution/download. Employee Detail excludes pay and sensitive identifiers. Training Completion uses current employee training records until Phase15 learning assignments exist.
 - Follow existing tenant composite file references, document.file full-scope permissions and scan-gated short-lived downloads. Personal files remain on employee profiles; policies/signatures belong to T10.3.
 - Earlier domain decisions remain in git history and .agent/journal.md. AI hidden without ANTHROPIC_API_KEY; Ask Mady deferred.
 
