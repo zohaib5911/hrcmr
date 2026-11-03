@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-03
-- **Current task:** Phase 8 gate (T8.1–T8.5 complete)
+- **Current task:** T9.1 Attendance records and workspace (Phase 8 merged green)
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -309,7 +309,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T8.3** Requests, conflicts, approvals, attendance sync — 2026-11-03. Own/on-behalf submission and working-day/conflict previews; LSA-scoped decisions with no self-approval; serialized atomic taken ledger/attendance and private notification/outbox delivery; calendar/pattern-change guards, negative-policy handling and rollback/concurrency tests. Verified: combined requests/ledger/RBAC/notifications/calculations115 pass; API ruff/format/mypy, web types and generated contract pass; migration8 previously passed. Shift conflicts connect in Phase 9.
 - [x] **T8.4** Leave workspaces — 2026-11-03. Scoped read-only balance projections and working-date calendar; audited retry-safe Grant/Deduct/Set; Calendar/Requests/Balances, My Leave, My Approvals and employee Leave tab with live duration/conflict previews and decision sheets. Verified: affected API/request/RBAC71, production workflow/setup2 and mobile axe pass; Python lint/format/types and web lint/types/contract pass; web776 plus corrected navigation22 pass. Notification badge accessible name includes its visible total.
 - [x] **T8.5** Year-end carry-over — 2026-11-03. Immutable tenant run snapshots, read-only closing projections, reasoned overrides, stale-review detection and atomic audited carry/expiry posting; repeat/concurrent commits reuse one run, source years reject further bookings/adjustments, unresolved requests and fixed-allowance debts block close. Settings-linked year-end UI supports preview/review/history. Verified: year-end/workspace/requests34, migration/projections12, production browser/setup2 and mobile axe pass; Python/web lint/types/contract pass.
-- [ ] **Phase 8 gate** — local gate complete; PR/green CI merge next.
+- [x] **Phase 8 gate** — PR #14 merged as 2d1394e after all 12 CI checks passed (run 41640316888); 48 reviewed screenshots saved.
   - Seeded twelve source-verified leave types with audited company settings and scoped configuration.
   - Added immutable ledger, exact pro-rata/personal-pattern/calendar computation and atomic request/attendance/notification decisions.
   - Delivered Calendar/Requests/Balances, self-service, employee balance actions and reviewed immutable year-end closes.

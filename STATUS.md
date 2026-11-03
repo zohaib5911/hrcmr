@@ -1,25 +1,25 @@
 # STATUS
-Updated: 2026-11-03 12:58, Europe/London    Agent: Codex    Branch: dev    Commit: 279467e
+Updated: 2026-11-03 13:20, Europe/London    Agent: Codex    Branch: dev    Commit: d778afc
 State: IN PROGRESS
 
 ## Last completed
-- T8.5 — audited reviewed carry-over, immutable closes and closed-year guards
+- Phase 8 — leave/settings/ledger/requests/workspaces/year-end; PR #14 merged 2d1394e after all 12 CI checks green (41640316888)
 
 ## Current task
-- Phase 8 gate — leave and holidays
-  - [x] Full API/static checks
-  - [x] Full web/unit/browser checks
-  - [x] 390/1280 light/dark screenshots and visual review
-  - [ ] Five-line summary, CI-green PR dev → main and merge
-- Resume note: Local gate complete. Full API590+doc1/affected55; web776+shell19/nav22; scripts32; browser407+corrected four cases; screenshot/setup5 (48 images reviewed); static/build/contract pass. Five-line summary recorded. PR #14 open (https://github.com/zohaib5911/hrcmr/pull/14). Wait all CI checks green on latest head, fix any failures; merge with gh pr merge 14 --merge --auto, sync clean dev and continue T9.1.
+- T9.1 — attendance records, record sheet and workspace
+  - [ ] Scoped list/own/summary APIs and validated audited upsert
+  - [ ] API validation, scopes, concurrency and leave-sync safeguards
+  - [ ] Day/week/month/custom workspace, KPIs, filters and record sheet
+  - [ ] Employee Attendance tab and affected browser/static checks
+- Resume note: Start attendance router/schemas around existing AttendanceRecord model (T8.3). Implement list/own/summary/upsert, company-zone times and overnight duration/break calculation; manual writes limited to full permission (employee own writes are clock-only T9.3), preserve leave_sync rows. Then UI/profile tab and affected checks. No full suite/screenshots until Phase 9 gate.
 
 ## Next tasks
-- Phase 8 gate
 - T9.1 — attendance workspace, records and filters
 - T9.2 — import, bulk entry and exports
+- T9.3 — clock in/out and timesheet approvals
 
 ## Health
-- CI on dev: Phase 8 PR #14 CI pending; prior audit/T8.1 green (41610450677). CI on main: not rechecked.
+- CI on dev: Phase 8 all 12 green (41640316888). CI on main: post-merge run pending/not rechecked.
 - Local checks run: API590 plus corrected generated-doc1/affected55 pass; web776 plus corrected shell19/nav22, guard scripts32 pass; browser407 plus four corrected cases and screenshot/setup5 pass. Python/web static, production build and generated contract clean. 48 screenshots saved/reviewed.
 
 ## Issues / suggestions
