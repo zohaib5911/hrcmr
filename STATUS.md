@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 18:22, Europe/London    Agent: Codex    Branch: dev    Commit: 5805cc2
+Updated: 2026-11-03 18:26, Europe/London    Agent: Codex    Branch: dev    Commit: 6169f7f
 State: IN PROGRESS
 
 ## Last completed
@@ -7,10 +7,10 @@ State: IN PROGRESS
 
 ## Current task
 - T9.6 — My Work Log and admin corrections/removal
-  - [ ] Entry schema/migration and same-day own-write service
+  - [x] Entry schema/migration and same-day own-write service
   - [ ] Scoped list/KPIs/search, audited correction/removal and tests
   - [ ] Own/admin workspace/forms and browser checks
-- Resume note: Implement T9.6 from plan 6.6/8.9/Phase9/API list. Own daily entry with responsibility selection/free text; own edits same company-local day. Admin range/search/employee/removed/archived filters, KPIs, correction keeps original and removal is soft, both reasoned/audited. Preserve history if a profile responsibility is removed. Then Phase9 gate.
+- Resume note: Work log model/migration/contracts and serialized service written; retains responsibility wording/original corrections and soft removal, revision guards, same-local-day own edits. Responsibility deletion detaches links while preserving log text. Registry side-effect imports restored with explicit F401 exemption after lint removed them; migration7 and service typing pass. Next scoped list/KPIs/admin correction/removal endpoints and tests, then own/admin UI.
 
 ## Next tasks
 - Phase 9 gate — full suite/screenshots/green PR
@@ -27,6 +27,7 @@ State: IN PROGRESS
 - docs/audits/phase7.md absent from synced dev; F7.1–F7.7 queued findings were implemented and confirmed green in CI.
 
 ## Strategy / decisions taken
+- T9.6: work log duration uses the entered HH:MM interval, wrapping overnight. Own edit eligibility uses company-local work date. Responsibility wording is snapshotted; first admin correction retains the complete original, later changes remain audited. Free entry text stays out of audit events. Revision checks prevent overwriting intervening edits.
 - T9.5: preserve last published shifts in a weekly snapshot while draft edits change current rows; manager publication merges only their reports and preserves other employees. Version checks prevent stale destructive actions. Times are UTC instants derived from explicit company-local wall times/fold choices.
 - T9.4: follow existing settings archive conventions; one active late policy/day-off pattern per department/designation/shift, overnight breaks validated within the shift. Deduction settings are stored configuration; no automatic payroll deduction is introduced.
 - T9.3: weekly review uses a deterministic employee/week identifier for read-only projections; only approval writes a stamp with the reviewed record fingerprint. Changed records show review needed again. Location defaults off and requires employee consent per clock action; location/note text never enters audit events.

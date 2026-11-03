@@ -257,6 +257,11 @@ class EmployeeAssignment(Base, RecordMixin, TenantMixin):
 
 class EmployeeResponsibility(Base, RecordMixin, TenantMixin):
     __tablename__ = "employee_responsibilities"
+    __table_args__ = (
+        UniqueConstraint(
+            "company_id", "employee_id", "id", name="uq_responsibility_company_employee_id"
+        ),
+    )
 
     company_id: Mapped[uuid.UUID] = _company()
     employee_id: Mapped[uuid.UUID] = _employee()

@@ -1348,6 +1348,33 @@ Checks:
 - `failed_login_count >= 0`
 - `theme_pref in ('system', 'light', 'dark')`
 
+## `work_log_entries`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `employee_responsibilities`, references `employees` |
+| `employee_id` | UUID | no |  | references `employee_responsibilities`, references `employees` |
+| `date` | DATE | no |  |  |
+| `from_time` | TIME WITHOUT TIME ZONE | no |  |  |
+| `to_time` | TIME WITHOUT TIME ZONE | no |  |  |
+| `hours` | NUMERIC(6, 2) | no |  |  |
+| `responsibility_id` | UUID | yes |  | references `employee_responsibilities` |
+| `responsibility_text` | TEXT | no |  |  |
+| `description` | TEXT | no |  |  |
+| `removed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `removed_by` | UUID | yes |  |  |
+| `corrected_from` | JSONB | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(removed_at is null) = (removed_by is null)`
+- `from_time <> to_time AND hours>0 AND hours<=24`
+
 ## `working_pattern_days`
 
 | Column | Type | Null | Default | Notes |

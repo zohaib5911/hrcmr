@@ -71,6 +71,7 @@ IDENTITY_TABLES = [
     "timesheet_approvals",
     "trading_hours_days",
     "users",
+    "work_log_entries",
     "working_pattern_days",
 ]
 IDENTITY_FUNCTIONS = {

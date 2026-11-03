@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 
 from app.core.errors import ConflictError, NotFoundError
 from app.modules.companies.models import Department, Designation, Location
@@ -40,6 +40,7 @@ from app.modules.employees.models import (
 from app.modules.employees.router import _employee as reachable_employee
 from app.modules.employees.schemas import twelve_months_from
 from app.modules.rbac.deps import Access, require
+from app.modules.work_log.models import WorkLogEntry
 
 router = APIRouter(tags=["employees"])
 Reads = Annotated[Access, Depends(require("employee.profile.read"))]
@@ -359,6 +360,11 @@ async def remove_responsibility(
         entity_type="employee",
         entity_id=employee.id,
         before={"id": str(row.id)},
+    )
+    await access.db.execute(
+        update(WorkLogEntry)
+        .where(WorkLogEntry.employee_id == employee.id, WorkLogEntry.responsibility_id == row.id)
+        .values(responsibility_id=None)
     )
     await access.db.delete(row)
     await access.db.commit()

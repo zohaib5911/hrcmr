@@ -192,3 +192,4 @@
 2026-11-03 18:16 | Codex | T9.5 | rota grid/cell/quick-add/actions/warnings/print and My Shifts UI ready; API61/static/web types/lint/nav22 pass | next production rota-workspace/settings browser and T9.6
 2026-11-03 18:20 | Codex | T9.5 | browser planning/publish/draft/copy passes to mobile axe; fixed paid-hours contrast, no-report manager guard isolated API9 pass | next browser final through clears; keep pytest and Playwright sequential (shared role passwords)
 2026-11-03 18:22 | Codex | T9.5 | complete: final workspace/setup2 browser passes planning/publication/snapshots/copy/clear/mobile axe; API/static green | next T9.6 work log then Phase9 gate
+2026-11-03 18:26 | Codex | T9.6 | work log schema/service and responsibility-history preservation ready; registry side-effect imports explicitly exempted, migration7 and typing pass | next scoped API/KPIs/correct/remove/tests then UI
