@@ -1,6 +1,6 @@
 # STATUS
-Updated: 2026-11-03 11:55, Europe/London    Agent: Codex    Branch: dev    Commit: 98c1ddd
-State: IN PROGRESS
+Updated: 2026-11-03 11:55, Europe/London    Agent: Codex    Branch: dev    Commit: 71da003
+State: HANDED OVER
 
 ## Last completed
 - T8.3 — scoped requests/previews/LSA approvals, atomic ledger/attendance/notifications and security regressions
