@@ -553,6 +553,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/compliance/sponsored-employees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sponsored Employees */
+        get: operations["sponsor-documents_sponsored_employees"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/departments": {
         parameters: {
             query?: never;
@@ -1231,6 +1248,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/employees/{employee_id}/sponsor-documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Documents */
+        get: operations["sponsor-documents_documents"];
+        put?: never;
+        /** Add Document */
+        post: operations["sponsor-documents_add_document"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/employees/{employee_id}/status": {
         parameters: {
             query?: never;
@@ -1675,6 +1710,74 @@ export interface paths {
          */
         put: operations["access_set_two_step_policy"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sponsor-documents/{document_id}/evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Evidence */
+        get: operations["sponsor-documents_evidence"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sponsor-documents/{document_id}/renewal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Plan Renewal */
+        post: operations["sponsor-documents_plan_renewal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sponsor-documents/{document_id}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update Document */
+        post: operations["sponsor-documents_update_document"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sponsor-documents/{document_id}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Withdraw Document */
+        post: operations["sponsor-documents_withdraw_document"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4009,6 +4112,16 @@ export interface components {
             /** Recovery Codes */
             recovery_codes: string[];
         };
+        /** RenewalIn */
+        RenewalIn: {
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Renewal Date
+             * Format: date
+             */
+            renewal_date: string;
+        };
         /** ResetPasswordRequest */
         ResetPasswordRequest: {
             /** New Password */
@@ -4125,6 +4238,132 @@ export interface components {
             password: string;
             /** Turnstile Token */
             turnstile_token?: string | null;
+        };
+        /** SponsorDocumentIn */
+        SponsorDocumentIn: {
+            /** Cos Number */
+            cos_number?: string | null;
+            /**
+             * Doc Type
+             * @enum {string}
+             */
+            doc_type: "visa" | "passport" | "dbs" | "euss" | "national_id" | "other";
+            /** Evidence File Id */
+            evidence_file_id?: string | null;
+            /** Expiry Date */
+            expiry_date?: string | null;
+            /** Issue Date */
+            issue_date?: string | null;
+            /** Issuing Country */
+            issuing_country?: string | null;
+            /** Reference Number */
+            reference_number?: string | null;
+            /** Remarks */
+            remarks?: string | null;
+            /** Review Date */
+            review_date?: string | null;
+            /** Soc Code */
+            soc_code?: string | null;
+            /** Sponsored Salary */
+            sponsored_salary?: number | string | null;
+            /** Visa Route */
+            visa_route?: ("skilled_worker" | "health_care_worker" | "global_business_mobility" | "scale_up" | "temporary_worker" | "graduate" | "student" | "euss_settled" | "euss_pre_settled" | "family" | "other") | null;
+        };
+        /** SponsorDocumentOut */
+        SponsorDocumentOut: {
+            /** Cos Number Masked */
+            cos_number_masked: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Doc Type
+             * @enum {string}
+             */
+            doc_type: "visa" | "passport" | "dbs" | "euss" | "national_id" | "other";
+            /** Evidence File Id */
+            evidence_file_id: string | null;
+            /** Evidence File Name */
+            evidence_file_name: string | null;
+            /** Evidence Scan Status */
+            evidence_scan_status: string | null;
+            /** Expiry Date */
+            expiry_date: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Issue Date */
+            issue_date: string | null;
+            /** Issuing Country */
+            issuing_country: string | null;
+            /** Reference Number Masked */
+            reference_number_masked: string | null;
+            /** Remarks */
+            remarks: string | null;
+            /** Renewal Date */
+            renewal_date: string | null;
+            /** Renewal Notes */
+            renewal_notes: string | null;
+            /** Review Date */
+            review_date: string | null;
+            /** Soc Code */
+            soc_code: string | null;
+            /** Sponsored Salary */
+            sponsored_salary: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "current" | "expiring" | "expired" | "evidence_missing" | "superseded" | "withdrawn";
+            /** Superseded By */
+            superseded_by: string | null;
+            /** Version */
+            version: number;
+            /** Visa Route */
+            visa_route: ("skilled_worker" | "health_care_worker" | "global_business_mobility" | "scale_up" | "temporary_worker" | "graduate" | "student" | "euss_settled" | "euss_pre_settled" | "family" | "other") | null;
+            /** Withdraw Reason */
+            withdraw_reason: string | null;
+            /** Withdrawn At */
+            withdrawn_at: string | null;
+        };
+        /** SponsoredEmployee */
+        SponsoredEmployee: {
+            /** Cos Number Masked */
+            cos_number_masked: string | null;
+            /** Employee Number */
+            employee_number: string;
+            /** Expiry Date */
+            expiry_date: string | null;
+            /** First Name */
+            first_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Last Name */
+            last_name: string;
+            /**
+             * Rtw Status
+             * @enum {string}
+             */
+            rtw_status: "verified" | "expiring" | "expired" | "failed" | "pending" | "evidence_missing" | "not_recorded";
+            /** Soc Code */
+            soc_code: string | null;
+            /**
+             * Visa Route
+             * @enum {string}
+             */
+            visa_route: "skilled_worker" | "health_care_worker" | "global_business_mobility" | "scale_up" | "temporary_worker" | "graduate" | "student" | "euss_settled" | "euss_pre_settled" | "family" | "other";
+        };
+        /** SponsoredEmployees */
+        SponsoredEmployees: {
+            /** Employees */
+            employees: components["schemas"]["SponsoredEmployee"][];
         };
         /** StatusChange */
         StatusChange: {
@@ -4270,6 +4509,11 @@ export interface components {
              * @default https://www.gov.uk/national-minimum-wage-rates
              */
             source: string;
+        };
+        /** WithdrawalIn */
+        WithdrawalIn: {
+            /** Reason */
+            reason: string;
         };
         /** WorkingPattern */
         "WorkingPattern-Input": {
@@ -5926,6 +6170,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DocumentLink"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "sponsor-documents_sponsored_employees": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SponsoredEmployees"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -8178,6 +8460,90 @@ export interface operations {
             };
         };
     };
+    "sponsor-documents_documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SponsorDocumentOut"][];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "sponsor-documents_add_document": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                employee_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SponsorDocumentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SponsorDocumentOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     employees_change_status: {
         parameters: {
             query?: never;
@@ -9787,6 +10153,178 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TwoStepPolicy"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "sponsor-documents_evidence": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DownloadOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "sponsor-documents_plan_renewal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RenewalIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SponsorDocumentOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "sponsor-documents_update_document": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SponsorDocumentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SponsorDocumentOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    "sponsor-documents_withdraw_document": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WithdrawalIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SponsorDocumentOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

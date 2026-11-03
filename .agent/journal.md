@@ -63,3 +63,4 @@
 2026-11-02 21:04 | Codex | T7.2 | requirements/patterns reviewed; API area lint/types and web types pass; 15-test baseline unchanged | next sponsor document model/migration 0016
 2026-11-02 21:07 | Codex | T7.2 | sponsor model/migration 0016 with encrypted refs, retained versions/withdrawals/renewal planning; migration/doc 7 pass | next scoped API and tests
 2026-11-03 01:08 | Codex | T7.2 | resumed clean e2269e4; dev synced and latest CI green, model checkpoint intact | next scoped sponsor document API/tests
+2026-11-03 01:11 | Codex | T7.2 | scoped document/version/renewal/withdraw/evidence/register API; 14 integration tests pass; generated types/lint/mypy pass | next employee forms and sponsored table
