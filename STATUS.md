@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 01:45    Agent: Codex    Branch: dev    Commit: 1b818a8
+Updated: 2026-11-03 01:47    Agent: Codex    Branch: dev    Commit: 8c76f13
 State: IN PROGRESS
 
 ## Last completed
@@ -13,8 +13,9 @@ State: IN PROGRESS
   - [x] Scoped APIs, deadlines and mark-reported tests; 7 integration + 12 working-day checks pass
   - [x] Official 2026/2027 test calendar seeded for browser API; retained document version labels; reporting/holiday API 13 tests pass
   - [x] Employee change form/log and company-wide Workers/Organisation register; web types/lint pass
+  - [x] Worker/org browser scenarios prepared; test TypeScript/lint pass
   - [ ] Affected browser checks and final verification
-- Resume note: T7.3 UI built/types/lint pass: change-forms.tsx/change-log.tsx/changes-page.tsx, company route /sponsor-compliance/change-of-circumstances; employee Sponsor compliance tab includes CoC log and link to company register. Next write browser scenario for fixed 28 Aug 2026 -> 14 Sep worker / 28 Sep org deadlines, snapshots/reporting and org CRUD/prompt exception, then run affected new scenario + holidays.spec.ts. No screenshots until gate. API/reporting+holiday 13, working-day 12 and migration/doc 7 checks pass.
+- Resume note: T7.3 UI and worker/org scenarios ready. Next run Playwright compliance-changes.spec.ts plus holidays.spec.ts with UV_CACHE_DIR=/tmp/cmr-uv-cache, inspect failures before rerunning. New tests cover Friday/bank holiday 10/20-day targets, snapshot/document version, reported actor/reference, company filters/mobile/axe and unreported org edit/archive/prompt exception. All API/unit/migration and web static checks passed.
 
 
 ## Next tasks

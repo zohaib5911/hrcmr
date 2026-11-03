@@ -75,3 +75,4 @@
 2026-11-03 01:36 | Codex | T7.3 | scoped change/org CRUD, snapshot/defaults, deadline preview and reported actor/date API; 19 tests pass, generated types/lint/mypy clean | next UI + test-only e2e calendar seed
 2026-11-03 01:40 | Codex | T7.3 | retained document version labels + shared official 2026/27 calendar fixture seeded in e2e API; reporting/holiday API 13 pass | next employee/company change UI, browser + holiday regression
 2026-11-03 01:45 | Codex | T7.3 | employee log/forms, live official-calendar preview and company Workers/Organisation register built; web types/lint pass | next browser scenario and holiday regression
+2026-11-03 01:47 | Codex | T7.3 | worker/org browser scenarios prepared and statically checked | next affected compliance-changes + holidays Playwright run
