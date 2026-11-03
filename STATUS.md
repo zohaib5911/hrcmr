@@ -6,15 +6,17 @@ State: IN PROGRESS
 - T8.5 — audited reviewed carry-over, immutable closes and closed-year guards
 
 ## Current task
-- T8.5 — year-end carry-over
-  - [x] Run model/migration and closed-year safeguards
-  - [x] Preview, reasoned overrides and atomic audited commit API
-  - [x] Year-end UI and affected API/browser checks
-- Resume note: T8.5 complete; affected API34/migration12/browser2 pass. Start Phase 8 gate: full API then web/static/browser checks; 390/1280 light/dark screenshots; five-line summary; PR dev→main, green CI and merge; then T9.1 without stopping.
+- Phase 8 gate — leave and holidays
+  - [ ] Full API/static checks
+  - [ ] Full web/unit/browser checks
+  - [ ] 390/1280 light/dark screenshots and visual review
+  - [ ] Five-line summary, CI-green PR dev → main and merge
+- Resume note: T8.1–T8.5 complete. Screenshot spec ready (phase8-screenshots, gated by SCREENSHOTS=1). Run full API once, then full web/browser sequentially; fix any failures with targeted reruns. Phase 8 has no audit stop; continue T9.1 after green merge.
 
 ## Next tasks
-- T8.4 — leave workspaces and employee tab
-- T8.5 — carry-over, then Phase 8 gate
+- Phase 8 gate
+- T9.1 — attendance workspace, records and filters
+- T9.2 — import, bulk entry and exports
 
 ## Health
 - CI on dev: last run green (41610450677, audit fixes/T8.1); T8.2/T8.3 phase gate CI pending. CI on main: not rechecked.
