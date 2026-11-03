@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 17:49, Europe/London    Agent: Codex    Branch: dev    Commit: d8fde90
+Updated: 2026-11-03 17:55, Europe/London    Agent: Codex    Branch: dev    Commit: d743206
 State: IN PROGRESS
 
 ## Last completed
@@ -9,9 +9,9 @@ State: IN PROGRESS
 - T9.4 — shift types, late policies and day off patterns
   - [x] Models/migration and validation schemas
   - [x] Scoped audited settings APIs and affected tests
-  - [ ] Settings tabs/forms and prerequisite empty states
+  - [x] Settings tabs/forms and prerequisite empty states
   - [ ] Production browser/static checks
-- Resume note: Shift/late/day-off list/create/full-update/archive endpoints added with permission guards, serialized unique validation, active prerequisite checks and audit rollback. Shift archive blocks while active configs reference it. Rota/RBAC/doc34 and migration7 pass, mypy272 clean; client generated. Next settings tabs/forms/prerequisite empty states and production browser.
+- Resume note: /rota/settings tabs/forms, shift suggestions/live paid hours/overnight breaks, scoped late/day-off forms, prerequisites/links and archive confirmation written. API34/migration7, Python mypy273, web types/lint/nav22 pass. Browser scenario ready for overnight shift + scoped rules + mobile axe + blocked archive and cleanup. Next production rota-settings browser then finish T9.4.
 
 ## Next tasks
 - T9.5 — rota grid, publish, print and My Shifts

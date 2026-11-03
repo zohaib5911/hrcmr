@@ -170,12 +170,13 @@ async def test_invalid_config_and_audit_failure_rollback(
     settings: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     admin, scope = settings["admin"], settings["scope"]
-    for changes in [
+    invalid: list[dict[str, Any]] = [
         {"deduction_type": "none", "deduction_value": "1"},
         {"deduction_type": "percentage_of_day", "deduction_value": "101"},
         {"grace_minutes": -1},
         {"allowed_late_days_per_month": 32},
-    ]:
+    ]
+    for changes in invalid:
         response = await admin.post(
             API + "/late-policies",
             json={

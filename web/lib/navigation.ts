@@ -342,6 +342,7 @@ export function isActive(item: NavItem, pathname: string): boolean {
  */
 export const SUB_PAGES: readonly { href: string; label: string; parent: string }[] = [
   { href: "/clock", label: "Clock in or out", parent: "/attendance" },
+  { href: "/rota/settings", label: "Rota settings", parent: "/rota" },
   { href: "/attendance/timesheets", label: "Timesheet approvals", parent: "/attendance" },
   { href: "/attendance/import", label: "Import attendance", parent: "/attendance" },
   { href: "/attendance/bulk", label: "Bulk attendance", parent: "/attendance" },
