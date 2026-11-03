@@ -456,3 +456,4 @@ Do not start until the owner says so: US site, Australia, native wrapper, passke
 - [x] F7.2 — transactional authentication audit events with private pre-tenant inserts and no credentials; auth endpoints 18 pass; auth flows and migrations 30 pass; ruff/mypy pass.
 - [x] F7.3 — exercise every effective route guard for six roles; prevent deferred-router enumeration from passing vacuously; RBAC 22 pass; ruff/mypy pass.
 - [x] F7.4 — foreign PDF IDs match missing-record 404s without render/audit; shared global dossier and tenant download audit verified; PDF/dossier isolation and related tests 8 pass; ruff/mypy pass.
+- [x] F7.5 — Python and SQL RTW status parity for 225 identical outcome/expiry/evidence cases in three timezones plus absent checks; RTW parity 3 pass (225 combinations); ruff/mypy pass.

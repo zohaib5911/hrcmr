@@ -351,3 +351,101 @@ async def test_derived_view_boundaries_and_tenant_isolation(
             assert rows == [emp]  # view cannot use owner privileges to expose the other tenant
     finally:
         await engine.dispose()
+
+
+@pytest.mark.parametrize("timezone", ["Europe/London", "Pacific/Kiritimati", "America/Los_Angeles"])
+async def test_python_and_sql_rtw_status_match_on_identical_rows(
+    rig: dict[str, Any],
+    timezone: str,
+) -> None:
+    from datetime import date
+    from itertools import product
+
+    from app.modules.employees.models import Employee
+    from app.modules.files.models import File
+    from app.modules.rtw.models import RTWCheck
+    from app.modules.rtw.router import status_of
+
+    hr = await rig["person"]("hr_admin", rig["a"])
+    checker = uuid.UUID(await _checker(hr))
+    async with rig["owner"].begin() as connection:
+        await connection.execute(
+            text("update companies set timezone=:tz where id=:c"), {"tz": timezone, "c": rig["a"]}
+        )
+    engine = engine_for(rig["db"].app_url, poolclass=NullPool)
+    try:
+        async with TenantSession(engine, company_id=rig["a"]) as db:
+            # CURRENT_TIMESTAMP is transaction-stable: Python gets exactly the SQL view's date.
+            today = (
+                await db.execute(
+                    text("select (CURRENT_TIMESTAMP AT TIME ZONE :tz)::date"), {"tz": timezone}
+                )
+            ).scalar_one()
+            cases = []
+            for outcome, days, scan in product(
+                ("verified", "pending", "failed"),
+                (None, -1, 0, 60, 61),
+                (None, "pending", "clean", "infected", "error"),
+            ):
+                emp = Employee(
+                    id=uuid.uuid4(),
+                    employee_number=str(uuid.uuid4()),
+                    first_name="Status",
+                    last_name="Parity",
+                    email="parity@example.com",
+                    hire_date=date(2025, 1, 1),
+                )
+                db.add(emp)
+                proof = None
+                if scan is not None:
+                    proof = File(
+                        id=uuid.uuid4(),
+                        storage_key=str(uuid.uuid4()),
+                        original_name="proof.pdf",
+                        mime="application/pdf",
+                        size=1,
+                        sha256="a" * 64,
+                        scan_status=scan,
+                    )
+                    db.add(proof)
+                await db.flush()
+                check = RTWCheck(
+                    id=uuid.uuid4(),
+                    subject_type="employee",
+                    subject_id=emp.id,
+                    check_type="manual_list_a" if days is None else "manual_list_b",
+                    list_b_group=None if days is None else "group1",
+                    permission_expires=days is not None,
+                    permission_expires_on=None if days is None else today + timedelta(days=days),
+                    check_date=today,
+                    checked_by_user_id=checker,
+                    outcome=outcome,
+                    evidence_file_id=proof.id if proof else None,
+                )
+                db.add(check)
+                await db.flush()  # read the database-generated follow_up_due_on
+                cases.append((emp.id, check, scan, outcome, days))
+            missing = Employee(
+                id=uuid.uuid4(),
+                employee_number="NO-CHECK",
+                first_name="No",
+                last_name="Check",
+                email="none@example.com",
+                hire_date=date(2025, 1, 1),
+            )
+            db.add(missing)
+            await db.flush()
+            sql_statuses = dict(
+                (
+                    await db.execute(
+                        select(employee_rtw_status.c.employee_id, employee_rtw_status.c.status)
+                    )
+                ).all()
+            )
+            assert sql_statuses[missing.id] == "not_recorded"
+            assert len(sql_statuses) == 76
+            for employee_id, check, scan, outcome, days in cases:
+                python_status = status_of(check, today, clean_evidence=scan == "clean")
+                assert python_status == sql_statuses[employee_id], (timezone, outcome, days, scan)
+    finally:
+        await engine.dispose()

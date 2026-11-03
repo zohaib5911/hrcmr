@@ -1,19 +1,18 @@
 # STATUS
-Updated: 2026-11-03 08:55, Europe/London    Agent: Codex    Branch: dev    Commit: f8d74b6
+Updated: 2026-11-03 08:57, Europe/London    Agent: Codex    Branch: dev    Commit: a9fcb5f
 State: IN PROGRESS
 
 ## Last completed
-- F7.4 — foreign PDF IDs match missing-record 404s without render/audit; shared global dossier and tenant download audit verified
+- F7.5 — Python and SQL RTW status parity for 225 identical outcome/expiry/evidence cases in three timezones plus absent checks
 
 ## Current task
-- F7.5 — Python/SQL RTW status parity on identical data
+- F7.6 — deterministic browser waits and Redis-isolated error tests
   - [ ] Implement and verify (one commit per audit fix)
-- Resume note: F7.4 complete. Next: F7.5 — Python/SQL RTW status parity on identical data. Audit file docs/audits/phase7.md absent from synced dev; user asked for contents, using queued STATUS findings.
+- Resume note: F7.5 complete. Next: F7.6 — deterministic browser waits and Redis-isolated error tests. Audit file docs/audits/phase7.md absent from synced dev; user asked for contents, using queued STATUS findings.
 
 ## Next tasks
 
 F7.1 Step-up on role change, admin/HR-admin invite, and two-step policy change (+ tests)   [high]
-F7.5 Test: Python status_of == SQL employee_rtw_status on the same data   [low]
 F7.6 Replace waitForTimeout in 4 functional specs; stub Redis in test_errors_and_request_id   [low]
 F7.7 Update PROGRESS header and T7.4–T7.6 entries   [low]
 (Ongoing, not a task: move shared helpers into employees/access.py and core/dates.py only when a task already touches that code.)
@@ -22,9 +21,10 @@ F7.7 Update PROGRESS header and T7.4–T7.6 entries   [low]
 
 
 
+
 ## Health
 - CI on dev: last Phase 7 PR green; no dev push workflow. CI on main: previously pending, not rechecked.
-- Local checks run: PDF/dossier isolation and related tests 8 pass; ruff/mypy pass
+- Local checks run: RTW parity 3 pass (225 combinations); ruff/mypy pass
 
 ## Issues / suggestions
 - Remove cooldown exceptions once safe: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.
