@@ -1209,6 +1209,60 @@ export interface paths {
         patch: operations["company_update_designation"];
         trace?: never;
     };
+    "/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Company Documents */
+        get: operations["documents_list_company_documents"];
+        put?: never;
+        /** Upload Company Document */
+        post: operations["documents_upload_company_document"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Company Document */
+        get: operations["documents_get_company_document"];
+        put?: never;
+        post?: never;
+        /** Archive Company Document */
+        delete: operations["documents_archive_company_document"];
+        options?: never;
+        head?: never;
+        /** Edit Company Document */
+        patch: operations["documents_edit_company_document"];
+        trace?: never;
+    };
+    "/documents/{document_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Company Document */
+        get: operations["documents_download_company_document"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/employee-lookups/postcode/{postcode}": {
         parameters: {
             query?: never;
@@ -4150,6 +4204,20 @@ export interface components {
             /** File */
             file: string;
         };
+        /** Body_documents_upload_company_document */
+        Body_documents_upload_company_document: {
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "policy_handbook" | "health_safety" | "companies_house" | "hmrc_payroll" | "insurance" | "premises_lease" | "certificate" | "hr_template" | "training" | "other";
+            /** File */
+            file: string;
+            /** Next Review Date */
+            next_review_date?: string | null;
+            /** Title */
+            title: string;
+        };
         /** Body_employees_upload_agreement */
         Body_employees_upload_agreement: {
             /** File */
@@ -4649,6 +4717,77 @@ export interface components {
             type_of_organisation: string | null;
             /** Website */
             website: string | null;
+        };
+        /** CompanyDocumentEdit */
+        CompanyDocumentEdit: {
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "policy_handbook" | "health_safety" | "companies_house" | "hmrc_payroll" | "insurance" | "premises_lease" | "certificate" | "hr_template" | "training" | "other";
+            /** Next Review Date */
+            next_review_date?: string | null;
+            /** Title */
+            title: string;
+        };
+        /** CompanyDocumentOut */
+        CompanyDocumentOut: {
+            /** Archived At */
+            archived_at: string | null;
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "policy_handbook" | "health_safety" | "companies_house" | "hmrc_payroll" | "insurance" | "premises_lease" | "certificate" | "hr_template" | "training" | "other";
+            /**
+             * File Id
+             * Format: uuid
+             */
+            file_id: string;
+            /** File Name */
+            file_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Next Review Date */
+            next_review_date: string | null;
+            /**
+             * Review Status
+             * @enum {string}
+             */
+            review_status: "no_review_date" | "current" | "review_due" | "overdue";
+            /**
+             * Scan Status
+             * @enum {string}
+             */
+            scan_status: "pending" | "clean" | "infected" | "error";
+            /** Size */
+            size: number;
+            /** Title */
+            title: string;
+            /**
+             * Uploaded At
+             * Format: date-time
+             */
+            uploaded_at: string;
+        };
+        /** CompanyDocuments */
+        CompanyDocuments: {
+            /** Items */
+            items: components["schemas"]["CompanyDocumentOut"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /**
+             * Today
+             * Format: date
+             */
+            today: string;
+            /** Total */
+            total: number;
         };
         /** CompanyHolidayIn */
         CompanyHolidayIn: {
@@ -11597,6 +11736,255 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DesignationOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    documents_list_company_documents: {
+        parameters: {
+            query?: {
+                search?: string;
+                category?: ("policy_handbook" | "health_safety" | "companies_house" | "hmrc_payroll" | "insurance" | "premises_lease" | "certificate" | "hr_template" | "training" | "other") | null;
+                show_archived?: boolean;
+                review_due?: boolean;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyDocuments"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    documents_upload_company_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_documents_upload_company_document"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyDocumentOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    documents_get_company_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyDocumentOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    documents_archive_company_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    documents_edit_company_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompanyDocumentEdit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyDocumentOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    documents_download_company_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DownloadOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

@@ -49,6 +49,7 @@ from app.modules.compliance.hub_router import router as compliance_hub_router
 from app.modules.compliance.reminder_router import router as reminders_router
 from app.modules.compliance.router import router as compliance_changes_router
 from app.modules.compliance.sponsor_pdf import router as sponsor_pdf_router
+from app.modules.documents.router import router as documents_router
 from app.modules.email.outbox import OutboxMailer
 from app.modules.employees.activity_router import router as employee_activity_router
 from app.modules.employees.compensation_router import router as compensation_router
@@ -233,6 +234,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(employees_router, prefix=API_PREFIX)
     app.include_router(personal_router, prefix=API_PREFIX)
     app.include_router(employment_router, prefix=API_PREFIX)
+    app.include_router(documents_router, prefix=API_PREFIX)
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)
     app.include_router(employee_activity_router, prefix=API_PREFIX)

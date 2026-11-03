@@ -216,3 +216,4 @@
 2026-11-03 23:11 | Codex | Phase9 gate | UTC targeted browser4 pass: DST attendance and compliance/leave streaming cases; PR15 awaiting final-head CI | next all-green merge15 then T10.1
 2026-11-03 23:33 | Codex | Phase9 gate | all12 CI green41737189830; PR15 merged86c51a5 and dev synced | next T10.1 company documents
 2026-11-03 23:35 | Codex | T10.1 | company document model/contracts and tenant migration0030 ready; migration7/static/types pass | next full-scope scanned CRUD/API tests
+2026-11-03 23:39 | Codex | T10.1 | scoped scanned library CRUD/download/review flags and file demotion guard ready; new5+related49/migration7/static/types/client pass | next documents workspace/forms and browser

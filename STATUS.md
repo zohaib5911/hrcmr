@@ -9,10 +9,10 @@ State: IN PROGRESS
 - T10.1 — Company documents (categories and review dates)
   - [x] Read relevant plan and verify existing document/file/RBAC baseline34
   - [x] Model, tenant migration and contracts
-  - [ ] Scoped audited scanned CRUD/download API and affected tests
+  - [x] Scoped audited scanned CRUD/download API and affected tests
   - [ ] Documents workspace, upload/edit/archive and review flags
   - [ ] Production browser verification, static checks and completion log
-- Resume note: CompanyDocument model/contracts and migration0030 ready; tenant composite file FK/RLS/triggers and ten category constraints. Migration7, document typing/ruff pass. Next documents/router.py full-scope scanned CRUD/download plus regression tests, then UI.
+- Resume note: Documents API/scanning/full-scope RBAC/demoted-uploader guards and paged filters ready; review boundaries/archive/idempotence/audit rollback5 plus related49 pass, migration7, app ruff/format/mypy212 and generated client pass. Next documents workspace/upload/edit/archive/review indicators, then focused production browser. Keep DB pytest and browser sequential.
 
 ## Next tasks
 - T10.2 — reports
