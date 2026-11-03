@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 01:40    Agent: Codex    Branch: dev    Commit: 9f5224d
+Updated: 2026-11-03 01:45    Agent: Codex    Branch: dev    Commit: 1b818a8
 State: IN PROGRESS
 
 ## Last completed
@@ -12,9 +12,9 @@ State: IN PROGRESS
   - [x] Change/org-change models and migration 0017; immutable worker/reported records, unreported org CRUD; 7 migration/doc checks pass
   - [x] Scoped APIs, deadlines and mark-reported tests; 7 integration + 12 working-day checks pass
   - [x] Official 2026/2027 test calendar seeded for browser API; retained document version labels; reporting/holiday API 13 tests pass
-  - [ ] Employee change form/log and company-wide pages
+  - [x] Employee change form/log and company-wide Workers/Organisation register; web types/lint pass
   - [ ] Affected browser checks and final verification
-- Resume note: T7.3 API and test calendar ready. Reporting/holiday API 13, working-day 12, migration/doc 7 checks pass; lint/mypy/generated API/web types pass. Next employee change log/form and company-wide CoC/org pages, then browser scenario plus holidays.spec.ts regression. Browser API now seeds official 2026/2027 dates; holiday test expects loaded calendar. Runtime import unchanged. UI not started.
+- Resume note: T7.3 UI built/types/lint pass: change-forms.tsx/change-log.tsx/changes-page.tsx, company route /sponsor-compliance/change-of-circumstances; employee Sponsor compliance tab includes CoC log and link to company register. Next write browser scenario for fixed 28 Aug 2026 -> 14 Sep worker / 28 Sep org deadlines, snapshots/reporting and org CRUD/prompt exception, then run affected new scenario + holidays.spec.ts. No screenshots until gate. API/reporting+holiday 13, working-day 12 and migration/doc 7 checks pass.
 
 
 ## Next tasks

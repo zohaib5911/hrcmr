@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { useCan } from "@/components/app/session-context";
+import { EmployeeChanges } from "@/components/compliance/change-log";
 import { FormSheet } from "@/components/company/form-sheet";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -226,6 +227,7 @@ export function SponsorDocumentsTab({ id, onChanged }: { id: string; onChanged: 
             </section>
           );
         })}
+      {can("employee.change_of_circumstances.read") && <EmployeeChanges id={id} />}
       {sheet &&
         (sheet.kind === "record" ? (
           <DocumentSheet
