@@ -97,7 +97,13 @@ test("clock from Home, consent to location, clock out and approve a report's com
   });
   expect(recorded.status(), await recorded.text()).toBe(200);
   await page.goto("/attendance/timesheets");
+  await expect(page.getByRole("button", { name: "Review Ben Clock", exact: true })).toBeVisible();
   await page.getByLabel("Timesheet week containing", { exact: true }).fill("2026-01-05");
+  await expect(
+    page
+      .getByRole("list", { name: "Report timesheets", exact: true })
+      .getByText("7.50", { exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Review Ben Clock", exact: true }).click();
   const sheet = page.getByRole("dialog", { name: "Ben Clock timesheet", exact: true });
   await expect(sheet.getByText("Needs review", { exact: true })).toBeVisible();

@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 18:45, Europe/London    Agent: Codex    Branch: dev    Commit: d861a75
+Updated: 2026-11-03 18:56, Europe/London    Agent: Codex    Branch: dev    Commit: cbb8700
 State: IN PROGRESS
 
 ## Last completed
@@ -11,7 +11,7 @@ State: IN PROGRESS
   - [ ] Full web/unit/script/browser suite (sequentially)
   - [ ] 390/1280 light/dark screenshots and visual review
   - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: Full API658 + corrected architecture/migration/WorkLog19 pass. Full web static/client and unit777 pass; root guard scripts32 pass (child-process test requires normal host execution). Next full Playwright once, then SCREENSHOTS=1 phase9 screenshots (76), visual review/summary/all-green PR. Keep DB pytest and Playwright sequential. Logs: /tmp/phase9-api-full.txt, /tmp/phase9-api-corrected.txt, /tmp/phase9-web-unit.txt, /tmp/phase9-scripts.txt.
+- Resume note: Full Playwright active /tmp/phase9-browser-full.txt (design checks green; two attendance tests hit hydration/filter readiness races, test selectors/waits corrected). No other failures so far. Screenshot spec also awaits template hydration and selected timesheet data. Finish full browser without restarting it, rerun only affected failures, then SCREENSHOTS=1 phase9 screenshots and visual review/summary/PR. API658+corrected19, web777/scripts32/static green.
 
 ## Next tasks
 - T10.1 — company documents

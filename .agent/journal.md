@@ -200,3 +200,4 @@
 2026-11-03 18:43 | Codex | Phase9 gate | full API active /tmp/phase9-api-full.txt, static321/mypy288 pass; 76-image isolated screenshot spec ready and types pass | next full API result then web/browser sequentially
 2026-11-03 18:45 | Codex | Phase9 gate | full API658 pass plus corrected architecture/migration/worklog19, lint/format321/mypy288 and contract pass | next full web/unit/scripts then full browser and 76 screenshots
 2026-11-03 18:47 | Codex | Phase9 gate | full web unit777, static/client and guard scripts32 pass; API658+corrected19 green | next full Playwright once then screenshot spec/visual review/summary/PR
+2026-11-03 18:56 | Codex | Phase9 gate | full browser active, design green; two attendance readiness races corrected with loaded-data waits/visible role selector; screenshot waits hardened | next finish full run then targeted failures and 76 screenshot evidence

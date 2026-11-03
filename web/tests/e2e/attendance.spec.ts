@@ -25,7 +25,8 @@ test("record and update attendance, filter ranges, inspect profile and protect a
   await expect(
     page.getByRole("heading", { level: 1, name: "Attendance", exact: true }),
   ).toBeVisible();
-  await page.getByLabel("Selected day", { exact: true }).fill("2026-11-03");
+  await expect(page.getByText("No attendance recorded", { exact: true })).toBeVisible();
+  await page.getByRole("textbox", { name: "Selected day", exact: true }).fill("2026-11-03");
   await page.getByRole("button", { name: "Record attendance", exact: true }).click();
   const form = page.getByRole("dialog", { name: "Record attendance", exact: true });
   await form.getByLabel("Employee", { exact: true }).selectOption(id);

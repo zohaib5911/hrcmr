@@ -260,6 +260,9 @@ for (const colorScheme of ["light", "dark"] as const) {
         await shoot(page, `attendance-record-${suffix}`, true);
         await page.keyboard.press("Escape");
         await page.goto("/attendance/import");
+        const templateDownload = page.waitForEvent("download");
+        await page.getByRole("button", { name: "Download CSV template", exact: true }).click();
+        await templateDownload;
         await page.getByLabel(/Attendance spreadsheet/).setInputFiles({
           name: "attendance-preview.csv",
           mimeType: "text/csv",
@@ -282,7 +285,15 @@ for (const colorScheme of ["light", "dark"] as const) {
         await expect(page.getByRole("button", { name: "Clock out", exact: true })).toBeVisible();
         await shoot(page, `clock-${suffix}`);
         await page.goto("/attendance/timesheets");
+        await expect(
+          page.getByRole("button", { name: "Review Ben Patel", exact: true }),
+        ).toBeVisible();
         await page.getByLabel("Timesheet week containing", { exact: true }).fill("2026-01-05");
+        await expect(
+          page
+            .getByRole(width === 390 ? "list" : "grid", { name: "Report timesheets", exact: true })
+            .getByText("7.50", { exact: true }),
+        ).toBeVisible();
         await expect(
           page.getByRole("button", { name: "Review Ben Patel", exact: true }),
         ).toBeVisible();
