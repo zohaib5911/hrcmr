@@ -232,6 +232,15 @@ export const NAV_GROUPS: readonly NavGroup[] = [
   ]),
   group("me", "Me", [
     {
+      id: "my-shifts",
+      label: "My shifts",
+      purpose: "Your published working schedule.",
+      href: "/my-shifts",
+      icon: CalendarDays,
+      emptyTitle: "No published shifts",
+      emptyDescription: "Your shifts appear here after your manager publishes the weekly rota.",
+    },
+    {
       id: "my-leave",
       label: "My leave",
       purpose: "Your allowance and time away.",

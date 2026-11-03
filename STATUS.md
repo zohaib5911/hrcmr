@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-03 18:09, Europe/London    Agent: Codex    Branch: dev    Commit: ecb8d4d
+Updated: 2026-11-03 18:16, Europe/London    Agent: Codex    Branch: dev    Commit: fac4c48
 State: IN PROGRESS
 
 ## Last completed
@@ -11,9 +11,9 @@ State: IN PROGRESS
   - [x] Scoped grid and shift write APIs
   - [x] Copy/clear actions and advisory warning APIs
   - [x] Publish notifications/PDF/own projection
-  - [ ] Rota workspace/cell forms/menus and My Shifts
+  - [x] Rota workspace/cell forms/menus and My Shifts
   - [ ] Affected API/browser checks
-- Resume note: Rota backend implemented: scoped publish snapshot merge/digest/own/PDF plus day-off, leave and late-policy integration. API46 run had45 pass and unscoped clock audit count fixed; corrected clock/email12 pass. Earlier grid/RBAC26, action6, migration7/static green; client generated. Next rota workspace/cell forms/copy-clear menus/My Shifts UI and production browser; final affected integration/API/RBAC/static verification before T9.5 done.
+- Resume note: Rota weekly grid/quick-add/cell editor/reassign/search/warnings/totals and copy-clear/publication confirmations plus My Shifts implemented; employee sidebar now points to My Shifts. Backend affected61 pass; migration7/static/mypy282 clean, web types/lint/nav22 pass. Browser workflow ready; run production rota-workspace + rota-settings, fix findings, then finish T9.5 and T9.6.
 
 ## Next tasks
 - T9.6 — Work Log

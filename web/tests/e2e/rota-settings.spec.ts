@@ -7,7 +7,7 @@ test("configure overnight shifts, late policy and regular days off", async ({ pa
   const api = context.request;
   const headers = await csrfHeaders(api);
   await page.goto("/rota");
-  await page.getByRole("link", { name: "Rota settings", exact: true }).click();
+  await page.getByRole("link", { name: "Shift types and settings", exact: true }).click();
   await page.getByRole("radio", { name: "Late policy", exact: true }).click();
   await expect(
     page.getByRole("heading", {
