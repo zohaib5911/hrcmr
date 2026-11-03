@@ -1,26 +1,26 @@
 # STATUS
-Updated: 2026-11-03 17:34, Europe/London    Agent: Codex    Branch: dev    Commit: 0daebc7
+Updated: 2026-11-03 17:47, Europe/London    Agent: Codex    Branch: dev    Commit: b0e5879
 State: IN PROGRESS
 
 ## Last completed
-- T9.2 — scanned imports, atomic bulk entry, XLSX/PDF exports and monthly absences; affected API31, browser/setup4 and static pass
+- T9.3 — clock/PWA, optional consented location and reviewed report timesheet approvals; API/browser/static pass
 
 ## Current task
-- T9.3 — clock in/out and timesheet approvals
-  - [x] Timesheet schema/migration and company geolocation switch
-  - [x] Serialized self-service clock API and scoped stale-safe approval API
-  - [x] Clock/PWA and manager approval UI
-  - [ ] Affected API/browser checks
-- Resume note: Production clock browser reaches enabled location toggle; manifest/192+512 PNG assets and service worker registration pass. Toggle accessible name includes its description; browser selector corrected to prefix match. Clock/consent/reload/out flow passes; mobile axe exposed breadcrumb contrast over translucent chrome. Use primary breadcrumb labels; rerun browser through report approval, then finish T9.3. Prior API39/attendance27/migration7/doc1/static/web25 pass.
+- T9.4 — shift types, late policies and day off patterns
+  - [ ] Models/migration and validation schemas
+  - [ ] Scoped audited settings APIs and affected tests
+  - [ ] Settings tabs/forms and prerequisite empty states
+  - [ ] Production browser/static checks
+- Resume note: Start T9.4 per plan 6.6/8.8/Phase9 and endpoint list. Copy nearby pay/structure CRUD conventions; validate department/designation/shift combinations and overnight breaks. No full suite/screenshots until Phase 9 gate.
 
 ## Next tasks
-- T9.4 — rota settings
-- T9.5 — rota grid and My Shifts
+- T9.5 — rota grid, publish, print and My Shifts
 - T9.6 — Work Log
+- Phase 9 gate — full suite/screenshots/green PR
 
 ## Health
-- CI on dev: Phase 8 all 12 green (41640316888). CI on main: post-merge run pending/not rechecked.
-- Local checks run: API590 plus corrected generated-doc1/affected55 pass; web776 plus corrected shell19/nav22, guard scripts32 pass; browser407 plus four corrected cases and screenshot/setup5 pass. Python/web static, production build and generated contract clean. 48 screenshots saved/reviewed.
+- CI on dev: current head not rechecked; last confirmed gate all 12 green (41640316888). CI on main: not rechecked.
+- Local checks run: T9.2 affected API31/browser4/static/web25 pass. T9.3 API39 + attendance27 + migration7/doc1, Python lint/format/mypy268, web type/lint/client/nav25 and production browser/setup2 (PWA/location/mobile axe) pass.
 
 ## Issues / suggestions
 - Focused pytest invocation must group all tests/db paths before tests outside that directory; interleaving caused a missing database fixture, grouped rerun115 and notification alone1 pass.
