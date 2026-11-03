@@ -15,7 +15,7 @@ State: IN PROGRESS
   - [x] Save/review 36 Phase 7 screenshots at 390 and 1280 px
   - [ ] Write five-line phase summary, open dev → main PR, merge only with all CI green
   - [ ] Set BLOCKED — audit requested and stop
-- Resume note: Local Phase 7 gate complete. API full 479 pass/two failures fixed with 15 affected pass; lint/format/mypy clean. Web 777 + node guards 32 pass; types/lint/generated client pass. Full Playwright 398 pass/148 screenshot skips/four stale shell expectations fixed, shell/setup rerun 68 pass. Final hub/screenshots 6 pass, 36 images reviewed. Next create dev → main PR, wait for ALL CI green, merge with --merge --auto, sync dev and set BLOCKED — audit requested; do not start Phase 8.
+- Resume note: Local Phase 7 gate complete. API full 479 pass/two failures fixed with 15 affected pass; lint/format/mypy clean. Web 777 + node guards 32 pass; types/lint/generated client pass. Full Playwright 398 pass/148 screenshot skips/four stale shell expectations fixed, shell/setup rerun 68 pass. Final hub/screenshots 6 pass, 36 images reviewed. PR #13 https://github.com/zohaib5911/hrcmr/pull/13 open. Next wait for ALL CI green, merge with --merge --auto, sync dev and set BLOCKED — audit requested; do not start Phase 8.
 
 ## Next tasks
 - Phase 7 PR/CI/merge; mandatory owner audit before Phase 8
