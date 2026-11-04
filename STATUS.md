@@ -11,8 +11,8 @@ State: IN PROGRESS
   - [x] Seven scoped report projections and safe XLSX generation
   - [x] Durable queue, worker/API status/download and affected tests
   - [x] Reports workspace and real worker browser harness
-  - [ ] Production browser verification and completion
-- Resume note: Production browser real worker/fresh requests/download/history all passed to mobile axe. Fixed Generate/Download accessible labels to include full visible button text. Setup+reports shell2 pass. Rerun reports.spec.ts only; then complete T10.2. API combined35+final6/migration7/static/client/web types/lint/nav15 green.
+  - [x] Production browser verification and completion
+- Resume note: T10.2 complete. Real-worker production browser/setup2 plus shell1 pass after accessible action label correction; mobile axe/overflow clean. Combined reports/projections/worker/files/docs/OpenAPI35+finalworker6, migration7/static/mypy220/client/webtypes/lint/nav15 pass. Next T10.3 policy wizard/audiences/send/versions/My Documents receipts. Preserve existing My Documents sponsor reminders when integrating policies.
 
 ## Next tasks
 - T10.3 — policies and sign-offs

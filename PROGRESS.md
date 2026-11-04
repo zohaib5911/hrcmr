@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-03
-- **Current task:** T10.2 — reports (T10.1 complete)
+- **Current task:** T10.3 — policies and sign-offs (T10.1–T10.2 complete)
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -332,7 +332,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 ### Phase 10 — Documents, policies and reports
 - [x] **T10.1** Company documents — 2026-11-03. Ten categories, company-local review flags, scoped scanned PDF/image/Word uploads, filtered/paged library, metadata editing and retained archives; file download rechecks current full-scope permission after demotion. Verified API5+related49/migration7, Python/web static/client/nav15, production workflow/setup2 plus shell1, mobile form/archive axe and overflow pass.
-- [ ] **T10.2** Reports
+- [x] **T10.2** Reports — 2026-11-04. Seven fresh tenant XLSX projections with formula-safe text, explicit non-sensitive employee fields and company-local leave/training cutoffs; durable requests, real ARQ generation/recovery, atomic audited artifacts and requester/current-permission downloads; Reports cards/recent polling/download UI. Verified combined API35+finalworker6/projection2/migration7/static/mypy220/client/webtypes/lint/nav15, actual-worker production workflow/setup2 plus shell1 with mobile axe/overflow.
 - [ ] **T10.3** Policies and sign-offs
 - [ ] **T10.4** "Draft with AI" UI and API contract (feature-flagged)
 - [ ] **Phase 10 gate**
