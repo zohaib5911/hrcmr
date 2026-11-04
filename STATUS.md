@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-04 00:20, Europe/London    Agent: Codex    Branch: dev    Commit: bb01e70
+Updated: 2026-11-04 00:24, Europe/London    Agent: Codex    Branch: dev    Commit: 2dae7d4
 State: IN PROGRESS
 
 ## Last completed
@@ -9,12 +9,12 @@ State: IN PROGRESS
 - T10.3 — Policies and sign-offs
   - [x] Relevant baseline and tenant policy/version/receipt schema/contracts
   - [x] Draft/file/audience/send/version/archive API implementation and atomic notifications
-  - [ ] Draft/send/version API regression verification
+  - [x] Draft/send/version API regression verification
   - [ ] Own accept/sign, immutable receipts, authorized viewer and access checks
   - [ ] Deadlines, reminders and automatic new-starter assignments
   - [ ] Policy wizard/list/detail and My Documents integration
   - [ ] Affected API/static and real production browser verification
-- Resume note: Policy service/router now implements scoped draft CRUD, scanned file, current audience preview token, atomic send/outbox/notifications, version cloning and archive. FileService policy ownership guard and employee delete history blocker added; policy inbox kinds included. Lint/types clean; API behavior not yet tested. Next tests/db/test_policies.py for send/tenant/audience/version/rollback/file guards, then own accept/sign/receipt/viewer, deadline/new-starter worker and UI. Baseline23/migration7/schema3+tenant1 already pass.
+- Resume note: Policy draft/file/audience/token-send/version/archive APIs verified: combined46 plus corrected linked-recipient rollback/basic2, schema3+tenant1/migration7/baseline23 and policy lint/types pass. Next own accept/sign/receipt and authorized PDF/image proxy viewer (separate own vs full-policy routes), then deadlines/reminders/new-starter worker and UI. Preserve sponsor reminders in My Documents; add only configured API origin to web frame-src for viewer. No own routes or policy worker/UI yet.
 
 ## Next tasks
 - T10.4 — Draft with AI feature-flagged UI/API contract
