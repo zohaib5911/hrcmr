@@ -8,16 +8,18 @@ from typing import TYPE_CHECKING, Annotated
 from fastapi import APIRouter, Depends, Query, Request, Response, UploadFile
 from sqlalchemy import func, select
 
-from app.core.errors import ForbiddenError
+from app.core.errors import ForbiddenError, NotFoundError
 from app.core.rbac_matrix import Scope
 from app.db.ids import uuid7
 from app.modules.files.models import File
 from app.modules.policies import service
-from app.modules.policies.models import PolicyDocument
+from app.modules.policies.models import PolicyAcceptance, PolicyDocument
+from app.modules.policies.own_router import receipt_out, view_file
 from app.modules.policies.schemas import (
     PolicyDraft,
     PolicyOut,
     PolicyPage,
+    PolicyReceipt,
     PolicyRecipient,
     PolicyRecipients,
     PolicySend,
@@ -219,3 +221,27 @@ async def archive_policy(policy_id: uuid.UUID, access: Writes) -> Response:
         )
     await access.db.commit()
     return Response(status_code=204)
+
+
+@router.get("/{policy_id}/view", response_class=Response)
+async def policy_file_view(policy_id: uuid.UUID, request: Request, access: Reads) -> Response:
+    all_scope(access)
+    return await view_file(request, access, await service.policy(access.db, policy_id))
+
+
+@router.get("/{policy_id}/acceptances/{acceptance_id}/receipt", response_model=PolicyReceipt)
+async def employee_receipt(
+    policy_id: uuid.UUID, acceptance_id: uuid.UUID, access: Reads
+) -> PolicyReceipt:
+    all_scope(access)
+    row = await service.policy(access.db, policy_id)
+    receipt = (
+        await access.db.execute(
+            select(PolicyAcceptance).where(
+                PolicyAcceptance.id == acceptance_id, PolicyAcceptance.policy_document_id == row.id
+            )
+        )
+    ).scalar_one_or_none()
+    if receipt is None:
+        raise NotFoundError
+    return await receipt_out(access, row, receipt)

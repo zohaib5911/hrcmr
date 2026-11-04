@@ -69,6 +69,7 @@ from app.modules.leave.workspace_router import router as leave_workspace_router
 from app.modules.leave.year_end_router import router as leave_year_end_router
 from app.modules.notifications.router import router as notifications_router
 from app.modules.pay.router import router as pay_router
+from app.modules.policies.own_router import router as own_policies_router
 from app.modules.policies.router import router as policies_router
 from app.modules.reports.router import router as reports_router
 from app.modules.rota.action_router import router as rota_action_router
@@ -236,6 +237,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(employees_router, prefix=API_PREFIX)
     app.include_router(personal_router, prefix=API_PREFIX)
     app.include_router(employment_router, prefix=API_PREFIX)
+    app.include_router(own_policies_router, prefix=API_PREFIX)
     app.include_router(policies_router, prefix=API_PREFIX)
     app.include_router(reports_router, prefix=API_PREFIX)
     app.include_router(documents_router, prefix=API_PREFIX)

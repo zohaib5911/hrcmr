@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-04 00:24, Europe/London    Agent: Codex    Branch: dev    Commit: 2dae7d4
+Updated: 2026-11-04 00:33, Europe/London    Agent: Codex    Branch: dev    Commit: 6bbf4c9
 State: IN PROGRESS
 
 ## Last completed
@@ -10,11 +10,11 @@ State: IN PROGRESS
   - [x] Relevant baseline and tenant policy/version/receipt schema/contracts
   - [x] Draft/file/audience/send/version/archive API implementation and atomic notifications
   - [x] Draft/send/version API regression verification
-  - [ ] Own accept/sign, immutable receipts, authorized viewer and access checks
+  - [x] Own accept/sign, immutable receipts, authorized viewer and access checks
   - [ ] Deadlines, reminders and automatic new-starter assignments
   - [ ] Policy wizard/list/detail and My Documents integration
   - [ ] Affected API/static and real production browser verification
-- Resume note: Policy draft/file/audience/token-send/version/archive APIs verified: combined46 plus corrected linked-recipient rollback/basic2, schema3+tenant1/migration7/baseline23 and policy lint/types pass. Next own accept/sign/receipt and authorized PDF/image proxy viewer (separate own vs full-policy routes), then deadlines/reminders/new-starter worker and UI. Preserve sponsor reminders in My Documents; add only configured API origin to web frame-src for viewer. No own routes or policy worker/UI yet.
+- Resume note: Own policy list/summary, explicit accept/sign, encrypted immutable receipts, private scan-gated PDF/image proxy and download APIs implemented; combinedOwn/policy/schema/files/OpenAPI32, lint/types pass. Full-policy viewer/receipt endpoints included. Next manual reminders plus scheduled overdue/new-starter reconciliation, then policy wizard/list/detail and My Documents policy section (preserve sponsor reminders). Viewer frontend must allow only configured API origin in frame-src; CSP proxy restricts frame-ancestors to configured web origin. No policy worker/UI yet.
 
 ## Next tasks
 - T10.4 — Draft with AI feature-flagged UI/API contract

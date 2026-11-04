@@ -135,3 +135,8 @@ class PolicySend(RequestModel):
 
 class PolicyAction(BaseModel):
     count: int
+
+
+class OwnPolicyPage(BaseModel):
+    items: list[OwnPolicy]
+    total: int
