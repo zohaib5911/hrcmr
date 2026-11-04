@@ -1,22 +1,24 @@
 # STATUS
-Updated: 2026-11-03 23:33, Europe/London    Agent: Codex    Branch: dev    Commit: 35d703d
+Updated: 2026-11-03 23:33, Europe/London    Agent: Codex    Branch: dev    Commit: 9620587
 State: IN PROGRESS
 
 ## Last completed
-- T10.1 — Company document library complete; API5+related49/migration7/static/client/nav15/browser3 pass.
+- T10.2 — Seven fresh private worker XLSX reports complete; backend35+worker6/migration7/static/nav15/real-worker browser3 pass.
 
 ## Current task
-- T10.2 — Worker-generated XLSX reports
-  - [x] Existing worker baseline and report schema/contracts
-  - [x] Seven scoped report projections and safe XLSX generation
-  - [x] Durable queue, worker/API status/download and affected tests
-  - [x] Reports workspace and real worker browser harness
-  - [x] Production browser verification and completion
-- Resume note: T10.2 complete. Real-worker production browser/setup2 plus shell1 pass after accessible action label correction; mobile axe/overflow clean. Combined reports/projections/worker/files/docs/OpenAPI35+finalworker6, migration7/static/mypy220/client/webtypes/lint/nav15 pass. Next T10.3 policy wizard/audiences/send/versions/My Documents receipts. Preserve existing My Documents sponsor reminders when integrating policies.
+- T10.3 — Policies and sign-offs
+  - [ ] Relevant baseline and tenant policy/version/receipt schema/contracts
+  - [ ] Draft/file/audience/send/version/archive APIs and atomic notifications
+  - [ ] Own accept/sign, immutable receipts, authorized viewer and access checks
+  - [ ] Deadlines, reminders and automatic new-starter assignments
+  - [ ] Policy wizard/list/detail and My Documents integration
+  - [ ] Affected API/static and real production browser verification
+- Resume note: Read plan6.7/8.10/T10.3 and policy permissions. No policy code yet. My Documents already hosts sponsor reminders; preserve them while adding policy assignments/viewer/receipts. Reports e2e server now runs the real ARQ report worker; never overlap DB pytest and Playwright.
 
 ## Next tasks
-- T10.3 — policies and sign-offs
 - T10.4 — Draft with AI feature-flagged UI/API contract
+- Phase 10 gate — full validation/screenshots/green PR
+- T11.1 — requisitions
 
 ## Health
 - CI on dev: green (all12;41737189830)    CI on main: merged green PR15; main push run not checked
