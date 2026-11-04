@@ -12,7 +12,7 @@ State: IN PROGRESS
   - [x] Durable queue, worker/API status/download and affected tests
   - [x] Reports workspace and real worker browser harness
   - [ ] Production browser verification and completion
-- Resume note: Reports UI (7 generate cards/recent polling/fresh download) and actual ARQ report worker in isolated e2e server ready. UI/e2e lint/types/nav15 pass; API combined35+final6/projection2/migration7/mypy220/client green. Next pnpm playwright reports.spec.ts plus reports shell case (no screenshots until phase gate); then completion. DB pytest finished; browser may run safely.
+- Resume note: Production browser real worker/fresh requests/download/history all passed to mobile axe. Fixed Generate/Download accessible labels to include full visible button text. Setup+reports shell2 pass. Rerun reports.spec.ts only; then complete T10.2. API combined35+final6/migration7/static/client/web types/lint/nav15 green.
 
 ## Next tasks
 - T10.3 — policies and sign-offs

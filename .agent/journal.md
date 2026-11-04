@@ -224,3 +224,4 @@
 2026-11-03 23:52 | Codex | T10.2 | all7 scoped projections and bounded formula-safe XLSX ready; projection2/privacy/tenant/as-of/size/static/types pass | next durable queue worker and scoped API/tests
 2026-11-03 23:57 | Codex | T10.2 | scoped report API/private artifacts, actual ARQ generation/recovery and audit/storage rollback ready; combined35+final6/static/mypy220/client pass | next Reports UI and real worker browser
 2026-11-04 00:01 | Codex | T10.2 | Reports UI and real ARQ e2e worker harness ready; web/static/types/nav15 and e2e-server typing pass | next production report workflow/shell browser
+2026-11-04 00:03 | Codex | T10.2 | real worker production requests/download/fresh jobs/history pass; corrected Generate/Download accessible label text after mobile axe | next final browser and completion

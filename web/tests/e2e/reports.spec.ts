@@ -26,19 +26,25 @@ test("request worker-generated reports, download fresh files and keep recent job
   await expect(
     page.getByRole("list", { name: "Available reports", exact: true }).getByRole("button"),
   ).toHaveCount(7);
-  await page.getByRole("button", { name: "Generate Employee Directory", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Generate report: Employee Directory", exact: true })
+    .click();
   const files = page.getByRole("region", { name: "Your report files", exact: true });
   await expect(files.getByText("Ready", { exact: true })).toBeVisible({ timeout: 20_000 });
   const requestJob = (await (await context.request.get(`${API}/reports/jobs`)).json())[0];
   expect(requestJob.status).toBe("ready");
   const download = page.waitForEvent("download");
-  await files.getByRole("button", { name: /^Download Employee Directory requested / }).click();
+  await files
+    .getByRole("button", { name: /^Download XLSX: Employee Directory requested / })
+    .click();
   expect((await download).suggestedFilename()).toMatch(/^employee_directory-.*\.xlsx$/);
   const status = await context.request.get(`${API}/reports/jobs/${requestJob.id}`);
   expect(status.status(), await status.text()).toBe(200);
   expect((await status.json()).expires_in).toBe(60);
   // A second request must produce a fresh durable job rather than reuse the previous file.
-  await page.getByRole("button", { name: "Generate Employee Directory", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Generate report: Employee Directory", exact: true })
+    .click();
   await expect(files.getByText("Ready", { exact: true })).toHaveCount(2, { timeout: 20_000 });
   const jobs = await (await context.request.get(`${API}/reports/jobs`)).json();
   expect(jobs).toHaveLength(2);
@@ -46,7 +52,7 @@ test("request worker-generated reports, download fresh files and keep recent job
   await page.reload();
   await expect(files.getByText("Ready", { exact: true })).toHaveCount(2);
   await page.setViewportSize({ width: 390, height: 900 });
-  await page.getByRole("button", { name: "Generate Company Report", exact: true }).click();
+  await page.getByRole("button", { name: "Generate report: Company Report", exact: true }).click();
   await expect(files.getByText("Ready", { exact: true })).toHaveCount(3, { timeout: 20_000 });
   await audit(page, "mobile reports and worker files");
   expect(

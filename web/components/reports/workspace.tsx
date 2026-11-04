@@ -150,7 +150,7 @@ export function ReportsWorkspace() {
           <Button
             variant="gray"
             size="sm"
-            aria-label={`Download ${titleFor(j.report_type)} requested ${j.created_at}`}
+            aria-label={`Download XLSX: ${titleFor(j.report_type)} requested ${j.created_at}`}
             loading={downloading === j.id}
             onClick={() => void download(j)}
           >
@@ -187,7 +187,7 @@ export function ReportsWorkspace() {
                 <p className="text-callout text-label-secondary flex-1">{report.description}</p>
                 <Button
                   variant="gray"
-                  aria-label={`Generate ${report.title}`}
+                  aria-label={`Generate report: ${report.title}`}
                   disabled={requesting !== null}
                   loading={requesting === report.kind}
                   onClick={() => void generate(report.kind)}
