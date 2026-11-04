@@ -1,7 +1,8 @@
 """The API for the browser tests: ``uv run python -m tests.e2e_server`` (started by Playwright).
 
 It gets its own throwaway database (migrated, with the app roles), random secrets, and sends every
-e-mail straight to Mailpit, so no worker has to run. Everything it creates is dropped when it stops.
+e-mail straight to Mailpit. A real ARQ report worker shares its isolated database and Redis.
+Everything it creates is dropped when it stops.
 The local Postgres, Redis, Mailpit, RustFS and ClamAV test services must be running.
 """
 
@@ -10,8 +11,12 @@ from __future__ import annotations
 import asyncio
 import os
 import secrets
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager, suppress
 
 import uvicorn
+from arq.worker import Worker
+from fastapi import FastAPI
 from redis import Redis
 from sqlalchemy.pool import NullPool
 
@@ -19,6 +24,9 @@ from app.core.config import Settings
 from app.core.crypto import KeyRing, set_keyring
 from app.core.logging import configure_logging
 from app.integrations.email import Message, SmtpTransport
+from app.jobs.audit import JobAudit
+from app.jobs.queue import open_queue
+from app.jobs.scheduled import functions
 from app.main import create_app
 from app.modules.email.outbox import sender_of
 from app.modules.email.templates import render
@@ -93,6 +101,40 @@ def main() -> None:
         app = create_app(
             settings, mailer=DirectMailer(SmtpTransport(SMTP_HOST, SMTP_PORT), settings)
         )
+        original_lifespan = app.router.lifespan_context
+
+        @asynccontextmanager
+        async def with_report_worker(app: FastAPI) -> AsyncIterator[None]:
+            async with original_lifespan(app):
+                owner = engine_for(database.owner_url, poolclass=NullPool)
+                queue = await open_queue(settings)
+                worker = Worker(
+                    functions=[
+                        function for function in functions() if function.name == "generate_report"
+                    ],
+                    redis_pool=queue._pool,
+                    handle_signals=False,
+                    poll_delay=0.05,
+                    ctx={
+                        "engine": app.state.engine,
+                        "owner_engine": owner,
+                        "storage": app.state.files.storage,
+                        "audit": JobAudit(owner),
+                    },
+                )
+                task = asyncio.create_task(worker.async_run())
+                try:
+                    yield
+                finally:
+                    with suppress(asyncio.CancelledError):
+                        await worker.close()
+                    task.cancel()
+                    with suppress(asyncio.CancelledError):
+                        await task
+                    await queue.close()
+                    await owner.dispose()
+
+        app.router.lifespan_context = with_report_worker
         uvicorn.run(app, host="127.0.0.1", port=API_PORT, log_level="warning")
 
 

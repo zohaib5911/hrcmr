@@ -10,8 +10,9 @@ State: IN PROGRESS
   - [x] Existing worker baseline and report schema/contracts
   - [x] Seven scoped report projections and safe XLSX generation
   - [x] Durable queue, worker/API status/download and affected tests
-  - [ ] Reports workspace and real worker/browser verification
-- Resume note: Report enqueue/status/recent API, real ARQ generation/recovery and private File artifacts ready; combined reports/projections/worker/files/docs/OpenAPI35 plus final worker6 pass, mypy220/ruff/client clean. Next Reports workspace (7 request cards, recent jobs/poll/download), then real worker production browser. E2E API currently has no worker; extend tests.e2e_server with a real ARQ report worker using isolated Redis12 and its test engines/storage. No Playwright while DB pytest runs (now finished).
+  - [x] Reports workspace and real worker browser harness
+  - [ ] Production browser verification and completion
+- Resume note: Reports UI (7 generate cards/recent polling/fresh download) and actual ARQ report worker in isolated e2e server ready. UI/e2e lint/types/nav15 pass; API combined35+final6/projection2/migration7/mypy220/client green. Next pnpm playwright reports.spec.ts plus reports shell case (no screenshots until phase gate); then completion. DB pytest finished; browser may run safely.
 
 ## Next tasks
 - T10.3 — policies and sign-offs
