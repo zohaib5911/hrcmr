@@ -59,6 +59,8 @@ IDENTITY_TABLES = [
     "pay_schedules",
     "payment_types",
     "platform_admins",
+    "policy_acceptances",
+    "policy_documents",
     "reminders",
     "report_jobs",
     "rota_weeks",
@@ -85,6 +87,8 @@ IDENTITY_FUNCTIONS = {
     "reminders_immutable",
     "leave_ledger_immutable",
     "leave_year_end_immutable",
+    "policy_documents_frozen",
+    "policy_acceptances_frozen",
 }
 
 
