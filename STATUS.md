@@ -1,5 +1,5 @@
 # STATUS
-Updated: 2026-11-04 00:12, Europe/London    Agent: Codex    Branch: dev    Commit: f37f781
+Updated: 2026-11-04 00:20, Europe/London    Agent: Codex    Branch: dev    Commit: bb01e70
 State: IN PROGRESS
 
 ## Last completed
@@ -8,12 +8,13 @@ State: IN PROGRESS
 ## Current task
 - T10.3 — Policies and sign-offs
   - [x] Relevant baseline and tenant policy/version/receipt schema/contracts
-  - [ ] Draft/file/audience/send/version/archive APIs and atomic notifications
+  - [x] Draft/file/audience/send/version/archive API implementation and atomic notifications
+  - [ ] Draft/send/version API regression verification
   - [ ] Own accept/sign, immutable receipts, authorized viewer and access checks
   - [ ] Deadlines, reminders and automatic new-starter assignments
   - [ ] Policy wizard/list/detail and My Documents integration
   - [ ] Affected API/static and real production browser verification
-- Resume note: T10.3 model/contracts and migration0032 ready; baseline23/migration7/schema3+tenant1/static/types pass. Sent versions frozen except archive; completed receipts and assignment identity/deadlines frozen; typed signatures encrypted. No policy routes/worker/UI wired yet. Next draft/file/audience/send/version/archive APIs with atomic notification/outbox, then own acceptance/receipt/viewer. Preserve existing My Documents sponsor reminders. Do not overlap DB pytest and Playwright.
+- Resume note: Policy service/router now implements scoped draft CRUD, scanned file, current audience preview token, atomic send/outbox/notifications, version cloning and archive. FileService policy ownership guard and employee delete history blocker added; policy inbox kinds included. Lint/types clean; API behavior not yet tested. Next tests/db/test_policies.py for send/tenant/audience/version/rollback/file guards, then own accept/sign/receipt/viewer, deadline/new-starter worker and UI. Baseline23/migration7/schema3+tenant1 already pass.
 
 ## Next tasks
 - T10.4 — Draft with AI feature-flagged UI/API contract
@@ -28,6 +29,8 @@ State: IN PROGRESS
 - Never overlap DB pytest and Playwright: both provision shared PostgreSQL role passwords. Group DB test paths before other tests.
 - Remove dependency cooldown exceptions when due: brotli after2026-11-05, certifi after2026-11-06, pypdf after2026-11-12.
 - Browser assertions must wait for hydrated data and target visible roles: Next streaming can briefly retain hidden server copies. Audit document IDs after streamed copies are removed.
+
+- Audit follow-up: rota publish inserts rota.published notifications, but notifications/router.py _kinds currently omits that kind; policy changes only added policy kinds.
 
 ## Strategy / decisions taken
 - Reports are generated fresh by the worker with full report permission rechecked at execution/download. Employee Detail excludes pay and sensitive identifiers. Training Completion uses current employee training records until Phase15 learning assignments exist.

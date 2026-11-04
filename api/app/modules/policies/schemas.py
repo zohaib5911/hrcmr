@@ -18,7 +18,10 @@ from app.modules.policies.reference import (
     PolicyStatus,
 )
 
-Title = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
+Title = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=1, max_length=200, pattern=r"^[^\r\n]+$"),
+]
 
 
 class PolicyDraft(RequestModel):
@@ -114,3 +117,21 @@ class OwnPolicySummary(BaseModel):
     pending: int
     overdue: int
     completed: int
+
+
+class PolicyPage(BaseModel):
+    items: list[PolicyOut]
+    total: int
+
+
+class PolicyRecipients(BaseModel):
+    items: list[PolicyRecipient]
+    preview_token: str
+
+
+class PolicySend(RequestModel):
+    preview_token: str = Field(min_length=64, max_length=64, pattern=r"^[a-f0-9]{64}$")
+
+
+class PolicyAction(BaseModel):
+    count: int
