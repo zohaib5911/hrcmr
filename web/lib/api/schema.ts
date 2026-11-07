@@ -4417,6 +4417,78 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/soc/checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Checks */
+        get: operations["soc_list_checks"];
+        put?: never;
+        /**
+         * Create Check
+         * @description Saves a draft: the rules engine's answer for this code, on the live rules version.
+         */
+        post: operations["soc_create_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/soc/checks/{check_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Check */
+        get: operations["soc_read_check"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/soc/checks/{check_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Check */
+        post: operations["soc_confirm_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/soc/checks/{check_id}/report.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Check Report */
+        get: operations["soc_check_report"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/soc/match": {
         parameters: {
             query?: never;
@@ -10613,6 +10685,19 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** SocCheckCreateIn */
+        SocCheckCreateIn: {
+            check: components["schemas"]["SocCheckIn"];
+            /**
+             * Job Description
+             * @default
+             */
+            job_description: string;
+            /** Job Title */
+            job_title: string;
+            /** Soc Code */
+            soc_code: string;
+        };
         /** SocCheckIn */
         SocCheckIn: {
             applicant?: components["schemas"]["SocApplicantIn"];
@@ -10636,6 +10721,80 @@ export interface components {
              * @enum {string}
              */
             work_nation: "England" | "Scotland" | "Wales" | "Northern Ireland";
+        };
+        /** SocCheckListOut */
+        SocCheckListOut: {
+            /** Items */
+            items: components["schemas"]["SocCheckSummaryOut"][];
+        };
+        /** SocCheckOut */
+        SocCheckOut: {
+            /** Confirmed At */
+            confirmed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Eligibility */
+            eligibility: string;
+            /** Id */
+            id: string;
+            /** Inputs */
+            inputs: {
+                [key: string]: unknown;
+            };
+            /** Job Description */
+            job_description: string;
+            /** Job Title */
+            job_title: string;
+            result: components["schemas"]["CheckResult"];
+            /**
+             * Rules Effective From
+             * Format: date
+             */
+            rules_effective_from: string;
+            /** Rules Version Name */
+            rules_version_name: string;
+            /** Soc Code */
+            soc_code: string;
+            /** Soc Title */
+            soc_title: string;
+            /** Status */
+            status: string;
+            /** Verdict Meets */
+            verdict_meets: boolean | null;
+        };
+        /** SocCheckSummaryOut */
+        SocCheckSummaryOut: {
+            /** Confirmed At */
+            confirmed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Eligibility */
+            eligibility: string;
+            /** Id */
+            id: string;
+            /** Job Title */
+            job_title: string;
+            /**
+             * Rules Effective From
+             * Format: date
+             */
+            rules_effective_from: string;
+            /** Rules Version Name */
+            rules_version_name: string;
+            /** Soc Code */
+            soc_code: string;
+            /** Soc Title */
+            soc_title: string;
+            /** Status */
+            status: string;
+            /** Verdict Meets */
+            verdict_meets: boolean | null;
         };
         /** SocCvEvidenceOut */
         SocCvEvidenceOut: {
@@ -25114,6 +25273,204 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["TwoStepPolicy"];
                 };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_list_checks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SocCheckListOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_create_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SocCheckCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SocCheckOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_read_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                check_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SocCheckOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_confirm_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                check_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SocCheckOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_check_report: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                check_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description The request could not be completed. `error.code` says why. */
             "4XX": {

@@ -87,6 +87,7 @@ IDENTITY_TABLES = [
     "sessions",
     "shift_types",
     "shortage_list_entries",
+    "soc_checks",
     "soc_index_entries",
     "soc_unit_groups",
     "sponsor_documents",

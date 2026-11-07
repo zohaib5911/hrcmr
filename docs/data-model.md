@@ -1758,6 +1758,35 @@ Checks:
 - `list in ('TSL', 'ISL')`
 - `soc_code ~ '^[1-9][0-9]{3}$'`
 
+## `soc_checks`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `status` | VARCHAR(12) | no | `draft` |  |
+| `job_title` | VARCHAR(200) | no |  |  |
+| `job_description` | TEXT | no | `` |  |
+| `soc_code` | VARCHAR(4) | no |  | references `soc_unit_groups` |
+| `soc_title` | TEXT | no |  |  |
+| `rules_version_id` | UUID | no |  | references `rules_versions` |
+| `rules_version_name` | VARCHAR(200) | no |  |  |
+| `rules_effective_from` | DATE | no |  |  |
+| `inputs` | JSONB | no |  |  |
+| `result` | JSONB | no |  |  |
+| `confirmed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `confirmed_by` | UUID | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(status = 'confirmed') = (confirmed_at is not null)`
+- `soc_code ~ '^[1-9][0-9]{3}$'`
+- `status in ('draft', 'confirmed')`
+
 ## `soc_index_entries`
 
 | Column | Type | Null | Default | Notes |

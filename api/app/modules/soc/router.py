@@ -130,7 +130,7 @@ async def _vector(request: Request, text: str) -> list[float]:
         raise AppError("SOC_SEARCH_UNAVAILABLE", SEARCH_UNAVAILABLE, status_code=503) from exc
 
 
-def _check_input(check: SocCheckIn, code: str, today: date) -> CheckInput:
+def check_input(check: SocCheckIn, code: str, today: date) -> CheckInput:
     return CheckInput(
         soc_code=code,
         weekly_hours=check.weekly_hours,
@@ -209,7 +209,7 @@ async def match(body: SocMatchIn, request: Request, access: Matcher) -> SocMatch
     today = datetime.now(ZONE).date()
     try:
         checks = [
-            evaluate(rules, _check_input(body.check, item.candidate.code, today))
+            evaluate(rules, check_input(body.check, item.candidate.code, today))
             for item in outcome.items[:TOP_CHECKS]
         ]
     except ValueError as exc:

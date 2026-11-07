@@ -7,12 +7,26 @@ embedding (fastembed, 384 dimensions) for vector retrieval in T15.4.
 
 from __future__ import annotations
 
+import uuid  # noqa: TC003  (SQLAlchemy resolves the Mapped[...] annotations at runtime)
+from datetime import date, datetime  # noqa: TC003  (same)
+from typing import Any
+
 from pgvector.sqlalchemy import Vector
-from sqlalchemy import CheckConstraint, ForeignKey, Index, String, Text, UniqueConstraint
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import (
+    CheckConstraint,
+    Date,
+    DateTime,
+    ForeignKey,
+    Index,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+)
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.base import Base, RecordMixin
+from app.db.base import Base, RecordMixin, TenantMixin
 
 EMBEDDING_DIMENSIONS = 384
 
@@ -64,3 +78,38 @@ class SocIndexEntry(Base, RecordMixin):
         index=True,
     )
     embedding: Mapped[list[float]] = mapped_column(Vector(EMBEDDING_DIMENSIONS), nullable=False)
+
+
+class SocCheck(Base, RecordMixin, TenantMixin):
+    """A sponsorship checker run the company keeps (plan 8.17, T15.6).
+
+    ``result`` is the rules engine's answer on the rules version named here, so a later rules change
+    does not rewrite a saved check. The row is a draft until someone confirms the code.
+    """
+
+    __tablename__ = "soc_checks"
+    __table_args__ = (
+        CheckConstraint("status in ('draft', 'confirmed')", name="status"),
+        CheckConstraint("soc_code ~ '^[1-9][0-9]{3}$'", name="soc_code"),
+        CheckConstraint("(status = 'confirmed') = (confirmed_at is not null)", name="confirmed_at"),
+    )
+
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    status: Mapped[str] = mapped_column(String(12), nullable=False, server_default="draft")
+    job_title: Mapped[str] = mapped_column(String(200), nullable=False)
+    job_description: Mapped[str] = mapped_column(Text, nullable=False, server_default="")
+    soc_code: Mapped[str] = mapped_column(
+        String(4), ForeignKey("soc_unit_groups.code", ondelete="RESTRICT"), nullable=False
+    )
+    soc_title: Mapped[str] = mapped_column(Text, nullable=False)
+    rules_version_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("rules_versions.id", ondelete="RESTRICT"), nullable=False
+    )
+    rules_version_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    rules_effective_from: Mapped[date] = mapped_column(Date, nullable=False)
+    inputs: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    result: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
+    confirmed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    confirmed_by: Mapped[uuid.UUID | None] = mapped_column(Uuid)
