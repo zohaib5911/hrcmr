@@ -2,17 +2,21 @@
 
 from __future__ import annotations
 
+import asyncio
 import uuid  # noqa: TC003
+from datetime import UTC, datetime
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy import func, select
 
 from app.core.errors import ConflictError
 from app.core.rbac_matrix import scope_for
 from app.db.ids import uuid7
+from app.modules.employees.record_pdf import render_pdf
 from app.modules.organogram import service
 from app.modules.organogram.models import OrganogramLevel
+from app.modules.organogram.pdf import org_chart_html
 from app.modules.organogram.schemas import LevelIn, LevelOut, LevelPatch, OrgChartOut
 from app.modules.rbac.deps import Access, require
 
@@ -35,6 +39,34 @@ async def org_chart(access: Reads) -> OrgChartOut:
     with_rtw = scope_for(access.role, "employee.rtw.read") is not None
     tree = await service.org_chart(access.db, access.company_id, with_rtw=with_rtw)
     return OrgChartOut(rtw_visible=with_rtw, unassigned=tree)
+
+
+@router.get(
+    "/organogram.pdf",
+    response_class=Response,
+    responses={200: {"content": {"application/pdf": {}}, "description": "The org chart as a PDF"}},
+)
+async def org_chart_pdf(access: Reads) -> Response:
+    with_rtw = scope_for(access.role, "employee.rtw.read") is not None
+    tree = await service.org_chart(access.db, access.company_id, with_rtw=with_rtw)
+    generated = datetime.now(UTC).strftime("%d %b %Y %H:%M UTC")
+    html = org_chart_html(
+        [person.model_dump(mode="json") for person in tree],
+        generated=generated,
+        rtw_visible=with_rtw,
+    )
+    pdf = await asyncio.to_thread(render_pdf, html)
+    await access.audit("organogram.exported")
+    await access.db.commit()
+    return Response(
+        pdf,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": 'attachment; filename="org-chart.pdf"',
+            "Cache-Control": "private, no-store",
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
 
 
 @router.get("/organogram/levels", response_model=list[LevelOut])

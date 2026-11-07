@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Org chart</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 18mm;
+        @bottom-right {
+          content: "Page " counter(page) " of " counter(pages);
+          font-size: 9pt;
+        }
+      }
+      body {
+        font-family: "DejaVu Sans", sans-serif;
+        font-size: 10pt;
+        color: #1c1c1e;
+      }
+      h1 {
+        font-size: 20pt;
+        margin-bottom: 4pt;
+      }
+      .meta {
+        color: #555;
+        margin-top: 0;
+      }
+      ul {
+        list-style: none;
+        margin: 2pt 0 2pt 9mm;
+        padding: 0;
+        border-left: 1px solid #ccc;
+      }
+      ul.top {
+        margin-left: 0;
+        border-left: none;
+      }
+      li {
+        padding-left: 4mm;
+      }
+      .person {
+        padding: 3pt 0;
+        border-bottom: 1px solid #eee;
+        overflow-wrap: anywhere;
+        page-break-inside: avoid;
+      }
+      .name {
+        font-weight: bold;
+      }
+      .detail {
+        color: #555;
+        font-size: 9pt;
+      }
+      .chip {
+        display: inline-block;
+        border: 1px solid #999;
+        border-radius: 3pt;
+        padding: 0 4pt;
+        margin-left: 4pt;
+        font-size: 8pt;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Org chart</h1>
+    <p class="meta">{{ count }} people · Generated {{ generated }}</p>
+    <p class="meta">Each line shows a person's name, job title, department, hierarchy level and,
+      where the viewer may see it, right to work status. Reporting lines follow the Reporting
+      Authority set on each person's current role.</p>
+    {% macro branch(person) -%}
+    <li>
+      <div class="person">
+        <span class="name">{{ person.name }}</span>
+        {%- if person.job_title %} <span class="detail">{{ person.job_title }}</span>{% endif -%}
+        {%- if person.department %} <span class="detail">· {{ person.department }}</span>{% endif -%}
+        {%- if person.level %} <span class="chip">{{ person.level }}</span>{% endif -%}
+        {%- if rtw_visible and person.rtw_status %}
+        <span class="chip">RTW: {{ person.rtw_status | replace("_", " ") }}</span>
+        {%- endif %}
+      </div>
+      {%- if person.reports %}
+      <ul>
+        {%- for report in person.reports %}{{ branch(report) }}{% endfor -%}
+      </ul>
+      {%- endif %}
+    </li>
+    {%- endmacro %}
+    {% if people %}
+    <h2>Unassigned</h2>
+    <p class="meta">People without a Reporting Authority, and the people who report to them.</p>
+    <ul class="top">
+      {%- for person in people %}{{ branch(person) }}{% endfor -%}
+    </ul>
+    {% else %}
+    <p>Nobody is in the chart yet.</p>
+    {% endif %}
+  </body>
+</html>

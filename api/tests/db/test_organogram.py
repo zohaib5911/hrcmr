@@ -3,9 +3,11 @@ employee.rtw.read, hierarchy levels are CRUD with their own permissions, and ten
 
 from __future__ import annotations
 
+import io
 import uuid
 from typing import Any
 
+from pypdf import PdfReader
 from sqlalchemy import text
 
 from tests.db.test_employee_documents import rig as rig
@@ -227,3 +229,26 @@ async def test_another_company_sees_no_one_here_and_cannot_touch_the_levels(
     assert (await admin_b.delete(base)).status_code == 404
     still = (await admin_a.get(f"{API}/organogram/levels")).json()
     assert level["id"] in [row["id"] for row in still]
+
+
+async def test_the_org_chart_pdf_runs_over_pages_and_names_everyone(rig: dict[str, Any]) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    manager = await rig["person"]("people_manager", rig["a"])
+    employee = await rig["person"]("employee", rig["a"])
+    stamp = uuid.uuid4().hex[:6]
+    boss = await _person(rig, rig["a"], "Top", f"Boss{stamp}")
+    for number in range(59):  # 60 people in all
+        await _person(rig, rig["a"], "Staff", f"Member{number:02d}x{stamp}", manager=boss)
+
+    response = await admin.get(f"{API}/organogram.pdf")
+    assert response.status_code == 200, response.text
+    assert response.headers["content-type"] == "application/pdf"
+    assert response.content.startswith(b"%PDF")
+    assert "no-store" in response.headers["cache-control"]
+    reader = PdfReader(io.BytesIO(response.content))
+    assert len(reader.pages) >= 2
+    text_out = "\n".join(page.extract_text() for page in reader.pages)
+    assert f"Member00x{stamp}" in text_out
+    assert f"Member58x{stamp}" in text_out
+    assert (await manager.get(f"{API}/organogram.pdf")).status_code == 200
+    assert (await employee.get(f"{API}/organogram.pdf")).status_code == 403

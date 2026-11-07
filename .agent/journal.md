@@ -265,3 +265,4 @@
 2026-11-07 10:11 | Claude (Haiku) | T12.1 | migration test table list updated (organogram_levels); targeted suites pass; odd 3-file subset errors in auth tests (order-dependent) | next full API suite in default order
 2026-11-07 10:17 | Claude (Haiku) | T12.1 | DONE: full API suite 802 pass, 0 fail; ticked in micro_plan and PROGRESS | next bash .agent/next.sh
 2026-11-07 10:17 | Claude (Haiku) | T12.2 | started: STATUS with sub-steps 1-4 | next step 1 GET /organogram.pdf (copy record_pdf.py)
+2026-11-07 10:19 | Claude (Haiku) | T12.2 | step 1 done: GET /organogram.pdf (WeasyPrint, template, audit) ; organogram 7 pass incl 60-person multi-page PDF; openapi+rbac enforcement 40 pass | next web canvas (step 2)
