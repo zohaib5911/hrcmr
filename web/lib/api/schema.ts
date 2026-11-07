@@ -36,6 +36,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/ai/letters/docx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Download Docx */
+        post: operations["ai_download_docx"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/letters/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Draft */
+        post: operations["ai_create_draft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/attendance-records": {
         parameters: {
             query?: never;
@@ -6792,6 +6826,51 @@ export interface components {
             /** Rule Text */
             rule_text?: string | null;
         };
+        /** LetterDocxIn */
+        LetterDocxIn: {
+            /** Body */
+            body: string;
+            /** Title */
+            title: string;
+        };
+        /** LetterDraftIn */
+        LetterDraftIn: {
+            /** Key Points */
+            key_points?: string[];
+            /**
+             * Letter Type
+             * @enum {string}
+             */
+            letter_type: "offer" | "welcome" | "disciplinary" | "written_warning" | "policy_explainer" | "reference" | "termination";
+            /**
+             * Tone
+             * @default neutral
+             * @enum {string}
+             */
+            tone: "formal" | "neutral" | "friendly";
+        };
+        /** LetterDraftOut */
+        LetterDraftOut: {
+            /** Body */
+            body: string;
+            /**
+             * Letter Type
+             * @enum {string}
+             */
+            letter_type: "offer" | "welcome" | "disciplinary" | "written_warning" | "policy_explainer" | "reference" | "termination";
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "template" | "ai";
+            /** Title */
+            title: string;
+            /**
+             * Tone
+             * @enum {string}
+             */
+            tone: "formal" | "neutral" | "friendly";
+        };
         /** LocationIn */
         LocationIn: {
             /** Address Line1 */
@@ -6894,6 +6973,8 @@ export interface components {
         MeResponse: {
             /** Active Company Id */
             active_company_id: string | null;
+            /** Ai Available */
+            ai_available: boolean;
             /** Companies */
             companies: components["schemas"]["CompanyMembership"][];
             /**
@@ -8873,6 +8954,88 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DossierLinkOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    ai_download_docx: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LetterDocxIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    ai_create_draft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LetterDraftIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LetterDraftOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

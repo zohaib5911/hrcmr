@@ -1,36 +1,34 @@
 # STATUS
-Updated: 2026-11-07 06:30, Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: pending (feat T10.3)
+Updated: 2026-11-07 07:10, Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: pending (feat T10.4)
 State: IN PROGRESS
 
 ## Last completed
-- T10.3 — Policies and sign-offs: remind, overdue job, new-starter assignment, /policies wizard/list/detail, My Documents policy viewer/sign/receipt, Playwright spec green.
+- T10.4 — "Draft with AI" template drafts: letter API (placeholders only, no AI call), .docx download, /documents sheet with copy/download/save.
 
 ## Current task
-- none (T10.3 closed; next block is T10.4 per next.sh)
+- none (T10.4 closed; next block is the Phase 10 gate, P10, per next.sh)
 
 ## Next tasks
-- T10.4 — "Draft with AI" UI and API contract (feature-flagged)
-- Phase 10 gate — full validation/screenshots/green PR
-- AUDIT-1 after P11
+- P10 — Phase 10 gate (full suite, screenshots, PR dev→main)
+- AUDIT-1 is after P11 (not yet reached)
 
 ## Health
-- CI on dev: fixed mypy --strict error from T10.2 test (6e8b92f); last green run was before T10.2 — re-check on push
+- CI on dev: mypy --strict fixed in 6e8b92f (T10.2 test); re-check on push
 - CI on main: green (PR15)
-- Local checks run: API policies 15 pass; related worker/notifications/employees/profile/rbac 34 pass; reports 6 pass; mypy clean; ruff clean. Web typecheck/lint clean; web unit 777 pass; gen:api:check clean; Playwright policies.spec 1 pass.
+- Local checks run this session: API policies 15, letters+auth 47, related worker/notifications/employees 34, reports 6, Playwright policies.spec 1; ruff/mypy (318 files) clean; web typecheck/lint, unit 777, gen:api:check clean.
 
 ## Issues / suggestions
-- Rota publish inserts rota.published notifications but notifications/router.py _kinds omits that kind (not in T10.3; left alone).
-- Policy notify() uses scope_for(role,"policy.acceptance.read") which resolves to _own for employees (works), but the check reads oddly; consider a clearer read_own check.
-- Overdue notices go to the employee only; admins see overdue via the detail page counts, not a notification.
-- Audience pickers load full department/location lists and up to the first page of employees for named people; large companies may want server search for named people.
+- Rota publish inserts rota.published notifications but notifications/router.py _kinds omits that kind (not in T10.3/T10.4; left alone).
+- require("document.file.write") accepts own-only scope (employees hold document.file.write_own); endpoints that are company-wide must check access.scope is Scope.ALL (policies and letters do).
+- Named-people audience picker loads the first employee page only; large companies need server-side search for that picker.
 - Never overlap DB pytest and Playwright (shared PostgreSQL role passwords).
 
 ## Strategy / decisions taken
-- Overdue is a stored status flip (pending→overdue) by policies_overdue_daily at 06:15 (same slot as leave/learning overdue jobs in plan); the API status and count honour the stored overdue as well as the due date.
-- Remind targets people who have not accepted or signed a sent version, including overdue ones; it is rejected for drafts and archived versions (409).
-- New-starter assignment: one function used by the employee-create hook (same transaction) and the daily job (catch-up for anyone who joined an audience later); existing acceptances are never duplicated.
-- Policy viewer iframe loads the API's own /policies/own/{id}/view proxy (cookie auth); web CSP frame-src adds only the configured API origin.
-- The /policies page is gated to policy.document.read (HR), so employees see an explanation instead of the list.
+- T10.4 .docx: built server-side from a minimal OOXML zip (zipfile + XML escape), no new dependency; the endpoint returns the file for the current text, so edits are kept.
+- T10.4 AI label: `/auth/me` gains `ai_available` = server has ANTHROPIC_API_KEY AND the active company's ai_features_enabled. The draft endpoint itself makes no AI call yet; `source` is always "template" until T14.4.
+- T10.4 letters are company-wide: require("document.file.write") plus a Scope.ALL check, so employees' own-only write is refused (403).
+- T10.4 "Save as company document" uploads the .docx through the existing scanned upload path with category hr_template.
+- T10.3 decisions (kept): overdue flip at 06:15 by policies_overdue_daily; remind includes overdue people; new-starter assignment on hire and by the daily job; /policies gated to policy.document.read.
 
 ## Owner actions needed
 - None.

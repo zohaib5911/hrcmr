@@ -312,7 +312,7 @@ async def reset_password(
 # --- describing the caller -----------------------------------------------------------------------
 
 
-async def build_me(db: GlobalSession, caller: Caller) -> MeResponse:
+async def build_me(db: GlobalSession, caller: Caller, *, ai_key: bool = False) -> MeResponse:
     user = caller.user
     rows = (
         await db.execute(
@@ -373,6 +373,7 @@ async def build_me(db: GlobalSession, caller: Caller) -> MeResponse:
         terms_version=terms.version,
         step_up_active=caller.session.has_recent_step_up(utcnow()),
         platform_admin=platform_admin,
+        ai_available=ai_key and active is not None and active[1].ai_features_enabled,
     )
 
 

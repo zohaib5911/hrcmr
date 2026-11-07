@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.ai.letters import router as letters_router
 from app.core.body_limit import LOGO_LIMIT, PROOF_LIMIT, UPLOAD_LIMIT, BodyLimitMiddleware
 from app.core.config import Settings, get_settings
 from app.core.csrf import CsrfMiddleware
@@ -241,6 +242,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(policies_router, prefix=API_PREFIX)
     app.include_router(reports_router, prefix=API_PREFIX)
     app.include_router(documents_router, prefix=API_PREFIX)
+    app.include_router(letters_router, prefix=API_PREFIX)
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)
     app.include_router(employee_activity_router, prefix=API_PREFIX)

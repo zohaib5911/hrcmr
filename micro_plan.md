@@ -128,7 +128,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Watch:** keep the sponsor reminders already on My Documents. Viewer `frame-src` allows only the configured API origin.
   Sent versions are frozen (edits need a new version). Signature text is encrypted and never enters audit.
 
-### [ ] T10.4 · S · "Draft with AI" UI and API contract (feature-flagged)
+### [x] T10.4 · S · "Draft with AI" UI and API contract (feature-flagged)
 - **Spec:** plan L933–938, L1415; API `POST /ai/letters/draft` (L1623); AI rules L986–1000.
 - **Copy:** `api/app/modules/documents/`, `web/components/documents/`.
 - **Steps:**

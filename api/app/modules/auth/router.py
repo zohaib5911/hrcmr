@@ -80,7 +80,11 @@ async def _me(db: GlobalDb, auth: Auth, token: str) -> MeResponse:
     if data is None:
         raise unauthenticated()
     user = (await db.execute(select(User).where(User.id == uuid.UUID(data.user_id)))).scalar_one()
-    return await accounts.build_me(db, Caller(token=token, session=data, user=user))
+    return await accounts.build_me(
+        db,
+        Caller(token=token, session=data, user=user),
+        ai_key=auth.settings.anthropic_api_key is not None,
+    )
 
 
 def _cookie(auth: Auth, response: Response, token: str, expires_at_iso: str) -> None:
@@ -182,8 +186,8 @@ async def logout(
 
 
 @router.get("/me", summary="Who is signed in, and where they stand")
-async def me(db: GlobalDb, caller: SessionCaller) -> MeResponse:
-    return await accounts.build_me(db, caller)
+async def me(db: GlobalDb, auth: Auth, caller: SessionCaller) -> MeResponse:
+    return await accounts.build_me(db, caller, ai_key=auth.settings.anthropic_api_key is not None)
 
 
 # --- passwords -----------------------------------------------------------------------------
@@ -398,7 +402,11 @@ async def step_up(
         await _audit(db, request, caller, "auth.recovery_code.used")
     await _audit(db, request, caller, "auth.step_up.succeeded")
     await db.commit()
-    return await accounts.build_me(db, Caller(caller.token, data, caller.user))
+    return await accounts.build_me(
+        db,
+        Caller(caller.token, data, caller.user),
+        ai_key=auth.settings.anthropic_api_key is not None,
+    )
 
 
 # --- terms, invitations, company -----------------------------------------------------------

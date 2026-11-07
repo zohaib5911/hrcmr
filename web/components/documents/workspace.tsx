@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { PageHeader } from "@/components/app/page-header";
-import { useCan } from "@/components/app/session-context";
+import { useCan, useMe } from "@/components/app/session-context";
 import { FormSheet } from "@/components/company/form-sheet";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FileDrop } from "@/components/ui/file-drop";
+import { LetterDraftSheet } from "@/components/documents/letter-draft-sheet";
 import { Select } from "@/components/ui/select";
 import { StatusChip } from "@/components/ui/status-chip";
 import { TextField } from "@/components/ui/text-field";
@@ -57,6 +58,8 @@ export function DocumentsWorkspace() {
   const [loaded, setLoaded] = useState("");
   const [version, setVersion] = useState(0);
   const [opened, setOpened] = useState<Document | "new" | null>(null);
+  const [drafting, setDrafting] = useState(false);
+  const aiAvailable = useMe()?.ai_available ?? false;
   const [problem, setProblem] = useState<Problem | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
   const key = JSON.stringify([search, category, due, archived, offset, version]);
@@ -193,7 +196,14 @@ export function DocumentsWorkspace() {
         title="Documents"
         description="Company files, with their review dates."
         actions={
-          mayWrite ? <Button onClick={() => setOpened("new")}>Upload document</Button> : undefined
+          mayWrite ? (
+            <div className="flex flex-wrap gap-2">
+              <Button variant="gray" onClick={() => setDrafting(true)}>
+                {aiAvailable ? "Draft with AI" : "Start from template"}
+              </Button>
+              <Button onClick={() => setOpened("new")}>Upload document</Button>
+            </div>
+          ) : undefined
         }
       />
       {!mayRead ? (
@@ -296,6 +306,18 @@ export function DocumentsWorkspace() {
           close={() => setOpened(null)}
           saved={() => {
             setOpened(null);
+            setVersion((v) => v + 1);
+          }}
+        />
+      )}
+      {drafting && (
+        <LetterDraftSheet
+          aiAvailable={aiAvailable}
+          onOpenChange={(open) => {
+            if (!open) setDrafting(false);
+          }}
+          onSaved={() => {
+            setDrafting(false);
             setVersion((v) => v + 1);
           }}
         />
