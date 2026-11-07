@@ -1,0 +1,118 @@
+{
+  "slug": "agency-workers-rights",
+  "title": "Agency workers' rights",
+  "summary": "Who counts as an agency worker, what agencies may and may not charge, pay and equal treatment, and the protections that apply during pregnancy and illness.",
+  "duration_minutes": 15,
+  "audience": "all_staff",
+  "sections": [
+    {
+      "title": "Who is an agency worker",
+      "body": "An agency worker is someone an agency employs or contracts, who then works temporarily for a hirer.\nUsing an agency to find permanent or fixed-term work does not make someone an agency worker in this sense.",
+      "key_points": [
+        "An agency worker works temporarily for a hirer",
+        "Finding permanent work through an agency does not count"
+      ]
+    },
+    {
+      "title": "Fees and paperwork",
+      "body": "A recruitment agency cannot charge a worker simply for finding them work. It can charge for some services, such as training, but those charges can be cancelled on the notice the guidance sets out.\nBefore looking for work, the agency should give the worker a key information document and written terms. When a job is offered, the worker should receive a written statement that covers the start date, hours and location.",
+      "key_points": [
+        "An agency cannot charge simply for finding work",
+        "Some charged services can be cancelled on notice",
+        "The worker should receive written terms, and a written statement when offered a job"
+      ]
+    },
+    {
+      "title": "Pay for every hour",
+      "body": "An agency worker is owed the National Minimum Wage for all the hours they work, including hours that were not recorded.\nAn agency may delay pay only for a reasonable period while it checks the hours worked.",
+      "key_points": [
+        "The National Minimum Wage applies to all hours worked",
+        "Hours that were not recorded are still paid",
+        "Pay can be delayed only for a reasonable checking period"
+      ]
+    },
+    {
+      "title": "Equal treatment after a qualifying period",
+      "body": "After a qualifying period in the same role, an agency worker is entitled to the same treatment as a permanent colleague doing the same job. This includes equal pay, automatic pension enrolment and paid annual leave.\nShort breaks and certain periods of sick leave can pause the qualifying period. A new job, or a substantially different role, starts it again.",
+      "key_points": [
+        "Equal pay and basic terms apply after the qualifying period",
+        "Breaks and sick leave can pause the period",
+        "A new job or a substantially different role starts it again"
+      ]
+    },
+    {
+      "title": "Pregnancy and health",
+      "body": "It is illegal to discriminate against an agency worker because they are pregnant, have recently given birth, or are breastfeeding.\nIf a worker's health is at risk, the hirer should make reasonable adjustments. If that is not possible, the agency should find other suitable work, or pay the worker at the same rate.",
+      "key_points": [
+        "Discrimination because of pregnancy, recent birth or breastfeeding is illegal",
+        "Reasonable adjustments should be made if health is at risk"
+      ]
+    },
+    {
+      "title": "Where to find the detail",
+      "body": "This course summarises the GOV.UK guidance on agency workers. The periods, notice rules and amounts are set out on the source page, and that page is the reference to check.",
+      "key_points": [
+        "The source page has the exact periods and notice rules",
+        "Check the source before acting on a specific period"
+      ]
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "prompt": "Who counts as an agency worker?",
+        "options": [
+          "Someone who finds permanent work through an agency",
+          "Someone an agency employs or contracts, who works temporarily for a hirer",
+          "Any self-employed person"
+        ],
+        "answer": 1,
+        "explanation": "An agency worker is employed or contracted by an agency and works temporarily for a hirer."
+      },
+      {
+        "prompt": "Can a recruitment agency charge a worker simply for finding them work?",
+        "options": ["Yes, always", "No", "Only in London"],
+        "answer": 1,
+        "explanation": "An agency cannot charge simply for finding work, although some services can be charged for."
+      },
+      {
+        "prompt": "What must an agency worker be paid for?",
+        "options": [
+          "Only the hours that were recorded",
+          "The National Minimum Wage for all hours worked",
+          "Nothing until the job ends"
+        ],
+        "answer": 1,
+        "explanation": "The National Minimum Wage applies to all hours worked, including hours that were not recorded."
+      },
+      {
+        "prompt": "After the qualifying period, what treatment applies in the same role?",
+        "options": [
+          "The same treatment as a permanent colleague doing the same job",
+          "The worst terms the agency offers",
+          "No difference from the first day"
+        ],
+        "answer": 0,
+        "explanation": "After the qualifying period an agency worker is entitled to the same treatment as a permanent colleague doing the same job."
+      },
+      {
+        "prompt": "What should an agency worker receive when a job is offered?",
+        "options": [
+          "Nothing in writing",
+          "A written statement covering the start date, hours and location",
+          "A personal reference"
+        ],
+        "answer": 1,
+        "explanation": "When a job is offered, the worker should receive a written statement covering the start date, hours and location."
+      }
+    ]
+  },
+  "pass_mark": 80,
+  "source_title": "Your rights as an agency worker",
+  "source_publisher": "GOV.UK",
+  "source_url": "https://www.gov.uk/agency-workers-your-rights",
+  "source_updated_on": "2015-03-09",
+  "content_reviewed_on": "2026-11-07",
+  "licence_note": "Based on GOV.UK guidance, which is published under the Open Government Licence v3.0. The text here is our own summary, not a copy.",
+  "published": false
+}
