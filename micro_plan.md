@@ -346,7 +346,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Steps:** R5 endpoints `/public/soc/search`, `/public/soc/{code}`, `/public/soc/salary-check`; page `/resources/tools/sponsorship-job-checker` (title search + salary table, no CV, no AI unless Turnstile passes).
 - **Done when:** rate limit test; no tenant data reachable.
 
-### [ ] P15 · S · Phase 15 gate
+### [x] P15 · S · Phase 15 gate
 - Recipe R7.
 
 ---
