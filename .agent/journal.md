@@ -321,3 +321,4 @@
 2026-11-08 20:35 | Claude (Opus) | AUDIT-2 | round 2 started; scope audit-2-r1..fcfa2b5; diff reviewed | next full checks
 2026-11-08 20:59 | Claude (Opus) | AUDIT-2 | round 2 DONE: 0/0/0 PASS; api 1043, unit 786, e2e 430; tagged audit-pass-2 | next small model T15.1
 2026-11-08 02:00 | Claude (Haiku) | T15.1 | started; STATUS updated | next find ONS URLs (Watch line)
+2026-11-08 02:05 | Claude (Haiku) | T15.1 | step 0 done: ONS URLs found (coding index 32,670 rows / 32,439 coded / 231 see-rows; 412 unit groups), raw files + sidecars + SOURCES.md; deps fastembed 0.9.1 + pgvector 0.5.1 (lock additive) | next model + migration 0040, then importer
