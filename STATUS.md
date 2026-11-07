@@ -1,7 +1,7 @@
 # STATUS
-Updated: 2026-11-07 17:10 UTC    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: 736ab45
+Updated: 2026-11-07 20:55 Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: 5a7317e
 
-State: BLOCKED — needs big model (T14.4)
+State: IN PROGRESS
 
 ## Last completed
 - T14.3 — live search in the command palette: GET /search (two characters or more, at most eight people and eight candidates, company-wide access only, tenant-scoped); People and Actions groups (736ab45).
@@ -12,7 +12,12 @@ State: BLOCKED — needs big model (T14.4)
 - P12 — Phase 12 org chart gate, PR #20 merged.
 
 ## Current task
-- none. T14.4 is the next block and is tier B.
+- T14.4 — AI server layer (Ask Mady chat panel/tools deferred by owner)
+  - [ ] 1 redaction + pseudonymisation layer (api/app/ai/redaction.py)
+  - [ ] 2 Anthropic client (api/app/integrations/anthropic.py), gated on key + company toggle, rate limit 30/h/user
+  - [ ] 3 ai_interactions metadata log (migration 0039)
+  - [ ] 4 Phase 14 payload fuzz test
+- Resume note: see journal.
 
 ## Next tasks
 - T14.4 (B): Anthropic integration, redaction layer, tools, assistant panel. A big model does this and also writes the Phase 14 payload fuzz test.
