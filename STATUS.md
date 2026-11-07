@@ -1,42 +1,45 @@
 # STATUS
-Updated: 2026-11-07 17:14 Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: cce2539
+Updated: 2026-11-07 17:57 Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: 691da5b
 
-State: IN PROGRESS
+State: BLOCKED — audit requested (AUDIT-2)
 
 ## Last completed
-- T14.5 — AI in letter drafting (Claude paragraphs, template fallback) and reminder wording (Draft with AI button, document type and days only); API 16 DB tests pass, browser 8 pass (PROGRESS.md).
-- T14.4 — AI server layer (app/integrations/anthropic.py, app/ai/redaction.py, app/ai/service.py, ai_interactions 0039); fuzz test 202 pass (cd2ff53).
-- T14.3, T14.2, T14.1 — search, notifications, dashboard (see PROGRESS.md).
+- P14 — Phase 14 gate: PR #22 merged to main (all 13 checks green). API suite 1036 pass; web lint, typecheck, unit 786 pass; browser 430 pass (176 screenshot-only skipped); screenshots docs/screenshots/phase-14 (12 files). PROGRESS.md has the summary.
+- T14.5 — AI in letter drafting (Claude paragraphs, template fallback) and reminder wording (Draft with AI button, document type and days only). 16 DB tests pass.
+- T14.4 — AI server layer; fuzz test 202 pass.
 
 ## Current task
-- P14 — Phase 14 gate (S): full API suite, full web checks and e2e, screenshots 390+1280 light+dark, PROGRESS summary, PR dev->main, merge when green. Then AUDIT-2 stop (big model).
-  - [ ] full API suite (cd api && uv run pytest -q)
-  - [ ] web lint, typecheck, unit, e2e (full)
-  - [ ] fuzz test tests/test_ai_redaction.py (202)
-  - [ ] screenshots phase-14
-  - [ ] PROGRESS phase summary
-  - [ ] PR dev->main, CI green, merge
-- Resume note: run the full API suite first (no Playwright at the same time), then web e2e.
+- AUDIT-2 — AUDIT STOP, covers T12.1 → P14 (and T14.4 by the big model). Not done by a small model.
+  - [ ] big model runs audit.md on T12.1 → P14 (incl. T14.4)
+  - [ ] writes fixes into changesneeded.md
+- Resume note: a BIG model (Opus / Solo 6.1) runs audit.md fully, then writes findings to changesneeded.md and sets STATUS. Small models fix audit items next. The T14.4 redaction and AI wiring should be audited together with T14.5 (both touch app/ai and the reminder router).
 
 ## Next tasks
-- P14 (S): phase gate (R7 + T14.4 fuzz test), then AUDIT-2 (big model stop).
+- After AUDIT-2 passes (no P0/P1): next phase is Phase 15 (T15.1 S!, then T15.2 B, T15.3 B).
 
 ## Health
-- CI on dev: not run for T14.x yet (dev has commits after PR #21)    CI on main: green
-- Local checks run: T14.4 — fuzz 202 pass (21:35). T14.5 — not run yet.
+- CI on dev: green (PR #22 all checks pass; merged to main)    CI on main: green after PR #22
+- Local checks run: API full suite 1036 pass; web lint, typecheck, unit 786 pass; browser 430 pass; dashboard spec re-run 2 pass after the checklist icon change.
 
 ## Issues / suggestions
-- Eight launch courses (api/seed/courses) are unpublished; owner must review. See PROGRESS.md.
+- AI wording button and AI letter path are covered by API tests only, not browser tests (the e2e server has no AI key). The auditor should look at the browser path with an AI key set.
+- Reminder drawer: clicking Draft with AI replaces the textarea, including any text HR has typed. Consider a confirm step.
+- Dashboard checklist: marks now use Lucide icons (Check, Circle) instead of text glyphs; a dashboard unit test for them does not exist.
+- Eight launch courses (api/seed/courses) are unpublished; owner must review.
 - Dashboard "sponsor licence" checklist item (plan 8.2) left out; owner decision.
 - Notifications digest sent 07:00 UTC for every company.
 - Learning report: people managers do not see their team's report yet.
+- Ask Mady assistant panel (T14.4 part) is deferred by the owner; not built.
 
 ## Strategy / decisions taken
-- T14.5: AI output is restricted-checked with find_restricted; a hit or any AI error falls back to the template (the draft still works).
-- T14.5: AI reminder wording is requested by a button in the drawer (not on open), so viewing a reminder does not use the 30/hour AI limit.
-- T14.5: reminder AI prompt gets only the document label and the threshold days; no name, no date.
+- T14.5: AI output is checked with find_restricted; a hit, an empty answer or any AI error falls back to the template. The letter draft still works.
+- T14.5: any AI error (provider, refusal, rate limit) falls back silently to the template; the letter sheet shows a note when AI was on but the template was used.
+- T14.5: reminder AI prompt gets only the document label and the threshold days; never the name or a date.
+- T14.5: reminder wording is requested by a button in the drawer, not on open, so viewing a reminder does not use the 30/hour AI limit.
+- P14: sponsor-licence item left out of the dashboard checklist (no company-level record to check).
 
 ## Owner actions needed
 - Review the eight launch courses before publishing them (api/seed/courses). See PROGRESS.md.
 - Decide how seed courses reach production.
 - Decide on the sponsor-licence checklist item (plan 8.2).
+- Phase 23: add a Cloudflare rate-limit rule for /careers/* (the API cannot tell visitors apart on server-rendered pages).
