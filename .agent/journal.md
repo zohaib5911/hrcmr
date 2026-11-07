@@ -305,3 +305,4 @@
 2026-11-07 17:57 | Claude (Haiku) | AUDIT-2 | STOP: T12.1 to P14 needs a big model; PR #22 merged (P14 gate); STATUS BLOCKED | next big model: Read AGENTS.md and continue
 2026-11-07 18:06 | Claude (Opus) | AUDIT-2 | started round 1; scope audit-pass-1..a87d511 | next run full checks
 2026-11-07 19:57 | Claude (Opus) | AUDIT-2 | round 1 DONE: 0/3/3, FIX NEEDED; tagged audit-2-r1 | next small model fixes changesneeded.md C2.1.1+
+2026-11-08 00:59 | Claude (Haiku) | C2.1.1 | started; STATUS updated | next api/app/ai/service.py names kwarg
