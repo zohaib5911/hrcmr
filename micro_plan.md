@@ -341,7 +341,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Steps:** `rules_watch_daily` 07:00 (R3) using ETag/hash → imports into a **draft** via T15.2's importer; admin screen under `web/app/(admin)/platform/rules/` with diff, Publish, Rollback (Platform Admin only, audited).
 - **Done when:** unchanged pages → no new draft; publish requires platform permission (test); old checks keep their rules version.
 
-### [ ] T15.8 · S · Public free version
+### [x] T15.8 · S · Public free version
 - **Spec:** plan L1152, L1450; public SOC endpoints (item 24).
 - **Steps:** R5 endpoints `/public/soc/search`, `/public/soc/{code}`, `/public/soc/salary-check`; page `/resources/tools/sponsorship-job-checker` (title search + salary table, no CV, no AI unless Turnstile passes).
 - **Done when:** rate limit test; no tenant data reachable.
