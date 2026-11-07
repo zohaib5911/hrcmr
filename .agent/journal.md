@@ -292,3 +292,4 @@
 2026-11-07 20:36 | Claude (Haiku) | T14.1 | DONE: dashboard + checklist; tests pass; ticked | next bash .agent/next.sh (T14.2)
 2026-11-07 20:42 | Claude (Haiku) | T14.2 | DONE: prefs, digest, kinds, tests; ticked | next bash .agent/next.sh (T14.3)
 2026-11-07 20:46 | Claude (Haiku) | T14.3 | DONE: search API + palette groups; tests pass; ticked | next bash .agent/next.sh (T14.4 is B: stop)
+2026-11-07 20:47 | Claude (Haiku) | T14.4 | BLOCKED: task is tier B (big model); SMALL stops here | next big model: Read AGENTS.md and continue (T14.4, then T14.5 S, P14, AUDIT-2)
