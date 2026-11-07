@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, Response
 from sqlalchemy import func, select
 
 from app.core.errors import ConflictError
-from app.core.rbac_matrix import scope_for
+from app.core.rbac_matrix import Scope, scope_for
 from app.db.ids import uuid7
 from app.modules.employees.record_pdf import render_pdf
 from app.modules.organogram import service
@@ -35,8 +35,8 @@ def _snapshot(row: OrganogramLevel) -> dict[str, Any]:
 
 @router.get("/organogram", response_model=OrgChartOut)
 async def org_chart(access: Reads) -> OrgChartOut:
-    # Visa/RTW chips only for people who may read RTW; the tree itself needs only this permission.
-    with_rtw = scope_for(access.role, "employee.rtw.read") is not None
+    # Visa/RTW chips only for people who may read RTW for the whole company (not "own" only).
+    with_rtw = scope_for(access.role, "employee.rtw.read") is Scope.ALL
     tree = await service.org_chart(access.db, access.company_id, with_rtw=with_rtw)
     return OrgChartOut(rtw_visible=with_rtw, unassigned=tree)
 
@@ -47,7 +47,7 @@ async def org_chart(access: Reads) -> OrgChartOut:
     responses={200: {"content": {"application/pdf": {}}, "description": "The org chart as a PDF"}},
 )
 async def org_chart_pdf(access: Reads) -> Response:
-    with_rtw = scope_for(access.role, "employee.rtw.read") is not None
+    with_rtw = scope_for(access.role, "employee.rtw.read") is Scope.ALL
     tree = await service.org_chart(access.db, access.company_id, with_rtw=with_rtw)
     generated = datetime.now(UTC).strftime("%d %b %Y %H:%M UTC")
     html = org_chart_html(

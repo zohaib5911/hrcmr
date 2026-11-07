@@ -20,7 +20,7 @@ Result: FIX NEEDED: 0 P0 / 3 P1 / 3 P2. AUDIT-2 stays open; re-audit after C2.1.
 - **Fix:** in `assign_courses`, after the insert, add one `Notification` (kind `learning.assigned`, title "A course has been assigned to you", link `/learning/my`) per newly created assignment's person who has an active membership (copy how `api/app/jobs/learning.py` finds the user for an employee and builds its notice). Use `.returning(CourseAssignment.employee_id, CourseAssignment.course_id)` on the insert so assigning twice does not notify twice. Add `"learning.assigned"` to `PERSONAL_KINDS` in `api/app/modules/notifications/router.py`. In-app only (no e-mail) is fine.
 - **Done when:** a test in `api/tests/db/test_learning_report.py` assigns a course to a named employee twice and asserts that person has exactly one `learning.assigned` notice in `GET /notifications`.
 
-### [ ] C2.1.4 · P2 · "AI available" ignores the platform switch (from T14.4)
+### [x] C2.1.4 · P2 · "AI available" ignores the platform switch (from T14.4) — fixed in 52fc451
 - **Problem:** `api/app/modules/auth/accounts.py:378` sets `ai_available` from the key and the company flag only; `ai_ready` (`api/app/ai/service.py:41`) also needs `settings.ai_features_enabled`. With the platform switch off, the reminder drawer shows "Draft with AI" but always gets the template.
 - **Fix:** in the three `build_me(..., ai_key=...)` calls in `api/app/modules/auth/router.py` (lines ~86, 190, 408) pass `ai_key=auth.settings.anthropic_api_key is not None and auth.settings.ai_features_enabled`.
 - **Done when:** a test (copy an existing `/auth/me` test) with `ai_features_enabled=False` and a key set asserts `ai_available` is false.

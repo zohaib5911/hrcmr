@@ -313,3 +313,4 @@
 2026-11-08 01:07 | Claude (Haiku) | C2.1.3 | steps done: assign_courses returns inserted rows, one learning.assigned notice per person (verified members only), PERSONAL_KINDS; new test; tests: learning+notifications+arch+openapi 22 pass; mypy/ruff clean | next tick C2.1.3, then C2.1.4
 2026-11-08 01:07 | Claude (Haiku) | C2.1.3 | DONE: ticked (fix 2705617) | next C2.1.4 ai_available platform switch
 2026-11-08 01:10 | Claude (Haiku) | C2.1.4 | steps done: _ai_key helper in auth router (key and platform switch); new test platform switch; mutation fails; tests: auth+letters+openapi 37 pass | next tick C2.1.4, then C2.1.5
+2026-11-08 01:11 | Claude (Haiku) | C2.1.5 | steps done: org chart RTW chips only when employee.rtw.read is Scope.ALL (both endpoints); tests: organogram 7 pass; ruff/mypy clean | next tick C2.1.4 and C2.1.5, then C2.1.6
