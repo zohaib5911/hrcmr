@@ -287,3 +287,4 @@
 2026-11-07 11:40 | Claude (Haiku) | T13.3 | DONE: API + web UI; ticked; unit 786 pass; typecheck/lint pass | next bash .agent/next.sh
 2026-11-07 11:45 | Claude (Haiku) | T13.4 | DONE: certificates, PDF, public check, /verify page, player button; ticked | next P13 gate
 2026-11-07 12:05 | Claude (Haiku) | P13 | gate: API 818, web lint/typecheck/unit 786, e2e 429, 16 screenshots; PROGRESS summary; ticked | next PR dev->main
+2026-11-07 20:05 | Claude (Haiku) | P13 | Semgrep on PR 21: len(all()) on the assignment insert; now counted with rowcount; learning tests 10 pass; local Semgrep clean on the learning paths | next re-run PR 21 checks, merge when green

@@ -10,11 +10,14 @@ from __future__ import annotations
 import asyncio
 import uuid  # noqa: TC003
 from datetime import UTC, datetime
-from typing import Annotated, Literal
+from typing import TYPE_CHECKING, Annotated, Any, Literal, cast
 
 from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+
+if TYPE_CHECKING:
+    from sqlalchemy.engine import CursorResult
 
 from app.core.errors import AppError, ConflictError, ForbiddenError, NotFoundError
 from app.core.rbac_matrix import Scope
@@ -139,13 +142,13 @@ async def assign_courses(body: CourseAssignmentIn, access: AssignWrites) -> Assi
     # One row per course and person: assigning the same course twice changes nothing.
     created = 0
     if values:
-        statement = (
-            pg_insert(CourseAssignment)
-            .values(values)
-            .on_conflict_do_nothing(constraint="uq_course_assignments_one_per_person")
-            .returning(CourseAssignment.id)
+        statement = pg_insert(CourseAssignment).values(values)
+        statement = statement.on_conflict_do_nothing(
+            constraint="uq_course_assignments_one_per_person"
         )
-        created = len((await access.db.execute(statement)).all())
+        # rowcount is the number of rows actually inserted; the rest already existed.
+        result = cast("CursorResult[Any]", await access.db.execute(statement))
+        created = result.rowcount
     await access.audit(
         "learning.assignments_created",
         entity_type="course_assignment",
