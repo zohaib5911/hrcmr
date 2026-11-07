@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
-import { useCan } from "@/components/app/session-context";
+import { useCan, useMe } from "@/components/app/session-context";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -13,7 +13,7 @@ import { attempt, type Problem } from "@/lib/auth/request";
 import { REMINDER_STATUS, EMAIL_STATUS, sentTime, type Reminder } from "@/lib/compliance/reminders";
 import { shortDate } from "@/lib/employees/profile";
 
-type Action = "draft" | "snooze" | "send";
+type Action = "draft" | "snooze" | "send" | "wording";
 
 export function ReminderReview({
   initial,
@@ -25,6 +25,7 @@ export function ReminderReview({
   onChanged: () => void;
 }) {
   const maySend = useCan()("compliance.reminder.send");
+  const aiAvailable = useMe()?.ai_available ?? false;
   const toast = useToast();
   const [record, setRecord] = useState(initial);
   const [message, setMessage] = useState(initial.message_draft);
@@ -32,6 +33,7 @@ export function ReminderReview({
   const [busy, setBusy] = useState<Action | null>(null);
   const [problem, setProblem] = useState<Problem | null>(null);
   const [error, setError] = useState<string>();
+  const [wording, setWording] = useState<"ai" | "template" | null>(null);
   useEffect(() => {
     let active = true;
     async function load() {
@@ -82,6 +84,21 @@ export function ReminderReview({
     });
     onChanged();
     if (action !== "draft") onClose();
+  }
+  /** Replaces the message with a suggestion. Nothing is saved until HR saves or sends it. */
+  async function draftWording() {
+    setError(undefined);
+    setProblem(null);
+    setBusy("wording");
+    const result = await attempt((c) =>
+      c.POST("/reminders/{reminder_id}/wording", {
+        params: { path: { reminder_id: record.id } },
+      }),
+    );
+    setBusy(null);
+    if (!result.ok) return setProblem(result.problem);
+    setMessage(result.data.message);
+    setWording(result.data.source);
   }
   function submit(event: FormEvent) {
     event.preventDefault();
@@ -179,15 +196,40 @@ export function ReminderReview({
           )}
           {problem && <Alert tone="danger" title={problem.message} />}
           {editable ? (
-            <TextArea
-              label="Message for employee"
-              name="message"
-              rows={8}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              maxLength={2000}
-              disabled={!loaded || !!busy}
-            />
+            <div className="flex flex-col gap-2">
+              {aiAvailable && (
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button
+                    type="button"
+                    variant="gray"
+                    disabled={!loaded || !!busy}
+                    loading={busy === "wording"}
+                    onClick={() => void draftWording()}
+                  >
+                    Draft with AI
+                  </Button>
+                  {wording === "ai" && (
+                    <span className="text-caption text-label-secondary">
+                      AI wording. Check it before you send.
+                    </span>
+                  )}
+                  {wording === "template" && (
+                    <span className="text-caption text-label-secondary">
+                      AI wording is not available right now, so the standard message is shown.
+                    </span>
+                  )}
+                </div>
+              )}
+              <TextArea
+                label="Message for employee"
+                name="message"
+                rows={8}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                maxLength={2000}
+                disabled={!loaded || !!busy}
+              />
+            </div>
           ) : (
             <div>
               <h3 className="text-callout text-label mb-2">Message for employee</h3>
