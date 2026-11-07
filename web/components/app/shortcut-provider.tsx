@@ -25,6 +25,9 @@ import { interpretKey, type SequenceState } from "@/lib/shortcuts";
 import { useNavGroups } from "./session-context";
 import { useApple } from "./use-apple";
 
+/** How long the palette waits after the last keystroke before it searches people. */
+const SEARCH_DEBOUNCE_MS = 200;
+
 /** Every page the palette can open (the ones this person can use), with its group's name. */
 const pageItems = (groups: readonly NavGroup[]): readonly CommandItem[] =>
   groups.flatMap((group) =>
@@ -236,31 +239,37 @@ export function ShortcutProvider({ onToggleSidebar, children }: ShortcutProvider
   // Live people and candidates. Only the newest search is shown, so a slow answer never wins.
   const [remote, setRemote] = useState<CommandItem[]>([]);
   const latestSearch = useRef(0);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => clearTimeout(searchTimer.current ?? undefined), []);
   const searchPeople = useCallback((query: string) => {
     const wanted = query.trim();
     latestSearch.current += 1;
     const token = latestSearch.current;
+    clearTimeout(searchTimer.current ?? undefined);
     if (wanted.length < 2) {
       setRemote([]);
       return;
     }
-    void attempt((c) => c.GET("/search", { params: { query: { q: wanted } } })).then((result) => {
-      if (token !== latestSearch.current || !result.ok) return;
-      setRemote([
-        ...result.data.people.map((person) => ({
-          id: `person-${person.id}`,
-          label: person.name,
-          group: "People",
-          href: person.link,
-        })),
-        ...result.data.candidates.map((candidate) => ({
-          id: `candidate-${candidate.id}`,
-          label: `${candidate.name} (candidate)`,
-          group: "People",
-          href: candidate.link,
-        })),
-      ]);
-    });
+    // Wait 200 ms after the last keystroke before asking the server.
+    searchTimer.current = setTimeout(() => {
+      void attempt((c) => c.GET("/search", { params: { query: { q: wanted } } })).then((result) => {
+        if (token !== latestSearch.current || !result.ok) return;
+        setRemote([
+          ...result.data.people.map((person) => ({
+            id: `person-${person.id}`,
+            label: person.name,
+            group: "People",
+            href: person.link,
+          })),
+          ...result.data.candidates.map((candidate) => ({
+            id: `candidate-${candidate.id}`,
+            label: `${candidate.name} (candidate)`,
+            group: "People",
+            href: candidate.link,
+          })),
+        ]);
+      });
+    }, SEARCH_DEBOUNCE_MS);
   }, []);
   const recentItems = useMemo(
     () =>

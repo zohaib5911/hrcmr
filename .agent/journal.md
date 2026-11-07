@@ -315,3 +315,4 @@
 2026-11-08 01:10 | Claude (Haiku) | C2.1.4 | steps done: _ai_key helper in auth router (key and platform switch); new test platform switch; mutation fails; tests: auth+letters+openapi 37 pass | next tick C2.1.4, then C2.1.5
 2026-11-08 01:11 | Claude (Haiku) | C2.1.5 | steps done: org chart RTW chips only when employee.rtw.read is Scope.ALL (both endpoints); tests: organogram 7 pass; ruff/mypy clean | next tick C2.1.4 and C2.1.5, then C2.1.6
 2026-11-08 01:12 | Claude (Haiku) | C2.1.6 | part 1/4 done: certificate reference trimmed and upper-cased; test typed-lower-case verifies; certificates 3 pass | next palette debounce (web/components/app/shortcut-provider.tsx)
+2026-11-08 01:13 | Claude (Haiku) | C2.1.6 | part 2/4 done: palette people search waits 200 ms (cleared on next keystroke and unmount); provider unit 40 pass; web lint + typecheck clean | next dashboard empty-state (web/app/(app)/dashboard)
