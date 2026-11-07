@@ -154,7 +154,9 @@ test("Sponsor documents save explicitly, retain versions, plan renewals and with
   await expect(visa.getByText("Version 1", { exact: true })).toBeVisible();
   await expect(visa.getByText("Superseded", { exact: true })).toBeVisible();
   await page.goto("/sponsor-compliance/migrant-employees");
-  await expect(page.getByText("No sponsored employees yet", { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { level: 2, name: "No sponsored employees yet" }),
+  ).toBeVisible();
   await page.goto("/employees/" + id);
   await page.getByRole("tab", { name: "Sponsor compliance", exact: true }).click();
   await visa.getByRole("button", { name: "Withdraw", exact: true }).click();
