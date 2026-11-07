@@ -105,6 +105,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/applications/{application_id}/interviews": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Interviews */
+        get: operations["recruitment_list_interviews"];
+        put?: never;
+        /** Create Interview */
+        post: operations["recruitment_create_interview"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/applications/{application_id}/interviews/{interview_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Interview */
+        patch: operations["recruitment_update_interview"];
+        trace?: never;
+    };
+    "/applications/{application_id}/interviews/{interview_id}/invite.ics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Interview Invite */
+        get: operations["recruitment_interview_invite"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/applications/{application_id}/stage": {
         parameters: {
             query?: never;
@@ -6776,6 +6828,93 @@ export interface components {
                 [key: string]: string;
             };
         };
+        /** InterviewIn */
+        InterviewIn: {
+            /**
+             * Duration Minutes
+             * @default 60
+             */
+            duration_minutes: number;
+            /** Interviewer Employee Ids */
+            interviewer_employee_ids?: string[];
+            /** Location Or Link */
+            location_or_link?: string | null;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "in_person" | "video" | "phone";
+            /** Notes */
+            notes?: string | null;
+            /**
+             * Scheduled At
+             * Format: date-time
+             */
+            scheduled_at: string;
+        };
+        /** InterviewOut */
+        InterviewOut: {
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Duration Minutes */
+            duration_minutes: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Interviewers */
+            interviewers: components["schemas"]["InterviewerOut"][];
+            /** Location Or Link */
+            location_or_link: string | null;
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "in_person" | "video" | "phone";
+            /** Notes */
+            notes: string | null;
+            /**
+             * Outcome
+             * @enum {string}
+             */
+            outcome: "pending" | "passed" | "failed" | "no_show";
+            /**
+             * Scheduled At
+             * Format: date-time
+             */
+            scheduled_at: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** InterviewPatch */
+        InterviewPatch: {
+            /** Notes */
+            notes?: string | null;
+            /** Outcome */
+            outcome?: ("pending" | "passed" | "failed" | "no_show") | null;
+        };
+        /** InterviewerOut */
+        InterviewerOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+        };
         /** InvitationDetails */
         InvitationDetails: {
             /** Company Name */
@@ -9856,6 +9995,174 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["ApplicationOut"];
                 };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_list_interviews: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InterviewOut"][];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_create_interview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InterviewIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InterviewOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_update_interview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: string;
+                interview_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["InterviewPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InterviewOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_interview_invite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: string;
+                interview_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description The request could not be completed. `error.code` says why. */
             "4XX": {

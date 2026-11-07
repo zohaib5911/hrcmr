@@ -2,21 +2,38 @@
 
 from __future__ import annotations
 
+import json
 import uuid  # noqa: TC003
+from datetime import datetime  # noqa: TC003
 from typing import Annotated, Any, cast
+from urllib.parse import urlparse
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Query, Request, Response
 from sqlalchemy import func, select
 
+from app.core.crypto import encrypt
 from app.core.errors import AppError, ForbiddenError, NotFoundError
 from app.core.rbac_matrix import Scope, scope_for
 from app.db.ids import uuid7
 from app.modules.companies.compliance_documents import _today as company_today
+from app.modules.companies.models import Company
+from app.modules.email.models import EmailOutbox
+from app.modules.email.outbox import PAYLOAD_CONTEXT
+from app.modules.email.templates import check
+from app.modules.employees.models import Employee
 from app.modules.files.models import File
 from app.modules.rbac.deps import Access, require
 from app.modules.recruitment import service
 from app.modules.recruitment.applications import LABELS, STAGES, check_move
-from app.modules.recruitment.models import Application, Candidate, Posting, Requisition
+from app.modules.recruitment.ics import interview_ics
+from app.modules.recruitment.models import (
+    Application,
+    Candidate,
+    Interview,
+    Posting,
+    Requisition,
+)
 from app.modules.recruitment.schemas import (
     ApplicationIn,
     ApplicationOut,
@@ -26,6 +43,9 @@ from app.modules.recruitment.schemas import (
     CandidateIn,
     CandidateOut,
     CandidatePage,
+    InterviewIn,
+    InterviewOut,
+    InterviewPatch,
     Pipeline,
     PipelineStage,
     PostingIn,
@@ -41,6 +61,7 @@ from app.modules.recruitment.schemas import (
     RequisitionStatusIn,
     Stage,
 )
+from app.modules.recruitment.service import MODE_LABELS
 
 router = APIRouter(tags=["recruitment"])
 Reads = Annotated[Access, Depends(require("recruitment.requisition.read"))]
@@ -694,3 +715,232 @@ async def pipeline(access: ApplicationReads) -> Pipeline:
         for stage in STAGES
     ]
     return Pipeline(stages=stages, total=sum(item.count for item in stages))
+
+
+InterviewWrites = Annotated[Access, Depends(require("recruitment.interview.write"))]
+InterviewReads = Annotated[Access, Depends(require("recruitment.interview.read"))]
+
+
+async def _interview(
+    access: Access, application_id: uuid.UUID, interview_id: uuid.UUID, *, lock: bool = False
+) -> Interview:
+    query = select(Interview).where(
+        Interview.id == interview_id, Interview.application_id == application_id
+    )
+    if lock:
+        query = query.with_for_update()
+    row = (await access.db.execute(query)).scalar_one_or_none()
+    if row is None:
+        raise NotFoundError
+    return row
+
+
+async def _application_context(
+    access: Access, application_id: uuid.UUID
+) -> tuple[Application, str, str]:
+    """The application, the candidate's name and the posting title, all in this company."""
+    row = await _application(access, application_id)
+    candidate = (
+        await access.db.execute(
+            select(Candidate.first_name, Candidate.last_name, Candidate.email).where(
+                Candidate.id == row.candidate_id
+            )
+        )
+    ).one()
+    title = (
+        await access.db.execute(select(Posting.title).where(Posting.id == row.posting_id))
+    ).scalar_one()
+    return row, f"{candidate[0]} {candidate[1]}", title
+
+
+def _when(starts: datetime, zone: str) -> str:
+    return starts.astimezone(ZoneInfo(zone)).strftime("%A %d %B %Y at %H:%M")
+
+
+@router.get("/applications/{application_id}/interviews", response_model=list[InterviewOut])
+async def list_interviews(application_id: uuid.UUID, access: InterviewReads) -> list[InterviewOut]:
+    company_wide(access)
+    await _application(access, application_id)
+    rows = (
+        (
+            await access.db.execute(
+                select(Interview)
+                .where(Interview.application_id == application_id)
+                .order_by(Interview.scheduled_at, Interview.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    return [await service.interview_out(access.db, row) for row in rows]
+
+
+@router.post(
+    "/applications/{application_id}/interviews", status_code=201, response_model=InterviewOut
+)
+async def create_interview(
+    application_id: uuid.UUID, body: InterviewIn, request: Request, access: InterviewWrites
+) -> InterviewOut:
+    company_wide(access)
+    application, candidate_name, title = await _application_context(access, application_id)
+    interviewers = (
+        (
+            await access.db.execute(
+                select(Employee).where(
+                    Employee.id.in_(body.interviewer_employee_ids),
+                    Employee.status.in_(("active", "on_leave")),
+                )
+            )
+        )
+        .scalars()
+        .all()
+        if body.interviewer_employee_ids
+        else []
+    )
+    if len(interviewers) != len(set(body.interviewer_employee_ids)):
+        raise AppError(
+            "VALIDATION_ERROR",
+            "Choose current people from this company as interviewers.",
+            status_code=422,
+            field="interviewer_employee_ids",
+        )
+    row = Interview(
+        id=uuid7(),
+        company_id=access.company_id,
+        application_id=application_id,
+        scheduled_at=body.scheduled_at,
+        duration_minutes=body.duration_minutes,
+        mode=body.mode,
+        location_or_link=body.location_or_link,
+        interviewer_employee_ids=list(body.interviewer_employee_ids),
+        outcome="pending",
+        notes=body.notes,
+    )
+    access.db.add(row)
+    await access.db.flush()
+    await access.db.refresh(row)
+    zone = (
+        await access.db.execute(select(Company.timezone).where(Company.id == access.company_id))
+    ).scalar_one()
+    where = body.location_or_link or MODE_LABELS[body.mode]
+    settings = request.app.state.settings
+    link = f"{settings.web_origin}/recruitment/applications/{application_id}"
+    when = _when(body.scheduled_at, zone)
+    for person in interviewers:
+        if person.email:
+            data = {
+                "first_name": person.first_name,
+                "job_title": title,
+                "when": when,
+                "where": where,
+                "link": link,
+            }
+            check("interview_invite", data)
+            db_row = EmailOutbox(
+                to_address=person.email,
+                template="interview_invite",
+                payload=encrypt(json.dumps(data), context=PAYLOAD_CONTEXT),
+            )
+            access.db.add(db_row)
+    candidate_email = (
+        await access.db.execute(
+            select(Candidate.email).where(Candidate.id == application.candidate_id)
+        )
+    ).scalar_one()
+    if candidate_email:
+        first = candidate_name.split(" ")[0]
+        data = {"first_name": first, "job_title": title, "when": when, "where": where}
+        check("interview_invite_candidate", data)
+        access.db.add(
+            EmailOutbox(
+                to_address=candidate_email,
+                template="interview_invite_candidate",
+                payload=encrypt(json.dumps(data), context=PAYLOAD_CONTEXT),
+            )
+        )
+    await access.audit(
+        "recruitment.interview.created",
+        entity_type="interview",
+        entity_id=row.id,
+        after={
+            "application_id": str(application_id),
+            "scheduled_at": body.scheduled_at.isoformat(),
+            "mode": body.mode,
+            "interviewers": len(interviewers),
+        },
+    )
+    await access.db.commit()
+    return await service.interview_out(access.db, row)
+
+
+@router.patch(
+    "/applications/{application_id}/interviews/{interview_id}", response_model=InterviewOut
+)
+async def update_interview(
+    application_id: uuid.UUID,
+    interview_id: uuid.UUID,
+    body: InterviewPatch,
+    access: InterviewWrites,
+) -> InterviewOut:
+    company_wide(access)
+    row = await _interview(access, application_id, interview_id, lock=True)
+    before = {"outcome": row.outcome}
+    if body.outcome is not None:
+        row.outcome = body.outcome
+    if "notes" in body.model_fields_set:
+        row.notes = body.notes
+    await access.db.flush()
+    await access.audit(
+        "recruitment.interview.updated",
+        entity_type="interview",
+        entity_id=row.id,
+        before=before,
+        after={"outcome": row.outcome},
+    )
+    await access.db.commit()
+    return await service.interview_out(access.db, row)
+
+
+@router.get(
+    "/applications/{application_id}/interviews/{interview_id}/invite.ics", response_class=Response
+)
+async def interview_invite(
+    application_id: uuid.UUID, interview_id: uuid.UUID, request: Request, access: InterviewReads
+) -> Response:
+    company_wide(access)
+    row = await _interview(access, application_id, interview_id)
+    application, candidate_name, title = await _application_context(access, application_id)
+    people = (
+        await access.db.execute(
+            select(Employee.first_name, Employee.last_name, Employee.email)
+            .where(Employee.id.in_(row.interviewer_employee_ids))
+            .order_by(Employee.last_name, Employee.first_name)
+        )
+    ).all()
+    candidate = (
+        await access.db.execute(
+            select(Candidate.email).where(Candidate.id == application.candidate_id)
+        )
+    ).scalar_one()
+    attendees = [(f"{first} {last}".strip(), email) for first, last, email in people if email]
+    if candidate:
+        attendees.append((candidate_name, candidate))
+    host = urlparse(request.app.state.settings.web_origin).hostname or "invite.local"
+    text = interview_ics(
+        uid=f"interview-{row.id}@{host}",
+        starts=row.scheduled_at,
+        duration_minutes=row.duration_minutes,
+        summary=f"Interview: {candidate_name} for {title}",
+        location=row.location_or_link or MODE_LABELS[row.mode],
+        description=f"Interview ({MODE_LABELS[row.mode]}) for {title}.",
+        attendees=attendees,
+        stamp=service.now(),
+    )
+    return Response(
+        content=text,
+        media_type="text/calendar",
+        headers={
+            "Content-Disposition": f'attachment; filename="interview-{row.id}.ics"',
+            "Cache-Control": "private, no-store",
+        },
+    )

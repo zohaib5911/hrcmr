@@ -251,3 +251,48 @@ class PipelineStage(BaseModel):
 class Pipeline(BaseModel):
     stages: list[PipelineStage]
     total: int
+
+
+InterviewMode = Literal["in_person", "video", "phone"]
+InterviewOutcome = Literal["pending", "passed", "failed", "no_show"]
+
+
+class InterviewIn(RequestModel):
+    scheduled_at: datetime
+    duration_minutes: int = Field(default=60, ge=5, le=480)
+    mode: InterviewMode
+    location_or_link: (
+        Annotated[str, StringConstraints(strip_whitespace=True, max_length=300)] | None
+    ) = None
+    interviewer_employee_ids: list[uuid.UUID] = Field(default_factory=list, max_length=10)
+    notes: Annotated[str, StringConstraints(max_length=5000)] | None = None
+
+    @model_validator(mode="after")
+    def has_time_zone(self) -> Self:
+        if self.scheduled_at.tzinfo is None:
+            raise ValueError("Give the date and time with a time zone.")
+        return self
+
+
+class InterviewPatch(RequestModel):
+    outcome: InterviewOutcome | None = None
+    notes: Annotated[str, StringConstraints(max_length=5000)] | None = None
+
+
+class InterviewerOut(BaseModel):
+    id: uuid.UUID
+    name: str
+
+
+class InterviewOut(BaseModel):
+    id: uuid.UUID
+    application_id: uuid.UUID
+    scheduled_at: datetime
+    duration_minutes: int
+    mode: InterviewMode
+    location_or_link: str | None
+    interviewers: list[InterviewerOut]
+    outcome: InterviewOutcome
+    notes: str | None
+    created_at: datetime
+    updated_at: datetime

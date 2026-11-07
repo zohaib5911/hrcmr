@@ -11,14 +11,25 @@ from sqlalchemy import and_, select
 
 from app.core.errors import AppError, NotFoundError
 from app.modules.companies.models import Company, Department, Location
+from app.modules.employees.models import Employee
 from app.modules.files.models import File
 from app.modules.identity.models import User
 from app.modules.recruitment.applications import LABELS
-from app.modules.recruitment.models import Application, Candidate, Posting, Requisition
+from app.modules.recruitment.models import (
+    Application,
+    Candidate,
+    Interview,
+    Posting,
+    Requisition,
+)
 from app.modules.recruitment.schemas import (
     ApplicationOut,
     BudgetPer,
     CandidateOut,
+    InterviewerOut,
+    InterviewMode,
+    InterviewOut,
+    InterviewOutcome,
     PostingOut,
     PostingStatus,
     PostingVisibility,
@@ -361,6 +372,39 @@ async def application_out(db: TenantSession, row: Application, today: date) -> A
         cover_note=row.cover_note,
         applied_via=cast("Literal['admin', 'careers_page']", row.applied_via),
         candidate_rtw_status=await candidate_rtw_status(db, row.candidate_id, today),
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+    )
+
+
+MODE_LABELS: dict[str, str] = {
+    "in_person": "in person",
+    "video": "video call",
+    "phone": "phone call",
+}
+
+
+async def interview_out(db: TenantSession, row: Interview) -> InterviewOut:
+    people = (
+        await db.execute(
+            select(Employee.id, Employee.first_name, Employee.last_name)
+            .where(Employee.id.in_(row.interviewer_employee_ids))
+            .order_by(Employee.last_name, Employee.first_name)
+        )
+    ).all()
+    return InterviewOut(
+        id=row.id,
+        application_id=row.application_id,
+        scheduled_at=row.scheduled_at,
+        duration_minutes=row.duration_minutes,
+        mode=cast("InterviewMode", row.mode),
+        location_or_link=row.location_or_link,
+        interviewers=[
+            InterviewerOut(id=ident, name=f"{first} {last}".strip())
+            for ident, first, last in people
+        ],
+        outcome=cast("InterviewOutcome", row.outcome),
+        notes=row.notes,
         created_at=row.created_at,
         updated_at=row.updated_at,
     )

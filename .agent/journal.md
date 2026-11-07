@@ -247,3 +247,4 @@
 2026-11-07 06:54 | Claude | T11.3 | DONE: candidate CRUD/archive, RTW for candidates via shared service (subject_type candidate), candidate documents with owner check, candidates tab and profile; DB 60 pass, mypy/ruff clean, web unit 777, recruitment.spec pass | next T11.4 via next.sh
 2026-11-07 06:57 | Claude | T11.4 | step 1 done: applications, stage rules (every pair tested, exact skip message), history, pipeline counts; tests 69 pass | next step 2 interviews + .ics
 2026-11-07 06:57 | Claude | T11.4 | step 1 done: applications, stage rules (every pair tested, exact skip message), history, pipeline counts; tests 69 pass | next step 2 interviews + .ics
+2026-11-07 07:02 | Claude | T11.4 | step 2 done: interviews CRUD, invite emails (staff + candidate templates, samples), RFC 5545 .ics endpoint; ics 3 + stages 65 + applications 4 + interviews 2 + email 7 pass | next step 3 offers

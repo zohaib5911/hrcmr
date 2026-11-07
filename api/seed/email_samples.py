@@ -73,6 +73,19 @@ SAMPLES: dict[str, dict[str, str]] = {
         "policy_title": "Data protection policy",
         "link": f"{SAMPLE_BASE}/policies",
     },
+    "interview_invite": {
+        "first_name": "Tom",
+        "job_title": "Sous chef",
+        "when": "Thursday 12 November 2026 at 14:30",
+        "where": "video call",
+        "link": f"{SAMPLE_BASE}/recruitment/applications",
+    },
+    "interview_invite_candidate": {
+        "first_name": "Ana",
+        "job_title": "Sous chef",
+        "when": "Thursday 12 November 2026 at 14:30",
+        "where": "video call",
+    },
     "deletion_code": {"first_name": "Amira", "code": "482 915", "minutes": "15"},
 }
 

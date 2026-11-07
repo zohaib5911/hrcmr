@@ -209,6 +209,29 @@ TEMPLATES: dict[str, Template] = {
         button=("Read the policy", "link"),
         fields=_fields("first_name", "policy_title", "link"),
     ),
+    "interview_invite": Template(
+        subject="Interview for {job_title}",
+        heading="You are on an interview panel",
+        preheader="Interview for {job_title} on {when}.",
+        paragraphs=(
+            "Hi {first_name},",
+            "You are on the panel for an interview for {job_title}. It is on {when}, at {where}.",
+            "The calendar invite is on the application page.",
+        ),
+        button=("Open the application", "link"),
+        fields=_fields("first_name", "job_title", "when", "where", "link"),
+    ),
+    "interview_invite_candidate": Template(
+        subject="Your interview for {job_title}",
+        heading="Your interview is booked",
+        preheader="Your interview for {job_title} is on {when}.",
+        paragraphs=(
+            "Hi {first_name},",
+            "Thank you for applying for {job_title}. Your interview is on {when}, at {where}.",
+            "We look forward to meeting you.",
+        ),
+        fields=_fields("first_name", "job_title", "when", "where"),
+    ),
     "deletion_code": Template(
         subject="Your confirmation code",
         heading="Your confirmation code",
