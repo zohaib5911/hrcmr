@@ -1,16 +1,16 @@
 # STATUS
 Updated: 2026-11-07 03:54, Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: 0044639+
-State: HANDED OVER — AUDIT-1 round 1 fixes done; re-audit (round 2) needed by a big model
+State: HANDED OVER — audit fixes ready (AUDIT-1 round 2: 0 P0 / 3 P1 / 1 P2 in changesneeded.md)
 
 ## Last completed
 - AUDIT-1 round 1 (scope f37f781..a49307d): 1 P0, 5 P1, 1 P2 in changesneeded.md; all 7 fixed and ticked at the owner's request.
 - PR #18 (Phase 11) merged to main as 1ea40b1 with all checks green.
 
 ## Current task
-- none. next.sh now shows a re-audit (all changesneeded.md items ticked, no PASS line).
+- none. next.sh shows C1.2.1 (FIX, S). PR #19 (round 1 fixes) is open; do not merge it until C1.2.1 and C1.2.2 are in.
 
 ## Next tasks
-- AUDIT-1 round 2 (big model): scope audit-1-r1..HEAD (the fix commits) plus regressions in files service upload and e-mail delivery.
+- C1.2.1–C1.2.4 (small model), then AUDIT-1 round 3 (big model, fresh session): scope audit-1-r2..HEAD.
 - Then T12.1, T12.2, P12.
 
 ## Health
