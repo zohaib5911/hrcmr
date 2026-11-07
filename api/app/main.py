@@ -7,6 +7,7 @@ Run in container: gunicorn -c gunicorn.conf.py "app.main:create_app()"
 from __future__ import annotations
 
 import asyncio
+import re
 from contextlib import asynccontextmanager
 from functools import partial
 from typing import TYPE_CHECKING, Any
@@ -15,7 +16,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.ai.letters import router as letters_router
-from app.core.body_limit import LOGO_LIMIT, PROOF_LIMIT, UPLOAD_LIMIT, BodyLimitMiddleware
+from app.core.body_limit import (
+    LOGO_LIMIT,
+    PROOF_LIMIT,
+    SMALL_FILE_LIMIT,
+    UPLOAD_LIMIT,
+    BodyLimitMiddleware,
+)
 from app.core.config import Settings, get_settings
 from app.core.csrf import CsrfMiddleware
 from app.core.errors import ErrorEnvelope, register_exception_handlers
@@ -195,6 +202,13 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
             f"{API_PREFIX}/compliance-documents": UPLOAD_LIMIT,
             # The careers apply form: a CV of up to 10 MB and its fields.
             f"{API_PREFIX}/public/postings": PROOF_LIMIT,
+            f"{API_PREFIX}/attendance/import/preview": SMALL_FILE_LIMIT,
+            # Upload routes whose prefix also serves JSON: the whole path must match.
+            re.compile(rf"{API_PREFIX}/documents"): UPLOAD_LIMIT,
+            re.compile(rf"{API_PREFIX}/policies/[^/]+/file"): UPLOAD_LIMIT,
+            re.compile(rf"{API_PREFIX}/employees/[^/]+/documents"): UPLOAD_LIMIT,
+            re.compile(rf"{API_PREFIX}/employees/[^/]+/opt-out-48h/agreement"): UPLOAD_LIMIT,
+            re.compile(rf"{API_PREFIX}/employees/[^/]+/photo"): SMALL_FILE_LIMIT,
         },
     )
     app.add_middleware(

@@ -416,3 +416,16 @@ async def test_new_starters_join_marked_policies_on_hire_and_daily_catch_up(
             ).scalars()
         )
     assert "policy.assigned_new_starters" in actions
+
+
+async def test_a_policy_file_over_one_megabyte_is_accepted(rig: dict[str, Any]) -> None:
+    """The body limit for this route is the upload limit, not the 1 MB JSON default (C1.2.3)."""
+    admin = await rig["person"]("company_admin", rig["a"])
+    made = await admin.post(API, json=draft(title="Large handbook"))
+    assert made.status_code == 201, made.text
+    large = PDF + b"\n%" + b"0" * 3_000_000
+    uploaded = await admin.post(
+        API + f"/{made.json()['id']}/file",
+        files={"file": ("handbook.pdf", large, "application/pdf")},
+    )
+    assert uploaded.status_code == 200, uploaded.text
