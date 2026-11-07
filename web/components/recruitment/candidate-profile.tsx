@@ -19,6 +19,7 @@ import { formatBytes } from "@/lib/ui/files";
 import { formatUk } from "@/lib/ui/dates";
 
 import { CHECK_TYPE, OUTCOME, RTW_STATUS, type RtwCheckType, type RtwOutcome } from "./rtw";
+import { STAGE_LABEL, STAGE_TONE } from "./stages";
 
 type Candidate = components["schemas"]["CandidateOut"];
 type RtwTab = components["schemas"]["RTWTab"];
@@ -36,6 +37,7 @@ export function CandidateProfile({ candidateId }: { candidateId: string }) {
   const [candidate, setCandidate] = useState<Candidate | null>(null);
   const [problem, setProblem] = useState<Problem | null>(null);
   const [version, setVersion] = useState(0);
+  const [tab, setTab] = useState("overview");
 
   useEffect(() => {
     if (!mayRead) return;
@@ -95,7 +97,7 @@ export function CandidateProfile({ candidateId }: { candidateId: string }) {
         Back to recruitment
       </Link>
 
-      <Tabs defaultValue="overview">
+      <Tabs value={tab} onValueChange={setTab}>
         <TabsList aria-label="Candidate">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="applications">Applications</TabsTrigger>
@@ -120,9 +122,7 @@ export function CandidateProfile({ candidateId }: { candidateId: string }) {
         </TabsContent>
 
         <TabsContent value="applications" className="pt-4">
-          <p className="text-callout text-label-secondary">
-            Applications to postings appear here once they are set up.
-          </p>
+          <ApplicationsPanel candidateId={candidateId} mayWrite={mayWrite} />
         </TabsContent>
 
         <TabsContent value="rtw" className="pt-4">
@@ -382,6 +382,99 @@ function DocumentsPanel({ candidateId, mayWrite }: { candidateId: string; mayWri
             </li>
           ))}
         </ul>
+      )}
+    </div>
+  );
+}
+
+function ApplicationsPanel({ candidateId, mayWrite }: { candidateId: string; mayWrite: boolean }) {
+  const toast = useToast();
+  const [apps, setApps] = useState<components["schemas"]["ApplicationOut"][] | null>(null);
+  const [postings, setPostings] = useState<{ id: string; title: string }[]>([]);
+  const [posting, setPosting] = useState("");
+  const [version, setVersion] = useState(0);
+  const [problem, setProblem] = useState<Problem | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    void attempt((c) =>
+      c.GET("/applications", { params: { query: { candidate_id: candidateId, limit: 100 } } }),
+    ).then((result) => {
+      if (!active) return;
+      if (result.ok) setApps(result.data.items);
+      else setProblem(result.problem);
+    });
+    return () => {
+      active = false;
+    };
+  }, [candidateId, version]);
+
+  useEffect(() => {
+    if (!mayWrite) return;
+    let active = true;
+    void attempt((c) =>
+      c.GET("/postings", { params: { query: { status: "open", limit: 100 } } }),
+    ).then((result) => {
+      if (active && result.ok)
+        setPostings(result.data.items.map((row) => ({ id: row.id, title: row.title })));
+    });
+    return () => {
+      active = false;
+    };
+  }, [mayWrite]);
+
+  async function apply() {
+    if (!posting) return;
+    setProblem(null);
+    const result = await attempt((c) =>
+      c.POST("/applications", { body: { candidate_id: candidateId, posting_id: posting } }),
+    );
+    if (result.ok) {
+      toast.show({ title: "Application added", tone: "success" });
+      setPosting("");
+      setVersion((n) => n + 1);
+    } else setProblem(result.problem);
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      {problem && <Alert tone="danger" title={problem.message} />}
+      {apps && apps.length === 0 && (
+        <p className="text-callout text-label-secondary">Not applied for any posting yet.</p>
+      )}
+      <ul className="flex flex-col gap-2">
+        {(apps ?? []).map((app) => (
+          <li key={app.id}>
+            <Link
+              href={`/recruitment/applications/${app.id}`}
+              className="border-separator flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3 text-callout"
+            >
+              <span className="break-words">{app.posting_title}</span>
+              <StatusChip tone={STAGE_TONE[app.stage]}>{STAGE_LABEL[app.stage]}</StatusChip>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {mayWrite && (
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="w-72">
+            <Select
+              label="Apply to posting"
+              value={posting}
+              onChange={(e) => setPosting(e.target.value)}
+            >
+              <option value="">Choose an open posting</option>
+              {postings.map((row) => (
+                <option key={row.id} value={row.id}>
+                  {row.title}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <Button variant="filled" disabled={!posting} onClick={() => void apply()}>
+            Add application
+          </Button>
+        </div>
       )}
     </div>
   );

@@ -9999,6 +9999,7 @@ export interface operations {
             query?: {
                 stage?: ("applied" | "shortlisted" | "interview" | "offer_letter" | "offer_accepted" | "hired" | "rejected" | "withdrawn") | null;
                 posting_id?: string | null;
+                candidate_id?: string | null;
                 offset?: number;
                 limit?: number;
             };

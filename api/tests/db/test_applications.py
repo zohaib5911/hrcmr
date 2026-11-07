@@ -121,6 +121,20 @@ async def test_the_pipeline_counts_match_the_database(rig: dict[str, Any]) -> No
     assert len(shown["stages"]) == 8
 
 
+async def test_applications_can_be_listed_for_one_candidate(rig: dict[str, Any]) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    posting = await open_posting(admin, "Runner")
+    mine = await candidate(admin, "Lou")
+    other = await candidate(admin, "Max")
+    for who in (mine, other):
+        made = await admin.post(
+            API + "/applications", json={"candidate_id": who, "posting_id": posting}
+        )
+        assert made.status_code == 201, made.text
+    listed = (await admin.get(API + "/applications", params={"candidate_id": mine})).json()
+    assert [item["candidate_id"] for item in listed["items"]] == [mine]
+
+
 async def test_employees_are_refused(rig: dict[str, Any]) -> None:
     employee = await rig["person"]("employee", rig["a"])
     assert (await employee.get(API + "/applications")).status_code == 403

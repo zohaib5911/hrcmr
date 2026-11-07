@@ -172,7 +172,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   2. `/recruitment/candidates/[id]`: header (initials, name, RTW status, source, email; actions Apply to posting, Convert — disabled until T11.5), tabs Overview / Applications / Right to Work / Documents / Sponsorship check (placeholder text "Available after the checker launches" until T15.6).
 - **Done when:** a candidate RTW check records and shows its status; cross-tenant 404.
 
-### [ ] T11.4 · S · Applications, interviews, offers
+### [x] T11.4 · S · Applications, interviews, offers
 - **Spec:** plan L957–961 (pipeline), L978–983, L1420.
 - **Steps:**
   1. Applications: create (candidate + posting), `POST /applications/{id}/stage`. **Forward moves one step only**, error text exactly "The next step from X is Y"; backward allowed; Rejected/Withdrawn end it. History rows with timestamps. Unit-test every stage pair.

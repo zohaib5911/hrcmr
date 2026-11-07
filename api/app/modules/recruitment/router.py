@@ -572,6 +572,7 @@ async def list_applications(
     access: ApplicationReads,
     stage: Stage | None = None,
     posting_id: uuid.UUID | None = None,
+    candidate_id: uuid.UUID | None = None,
     offset: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
 ) -> ApplicationPage:
@@ -581,6 +582,8 @@ async def list_applications(
         query = query.where(Application.stage == stage)
     if posting_id is not None:
         query = query.where(Application.posting_id == posting_id)
+    if candidate_id is not None:
+        query = query.where(Application.candidate_id == candidate_id)
     total = (
         await access.db.execute(select(func.count()).select_from(query.subquery()))
     ).scalar_one()

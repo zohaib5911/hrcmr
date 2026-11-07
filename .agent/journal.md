@@ -249,3 +249,4 @@
 2026-11-07 06:57 | Claude | T11.4 | step 1 done: applications, stage rules (every pair tested, exact skip message), history, pipeline counts; tests 69 pass | next step 2 interviews + .ics
 2026-11-07 07:02 | Claude | T11.4 | step 2 done: interviews CRUD, invite emails (staff + candidate templates, samples), RFC 5545 .ics endpoint; ics 3 + stages 65 + applications 4 + interviews 2 + email 7 pass | next step 3 offers
 2026-11-07 07:03 | Claude | T11.4 | step 3 done: offers (draft, sent, accepted/declined/withdrawn; edits locked after sent; ended applications refused); offers 3 pass | next step 4 UI (pipeline bar, application page, interview and offer panels)
+2026-11-07 07:10 | Claude | T11.4 | DONE: applications + stage rules, interviews + .ics + invite emails, offers, pipeline bar, application page, candidate applications; API 134 pass, rules 65, ics 3, mypy/ruff clean, web unit 777, recruitment.spec 4 pass | next T11.5 via next.sh
