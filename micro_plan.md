@@ -301,7 +301,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] P14 · S · Phase 14 gate
 - Recipe R7 + run the T14.4 fuzz test.
 
-### [ ] AUDIT-2 · AUDIT STOP · covers T12.1 → P14 (and T14.4 by the big model)
+### [x] AUDIT-2 · AUDIT STOP · covers T12.1 → P14 (and T14.4 by the big model)
 
 ---
 

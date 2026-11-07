@@ -515,3 +515,4 @@ Do not start until the owner says so: US site, Australia, native wrapper, passke
 - Gate: API suite 1036 pass; web lint, typecheck and unit 786 pass; browser suite 430 pass (176 screenshot-only skipped; dashboard spec re-run after the checklist icon change, 2 pass); screenshots docs/screenshots/phase-14 (12 files: dashboard, notifications, search; 390 and 1280 px; light and dark).
 - Open: the Ask Mady assistant panel is still deferred by the owner. The AI wording button and AI letter path are covered by API tests only, not browser tests (the e2e server has no AI key). Owner: review the eight launch courses before publishing.
 - AUDIT-2 round 1: 0/3/3 (P0/P1/P2) — FIX NEEDED. Worst: employee names typed into letter key points are sent to Claude unredacted; leave and rota e-mails ignore the e-mail preference; no course-assigned notice.
+- AUDIT-2 round 2: 0/0/0 (P0/P1/P2) — PASS. All six round-1 fixes verified; api 1043, web unit 786, e2e 430 pass.
