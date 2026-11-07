@@ -331,3 +331,4 @@
 2026-11-08 02:40 | Claude (Opus) | T15.2 | step 3 done: soc_rules/source.py (stdlib HTML parser: Tables 1-6, ISL, TSL SW 6.1A, options A-K; fails loudly on changed pages); parser tests 18 pass | next importer (draft version, diff, rqf) + CLI data/import_rules.py + DB tests
 2026-11-08 02:43 | Claude (Opus) | T15.2 | step 4a done: importer (draft version, unchanged-hash skip, one draft at a time, diff vs live, publish sets live/retired + rqf_level from tables); DB tests 6 pass | next CLI data/import_rules.py, full run, docs
 2026-11-08 02:44 | Claude (Opus) | T15.2 | DONE: CLI data/import_rules.py; full run temp DB: going 598, pay 178, Table 6 114, lists 77 (ISL 25/TSL 52), salary 11; publish ok; re-run unchanged; tests parser 18, DB 6, related 55+31 pass | next T15.3 (B) rules engine
+2026-11-08 02:45 | Claude (Opus) | T15.3 | started; STATUS updated | next engine.py

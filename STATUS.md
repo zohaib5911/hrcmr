@@ -7,7 +7,11 @@ State: IN PROGRESS
 - T15.1 — ONS SOC 2020 import and local embeddings.
 
 ## Current task
-- T15.3 — Rules engine and 20+ golden tests (B) — starting next.
+- T15.3 — Rules engine and 20+ golden tests (B)
+  - [ ] 1 engine.py: inputs/outputs, eligibility (Table 6, 1/2/3, 1a/2aa/2a/3a transitional, ISL/TSL by CoS date and nation), options A–K with pro-rated going rates, verdict, dependants, notes
+  - [ ] 2 rules_data loader (live or given version) from the DB, same shapes as the parser
+  - [ ] 3 20+ golden tests on the saved pages; DB loader test
+- Resume note: see journal and last commit Next: line.
 
 ## Next tasks
 - T15.3 (B), then T15.4 (S!), T15.5 (S!)
