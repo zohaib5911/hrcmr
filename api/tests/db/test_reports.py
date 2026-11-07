@@ -209,10 +209,11 @@ async def test_worker_audit_failure_rolls_back_artifact(
     rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
     from app.jobs import reports as report_jobs
+    from app.modules.audit import service as audit_service
 
     admin = await rig["person"]("company_admin", rig["a"])
     job = (await admin.post(API + "/company")).json()
-    original = report_jobs.record
+    original = audit_service.record
 
     async def fail(*args: Any, **kwargs: Any) -> None:
         if args[2] == "report.generated":
