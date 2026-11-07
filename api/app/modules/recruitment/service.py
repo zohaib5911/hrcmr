@@ -19,6 +19,7 @@ from app.modules.recruitment.models import (
     Application,
     Candidate,
     Interview,
+    Offer,
     Posting,
     Requisition,
 )
@@ -30,6 +31,8 @@ from app.modules.recruitment.schemas import (
     InterviewMode,
     InterviewOut,
     InterviewOutcome,
+    OfferOut,
+    OfferStatus,
     PostingOut,
     PostingStatus,
     PostingVisibility,
@@ -405,6 +408,31 @@ async def interview_out(db: TenantSession, row: Interview) -> InterviewOut:
         ],
         outcome=cast("InterviewOutcome", row.outcome),
         notes=row.notes,
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+    )
+
+
+# Where an offer may move from. Accepted, declined and withdrawn offers are final.
+OFFER_NEXT: dict[str, frozenset[str]] = {
+    "draft": frozenset({"sent", "withdrawn"}),
+    "sent": frozenset({"accepted", "declined", "withdrawn"}),
+    "accepted": frozenset(),
+    "declined": frozenset(),
+    "withdrawn": frozenset(),
+}
+
+
+def offer_out(row: Offer) -> OfferOut:
+    return OfferOut(
+        id=row.id,
+        application_id=row.application_id,
+        role_title=row.role_title,
+        salary=row.salary,
+        salary_per=cast("BudgetPer", row.salary_per),
+        start_date=row.start_date,
+        status=cast("OfferStatus", row.status),
+        decided_at=row.decided_at,
         created_at=row.created_at,
         updated_at=row.updated_at,
     )

@@ -296,3 +296,34 @@ class InterviewOut(BaseModel):
     notes: str | None
     created_at: datetime
     updated_at: datetime
+
+
+OfferStatus = Literal["draft", "sent", "accepted", "declined", "withdrawn"]
+
+
+class OfferIn(RequestModel):
+    role_title: Title
+    salary: Money
+    salary_per: BudgetPer
+    start_date: date | None = None
+
+
+class OfferPatch(RequestModel):
+    status: OfferStatus | None = None
+    role_title: Title | None = None
+    salary: Money | None = None
+    salary_per: BudgetPer | None = None
+    start_date: date | None = None
+
+
+class OfferOut(BaseModel):
+    id: uuid.UUID
+    application_id: uuid.UUID
+    role_title: str
+    salary: Decimal
+    salary_per: BudgetPer
+    start_date: date | None
+    status: OfferStatus
+    decided_at: datetime | None
+    created_at: datetime
+    updated_at: datetime

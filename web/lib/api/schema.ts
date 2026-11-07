@@ -157,6 +157,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/applications/{application_id}/offers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Offers */
+        get: operations["recruitment_list_offers"];
+        put?: never;
+        /** Create Offer */
+        post: operations["recruitment_create_offer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/applications/{application_id}/stage": {
         parameters: {
             query?: never;
@@ -2861,6 +2879,23 @@ export interface paths {
         head?: never;
         /** Read Notification */
         patch: operations["notifications_read_notification"];
+        trace?: never;
+    };
+    "/offers/{offer_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Offer */
+        patch: operations["recruitment_update_offer"];
         trace?: never;
     };
     "/pay-bands": {
@@ -7668,6 +7703,74 @@ export interface components {
             /** Marked */
             marked: number;
         };
+        /** OfferIn */
+        OfferIn: {
+            /** Role Title */
+            role_title: string;
+            /** Salary */
+            salary: number | string;
+            /**
+             * Salary Per
+             * @enum {string}
+             */
+            salary_per: "year" | "month" | "hour";
+            /** Start Date */
+            start_date?: string | null;
+        };
+        /** OfferOut */
+        OfferOut: {
+            /**
+             * Application Id
+             * Format: uuid
+             */
+            application_id: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Decided At */
+            decided_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Role Title */
+            role_title: string;
+            /** Salary */
+            salary: string;
+            /**
+             * Salary Per
+             * @enum {string}
+             */
+            salary_per: "year" | "month" | "hour";
+            /** Start Date */
+            start_date: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "sent" | "accepted" | "declined" | "withdrawn";
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** OfferPatch */
+        OfferPatch: {
+            /** Role Title */
+            role_title?: string | null;
+            /** Salary */
+            salary?: number | string | null;
+            /** Salary Per */
+            salary_per?: ("year" | "month" | "hour") | null;
+            /** Start Date */
+            start_date?: string | null;
+            /** Status */
+            status?: ("draft" | "sent" | "accepted" | "declined" | "withdrawn") | null;
+        };
         /** OptOutChange */
         OptOutChange: {
             /** Opted Out */
@@ -10163,6 +10266,90 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_list_offers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferOut"][];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_create_offer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OfferIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferOut"];
+                };
             };
             /** @description The request could not be completed. `error.code` says why. */
             "4XX": {
@@ -18667,6 +18854,50 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["NotificationOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_update_offer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                offer_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OfferPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OfferOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

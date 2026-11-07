@@ -31,6 +31,7 @@ from app.modules.recruitment.models import (
     Application,
     Candidate,
     Interview,
+    Offer,
     Posting,
     Requisition,
 )
@@ -46,6 +47,9 @@ from app.modules.recruitment.schemas import (
     InterviewIn,
     InterviewOut,
     InterviewPatch,
+    OfferIn,
+    OfferOut,
+    OfferPatch,
     Pipeline,
     PipelineStage,
     PostingIn,
@@ -944,3 +948,105 @@ async def interview_invite(
             "Cache-Control": "private, no-store",
         },
     )
+
+
+OfferReads = Annotated[Access, Depends(require("recruitment.offer.read"))]
+OfferWrites = Annotated[Access, Depends(require("recruitment.offer.write"))]
+ENDED = frozenset({"rejected", "withdrawn"})
+
+
+async def _offer(access: Access, ident: uuid.UUID, *, lock: bool = False) -> Offer:
+    query = select(Offer).where(Offer.id == ident)
+    if lock:
+        query = query.with_for_update()
+    row = (await access.db.execute(query)).scalar_one_or_none()
+    if row is None:
+        raise NotFoundError
+    return row
+
+
+@router.get("/applications/{application_id}/offers", response_model=list[OfferOut])
+async def list_offers(application_id: uuid.UUID, access: OfferReads) -> list[OfferOut]:
+    company_wide(access)
+    await _application(access, application_id)
+    rows = (
+        (
+            await access.db.execute(
+                select(Offer)
+                .where(Offer.application_id == application_id)
+                .order_by(Offer.created_at, Offer.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    return [service.offer_out(row) for row in rows]
+
+
+@router.post("/applications/{application_id}/offers", status_code=201, response_model=OfferOut)
+async def create_offer(application_id: uuid.UUID, body: OfferIn, access: OfferWrites) -> OfferOut:
+    company_wide(access)
+    application = await _application(access, application_id, lock=True)
+    if application.stage in ENDED:
+        raise AppError(
+            "APPLICATION_ENDED",
+            "This application has ended, so no offer can be made.",
+            status_code=422,
+        )
+    row = Offer(
+        id=uuid7(),
+        company_id=access.company_id,
+        application_id=application_id,
+        role_title=body.role_title,
+        salary=body.salary,
+        salary_per=body.salary_per,
+        start_date=body.start_date,
+        status="draft",
+    )
+    access.db.add(row)
+    await access.db.flush()
+    await access.db.refresh(row)
+    await access.audit(
+        "recruitment.offer.created",
+        entity_type="offer",
+        entity_id=row.id,
+        after={"application_id": str(application_id), "salary_per": body.salary_per},
+    )
+    await access.db.commit()
+    return service.offer_out(row)
+
+
+@router.patch("/offers/{offer_id}", response_model=OfferOut)
+async def update_offer(offer_id: uuid.UUID, body: OfferPatch, access: OfferWrites) -> OfferOut:
+    company_wide(access)
+    row = await _offer(access, offer_id, lock=True)
+    before = {"status": row.status}
+    edits = {"role_title", "salary", "salary_per", "start_date"} & body.model_fields_set
+    if edits and row.status != "draft":
+        raise AppError(
+            "OFFER_LOCKED",
+            "Only a draft offer can change. Withdraw this one and make a new offer.",
+            status_code=409,
+        )
+    for name in edits:
+        setattr(row, name, getattr(body, name))
+    if body.status is not None and body.status != row.status:
+        if body.status not in service.OFFER_NEXT[row.status]:
+            raise AppError(
+                "OFFER_STATUS_INVALID",
+                f"An offer that is {row.status} cannot become {body.status}.",
+                status_code=409,
+            )
+        row.status = body.status
+        if body.status in {"accepted", "declined", "withdrawn"}:
+            row.decided_at = service.now()
+    await access.db.flush()
+    await access.audit(
+        "recruitment.offer.status_changed",
+        entity_type="offer",
+        entity_id=row.id,
+        before=before,
+        after={"status": row.status},
+    )
+    await access.db.commit()
+    return service.offer_out(row)
