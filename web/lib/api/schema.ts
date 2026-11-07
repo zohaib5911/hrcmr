@@ -3400,7 +3400,12 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Apply */
+        /**
+         * Apply
+         * @description The apply form, sent as multipart form data so a CV (optional) can come with it.
+         *
+         *     The fields are checked by ``ApplyIn``, the same rules as before the CV was added.
+         */
         post: operations["careers_apply"];
         delete?: never;
         options?: never;
@@ -4589,26 +4594,6 @@ export interface components {
              */
             stage: "applied" | "shortlisted" | "interview" | "offer_letter" | "offer_accepted" | "hired" | "rejected" | "withdrawn";
         };
-        /** ApplyIn */
-        ApplyIn: {
-            /** Consent */
-            consent: boolean;
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            /** First Name */
-            first_name: string;
-            /** Last Name */
-            last_name: string;
-            /** Phone */
-            phone?: string | null;
-            /** Turnstile Token */
-            turnstile_token: string;
-            /** What You Bring */
-            what_you_bring?: string | null;
-        };
         /** ApplyOut */
         ApplyOut: {
             /**
@@ -5079,6 +5064,25 @@ export interface components {
         Body_attendance_preview: {
             /** File */
             file: string;
+        };
+        /** Body_careers_apply */
+        Body_careers_apply: {
+            /** Consent */
+            consent: boolean;
+            /** Cv */
+            cv?: string | null;
+            /** Email */
+            email: string;
+            /** First Name */
+            first_name: string;
+            /** Last Name */
+            last_name: string;
+            /** Phone */
+            phone?: string | null;
+            /** Turnstile Token */
+            turnstile_token: string;
+            /** What You Bring */
+            what_you_bring?: string | null;
         };
         /** Body_company_add_document */
         Body_company_add_document: {
@@ -20699,7 +20703,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ApplyIn"];
+                "multipart/form-data": components["schemas"]["Body_careers_apply"];
             };
         };
         responses: {

@@ -9,10 +9,11 @@ from __future__ import annotations
 import json
 from datetime import UTC, date, datetime
 from decimal import Decimal  # noqa: TC003
-from typing import Annotated, Literal
+from typing import TYPE_CHECKING, Annotated, Literal
 
-from fastapi import APIRouter, Request
-from pydantic import BaseModel, EmailStr, StringConstraints, field_validator
+from fastapi import APIRouter, Form, Request, UploadFile
+from fastapi.exceptions import RequestValidationError
+from pydantic import BaseModel, EmailStr, StringConstraints, ValidationError, field_validator
 from sqlalchemy import func, select
 
 from app.core.crypto import encrypt
@@ -32,9 +33,14 @@ from app.modules.identity.models import Membership
 from app.modules.notifications.models import Notification
 from app.modules.recruitment.models import Application, Candidate, Posting
 
+if TYPE_CHECKING:
+    from app.modules.files.service import FileService
+
 router = APIRouter(prefix="/public", tags=["careers"])
 
 APPLY_PER_CONNECTION = ("careers.apply", 20, 3600)  # attempts, per hour, per connection
+CV_KINDS = frozenset({"pdf", "doc", "docx"})
+CV_MAX_BYTES = 10 * 1024 * 1024
 
 
 class CareersPostingItem(BaseModel):
@@ -165,8 +171,34 @@ async def careers_posting(
     "/postings/{company_slug}/{posting_slug}/apply", status_code=202, response_model=ApplyOut
 )
 async def apply(
-    company_slug: str, posting_slug: str, body: ApplyIn, db: GlobalDb, request: Request
+    company_slug: str,
+    posting_slug: str,
+    db: GlobalDb,
+    request: Request,
+    first_name: Annotated[str, Form()],
+    last_name: Annotated[str, Form()],
+    email: Annotated[str, Form()],
+    consent: Annotated[bool, Form()],
+    turnstile_token: Annotated[str, Form()],
+    phone: Annotated[str | None, Form()] = None,
+    what_you_bring: Annotated[str | None, Form()] = None,
+    cv: UploadFile | None = None,
 ) -> ApplyOut:
+    """The apply form, sent as multipart form data so a CV (optional) can come with it.
+
+    The fields are checked by ``ApplyIn``, the same rules as before the CV was added."""
+    try:
+        body = ApplyIn(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            phone=phone or None,
+            what_you_bring=what_you_bring or None,
+            consent=consent,
+            turnstile_token=turnstile_token,
+        )
+    except ValidationError as exc:
+        raise RequestValidationError(exc.errors()) from None
     company = await _company(db, company_slug)
     ip = client_ip(request)
     auth = request.app.state.auth
@@ -217,6 +249,22 @@ async def apply(
             )
         ).first()
         if already is None:
+            context = AuditContext(
+                company_id=company.id, actor_user_id=None, actor_type="system", ip=ip
+            )
+            if cv is not None and cv.filename:
+                files: FileService = request.app.state.files
+                # Checked and scanned before anything is kept: a refused CV saves nothing.
+                await files.store_public(
+                    tenant,
+                    context,
+                    cv.file,
+                    filename=cv.filename,
+                    owner_type="candidate",
+                    owner_id=candidate.id,
+                    kinds=CV_KINDS,
+                    max_bytes=CV_MAX_BYTES,
+                )
             await _record_application(tenant, company, posting, candidate, body, ip, request)
         await tenant.commit()
     return ApplyOut()
