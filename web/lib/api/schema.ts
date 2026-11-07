@@ -2527,10 +2527,28 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** Assignment Report */
+        get: operations["learning_assignment_report"];
         put?: never;
         /** Assign Courses */
         post: operations["learning_assign_courses"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/learning/assignments.xlsx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Assignment Export */
+        get: operations["learning_assignment_export"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -2648,6 +2666,23 @@ export interface paths {
         };
         /** Get Course */
         get: operations["learning_get_course"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/learning/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Learning Summary */
+        get: operations["learning_learning_summary"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6526,13 +6561,21 @@ export interface components {
         CourseAssignmentIn: {
             /** Course Ids */
             course_ids: string[];
+            /** Department Ids */
+            department_ids?: string[];
             /**
              * Due On
              * Format: date
              */
             due_on: string;
             /** Employee Ids */
-            employee_ids: string[];
+            employee_ids?: string[];
+            /**
+             * Scope
+             * @default named
+             * @enum {string}
+             */
+            scope: "everyone" | "departments" | "named";
         };
         /** CourseAssignmentOut */
         CourseAssignmentOut: {
@@ -7799,6 +7842,19 @@ export interface components {
              * Format: uuid
              */
             shift_type_id: string;
+        };
+        /** LearningSummaryOut */
+        LearningSummaryOut: {
+            /** Assignments */
+            assignments: number;
+            /** Completed */
+            completed: number;
+            /** In Progress */
+            in_progress: number;
+            /** Not Started */
+            not_started: number;
+            /** Overdue */
+            overdue: number;
         };
         /** LeaveConflict */
         LeaveConflict: {
@@ -9540,6 +9596,48 @@ export interface components {
             status: "queued" | "ready" | "failed";
             /** Url */
             url?: string | null;
+        };
+        /** ReportPageOut */
+        ReportPageOut: {
+            /** Items */
+            items: components["schemas"]["ReportRowOut"][];
+            /** Total */
+            total: number;
+        };
+        /** ReportRowOut */
+        ReportRowOut: {
+            /** Completed At */
+            completed_at: string | null;
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /** Course Title */
+            course_title: string;
+            /** Department */
+            department: string | null;
+            /**
+             * Due On
+             * Format: date
+             */
+            due_on: string;
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Employee Name */
+            employee_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Quiz Score */
+            quiz_score: number | null;
+            /** Status */
+            status: string;
         };
         /** ReportedIn */
         ReportedIn: {
@@ -18543,6 +18641,51 @@ export interface operations {
             };
         };
     };
+    learning_assignment_report: {
+        parameters: {
+            query?: {
+                course_id?: string | null;
+                department_id?: string | null;
+                status?: ("not_started" | "in_progress" | "completed" | "overdue") | null;
+                search?: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportPageOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     learning_assign_courses: {
         parameters: {
             query?: never;
@@ -18563,6 +18706,49 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AssignmentCreatedOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    learning_assignment_export: {
+        parameters: {
+            query?: {
+                course_id?: string | null;
+                department_id?: string | null;
+                status?: ("not_started" | "in_progress" | "completed" | "overdue") | null;
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": unknown;
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -18847,6 +19033,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CourseOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    learning_learning_summary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LearningSummaryOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

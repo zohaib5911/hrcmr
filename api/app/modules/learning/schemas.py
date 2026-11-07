@@ -144,7 +144,10 @@ class CourseCardOut(BaseModel):
 
 class CourseAssignmentIn(RequestModel):
     course_ids: list[uuid.UUID] = Field(min_length=1, max_length=20)
-    employee_ids: list[uuid.UUID] = Field(min_length=1, max_length=500)
+    # everyone: all current staff; departments: staff in these departments; named: these people.
+    scope: Literal["everyone", "departments", "named"] = "named"
+    department_ids: list[uuid.UUID] = Field(default_factory=list, max_length=100)
+    employee_ids: list[uuid.UUID] = Field(default_factory=list, max_length=500)
     due_on: date
 
 
@@ -196,3 +199,29 @@ class QuizResultOut(BaseModel):
     pass_mark: int
     best_score: int
     results: list[QuestionResultOut]
+
+
+class ReportRowOut(BaseModel):
+    id: uuid.UUID
+    course_id: uuid.UUID
+    course_title: str
+    employee_id: uuid.UUID
+    employee_name: str
+    department: str | None
+    due_on: date
+    status: str
+    quiz_score: int | None
+    completed_at: datetime | None
+
+
+class ReportPageOut(BaseModel):
+    items: list[ReportRowOut]
+    total: int
+
+
+class LearningSummaryOut(BaseModel):
+    assignments: int
+    not_started: int
+    in_progress: int
+    completed: int
+    overdue: int

@@ -1,23 +1,25 @@
-"""Learning for employees: the course library, assignments, the player and the check (plan 8.14).
+"""Learning: the course library, assignments, the report, the player and the check (plan 8.14).
 
 Only the person a course is assigned to can see it, record progress, sit the check or complete it.
-A check that is below the pass mark never completes a course.
+A check that is below the pass mark never completes a course. The report is for people who may
+read every assignment (the company's administrators and auditors), never for an employee.
 """
 
 from __future__ import annotations
 
+import asyncio
 import uuid  # noqa: TC003
 from datetime import UTC, datetime
-from typing import Annotated
+from typing import Annotated, Literal
 
-from fastapi import APIRouter, Depends
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, Query, Response
+from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
-from app.core.errors import AppError, ConflictError, NotFoundError
+from app.core.errors import AppError, ConflictError, ForbiddenError, NotFoundError
+from app.core.rbac_matrix import Scope
 from app.db.ids import uuid7
-from app.modules.employees.models import Employee
-from app.modules.learning import service
+from app.modules.learning import report, service
 from app.modules.learning.models import Course, CourseAssignment
 from app.modules.learning.schemas import (
     AssignmentCreatedOut,
@@ -26,19 +28,30 @@ from app.modules.learning.schemas import (
     CourseAssignmentOut,
     CourseCardOut,
     CourseOut,
+    LearningSummaryOut,
     ProgressIn,
     QuizAnswersIn,
     QuizResultOut,
+    ReportPageOut,
 )
+from app.modules.learning.workbook import xlsx_bytes
 from app.modules.rbac.deps import Access, require
 
 router = APIRouter(tags=["learning"])
 CourseReads = Annotated[Access, Depends(require("learning.course.read"))]
 AssignWrites = Annotated[Access, Depends(require("learning.assignment.write"))]
+ReportReads = Annotated[Access, Depends(require("learning.assignment.read"))]
 OwnReads = Annotated[Access, Depends(require("learning.assignment.read_own"))]
 OwnWrites = Annotated[Access, Depends(require("learning.assignment.complete_own"))]
 
-CURRENT_STATUSES = ("active", "on_leave")  # people who can be assigned a course
+XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+Status = Literal["not_started", "in_progress", "completed", "overdue"]
+
+
+def _company_wide(access: Access) -> None:
+    """The report covers the whole company. Someone who may only see their own is refused."""
+    if access.scope is not Scope.ALL:
+        raise ForbiddenError
 
 
 async def _own(
@@ -91,7 +104,6 @@ async def get_course(course_id: uuid.UUID, access: CourseReads) -> CourseOut:
 @router.post("/learning/assignments", status_code=201, response_model=AssignmentCreatedOut)
 async def assign_courses(body: CourseAssignmentIn, access: AssignWrites) -> AssignmentCreatedOut:
     course_ids = set(body.course_ids)
-    employee_ids = set(body.employee_ids)
     published = (
         (
             await access.db.execute(
@@ -108,26 +120,8 @@ async def assign_courses(body: CourseAssignmentIn, access: AssignWrites) -> Assi
             status_code=422,
             field="course_ids",
         )
-    people = (
-        (
-            await access.db.execute(
-                select(Employee.id).where(
-                    Employee.id.in_(employee_ids),
-                    Employee.company_id == access.company_id,
-                    Employee.status.in_(CURRENT_STATUSES),
-                )
-            )
-        )
-        .scalars()
-        .all()
-    )
-    if len(set(people)) != len(employee_ids):
-        raise AppError(
-            "VALIDATION_ERROR",
-            "Choose current people from this company.",
-            status_code=422,
-            field="employee_ids",
-        )
+    # Every person is resolved and checked before a single row is written.
+    people = await report.people_for(access.db, access.company_id, body)
     values = [
         {
             "id": uuid7(),
@@ -140,28 +134,120 @@ async def assign_courses(body: CourseAssignmentIn, access: AssignWrites) -> Assi
             "assigned_by": access.caller.user_id,
         }
         for course in course_ids
-        for person in employee_ids
+        for person in people
     ]
     # One row per course and person: assigning the same course twice changes nothing.
-    statement = (
-        pg_insert(CourseAssignment)
-        .values(values)
-        .on_conflict_do_nothing(constraint="uq_course_assignments_one_per_person")
-        .returning(CourseAssignment.id)
-    )
-    created = len((await access.db.execute(statement)).all())
+    created = 0
+    if values:
+        statement = (
+            pg_insert(CourseAssignment)
+            .values(values)
+            .on_conflict_do_nothing(constraint="uq_course_assignments_one_per_person")
+            .returning(CourseAssignment.id)
+        )
+        created = len((await access.db.execute(statement)).all())
     await access.audit(
         "learning.assignments_created",
         entity_type="course_assignment",
         after={
+            "scope": body.scope,
             "courses": len(course_ids),
-            "people": len(employee_ids),
+            "people": len(people),
             "due_on": body.due_on.isoformat(),
             "created": created,
         },
     )
     await access.db.commit()
     return AssignmentCreatedOut(created=created, already_assigned=len(values) - created)
+
+
+@router.get("/learning/assignments", response_model=ReportPageOut)
+async def assignment_report(
+    access: ReportReads,
+    course_id: uuid.UUID | None = None,
+    department_id: uuid.UUID | None = None,
+    status: Status | None = None,
+    search: Annotated[str, Query(max_length=200)] = "",
+    offset: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+) -> ReportPageOut:
+    _company_wide(access)
+    query = report.report_query(
+        access.company_id,
+        course_id=course_id,
+        department_id=department_id,
+        status=status,
+        search=search,
+    )
+    total = (
+        await access.db.execute(select(func.count()).select_from(query.subquery()))
+    ).scalar_one()
+    rows = (await access.db.execute(query.offset(offset).limit(limit))).all()
+    return ReportPageOut(items=[report.report_row(row) for row in rows], total=total)
+
+
+@router.get("/learning/summary", response_model=LearningSummaryOut)
+async def learning_summary(access: ReportReads) -> LearningSummaryOut:
+    _company_wide(access)
+    return await report.summary(access.db, access.company_id)
+
+
+@router.get(
+    "/learning/assignments.xlsx",
+    response_class=Response,
+    responses={200: {"content": {XLSX: {}}}},
+)
+async def assignment_export(
+    access: ReportReads,
+    course_id: uuid.UUID | None = None,
+    department_id: uuid.UUID | None = None,
+    status: Status | None = None,
+    search: Annotated[str, Query(max_length=200)] = "",
+) -> Response:
+    _company_wide(access)
+    rows = (
+        await access.db.execute(
+            report.report_query(
+                access.company_id,
+                course_id=course_id,
+                department_id=department_id,
+                status=status,
+                search=search,
+            )
+        )
+    ).all()
+    values = [
+        [
+            item.employee_name,
+            item.department or "",
+            item.course_title,
+            item.due_on.isoformat(),
+            item.status.replace("_", " ").capitalize(),
+            "" if item.quiz_score is None else item.quiz_score,
+            item.completed_at.date().isoformat() if item.completed_at else "",
+        ]
+        for item in (report.report_row(row) for row in rows)
+    ]
+    content = await asyncio.to_thread(
+        xlsx_bytes,
+        ["Employee", "Department", "Course", "Due", "Status", "Check score (%)", "Completed"],
+        values,
+    )
+    await access.audit(
+        "learning.report_exported",
+        entity_type="course_assignment",
+        after={"rows": len(values)},
+    )
+    await access.db.commit()
+    return Response(
+        content,
+        media_type=XLSX,
+        headers={
+            "Content-Disposition": 'attachment; filename="learning-report.xlsx"',
+            "Cache-Control": "private, no-store",
+            "X-Content-Type-Options": "nosniff",
+        },
+    )
 
 
 @router.get("/learning/assignments/own", response_model=list[CourseAssignmentOut])
