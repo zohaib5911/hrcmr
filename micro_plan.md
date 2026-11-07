@@ -326,7 +326,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   2. `POST /soc/match`: retrieval → Claude re-rank via the T14.4 integration with a JSON schema (confidence 0–100, matched duties, why runner-ups lost) → rules engine (T15.3) on top 3. Without AI: return retrieval order with `confidence: null` and a "not AI-ranked" flag.
 - **Done when:** works with and without key (tests mock the AI client); confidence < 60 flagged `low_confidence`.
 
-### [ ] T15.5 · S! · CV match
+### [x] T15.5 · S! · CV match
 - **Spec:** plan L1139–1141, L997.
 - **Steps:** PDF/DOCX text extraction (pypdf / python-docx), **strip e-mail, phone, address and postcode patterns before sending** (unit tests with many formats), Claude comparison → score, evidence quotes, gaps, suggestions. Honesty guardrail text in the prompt (L1143–1146).
 - **Done when:** stripping tests pass; payload test proves no contact details leave; feature hidden without key.

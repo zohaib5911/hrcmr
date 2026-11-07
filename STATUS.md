@@ -1,40 +1,45 @@
 # STATUS
-Updated: 2026-11-08 Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: d381fed
+Updated: 2026-11-08 Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: pending (T15.5 close)
 State: IN PROGRESS
 
 ## Last completed
-- T15.4 — Search and match API: GET /soc/search (trigram + full-text + vector, RRF, top 10) and POST /soc/match (Claude re-rank with strict JSON, confidence and low_confidence < 60, rules engine on top 3; search order with confidence null when AI is off). Tests: 17 pure + 13 DB.
-- T15.3 — Rules engine (engine.py, loader.py), 27 golden tests + 1 DB test.
+- T15.5 — CV match: POST /soc/resume-match (PDF/DOCX up to 10 MB; contact details stripped before sending; Claude score, evidence quotes checked against the CV, gaps, suggestions; AI off = 409). Tests: 43 pure + 2 DB.
+- T15.4 — Search and match API: GET /soc/search, POST /soc/match (Claude re-rank, low_confidence < 60, rules engine on top 3, 409 until rules published). Tests: 17 pure + 13 DB.
 
 ## Current task
-- none (T15.4 done; next block is T15.5, S!)
+- T15.6 — Checker UI, "Find code" embeds, PDF report (S). Not started. Read micro_plan T15.6 block and the recipes it cites (R4 PDF, R6 done-when) before starting.
 
 ## Next tasks
-- T15.5 (S!) CV match, then T15.6 (S) checker UI
+- T15.6 (S), T15.7 (daily rules watcher, super-admin diff/publish/rollback)
 
 ## Health
 - CI on dev: not run since T15.1 (Phase 15 gate PR runs it)    CI on main: green (last PR #22)
-- Local checks run this session: ruff check + format, mypy (app/modules/soc, app/main.py) clean; pytest tests/test_soc_matching.py, tests/db/test_soc_match.py, tests/db/test_soc_import.py, tests/db/test_soc_rules_import.py, tests/test_soc_rules_engine.py, tests/test_soc_rules_source.py, tests/test_soc_source.py, tests/test_openapi.py, tests/test_architecture.py: 112 pass (before the final rename, 43 pass after it). Pre-commit hooks passed on d381fed (api client types regenerated).
+- Last local checks: ruff check + format, mypy (app/modules/soc, app/main.py) clean. Non-DB API tests: 624 pass. SOC DB tests (match, cv, import, rules import): pass. Pre-commit hooks passed on 21e5d8b (client schema regenerated).
 
 ## Issues / suggestions
-- OpenAPI component names must be unique. Pydantic qualifies a clashing name (e.g. app__modules__...__CandidateOut) and the original name disappears from web/lib/api/schema.ts. My first draft clashed with CandidateOut (recruitment), CheckIn (rtw) and SearchOut (search). The SOC models are now prefixed Soc*. Any new model should use a unique name; check the schema diff for removed names.
-- Test harness: the rig's `two_companies` runs `truncate users, companies cascade`, which also truncates rules_versions (its rows refer to users). Tests that need published rules must publish them after the rig (tests/db/test_soc_match.py does this in an autouse fixture).
-- Test harness (from T15.1): temporary_database() re-provisions the shared app_owner/app_user roles; do not run DB suites in parallel.
-- PROGRESS.md ends with an old unchecked Phase 15 list (T15.2–T15.7 lines after the [x] lines). The [x] lines above it are the record; the old list is stale.
-- The first request that needs a query embedding loads fastembed in a thread (first run downloads about 70 MB). Until the model is loaded, /soc/search and /soc/match take longer once per process. Consider preloading at startup in T15.6 or later.
-- AI ranking is gated by ai_ready (key, platform and company switches), as in letters. The matrix has ai.ask.use, but no code checks it yet. Owner to decide whether SOC AI ranking should need it (Recruiter has soc.check.run but not ai.ask.use).
-- Job descriptions with personal data (an e-mail, for example) are redacted before the call, not refused. Only a body that still holds restricted data after redaction gets AI_REFUSED (422). Owner may prefer a visible warning instead.
-- Pre-existing: the OpenAPI schema already had five qualified AddressOut names (app__modules__companies__..., app__modules__employees__personal_schemas__...). Not from SOC; worth a rename later.
-- T15.4 search quality is unmeasured (plan: measure in T15.4/T15.6). The fixture-based tests only prove the wiring.
+- OpenAPI component names must be unique. Pydantic qualifies a clashing name, which drops the original from web/lib/api/schema.ts. SOC models use the Soc prefix (SocCandidateOut, SocCvMatchOut, ...). After any new endpoint run `pnpm gen:api` in web and check that no names disappear.
+- Body limits: every upload route must be in the limits table in api/app/main.py. The SOC CV route is there (PROOF_LIMIT). tests/test_body_limits.py enforces it.
+- Architecture rule: app code may not use any `.text` attribute (it is taken for raw SQL text()). Use itertext() or other names (the stripping result field is `cleaned`).
+- Test harness: the rig's `two_companies` runs `truncate users, companies cascade`, which also truncates rules_versions (rows refer to users). Tests that need published rules publish them after the rig (tests/db/test_soc_match.py).
+- Test harness: temporary_database() re-provisions app_owner/app_user; do not run DB suites in parallel.
+- pypdf is now a runtime dependency (moved from dev). types-defusedxml is a dev stub.
+- CV stripping is pattern based. It does not remove names (the plan does not ask for it), and a street address with no street type word is not caught. The redaction layer in app/ai still runs on the request body.
+- CV match does not suggest other SOC codes ("Code 3544 fits better"). That would need the search retrieval on the job title; not done in T15.5.
+- The CV match response has no rules version (the disclaimer in T15.6 must show rules version and date from the checker).
+- PROGRESS.md ends with an old unchecked Phase 15 list (T15.2–T15.7). The [x] lines above it are the record.
+- AI ranking gating: ai_ready only. ai.ask.use is in the matrix but no code checks it (same as letters).
+- Job descriptions with personal data are redacted before the call, not refused (only a body with restricted data left after redaction gets AI_REFUSED).
+- Pre-existing: OpenAPI already had five qualified AddressOut names (app__modules__companies__..., app__modules__employees__personal_schemas__...). Not from SOC.
 
 ## Strategy / decisions taken
-- (T15.4) Permissions: GET /soc/search needs soc.check.read (reference data); POST /soc/match needs soc.check.run (it runs the rules and may call AI). Auditors can search, not match.
-- (T15.4) Retrieval: 30 hits per leg (trigram on index titles, English full-text on index titles, vector on index titles, vector on unit groups), merged by reciprocal rank fusion (k = 60), top 10 unit groups. The vector query is the normalised job title plus the first 1,000 characters of the description; the lexical legs use the title only.
-- (T15.4) Re-rank: fast=False (ANTHROPIC_MODEL_MAIN), max 1,500 tokens. The reply must be JSON with unique candidate codes (at least one). Anything else returns the search order, with notice "The AI reply could not be read...". AI_FAILED, RATE_LIMITED and AI_UNAVAILABLE fall back to search order with notice "Not AI-ranked...". The plan's "JSON schema" is enforced by pydantic on the reply, not by an API schema feature.
-- (T15.4) Match input: a `check` block (weekly hours, offered salary and per, work nation, optional CoS date (default today, Europe/London), applicant flags, optional pay-scale role and administration). The rules engine runs on the top 3 codes of the final ranking.
-- (T15.4) The match answers 409 RULES_NOT_PUBLISHED before any AI call when no rules version is live (as T15.3 note asked).
-- (T15.4) Response: `checks` is the engine's CheckResult (dataclasses serialised by pydantic). Decimal values come out as strings (pydantic v2 default), so T15.6 must parse them.
-- (T15.4) Search needs at least 2 characters after normalising; under that it returns no results. A title with no letters or digits (e.g. "!!") is refused with 422 INVALID_JOB_TITLE.
+- (T15.4) Search needs soc.check.read; match needs soc.check.run (auditors can search, not match). Retrieval: 30 hits per leg (trigram, FTS, vector on index titles, vector on unit groups), fused by reciprocal rank (k = 60), top 10. Re-rank: fast=False (ANTHROPIC_MODEL_MAIN), 1,500 max tokens, strict JSON (unique candidate codes). Any unusable reply, AI error or rate limit: search order with notice, ai_ranked false.
+- (T15.4) The plan's "JSON schema" is enforced by pydantic on the reply, not by an API schema feature.
+- (T15.4) Response `checks` = engine CheckResult. Decimal values serialise as strings (pydantic v2 default).
+- (T15.4) The embedder loads on first use (fastembed in a thread) and is kept on app.state.soc_embedder; tests set a fake there. A failure gives 503 SOC_SEARCH_UNAVAILABLE.
+- (T15.5) Endpoint order: AI on (409), size (10 MB, 413), empty (422), PDF or DOCX by name (422), magic bytes (415), virus scan through app.state.files.scanner (422 infected, 503 scan down), readable text (422), SOC code exists (404), Claude (502 if the reply is unusable: no fallback, the feature is AI-only). The CV is held in memory only; nothing is stored.
+- (T15.5) Quotes: every evidence quote must appear in the cleaned CV (case and spacing folded). Quotes that do not are dropped, not shown.
+- (T15.5) Phone rule: a leading + with 8-13 digits, or a UK national number of 10-11 digits starting 0. A 12-digit CV date range is not treated as a phone number.
+- (T15.5) Street rule: a house number, up to three capitalised words, then a street type on the same line. green, row and view are left out.
 
 ## Owner actions needed
-- None for T15.4. The SOC tables and the rules v1 must be loaded and published as before (see the earlier handover in git history: data/import_soc.py and data/import_rules.py --publish).
+- None for T15.5. Reminder: the AI features need ANTHROPIC_API_KEY (the CV match is hidden without it).
