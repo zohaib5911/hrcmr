@@ -147,7 +147,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 11 — Recruitment and public careers
 
-### [ ] T11.1 · S · Requisitions
+### [x] T11.1 · S · Requisitions
 - **Spec:** plan L956–967, L1417; data model §6.8 L581–592; API item 15 (L1625–1627).
 - **Copy:** R1 from `api/app/modules/work_log/`; status-change pattern from `api/app/modules/leave/` (approve).
 - **Steps:**
@@ -156,7 +156,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. `/recruitment` page shell: intro line, 4 KPIs (`GET /recruitment/summary`), tabs Requisitions/Postings/Candidates/Applications with counts; Requisitions tab with sheet and status select (Cancel asks to confirm).
 - **Done when:** non-approver setting Open → 403; approver → stamped; cross-tenant 404; page works.
 
-### [ ] T11.2 · S · Postings
+### [x] T11.2 · S · Postings
 - **Spec:** plan L966–969, L1418.
 - **Steps:**
   1. Posting CRUD + `PATCH /postings/{id}/status` (Draft/Open/Closed). Create requires an **Open** requisition (else 422). Slug unique per company.
@@ -164,7 +164,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. Table with public link column (External + Open only, Copy button). Closing asks to confirm.
 - **Done when:** closed posting → its public link field is null; posting on a non-Open requisition refused.
 
-### [ ] T11.3 · S · Candidates
+### [x] T11.3 · S · Candidates
 - **Spec:** plan L974–977, L1419. RTW reuse: `GET/POST /candidates/{id}/rtw-checks` (L1601).
 - **Copy:** RTW forms from `web/components/compliance/` / `api/app/modules/rtw/` (reuse, don't duplicate the forms).
 - **Steps:**
@@ -172,7 +172,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   2. `/recruitment/candidates/[id]`: header (initials, name, RTW status, source, email; actions Apply to posting, Convert — disabled until T11.5), tabs Overview / Applications / Right to Work / Documents / Sponsorship check (placeholder text "Available after the checker launches" until T15.6).
 - **Done when:** a candidate RTW check records and shows its status; cross-tenant 404.
 
-### [ ] T11.4 · S · Applications, interviews, offers
+### [x] T11.4 · S · Applications, interviews, offers
 - **Spec:** plan L957–961 (pipeline), L978–983, L1420.
 - **Steps:**
   1. Applications: create (candidate + posting), `POST /applications/{id}/stage`. **Forward moves one step only**, error text exactly "The next step from X is Y"; backward allowed; Rejected/Withdrawn end it. History rows with timestamps. Unit-test every stage pair.
@@ -181,7 +181,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   4. UI: pipeline bar (8 stages, counts, click filters Applications tab); `/recruitment/applications/[id]` with stepper, "Move to {next}", "Waiting on…" hint, interviews and offers panels.
 - **Done when:** skipping a stage → 422 with the exact message; .ics test passes; pipeline counts match DB.
 
-### [ ] T11.5 · S! · Convert to employee
+### [x] T11.5 · S! · Convert to employee
 - **Spec:** plan L984, L1421, §13 L1694.
 - **Copy:** employee creation in `api/app/modules/employees/` (call its service; don't duplicate it).
 - **Steps:**
@@ -189,7 +189,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   2. UI: Convert button enabled only when both gates pass, with a sheet showing the prefilled data.
 - **Done when:** tests for: no offer → refused; offer not Accepted → refused; RTW not Verified → refused; both OK → employee exists, links set, one audit event; repeat call → refused (no duplicate employee).
 
-### [ ] T11.6 · S! · Public careers pages and apply form
+### [x] T11.6 · S! · Public careers pages and apply form
 - **Spec:** plan L970–973, L1422; public API L1636 (item 24).
 - **Copy:** Recipe R5; `web/app/careers/[company]/` (folder exists, empty); marketing layout `web/app/(marketing)/layout.tsx`.
 - **Steps:**
@@ -198,7 +198,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. Pages `/careers/[company]` and `/careers/[company]/[posting]` with the apply form.
 - **Done when:** closed or Internal posting → 404 page and apply refused; response bodies contain only listed fields (test); missing Turnstile → refused.
 
-### [ ] P11 · S · Phase 11 gate
+### [x] P11 · S · Phase 11 gate
 - Recipe R7. Screens: recruitment tabs, application detail, candidate profile, careers list/detail.
 
 ### [ ] AUDIT-1 · AUDIT STOP · covers T10.3 → P11

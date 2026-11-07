@@ -312,6 +312,7 @@ const BUILT = new Set([
   "my-leave",
   "my-approvals",
   "attendance",
+  "recruitment",
   "rota",
   "work-log",
   "my-work-log",

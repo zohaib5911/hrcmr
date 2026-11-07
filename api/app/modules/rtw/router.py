@@ -11,7 +11,8 @@ from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy import select
 
 from app.core.crypto import mask_tail
-from app.core.errors import ConflictError, NotFoundError
+from app.core.errors import ConflictError, ForbiddenError, NotFoundError
+from app.core.rbac_matrix import Scope
 from app.db.ids import uuid7
 from app.db.rtw import employee_rtw_status
 from app.integrations.storage import PRESIGN_SECONDS
@@ -24,6 +25,7 @@ from app.modules.files.models import File
 from app.modules.files.schemas import DownloadOut
 from app.modules.identity.models import Membership, User
 from app.modules.rbac.deps import Access, require
+from app.modules.recruitment.models import Candidate
 from app.modules.rtw.models import RTWCheck
 from app.modules.rtw.schemas import CheckIn, CheckOut, CorrectionIn, RTWStatus, RTWTab
 
@@ -78,7 +80,7 @@ async def _out(access: Access, row: RTWCheck, today: date) -> CheckOut:
             await access.db.execute(
                 select(File.original_name, File.scan_status).where(
                     File.id == row.evidence_file_id,
-                    File.owner_type == "employee",
+                    File.owner_type == row.subject_type,
                     File.owner_id == row.subject_id,
                 )
             )
@@ -115,7 +117,9 @@ async def _out(access: Access, row: RTWCheck, today: date) -> CheckOut:
     )
 
 
-async def _validate(access: Access, employee_id: uuid.UUID, body: CheckIn) -> None:
+async def _validate(
+    access: Access, employee_id: uuid.UUID, body: CheckIn, *, subject_type: str = "employee"
+) -> None:
     if body.check_date > await _today(access):
         raise ConflictError("The date of the check cannot be in the future.", field="check_date")
     checker = (
@@ -130,7 +134,7 @@ async def _validate(access: Access, employee_id: uuid.UUID, body: CheckIn) -> No
             await access.db.execute(
                 select(File).where(
                     File.id == body.evidence_file_id,
-                    File.owner_type == "employee",
+                    File.owner_type == subject_type,
                     File.owner_id == employee_id,
                     File.scan_status == "clean",
                 )
@@ -309,3 +313,83 @@ async def evidence_pdf(employee_id: uuid.UUID, check_id: uuid.UUID, access: Repo
             "X-Content-Type-Options": "nosniff",
         },
     )
+
+
+# --- candidates: the same check, owned by a candidate (plan 8.11, T11.3) ----------------------
+CandidateReads = Annotated[Access, Depends(require("recruitment.candidate.read"))]
+CandidateWrites = Annotated[Access, Depends(require("recruitment.candidate.write"))]
+
+
+async def _candidate(access: Access, candidate_id: uuid.UUID, *, lock: bool = False) -> Candidate:
+    """A candidate of this company, or a 404. Less than company-wide scope is refused."""
+    if access.scope is not Scope.ALL:
+        raise ForbiddenError
+    query = select(Candidate).where(Candidate.id == candidate_id)
+    if lock:
+        query = query.with_for_update()
+    row = (await access.db.execute(query)).scalar_one_or_none()
+    if row is None:
+        raise NotFoundError
+    return row
+
+
+@router.get("/candidates/{candidate_id}/rtw-checks", response_model=RTWTab)
+async def candidate_checks(candidate_id: uuid.UUID, access: CandidateReads) -> RTWTab:
+    await _candidate(access, candidate_id)
+    rows = list(
+        (
+            await access.db.execute(
+                select(RTWCheck)
+                .where(RTWCheck.subject_type == "candidate", RTWCheck.subject_id == candidate_id)
+                .order_by(RTWCheck.created_at.desc(), RTWCheck.id.desc())
+            )
+        ).scalars()
+    )
+    today = await _today(access)
+    result = [await _out(access, row, today) for row in rows]
+    current = next((check for check in result if check.superseded_at is None), None)
+    return RTWTab(
+        status=current.status if current else "not_recorded",
+        follow_up_due_on=current.follow_up_due_on if current else None,
+        current=current,
+        checks=result,
+    )
+
+
+@router.post("/candidates/{candidate_id}/rtw-checks", status_code=201, response_model=CheckOut)
+async def record_candidate_check(
+    candidate_id: uuid.UUID, body: CheckIn, access: CandidateWrites
+) -> CheckOut:
+    await _candidate(access, candidate_id, lock=True)
+    await _validate(access, candidate_id, body, subject_type="candidate")
+    ident = uuid7()
+    current = (
+        await access.db.execute(
+            select(RTWCheck).where(
+                RTWCheck.subject_type == "candidate",
+                RTWCheck.subject_id == candidate_id,
+                RTWCheck.superseded_at.is_(None),
+            )
+        )
+    ).scalar_one_or_none()
+    if current is not None:
+        current.superseded_at = datetime.now(UTC)
+        current.superseded_by = ident
+        await access.db.flush()
+    row = RTWCheck(
+        id=ident,
+        company_id=access.company_id,
+        subject_type="candidate",
+        subject_id=candidate_id,
+        **body.model_dump(),
+    )
+    access.db.add(row)
+    await access.db.flush()
+    await access.audit(
+        "candidate.rtw_recorded",
+        entity_type="candidate",
+        entity_id=candidate_id,
+        after={"check_id": str(row.id), "check_type": row.check_type, "outcome": row.outcome},
+    )
+    await access.db.commit()
+    return await _out(access, row, await _today(access))

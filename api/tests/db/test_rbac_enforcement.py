@@ -278,6 +278,8 @@ def test_no_real_endpoint_skips_authorisation() -> None:
         "/api/v1/auth/",  # sign-in and account flows: each does its own checks (see test_auth_*)
         "/api/v1/health",
         "/api/v1/ready",
+        "/api/v1/public/careers/",  # no-login careers pages and apply: Turnstile, rate limit, listed fields
+        "/api/v1/public/postings/",  # (see test_careers)
     )
 
     app: FastAPI = create_app(build_settings())
@@ -321,7 +323,9 @@ async def test_every_real_routes_permission_dependencies_match_the_matrix(
                 continue
             required = permissions(dependant)
             if not required:
-                assert path.startswith(("/api/v1/auth/", "/api/v1/health", "/api/v1/ready")), path
+                assert path.startswith(
+                    ("/api/v1/auth/", "/api/v1/health", "/api/v1/ready", "/api/v1/public/")
+                ), path
                 continue
             expected = {permission: scope_for(role, permission) for permission in required}
             admitted = all(scope is not None for scope in expected.values())
