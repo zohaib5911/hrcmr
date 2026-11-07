@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard } from "lucide-react";
+import { Check, Circle, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import { type ReactNode, useEffect, useState } from "react";
 
@@ -8,6 +8,7 @@ import { useCan } from "@/components/app/session-context";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Icon } from "@/components/ui/icon";
 import { KpiCard } from "@/components/ui/kpi-card";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import type { components } from "@/lib/api/client";
@@ -133,7 +134,7 @@ export function DashboardWorkspace() {
           <ul className="flex flex-col gap-2">
             {checklist.items.map((item) => (
               <li key={item.key} className="text-body text-label flex items-center gap-2">
-                <span aria-hidden="true">{item.done ? "✓" : "○"}</span>
+                <Icon icon={item.done ? Check : Circle} size={16} />
                 <span className={item.done ? "text-label-secondary line-through" : ""}>
                   {item.label}
                 </span>

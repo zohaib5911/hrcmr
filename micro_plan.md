@@ -298,7 +298,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   2. Reminder review drawer (T7.4) gets an AI-worded message when available, else the current template.
 - **Done when:** with no key, both still work (test); a test asserts the outgoing payload has no employee names/identifiers (reuse T14.4's assertion helper).
 
-### [ ] P14 · S · Phase 14 gate
+### [x] P14 · S · Phase 14 gate
 - Recipe R7 + run the T14.4 fuzz test.
 
 ### [ ] AUDIT-2 · AUDIT STOP · covers T12.1 → P14 (and T14.4 by the big model)
