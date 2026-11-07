@@ -240,3 +240,4 @@
 2026-11-07 05:37 | Claude | T10.3 | DONE: steps 5–7 complete; policies API15, related34, reports6, mypy/ruff clean, web typecheck/lint/unit777, Playwright policies 1 pass, gen:api clean | next T10.4 (S) via next.sh
 2026-11-07 05:42 | Claude | T10.4 | DONE: template letter drafts (7 types, 3 tones, key points validated), .docx endpoint, /documents sheet, ai_available on /auth/me; letters+auth 47 pass, ruff/mypy clean, web typecheck/lint/unit777, gen:api clean | next P10 gate via next.sh
 2026-11-07 05:51 | Claude | P10 | gate: full API suite 687 pass, 3 fail: data-model doc stale (regenerated), encrypted-column inventory missing policy_acceptances.typed_signature (added), cleanup test assumed clean shared bucket (now sweeps leftovers first) | next re-run full API suite
+2026-11-07 06:13 | Claude | P10 | gate checks green: API 690, web e2e 423 (160 screenshot/design skipped), unit 777, 24 screenshots | next open PR dev->main, wait for CI, merge

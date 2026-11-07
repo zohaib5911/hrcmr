@@ -140,7 +140,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. `.docx` download: add `python-docx` (API) and generate server-side, or build client-side from text; choose the simpler, record it in STATUS decisions.
 - **Done when:** the template draft works with no key set; key points with an email/NI-number pattern are rejected (422); gen:api clean.
 
-### [ ] P10 · S · Phase 10 gate
+### [x] P10 · S · Phase 10 gate
 - Recipe R7. Screens: documents, reports, policies list/detail/wizard, My Documents.
 
 ---

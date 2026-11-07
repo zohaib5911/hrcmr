@@ -336,6 +336,11 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T10.3** Policies and sign-offs — 2026-11-07. Manual remind for outstanding people, daily overdue job with employee notices, new-starter assignment on hire and by the same daily job, 3-step New document sheet (details, scanned file, recipients and send), /policies list and detail with acceptance progress, My Documents policy viewer with accept/sign and receipt; sponsor reminders kept. Verified: policy API15 (policies/own/schema), related worker/notifications/employees/profile/rbac34, reports6 (mypy-fix), mypy clean, ruff clean, web typecheck/lint, web unit777, policies Playwright spec 1 pass, gen:api:check clean.
 - [x] **T10.4** "Draft with AI" UI and API contract (feature-flagged) — 2026-11-07. `POST /ai/letters/draft` returns placeholder templates (7 letter types, 3 tones, up to 10 key points; no AI call; email/NI key points and unknown fields refused), `POST /ai/letters/docx` builds the Word file, /documents sheet copies, downloads or saves the draft; label follows /auth/me `ai_available`. Verified: letters + auth endpoint/flow tests 47 pass, ruff/mypy (318 files) clean, web typecheck/lint, web unit777, gen:api:check clean.
 - [ ] **Phase 10 gate**
+  - Delivered: policies with remind, overdue job, new-starter assignment, the 3-step wizard, list/detail and My Documents accept/sign with receipts; letter drafts from templates with .docx and save-to-documents; seven XLSX reports.
+  - Verified: full API suite 690 pass; full web e2e 423 pass (160 screenshot/design specs skipped by design); web unit 777 pass; ruff, mypy (strict), web typecheck/lint and gen:api clean.
+  - Browser: policies.spec pass; 24 reviewed screenshots saved in docs/screenshots/phase-10 (390 and 1280 px, light and dark).
+  - Fixed at the gate: mypy strict error in a T10.2 test; data-model doc regenerated; encrypted-column inventory lists policy_acceptances.typed_signature; orphan-cleanup test no longer assumes a clean shared bucket.
+  - Decisions: overdue marking at 06:15 daily; AI label follows /auth/me ai_available; letter drafts are template-only until T14.4.
 
 ### Phase 11 — Recruitment and public careers
 - [ ] **T11.1** Requisitions
