@@ -273,3 +273,4 @@
 2026-11-07 11:13 | Claude (Haiku) | T13.1 | started after P12 merged (PR 20); STATUS updated | next read plan L1012-1029 and build course model
 2026-11-07 11:21 | Claude (Haiku) | T13.1 | API done: migration 0035 (courses global RLS, course_assignments), learner + platform endpoints, loader, e2e fixture course; tests learning 6, migrations, architecture, openapi, rbac 53 pass | next web: player and platform editor, e2e spec
 2026-11-07 11:24 | Claude (Haiku) | T13.1 | web player, platform editor, R6 spec written; typecheck and lint pass; api naming CourseAssignmentOut | next run learning-player e2e
+2026-11-07 11:25 | Claude (Haiku) | T13.1 | DONE: API 6 + player/editor + browser spec pass; ticked micro_plan and PROGRESS | next bash .agent/next.sh (T13.2 S!)

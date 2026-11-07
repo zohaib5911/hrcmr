@@ -229,7 +229,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 13 — Learning
 
-### [ ] T13.1 · S · Course model, minimal editor, course player
+### [x] T13.1 · S · Course model, minimal editor, course player
 - **Spec:** plan L1012–1029, L1429; §6.9 L593–597; API item 17 (L1629).
 - **Steps:**
   1. Global (not tenant) `courses` with sections, quiz, sources (title, publisher, URL, source-updated date), reviewed date, OGL attribution; tenant `learning_assignments`. Migration.

@@ -211,6 +211,7 @@ export function CoursePlayer({ assignmentId }: { assignmentId: string }) {
             </>
           ) : (
             <CheckPanel
+              headingId={headingId}
               course={course}
               answers={answers}
               setAnswers={setAnswers}
@@ -255,6 +256,7 @@ export function CoursePlayer({ assignmentId }: { assignmentId: string }) {
 }
 
 function CheckPanel({
+  headingId,
   course,
   answers,
   setAnswers,
@@ -268,6 +270,7 @@ function CheckPanel({
   onRetry,
   onBack,
 }: {
+  headingId: string;
   course: Detail["course"];
   answers: (number | null)[];
   setAnswers: (next: (number | null)[]) => void;
@@ -286,7 +289,9 @@ function CheckPanel({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
-        <h2 className="text-title-3 text-label">Check your understanding</h2>
+        <h2 id={headingId} className="text-title-3 text-label">
+          Check your understanding
+        </h2>
         <p className="text-body text-label-secondary">
           Answer every question. You need {course.pass_mark}% to complete this course.
         </p>
