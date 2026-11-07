@@ -233,14 +233,21 @@ export function DashboardWorkspace() {
 
             {data.distribution ? (
               <Card title="Employee distribution">
-                <ul className="flex flex-col gap-1">
-                  {data.distribution.rows.map((row) => (
-                    <li key={row.department} className="text-body text-label flex justify-between">
-                      <span>{row.department}</span>
-                      <span className="text-label-secondary">{row.headcount}</span>
-                    </li>
-                  ))}
-                </ul>
+                {data.distribution.rows.length === 0 ? (
+                  <p className="text-callout text-label-secondary">No employees yet</p>
+                ) : (
+                  <ul className="flex flex-col gap-1">
+                    {data.distribution.rows.map((row) => (
+                      <li
+                        key={row.department}
+                        className="text-body text-label flex justify-between"
+                      >
+                        <span>{row.department}</span>
+                        <span className="text-label-secondary">{row.headcount}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </Card>
             ) : null}
 

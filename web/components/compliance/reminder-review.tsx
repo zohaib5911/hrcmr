@@ -5,6 +5,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useCan, useMe } from "@/components/app/session-context";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { StatusChip } from "@/components/ui/status-chip";
 import { TextArea } from "@/components/ui/text-area";
@@ -199,15 +200,35 @@ export function ReminderReview({
             <div className="flex flex-col gap-2">
               {aiAvailable && (
                 <div className="flex flex-wrap items-center gap-3">
-                  <Button
-                    type="button"
-                    variant="gray"
-                    disabled={!loaded || !!busy}
-                    loading={busy === "wording"}
-                    onClick={() => void draftWording()}
-                  >
-                    Draft with AI
-                  </Button>
+                  {/* Text HR typed is not replaced without asking first. */}
+                  {message !== record.message_draft ? (
+                    <ConfirmDialog
+                      trigger={
+                        <Button
+                          type="button"
+                          variant="gray"
+                          disabled={!loaded || !!busy}
+                          loading={busy === "wording"}
+                        >
+                          Draft with AI
+                        </Button>
+                      }
+                      title="Replace your message with an AI draft?"
+                      description="The AI draft replaces the message you have typed. Nothing is saved until you save or send."
+                      confirmLabel="Replace message"
+                      onConfirm={draftWording}
+                    />
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="gray"
+                      disabled={!loaded || !!busy}
+                      loading={busy === "wording"}
+                      onClick={() => void draftWording()}
+                    >
+                      Draft with AI
+                    </Button>
+                  )}
                   {wording === "ai" && (
                     <span className="text-caption text-label-secondary">
                       AI wording. Check it before you send.
