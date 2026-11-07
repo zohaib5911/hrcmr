@@ -32,7 +32,7 @@ export function VerifyCertificate({ initialRef }: { initialRef: string }) {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col gap-6 p-5 sm:p-8">
+    <main className="mx-auto flex w-full max-w-xl flex-col gap-6 p-5 sm:p-8">
       <header className="flex flex-col gap-2">
         <h1 className="text-large-title text-label">Check a certificate</h1>
         <p className="text-body text-label-secondary">
@@ -67,6 +67,6 @@ export function VerifyCertificate({ initialRef }: { initialRef: string }) {
           </p>
         </section>
       ) : null}
-    </div>
+    </main>
   );
 }

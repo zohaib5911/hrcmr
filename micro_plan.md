@@ -258,7 +258,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   2. Public verify endpoint (R5): returns only holder name, course title, completion date, status. Page `/verify`.
 - **Done when:** test asserts the verify response has exactly those 4 fields; rate limit test; unknown ref → generic "not found".
 
-### [ ] P13 · S · Phase 13 gate
+### [x] P13 · S · Phase 13 gate
 - Recipe R7.
 
 ---

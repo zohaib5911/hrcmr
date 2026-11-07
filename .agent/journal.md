@@ -286,3 +286,4 @@
 2026-11-07 11:38 | Claude (Haiku) | T13.3 | API: scoped assignment (everyone/departments/named), report with filters, summary, xlsx export (company-wide only), overdue job learning_overdue 06:15 with one notification; db 42 pass, root 32 pass | next web: /learning KPIs + report + courses, assign wizard, /learning/my
 2026-11-07 11:40 | Claude (Haiku) | T13.3 | DONE: API + web UI; ticked; unit 786 pass; typecheck/lint pass | next bash .agent/next.sh
 2026-11-07 11:45 | Claude (Haiku) | T13.4 | DONE: certificates, PDF, public check, /verify page, player button; ticked | next P13 gate
+2026-11-07 12:05 | Claude (Haiku) | P13 | gate: API 818, web lint/typecheck/unit 786, e2e 429, 16 screenshots; PROGRESS summary; ticked | next PR dev->main
