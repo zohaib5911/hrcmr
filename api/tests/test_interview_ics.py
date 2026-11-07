@@ -26,6 +26,7 @@ def test_the_invite_has_the_fields_a_calendar_needs() -> None:
         location="Video call; link to follow",
         description="Panel: Sam, Lee; bring a CV",
         attendees=[("Sam Lee", "sam@example.com"), ("Ada Test", "ada@example.com")],
+        organizer=("Brand HR Ltd", "hr@example.com"),
         stamp=datetime(2026, 11, 7, 9, 0, tzinfo=UTC),
     )
     assert text.endswith("\r\n")
@@ -40,6 +41,9 @@ def test_the_invite_has_the_fields_a_calendar_needs() -> None:
     assert fields["DTSTART"] == "20261112T143000Z"
     assert fields["DTEND"] == "20261112T151500Z"
     assert fields["DTSTAMP"] == "20261107T090000Z"
+    organizer = [line for line in lines if line.startswith("ORGANIZER")]
+    assert organizer == ["ORGANIZER;CN=Brand HR Ltd:mailto:hr@example.com"]
+    assert lines.index(organizer[0]) == lines.index("DTSTAMP:20261107T090000Z") + 1
     assert fields["SUMMARY"] == "Interview: Ada Test\\, Barista"
     assert fields["DESCRIPTION"] == "Panel: Sam\\, Lee\\; bring a CV"
     attendees = [line for line in lines if line.startswith("ATTENDEE")]
@@ -59,6 +63,7 @@ def test_long_lines_are_folded_at_75_octets_without_splitting_characters() -> No
         location="Office",
         description=long_note,
         attendees=[],
+        organizer=("Brand HR Ltd", "hr@example.com"),
         stamp=datetime(2026, 11, 7, 9, 0, tzinfo=UTC),
     )
     for raw in text.split("\r\n"):
@@ -76,6 +81,7 @@ def test_text_with_a_line_break_is_escaped() -> None:
         location="Room 1",
         description="First line\nSecond, line; with \\ slash",
         attendees=[],
+        organizer=("Brand HR Ltd", "hr@example.com"),
         stamp=datetime(2026, 11, 7, 9, 0, tzinfo=UTC),
     )
     assert "DESCRIPTION:First line\\nSecond\\, line\\; with \\\\ slash" in _unfold(text)

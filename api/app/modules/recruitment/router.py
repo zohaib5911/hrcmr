@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import uuid  # noqa: TC003
 from datetime import datetime  # noqa: TC003
+from email.utils import parseaddr
 from typing import Annotated, Any, cast
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
@@ -20,7 +21,7 @@ from app.db.ids import uuid7
 from app.modules.companies.compliance_documents import _today as company_today
 from app.modules.companies.models import Company
 from app.modules.email.models import EmailOutbox
-from app.modules.email.outbox import ICS_KEY, PAYLOAD_CONTEXT
+from app.modules.email.outbox import ICS_KEY, PAYLOAD_CONTEXT, sender_of
 from app.modules.email.templates import check
 from app.modules.employees.models import Employee
 from app.modules.employees.schemas import EmployeeIn
@@ -795,9 +796,11 @@ def _invite_text(
     candidate_name: str,
     title: str,
     attendees: list[tuple[str, str]],
+    company_name: str,
 ) -> str:
     """The RFC 5545 invite for one interview: the download and the invite e-mails share it."""
     host = urlparse(request.app.state.settings.web_origin).hostname or "invite.local"
+    _, sender_address = parseaddr(sender_of(request.app.state.settings))
     return interview_ics(
         uid=f"interview-{row.id}@{host}",
         starts=row.scheduled_at,
@@ -806,6 +809,7 @@ def _invite_text(
         location=row.location_or_link or MODE_LABELS[row.mode],
         description=f"Interview ({MODE_LABELS[row.mode]}) for {title}.",
         attendees=attendees,
+        organizer=(company_name, sender_address),
         stamp=service.now(),
     )
 
@@ -854,9 +858,11 @@ async def create_interview(
     access.db.add(row)
     await access.db.flush()
     await access.db.refresh(row)
-    zone = (
-        await access.db.execute(select(Company.timezone).where(Company.id == access.company_id))
-    ).scalar_one()
+    zone, company_name = (
+        await access.db.execute(
+            select(Company.timezone, Company.name).where(Company.id == access.company_id)
+        )
+    ).one()
     where = body.location_or_link or MODE_LABELS[body.mode]
     settings = request.app.state.settings
     link = f"{settings.web_origin}/recruitment/applications/{application_id}"
@@ -873,11 +879,13 @@ async def create_interview(
     ]
     if candidate_email:
         attendees.append((candidate_name, candidate_email))
-    invite = _invite_text(request, row, candidate_name, title, attendees)
+    invite = _invite_text(request, row, candidate_name, title, attendees, company_name)
     # The candidate's copy is the same event (same UID) but names only them: staff addresses
     # (often personal, the only e-mail on file) are not shared with someone outside the company.
     candidate_invite = (
-        _invite_text(request, row, candidate_name, title, [(candidate_name, candidate_email)])
+        _invite_text(
+            request, row, candidate_name, title, [(candidate_name, candidate_email)], company_name
+        )
         if candidate_email
         else None
     )
@@ -977,7 +985,10 @@ async def interview_invite(
     attendees = [(f"{first} {last}".strip(), email) for first, last, email in people if email]
     if candidate:
         attendees.append((candidate_name, candidate))
-    text = _invite_text(request, row, candidate_name, title, attendees)
+    company_name = (
+        await access.db.execute(select(Company.name).where(Company.id == access.company_id))
+    ).scalar_one()
+    text = _invite_text(request, row, candidate_name, title, attendees, company_name)
     return Response(
         content=text,
         media_type="text/calendar",

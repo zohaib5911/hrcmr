@@ -257,3 +257,4 @@
 2026-11-07 03:58 | Claude | AUDIT-1 | round 2 written: 0/3/1 (careers read limit shared via SSR; 1 MB body limit on CV and policy/employee uploads; candidate ics lists panel emails) | next small model fixes C1.2.1 via next.sh
 2026-11-07 04:23 | Claude | AUDIT-1 | round 2 fixed (C1.2.1-4); round 3 PASS 0/0/1; API 796, web unit 777, e2e 426/1 flaky toast fixed (company.spec 15 pass) | next small model C1.3.1 then T12.1
 2026-11-07 09:54 | Claude (Haiku) | C1.3.1 | started: read ics/router/outbox; plan = organizer arg + company name via _invite_text | next edit ics.py
+2026-11-07 09:56 | Claude (Haiku) | C1.3.1 | step done: ORGANIZER from company name + sender_of address in interview_ics/_invite_text (tests: ics 3, interviews db 2, recruitment+interview set 149 pass; ruff/mypy clean) | next tick C1.3.1 and next.sh
