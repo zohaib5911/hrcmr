@@ -4439,6 +4439,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/soc/resume-match": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resume Match */
+        post: operations["soc_resume_match"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/soc/search": {
         parameters: {
             query?: never;
@@ -5683,6 +5700,18 @@ export interface components {
         Body_policies_upload_policy_file: {
             /** File */
             file: string;
+        };
+        /** Body_soc_resume_match */
+        Body_soc_resume_match: {
+            /** Cv */
+            cv: string;
+            /**
+             * Job Description
+             * @default
+             */
+            job_description: string;
+            /** Soc Code */
+            soc_code: string;
         };
         /** CalendarEntry */
         CalendarEntry: {
@@ -10607,6 +10636,34 @@ export interface components {
              * @enum {string}
              */
             work_nation: "England" | "Scotland" | "Wales" | "Northern Ireland";
+        };
+        /** SocCvEvidenceOut */
+        SocCvEvidenceOut: {
+            /** Point */
+            point: string;
+            /** Quote */
+            quote: string;
+        };
+        /** SocCvMatchOut */
+        SocCvMatchOut: {
+            /** Disclaimer */
+            disclaimer: string;
+            /** Evidence */
+            evidence: components["schemas"]["SocCvEvidenceOut"][];
+            /** Gaps */
+            gaps: string[];
+            /** Low Confidence */
+            low_confidence: boolean;
+            /** Removed */
+            removed: string[];
+            /** Score */
+            score: number;
+            /** Soc Code */
+            soc_code: string;
+            /** Suggestions */
+            suggestions: string[];
+            /** Title */
+            title: string;
         };
         /** SocMatchIn */
         SocMatchIn: {
@@ -25098,6 +25155,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SocMatchOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_resume_match: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_soc_resume_match"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SocCvMatchOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

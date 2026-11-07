@@ -94,6 +94,7 @@ from app.modules.rota.router import router as rota_router
 from app.modules.rota.week_router import router as rota_week_router
 from app.modules.rtw.router import router as rtw_router
 from app.modules.search.router import router as search_router
+from app.modules.soc.cv_router import router as soc_cv_router
 from app.modules.soc.router import router as soc_router
 from app.modules.sponsor_documents.router import router as sponsor_documents_router
 from app.modules.work_log.router import router as work_log_router
@@ -211,6 +212,8 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
             f"{API_PREFIX}/compliance-documents": UPLOAD_LIMIT,
             # The careers apply form: a CV of up to 10 MB and its fields.
             f"{API_PREFIX}/public/postings": PROOF_LIMIT,
+            # The SOC CV match: a CV of up to 10 MB and the job description.
+            f"{API_PREFIX}/soc/resume-match": PROOF_LIMIT,
             f"{API_PREFIX}/attendance/import/preview": SMALL_FILE_LIMIT,
             # Upload routes whose prefix also serves JSON: the whole path must match.
             re.compile(rf"{API_PREFIX}/documents"): UPLOAD_LIMIT,
@@ -278,6 +281,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(dashboard_router, prefix=API_PREFIX)
     app.include_router(search_router, prefix=API_PREFIX)
     app.include_router(soc_router, prefix=API_PREFIX)
+    app.include_router(soc_cv_router, prefix=API_PREFIX)
     app.include_router(careers_router, prefix=API_PREFIX)
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)
