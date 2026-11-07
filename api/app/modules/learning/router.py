@@ -10,18 +10,16 @@ from __future__ import annotations
 import asyncio
 import uuid  # noqa: TC003
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Annotated, Any, Literal, cast
+from typing import Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
-if TYPE_CHECKING:
-    from sqlalchemy.engine import CursorResult
-
 from app.core.errors import AppError, ConflictError, ForbiddenError, NotFoundError
 from app.core.rbac_matrix import Scope
 from app.db.ids import uuid7
+from app.modules.identity.models import Membership, User
 from app.modules.learning import certificates, report, service
 from app.modules.learning.models import Course, CourseAssignment
 from app.modules.learning.schemas import (
@@ -38,6 +36,7 @@ from app.modules.learning.schemas import (
     ReportPageOut,
 )
 from app.modules.learning.workbook import xlsx_bytes
+from app.modules.notifications.models import Notification
 from app.modules.rbac.deps import Access, require
 
 router = APIRouter(tags=["learning"])
@@ -141,14 +140,42 @@ async def assign_courses(body: CourseAssignmentIn, access: AssignWrites) -> Assi
     ]
     # One row per course and person: assigning the same course twice changes nothing.
     created = 0
+    newly_assigned: set[uuid.UUID] = set()
     if values:
         statement = pg_insert(CourseAssignment).values(values)
-        statement = statement.on_conflict_do_nothing(
+        insert_rows = statement.on_conflict_do_nothing(
             constraint="uq_course_assignments_one_per_person"
-        )
-        # rowcount is the number of rows actually inserted; the rest already existed.
-        result = cast("CursorResult[Any]", await access.db.execute(statement))
-        created = result.rowcount
+        ).returning(CourseAssignment.employee_id)
+        # Only the rows actually inserted come back; the rest already existed.
+        inserted = (await access.db.execute(insert_rows)).scalars().all()
+        created = len(inserted)
+        newly_assigned = set(inserted)
+    if newly_assigned:
+        # One notice per person with a new assignment, not per course; people found as the job does.
+        links = (
+            await access.db.execute(
+                select(User.id)
+                .join(Membership, Membership.user_id == User.id)
+                .where(
+                    Membership.company_id == access.company_id,
+                    Membership.employee_id.in_(list(newly_assigned)),
+                    Membership.status == "active",
+                    User.is_active.is_(True),
+                    User.email_verified_at.is_not(None),
+                )
+            )
+        ).scalars()
+        for user_id in set(links):
+            access.db.add(
+                Notification(
+                    company_id=access.company_id,
+                    user_id=user_id,
+                    kind="learning.assigned",
+                    title="A course has been assigned to you",
+                    body="Open My learning to see your courses and due dates.",
+                    link="/learning/my",
+                )
+            )
     await access.audit(
         "learning.assignments_created",
         entity_type="course_assignment",

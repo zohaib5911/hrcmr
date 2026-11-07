@@ -221,3 +221,26 @@ async def test_the_overdue_job_flips_once_and_tells_the_person(rig: dict[str, An
     assert second == 1  # and nobody is told twice
     own = (await admin.get(API + "/learning/assignments/own")).json()
     assert own[0]["status"] == "overdue"
+
+
+async def test_a_new_assignment_tells_the_person_once(rig: dict[str, Any]) -> None:
+    course = await _course(rig)
+    admin = await rig["person"]("company_admin", rig["a"])
+    member = next(u for u in (await admin.get(API + "/users")).json()["users"] if u["is_you"])
+    mine = await _staff(admin, "Newly", None)
+    linked = await admin.put(f"{API}/users/{member['id']}/employee", json={"employee_id": mine})
+    assert linked.status_code == 200, linked.text
+    body = {
+        "course_ids": [course],
+        "scope": "named",
+        "employee_ids": [mine],
+        "due_on": "2026-12-01",
+    }
+    first = await admin.post(API + "/learning/assignments", json=body)
+    assert first.status_code == 201, first.text
+    assert first.json()["created"] == 1
+    again = await admin.post(API + "/learning/assignments", json=body)
+    assert again.status_code == 201, again.text
+    assert again.json()["created"] == 0
+    items = (await admin.get(API + "/notifications")).json()["items"]
+    assert [item["kind"] for item in items].count("learning.assigned") == 1

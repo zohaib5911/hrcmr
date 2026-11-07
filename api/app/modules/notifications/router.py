@@ -41,6 +41,7 @@ def _may_read_compliance(access: Access) -> bool:
 PERSONAL_KINDS = (
     "compliance.reminder_received",
     "leave.decision",
+    "learning.assigned",
     "learning.overdue",
     "policy.assigned",
     "policy.reminder",
