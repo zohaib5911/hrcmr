@@ -316,7 +316,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Done when:** importer is re-runnable (no duplicates); fixture import test passes; row counts recorded in PROGRESS.
 - **Watch:** find the ONS download URLs from the ONS site and record them; if not found, BLOCKED.
 
-### [ ] T15.2 · B · Rules-data importer (draft rules version, fixtures, salary rules)
+### [x] T15.2 · B · Rules-data importer (draft rules version, fixtures, salary rules)
 ### [ ] T15.3 · B · Rules engine and 20+ golden tests
 
 ### [ ] T15.4 · S! · Search and match API
