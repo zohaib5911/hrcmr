@@ -142,7 +142,7 @@ class CourseCardOut(BaseModel):
     content_reviewed_on: date
 
 
-class AssignmentIn(RequestModel):
+class CourseAssignmentIn(RequestModel):
     course_ids: list[uuid.UUID] = Field(min_length=1, max_length=20)
     employee_ids: list[uuid.UUID] = Field(min_length=1, max_length=500)
     due_on: date
@@ -157,7 +157,7 @@ class ProgressIn(RequestModel):
     section: int = Field(ge=0, le=7)
 
 
-class AssignmentOut(BaseModel):
+class CourseAssignmentOut(BaseModel):
     id: uuid.UUID
     course_id: uuid.UUID
     slug: str
@@ -176,7 +176,7 @@ class AssignmentOut(BaseModel):
 
 
 class AssignmentDetailOut(BaseModel):
-    assignment: AssignmentOut
+    assignment: CourseAssignmentOut
     course: CourseOut
 
 

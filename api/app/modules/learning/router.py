@@ -22,8 +22,8 @@ from app.modules.learning.models import Course, CourseAssignment
 from app.modules.learning.schemas import (
     AssignmentCreatedOut,
     AssignmentDetailOut,
-    AssignmentIn,
-    AssignmentOut,
+    CourseAssignmentIn,
+    CourseAssignmentOut,
     CourseCardOut,
     CourseOut,
     ProgressIn,
@@ -89,7 +89,7 @@ async def get_course(course_id: uuid.UUID, access: CourseReads) -> CourseOut:
 
 
 @router.post("/learning/assignments", status_code=201, response_model=AssignmentCreatedOut)
-async def assign_courses(body: AssignmentIn, access: AssignWrites) -> AssignmentCreatedOut:
+async def assign_courses(body: CourseAssignmentIn, access: AssignWrites) -> AssignmentCreatedOut:
     course_ids = set(body.course_ids)
     employee_ids = set(body.employee_ids)
     published = (
@@ -164,8 +164,8 @@ async def assign_courses(body: AssignmentIn, access: AssignWrites) -> Assignment
     return AssignmentCreatedOut(created=created, already_assigned=len(values) - created)
 
 
-@router.get("/learning/assignments/own", response_model=list[AssignmentOut])
-async def own_assignments(access: OwnReads) -> list[AssignmentOut]:
+@router.get("/learning/assignments/own", response_model=list[CourseAssignmentOut])
+async def own_assignments(access: OwnReads) -> list[CourseAssignmentOut]:
     if access.employee_id is None:
         return []
     rows = (
@@ -192,10 +192,10 @@ async def assignment_detail(assignment_id: uuid.UUID, access: OwnReads) -> Assig
     )
 
 
-@router.post("/learning/assignments/{assignment_id}/progress", response_model=AssignmentOut)
+@router.post("/learning/assignments/{assignment_id}/progress", response_model=CourseAssignmentOut)
 async def save_progress(
     assignment_id: uuid.UUID, body: ProgressIn, access: OwnWrites
-) -> AssignmentOut:
+) -> CourseAssignmentOut:
     row, course = await _own(access, assignment_id, lock=True)
     if body.section >= len(course.sections):
         raise AppError(
@@ -235,8 +235,8 @@ async def submit_check(
     )
 
 
-@router.post("/learning/assignments/{assignment_id}/complete", response_model=AssignmentOut)
-async def complete_course(assignment_id: uuid.UUID, access: OwnWrites) -> AssignmentOut:
+@router.post("/learning/assignments/{assignment_id}/complete", response_model=CourseAssignmentOut)
+async def complete_course(assignment_id: uuid.UUID, access: OwnWrites) -> CourseAssignmentOut:
     row, course = await _own(access, assignment_id, lock=True)
     if row.quiz_score is None or row.quiz_score < course.pass_mark:
         raise ConflictError("Pass the check before completing this course.")

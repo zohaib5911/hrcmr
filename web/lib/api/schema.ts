@@ -4878,8 +4878,83 @@ export interface components {
         };
         /** AssignmentDetailOut */
         AssignmentDetailOut: {
-            assignment: components["schemas"]["app__modules__learning__schemas__AssignmentOut"];
+            assignment: components["schemas"]["CourseAssignmentOut"];
             course: components["schemas"]["CourseOut"];
+        };
+        /** AssignmentIn */
+        AssignmentIn: {
+            /** Custom Working Days */
+            custom_working_days?: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] | null;
+            /** Department Id */
+            department_id?: string | null;
+            /** Designation Id */
+            designation_id?: string | null;
+            /**
+             * Effective From
+             * Format: date
+             */
+            effective_from: string;
+            /**
+             * Employment Type
+             * @enum {string}
+             */
+            employment_type: "full_time" | "part_time" | "fixed_term" | "zero_hours" | "casual" | "apprentice" | "agency";
+            /** Hours Per Day */
+            hours_per_day?: number | string | null;
+            /** Leave Sanctioning Employee Id */
+            leave_sanctioning_employee_id?: string | null;
+            /** Location Id */
+            location_id?: string | null;
+            /** Organogram Level Id */
+            organogram_level_id?: string | null;
+            /** Reporting Authority Employee Id */
+            reporting_authority_employee_id?: string | null;
+        };
+        /** AssignmentOut */
+        AssignmentOut: {
+            /** Custom Working Days */
+            custom_working_days?: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] | null;
+            /** Department */
+            department?: string | null;
+            /** Department Id */
+            department_id?: string | null;
+            /** Designation */
+            designation?: string | null;
+            /** Designation Id */
+            designation_id?: string | null;
+            /**
+             * Effective From
+             * Format: date
+             */
+            effective_from: string;
+            /**
+             * Employment Type
+             * @enum {string}
+             */
+            employment_type: "full_time" | "part_time" | "fixed_term" | "zero_hours" | "casual" | "apprentice" | "agency";
+            /** Ended At */
+            ended_at: string | null;
+            /** Hours Per Day */
+            hours_per_day?: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Leave Sanctioning Authority */
+            leave_sanctioning_authority?: string | null;
+            /** Leave Sanctioning Employee Id */
+            leave_sanctioning_employee_id?: string | null;
+            /** Location */
+            location?: string | null;
+            /** Location Id */
+            location_id?: string | null;
+            /** Organogram Level Id */
+            organogram_level_id?: string | null;
+            /** Reporting Authority */
+            reporting_authority?: string | null;
+            /** Reporting Authority Employee Id */
+            reporting_authority_employee_id?: string | null;
         };
         /** AttendanceImportOut */
         AttendanceImportOut: {
@@ -6447,6 +6522,60 @@ export interface components {
             /** Version */
             version: number;
         };
+        /** CourseAssignmentIn */
+        CourseAssignmentIn: {
+            /** Course Ids */
+            course_ids: string[];
+            /**
+             * Due On
+             * Format: date
+             */
+            due_on: string;
+            /** Employee Ids */
+            employee_ids: string[];
+        };
+        /** CourseAssignmentOut */
+        CourseAssignmentOut: {
+            /** Completed At */
+            completed_at: string | null;
+            /**
+             * Course Id
+             * Format: uuid
+             */
+            course_id: string;
+            /**
+             * Due On
+             * Format: date
+             */
+            due_on: string;
+            /** Duration Minutes */
+            duration_minutes: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Pass Mark */
+            pass_mark: number;
+            /** Passed */
+            passed: boolean;
+            /** Question Count */
+            question_count: number;
+            /** Quiz Score */
+            quiz_score: number | null;
+            /** Section */
+            section: number;
+            /** Section Count */
+            section_count: number;
+            /** Slug */
+            slug: string;
+            /** Status */
+            status: string;
+            /** Summary */
+            summary: string;
+            /** Title */
+            title: string;
+        };
         /** CourseCardOut */
         CourseCardOut: {
             /** Audience */
@@ -7112,7 +7241,7 @@ export interface components {
         /** EmploymentTab */
         EmploymentTab: {
             /** Assignments */
-            assignments: components["schemas"]["app__modules__employees__employment_schemas__AssignmentOut"][];
+            assignments: components["schemas"]["AssignmentOut"][];
             /** Education */
             education: components["schemas"]["EducationOut"][];
             /**
@@ -10440,81 +10569,6 @@ export interface components {
             /** Postcode */
             postcode: string | null;
         };
-        /** AssignmentIn */
-        app__modules__employees__employment_schemas__AssignmentIn: {
-            /** Custom Working Days */
-            custom_working_days?: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] | null;
-            /** Department Id */
-            department_id?: string | null;
-            /** Designation Id */
-            designation_id?: string | null;
-            /**
-             * Effective From
-             * Format: date
-             */
-            effective_from: string;
-            /**
-             * Employment Type
-             * @enum {string}
-             */
-            employment_type: "full_time" | "part_time" | "fixed_term" | "zero_hours" | "casual" | "apprentice" | "agency";
-            /** Hours Per Day */
-            hours_per_day?: number | string | null;
-            /** Leave Sanctioning Employee Id */
-            leave_sanctioning_employee_id?: string | null;
-            /** Location Id */
-            location_id?: string | null;
-            /** Organogram Level Id */
-            organogram_level_id?: string | null;
-            /** Reporting Authority Employee Id */
-            reporting_authority_employee_id?: string | null;
-        };
-        /** AssignmentOut */
-        app__modules__employees__employment_schemas__AssignmentOut: {
-            /** Custom Working Days */
-            custom_working_days?: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[] | null;
-            /** Department */
-            department?: string | null;
-            /** Department Id */
-            department_id?: string | null;
-            /** Designation */
-            designation?: string | null;
-            /** Designation Id */
-            designation_id?: string | null;
-            /**
-             * Effective From
-             * Format: date
-             */
-            effective_from: string;
-            /**
-             * Employment Type
-             * @enum {string}
-             */
-            employment_type: "full_time" | "part_time" | "fixed_term" | "zero_hours" | "casual" | "apprentice" | "agency";
-            /** Ended At */
-            ended_at: string | null;
-            /** Hours Per Day */
-            hours_per_day?: string | null;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Leave Sanctioning Authority */
-            leave_sanctioning_authority?: string | null;
-            /** Leave Sanctioning Employee Id */
-            leave_sanctioning_employee_id?: string | null;
-            /** Location */
-            location?: string | null;
-            /** Location Id */
-            location_id?: string | null;
-            /** Organogram Level Id */
-            organogram_level_id?: string | null;
-            /** Reporting Authority */
-            reporting_authority?: string | null;
-            /** Reporting Authority Employee Id */
-            reporting_authority_employee_id?: string | null;
-        };
         /** AddressOut */
         app__modules__employees__personal_schemas__AddressOut: {
             /** City County */
@@ -10529,60 +10583,6 @@ export interface components {
             line3: string | null;
             /** Postcode */
             postcode: string | null;
-        };
-        /** AssignmentIn */
-        app__modules__learning__schemas__AssignmentIn: {
-            /** Course Ids */
-            course_ids: string[];
-            /**
-             * Due On
-             * Format: date
-             */
-            due_on: string;
-            /** Employee Ids */
-            employee_ids: string[];
-        };
-        /** AssignmentOut */
-        app__modules__learning__schemas__AssignmentOut: {
-            /** Completed At */
-            completed_at: string | null;
-            /**
-             * Course Id
-             * Format: uuid
-             */
-            course_id: string;
-            /**
-             * Due On
-             * Format: date
-             */
-            due_on: string;
-            /** Duration Minutes */
-            duration_minutes: number;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Pass Mark */
-            pass_mark: number;
-            /** Passed */
-            passed: boolean;
-            /** Question Count */
-            question_count: number;
-            /** Quiz Score */
-            quiz_score: number | null;
-            /** Section */
-            section: number;
-            /** Section Count */
-            section_count: number;
-            /** Slug */
-            slug: string;
-            /** Status */
-            status: string;
-            /** Summary */
-            summary: string;
-            /** Title */
-            title: string;
         };
     };
     responses: never;
@@ -15783,7 +15783,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["app__modules__employees__employment_schemas__AssignmentIn"];
+                "application/json": components["schemas"]["AssignmentIn"];
             };
         };
         responses: {
@@ -15793,7 +15793,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__modules__employees__employment_schemas__AssignmentOut"];
+                    "application/json": components["schemas"]["AssignmentOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -18552,7 +18552,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["app__modules__learning__schemas__AssignmentIn"];
+                "application/json": components["schemas"]["CourseAssignmentIn"];
             };
         };
         responses: {
@@ -18600,7 +18600,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__modules__learning__schemas__AssignmentOut"][];
+                    "application/json": components["schemas"]["CourseAssignmentOut"][];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -18680,7 +18680,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__modules__learning__schemas__AssignmentOut"];
+                    "application/json": components["schemas"]["CourseAssignmentOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -18724,7 +18724,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__modules__learning__schemas__AssignmentOut"];
+                    "application/json": components["schemas"]["CourseAssignmentOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

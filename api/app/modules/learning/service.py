@@ -14,8 +14,8 @@ from sqlalchemy import select
 from app.core.errors import AppError, NotFoundError
 from app.modules.learning.models import Course, CourseAssignment
 from app.modules.learning.schemas import (
-    AssignmentOut,
     CourseAdminOut,
+    CourseAssignmentOut,
     CourseCardOut,
     CourseOut,
     QuestionAdminOut,
@@ -98,9 +98,9 @@ def card_out(course: Course) -> CourseCardOut:
     )
 
 
-def assignment_out(row: CourseAssignment, course: Course) -> AssignmentOut:
+def assignment_out(row: CourseAssignment, course: Course) -> CourseAssignmentOut:
     score = row.quiz_score
-    return AssignmentOut(
+    return CourseAssignmentOut(
         id=row.id,
         course_id=course.id,
         slug=course.slug,
