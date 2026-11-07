@@ -355,6 +355,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
   - Not done (recorded in STATUS): the optional CV upload on the apply form; the company logo on careers pages; a browser test for convert (needs a clean scan).
   - Fixed at the gate: an interview test used shared addresses; two e2e expectations (recruitment in the built-page list; the sponsored empty state read the hidden streamed copy).
   - Decisions: convert needs an accepted offer and a verified check; apply is public with consent, Turnstile and a rate limit; careers responses list their fields.
+- AUDIT-1 round 1: 1/5/1 (P0/P1/P2) — FIX NEEDED. Worst: the stage endpoint could set Hired without convert, or leave Hired so convert made a second employee. All 7 fixed the same day at the owner's request (CV upload, logo, .ics attachment, refusal tests, read rate limit); re-audit (round 2) still due.
 
 ### Phase 12 — Org chart
 - [ ] **T12.1** Tree API and hierarchy levels

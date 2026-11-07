@@ -1,5 +1,5 @@
 # changesneeded.md — audit AUDIT-1 round 1 (2026-11-07, Claude Opus 5.5)
-Scope: f37f781..a49307d   Tests at audit: api __API__, web unit __WEB__, e2e __E2E__, CI __CI__
+Scope: f37f781..a49307d   Tests at audit: api 784/0/0, web unit 777/0, e2e 427/0 (164 skipped, CI run on d7e526e), CI green. check-rls covered by tests/db/test_cli.py (CLI needs a local .env)
 
 ### [x] C1.1.1 · P0 · Only Convert may set Hired; nothing moves out of Hired (from T11.4/T11.5)
 - **Problem:** `POST /applications/{id}/stage` accepts `stage="hired"` (`api/app/modules/recruitment/applications.py:35` `stage_error` allows offer_accepted → hired), so an application can be Hired with no employee, skipping both convert gates. It also allows hired → offer_accepted (backward move); after that, `convert_application` (`router.py:1077`, the `stage == "hired"` check) runs again and creates a **second employee** for the same candidate.
@@ -36,6 +36,11 @@ Scope: f37f781..a49307d   Tests at audit: api __API__, web unit __WEB__, e2e __E
 - **Problem:** plan item 24: public endpoints are rate-limited. Only `apply` uses `RateLimiter`; `careers_page` and `careers_posting` (`public.py:114,138`) have none.
 - **Fix:** add a per-connection limit (e.g. `("careers.read", 120, 60)`) to both GETs using the same `RateLimiter(...).hit` code as `apply`, returning the same 429 envelope.
 - **Done when:** a test hitting the list over the limit gets 429 (monkeypatch the limit low).
+
+## Fixes (applied by the auditor at the owner's request, same session)
+- All 7 items fixed on dev: 26f92e6 (C1.1.1, C1.1.6), 6a6d203 (C1.1.2), d7b0a46 (C1.1.3, C1.1.5), 0044639 (C1.1.4, C1.1.7).
+- After the fixes: api 792 pass, web unit 777, recruitment + careers browser specs 5 pass, gen:api clean.
+- A re-audit (round 2) by a big model is still due: scope `audit-1-r1..HEAD`.
 
 ## Notes (no action needed)
 - Convert copies the candidate's current RTW check onto the employee (a new row) rather than re-pointing it; the convert audit event names the new check id. Fine against plan L984.

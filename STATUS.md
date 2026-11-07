@@ -1,38 +1,35 @@
 # STATUS
-Updated: 2026-11-07, Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: a49307d
-State: IN PROGRESS — AUDIT-1 round 1 (scope f37f781..a49307d); PR #18 waiting on e2e before merge
+Updated: 2026-11-07 03:54, Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: 0044639+
+State: HANDED OVER — AUDIT-1 round 1 fixes done; re-audit (round 2) needed by a big model
 
 ## Last completed
-- T11.6 — Public careers: list and posting endpoints (open external only, listed fields), apply endpoint (consent, Turnstile, rate limit, candidate and application created, confirmation and recruiter notice), careers pages.
+- AUDIT-1 round 1 (scope f37f781..a49307d): 1 P0, 5 P1, 1 P2 in changesneeded.md; all 7 fixed and ticked at the owner's request.
+- PR #18 (Phase 11) merged to main as 1ea40b1 with all checks green.
 
 ## Current task
-- AUDIT-1 round 1 (audit.md): run checks, review T10.3–T11.6, write changesneeded.md
+- none. next.sh now shows a re-audit (all changesneeded.md items ticked, no PASS line).
 
 ## Next tasks
-- P11 — Phase 11 gate: full API suite once, full web e2e once, phase-11 screenshots (390 and 1280, light and dark; recruitment, candidate, application, careers), 5-line summary, PR dev to main, green CI, merge
-- AUDIT-1 — audit stop after P11: a big model runs audit.md (small models stop with "AUDIT NEEDED FIRST")
+- AUDIT-1 round 2 (big model): scope audit-1-r1..HEAD (the fix commits) plus regressions in files service upload and e-mail delivery.
+- Then T12.1, T12.2, P12.
 
 ## Health
-- CI on dev: last PR (#17, Phase 10) merged on main as 34f7aee. dev has T11.1–T11.6 checkpoints, not yet through a PR.
-- Local checks run this session: careers 3 + careers.spec 2; email, notifications, applications, recruitment, candidates, convert, RBAC, guards, data-model doc 36+ pass; mypy (337 files) and ruff clean; web unit 777, typecheck, lint, gen:api clean.
+- CI on dev: fixes PR open (dev → main), waiting for checks. CI on main: green (PR #18).
+- Local checks after fixes: API 792 pass, ruff/mypy clean; web unit 777, typecheck, lint, gen:api clean; recruitment + careers browser specs 5 pass.
 
 ## Issues / suggestions
-- NOT DONE (T11.6 step 2): the optional CV upload. It needs a public upload path through the files service and ClamAV; the apply endpoint takes no file yet. Add it with the scan path in a later step or ask for a decision.
-- NOT DONE (T11.6 page): the company logo. No logo field is exposed on the public pages yet.
-- Turnstile: the test environment has no secret, so the verifier accepts any present token. The rejection path for a bad token is covered by code, not by a test. A test with a Turnstile secret needs a fake verifier.
-- The public careers pages send the placeholder token when no Turnstile site key is set; with a secret configured on the server, the server rejects it. Production must set both keys.
-- Accepting an offer does not move the application on its own (decide before the P11 audit).
-- The candidate profile's header Convert button is still disabled; conversion lives on the application page.
-- Rota publish inserts rota.published notifications but notifications/router.py _kinds omits that kind (left alone).
-- Never overlap DB pytest and Playwright (shared PostgreSQL role passwords).
+- Public CV refusals are not audit-logged (no signed-in user, and the request writes nothing); staff upload refusals still are.
+- Turnstile: production must set the site key (web) and secret (API) together; with no secret the verifier accepts any token.
+- Accepting an offer does not move the application to Offer Accepted on its own (plan silent).
+- rota.published is missing from notifications/router.py _kinds (pre-existing).
+- Pushing to dev while a gate PR runs restarts its CI; batch pushes during gates.
 
 ## Strategy / decisions taken
-- The public guard allowlist now includes /api/v1/public/careers and /api/v1/public/postings (reviewed: each POST has Turnstile and a rate limit; each response lists its fields, tested).
-- Apply: a repeat application for the same person and posting returns the same 202 and does not create a second one, so the form does not reveal who has applied.
-- Apply: the candidate is found by email (case-insensitive, not archived) or created with source "Careers page".
-- The applicant's confirmation is an email; recruiters get an in-app notification (recruitment.application_received) for roles with recruitment.application.read.
-- Apply records an audit event with actor type system and the visitor's IP (no user).
-- Closed or internal postings return 404 on both the detail page and apply.
+- Hired is set only by Convert; no stage moves into or out of Hired.
+- Interview invites: the .ics text travels in the encrypted outbox payload under "ics" and is attached as invite.ics (text/calendar; method=REQUEST) at delivery; Message gained attachments (Resend + SMTP).
+- Careers apply is multipart form data; the CV (PDF/DOC/DOCX, 10 MB) uses FileService.store_public, which shares FileService._vet with staff uploads.
+- Careers logo: has_logo + public GET /public/careers/{slug}/logo (copies GET /company/logo), not a signed storage URL, so the CSP is unchanged.
+- Public careers reads: 120 per minute per connection.
 
 ## Owner actions needed
-- None for the code. For production: set the Turnstile site key (web) and secret (API) together.
+- None.
