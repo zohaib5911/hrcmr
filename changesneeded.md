@@ -25,7 +25,7 @@ Result: FIX NEEDED: 0 P0 / 3 P1 / 3 P2. AUDIT-2 stays open; re-audit after C2.1.
 - **Fix:** in the three `build_me(..., ai_key=...)` calls in `api/app/modules/auth/router.py` (lines ~86, 190, 408) pass `ai_key=auth.settings.anthropic_api_key is not None and auth.settings.ai_features_enabled`.
 - **Done when:** a test (copy an existing `/auth/me` test) with `ai_features_enabled=False` and a key set asserts `ai_available` is false.
 
-### [ ] C2.1.5 · P2 · Org chart shows RTW chips to any role with an "own" RTW permission (from T12.1)
+### [x] C2.1.5 · P2 · Org chart shows RTW chips to any role with an "own" RTW permission (from T12.1) — fixed in 47f6b51
 - **Problem:** `api/app/modules/organogram/router.py:39` and `:50` use `scope_for(access.role, "employee.rtw.read") is not None`, which is true for `employee.rtw.read_own`. No current role has both that and `organogram.level.read`, so nothing leaks today, but a future grant would show everyone's RTW status.
 - **Fix:** compare `is Scope.ALL` (import `Scope` from `app.core.rbac_matrix`) in both places.
 - **Done when:** `uv run pytest tests/db/test_organogram.py -q` passes.

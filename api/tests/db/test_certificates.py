@@ -113,6 +113,11 @@ async def test_the_public_check_returns_exactly_four_fields_and_a_generic_not_fo
         assert body["holder_name"] == name
         assert body["course_title"] == "Test course for the player"
         assert body["status"] == "valid"
+        # Typed in lower case, with spaces around it, the same certificate still verifies.
+        typed = f"  {reference.lower()} "
+        lower = await anonymous.get(API + "/public/certificates/verify", params={"ref": typed})
+        assert lower.status_code == 200, lower.text
+        assert lower.json()["holder_name"] == name
 
         for ref in ("NOSUCHREFERENCE1", "x", "A" * 40):
             missing = await anonymous.get(API + "/public/certificates/verify", params={"ref": ref})

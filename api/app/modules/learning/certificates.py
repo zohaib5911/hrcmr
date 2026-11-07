@@ -182,6 +182,8 @@ async def verify_certificate(ref: str, request: Request, db: GlobalDb) -> Certif
             "Too many checks from this connection. Try again later.",
             status_code=429,
         )
+    # A reference typed in lower case, or with spaces around it, is still the same reference.
+    ref = ref.strip().upper()
     if not (10 <= len(ref) <= 20):
         raise NotFoundError("We could not find a certificate with that reference.")
     # One transaction, one reference: the database policy shows only the certificate with it.
