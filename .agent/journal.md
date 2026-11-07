@@ -284,3 +284,4 @@
 2026-11-07 11:32 | Claude (Haiku) | T13.2 | course 8 of 8 written (acas how-to-advertise-a-job 2026-06-30) and validated; tests/test_seed_courses.py 5 pass | next tick T13.2 and add owner action to PROGRESS
 2026-11-07 11:32 | Claude (Haiku) | T13.2 | DONE: 8 courses + test 5 pass; ticked; owner action added to PROGRESS | next bash .agent/next.sh (T13.3 S)
 2026-11-07 11:38 | Claude (Haiku) | T13.3 | API: scoped assignment (everyone/departments/named), report with filters, summary, xlsx export (company-wide only), overdue job learning_overdue 06:15 with one notification; db 42 pass, root 32 pass | next web: /learning KPIs + report + courses, assign wizard, /learning/my
+2026-11-07 11:40 | Claude (Haiku) | T13.3 | DONE: API + web UI; ticked; unit 786 pass; typecheck/lint pass | next bash .agent/next.sh

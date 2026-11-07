@@ -243,7 +243,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Done when:** a test checks every course has ≥5 sections, exactly 5 questions, ≥1 source URL on gov.uk/acas.org.uk/equalityhumanrights.com. Owner action "Review the 8 courses" added to PROGRESS.
 - **Watch:** write fresh text; no copying from GOV.UK/ACAS beyond short quotes; no legal figures unless the source page states them (cite it).
 
-### [ ] T13.3 · S · Assign wizard, report view and export, overdue job, My Learning
+### [x] T13.3 · S · Assign wizard, report view and export, overdue job, My Learning
 - **Spec:** plan L1024–1027, L1431.
 - **Steps:**
   1. `POST /learning/assignments` (courses × people: everyone / departments / named, one due date); report list with filters; `GET /learning/assignments.xlsx` (R4).
