@@ -16,7 +16,10 @@ test("the dashboard shows the cards and the set-up checklist, which can be dismi
     page.getByRole("region", { name: "Employee distribution", exact: true }),
   ).toBeVisible();
 
-  await page.getByRole("button", { name: "Dismiss", exact: true }).click();
+  await page
+    .getByRole("region", { name: "Get set up", exact: true })
+    .getByRole("button", { name: "Dismiss", exact: true })
+    .click();
   await expect(page.getByRole("region", { name: "Get set up", exact: true })).toHaveCount(0);
   await page.reload();
   await expect(

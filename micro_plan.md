@@ -265,7 +265,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 14 — Dashboard, notifications, search, AI
 
-### [ ] T14.1 · S · Dashboard API, cards and setup checklist
+### [x] T14.1 · S · Dashboard API, cards and setup checklist
 - **Spec:** plan §8.2 (find with `grep -n '### 8.2' plan.md`, read to 8.3), L1435; API item 18.
 - **Steps:**
   1. `GET /dashboard`: one aggregated, permission-aware response (each card omitted if the user lacks its permission). Reuse existing services; no new queries where a service exists.
