@@ -1,0 +1,123 @@
+{
+  "slug": "bullying-and-harassment-at-work",
+  "title": "Bullying and harassment at work",
+  "summary": "What bullying looks like, where it happens, how harassment linked to a protected characteristic differs, and what to do if you think it is happening to you.",
+  "duration_minutes": 20,
+  "audience": "all_staff",
+  "sections": [
+    {
+      "title": "What bullying is",
+      "body": "Bullying has no formal legal definition. In general, it is unwelcome conduct from a person or a group that is hurtful, or that misuses power to demean or harm someone.\nIt can be a repeated pattern of behaviour, or a single event that is serious enough to hurt someone.",
+      "key_points": [
+        "Bullying has no formal legal definition",
+        "It is unwelcome conduct that hurts or misuses power",
+        "It can be a pattern or a single serious event"
+      ]
+    },
+    {
+      "title": "Examples of bullying",
+      "body": "Examples include relentless criticism of someone's work, spreading nasty gossip, belittling someone in meetings, piling extra work on someone unfairly, and leaving someone out of team events.\nPosting demeaning content about a colleague online is also bullying.",
+      "key_points": [
+        "Relentless criticism of someone's work",
+        "Spreading gossip and belittling people in meetings",
+        "Unfairly piling on work, or leaving someone out"
+      ]
+    },
+    {
+      "title": "Where and how it happens",
+      "body": "Bullying can happen in person, online, or through messages and calls. It can happen at work or in other work-related settings, such as a work trip.\nThe person doing it may not realise that their behaviour is bullying, and may not mean to cause harm. That does not make it acceptable.",
+      "key_points": [
+        "It can happen in person, online, by message or by call",
+        "It can happen in any work-related setting",
+        "Intent does not decide whether it is bullying"
+      ]
+    },
+    {
+      "title": "Bullying can go up as well as down",
+      "body": "Bullying is not only a manager picking on staff. It can also be aimed upward at a senior person, through disrespect, refusing reasonable tasks or undermining their authority.\nAll of it matters, and each case should be looked at on its facts.",
+      "key_points": [
+        "Bullying can be aimed at a manager as well as by one",
+        "Each case should be looked at on its facts"
+      ]
+    },
+    {
+      "title": "Harassment linked to a protected characteristic",
+      "body": "Harassment is different from general bullying in one respect. Under the Equality Act 2010, harassment is unwanted conduct that is related to a protected characteristic, such as race, sex or disability.\nHarassment does not need to be intended to count. What matters is the effect it has on the person.",
+      "key_points": [
+        "Harassment is unwanted conduct linked to a protected characteristic",
+        "It can count even when it was not intended"
+      ]
+    },
+    {
+      "title": "If you think you are being bullied",
+      "body": "Write down what happened, when, and who was there, while it is fresh. Raise it with your manager or with HR, following your organisation's policy.\nIf you are not sure what to do, the Acas helpline gives free advice on bullying and harassment at work.",
+      "key_points": [
+        "Keep a written record while the details are fresh",
+        "Raise it with your manager or HR",
+        "Acas can advise on bullying and harassment"
+      ]
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "prompt": "Does bullying have a formal legal definition?",
+        "options": [
+          "Yes, a fixed definition in one statute",
+          "No, it has no formal legal definition",
+          "Only in criminal law"
+        ],
+        "answer": 1,
+        "explanation": "Bullying has no formal legal definition. In general it means unwelcome conduct that hurts or misuses power."
+      },
+      {
+        "prompt": "Which of these is an example of bullying?",
+        "options": [
+          "Constructive feedback given privately",
+          "Spreading nasty gossip about a colleague",
+          "Asking for a report by Friday"
+        ],
+        "answer": 1,
+        "explanation": "Spreading nasty gossip is an example of bullying. Feedback and reasonable requests are part of normal work."
+      },
+      {
+        "prompt": "Can bullying happen online?",
+        "options": [
+          "No, only face to face",
+          "Yes, including through messages and calls",
+          "Only on social media outside work"
+        ],
+        "answer": 1,
+        "explanation": "Bullying can happen in person, online, or through messages and calls, at work or in other work-related settings."
+      },
+      {
+        "prompt": "Can a single incident be bullying?",
+        "options": [
+          "Never",
+          "It can be, as well as a repeated pattern",
+          "Only if it is written down"
+        ],
+        "answer": 1,
+        "explanation": "Bullying can be a repeated pattern or a single serious event."
+      },
+      {
+        "prompt": "For harassment linked to a protected characteristic, must the person doing it intend the effect?",
+        "options": [
+          "Yes, always",
+          "No, the conduct can count whether or not it was intended",
+          "Only if they are a manager"
+        ],
+        "answer": 1,
+        "explanation": "Harassment under the Equality Act does not need to be intended. What matters is the effect of the conduct."
+      }
+    ]
+  },
+  "pass_mark": 80,
+  "source_title": "Bullying at work",
+  "source_publisher": "Acas",
+  "source_url": "https://www.acas.org.uk/bullying-at-work",
+  "source_updated_on": "2025-12-16",
+  "content_reviewed_on": "2026-11-07",
+  "licence_note": "Based on Acas guidance. The text here is our own summary of it, written in our own words; no Acas text is reproduced.",
+  "published": false
+}

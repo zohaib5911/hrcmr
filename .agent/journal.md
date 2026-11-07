@@ -278,3 +278,4 @@
 2026-11-07 11:30 | Claude (Haiku) | T13.2 | course 2 of 8 employment-status (gov.uk 2015-02-12) validated | next course 3
 2026-11-07 11:30 | Claude (Haiku) | T13.2 | course 3 of 8 written (gov.uk discrimination 2015-03-04) and validated | next course 4
 2026-11-07 11:30 | Claude (Haiku) | T13.2 | course 4 of 8 written (acas preventing-harassment 2026-10-30) and validated | next course 5
+2026-11-07 11:31 | Claude (Haiku) | T13.2 | course 5 of 8 written (acas bullying-at-work 2025-12-16) and validated | next course 6
