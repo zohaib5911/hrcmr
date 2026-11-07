@@ -147,7 +147,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 11 — Recruitment and public careers
 
-### [ ] T11.1 · S · Requisitions
+### [x] T11.1 · S · Requisitions
 - **Spec:** plan L956–967, L1417; data model §6.8 L581–592; API item 15 (L1625–1627).
 - **Copy:** R1 from `api/app/modules/work_log/`; status-change pattern from `api/app/modules/leave/` (approve).
 - **Steps:**

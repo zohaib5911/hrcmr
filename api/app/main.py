@@ -72,6 +72,7 @@ from app.modules.notifications.router import router as notifications_router
 from app.modules.pay.router import router as pay_router
 from app.modules.policies.own_router import router as own_policies_router
 from app.modules.policies.router import router as policies_router
+from app.modules.recruitment.router import router as recruitment_router
 from app.modules.reports.router import router as reports_router
 from app.modules.rota.action_router import router as rota_action_router
 from app.modules.rota.publish_router import router as rota_publish_router
@@ -243,6 +244,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(reports_router, prefix=API_PREFIX)
     app.include_router(documents_router, prefix=API_PREFIX)
     app.include_router(letters_router, prefix=API_PREFIX)
+    app.include_router(recruitment_router, prefix=API_PREFIX)
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)
     app.include_router(employee_activity_router, prefix=API_PREFIX)

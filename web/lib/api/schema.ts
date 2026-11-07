@@ -3090,6 +3090,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/recruitment/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recruitment Summary */
+        get: operations["recruitment_recruitment_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/reminders/{reminder_id}": {
         parameters: {
             query?: never;
@@ -3191,6 +3208,59 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/requisitions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Requisitions */
+        get: operations["recruitment_list_requisitions"];
+        put?: never;
+        /** Create Requisition */
+        post: operations["recruitment_create_requisition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/requisitions/{requisition_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Requisition */
+        get: operations["recruitment_get_requisition"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Requisition */
+        patch: operations["recruitment_update_requisition"];
+        trace?: never;
+    };
+    "/requisitions/{requisition_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Set Requisition Status */
+        patch: operations["recruitment_set_requisition_status"];
         trace?: never;
     };
     "/roles/matrix": {
@@ -7767,6 +7837,21 @@ export interface components {
             /** Recovery Codes */
             recovery_codes: string[];
         };
+        /** RecruitmentSummary */
+        RecruitmentSummary: {
+            /** Applications In Progress */
+            applications_in_progress: number;
+            /** Candidates */
+            candidates: number;
+            /** Live Postings */
+            live_postings: number;
+            /** Open Requisitions */
+            open_requisitions: number;
+            /** Postings */
+            postings: number;
+            /** Requisitions */
+            requisitions: number;
+        };
         /** ReminderMessageIn */
         ReminderMessageIn: {
             /** Message */
@@ -7924,6 +8009,88 @@ export interface components {
              * Format: date
              */
             reported_date: string;
+        };
+        /** RequisitionIn */
+        RequisitionIn: {
+            /** Budget From */
+            budget_from?: number | string | null;
+            /** Budget Per */
+            budget_per?: ("year" | "month" | "hour") | null;
+            /** Budget To */
+            budget_to?: number | string | null;
+            /** Department Id */
+            department_id?: string | null;
+            /** Grade */
+            grade?: string | null;
+            /**
+             * Headcount
+             * @default 1
+             */
+            headcount: number;
+            /** Job Title */
+            job_title: string;
+            /** Justification */
+            justification?: string | null;
+        };
+        /** RequisitionOut */
+        RequisitionOut: {
+            /** Approved At */
+            approved_at: string | null;
+            /** Approved By Name */
+            approved_by_name: string | null;
+            /** Budget From */
+            budget_from: string | null;
+            /** Budget Per */
+            budget_per: ("year" | "month" | "hour") | null;
+            /** Budget To */
+            budget_to: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Department */
+            department: string | null;
+            /** Department Id */
+            department_id: string | null;
+            /** Grade */
+            grade: string | null;
+            /** Headcount */
+            headcount: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Job Title */
+            job_title: string;
+            /** Justification */
+            justification: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "open" | "on_hold" | "filled" | "cancelled";
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+        };
+        /** RequisitionPage */
+        RequisitionPage: {
+            /** Items */
+            items: components["schemas"]["RequisitionOut"][];
+            /** Total */
+            total: number;
+        };
+        /** RequisitionStatusIn */
+        RequisitionStatusIn: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "open" | "on_hold" | "filled" | "cancelled";
         };
         /** ResetPasswordRequest */
         ResetPasswordRequest: {
@@ -18496,6 +18663,44 @@ export interface operations {
             };
         };
     };
+    recruitment_recruitment_summary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecruitmentSummary"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     reminders_reminder: {
         parameters: {
             query?: never;
@@ -18764,6 +18969,219 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReportJobOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_list_requisitions: {
+        parameters: {
+            query?: {
+                status?: ("draft" | "open" | "on_hold" | "filled" | "cancelled") | null;
+                search?: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequisitionPage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_create_requisition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequisitionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequisitionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_get_requisition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                requisition_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequisitionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_update_requisition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                requisition_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequisitionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequisitionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_set_requisition_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                requisition_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequisitionStatusIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequisitionOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

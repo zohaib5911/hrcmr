@@ -343,7 +343,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
   - Decisions: overdue marking at 06:15 daily; AI label follows /auth/me ai_available; letter drafts are template-only until T14.4.
 
 ### Phase 11 — Recruitment and public careers
-- [ ] **T11.1** Requisitions
+- [x] **T11.1** Requisitions — 2026-11-07. Requisition CRUD with status changes; only recruitment.requisition.approve can open one and the approval is stamped; cancelled is final; /recruitment shell with KPIs, tabs and sheet. Also the 0033 migration for all six recruitment tables (plan 6.8). Verified: requisitions/migrations/RLS/guards 64 pass (incl. 3 requisition tests); web unit 777 pass; typecheck/lint clean; recruitment.spec pass; gen:api:check clean.
 - [ ] **T11.2** Postings
 - [ ] **T11.3** Candidates
 - [ ] **T11.4** Applications, interviews, offers

@@ -3,6 +3,28 @@
 Generated from the SQLAlchemy models by `python -m app.cli export-data-model`.
 Do not edit by hand: a test fails when this file is out of date.
 
+## `applications`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `candidate_id` | UUID | no |  | references `candidates` |
+| `posting_id` | UUID | no |  | references `postings` |
+| `stage` | VARCHAR(16) | no | `applied` |  |
+| `stage_history` | JSONB | no | `[]` |  |
+| `cover_note` | TEXT | yes |  |  |
+| `applied_via` | VARCHAR(14) | no | `admin` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `applied_via in ('admin','careers_page')`
+- `stage in ('applied','shortlisted','interview','offer_letter','offer_accepted','hired','rejected','withdrawn')`
+
 ## `attendance_imports`
 
 | Column | Type | Null | Default | Notes |
@@ -102,6 +124,29 @@ Checks:
 Checks:
 
 - `region in ('england-and-wales', 'scotland', 'northern-ireland')`
+
+## `candidates`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `first_name` | VARCHAR(100) | no |  |  |
+| `last_name` | VARCHAR(100) | no |  |  |
+| `email` | VARCHAR(254) | yes |  |  |
+| `phone` | VARCHAR(40) | yes |  |  |
+| `source` | VARCHAR(40) | yes |  |  |
+| `cv_file_id` | UUID | yes |  | references `files` |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `length(trim(first_name)) > 0`
+- `length(trim(last_name)) > 0`
 
 ## `change_of_circumstances`
 
@@ -692,6 +737,31 @@ Checks:
 
 - `colour in ('blue', 'green', 'orange', 'red', 'gray')`
 
+## `interviews`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `application_id` | UUID | no |  | references `applications` |
+| `scheduled_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `duration_minutes` | INTEGER | no | `60` |  |
+| `mode` | VARCHAR(10) | no |  |  |
+| `location_or_link` | VARCHAR(300) | yes |  |  |
+| `interviewer_employee_ids` | UUID[] | no | `{}` |  |
+| `outcome` | VARCHAR(10) | no | `pending` |  |
+| `notes` | TEXT | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `duration_minutes between 5 and 480`
+- `mode in ('in_person','video','phone')`
+- `outcome in ('pending','passed','failed','no_show')`
+
 ## `invitations`
 
 | Column | Type | Null | Default | Notes |
@@ -935,6 +1005,30 @@ Checks:
 | `created_by` | UUID | yes |  |  |
 | `updated_by` | UUID | yes |  |  |
 
+## `offers`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `application_id` | UUID | no |  | references `applications` |
+| `role_title` | VARCHAR(200) | no |  |  |
+| `salary` | NUMERIC(12, 2) | no |  |  |
+| `salary_per` | VARCHAR(6) | no |  |  |
+| `start_date` | DATE | yes |  |  |
+| `status` | VARCHAR(10) | no | `draft` |  |
+| `decided_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `length(trim(role_title)) > 0`
+- `salary_per in ('year','month','hour')`
+- `status in ('draft','sent','accepted','declined','withdrawn')`
+
 ## `org_changes`
 
 | Column | Type | Null | Default | Notes |
@@ -1110,6 +1204,46 @@ Checks:
 - `status in ('draft','sent','archived')`
 - `version > 0 and ((version=1) = (previous_version_id is null))`
 
+## `postings`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `requisition_id` | UUID | no |  | references `requisitions` |
+| `title` | VARCHAR(200) | no |  |  |
+| `slug` | VARCHAR(120) | no |  |  |
+| `visibility` | VARCHAR(8) | no | `internal` |  |
+| `location_id` | UUID | yes |  | references `locations` |
+| `job_code` | VARCHAR(40) | yes |  |  |
+| `soc_code` | VARCHAR(10) | yes |  |  |
+| `vacancies` | INTEGER | no | `1` |  |
+| `posted_on` | DATE | yes |  |  |
+| `closes_on` | DATE | yes |  |  |
+| `contact_email` | VARCHAR(254) | yes |  |  |
+| `contact_phone` | VARCHAR(40) | yes |  |  |
+| `salary_from` | NUMERIC(12, 2) | yes |  |  |
+| `salary_to` | NUMERIC(12, 2) | yes |  |  |
+| `salary_per` | VARCHAR(6) | yes |  |  |
+| `weekly_hours` | NUMERIC(4, 1) | yes |  |  |
+| `description` | TEXT | yes |  |  |
+| `visa_sponsorship` | VARCHAR(14) | no | `not_stated` |  |
+| `status` | VARCHAR(6) | no | `draft` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `length(trim(title)) > 0`
+- `salary_from is null or salary_to is null or salary_from <= salary_to`
+- `salary_per is null or salary_per in ('year','month','hour')`
+- `status in ('draft','open','closed')`
+- `vacancies between 1 and 999`
+- `visa_sponsorship in ('not_stated','available','considered','not_available')`
+- `visibility in ('internal','external')`
+
 ## `reminders`
 
 | Column | Type | Null | Default | Notes |
@@ -1170,6 +1304,38 @@ Checks:
 - `(status = 'ready') = (file_id is not null)`
 - `report_type in ('employee_directory', 'employee_detail', 'archived_employees', 'company', 'sponsor_workers', 'leave_taken', 'training_completion')`
 - `status in ('queued','ready','failed')`
+
+## `requisitions`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `job_title` | VARCHAR(200) | no |  |  |
+| `department_id` | UUID | yes |  | references `departments` |
+| `headcount` | INTEGER | no | `1` |  |
+| `grade` | VARCHAR(40) | yes |  |  |
+| `budget_from` | NUMERIC(12, 2) | yes |  |  |
+| `budget_to` | NUMERIC(12, 2) | yes |  |  |
+| `budget_per` | VARCHAR(6) | yes |  |  |
+| `justification` | TEXT | yes |  |  |
+| `status` | VARCHAR(10) | no | `draft` |  |
+| `approved_by` | UUID | yes |  | references `users` |
+| `approved_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(approved_by is null) = (approved_at is null)`
+- `budget_from is null or budget_to is null or budget_from <= budget_to`
+- `budget_per is null or budget_per in ('year','month','hour')`
+- `headcount between 1 and 999`
+- `length(trim(job_title)) > 0`
+- `status in ('draft','open','on_hold','filled','cancelled')`
+- `status not in ('open','filled') or approved_at is not null`
 
 ## `rota_weeks`
 
