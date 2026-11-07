@@ -328,6 +328,64 @@ Checks:
 
 - `end_date >= start_date`
 
+## `course_assignments`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `course_id` | UUID | no |  | references `courses` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `due_on` | DATE | no |  |  |
+| `status` | VARCHAR(12) | no | `not_started` |  |
+| `progress` | JSONB | no |  |  |
+| `quiz_score` | INTEGER | yes |  |  |
+| `completed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `assigned_by` | UUID | yes |  | references `users` |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `quiz_score is null or quiz_score between 0 and 100`
+- `status in ('not_started', 'in_progress', 'completed', 'overdue')`
+
+## `courses`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `slug` | VARCHAR(80) | no |  | unique |
+| `title` | VARCHAR(160) | no |  |  |
+| `summary` | VARCHAR(400) | no |  |  |
+| `duration_minutes` | INTEGER | no |  |  |
+| `audience` | VARCHAR(12) | no |  |  |
+| `sections` | JSONB | no |  |  |
+| `quiz` | JSONB | no |  |  |
+| `pass_mark` | INTEGER | no |  |  |
+| `source_title` | VARCHAR(200) | no |  |  |
+| `source_publisher` | VARCHAR(120) | no |  |  |
+| `source_url` | VARCHAR(1000) | no |  |  |
+| `source_updated_on` | DATE | no |  |  |
+| `content_reviewed_on` | DATE | no |  |  |
+| `licence_note` | VARCHAR(400) | yes |  |  |
+| `published` | BOOLEAN | no | `false` |  |
+| `version` | INTEGER | no | `1` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `audience in ('all_staff', 'managers')`
+- `duration_minutes between 5 and 120`
+- `pass_mark between 1 and 100`
+- `source_url like 'https://%'`
+- `version >= 1`
+
 ## `day_off_patterns`
 
 | Column | Type | Null | Default | Notes |

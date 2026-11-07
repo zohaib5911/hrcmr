@@ -18,6 +18,7 @@ import app.modules.employees.models
 import app.modules.files.models
 import app.modules.holidays.models
 import app.modules.identity.models
+import app.modules.learning.models
 import app.modules.leave.models
 import app.modules.leave.request_models
 import app.modules.leave.year_end_models

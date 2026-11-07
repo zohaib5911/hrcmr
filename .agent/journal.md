@@ -271,3 +271,4 @@
 2026-11-07 10:33 | Claude (Haiku) | P12 | API full suite 803 pass; web lint+typecheck pass; screenshot spec phase12 written | next full web e2e (pnpm test:e2e) then screenshots
 2026-11-07 10:52 | Claude (Haiku) | P12 | gate: API 803 pass, web e2e 428 pass, screenshots 8 written; PROGRESS summary; ticked | next PR dev->main, wait for CI, merge when green
 2026-11-07 11:13 | Claude (Haiku) | T13.1 | started after P12 merged (PR 20); STATUS updated | next read plan L1012-1029 and build course model
+2026-11-07 11:21 | Claude (Haiku) | T13.1 | API done: migration 0035 (courses global RLS, course_assignments), learner + platform endpoints, loader, e2e fixture course; tests learning 6, migrations, architecture, openapi, rbac 53 pass | next web: player and platform editor, e2e spec

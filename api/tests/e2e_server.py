@@ -13,11 +13,13 @@ import os
 import secrets
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager, suppress
+from pathlib import Path
 
 import uvicorn
 from arq.worker import Worker
 from fastapi import FastAPI
 from redis import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.pool import NullPool
 
 from app.core.config import Settings
@@ -30,6 +32,7 @@ from app.jobs.scheduled import functions
 from app.main import create_app
 from app.modules.email.outbox import sender_of
 from app.modules.email.templates import render
+from app.modules.learning.loader import load_courses
 from tests.db.support import engine_for, temporary_database
 from tests.reporting_calendar import seed_reporting_calendar
 from tests.support import build_settings
@@ -70,10 +73,22 @@ async def _calendar(owner_url: str) -> None:
         await engine.dispose()
 
 
+async def _courses(owner_url: str) -> None:
+    """The one test course the learning player tests use (never shipped content)."""
+    engine = engine_for(owner_url, poolclass=NullPool)
+    try:
+        async with AsyncSession(engine) as db:
+            await load_courses(db, Path(__file__).parent / "fixtures" / "courses")
+            await db.commit()
+    finally:
+        await engine.dispose()
+
+
 def main() -> None:
     configure_logging()
     with temporary_database() as database:
         asyncio.run(_calendar(database.owner_url))
+        asyncio.run(_courses(database.owner_url))
         settings = build_settings(
             database_url=database.app_url,
             redis_url=REDIS_URL,

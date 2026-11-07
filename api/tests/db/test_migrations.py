@@ -26,6 +26,8 @@ IDENTITY_TABLES = [
     "company_compliance_documents",
     "company_documents",
     "company_holidays",
+    "course_assignments",
+    "courses",
     "day_off_patterns",
     "departments",
     "designations",
