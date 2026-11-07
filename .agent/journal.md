@@ -233,3 +233,5 @@
 2026-11-07 00:08 | Claude | docs | added micro_plan.md, audit.md, .agent/next.sh; AGENTS.md points to them (slim checkpoints, model tiers, audit stops 11/14/17/20/22) | next T10.3 step 5 via .agent/next.sh
 2026-11-07 00:15 | Claude | docs | agents self-detect tier (BIG=Opus/Fable/Solo 6.1); fixed stop messages; next.sh prints NEXT kind/tier/id | next T10.3 step 5
 2026-11-07 05:23 | Claude | T10.3 | started: docker stack up; STATUS updated | next step 5 remind endpoint
+2026-11-07 05:27 | Claude | T10.3 | step 5 done: POST /policies/{id}/remind (sent+outstanding only), daily policies_overdue_daily 06:15 (overdue flip + notify), new-starter hook on create_employee; API tests policies15/own+schema pass, related worker/notifications/employees34 pass; mypy only pre-existing test_reports.py:215 (from e7839da) | next step 6 UI
+2026-11-07 05:27 | Claude | T10.3 | step 5 done: POST /policies/{id}/remind (sent+outstanding only), daily policies_overdue_daily 06:15 (overdue flip + notify), new-starter hook on create_employee; policy DB tests15 + related worker/notifications/employees34 pass; schema.ts regenerated | next step 6 UI

@@ -120,7 +120,12 @@ class Candidate:
 
 
 async def audience(
-    db: TenantSession, row: PolicyDocument, today: date, *, lock: bool = False
+    db: TenantSession,
+    row: PolicyDocument,
+    today: date,
+    *,
+    lock: bool = False,
+    only: list[uuid.UUID] | None = None,
 ) -> list[Candidate]:
     query = select(
         Employee.id, Employee.first_name, Employee.last_name, Employee.employee_number
@@ -154,6 +159,8 @@ async def audience(
             )
             .exists()
         )
+    if only is not None:
+        query = query.where(Employee.id.in_(only))
     query = query.order_by(Employee.id).limit(MAX_RECIPIENTS + 1)
     if lock:
         query = query.with_for_update(of=Employee)
@@ -187,7 +194,7 @@ def preview_token(row: PolicyDocument, people: list[Candidate], today: date) -> 
 
 def recipient_status(row: PolicyAcceptance, today: date) -> AcceptanceStatus:
     if row.accepted_at is None:
-        return "overdue" if row.due_on < today else "pending"
+        return "overdue" if row.status == "overdue" or row.due_on < today else "pending"
     return cast("AcceptanceStatus", row.status)
 
 
@@ -240,7 +247,10 @@ async def out(db: TenantSession, row: PolicyDocument, today: date) -> PolicyOut:
                     case(
                         (
                             PolicyAcceptance.accepted_at.is_(None)
-                            & (PolicyAcceptance.due_on < today),
+                            & (
+                                (PolicyAcceptance.status == "overdue")
+                                | (PolicyAcceptance.due_on < today)
+                            ),
                             1,
                         ),
                         else_=0,
@@ -287,13 +297,20 @@ def metadata(row: PolicyDocument) -> dict[str, Any]:
     }
 
 
+NOTICE_TITLES = {
+    "policy.assigned": "Please read a policy",
+    "policy.reminder": "Policy reminder",
+    "policy.overdue": "Policy overdue",
+}
+
+
 async def notify(
     db: TenantSession,
     row: PolicyDocument,
     assignments: list[PolicyAcceptance],
     web_origin: str,
     *,
-    reminder: bool = False,
+    kind: str = "policy.assigned",
 ) -> int:
     by_employee = {a.employee_id: a for a in assignments}
     if not by_employee:
@@ -325,8 +342,8 @@ async def notify(
             Notification(
                 company_id=db.company_id,
                 user_id=user_id,
-                kind="policy.reminder" if reminder else "policy.assigned",
-                title="Policy reminder" if reminder else "Please read a policy",
+                kind=kind,
+                title=NOTICE_TITLES[kind],
                 body=f"{row.title} · Due {by_employee[employee_id].due_on}",
                 link=link,
             )
@@ -463,3 +480,139 @@ async def new_version(
         after={"previous_version_id": str(row.id), "version": new.version},
     )
     return new
+
+
+async def remind(
+    db: TenantSession, row: PolicyDocument, audit: AuditContext, web_origin: str
+) -> int:
+    """Nudge everyone who has not yet accepted or signed this sent version."""
+    if row.status != "sent":
+        raise AppError(
+            "POLICY_NOT_SENT", "Send this version before reminding people.", status_code=409
+        )
+    outstanding = list(
+        (
+            await db.execute(
+                select(PolicyAcceptance)
+                .where(
+                    PolicyAcceptance.policy_document_id == row.id,
+                    PolicyAcceptance.accepted_at.is_(None),
+                )
+                .with_for_update()
+            )
+        ).scalars()
+    )
+    if not outstanding:
+        return 0
+    moment = now()
+    for receipt in outstanding:
+        receipt.last_reminded_at = moment
+    await notify(db, row, outstanding, web_origin, kind="policy.reminder")
+    await record(
+        db,
+        audit,
+        "policy.reminded",
+        entity_type="policy_document",
+        entity_id=row.id,
+        after={"version": row.version, "recipients": len(outstanding)},
+    )
+    return len(outstanding)
+
+
+async def mark_overdue(db: TenantSession, audit: AuditContext, today: date, web_origin: str) -> int:
+    """Flip outstanding acceptances past their due day to overdue (once), and tell each employee."""
+    rows = (
+        await db.execute(
+            select(PolicyAcceptance, PolicyDocument)
+            .join(PolicyDocument, PolicyDocument.id == PolicyAcceptance.policy_document_id)
+            .where(
+                PolicyDocument.status == "sent",
+                PolicyAcceptance.status == "pending",
+                PolicyAcceptance.accepted_at.is_(None),
+                PolicyAcceptance.due_on < today,
+            )
+            .with_for_update(of=PolicyAcceptance, skip_locked=True)
+        )
+    ).all()
+    by_document: dict[uuid.UUID, tuple[PolicyDocument, list[PolicyAcceptance]]] = {}
+    for receipt, document in rows:
+        receipt.status = "overdue"
+        by_document.setdefault(document.id, (document, []))[1].append(receipt)
+    for document, receipts in by_document.values():
+        await notify(db, document, receipts, web_origin, kind="policy.overdue")
+        await record(
+            db,
+            audit,
+            "policy.overdue_marked",
+            entity_type="policy_document",
+            entity_id=document.id,
+            after={"version": document.version, "overdue": len(receipts)},
+        )
+    return len(rows)
+
+
+async def assign_new_starters(
+    db: TenantSession,
+    audit: AuditContext,
+    today: date,
+    web_origin: str,
+    *,
+    only: list[uuid.UUID] | None = None,
+) -> int:
+    """Give each sent policy marked for new starters to the people now in its audience.
+
+    The hire hook passes the new employee's id; the daily job passes nothing and catches up on
+    everyone. Existing acceptances are never duplicated, so running this twice is safe.
+    """
+    sent = (
+        (
+            await db.execute(
+                select(PolicyDocument).where(
+                    PolicyDocument.status == "sent",
+                    PolicyDocument.auto_send_new_starters.is_(True),
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    created = 0
+    for row in sent:
+        people = await audience(db, row, today, only=only)
+        if not people:
+            continue
+        existing = set(
+            (
+                await db.execute(
+                    select(PolicyAcceptance.employee_id).where(
+                        PolicyAcceptance.policy_document_id == row.id,
+                        PolicyAcceptance.employee_id.in_([p.id for p in people]),
+                    )
+                )
+            ).scalars()
+        )
+        fresh = [
+            PolicyAcceptance(
+                company_id=db.company_id,
+                policy_document_id=row.id,
+                employee_id=p.id,
+                due_on=today + timedelta(days=row.accept_within_days),
+            )
+            for p in people
+            if p.id not in existing
+        ]
+        if not fresh:
+            continue
+        db.add_all(fresh)
+        await db.flush()
+        await notify(db, row, fresh, web_origin)
+        await record(
+            db,
+            audit,
+            "policy.assigned_new_starters",
+            entity_type="policy_document",
+            entity_id=row.id,
+            after={"version": row.version, "recipients": len(fresh)},
+        )
+        created += len(fresh)
+    return created

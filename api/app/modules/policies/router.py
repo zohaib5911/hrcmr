@@ -16,6 +16,7 @@ from app.modules.policies import service
 from app.modules.policies.models import PolicyAcceptance, PolicyDocument
 from app.modules.policies.own_router import receipt_out, view_file
 from app.modules.policies.schemas import (
+    PolicyAction,
     PolicyDraft,
     PolicyOut,
     PolicyPage,
@@ -196,6 +197,18 @@ async def send_policy(
         )
     await access.db.commit()
     return await service.out(access.db, row, await service.company_day(access.db))
+
+
+@router.post("/{policy_id}/remind", response_model=PolicyAction)
+async def remind_policy(policy_id: uuid.UUID, request: Request, access: Writes) -> PolicyAction:
+    """Nudge only the people who have not yet accepted or signed this sent version."""
+    all_scope(access)
+    row = await service.policy(access.db, policy_id, lock=True)
+    count = await service.remind(
+        access.db, row, access.audit_context, request.app.state.settings.web_origin
+    )
+    await access.db.commit()
+    return PolicyAction(count=count)
 
 
 @router.post("/{policy_id}/new-version", status_code=201, response_model=PolicyOut)

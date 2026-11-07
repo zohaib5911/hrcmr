@@ -2985,6 +2985,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/policies/{policy_id}/remind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Remind Policy
+         * @description Nudge only the people who have not yet accepted or signed this sent version.
+         */
+        post: operations["policies_remind_policy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/policies/{policy_id}/send": {
         parameters: {
             query?: never;
@@ -7359,6 +7379,11 @@ export interface components {
             confirmed: boolean;
             /** Typed Signature */
             typed_signature?: string | null;
+        };
+        /** PolicyAction */
+        PolicyAction: {
+            /** Count */
+            count: number;
         };
         /** PolicyDraft */
         PolicyDraft: {
@@ -18117,6 +18142,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PolicyRecipients"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_remind_policy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyAction"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 import httpx
@@ -11,6 +11,7 @@ import pytest
 from sqlalchemy import text
 
 from app.db.session import TenantSession
+from app.jobs.policies import reconcile_policies
 from app.modules.companies.models import Department, Location
 from app.modules.employees.models import EmployeeAssignment
 from app.modules.policies import service
@@ -308,3 +309,110 @@ async def test_send_audit_failure_rolls_back_policy_assignments_and_messages(
                 text("select count(*) from email_outbox where template='policy_request'")
             )
         ).scalar_one() == before_messages
+
+
+async def test_remind_targets_outstanding_people_and_overdue_job_notifies_once(
+    rig: dict[str, Any],
+) -> None:
+    origin = "https://app.example.test"
+    admin = await rig["person"]("company_admin", rig["a"])
+    first = await _employee(rig, rig["a"], "REM1")
+    await _employee(rig, rig["a"], "REM2")
+    member = await linked(rig, first)
+    everyone = await document(admin, title="Remind everyone")
+    assert (await admin.post(API + f"/{everyone['id']}/remind")).status_code == 409
+    assert (await send(admin, everyone)).status_code == 200
+    reminded = await admin.post(API + f"/{everyone['id']}/remind")
+    assert reminded.status_code == 200, reminded.text
+    assert reminded.json() == {"count": 2}
+    accepted = await member.post(API + f"/{everyone['id']}/accept", json={"confirmed": True})
+    assert accepted.status_code == 200, accepted.text
+    assert (await admin.post(API + f"/{everyone['id']}/remind")).json() == {"count": 1}
+    assert (await member.post(API + f"/{everyone['id']}/remind")).status_code == 403
+    foreign = await rig["person"]("company_admin", rig["b"])
+    assert (await foreign.post(API + f"/{everyone['id']}/remind")).status_code == 404
+    named = await document(
+        admin, title="Only the member", audience_type="named", audience_ids=[str(first)]
+    )
+    assert (await send(admin, named)).status_code == 200
+    later = datetime.now(UTC) + timedelta(days=60)
+    assert await reconcile_policies(rig["owner"], origin, now=later) >= 2
+    assert await reconcile_policies(rig["owner"], origin, now=later) == 0
+    statuses = {
+        row["employee_id"]: row["status"]
+        for row in (await admin.get(API + f"/{everyone['id']}/acceptances")).json()
+    }
+    assert statuses[str(first)] == "accepted"
+    assert sorted(statuses.values()) == ["accepted", "overdue"]
+    assert (await admin.post(API + f"/{everyone['id']}/remind")).json() == {"count": 1}
+    inbox = (await member.get("/api/v1/notifications")).json()["items"]
+    assert any(
+        n["kind"] == "policy.overdue" and n["link"] == f"/my-documents?policy={named['id']}"
+        for n in inbox
+    )
+    assert any(
+        n["kind"] == "policy.reminder" and n["link"] == f"/my-documents?policy={everyone['id']}"
+        for n in inbox
+    )
+    async with rig["owner"].connect() as db:
+        overdue = (
+            await db.execute(
+                text(
+                    "select count(*) from policy_acceptances where company_id=:c "
+                    "and status='overdue'"
+                ),
+                {"c": rig["a"]},
+            )
+        ).scalar_one()
+    assert overdue == 2
+
+
+async def test_new_starters_join_marked_policies_on_hire_and_daily_catch_up(
+    rig: dict[str, Any],
+) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    existing = await _employee(rig, rig["a"], "JOIN0")
+    marked = await document(admin, title="Joiners pack", auto_send_new_starters=True)
+    assert (await send(admin, marked)).status_code == 200
+    plain = await document(admin, title="Optional reading")
+    assert (await send(admin, plain)).status_code == 200
+    hired = await admin.post(
+        "/api/v1/employees",
+        json={
+            "first_name": "New",
+            "last_name": "Starter",
+            "email": "new.starter@example.com",
+            "employee_number": "JOIN1",
+            "hire_date": "2026-11-09",
+        },
+    )
+    assert hired.status_code == 201, hired.text
+    hired_id = hired.json()["id"]
+    marked_people = {
+        row["employee_id"] for row in (await admin.get(API + f"/{marked['id']}/acceptances")).json()
+    }
+    assert marked_people == {str(existing), hired_id}
+    plain_people = {
+        row["employee_id"] for row in (await admin.get(API + f"/{plain['id']}/acceptances")).json()
+    }
+    assert plain_people == {str(existing)}
+    late = await _employee(rig, rig["a"], "JOIN2")
+    assert await reconcile_policies(rig["owner"], "https://app.example.test") >= 1
+    assert await reconcile_policies(rig["owner"], "https://app.example.test") == 0
+    marked_after = {
+        row["employee_id"]: row["status"]
+        for row in (await admin.get(API + f"/{marked['id']}/acceptances")).json()
+    }
+    assert marked_after[str(late)] == "pending"
+    assert len(marked_after) == 3
+    plain_after = (await admin.get(API + f"/{plain['id']}/acceptances")).json()
+    assert {row["employee_id"] for row in plain_after} == {str(existing)}
+    async with rig["owner"].connect() as db:
+        actions = set(
+            (
+                await db.execute(
+                    text("select action from audit_events where company_id=:c"), {"c": rig["a"]}
+                )
+            ).scalars()
+        )
+    assert "policy.assigned_new_starters" in actions

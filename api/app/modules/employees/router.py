@@ -35,6 +35,7 @@ from app.modules.employees.schemas import (
     Status,
     StatusChange,
 )
+from app.modules.policies import service as policy_service
 from app.modules.policies.models import PolicyAcceptance
 from app.modules.rbac.deps import Access, require
 from app.modules.rtw.models import RTWCheck
@@ -209,7 +210,7 @@ def _number_key(number: str) -> str:
 
 
 @router.post("/employees", status_code=201, response_model=EmployeeRow)
-async def create_employee(body: EmployeeIn, access: Writes) -> EmployeeRow:
+async def create_employee(body: EmployeeIn, request: Request, access: Writes) -> EmployeeRow:
     """A new record with the essentials. The number must be unique in the company, ignoring case
     and spaces ("E 001" and "e001" are the same)."""
     _require_full_write(access)
@@ -249,6 +250,14 @@ async def create_employee(body: EmployeeIn, access: Writes) -> EmployeeRow:
             "hire_date": employee.hire_date.isoformat(),
             "status": employee.status,
         },
+    )
+    # New starters join sent policies marked "send to new starters", in this same transaction.
+    await policy_service.assign_new_starters(
+        access.db,
+        access.audit_context,
+        await policy_service.company_day(access.db),
+        request.app.state.settings.web_origin,
+        only=[employee.id],
     )
     await access.db.commit()
     return _row(employee)
