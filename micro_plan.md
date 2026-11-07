@@ -207,7 +207,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 12 — Org chart
 
-### [ ] T12.1 · S · Tree API and hierarchy levels
+### [x] T12.1 · S · Tree API and hierarchy levels
 - **Spec:** plan L1001–1011, L1425; API item 16 (L1628).
 - **Steps:**
   1. `GET /organogram`: tree from Reporting Authority on **current** assignments; people without a manager under `unassigned`; cycle-safe (test a cycle doesn't hang). Visa/RTW chips only if the user has `employee.rtw.read`.

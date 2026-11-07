@@ -263,3 +263,4 @@
 2026-11-07 10:02 | Claude (Haiku) | T12.1 | step 1+2 written: organogram models/schemas/service/router, migration 0034 (levels + FK + Director seed), signup seed, change_role validates level; ruff/mypy clean | next tests/db/test_organogram.py, run migrations+organogram+employment
 2026-11-07 10:04 | Claude (Haiku) | T12.1 | step 1+2 tests: tests/db/test_organogram.py 6 pass (tree, loop, RTW chips, level CRUD+perms, cross-company level, cross-tenant) | next migrations/rbac/openapi/employment/signup suites
 2026-11-07 10:11 | Claude (Haiku) | T12.1 | migration test table list updated (organogram_levels); targeted suites pass; odd 3-file subset errors in auth tests (order-dependent) | next full API suite in default order
+2026-11-07 10:17 | Claude (Haiku) | T12.1 | DONE: full API suite 802 pass, 0 fail; ticked in micro_plan and PROGRESS | next bash .agent/next.sh
