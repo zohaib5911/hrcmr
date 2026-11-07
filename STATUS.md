@@ -1,53 +1,39 @@
 # STATUS
-Updated: 2026-11-07 21:45 Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: see git log
+Updated: 2026-11-07 17:07 Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: 7fd75f4
 
-State: HANDED OVER — small model next
+State: IN PROGRESS
 
 ## Last completed
-- T14.4 — AI server layer: app/integrations/anthropic.py (key-gated, wire guard), app/ai/redaction.py (scrub, Pseudonymiser, assert_clean), app/ai/service.py (ai_ready, generate: platform+company toggle, 30/h/user, metadata log), ai_interactions (0039); Phase 14 fuzz test tests/test_ai_redaction.py 202 pass.
-- T14.3 — live search in the command palette: GET /search (two characters or more, at most eight people and eight candidates, company-wide access only, tenant-scoped); People and Actions groups (736ab45).
-- T14.2 — notifications: personal kinds reach every role; e-mail preferences immediate/daily/off; daily digest once per notice; policy e-mail only to immediate-mode people (3b72126).
-- T14.1 — dashboard cards (company-wide only, so the employee role gets none), set-up checklist with per-person dismiss, /dashboard page (710c2f8).
-- P13 — Phase 13 learning gate. PR #21 merged (all checks green); browser 429 pass; screenshots docs/screenshots/phase-13 (2b81ea7 is the last fix before the merge).
-- T13.1–T13.4 — courses (eight launch courses in api/seed/courses, unpublished for owner review), player, assign wizard, report, overdue job, certificates and public /verify.
-- P12 — Phase 12 org chart gate, PR #20 merged.
+- T14.4 — AI server layer (app/integrations/anthropic.py, app/ai/redaction.py, app/ai/service.py, ai_interactions 0039); fuzz test 202 pass (cd2ff53).
+- T14.3, T14.2, T14.1 — search, notifications, dashboard (see PROGRESS.md).
 
 ## Current task
-- none. T14.5 (S) is next.
+- T14.5 — Wire AI into letter drafting and reminder wording (S)
+  - [ ] step 1: /ai/letters/draft uses Claude when available (source "ai"), else template; only type, tone, key points sent
+  - [ ] step 2: reminder review drawer gets AI-worded message when available, else template
+  - [ ] tests: no-key path works; outgoing payload has no names/identifiers (assert_clean / find_restricted)
+  - [ ] tick T14.5 in micro_plan and PROGRESS
+- Resume note: start at api/app/ai/letters.py (create_draft) and api/app/modules/compliance/reminder_router.py. Verify with: cd api && uv run pytest -q tests/db/test_letters.py tests/db/test_reminders.py tests/test_ai_redaction.py
 
 ## Next tasks
-- T14.5 (S): wire AI into letter drafting and reminder wording — call app.ai.service.ai_ready/generate (never the client directly); reuse build_prompt + assert_clean in the payload test; P14 gate (S); AUDIT-2 stop (big model): covers T12.1 → P14.
+- P14 (S): phase gate (R7 + T14.4 fuzz test), then AUDIT-2 (big model stop).
 
 ## Health
-- CI on dev: green (PR #21 checks all passed before merge). CI on main: green after PR #21. Latest dev commit 736ab45 has not gone through a PR yet (T14.x work is not gated yet).
-- Local checks (T14.x): API DB groups pass (dashboard 4, notifications 4, search 4, RBAC 22+, learning 10, migrations 7, data-model doc); root-level tests 32 pass; web typecheck and lint pass; web unit 786 pass at Phase 13; browser specs dashboard 1 pass, shell 72 pass, shortcuts 7 pass.
+- CI on dev: not run for T14.x yet (dev has commits after PR #21)    CI on main: green
+- Local checks run: T14.4 — fuzz 202 pass (21:35). T14.5 — not run yet.
 
 ## Issues / suggestions
-- Eight launch courses (api/seed/courses) are unpublished; owner must review. Nothing loads seed courses into production yet (owner decision: owner-role load or import through the editor).
-- EHRC sources could not be verified (site returned 403 to the fetch); the courses cite GOV.UK and Acas only.
-- Dashboard: the "upload sponsor licence" checklist item from plan 8.2 is left out — there is no company-level sponsor-licence record in the codebase to check. Owner decision needed (add a record, or drop the item).
-- Dashboard: the employee role's own cards are limited to "My learning"; "My leave balance" is not built (no leave-balance card in T14.1 steps). Error and empty states on /dashboard are code-level only, not browser-tested.
-- Notifications: email digest is at 07:00 UTC for every company (plan gives no time). Only policy notices respect the "immediate" choice; other kinds have no immediate e-mail today.
-- Learning report: people managers (read_reports) do not see their team's report yet.
-- Hierarchy levels: no UI to create or edit them yet (plan 8.13 wants an editable list); Change role sheet has no level picker.
-- Shell spec at 768 px had one intermittent axe finding (scrollable region on the employees page) that did not reproduce on rerun.
-- Test-order issue: root-level test files mixed with tests/db/* give "fixture 'database' not found". Run them in separate pytest invocations; the default full run passes.
-- Turnstile: production must set the site key (web) and secret (API) together.
-- PR #16 (dependabot, python deps) is still open; not ours, left alone.
+- Eight launch courses (api/seed/courses) are unpublished; owner must review. See PROGRESS.md.
+- Dashboard "sponsor licence" checklist item (plan 8.2) left out; owner decision.
+- Notifications digest sent 07:00 UTC for every company.
+- Learning report: people managers do not see their team's report yet.
 
 ## Strategy / decisions taken
-- T14.4: Ask Mady chat (assistant panel, read-only tools, streaming endpoint) not built: owner deferred it (AGENTS.md §3, memory). Built only the shared server layer T14.5/T15 need. Raw httpx client, no SDK dependency. Fuzz test runs on the redaction + wire body (no tools exist yet).
-- T14.4: redaction over-redacts on purpose (any £ amount, 6/8/9-digit numbers, uppercase 9–12 char codes become [redacted]).
-- Learning: courses are global with RLS (published only for learners); assignments are tenant-scoped; the table is course_assignments (plan 6.9), not micro_plan's learning_assignments.
-- Certificates: the public check uses a row policy keyed by a transaction setting (app.certificate_ref) so no other certificate is opened.
-- The learning report requires company-wide scope (require() also admits own-scope holders, so the handler checks scope).
-- RBAC guard: reviewed public prefix /api/v1/public/certificates/ added in tests/db/test_rbac_enforcement.py.
-- Dashboard: the page needs company.overview.read (every role holds it); the checklist needs company.profile.write (admin only). A dashboard card is included only when scope_for(role, permission) is company-wide.
-- Notification kinds: PERSONAL_KINDS are always visible to the person; permission-gated kinds keep their gates.
-- Search: people need company-wide employee.profile.read; candidates need company-wide recruitment.candidate.read; two characters minimum; eight per group.
+- T14.5: AI output is restricted-checked with find_restricted; a hit or any AI error falls back to the template (the draft still works).
+- T14.5: AI reminder wording is requested by a button in the drawer (not on open), so viewing a reminder does not use the 30/hour AI limit.
+- T14.5: reminder AI prompt gets only the document label and the threshold days; no name, no date.
 
 ## Owner actions needed
 - Review the eight launch courses before publishing them (api/seed/courses). See PROGRESS.md.
 - Decide how seed courses reach production.
 - Decide on the sponsor-licence checklist item (plan 8.2).
-- Phase 23: add a Cloudflare rate-limit rule for /careers/* (the API cannot tell visitors apart on server-rendered pages).

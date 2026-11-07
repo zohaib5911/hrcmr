@@ -297,3 +297,4 @@
 2026-11-07 21:20 | Claude (Opus) | T14.4 | step 2+3 done: anthropic client, ai service (gate, 30/h limit, scrub, log), ai_interactions migration 0039, data-model doc; mypy pass | next fuzz test + DB tests
 2026-11-07 21:35 | Claude (Opus) | T14.4 | step 4 done: payload fuzz test 202 pass (mutation with redaction off fails) | next migrations/data-model/architecture/openapi tests, tick
 2026-11-07 21:45 | Claude (Opus) | T14.4 | DONE: ticked; arch/openapi/config 41, migrations 7, data-model, fuzz 202 pass | next T14.5 (S): small model
+2026-11-07 17:07 | Claude (Haiku) | T14.5 | started; STATUS updated | next api/app/ai/letters.py AI path
