@@ -290,3 +290,4 @@
 2026-11-07 20:05 | Claude (Haiku) | P13 | Semgrep on PR 21: len(all()) on the assignment insert; now counted with rowcount; learning tests 10 pass; local Semgrep clean on the learning paths | next re-run PR 21 checks, merge when green
 2026-11-07 20:31 | Claude (Haiku) | T14.1 | written: dashboard API (permission-aware cards), checklist + dismiss (migration 0037), /dashboard UI, specs; db dashboard 4 pass, migrations 7, rbac, openapi, architecture pass | next run dashboard e2e, then tick
 2026-11-07 20:36 | Claude (Haiku) | T14.1 | DONE: dashboard + checklist; tests pass; ticked | next bash .agent/next.sh (T14.2)
+2026-11-07 20:42 | Claude (Haiku) | T14.2 | DONE: prefs, digest, kinds, tests; ticked | next bash .agent/next.sh (T14.3)

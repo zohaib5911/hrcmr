@@ -273,7 +273,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. Cards UI per 8.2 on `/dashboard`.
 - **Done when:** Employee role response has no company-wide cards (test); page renders all states.
 
-### [ ] T14.2 · S · Notifications
+### [x] T14.2 · S · Notifications
 - **Spec:** plan L1193–1196, L1436.
 - **Steps:**
   1. Ensure `notifications/router.py` lists every kind now produced (policy, rota.published, course, recruitment); `PATCH /notifications/{id}`, `POST /notifications/read-all`, `GET/PUT /me/notification-preferences` (immediate / daily / off).

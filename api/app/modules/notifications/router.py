@@ -4,16 +4,20 @@ from __future__ import annotations
 
 import uuid  # noqa: TC003
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Literal
 
 from fastapi import APIRouter, Depends, Query
+from pydantic import BaseModel
 from sqlalchemy import func, select, tuple_, update
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.core.errors import NotFoundError
 from app.core.rbac_matrix import scope_for
+from app.core.schemas import RequestModel
+from app.db.ids import uuid7
 from app.modules.audit.router import _decode, _encode
 from app.modules.compliance.hub_router import overview
-from app.modules.notifications.models import Notification
+from app.modules.notifications.models import Notification, NotificationPreference
 from app.modules.notifications.schemas import (
     NotificationOut,
     NotificationPage,
@@ -33,10 +37,20 @@ def _may_read_compliance(access: Access) -> bool:
     return scope_for(access.role, "compliance.overview.read") is not None
 
 
+# Notices about the person themselves: everyone sees these, whatever their role.
+PERSONAL_KINDS = (
+    "compliance.reminder_received",
+    "leave.decision",
+    "learning.overdue",
+    "policy.assigned",
+    "policy.reminder",
+    "policy.overdue",
+    "rota.published",
+)
+
+
 def _kinds(access: Access) -> tuple[str, ...]:
-    kinds: tuple[str, ...] = ("compliance.reminder_received", "leave.decision", "learning.overdue")
-    if scope_for(access.role, "policy.acceptance.read") is not None:
-        kinds += ("policy.assigned", "policy.reminder", "policy.overdue")
+    kinds: tuple[str, ...] = PERSONAL_KINDS
     if scope_for(access.role, "recruitment.application.read") is not None:
         kinds += ("recruitment.application_received",)
     if _may_read_compliance(access):
@@ -139,3 +153,47 @@ async def read_notification(
         await access.audit("notification.read", entity_type="notification", entity_id=row.id)
         await access.db.commit()
     return _out(row)
+
+
+class PreferenceIn(RequestModel):
+    mode: Literal["immediate", "daily", "off"]
+
+
+class PreferenceOut(BaseModel):
+    mode: str  # one of the three EMAIL_MODES; the database check enforces it
+
+
+@router.get("/me/notification-preferences", response_model=PreferenceOut)
+async def get_preferences(access: Own) -> PreferenceOut:
+    mode = (
+        await access.db.execute(
+            select(NotificationPreference.mode).where(
+                NotificationPreference.company_id == access.company_id,
+                NotificationPreference.user_id == access.caller.user_id,
+            )
+        )
+    ).scalar_one_or_none()
+    return PreferenceOut(mode=mode or "immediate")
+
+
+@router.put("/me/notification-preferences", response_model=PreferenceOut)
+async def set_preferences(body: PreferenceIn, access: Own) -> PreferenceOut:
+    statement = (
+        pg_insert(NotificationPreference)
+        .values(
+            id=uuid7(),
+            company_id=access.company_id,
+            user_id=access.caller.user_id,
+            mode=body.mode,
+        )
+        .on_conflict_do_update(
+            constraint="uq_notification_preferences_company_user",
+            set_={"mode": body.mode, "updated_by": access.caller.user_id},
+        )
+    )
+    await access.db.execute(statement)
+    await access.audit(
+        "notification.preferences_changed", entity_type="notification", after={"mode": body.mode}
+    )
+    await access.db.commit()
+    return PreferenceOut(mode=body.mode)

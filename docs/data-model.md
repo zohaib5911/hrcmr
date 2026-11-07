@@ -1067,6 +1067,23 @@ Checks:
 - `role in ('company_admin', 'hr_admin', 'people_manager', 'recruiter', 'employee', 'read_only_auditor')`
 - `status in ('active', 'suspended')`
 
+## `notification_preferences`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `user_id` | UUID | no |  | references `users` |
+| `mode` | VARCHAR(10) | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `mode in ('immediate', 'daily', 'off')`
+
 ## `notifications`
 
 | Column | Type | Null | Default | Notes |
@@ -1078,6 +1095,7 @@ Checks:
 | `body` | TEXT | yes |  |  |
 | `link` | VARCHAR(300) | yes |  |  |
 | `read_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `digested_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 | `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |

@@ -59,6 +59,7 @@ IDENTITY_TABLES = [
     "leave_year_end_runs",
     "locations",
     "memberships",
+    "notification_preferences",
     "notifications",
     "offers",
     "onboarding_dismissals",

@@ -24,6 +24,7 @@ from app.modules.employees.models import Employee, EmployeeAssignment
 from app.modules.files.models import File
 from app.modules.identity.models import Membership, User
 from app.modules.notifications.models import Notification
+from app.modules.notifications.preferences import email_modes
 from app.modules.policies.models import PolicyAcceptance, PolicyDocument
 from app.modules.policies.schemas import PolicyDraft, PolicyOut, PolicyRecipient
 from app.modules.sponsor_documents.models import SponsorDocument
@@ -329,6 +330,8 @@ async def notify(
         )
     ).all()
     count = 0
+    # Only people on immediate e-mail get this message now; daily digest and off people do not.
+    modes = await email_modes(db, [target[0] for target in targets])
     for user_id, email, first, employee_id, role in targets:
         if employee_id is None or scope_for(role, "policy.acceptance.read") is None:
             continue
@@ -349,13 +352,14 @@ async def notify(
                 link=link,
             )
         )
-        db.add(
-            EmailOutbox(
-                to_address=email,
-                template="policy_request",
-                payload=encrypt(json.dumps(data), context=PAYLOAD_CONTEXT),
+        if modes.get(user_id, "immediate") == "immediate":
+            db.add(
+                EmailOutbox(
+                    to_address=email,
+                    template="policy_request",
+                    payload=encrypt(json.dumps(data), context=PAYLOAD_CONTEXT),
+                )
             )
-        )
         count += 1
     return count
 
