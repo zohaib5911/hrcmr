@@ -30,6 +30,7 @@ from app.core.logging import configure_logging, get_logger
 from app.core.middleware import RequestContextMiddleware
 from app.core.redis import create_redis, ping_redis
 from app.db.engine import create_engine, ping_database
+from app.integrations.anthropic import Anthropic
 from app.integrations.clamav import ClamAV
 from app.integrations.cloudflare_ips import keep_cloudflare_ranges_current
 from app.integrations.companies_house import CompaniesHouse
@@ -164,6 +165,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
             settings, redis, sender or LoggingMailer(), Turnstile(settings.turnstile_secret_key)
         )
         app.state.companies_house = CompaniesHouse.from_settings(settings)
+        app.state.anthropic = Anthropic.from_settings(settings)
         app.state.postcodes = Postcodes()
         app.state.files = FileService(
             Storage.from_settings(settings), ClamAV.from_settings(settings)

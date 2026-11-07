@@ -3,6 +3,28 @@
 Generated from the SQLAlchemy models by `python -m app.cli export-data-model`.
 Do not edit by hand: a test fails when this file is out of date.
 
+## `ai_interactions`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `user_id` | UUID | yes |  | references `users` |
+| `feature` | VARCHAR(40) | no |  |  |
+| `model` | VARCHAR(80) | no |  |  |
+| `status` | VARCHAR(10) | no |  |  |
+| `input_tokens` | INTEGER | no |  |  |
+| `output_tokens` | INTEGER | no |  |  |
+| `duration_ms` | INTEGER | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `status in ('ok', 'error', 'refused')`
+
 ## `applications`
 
 | Column | Type | Null | Default | Notes |

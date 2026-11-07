@@ -6,6 +6,7 @@ Add one import line here when a module gets its first model.
 from __future__ import annotations
 
 # ruff: noqa: F401 -- These imports register models for Alembic and are intentionally unused.
+import app.ai.models
 import app.modules.attendance.models
 import app.modules.audit.models
 import app.modules.companies.models
