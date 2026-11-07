@@ -17,6 +17,10 @@ def expected(current: str, target: str) -> str | None:
     """The rule written out separately from the implementation, for every pair."""
     if current in ENDING:
         return f"This application is {LABELS[current].lower()}. It cannot change."
+    if current == "hired":
+        return "This candidate is already an employee. The application cannot change."
+    if target == "hired":
+        return "Use Convert to employee to hire this candidate."
     if target == current or target in ENDING:
         return None
     if ORDER.index(target) <= ORDER.index(current):

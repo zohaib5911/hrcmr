@@ -187,3 +187,54 @@ async def test_recruiters_without_employee_rights_cannot_convert(rig: dict[str, 
         json={"employee_number": "CONV-3", "hire_date": "2026-12-01"},
     )
     assert refused.status_code == 403
+
+
+async def employee_count(rig: dict[str, Any]) -> int:
+    async with rig["owner"].connect() as db:
+        return int(
+            (
+                await db.execute(
+                    text("select count(*) from employees where company_id=:c"), {"c": rig["a"]}
+                )
+            ).scalar_one()
+        )
+
+
+async def test_only_convert_sets_hired_and_hired_is_final(rig: dict[str, Any]) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    who, app = await application(admin, "Line cook")
+    stage = f"{API}/applications/{app}/stage"
+    direct = await admin.post(stage, json={"stage": "hired"})
+    assert direct.status_code == 422
+    assert direct.json()["error"]["message"] == "Use Convert to employee to hire this candidate."
+    assert await employee_count(rig) == 0
+    await accepted_offer(admin, app)
+    await verified_check(rig, admin, who)
+    body = {"employee_number": "CONV-4", "hire_date": "2026-12-01"}
+    assert (await admin.post(f"{API}/applications/{app}/convert", json=body)).status_code == 200
+    for target in ("offer_accepted", "applied", "rejected"):
+        back = await admin.post(stage, json={"stage": target})
+        assert back.status_code == 422, target
+        assert back.json()["error"]["message"] == (
+            "This candidate is already an employee. The application cannot change."
+        )
+    again = await admin.post(
+        f"{API}/applications/{app}/convert", json={**body, "employee_number": "CONV-5"}
+    )
+    assert again.status_code == 409
+    assert await employee_count(rig) == 1
+
+
+async def test_other_companies_cannot_convert(rig: dict[str, Any]) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    foreign = await rig["person"]("company_admin", rig["b"])
+    who, app = await application(admin, "Kitchen porter")
+    await accepted_offer(admin, app)
+    await verified_check(rig, admin, who)
+    refused = await foreign.post(
+        f"{API}/applications/{app}/convert",
+        json={"employee_number": "CONV-6", "hire_date": "2026-12-01"},
+    )
+    assert refused.status_code == 404
+    assert (await admin.get(f"{API}/applications/{app}")).json()["stage"] == "applied"
+    assert await employee_count(rig) == 0
