@@ -46,6 +46,10 @@ RUN pnpm build && mkdir -p public
 
 # --- runtime: only the traced server files; no pnpm, no source, no dev dependencies -----------------
 FROM ${NODE_IMAGE} AS runtime
+# Security fixes for the base image's own packages (a fixed apt CVE is not in the base tag yet).
+RUN apt-get update \
+ && apt-get upgrade -y \
+ && rm -rf /var/lib/apt/lists/*
 RUN groupadd --system --gid 10001 app \
  && useradd --system --uid 10001 --gid 10001 --no-create-home --home-dir /nonexistent \
         --shell /usr/sbin/nologin app

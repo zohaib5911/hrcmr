@@ -98,7 +98,8 @@ async def validate_audience(db: TenantSession, body: PolicyDraft) -> None:
         )
     else:
         query = select(Location.id).where(Location.id.in_(ids), Location.archived_at.is_(None))
-    if len((await db.execute(query)).all()) != len(ids):
+    found = (await db.execute(select(func.count()).select_from(query.subquery()))).scalar_one()
+    if found != len(ids):
         raise AppError(
             "POLICY_AUDIENCE_CHANGED",
             "Choose current employees, departments or locations from this company.",

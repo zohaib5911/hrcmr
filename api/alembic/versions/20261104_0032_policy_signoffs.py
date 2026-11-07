@@ -114,7 +114,7 @@ def upgrade() -> None:
             "policy_documents",
             ["company_id", "group_id"],
             unique=True,
-            postgresql_where=sa.text(f"status = '{state}'"),
+            postgresql_where=sa.column("status") == state,
         )
     enable_tenant_rls("policy_documents")
     add_updated_at_trigger("policy_documents")

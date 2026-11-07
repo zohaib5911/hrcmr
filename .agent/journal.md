@@ -241,3 +241,4 @@
 2026-11-07 05:42 | Claude | T10.4 | DONE: template letter drafts (7 types, 3 tones, key points validated), .docx endpoint, /documents sheet, ai_available on /auth/me; letters+auth 47 pass, ruff/mypy clean, web typecheck/lint/unit777, gen:api clean | next P10 gate via next.sh
 2026-11-07 05:51 | Claude | P10 | gate: full API suite 687 pass, 3 fail: data-model doc stale (regenerated), encrypted-column inventory missing policy_acceptances.typed_signature (added), cleanup test assumed clean shared bucket (now sweeps leftovers first) | next re-run full API suite
 2026-11-07 06:13 | Claude | P10 | gate checks green: API 690, web e2e 423 (160 screenshot/design skipped), unit 777, 24 screenshots | next open PR dev->main, wait for CI, merge
+2026-11-07 06:23 | Claude | P10 | PR17 CI red: Semgrep 2 (migration f-string text(), validate_audience len(all)), Trivy HIGH apt CVE in both images; fixed + policy/migration tests 18 pass | next re-check PR17 checks then merge
