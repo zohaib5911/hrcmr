@@ -11,6 +11,7 @@ that is Resend; on a developer's machine it is Mailpit (SMTP), which catches eve
 
 from __future__ import annotations
 
+import base64
 from dataclasses import dataclass
 from email.message import EmailMessage
 from typing import TYPE_CHECKING, Protocol
@@ -42,6 +43,13 @@ class LoggingMailer:
 
 
 @dataclass(frozen=True)
+class Attachment:
+    filename: str
+    content_type: str  # e.g. "text/calendar; method=REQUEST"
+    content: bytes
+
+
+@dataclass(frozen=True)
 class Message:
     to: str
     subject: str
@@ -51,6 +59,7 @@ class Message:
     reply_to: str | None = None
     # Sending the same key twice must not send two e-mails (Resend honours it for 24 hours).
     idempotency_key: str | None = None
+    attachments: tuple[Attachment, ...] = ()
 
 
 class TransportError(Exception):
@@ -92,6 +101,15 @@ class ResendTransport:
         }
         if message.reply_to:
             body["reply_to"] = message.reply_to
+        if message.attachments:
+            body["attachments"] = [
+                {
+                    "filename": item.filename,
+                    "content": base64.b64encode(item.content).decode("ascii"),
+                    "content_type": item.content_type,
+                }
+                for item in message.attachments
+            ]
         headers = dict(self._headers)
         if message.idempotency_key:
             headers["Idempotency-Key"] = message.idempotency_key
@@ -127,6 +145,17 @@ class SmtpTransport:
             mail["Reply-To"] = message.reply_to
         mail.set_content(message.plain)
         mail.add_alternative(message.html, subtype="html")
+        for item in message.attachments:
+            kind, _, params = item.content_type.partition(";")
+            maintype, _, subtype = kind.strip().partition("/")
+            extra = dict(part.strip().split("=", 1) for part in params.split(";") if "=" in part)
+            mail.add_attachment(
+                item.content,
+                maintype=maintype,
+                subtype=subtype,
+                filename=item.filename,
+                params=extra,
+            )
         try:
             await aiosmtplib.send(
                 mail, hostname=self._host, port=self._port, timeout=TIMEOUT_SECONDS

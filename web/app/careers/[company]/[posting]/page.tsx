@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { ApplyForm } from "@/components/careers/apply-form";
+import { CareersLogo } from "@/components/careers/careers-logo";
 import { publicCareersClient } from "@/components/careers/public-client";
 import { formatUk } from "@/lib/ui/dates";
 
@@ -34,6 +35,7 @@ export default async function Page({
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-10">
       <header className="flex flex-col gap-2">
+        <CareersLogo company={company} name={data.company} hasLogo={data.has_logo} />
         <p className="text-callout text-label-secondary">{data.company}</p>
         <h1 className="text-large-title text-label break-words">{data.title}</h1>
         <p className="text-callout text-label-secondary">

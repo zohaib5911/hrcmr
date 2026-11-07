@@ -91,7 +91,7 @@ test("a save shows on the page, a wrong value is explained, and Cancel changes n
   await sheet.getByLabel("Previous company name", { exact: true }).fill("Harbour Care");
   await sheet.getByRole("button", { name: "Save" }).click();
   await expect(sheet).toBeHidden();
-  await expect(page.getByText("Company details saved")).toBeVisible();
+  await expect(page.getByText("Company details saved", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: /^Details/ })).toContainText("Harbourside");
 
   await page.reload();

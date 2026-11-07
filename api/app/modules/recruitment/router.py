@@ -20,7 +20,7 @@ from app.db.ids import uuid7
 from app.modules.companies.compliance_documents import _today as company_today
 from app.modules.companies.models import Company
 from app.modules.email.models import EmailOutbox
-from app.modules.email.outbox import PAYLOAD_CONTEXT
+from app.modules.email.outbox import ICS_KEY, PAYLOAD_CONTEXT
 from app.modules.email.templates import check
 from app.modules.employees.models import Employee
 from app.modules.employees.schemas import EmployeeIn
@@ -789,6 +789,27 @@ async def list_interviews(application_id: uuid.UUID, access: InterviewReads) -> 
     return [await service.interview_out(access.db, row) for row in rows]
 
 
+def _invite_text(
+    request: Request,
+    row: Interview,
+    candidate_name: str,
+    title: str,
+    attendees: list[tuple[str, str]],
+) -> str:
+    """The RFC 5545 invite for one interview: the download and the invite e-mails share it."""
+    host = urlparse(request.app.state.settings.web_origin).hostname or "invite.local"
+    return interview_ics(
+        uid=f"interview-{row.id}@{host}",
+        starts=row.scheduled_at,
+        duration_minutes=row.duration_minutes,
+        summary=f"Interview: {candidate_name} for {title}",
+        location=row.location_or_link or MODE_LABELS[row.mode],
+        description=f"Interview ({MODE_LABELS[row.mode]}) for {title}.",
+        attendees=attendees,
+        stamp=service.now(),
+    )
+
+
 @router.post(
     "/applications/{application_id}/interviews", status_code=201, response_model=InterviewOut
 )
@@ -840,6 +861,26 @@ async def create_interview(
     settings = request.app.state.settings
     link = f"{settings.web_origin}/recruitment/applications/{application_id}"
     when = _when(body.scheduled_at, zone)
+    candidate_email = (
+        await access.db.execute(
+            select(Candidate.email).where(Candidate.id == application.candidate_id)
+        )
+    ).scalar_one()
+    attendees = [
+        (f"{person.first_name} {person.last_name}".strip(), person.email)
+        for person in sorted(interviewers, key=lambda p: (p.last_name, p.first_name))
+        if person.email
+    ]
+    if candidate_email:
+        attendees.append((candidate_name, candidate_email))
+    invite = _invite_text(request, row, candidate_name, title, attendees)
+    # The candidate's copy is the same event (same UID) but names only them: staff addresses
+    # (often personal, the only e-mail on file) are not shared with someone outside the company.
+    candidate_invite = (
+        _invite_text(request, row, candidate_name, title, [(candidate_name, candidate_email)])
+        if candidate_email
+        else None
+    )
     for person in interviewers:
         if person.email:
             data = {
@@ -853,14 +894,9 @@ async def create_interview(
             db_row = EmailOutbox(
                 to_address=person.email,
                 template="interview_invite",
-                payload=encrypt(json.dumps(data), context=PAYLOAD_CONTEXT),
+                payload=encrypt(json.dumps({**data, ICS_KEY: invite}), context=PAYLOAD_CONTEXT),
             )
             access.db.add(db_row)
-    candidate_email = (
-        await access.db.execute(
-            select(Candidate.email).where(Candidate.id == application.candidate_id)
-        )
-    ).scalar_one()
     if candidate_email:
         first = candidate_name.split(" ")[0]
         data = {"first_name": first, "job_title": title, "when": when, "where": where}
@@ -869,7 +905,9 @@ async def create_interview(
             EmailOutbox(
                 to_address=candidate_email,
                 template="interview_invite_candidate",
-                payload=encrypt(json.dumps(data), context=PAYLOAD_CONTEXT),
+                payload=encrypt(
+                    json.dumps({**data, ICS_KEY: candidate_invite}), context=PAYLOAD_CONTEXT
+                ),
             )
         )
     await access.audit(
@@ -939,17 +977,7 @@ async def interview_invite(
     attendees = [(f"{first} {last}".strip(), email) for first, last, email in people if email]
     if candidate:
         attendees.append((candidate_name, candidate))
-    host = urlparse(request.app.state.settings.web_origin).hostname or "invite.local"
-    text = interview_ics(
-        uid=f"interview-{row.id}@{host}",
-        starts=row.scheduled_at,
-        duration_minutes=row.duration_minutes,
-        summary=f"Interview: {candidate_name} for {title}",
-        location=row.location_or_link or MODE_LABELS[row.mode],
-        description=f"Interview ({MODE_LABELS[row.mode]}) for {title}.",
-        attendees=attendees,
-        stamp=service.now(),
-    )
+    text = _invite_text(request, row, candidate_name, title, attendees)
     return Response(
         content=text,
         media_type="text/calendar",

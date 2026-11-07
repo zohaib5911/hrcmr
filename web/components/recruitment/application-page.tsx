@@ -117,7 +117,9 @@ export function ApplicationPage({ applicationId }: { applicationId: string }) {
   if (problem && !app) return <Alert tone="danger" title={problem.message} />;
   if (!app) return <p className="text-callout text-label-secondary">Loading application…</p>;
 
-  const next = nextStage(app.stage);
+  // Hired is set only by Convert to employee, so it is never offered as a move.
+  const following = nextStage(app.stage);
+  const next = following === "hired" ? null : following;
   const ended = app.stage === "rejected" || app.stage === "withdrawn";
   const reached = Math.max(
     0,
@@ -165,7 +167,7 @@ export function ApplicationPage({ applicationId }: { applicationId: string }) {
                 Move to {STAGE_LABEL[next]}
               </Button>
             )}
-            {!ended && (
+            {!ended && app.stage !== "hired" && (
               <div className="w-64">
                 <Select
                   label="Move to stage"
@@ -176,7 +178,7 @@ export function ApplicationPage({ applicationId }: { applicationId: string }) {
                     if (stage !== app.stage) void move(stage);
                   }}
                 >
-                  {ALL_STAGES.map((stage) => (
+                  {ALL_STAGES.filter((stage) => stage !== "hired").map((stage) => (
                     <option key={stage} value={stage}>
                       {STAGE_LABEL[stage]}
                     </option>

@@ -3374,6 +3374,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/careers/{company_slug}/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Careers Logo
+         * @description The company logo for its public careers pages (it is shown to anyone who visits them).
+         */
+        get: operations["careers_careers_logo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/postings/{company_slug}/{posting_slug}": {
         parameters: {
             query?: never;
@@ -3400,7 +3420,12 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Apply */
+        /**
+         * Apply
+         * @description The apply form, sent as multipart form data so a CV (optional) can come with it.
+         *
+         *     The fields are checked by ``ApplyIn``, the same rules as before the CV was added.
+         */
         post: operations["careers_apply"];
         delete?: never;
         options?: never;
@@ -4589,26 +4614,6 @@ export interface components {
              */
             stage: "applied" | "shortlisted" | "interview" | "offer_letter" | "offer_accepted" | "hired" | "rejected" | "withdrawn";
         };
-        /** ApplyIn */
-        ApplyIn: {
-            /** Consent */
-            consent: boolean;
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            /** First Name */
-            first_name: string;
-            /** Last Name */
-            last_name: string;
-            /** Phone */
-            phone?: string | null;
-            /** Turnstile Token */
-            turnstile_token: string;
-            /** What You Bring */
-            what_you_bring?: string | null;
-        };
         /** ApplyOut */
         ApplyOut: {
             /**
@@ -5080,6 +5085,25 @@ export interface components {
             /** File */
             file: string;
         };
+        /** Body_careers_apply */
+        Body_careers_apply: {
+            /** Consent */
+            consent: boolean;
+            /** Cv */
+            cv?: string | null;
+            /** Email */
+            email: string;
+            /** First Name */
+            first_name: string;
+            /** Last Name */
+            last_name: string;
+            /** Phone */
+            phone?: string | null;
+            /** Turnstile Token */
+            turnstile_token: string;
+            /** What You Bring */
+            what_you_bring?: string | null;
+        };
         /** Body_company_add_document */
         Body_company_add_document: {
             /** Doc Type */
@@ -5263,6 +5287,8 @@ export interface components {
         CareersPage: {
             /** Company */
             company: string;
+            /** Has Logo */
+            has_logo: boolean;
             /** Postings */
             postings: components["schemas"]["CareersPostingItem"][];
         };
@@ -5274,6 +5300,8 @@ export interface components {
             company: string;
             /** Description */
             description: string | null;
+            /** Has Logo */
+            has_logo: boolean;
             /** Location */
             location: string | null;
             /** Salary From */
@@ -20646,6 +20674,47 @@ export interface operations {
             };
         };
     };
+    careers_careers_logo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                company_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": unknown;
+                    "image/png": unknown;
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     careers_careers_posting: {
         parameters: {
             query?: never;
@@ -20699,7 +20768,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ApplyIn"];
+                "multipart/form-data": components["schemas"]["Body_careers_apply"];
             };
         };
         responses: {

@@ -22,6 +22,7 @@ from sqlalchemy import select
 from app.core.errors import AppError, ForbiddenError, NotFoundError
 from app.core.logging import get_logger
 from app.core.rbac_matrix import Scope, scope_for
+from app.modules.audit.service import record as record_event
 from app.modules.files.models import File
 from app.modules.files.validation import (
     ALLOWED,
@@ -35,8 +36,10 @@ from app.modules.policies.models import PolicyAcceptance, PolicyDocument
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncEngine
 
+    from app.db.session import TenantSession
     from app.integrations.clamav import ClamAV
     from app.integrations.storage import Storage
+    from app.modules.audit.service import AuditContext
     from app.modules.rbac.deps import Access
 
 logger = get_logger("app.files")
@@ -127,6 +130,87 @@ class FileService:
         await access.db.commit()
         return AppError(rejection.code, rejection.message, status_code=rejection.status_code)
 
+    async def _vet(
+        self, stream: BinaryIO, name: str, kinds: frozenset[str] | None, max_bytes: int
+    ) -> tuple[int, str, Rejection | None, str | None]:
+        """Size, type, real content and virus scan, in that order.
+
+        Returns (size, mime, refusal, detail); ``refusal`` is None when the file may be kept."""
+        size = await asyncio.to_thread(_size, stream)
+        if size == 0:
+            return size, "", EMPTY, None
+        if size > max_bytes:
+            return size, "", _too_large(max_bytes) if max_bytes != MAX_BYTES else TOO_LARGE, None
+        extension = extension_of(name)
+        if extension not in ALLOWED or (kinds is not None and ALLOWED[extension][0] not in kinds):
+            return size, "", BAD_TYPE, extension[:10]
+        kind, mime = ALLOWED[extension]
+        if await asyncio.to_thread(sniff, stream) != kind:
+            return size, mime, MISMATCH, extension
+        stream.seek(0)
+        verdict = await self.scanner.scan(stream)
+        if verdict.status == "infected":
+            return size, mime, INFECTED, verdict.signature
+        if verdict.status != "clean":
+            return size, mime, SCAN_DOWN, None
+        return size, mime, None, None
+
+    async def store_public(
+        self,
+        db: TenantSession,
+        context: AuditContext,
+        stream: BinaryIO,
+        *,
+        filename: str | None,
+        owner_type: str,
+        owner_id: uuid.UUID,
+        kinds: frozenset[str],
+        max_bytes: int,
+    ) -> File:
+        """A file sent by a visitor who is not signed in (a CV on the careers form).
+
+        The same checks as ``upload``. A refusal is not recorded (nobody is signed in, and the
+        request writes nothing). The caller owns the transaction and must commit it."""
+        if self.storage is None:
+            raise AppError(NOT_CONFIGURED.code, NOT_CONFIGURED.message, status_code=503)
+        name = safe_filename(filename)
+        size, mime, refusal, _detail = await self._vet(stream, name, kinds, max_bytes)
+        if refusal is not None:
+            raise AppError(
+                refusal.code, refusal.message, status_code=refusal.status_code, field="cv"
+            )
+        sha256 = await asyncio.to_thread(_digest, stream)
+        key = f"{KEY_PREFIX}{context.company_id}/{uuid.uuid4().hex}"
+        record = File(
+            company_id=context.company_id,
+            storage_key=key,
+            original_name=name,
+            mime=mime,
+            size=size,
+            sha256=sha256,
+            scan_status="clean",
+            scanned_at=datetime.now(UTC),
+            owner_type=owner_type,
+            owner_id=owner_id,
+            uploaded_by=None,
+        )
+        db.add(record)
+        await db.flush()
+        await record_event(
+            db,
+            context,
+            "file.uploaded",
+            entity_type="file",
+            entity_id=record.id,
+            after={"name": name, "mime": mime, "size": size, "owner_type": owner_type},
+        )
+        try:
+            await self.storage.put(key, stream, content_type=mime, size=size)
+        except Exception:
+            await db.rollback()
+            raise AppError(STORE_DOWN.code, STORE_DOWN.message, status_code=503) from None
+        return record
+
     async def upload(
         self,
         access: Access,
@@ -150,34 +234,9 @@ class FileService:
         await self._check_owner(access, owner_type, owner_id)
         name = safe_filename(filename)
         audit_name = "Attendance import" if owner_type == "attendance_import" else name
-        size = await asyncio.to_thread(_size, stream)
-        if size == 0:
-            raise await self._refuse(access, EMPTY, name=audit_name, size=size)
-        if size > max_bytes:
-            raise await self._refuse(
-                access,
-                _too_large(max_bytes) if max_bytes != MAX_BYTES else TOO_LARGE,
-                name=audit_name,
-                size=size,
-            )
-
-        extension = extension_of(name)
-        if extension not in ALLOWED or (kinds is not None and ALLOWED[extension][0] not in kinds):
-            raise await self._refuse(
-                access, BAD_TYPE, name=audit_name, size=size, detail=extension[:10]
-            )
-        kind, mime = ALLOWED[extension]
-        if await asyncio.to_thread(sniff, stream) != kind:
-            raise await self._refuse(access, MISMATCH, name=audit_name, size=size, detail=extension)
-
-        stream.seek(0)
-        verdict = await self.scanner.scan(stream)
-        if verdict.status == "infected":
-            raise await self._refuse(
-                access, INFECTED, name=audit_name, size=size, detail=verdict.signature
-            )
-        if verdict.status != "clean":
-            raise await self._refuse(access, SCAN_DOWN, name=audit_name, size=size)
+        size, mime, refusal, detail = await self._vet(stream, name, kinds, max_bytes)
+        if refusal is not None:
+            raise await self._refuse(access, refusal, name=audit_name, size=size, detail=detail)
 
         sha256 = await asyncio.to_thread(_digest, stream)
         key = f"{KEY_PREFIX}{access.company_id}/{uuid.uuid4().hex}"

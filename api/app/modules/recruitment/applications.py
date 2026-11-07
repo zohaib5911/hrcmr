@@ -31,14 +31,24 @@ LABELS: Final[dict[str, str]] = {
 }
 
 
+HIRED_FINAL: Final = "This candidate is already an employee. The application cannot change."
+HIRE_BY_CONVERT: Final = "Use Convert to employee to hire this candidate."
+
+
 def stage_error(current: str, target: str) -> str | None:
     """Why a move from ``current`` to ``target`` is refused, or None when it is allowed.
 
     Forward moves go one step at a time. Backward moves are allowed. Rejected and withdrawn end an
     application, so nothing moves out of them. Moving to the stage it is already at is a no-op.
+    Hired is set only by converting to an employee, and nothing moves out of it, so a candidate
+    can never be hired without the convert checks or converted twice.
     """
     if current in ENDING:
         return f"This application is {LABELS[current].lower()}. It cannot change."
+    if current == "hired":
+        return HIRED_FINAL
+    if target == "hired":
+        return HIRE_BY_CONVERT
     if target == current or target in ENDING:
         return None
     current_at = STAGE_ORDER.index(current)

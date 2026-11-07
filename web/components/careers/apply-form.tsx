@@ -6,6 +6,7 @@ import { Turnstile, TURNSTILE_SITE_KEY } from "@/components/auth/turnstile";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { FileDrop, type UploadItem } from "@/components/ui/file-drop";
 import { TextArea } from "@/components/ui/text-area";
 import { TextField } from "@/components/ui/text-field";
 import { attempt, type Problem } from "@/lib/auth/request";
@@ -21,6 +22,7 @@ export function ApplyForm({ company, posting }: { company: string; posting: stri
   const [phone, setPhone] = useState("");
   const [bring, setBring] = useState("");
   const [consent, setConsent] = useState(false);
+  const [cv, setCv] = useState<File | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [challenge, setChallenge] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -42,18 +44,26 @@ export function ApplyForm({ company, posting }: { company: string; posting: stri
         message: "Complete the check first.",
       } as Problem);
     setBusy(true);
+    const body = new FormData();
+    body.append("first_name", first.trim());
+    body.append("last_name", last.trim());
+    body.append("email", email.trim());
+    if (phone.trim()) body.append("phone", phone.trim());
+    if (bring.trim()) body.append("what_you_bring", bring.trim());
+    body.append("consent", "true");
+    body.append("turnstile_token", token ?? "no-turnstile");
+    if (cv) body.append("cv", cv);
     const result = await attempt((c) =>
       c.POST("/public/postings/{company_slug}/{posting_slug}/apply", {
         params: { path: { company_slug: company, posting_slug: posting } },
         body: {
-          first_name: first.trim(),
-          last_name: last.trim(),
-          email: email.trim(),
-          phone: phone.trim() || null,
-          what_you_bring: bring.trim() || null,
+          first_name: "",
+          last_name: "",
+          email: "",
           consent: true,
-          turnstile_token: token ?? "no-turnstile",
+          turnstile_token: "",
         },
+        bodySerializer: () => body,
       }),
     );
     setBusy(false);
@@ -62,6 +72,10 @@ export function ApplyForm({ company, posting }: { company: string; posting: stri
     if (result.ok) setSent(email.trim());
     else setProblem(result.problem);
   }
+
+  const cvItems: UploadItem[] = cv
+    ? [{ id: cv.name, name: cv.name, size: cv.size, status: "safe" }]
+    : [];
 
   if (sent) {
     return (
@@ -118,6 +132,16 @@ export function ApplyForm({ company, posting }: { company: string; posting: stri
           maxLength={3000}
           value={bring}
           onChange={(e) => setBring(e.target.value)}
+        />
+        <FileDrop
+          label="CV (optional)"
+          description="PDF or Word, up to 10 MB. We check it for viruses."
+          accept={[".pdf", ".doc", ".docx"]}
+          maxBytes={10 * 1024 * 1024}
+          items={cvItems}
+          onFiles={(files) => setCv(files[0] ?? null)}
+          onRemove={() => setCv(null)}
+          disabled={busy}
         />
         <Checkbox
           label="I agree that you may store my details to consider my application."

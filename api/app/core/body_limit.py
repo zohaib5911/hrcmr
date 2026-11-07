@@ -10,6 +10,7 @@ it. A request that announces too much in ``Content-Length`` is refused at once; 
 from __future__ import annotations
 
 import json
+import re
 from typing import TYPE_CHECKING
 
 from starlette.datastructures import Headers
@@ -21,16 +22,24 @@ DEFAULT_LIMIT = 1024 * 1024
 UPLOAD_LIMIT = 26 * 1024 * 1024  # a 25 MB file and its form fields
 LOGO_LIMIT = 3 * 1024 * 1024  # a 2 MB picture and its form fields
 PROOF_LIMIT = 11 * 1024 * 1024  # a 10 MB identity document and its form fields
+SMALL_FILE_LIMIT = 6 * 1024 * 1024  # a 5 MB photo or import sheet and its form fields
 
 
 class BodyLimitMiddleware:
-    def __init__(self, app: ASGIApp, *, limits: dict[str, int] | None = None) -> None:
+    def __init__(
+        self, app: ASGIApp, *, limits: dict[str | re.Pattern[str], int] | None = None
+    ) -> None:
+        """``limits`` maps a path prefix, or a compiled pattern the whole path must match (for an
+        upload route that shares its prefix with JSON routes), to the most it may receive."""
         self.app = app
         self.limits = limits or {}
 
     def _limit_for(self, path: str) -> int:
-        for prefix, limit in self.limits.items():
-            if path.startswith(prefix):
+        for key, limit in self.limits.items():
+            if isinstance(key, re.Pattern):
+                if key.fullmatch(path):
+                    return limit
+            elif path.startswith(key):
                 return limit
         return DEFAULT_LIMIT
 

@@ -7,9 +7,12 @@ from typing import Any
 
 from sqlalchemy import text
 
+from app.modules.email.outbox import EmailDelivery
 from tests.db.test_applications import candidate, open_posting
+from tests.db.test_email import FakeTransport
 from tests.db.test_employee_documents import _keys as _keys
 from tests.db.test_employee_documents import rig as rig
+from tests.support import build_settings
 
 API = "/api/v1"
 
@@ -61,7 +64,7 @@ async def test_an_interview_sends_invites_and_an_ics_file(rig: dict[str, Any]) -
         sent = (
             await db.execute(
                 text(
-                    "select template, to_address from email_outbox "
+                    "select template, to_address, id from email_outbox "
                     "where template like 'interview_invite%' and to_address in (:panel, :candidate) "
                     "order by template"
                 ),
@@ -83,6 +86,26 @@ async def test_an_interview_sends_invites_and_an_ics_file(rig: dict[str, Any]) -
     assert "DTEND:20261112T151500Z" in body
     assert f"ATTENDEE;CN=Gia Mendes;RSVP=TRUE:mailto:{candidate_mail}" in body
     assert "Ask about rota planning" not in body
+    # Both e-mails carry the same invite as a calendar attachment (plan 8.11).
+    transport = FakeTransport()
+    delivery = EmailDelivery(rig["owner"], transport, build_settings())
+    for row in sent:
+        assert (await delivery.deliver(row[2])).status == "sent"
+    assert len(transport.sent) == 2
+    invites = {message.to: message.attachments[0].content.decode() for message in transport.sent}
+    # Staff see the whole panel; the candidate's copy names only them.
+    assert f"mailto:{panel_mail}" in invites[panel_mail]
+    assert f"mailto:{candidate_mail}" in invites[panel_mail]
+    assert f"mailto:{panel_mail}" not in invites[candidate_mail]
+    assert f"mailto:{candidate_mail}" in invites[candidate_mail]
+    for message in transport.sent:
+        assert [item.filename for item in message.attachments] == ["invite.ics"]
+        attached = message.attachments[0]
+        assert attached.content_type == "text/calendar; method=REQUEST"
+        invite = attached.content.decode()
+        assert invite.startswith("BEGIN:VCALENDAR")
+        assert "DTSTART:20261112T143000Z" in invite
+        assert f"UID:interview-{interview['id']}@" in invite
     patched = await admin.patch(
         f"{API}/applications/{app['id']}/interviews/{interview['id']}", json={"outcome": "passed"}
     )
