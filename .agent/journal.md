@@ -320,3 +320,4 @@
 2026-11-07 20:16 | Claude (Haiku) | AUDIT-2 | C2.1 DONE: all 6 items ticked; dashboard e2e 2 pass; STATUS BLOCKED | next big model: Read AGENTS.md and continue (AUDIT-2 round 2)
 2026-11-08 20:35 | Claude (Opus) | AUDIT-2 | round 2 started; scope audit-2-r1..fcfa2b5; diff reviewed | next full checks
 2026-11-08 20:59 | Claude (Opus) | AUDIT-2 | round 2 DONE: 0/0/0 PASS; api 1043, unit 786, e2e 430; tagged audit-pass-2 | next small model T15.1
+2026-11-08 02:00 | Claude (Haiku) | T15.1 | started; STATUS updated | next find ONS URLs (Watch line)
