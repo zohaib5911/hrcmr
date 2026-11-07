@@ -237,7 +237,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. Course player: section by section, progress saved (`POST /learning/assignments/{id}/progress`), keyboard friendly, quiz with pass mark.
 - **Done when:** progress survives reload; quiz below pass mark doesn't complete.
 
-### [ ] T13.2 · S! · Write the 8 original courses
+### [x] T13.2 · S! · Write the 8 original courses
 - **Spec:** plan L1014–1023, L1430.
 - **Steps:** one course per sub-step (8 commits), as seed data files in `api/seed/courses/`. Each: 5–6 sections, 15–25 min, a 5-question check with explanations, sources from GOV.UK / ACAS / EHRC with URL + their updated date, reviewed date = today, OGL attribution if adapted.
 - **Done when:** a test checks every course has ≥5 sections, exactly 5 questions, ≥1 source URL on gov.uk/acas.org.uk/equalityhumanrights.com. Owner action "Review the 8 courses" added to PROGRESS.
