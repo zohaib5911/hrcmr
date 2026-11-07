@@ -99,8 +99,11 @@ for (const colorScheme of ["light", "dark"] as const) {
         await expect(page.getByRole("button", { name: /Ada Morrow/ })).toBeVisible();
         await shoot(page, `org-chart-${suffix}`);
         await page.getByRole("radio", { name: "List", exact: true }).click();
+        // A table on wide screens; the same people as a labelled list on phones.
         await expect(
-          page.getByRole("grid", { name: "People in the org chart", exact: true }),
+          page
+            .getByRole("grid", { name: "People in the org chart", exact: true })
+            .or(page.getByRole("list", { name: "People in the org chart", exact: true })),
         ).toBeVisible();
         await shoot(page, `org-list-${suffix}`);
       });

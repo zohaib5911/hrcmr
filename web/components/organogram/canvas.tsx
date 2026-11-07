@@ -85,7 +85,7 @@ export function OrgCanvas({ layout, showVisa, selectedId, onOpen, handle }: Canv
     return rect ? { x: x - rect.left, y: y - rect.top } : { x: 0, y: 0 };
   }, []);
 
-  // Show the whole chart at most at 100%, centred across the top.
+  // Show the whole chart, as large as the frame allows (at most 100%), centred across the top.
   const fitView = useCallback(() => {
     const { width, height } = size();
     if (layout.width === 0 || layout.height === 0 || width === 0 || height === 0) {
@@ -98,15 +98,22 @@ export function OrgCanvas({ layout, showVisa, selectedId, onOpen, handle }: Canv
     commit({ scale, x: (width - layout.width * scale) / 2, y: MARGIN });
   }, [layout, size, commit]);
 
-  // Fit at first paint, and again whenever the frame changes size. The observer is a subscription,
+  // Where the chart opens: at 100% so the names read, centred across the top. People pan from
+  // there, and the Fit button shows the whole chart when they want the overview.
+  const openView = useCallback(() => {
+    const { width } = size();
+    commit({ scale: 1, x: (width - layout.width) / 2, y: MARGIN });
+  }, [layout, size, commit]);
+
+  // Open at first paint, and again whenever the frame changes size. The observer is a subscription,
   // so the view is set from its callback rather than in the effect body.
   useEffect(() => {
     const el = frame.current;
     if (!el) return;
-    const observer = new ResizeObserver(() => fitView());
+    const observer = new ResizeObserver(() => openView());
     observer.observe(el);
     return () => observer.disconnect();
-  }, [fitView]);
+  }, [openView]);
 
   const centreOn = useCallback(
     (id: string) => {
@@ -293,7 +300,7 @@ export function OrgCanvas({ layout, showVisa, selectedId, onOpen, handle }: Canv
           </g>
         </svg>
       </div>
-      <div className="absolute top-3 right-3 flex gap-1">
+      <div className="absolute right-3 bottom-3 flex gap-1">
         <IconButton label="Zoom in" variant="gray" size="sm" onClick={() => zoomBy(ZOOM_STEP)}>
           <Icon icon={Plus} />
         </IconButton>

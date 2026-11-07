@@ -269,3 +269,4 @@
 2026-11-07 10:26 | Claude (Haiku) | T12.2 | step 2 written: canvas (SVG, pan/zoom/pinch, ResizeObserver fit, centreOn), list view, inspector, workspace, page; typecheck/lint/vitest 9 pass | next R6 e2e spec tests/e2e/organogram.spec.ts
 2026-11-07 10:28 | Claude (Haiku) | T12.2 | DONE: PDF + canvas + list + inspector + R6 spec (1 pass) ; unit 9 + full vitest pass; typecheck/lint pass; ticked in micro_plan and PROGRESS | next bash .agent/next.sh
 2026-11-07 10:33 | Claude (Haiku) | P12 | API full suite 803 pass; web lint+typecheck pass; screenshot spec phase12 written | next full web e2e (pnpm test:e2e) then screenshots
+2026-11-07 10:52 | Claude (Haiku) | P12 | gate: API 803 pass, web e2e 428 pass, screenshots 8 written; PROGRESS summary; ticked | next PR dev->main, wait for CI, merge when green

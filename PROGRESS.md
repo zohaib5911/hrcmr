@@ -484,3 +484,10 @@ Do not start until the owner says so: US site, Australia, native wrapper, passke
 - [x] F7.7 — refresh progress header and complete T7.4–T7.6 implementation/verification entries; affected browser/setup 63 pass; F7.1–F7.6 API/static checks pass; progress entries reviewed.
 - [x] T12.1 — org chart tree from current Reporting Authority (cycle-safe, unassigned list, RTW chips only with employee.rtw.read); hierarchy levels CRUD with default Director (signup and migration 0034); assignments validate the level; organogram 6 pass; migrations, data-model doc, openapi, RBAC matrix/enforcement, employment, signup 802 pass in full API suite; ruff/mypy pass.
 - [x] T12.2 — org chart canvas (SVG pan, zoom buttons, pinch, search jumps to a person and opens the card, visa toggle), list view, Unassigned section, GET /organogram.pdf (multi-page, RTW chips only when permitted); organogram API 7 pass, layout unit 9 pass, R6 spec organogram 1 pass (search, card, list, PDF download, mobile axe); typecheck and lint pass.
+
+## Phase 12 summary (org chart)
+- Tree from each person's current Reporting Authority (cycle-safe; no one drops out); RTW chips only with employee.rtw.read; hierarchy levels CRUD with default "Director" (signup and migration 0034); assignments validate the level.
+- /organogram: plain SVG canvas (drag, zoom buttons, pinch, search jumps to a person and opens the card), list view, Unassigned section, visa toggle, Download PDF (multi-page, WeasyPrint).
+- Tests: organogram DB 7 (tree, loop, RTW chips, level CRUD, cross-company, PDF 60 people); layout unit 9; browser spec organogram 1; full API suite 803 pass; full web e2e 428 pass (168 screenshot-gated skipped); web lint and typecheck pass.
+- Screenshots: docs/screenshots/phase-12 (390 and 1280 px, light and dark; chart and list).
+- Open: no UI to edit hierarchy levels yet (plan 8.13 wants an editable list), the Change role sheet has no level picker (employment-tab still says "available with the organogram"), and card text is small on wide charts until the user zooms in.

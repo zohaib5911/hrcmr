@@ -222,7 +222,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. `GET /organogram.pdf` (R4), multi-page for large teams.
 - **Done when:** R6 spec: search finds a person and opens inspector; PDF endpoint returns a PDF for a 60-person fixture.
 
-### [ ] P12 · S · Phase 12 gate
+### [x] P12 · S · Phase 12 gate
 - Recipe R7.
 
 ---
