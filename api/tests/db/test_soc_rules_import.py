@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import asyncio
 import dataclasses
+import datetime as dt
 import uuid
 from decimal import Decimal
 from pathlib import Path
@@ -17,12 +18,14 @@ from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.pool import NullPool
 
+from app.modules.soc_rules.engine import Applicant, CheckInput, RulesData, evaluate
 from app.modules.soc_rules.importer import (
     ImportResult,
     RulesImportError,
     import_rules_source,
     publish_rules_version,
 )
+from app.modules.soc_rules.loader import NoRulesVersionError, load_rules_data
 from app.modules.soc_rules.source import PAGE_KINDS, RulesSource, load_rules_source
 from tests.db.support import engine_for, temporary_database
 
@@ -277,3 +280,49 @@ def test_tenants_can_read_the_rules_tables_but_not_change_them(
         changed = asyncio.run(_execute_as_tenant(rules_database.app_url, f"delete from {table}"))  # noqa: S608
         assert changed == 0, table
         assert _scalar(rules_database.app_url, f"select count(*) from {table}") > 0, table  # noqa: S608
+
+
+async def _load(url: str, version_id: uuid.UUID | None = None) -> RulesData:
+    engine = engine_for(url, poolclass=NullPool)
+    try:
+        async with AsyncSession(engine) as db:
+            return await load_rules_data(db, version_id)
+    finally:
+        await engine.dispose()
+
+
+def test_t15_3_the_engine_gives_the_same_answer_on_the_stored_version(
+    rules_database: DatabaseUnderTest, source: RulesSource
+) -> None:
+    url = rules_database.owner_url
+    with pytest.raises(NoRulesVersionError):
+        asyncio.run(_load(url))
+    result = asyncio.run(_import(url, source))
+    assert result.version_id is not None
+    draft = asyncio.run(_load(url, result.version_id))
+    asyncio.run(_publish(url, result.version_id))
+
+    # Tenants read the live version (the checker runs as app_user).
+    live = asyncio.run(_load(rules_database.app_url))
+    parsed = RulesData.from_source(source)
+
+    assert live.version_id == str(result.version_id) == draft.version_id
+    assert live.effective_from == parsed.effective_from
+    assert sorted(live.going_rates, key=repr) == sorted(parsed.going_rates, key=repr)
+    assert sorted(live.pay_scales, key=repr) == sorted(parsed.pay_scales, key=repr)
+    assert sorted(live.shortage, key=repr) == sorted(parsed.shortage, key=repr)
+    assert live.salary_rules == parsed.salary_rules
+    assert live.table_notes == parsed.table_notes
+    check = CheckInput(
+        soc_code="2134",
+        weekly_hours=Decimal("37.5"),
+        offered_salary=Decimal("38300"),
+        salary_per="year",
+        work_nation="England",
+        cos_assignment_date=dt.date(2026, 11, 15),
+        applicant=Applicant(under_26=True),
+    )
+    stored, fresh = evaluate(live, check), evaluate(parsed, check)
+    assert stored.options == fresh.options
+    assert stored.verdict == fresh.verdict
+    assert stored.rules_version_id == str(result.version_id)

@@ -1,20 +1,16 @@
 # STATUS
 Updated: 2026-11-08 Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: (see git log)
-State: IN PROGRESS
+State: HANDED OVER — small model next
 
 ## Last completed
-- T15.2 — Rules-data importer: GOV.UK pages → draft rules version with diff; publish sets live + RQF levels. Migration 0041.
-- T15.1 — ONS SOC 2020 import and local embeddings.
+- T15.3 — Rules engine (engine.py, loader.py) and 27 golden tests + 1 DB test.
+- T15.2 — Rules-data importer: GOV.UK pages → draft rules version with diff; publish sets live + RQF levels.
 
 ## Current task
-- T15.3 — Rules engine and 20+ golden tests (B)
-  - [ ] 1 engine.py: inputs/outputs, eligibility (Table 6, 1/2/3, 1a/2aa/2a/3a transitional, ISL/TSL by CoS date and nation), options A–K with pro-rated going rates, verdict, dependants, notes
-  - [ ] 2 rules_data loader (live or given version) from the DB, same shapes as the parser
-  - [ ] 3 20+ golden tests on the saved pages; DB loader test
-- Resume note: see journal and last commit Next: line.
+- none (big-model blocks done; T15.4 is S!)
 
 ## Next tasks
-- T15.3 (B), then T15.4 (S!), T15.5 (S!)
+- T15.4 (S!) search and match API: call `load_rules_data(db)` then `evaluate(rules, CheckInput(...))` from app/modules/soc_rules for the top 3 codes; T15.5 (S!), T15.6 (S)
 
 ## Health
 - CI on dev: not run since T15.1 (Phase 15 gate PR runs it)    CI on main: green (last PR #22)
@@ -29,6 +25,10 @@ State: IN PROGRESS
 - T15.2: TSL removal_date stores the SW 6.1A(b) date: the CoS must be issued **before** 31 Dec 2026. ISL removal_date is the published "Removal date" column.
 - T15.2: publishing from the CLI writes no audit event (no platform-admin actor); T15.7's admin screen must audit publish/rollback.
 
+- T15.3: the engine needs a published version; `load_rules_data` raises NoRulesVersionError until the owner publishes v1 (T15.4 should return a clear "rules not published yet" error).
+- T15.3: Table 3/3a codes need the band or role (`pay_scale_role`; teachers also `pay_scale_administration`, e.g. "Inner London"); without it option K has no minimum and the verdict is None, with a note listing the roles. T15.4/T15.6 inputs must offer that choice.
+- T15.3: not modelled (notes only or left out): the Health and Care ASHE salary job route to F–J, SW 13.2 nurses' temporary rate, 3314 prison officers (SW 6.1(g)), SW 14.5 Tier 2 transitional going rates, uneven-hours averaging (SW 14.3A), English level.
+
 ## Strategy / decisions taken
 - Embedding model: BAAI/bge-small-en-v1.5 (384 dimensions, in fastembed 0.9.1), matching vector(384).
 - The 231 "see" cross-references (no occupation code, marker "}}}}") are counted and not loaded. Any other odd code stops the load.
@@ -42,6 +42,9 @@ State: IN PROGRESS
 - T15.2: dependants_allowed = code in Table 1, 2 or 3 (SW 29.1A); transitional exceptions left to the engine.
 - T15.2: rqf_level at publish: Table 1/3 → 6; 1a/2aa/3a → 3-5 except codes the 1a notes call RQF level 2 (6135) → below; 2a → below; else NULL. Each table's notes are checked for that wording first.
 - T15.2: same page hashes as the newest version → no new draft; a newer import deletes the older unpublished draft.
+
+- T15.3: reduced options use the published 90/80/70% columns (they already hold the £17.13 / £12.82 hourly floor), pro-rated by hours; going rate pro-rated on full hours (SW 14.4(d)); threshold checked on the first 48 hours' pay (SW 14.3); never pro-rated. Hourly pay x hours x 52 (SW 14.3 example). Rates rounded half-up to the penny.
+- T15.3: ISL/TSL dates: on the list when the CoS assignment date is before the removal/end date.
 
 ## Owner actions needed
 - Load the SOC tables into your database: `cd api && DATABASE_URL_OWNER=<owner connection string> uv run python ../data/import_soc.py`. Set the variable in your shell; do not paste it in chat. The first run downloads the embedding model (about 70 MB) and takes about 4 minutes. Until you run it, the database has no SOC rows.
