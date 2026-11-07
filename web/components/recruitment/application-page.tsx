@@ -19,6 +19,7 @@ import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { formatUk, formatUkDateTime } from "@/lib/ui/dates";
 
+import { ConvertSheet } from "./convert-sheet";
 import { RTW_STATUS } from "./rtw";
 import {
   ALL_STAGES,
@@ -73,7 +74,25 @@ export function ApplicationPage({ applicationId }: { applicationId: string }) {
   const [problem, setProblem] = useState<Problem | null>(null);
   const [version, setVersion] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [offers, setOffers] = useState<Offer[]>([]);
+  const [converting, setConverting] = useState(false);
   const toast = useToast();
+  const mayConvert = can("recruitment.candidate.convert") && can("employee.profile.write");
+
+  useEffect(() => {
+    if (!mayRead) return;
+    let active = true;
+    void attempt((c) =>
+      c.GET("/applications/{application_id}/offers", {
+        params: { path: { application_id: applicationId } },
+      }),
+    ).then((result) => {
+      if (active && result.ok) setOffers(result.data);
+    });
+    return () => {
+      active = false;
+    };
+  }, [mayRead, applicationId, version]);
 
   useEffect(() => {
     if (!mayRead) return;
@@ -167,6 +186,17 @@ export function ApplicationPage({ applicationId }: { applicationId: string }) {
             )}
           </div>
         )}
+        {mayConvert &&
+          app.stage !== "hired" &&
+          app.stage !== "rejected" &&
+          app.stage !== "withdrawn" && (
+            <ConvertControl
+              accepted={offers.find((offer) => offer.status === "accepted")}
+              verified={app.candidate_rtw_status === "verified"}
+              busy={busy}
+              onOpen={() => setConverting(true)}
+            />
+          )}
         {problem && <Alert tone="danger" title={problem.message} />}
       </header>
 
@@ -190,6 +220,15 @@ export function ApplicationPage({ applicationId }: { applicationId: string }) {
         </section>
       </Card>
 
+      {converting && (
+        <ConvertSheet
+          application={app}
+          startDate={offers.find((offer) => offer.status === "accepted")?.start_date ?? null}
+          onOpenChange={(open) => {
+            if (!open) setConverting(false);
+          }}
+        />
+      )}
       <InterviewsPanel
         application={app}
         mayWrite={mayWrite}
@@ -615,5 +654,33 @@ function OffersPanel({
         </form>
       )}
     </section>
+  );
+}
+
+/** The Convert button: enabled only when there is an accepted offer and a verified right-to-work check. */
+function ConvertControl({
+  accepted,
+  verified,
+  busy,
+  onOpen,
+}: {
+  accepted: Offer | undefined;
+  verified: boolean;
+  busy: boolean;
+  onOpen: () => void;
+}) {
+  const ready = Boolean(accepted) && verified;
+  const reason = !accepted
+    ? "Needs an accepted offer."
+    : !verified
+      ? "Needs a verified right-to-work check."
+      : "";
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <Button variant="filled" disabled={!ready || busy} onClick={onOpen}>
+        Convert to employee
+      </Button>
+      {!ready && <span className="text-callout text-label-secondary">{reason}</span>}
+    </div>
   );
 }

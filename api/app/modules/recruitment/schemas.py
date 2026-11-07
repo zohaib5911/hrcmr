@@ -327,3 +327,17 @@ class OfferOut(BaseModel):
     decided_at: datetime | None
     created_at: datetime
     updated_at: datetime
+
+
+class ConvertIn(RequestModel):
+    employee_number: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=50)
+    ]
+    hire_date: date | None = None
+    status: Literal["active", "on_leave"] = "active"
+    phone: Annotated[str, StringConstraints(strip_whitespace=True, max_length=40)] | None = None
+
+
+class ConvertOut(BaseModel):
+    employee_id: uuid.UUID
+    application: ApplicationOut

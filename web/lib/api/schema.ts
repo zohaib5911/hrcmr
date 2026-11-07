@@ -105,6 +105,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/applications/{application_id}/convert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Convert Application
+         * @description Turn an accepted, verified candidate into an employee, in one transaction (T11.5).
+         */
+        post: operations["recruitment_convert_application"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/applications/{application_id}/interviews": {
         parameters: {
             query?: never;
@@ -5973,6 +5993,30 @@ export interface components {
              */
             relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
         };
+        /** ConvertIn */
+        ConvertIn: {
+            /** Employee Number */
+            employee_number: string;
+            /** Hire Date */
+            hire_date?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /**
+             * Status
+             * @default active
+             * @enum {string}
+             */
+            status: "active" | "on_leave";
+        };
+        /** ConvertOut */
+        ConvertOut: {
+            application: components["schemas"]["ApplicationOut"];
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+        };
         /** CopyDay */
         CopyDay: {
             /**
@@ -10098,6 +10142,50 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApplicationOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_convert_application: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConvertIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConvertOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

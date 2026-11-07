@@ -181,7 +181,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   4. UI: pipeline bar (8 stages, counts, click filters Applications tab); `/recruitment/applications/[id]` with stepper, "Move to {next}", "Waiting on…" hint, interviews and offers panels.
 - **Done when:** skipping a stage → 422 with the exact message; .ics test passes; pipeline counts match DB.
 
-### [ ] T11.5 · S! · Convert to employee
+### [x] T11.5 · S! · Convert to employee
 - **Spec:** plan L984, L1421, §13 L1694.
 - **Copy:** employee creation in `api/app/modules/employees/` (call its service; don't duplicate it).
 - **Steps:**

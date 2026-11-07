@@ -9,7 +9,6 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request, UploadFile
 from sqlalchemy import delete, func, or_, select
-from sqlalchemy.exc import IntegrityError
 
 from app.core.errors import AppError, ConflictError, ForbiddenError, NotFoundError
 from app.core.rbac_matrix import Scope
@@ -35,6 +34,7 @@ from app.modules.employees.schemas import (
     Status,
     StatusChange,
 )
+from app.modules.employees.service import add_employee, number_key
 from app.modules.policies import service as policy_service
 from app.modules.policies.models import PolicyAcceptance
 from app.modules.rbac.deps import Access, require
@@ -206,7 +206,7 @@ def _row(e: Employee) -> EmployeeRow:
 
 
 def _number_key(number: str) -> str:
-    return "".join(number.split()).lower()
+    return number_key(number)
 
 
 @router.post("/employees", status_code=201, response_model=EmployeeRow)
@@ -214,32 +214,7 @@ async def create_employee(body: EmployeeIn, request: Request, access: Writes) ->
     """A new record with the essentials. The number must be unique in the company, ignoring case
     and spaces ("E 001" and "e001" are the same)."""
     _require_full_write(access)
-    taken = (
-        await access.db.execute(
-            select(Employee.id).where(
-                func.lower(func.regexp_replace(Employee.employee_number, r"\s", "", "g"))
-                == _number_key(body.employee_number)
-            )
-        )
-    ).first()
-    in_use = ConflictError("That employee number is already in use.", field="employee_number")
-    if taken is not None:
-        raise in_use
-    employee = Employee(
-        company_id=access.company_id,
-        employee_number=body.employee_number,
-        first_name=body.first_name,
-        last_name=body.last_name,
-        email=str(body.email).strip().lower(),
-        phone=body.phone,
-        hire_date=body.hire_date,
-        status=body.status,
-    )
-    access.db.add(employee)
-    try:
-        await access.db.flush()
-    except IntegrityError as exc:  # two people saving the same number at once
-        raise in_use from exc
+    employee = await add_employee(access.db, access.company_id, body)
     await access.audit(
         "employee.created",
         entity_type="employee",

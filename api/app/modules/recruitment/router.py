@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Query, Request, Response
+from pydantic import ValidationError
 from sqlalchemy import func, select
 
 from app.core.crypto import encrypt
@@ -22,7 +23,10 @@ from app.modules.email.models import EmailOutbox
 from app.modules.email.outbox import PAYLOAD_CONTEXT
 from app.modules.email.templates import check
 from app.modules.employees.models import Employee
+from app.modules.employees.schemas import EmployeeIn
+from app.modules.employees.service import add_employee
 from app.modules.files.models import File
+from app.modules.policies import service as policy_service
 from app.modules.rbac.deps import Access, require
 from app.modules.recruitment import service
 from app.modules.recruitment.applications import LABELS, STAGES, check_move
@@ -44,6 +48,8 @@ from app.modules.recruitment.schemas import (
     CandidateIn,
     CandidateOut,
     CandidatePage,
+    ConvertIn,
+    ConvertOut,
     InterviewIn,
     InterviewOut,
     InterviewPatch,
@@ -66,6 +72,7 @@ from app.modules.recruitment.schemas import (
     Stage,
 )
 from app.modules.recruitment.service import MODE_LABELS
+from app.modules.rtw.models import RTWCheck
 
 router = APIRouter(tags=["recruitment"])
 Reads = Annotated[Access, Depends(require("recruitment.requisition.read"))]
@@ -1053,3 +1060,154 @@ async def update_offer(offer_id: uuid.UUID, body: OfferPatch, access: OfferWrite
     )
     await access.db.commit()
     return service.offer_out(row)
+
+
+ConvertWrites = Annotated[Access, Depends(require("recruitment.candidate.convert"))]
+
+
+@router.post("/applications/{application_id}/convert", response_model=ConvertOut)
+async def convert_application(
+    application_id: uuid.UUID, body: ConvertIn, request: Request, access: ConvertWrites
+) -> ConvertOut:
+    """Turn an accepted, verified candidate into an employee, in one transaction (T11.5)."""
+    company_wide(access)
+    if scope_for(access.role, "employee.profile.write") is not Scope.ALL:
+        raise ForbiddenError
+    application = await _application(access, application_id, lock=True)
+    if application.stage == "hired":
+        raise AppError(
+            "ALREADY_CONVERTED", "This candidate is already an employee.", status_code=409
+        )
+    if application.stage in ENDED:
+        raise AppError(
+            "APPLICATION_ENDED",
+            "This application has ended, so it cannot convert.",
+            status_code=422,
+        )
+    candidate = (
+        await access.db.execute(
+            select(Candidate).where(Candidate.id == application.candidate_id).with_for_update()
+        )
+    ).scalar_one()
+    if candidate.email is None:
+        raise AppError(
+            "CANDIDATE_EMAIL_REQUIRED",
+            "Add the candidate's email address before converting.",
+            status_code=422,
+        )
+    offer = (
+        await access.db.execute(
+            select(Offer)
+            .where(Offer.application_id == application_id, Offer.status == "accepted")
+            .order_by(Offer.decided_at.desc().nulls_last(), Offer.id.desc())
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+    if offer is None:
+        raise AppError(
+            "CONVERT_NEEDS_ACCEPTED_OFFER",
+            "An accepted offer is needed before converting.",
+            status_code=422,
+        )
+    today = await company_today(access)
+    if await service.candidate_rtw_status(access.db, candidate.id, today) != "verified":
+        raise AppError(
+            "CONVERT_NEEDS_VERIFIED_RTW",
+            "A verified right-to-work check is needed before converting.",
+            status_code=422,
+        )
+    hire_date = body.hire_date or offer.start_date
+    if hire_date is None:
+        raise AppError(
+            "VALIDATION_ERROR", "Choose the hire date.", status_code=422, field="hire_date"
+        )
+    try:
+        person = EmployeeIn(
+            first_name=candidate.first_name,
+            last_name=candidate.last_name,
+            email=candidate.email,
+            phone=body.phone,
+            employee_number=body.employee_number,
+            hire_date=hire_date,
+            status=body.status,
+        )
+    except ValidationError as exc:
+        raise AppError(
+            "VALIDATION_ERROR",
+            "Check the candidate's details and the employee number before converting.",
+            status_code=422,
+        ) from exc
+    employee = await add_employee(access.db, access.company_id, person)
+    documents = (
+        (
+            await access.db.execute(
+                select(File).where(File.owner_type == "candidate", File.owner_id == candidate.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    for document in documents:
+        document.owner_type = "employee"
+        document.owner_id = employee.id
+    current = (
+        await access.db.execute(
+            select(RTWCheck).where(
+                RTWCheck.subject_type == "candidate",
+                RTWCheck.subject_id == candidate.id,
+                RTWCheck.superseded_at.is_(None),
+            )
+        )
+    ).scalar_one()
+    copied = RTWCheck(
+        id=uuid7(),
+        company_id=access.company_id,
+        subject_type="employee",
+        subject_id=employee.id,
+        check_type=current.check_type,
+        share_code=current.share_code,
+        idsp_provider=current.idsp_provider,
+        idsp_document=current.idsp_document,
+        list_b_group=current.list_b_group,
+        permission_expires=current.permission_expires,
+        permission_expires_on=current.permission_expires_on,
+        check_date=current.check_date,
+        checked_by_user_id=current.checked_by_user_id,
+        outcome=current.outcome,
+        evidence_file_id=current.evidence_file_id,
+    )
+    access.db.add(copied)
+    await access.db.flush()
+    await policy_service.assign_new_starters(
+        access.db,
+        access.audit_context,
+        today,
+        request.app.state.settings.web_origin,
+        only=[employee.id],
+    )
+    previous = application.stage
+    application.stage = "hired"
+    application.stage_history = [
+        *application.stage_history,
+        {"stage": "hired", "at": service.now().isoformat(), "by": str(access.caller.user_id)},
+    ]
+    await access.db.flush()
+    await access.audit(
+        "recruitment.candidate.converted",
+        entity_type="application",
+        entity_id=application.id,
+        before={"stage": previous},
+        after={
+            "stage": "hired",
+            "employee_id": str(employee.id),
+            "rtw_check_id": str(copied.id),
+            "offer_id": str(offer.id),
+            "hire_date": hire_date.isoformat(),
+            "documents": len(documents),
+        },
+    )
+    await access.db.commit()
+    return ConvertOut(
+        employee_id=employee.id,
+        application=await service.application_out(access.db, application, today),
+    )
