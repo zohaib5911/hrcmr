@@ -332,3 +332,4 @@
 2026-11-08 02:43 | Claude (Opus) | T15.2 | step 4a done: importer (draft version, unchanged-hash skip, one draft at a time, diff vs live, publish sets live/retired + rqf_level from tables); DB tests 6 pass | next CLI data/import_rules.py, full run, docs
 2026-11-08 02:44 | Claude (Opus) | T15.2 | DONE: CLI data/import_rules.py; full run temp DB: going 598, pay 178, Table 6 114, lists 77 (ISL 25/TSL 52), salary 11; publish ok; re-run unchanged; tests parser 18, DB 6, related 55+31 pass | next T15.3 (B) rules engine
 2026-11-08 02:45 | Claude (Opus) | T15.3 | started; STATUS updated | next engine.py
+2026-11-08 02:49 | Claude (Opus) | T15.3 | step 1+3 done: engine.py (eligibility incl Table 6/1a/2a/3a transitional, ISL/TSL by CoS date+nation, SW 6.1B, options A-K from published columns pro-rated SW 14.4, 48h SW 14.3, verdict short-by/hours, dependants SW 29.1A); 27 golden tests pass | next DB loader load_rules_data + test
