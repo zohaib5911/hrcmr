@@ -295,3 +295,4 @@
 2026-11-07 20:47 | Claude (Haiku) | T14.4 | BLOCKED: task is tier B (big model); SMALL stops here | next big model: Read AGENTS.md and continue (T14.4, then T14.5 S, P14, AUDIT-2)
 2026-11-07 21:05 | Claude (Opus) | T14.4 | step 1 done: redaction + pseudonymiser (api/app/ai/redaction.py; ruff/mypy pass) | next anthropic client + ai_interactions
 2026-11-07 21:20 | Claude (Opus) | T14.4 | step 2+3 done: anthropic client, ai service (gate, 30/h limit, scrub, log), ai_interactions migration 0039, data-model doc; mypy pass | next fuzz test + DB tests
+2026-11-07 21:35 | Claude (Opus) | T14.4 | step 4 done: payload fuzz test 202 pass (mutation with redaction off fails) | next migrations/data-model/architecture/openapi tests, tick
