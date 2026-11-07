@@ -1437,6 +1437,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/dashboard": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Dashboard */
+        get: operations["dashboard_dashboard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/departments": {
         parameters: {
             query?: never;
@@ -3090,6 +3107,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/notification-preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Preferences */
+        get: operations["notifications_get_preferences"];
+        /** Set Preferences */
+        put: operations["notifications_set_preferences"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/notifications": {
         parameters: {
             query?: never;
@@ -3156,6 +3191,40 @@ export interface paths {
         head?: never;
         /** Update Offer */
         patch: operations["recruitment_update_offer"];
+        trace?: never;
+    };
+    "/onboarding/checklist": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Checklist */
+        get: operations["dashboard_checklist"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/onboarding/checklist/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Dismiss */
+        post: operations["dashboard_dismiss"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/organogram": {
@@ -3867,6 +3936,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/reminders/{reminder_id}/wording": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reminder Wording Draft
+         * @description A suggested message for the review drawer: AI when available, else the template.
+         *
+         *     Read-only: nothing is saved. No row lock is taken, because the AI call can take seconds.
+         */
+        post: operations["reminders_reminder_wording_draft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/reports/jobs": {
         parameters: {
             query?: never;
@@ -4281,6 +4372,23 @@ export interface paths {
         put?: never;
         /** Publish */
         post: operations["rota_publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search */
+        get: operations["search_search"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4954,6 +5062,11 @@ export interface components {
              */
             received: true;
         };
+        /** ApprovalsCardOut */
+        ApprovalsCardOut: {
+            /** Pending */
+            pending: number;
+        };
         /** ArchiveChangeIn */
         ArchiveChangeIn: {
             /** Reason */
@@ -5195,6 +5308,15 @@ export interface components {
             priority: number;
             /** Title */
             title: string;
+        };
+        /** AttentionItemOut */
+        AttentionItemOut: {
+            /** Count */
+            count: number;
+            /** Label */
+            label: string;
+            /** Link */
+            link: string;
         };
         /** AuditEventOut */
         AuditEventOut: {
@@ -5570,6 +5692,15 @@ export interface components {
             scan_status: string;
             /** Size */
             size: number;
+        };
+        /** CandidateHitOut */
+        CandidateHitOut: {
+            /** Id */
+            id: string;
+            /** Link */
+            link: string;
+            /** Name */
+            name: string;
         };
         /** CandidateIn */
         CandidateIn: {
@@ -6001,6 +6132,26 @@ export interface components {
             superseded_at: string | null;
             /** Superseded By */
             superseded_by: string | null;
+        };
+        /** ChecklistItemOut */
+        ChecklistItemOut: {
+            /** Done */
+            done: boolean;
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
+        };
+        /** ChecklistOut */
+        ChecklistOut: {
+            /** Done */
+            done: number;
+            /** Items */
+            items: components["schemas"]["ChecklistItemOut"][];
+            /** Total */
+            total: number;
+            /** Visible */
+            visible: boolean;
         };
         /** ClearWeek */
         ClearWeek: {
@@ -6838,6 +6989,23 @@ export interface components {
             /** Status */
             status: string;
         };
+        /** DashboardOut */
+        DashboardOut: {
+            approvals?: components["schemas"]["ApprovalsCardOut"] | null;
+            distribution?: components["schemas"]["DistributionCardOut"] | null;
+            employees?: components["schemas"]["EmployeesCardOut"] | null;
+            /** First Name */
+            first_name: string;
+            learning?: components["schemas"]["LearningCardOut"] | null;
+            my_learning?: components["schemas"]["MyLearningCardOut"] | null;
+            /** Needs Attention */
+            needs_attention: components["schemas"]["AttentionItemOut"][];
+            off_today?: components["schemas"]["OffCardOut"] | null;
+            recruitment?: components["schemas"]["RecruitmentCardOut"] | null;
+            rtw?: components["schemas"]["RtwCardOut"] | null;
+            /** Status Line */
+            status_line: string;
+        };
         /** DayOffPatternIn */
         DayOffPatternIn: {
             /**
@@ -6963,6 +7131,18 @@ export interface components {
             soc_code?: string | null;
             /** Title */
             title?: string | null;
+        };
+        /** DistributionCardOut */
+        DistributionCardOut: {
+            /** Rows */
+            rows: components["schemas"]["DistributionRowOut"][];
+        };
+        /** DistributionRowOut */
+        DistributionRowOut: {
+            /** Department */
+            department: string;
+            /** Headcount */
+            headcount: number;
         };
         /** DocumentLink */
         DocumentLink: {
@@ -7362,6 +7542,13 @@ export interface components {
             employee_id: string;
             /** Version */
             version: number;
+        };
+        /** EmployeesCardOut */
+        EmployeesCardOut: {
+            /** Active */
+            active: number;
+            /** On Leave */
+            on_leave: number;
         };
         /** EmploymentTab */
         EmploymentTab: {
@@ -7925,6 +8112,11 @@ export interface components {
              */
             shift_type_id: string;
         };
+        /** LearningCardOut */
+        LearningCardOut: {
+            /** Overdue */
+            overdue: number;
+        };
         /** LearningSummaryOut */
         LearningSummaryOut: {
             /** Assignments */
@@ -8482,6 +8674,13 @@ export interface components {
             /** Secret */
             secret: string;
         };
+        /** MyLearningCardOut */
+        MyLearningCardOut: {
+            /** Open */
+            open: number;
+            /** Overdue */
+            overdue: number;
+        };
         /** NotificationOut */
         NotificationOut: {
             /** Body */
@@ -8531,6 +8730,13 @@ export interface components {
         NotificationsReadOut: {
             /** Marked */
             marked: number;
+        };
+        /** OffCardOut */
+        OffCardOut: {
+            /** Count */
+            count: number;
+            /** Names */
+            names: string[];
         };
         /** OfferIn */
         OfferIn: {
@@ -8901,6 +9107,17 @@ export interface components {
              * @description The full name, typed.
              */
             confirm_name: string;
+        };
+        /** PersonHitOut */
+        PersonHitOut: {
+            /** Employee Number */
+            employee_number: string;
+            /** Id */
+            id: string;
+            /** Link */
+            link: string;
+            /** Name */
+            name: string;
         };
         /** PersonalDetails */
         PersonalDetails: {
@@ -9336,6 +9553,19 @@ export interface components {
              */
             status: "draft" | "open" | "closed";
         };
+        /** PreferenceIn */
+        PreferenceIn: {
+            /**
+             * Mode
+             * @enum {string}
+             */
+            mode: "immediate" | "daily" | "off";
+        };
+        /** PreferenceOut */
+        PreferenceOut: {
+            /** Mode */
+            mode: string;
+        };
         /** PreviousEmploymentIn */
         PreviousEmploymentIn: {
             /** Description */
@@ -9516,6 +9746,11 @@ export interface components {
             /** Recovery Codes */
             recovery_codes: string[];
         };
+        /** RecruitmentCardOut */
+        RecruitmentCardOut: {
+            /** Latest */
+            latest: string[];
+        };
         /** RecruitmentSummary */
         RecruitmentSummary: {
             /** Applications In Progress */
@@ -9637,6 +9872,19 @@ export interface components {
              * Format: uuid
              */
             source_id: string;
+        };
+        /**
+         * ReminderWordingOut
+         * @description A suggested message for the review drawer. Nothing is saved until HR sends or saves it.
+         */
+        ReminderWordingOut: {
+            /** Message */
+            message: string;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "template" | "ai";
         };
         /** RenewalIn */
         RenewalIn: {
@@ -9933,6 +10181,30 @@ export interface components {
             message: string;
             /** Shift Id */
             shift_id: string | null;
+        };
+        /** RtwCardOut */
+        RtwCardOut: {
+            /** Checked */
+            checked: number;
+            /** Coverage Percent */
+            coverage_percent: number;
+            /** Evidence Missing */
+            evidence_missing: number;
+            /** Expired */
+            expired: number;
+            /** Expiring */
+            expiring: number;
+            /** Not Recorded */
+            not_recorded: number;
+            /** Verified */
+            verified: number;
+        };
+        /** SearchOut */
+        SearchOut: {
+            /** Candidates */
+            candidates: components["schemas"]["CandidateHitOut"][];
+            /** People */
+            people: components["schemas"]["PersonHitOut"][];
         };
         /** SectionIn */
         SectionIn: {
@@ -15062,6 +15334,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SponsoredEmployees"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    dashboard_dashboard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DashboardOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -20439,6 +20749,86 @@ export interface operations {
             };
         };
     };
+    notifications_get_preferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferenceOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    notifications_set_preferences: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreferenceIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferenceOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     notifications_notifications: {
         parameters: {
             query?: {
@@ -20585,6 +20975,80 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["OfferOut"];
                 };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    dashboard_checklist: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChecklistOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    dashboard_dismiss: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description The request could not be completed. `error.code` says why. */
             "4XX": {
@@ -22820,6 +23284,46 @@ export interface operations {
             };
         };
     };
+    reminders_reminder_wording_draft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reminder_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReminderWordingOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     reports_recent_reports: {
         parameters: {
             query?: never;
@@ -24170,6 +24674,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ActionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    search_search: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

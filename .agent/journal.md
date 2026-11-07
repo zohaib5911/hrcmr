@@ -288,3 +288,17 @@
 2026-11-07 11:45 | Claude (Haiku) | T13.4 | DONE: certificates, PDF, public check, /verify page, player button; ticked | next P13 gate
 2026-11-07 12:05 | Claude (Haiku) | P13 | gate: API 818, web lint/typecheck/unit 786, e2e 429, 16 screenshots; PROGRESS summary; ticked | next PR dev->main
 2026-11-07 20:05 | Claude (Haiku) | P13 | Semgrep on PR 21: len(all()) on the assignment insert; now counted with rowcount; learning tests 10 pass; local Semgrep clean on the learning paths | next re-run PR 21 checks, merge when green
+2026-11-07 20:31 | Claude (Haiku) | T14.1 | written: dashboard API (permission-aware cards), checklist + dismiss (migration 0037), /dashboard UI, specs; db dashboard 4 pass, migrations 7, rbac, openapi, architecture pass | next run dashboard e2e, then tick
+2026-11-07 20:36 | Claude (Haiku) | T14.1 | DONE: dashboard + checklist; tests pass; ticked | next bash .agent/next.sh (T14.2)
+2026-11-07 20:42 | Claude (Haiku) | T14.2 | DONE: prefs, digest, kinds, tests; ticked | next bash .agent/next.sh (T14.3)
+2026-11-07 20:46 | Claude (Haiku) | T14.3 | DONE: search API + palette groups; tests pass; ticked | next bash .agent/next.sh (T14.4 is B: stop)
+2026-11-07 20:47 | Claude (Haiku) | T14.4 | BLOCKED: task is tier B (big model); SMALL stops here | next big model: Read AGENTS.md and continue (T14.4, then T14.5 S, P14, AUDIT-2)
+2026-11-07 21:05 | Claude (Opus) | T14.4 | step 1 done: redaction + pseudonymiser (api/app/ai/redaction.py; ruff/mypy pass) | next anthropic client + ai_interactions
+2026-11-07 21:20 | Claude (Opus) | T14.4 | step 2+3 done: anthropic client, ai service (gate, 30/h limit, scrub, log), ai_interactions migration 0039, data-model doc; mypy pass | next fuzz test + DB tests
+2026-11-07 21:35 | Claude (Opus) | T14.4 | step 4 done: payload fuzz test 202 pass (mutation with redaction off fails) | next migrations/data-model/architecture/openapi tests, tick
+2026-11-07 21:45 | Claude (Opus) | T14.4 | DONE: ticked; arch/openapi/config 41, migrations 7, data-model, fuzz 202 pass | next T14.5 (S): small model
+2026-11-07 17:07 | Claude (Haiku) | T14.5 | started; STATUS updated | next api/app/ai/letters.py AI path
+2026-11-07 17:10 | Claude (Haiku) | T14.5 | steps 1-2 API done: letters AI paragraphs (source ai, template fallback), POST /reminders/{id}/wording; tests letters 6 + reminders 10 pass; mypy 378 clean; openapi/arch/fuzz 215 pass | next web: pnpm gen:api, reminder drawer button, letter note
+2026-11-07 17:12 | Claude (Haiku) | T14.5 | web: Draft with AI button in reminder drawer (only when ai_available), template note on letter sheet; lint, typecheck, unit 786 pass | next run reminders + letters browser specs, then tick
+2026-11-07 17:14 | Claude (Haiku) | T14.5 | DONE: ticked micro_plan and PROGRESS; browser 8 pass, API 16 DB pass | next P14 gate (full API suite, web e2e, screenshots, PR)
+2026-11-07 17:36 | Claude (Haiku) | P14 | gate: API 1036 pass; web lint/typecheck/unit 786; e2e 430 pass (dashboard re-run 2 pass after checklist icon change); 12 screenshots docs/screenshots/phase-14; PROGRESS summary; ticked | next PR dev->main, wait for CI, merge when green, then AUDIT-2 stop

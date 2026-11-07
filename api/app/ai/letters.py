@@ -1,8 +1,10 @@
 """Letter drafts from placeholder templates (T10.4), and the .docx they download as.
 
-No AI call happens here. Every draft is built from the templates below, which hold only
-placeholders such as ``[Employee name]``. Names and identifiers cannot be sent in: the request
-model refuses unknown fields, and key points with an e-mail address or NI number are rejected.
+Every draft is built from the templates below, which hold only placeholders such as
+``[Employee name]``. When AI is on for the company (T14.5), Claude writes the main paragraphs from
+the letter type, tone and key points only; the greeting and sign-off stay as templated. Names and
+identifiers cannot be sent in: the request model refuses unknown fields, and key points with an
+e-mail address or NI number are rejected.
 """
 
 from __future__ import annotations
@@ -13,11 +15,13 @@ import zipfile
 from typing import Annotated, Literal
 from xml.sax.saxutils import escape
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Request, Response
 from pydantic import Field, StringConstraints, field_validator
 
-from app.core.errors import ForbiddenError
-from app.core.rbac_matrix import Scope
+from app.ai.redaction import find_restricted
+from app.ai.service import ai_ready, generate
+from app.core.errors import AppError, ForbiddenError
+from app.core.rbac_matrix import Scope, scope_for
 from app.core.schemas import RequestModel
 from app.modules.rbac.deps import Access, require
 
@@ -98,6 +102,16 @@ CLOSING: dict[Tone, str] = {
     "friendly": "Best wishes,",
 }
 
+# Claude writes only the middle of the letter; the greeting and sign-off stay as templated above.
+LETTER_TASK = (
+    "Task: write the main paragraphs of one UK HR letter. The data gives the letter type, the tone "
+    "and the key points to cover. Use [square-bracket] placeholders for any detail you do not "
+    "have, such as [Job title], [Start date], [Date] or [Company name]. Do not invent names, "
+    "dates, pay, hours, figures or policy terms. Cover every key point, in order. Do not write the "
+    "greeting, "
+    "the sign-off, a subject line or any commentary: return the paragraphs only."
+)
+
 
 class LetterDraftIn(RequestModel):
     letter_type: LetterType
@@ -128,13 +142,48 @@ class LetterDocxIn(RequestModel):
     body: Annotated[str, StringConstraints(min_length=1, max_length=20000)]
 
 
+def _sign_off(tone: Tone) -> list[str]:
+    return ["", CLOSING[tone], "[Your name]", "[Your job title]", "[Company name]"]
+
+
 def draft_text(body: LetterDraftIn) -> tuple[str, str]:
     subject, opening = TEMPLATES[body.letter_type]
     lines = [GREETING[body.tone], "", opening]
     if body.key_points:
         lines += ["", "Key points:", *(f"- {point}" for point in body.key_points)]
-    lines += ["", CLOSING[body.tone], "[Your name]", "[Your job title]", "[Company name]"]
+    lines += _sign_off(body.tone)
     return subject, "\n".join(lines)
+
+
+async def _ai_paragraphs(request: Request, access: Access, body: LetterDraftIn) -> str | None:
+    """Claude's paragraphs for the letter, or None when AI is off, unavailable, failed or unsafe.
+
+    Only the letter type, tone and key points are sent (never names or identifiers). Any AI error,
+    including the rate limit, falls back to the template so the draft still works.
+    """
+    if scope_for(access.role, "ai.letter.draft") is None or not await ai_ready(request, access):
+        return None
+    try:
+        reply = await generate(
+            request,
+            access,
+            feature="letter",
+            task=LETTER_TASK,
+            instruction="Write the letter paragraphs described in the data.",
+            data={
+                "letter_type": body.letter_type,
+                "tone": body.tone,
+                "key_points": body.key_points,
+            },
+            max_tokens=1200,
+        )
+    except AppError:
+        return None
+    reply = reply.strip()
+    # Figures or identifiers in the answer are not trusted: the template is used instead.
+    if not reply or find_restricted(reply):
+        return None
+    return reply
 
 
 def build_docx(title: str, text: str) -> bytes:
@@ -172,11 +221,17 @@ def build_docx(title: str, text: str) -> bytes:
 
 
 @router.post("/draft", response_model=LetterDraftOut)
-async def create_draft(body: LetterDraftIn, access: Writes) -> LetterDraftOut:
+async def create_draft(body: LetterDraftIn, request: Request, access: Writes) -> LetterDraftOut:
     company_wide(access)
     subject, text = draft_text(body)
+    paragraphs = await _ai_paragraphs(request, access, body)
+    if paragraphs is None:
+        source: Literal["template", "ai"] = "template"
+    else:
+        source = "ai"
+        text = "\n".join([GREETING[body.tone], "", paragraphs, *_sign_off(body.tone)])
     return LetterDraftOut(
-        source="template",
+        source=source,
         letter_type=body.letter_type,
         tone=body.tone,
         title=subject,

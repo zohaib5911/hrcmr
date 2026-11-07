@@ -16,10 +16,11 @@ from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.pool import NullPool
 
+from app.ai.redaction import find_restricted
 from app.core.crypto import KeyRing, set_keyring
 from app.main import create_app
 from app.modules.auth.sessions import SessionStore
-from tests.db.api_support import sign_in_as, two_companies
+from tests.db.api_support import fake_claude, sign_in_as, two_companies
 from tests.db.support import DatabaseUnderTest, engine_for
 from tests.db.test_files import PDF, S3_ACCESS, S3_BUCKET, S3_ENDPOINT, S3_SECRET
 from tests.support import TEST_REDIS_URL, build_settings
@@ -618,3 +619,36 @@ async def test_future_and_replaced_sources_do_not_send_and_sent_history_survives
         await hr.post(f"{API}/reminders/{cancelled['id']}/send", json={"message": "Old source"})
     ).status_code == 409
     assert "PRIVATE-PASSPORT-123" not in str(history) + str(register)
+
+
+async def test_reminder_wording_is_ai_or_the_template_and_no_name_is_sent(
+    rig: dict[str, Any],
+) -> None:
+    hr, _emp, reminder = await _due_passport(rig)
+    path = f"{API}/reminders/{reminder['id']}/wording"
+    template = reminder["message_draft"]
+    no_key = await hr.post(path)
+    assert no_key.status_code == 200, no_key.text
+    assert no_key.json() == {"source": "template", "message": template}
+    sent = fake_claude(
+        rig["app"],
+        reply="Your passport needs review soon. Please check your record and speak with HR.",
+    )
+    made = await hr.post(path)
+    assert made.status_code == 200, made.text
+    assert made.json()["source"] == "ai"
+    assert made.json()["message"].startswith("Your passport needs review")
+    assert len(sent) == 1
+    # Only the document type and the threshold reach the AI: no employee, reference or date.
+    for identifier in ("Amira", "Hassan", "PRIVATE-PASSPORT", "a@example.com"):
+        assert identifier not in sent[0]
+    assert find_restricted(sent[0]) == []
+    # Asking for wording saves nothing; the draft stays the template until HR saves or sends.
+    current = (await hr.get(f"{API}/reminders/{reminder['id']}")).json()
+    assert current["message_draft"] == template
+    employee = await rig["person"]("employee", rig["a"])
+    assert (await employee.post(path)).status_code == 403
+    fake_claude(rig["app"], status=500)
+    down = await hr.post(path)
+    assert down.status_code == 200, down.text
+    assert down.json()["source"] == "template"

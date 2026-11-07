@@ -30,6 +30,7 @@ from app.core.logging import configure_logging, get_logger
 from app.core.middleware import RequestContextMiddleware
 from app.core.redis import create_redis, ping_redis
 from app.db.engine import create_engine, ping_database
+from app.integrations.anthropic import Anthropic
 from app.integrations.clamav import ClamAV
 from app.integrations.cloudflare_ips import keep_cloudflare_ranges_current
 from app.integrations.companies_house import CompaniesHouse
@@ -57,6 +58,7 @@ from app.modules.compliance.hub_router import router as compliance_hub_router
 from app.modules.compliance.reminder_router import router as reminders_router
 from app.modules.compliance.router import router as compliance_changes_router
 from app.modules.compliance.sponsor_pdf import router as sponsor_pdf_router
+from app.modules.dashboard.router import router as dashboard_router
 from app.modules.documents.router import router as documents_router
 from app.modules.email.outbox import OutboxMailer
 from app.modules.employees.activity_router import router as employee_activity_router
@@ -91,6 +93,7 @@ from app.modules.rota.publish_router import router as rota_publish_router
 from app.modules.rota.router import router as rota_router
 from app.modules.rota.week_router import router as rota_week_router
 from app.modules.rtw.router import router as rtw_router
+from app.modules.search.router import router as search_router
 from app.modules.sponsor_documents.router import router as sponsor_documents_router
 from app.modules.work_log.router import router as work_log_router
 
@@ -162,6 +165,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
             settings, redis, sender or LoggingMailer(), Turnstile(settings.turnstile_secret_key)
         )
         app.state.companies_house = CompaniesHouse.from_settings(settings)
+        app.state.anthropic = Anthropic.from_settings(settings)
         app.state.postcodes = Postcodes()
         app.state.files = FileService(
             Storage.from_settings(settings), ClamAV.from_settings(settings)
@@ -270,6 +274,8 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(learning_router, prefix=API_PREFIX)
     app.include_router(learning_admin_router, prefix=API_PREFIX)
     app.include_router(certificates_router, prefix=API_PREFIX)
+    app.include_router(dashboard_router, prefix=API_PREFIX)
+    app.include_router(search_router, prefix=API_PREFIX)
     app.include_router(careers_router, prefix=API_PREFIX)
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)

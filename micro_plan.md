@@ -265,7 +265,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 14 — Dashboard, notifications, search, AI
 
-### [ ] T14.1 · S · Dashboard API, cards and setup checklist
+### [x] T14.1 · S · Dashboard API, cards and setup checklist
 - **Spec:** plan §8.2 (find with `grep -n '### 8.2' plan.md`, read to 8.3), L1435; API item 18.
 - **Steps:**
   1. `GET /dashboard`: one aggregated, permission-aware response (each card omitted if the user lacks its permission). Reuse existing services; no new queries where a service exists.
@@ -273,7 +273,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. Cards UI per 8.2 on `/dashboard`.
 - **Done when:** Employee role response has no company-wide cards (test); page renders all states.
 
-### [ ] T14.2 · S · Notifications
+### [x] T14.2 · S · Notifications
 - **Spec:** plan L1193–1196, L1436.
 - **Steps:**
   1. Ensure `notifications/router.py` lists every kind now produced (policy, rota.published, course, recruitment); `PATCH /notifications/{id}`, `POST /notifications/read-all`, `GET/PUT /me/notification-preferences` (immediate / daily / off).
@@ -281,16 +281,16 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. Bell list with "Needs attention" + personal, mark all read, links.
 - **Done when:** a user never sees another user's notifications (test); digest idempotent.
 
-### [ ] T14.3 · S! · Command palette live search
+### [x] T14.3 · S! · Command palette live search
 - **Spec:** plan L1178, L1437; `GET /search?q=`.
 - **Copy:** existing palette in `web/components/app/` (pages + recent already exist).
 - **Steps:** API search over employees + candidates **only where the user has read permission**, max 8 each, min 2 chars; add People + Actions groups to palette.
 - **Done when:** user without `employee.profile.read` gets no employees (test); other-tenant names never returned (test).
 
-### [ ] T14.4 · B · Anthropic integration, redaction layer, tools, assistant panel
+### [x] T14.4 · B · Anthropic integration, redaction layer, tools, assistant panel
 - **Spec:** plan L986–1000, L1438, L1440–1441. Big model: also write the Phase 14 payload fuzz test here.
 
-### [ ] T14.5 · S · Wire AI into letter drafting and reminder wording
+### [x] T14.5 · S · Wire AI into letter drafting and reminder wording
 - **Spec:** plan L1439. Needs T14.4 done.
 - **Copy:** `api/app/integrations/anthropic.py` (from T14.4) and its redaction helper — call them; never call the SDK directly.
 - **Steps:**
@@ -298,7 +298,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   2. Reminder review drawer (T7.4) gets an AI-worded message when available, else the current template.
 - **Done when:** with no key, both still work (test); a test asserts the outgoing payload has no employee names/identifiers (reuse T14.4's assertion helper).
 
-### [ ] P14 · S · Phase 14 gate
+### [x] P14 · S · Phase 14 gate
 - Recipe R7 + run the T14.4 fuzz test.
 
 ### [ ] AUDIT-2 · AUDIT STOP · covers T12.1 → P14 (and T14.4 by the big model)

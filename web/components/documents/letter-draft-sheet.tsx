@@ -215,6 +215,11 @@ export function LetterDraftSheet({
                 {draft.source === "ai" ? "AI-generated draft" : "Template draft"}
               </StatusChip>
             </div>
+            {aiAvailable && draft.source === "template" && (
+              <p className="text-caption text-label-secondary">
+                AI could not write this letter this time, so the template is shown. Try again later.
+              </p>
+            )}
             <TextArea
               label="Draft letter"
               rows={16}

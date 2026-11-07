@@ -3,6 +3,28 @@
 Generated from the SQLAlchemy models by `python -m app.cli export-data-model`.
 Do not edit by hand: a test fails when this file is out of date.
 
+## `ai_interactions`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `user_id` | UUID | yes |  | references `users` |
+| `feature` | VARCHAR(40) | no |  |  |
+| `model` | VARCHAR(80) | no |  |  |
+| `status` | VARCHAR(10) | no |  |  |
+| `input_tokens` | INTEGER | no |  |  |
+| `output_tokens` | INTEGER | no |  |  |
+| `duration_ms` | INTEGER | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `status in ('ok', 'error', 'refused')`
+
 ## `applications`
 
 | Column | Type | Null | Default | Notes |
@@ -1067,6 +1089,23 @@ Checks:
 - `role in ('company_admin', 'hr_admin', 'people_manager', 'recruiter', 'employee', 'read_only_auditor')`
 - `status in ('active', 'suspended')`
 
+## `notification_preferences`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `user_id` | UUID | no |  | references `users` |
+| `mode` | VARCHAR(10) | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `mode in ('immediate', 'daily', 'off')`
+
 ## `notifications`
 
 | Column | Type | Null | Default | Notes |
@@ -1078,6 +1117,7 @@ Checks:
 | `body` | TEXT | yes |  |  |
 | `link` | VARCHAR(300) | yes |  |  |
 | `read_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `digested_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 | `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
@@ -1107,6 +1147,19 @@ Checks:
 - `length(trim(role_title)) > 0`
 - `salary_per in ('year','month','hour')`
 - `status in ('draft','sent','accepted','declined','withdrawn')`
+
+## `onboarding_dismissals`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `user_id` | UUID | no |  | references `users` |
+| `dismissed_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
 
 ## `org_changes`
 
