@@ -304,3 +304,4 @@
 2026-11-07 17:36 | Claude (Haiku) | P14 | gate: API 1036 pass; web lint/typecheck/unit 786; e2e 430 pass (dashboard re-run 2 pass after checklist icon change); 12 screenshots docs/screenshots/phase-14; PROGRESS summary; ticked | next PR dev->main, wait for CI, merge when green, then AUDIT-2 stop
 2026-11-07 17:57 | Claude (Haiku) | AUDIT-2 | STOP: T12.1 to P14 needs a big model; PR #22 merged (P14 gate); STATUS BLOCKED | next big model: Read AGENTS.md and continue
 2026-11-07 18:06 | Claude (Opus) | AUDIT-2 | started round 1; scope audit-pass-1..a87d511 | next run full checks
+2026-11-07 19:57 | Claude (Opus) | AUDIT-2 | round 1 DONE: 0/3/3, FIX NEEDED; tagged audit-2-r1 | next small model fixes changesneeded.md C2.1.1+

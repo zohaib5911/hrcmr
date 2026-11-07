@@ -1,6 +1,7 @@
 # changesneeded.md — audit AUDIT-2 round 1 (2026-11-07, Claude Opus 5.5)
 Scope: audit-pass-1 (afa2d28 base)..a87d511 (T12.1 → P14, incl. T14.4)
-Tests at audit: TESTS_LINE
+Tests at audit: api 1036/0/0 (lint, format, mypy clean; check-rls via tests/db/test_cli.py), web unit 786/0, web lint/types/build/gen:api clean, e2e 430/0 (176 screenshot-only skipped), CI green (PR #22)
+Result: FIX NEEDED: 0 P0 / 3 P1 / 3 P2. AUDIT-2 stays open; re-audit after C2.1.1 to C2.1.3.
 
 ### [ ] C2.1.1 · P1 · Employee names typed into letter key points reach Claude (from T14.5)
 - **Problem:** `api/app/ai/letters.py` `_ai_paragraphs` sends `key_points` as free text. `generate` (`api/app/ai/service.py:78`) makes a fresh `Pseudonymiser()` that knows no names, so a point such as "Meet Ada Morrow on Monday" is sent to Anthropic with the name in it. Plan 8.12: letter drafting "generic placeholders only; no identifiers". The existing test `test_ai_draft_wraps_claude_paragraphs_and_sends_only_type_tone_and_points` (`api/tests/db/test_letters.py:94`) never uses a name, so it cannot catch this.
