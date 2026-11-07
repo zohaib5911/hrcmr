@@ -13,3 +13,16 @@ Licence: Open Government Licence v3.0, as recorded in plan.md 6.10. The ONS lice
 
 The coding-index count in plan.md (about 30,110) is lower than the file (32,670 records, 32,439 with a code).
 The file is the source of truth; the row counts loaded are recorded in PROGRESS.md.
+
+# Immigration Rules pages (T15.2)
+
+Saved 2026-11-08 from GOV.UK (page "updated" stamp 29 Oct 2026) into `data/raw/rules/`. Each page has a sidecar
+`.json` with its URL, the GOV.UK `govuk:updated-at` stamp, byte count and SHA-256. `data/import_rules.py` checks the
+hash before it parses a page. The pages are also the parser test fixtures, so they are never overwritten: a new
+GOV.UK release is saved as new dated files.
+
+| File | Source page |
+|---|---|
+| `rules/appendix-skilled-occupations-2026-10-29.html` | [Appendix Skilled Occupations](https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-skilled-occupations): Tables 1–6 |
+| `rules/appendix-immigration-salary-list-2026-10-29.html` | [Appendix Immigration Salary List](https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-immigration-salary-list) |
+| `rules/appendix-skilled-worker-2026-10-29.html` | [Appendix Skilled Worker](https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-skilled-worker): points options A–K (SW 4.2 table) and the Temporary Shortage List (SW 6.1A) |
