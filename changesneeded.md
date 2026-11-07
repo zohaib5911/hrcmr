@@ -20,7 +20,7 @@ Note: the round 1 fixes were written by the same model that ran this round; roun
 - **Fix:** for each route, find the `max_bytes` it passes (default `MAX_BYTES` = 25 MB → `UPLOAD_LIMIT`) and add a matching prefix to `limits` in `app/main.py`. `/employees` is a prefix of JSON routes too, so use a path pattern or the exact sub-paths. If `_limit_for` only does `startswith`, extend it to accept a compiled regex key, and keep the existing entries working. Add a guard test `tests/test_body_limits.py`: walk `create_app().routes`, find every route whose endpoint has an `UploadFile` parameter, and assert `_limit_for(path with ids filled in)` is greater than 1 MB.
 - **Done when:** the guard test passes. A DB test uploads a 3 MB PDF to `/policies/{id}/file` and gets 200 (copy the upload lines from `tests/db/test_policies.py`).
 
-### [ ] C1.2.4 · P2 · The candidate's invite lists the interviewers' e-mail addresses (from C1.1.2)
+### [x] C1.2.4 · P2 · The candidate's invite lists the interviewers' e-mail addresses (from C1.1.2)
 - **Problem:** `create_interview` (`api/app/modules/recruitment/router.py`) builds one `.ics` with every attendee and attaches it to the candidate's e-mail too. `Employee.email` is the only e-mail on file (often personal), and the external candidate did not see these addresses before.
 - **Fix:** build two invites with `_invite_text`. The staff copy keeps every attendee. The candidate copy has only `[(candidate_name, candidate_email)]` as attendees. Use the same UID, so both are the same event.
 - **Done when:** `tests/db/test_interviews.py` asserts that the candidate's attachment does not contain the panel address and the staff attachment does.

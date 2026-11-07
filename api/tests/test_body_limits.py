@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import re
 import uuid
-from typing import Any
+from typing import Any, cast
 
 from app.core.body_limit import DEFAULT_LIMIT, BodyLimitMiddleware
 from app.main import API_PREFIX, create_app
@@ -20,8 +20,10 @@ PARAM = re.compile(r"\{[^}]+\}")
 def _middleware() -> tuple[BodyLimitMiddleware, dict[str, Any]]:
     app = create_app(build_settings())
     for item in app.user_middleware:
-        if item.cls is BodyLimitMiddleware:
-            return BodyLimitMiddleware(app, **item.kwargs), app.openapi()
+        factory: object = item.cls
+        if factory is BodyLimitMiddleware:
+            limits = cast("dict[str | re.Pattern[str], int]", item.kwargs["limits"])
+            return BodyLimitMiddleware(app, limits=limits), app.openapi()
     raise AssertionError("BodyLimitMiddleware is not installed")
 
 

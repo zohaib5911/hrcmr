@@ -874,6 +874,13 @@ async def create_interview(
     if candidate_email:
         attendees.append((candidate_name, candidate_email))
     invite = _invite_text(request, row, candidate_name, title, attendees)
+    # The candidate's copy is the same event (same UID) but names only them: staff addresses
+    # (often personal, the only e-mail on file) are not shared with someone outside the company.
+    candidate_invite = (
+        _invite_text(request, row, candidate_name, title, [(candidate_name, candidate_email)])
+        if candidate_email
+        else None
+    )
     for person in interviewers:
         if person.email:
             data = {
@@ -898,7 +905,9 @@ async def create_interview(
             EmailOutbox(
                 to_address=candidate_email,
                 template="interview_invite_candidate",
-                payload=encrypt(json.dumps({**data, ICS_KEY: invite}), context=PAYLOAD_CONTEXT),
+                payload=encrypt(
+                    json.dumps({**data, ICS_KEY: candidate_invite}), context=PAYLOAD_CONTEXT
+                ),
             )
         )
     await access.audit(

@@ -92,6 +92,12 @@ async def test_an_interview_sends_invites_and_an_ics_file(rig: dict[str, Any]) -
     for row in sent:
         assert (await delivery.deliver(row[2])).status == "sent"
     assert len(transport.sent) == 2
+    invites = {message.to: message.attachments[0].content.decode() for message in transport.sent}
+    # Staff see the whole panel; the candidate's copy names only them.
+    assert f"mailto:{panel_mail}" in invites[panel_mail]
+    assert f"mailto:{candidate_mail}" in invites[panel_mail]
+    assert f"mailto:{panel_mail}" not in invites[candidate_mail]
+    assert f"mailto:{candidate_mail}" in invites[candidate_mail]
     for message in transport.sent:
         assert [item.filename for item in message.attachments] == ["invite.ics"]
         attached = message.attachments[0]
