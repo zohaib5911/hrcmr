@@ -148,6 +148,27 @@ Checks:
 - `length(trim(first_name)) > 0`
 - `length(trim(last_name)) > 0`
 
+## `certificates`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `assignment_id` | UUID | no |  | references `course_assignments`, unique |
+| `reference` | VARCHAR(20) | no |  | unique |
+| `holder_name_snapshot` | VARCHAR(200) | no |  |  |
+| `course_title_snapshot` | VARCHAR(160) | no |  |  |
+| `completed_on` | DATE | no |  |  |
+| `issued_on` | DATE | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `length(reference) >= 10`
+
 ## `change_of_circumstances`
 
 | Column | Type | Null | Default | Notes |

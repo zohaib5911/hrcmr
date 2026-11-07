@@ -10,6 +10,8 @@ import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { formatUk } from "@/lib/ui/dates";
 
+import { CertificateButton } from "./certificate-button";
+
 type Detail = components["schemas"]["AssignmentDetailOut"];
 type Assignment = components["schemas"]["CourseAssignmentOut"];
 type Result = components["schemas"]["QuizResultOut"];
@@ -226,6 +228,8 @@ export function CoursePlayer({ assignmentId }: { assignmentId: string }) {
               onBack={() => setMode("read")}
             />
           )}
+
+          {a.status === "completed" ? <CertificateButton assignmentId={assignmentId} /> : null}
 
           <aside
             aria-label="Where this comes from"

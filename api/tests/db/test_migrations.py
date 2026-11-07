@@ -20,6 +20,7 @@ IDENTITY_TABLES = [
     "audit_events",
     "bank_holidays",
     "candidates",
+    "certificates",
     "change_of_circumstances",
     "companies",
     "company_bank_accounts",

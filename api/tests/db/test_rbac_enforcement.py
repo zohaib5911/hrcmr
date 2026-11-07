@@ -280,6 +280,7 @@ def test_no_real_endpoint_skips_authorisation() -> None:
         "/api/v1/ready",
         "/api/v1/public/careers/",  # no-login careers pages and apply: Turnstile, rate limit, listed fields
         "/api/v1/public/postings/",  # (see test_careers)
+        "/api/v1/public/certificates/",  # no-login certificate check: rate limited, four fields only (see test_certificates)
     )
 
     app: FastAPI = create_app(build_settings())

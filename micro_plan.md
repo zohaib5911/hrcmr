@@ -251,7 +251,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. UI: `/learning` KPIs, Report and Courses views, 3-step assign wizard; `/learning/my` (Assigned to me / All courses).
 - **Done when:** assigning twice doesn't duplicate; overdue job idempotent; Employee role sees only own.
 
-### [ ] T13.4 · S! · Certificates and public `/verify`
+### [x] T13.4 · S! · Certificates and public `/verify`
 - **Spec:** plan L1027–1028, L1432; API `GET /certificates/{id}.pdf`, `GET /public/certificates/verify?ref=`.
 - **Steps:**
   1. On completion: certificate with random reference (≥ 10 chars, from `secrets`, unguessable), PDF (R4).

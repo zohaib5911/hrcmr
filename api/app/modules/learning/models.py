@@ -85,3 +85,24 @@ class CourseAssignment(Base, RecordMixin, TenantMixin):
     assigned_by: Mapped[uuid.UUID | None] = mapped_column(
         Uuid, ForeignKey("users.id", ondelete="SET NULL")
     )
+
+
+class Certificate(Base, RecordMixin):
+    """Proof that a person completed a course. The public check finds it by its reference.
+
+    The holder and course names are copied when it is issued, so later edits do not change it."""
+
+    __tablename__ = "certificates"
+    __table_args__ = (CheckConstraint("length(reference) >= 10", name="reference_length"),)
+
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    assignment_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("course_assignments.id", ondelete="RESTRICT"), nullable=False, unique=True
+    )
+    reference: Mapped[str] = mapped_column(String(20), nullable=False, unique=True)
+    holder_name_snapshot: Mapped[str] = mapped_column(String(200), nullable=False)
+    course_title_snapshot: Mapped[str] = mapped_column(String(160), nullable=False)
+    completed_on: Mapped[date] = mapped_column(Date, nullable=False)
+    issued_on: Mapped[date] = mapped_column(Date, nullable=False)

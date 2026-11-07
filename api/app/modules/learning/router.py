@@ -19,7 +19,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from app.core.errors import AppError, ConflictError, ForbiddenError, NotFoundError
 from app.core.rbac_matrix import Scope
 from app.db.ids import uuid7
-from app.modules.learning import report, service
+from app.modules.learning import certificates, report, service
 from app.modules.learning.models import Course, CourseAssignment
 from app.modules.learning.schemas import (
     AssignmentCreatedOut,
@@ -329,6 +329,7 @@ async def complete_course(assignment_id: uuid.UUID, access: OwnWrites) -> Course
     if row.status != "completed":
         row.status = "completed"
         row.completed_at = datetime.now(UTC)
+        await certificates.issue(access.db, row, course)
         await access.audit(
             "learning.course_completed",
             entity_type="course_assignment",

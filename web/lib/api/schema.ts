@@ -1003,6 +1003,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/certificates/{certificate_id}.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Certificate Pdf */
+        get: operations["learning_certificate_pdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/changes/{change_id}/mark-reported": {
         parameters: {
             query?: never;
@@ -2589,6 +2606,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/learning/assignments/{assignment_id}/certificate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Assignment Certificate */
+        get: operations["learning_assignment_certificate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/learning/assignments/{assignment_id}/complete": {
         parameters: {
             query?: never;
@@ -3662,6 +3696,27 @@ export interface paths {
          * @description The company logo for its public careers pages (it is shown to anyone who visits them).
          */
         get: operations["careers_careers_logo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/certificates/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Verify Certificate
+         * @description Anyone can check a certificate by its reference. Limited per connection, and unknown
+         *     references get the same plain answer whatever the reason.
+         */
+        get: operations["learning_verify_certificate"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5661,6 +5716,33 @@ export interface components {
             override_reason: string | null;
             /** Remaining */
             remaining: string | null;
+        };
+        /**
+         * CertificateCheckOut
+         * @description Only these four fields. Nothing else about the person or the company is ever returned.
+         */
+        CertificateCheckOut: {
+            /**
+             * Completed On
+             * Format: date
+             */
+            completed_on: string;
+            /** Course Title */
+            course_title: string;
+            /** Holder Name */
+            holder_name: string;
+            /** Status */
+            status: string;
+        };
+        /** CertificateRefOut */
+        CertificateRefOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Reference */
+            reference: string;
         };
         /** ChangeDefaults */
         ChangeDefaults: {
@@ -13633,6 +13715,46 @@ export interface operations {
             };
         };
     };
+    learning_certificate_pdf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                certificate_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A course certificate */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": unknown;
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     compliance_changes_mark_reported: {
         parameters: {
             query?: never;
@@ -18849,6 +18971,46 @@ export interface operations {
             };
         };
     };
+    learning_assignment_certificate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CertificateRefOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     learning_complete_course: {
         parameters: {
             query?: never;
@@ -22215,6 +22377,46 @@ export interface operations {
                 content: {
                     "image/jpeg": unknown;
                     "image/png": unknown;
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    learning_verify_certificate: {
+        parameters: {
+            query: {
+                ref: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CertificateCheckOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
