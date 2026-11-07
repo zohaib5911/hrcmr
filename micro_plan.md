@@ -201,7 +201,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] P11 · S · Phase 11 gate
 - Recipe R7. Screens: recruitment tabs, application detail, candidate profile, careers list/detail.
 
-### [ ] AUDIT-1 · AUDIT STOP · covers T10.3 → P11
+### [x] AUDIT-1 · AUDIT STOP · covers T10.3 → P11
 
 ---
 

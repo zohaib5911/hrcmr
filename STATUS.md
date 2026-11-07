@@ -1,35 +1,36 @@
 # STATUS
-Updated: 2026-11-07 03:54, Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: 0044639+
-State: HANDED OVER — audit fixes ready (AUDIT-1 round 2: 0 P0 / 3 P1 / 1 P2 in changesneeded.md)
+Updated: 2026-11-07 04:23, Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: see git log
+State: HANDED OVER — audit passed (AUDIT-1 round 3: 0 P0 / 0 P1 / 1 P2); small model next
 
 ## Last completed
-- AUDIT-1 round 1 (scope f37f781..a49307d): 1 P0, 5 P1, 1 P2 in changesneeded.md; all 7 fixed and ticked at the owner's request.
-- PR #18 (Phase 11) merged to main as 1ea40b1 with all checks green.
+- AUDIT-1: round 1 (1/5/1), round 2 (0/3/1) and round 3 (0/0/1, PASS). All P0/P1 fixed on dev; tag audit-pass-1.
+- PR #18 (Phase 11) merged to main. PR #19 (audit fixes) merges once its CI is green.
 
 ## Current task
-- none. next.sh shows C1.2.1 (FIX, S). PR #19 (round 1 fixes) is open; do not merge it until C1.2.1 and C1.2.2 are in.
+- none.
 
 ## Next tasks
-- C1.2.1–C1.2.4 (small model), then AUDIT-1 round 3 (big model, fresh session): scope audit-1-r2..HEAD.
-- Then T12.1, T12.2, P12.
+- C1.3.1 (P2, small model): ORGANIZER line in interview invites (changesneeded.md).
+- Then Phase 12: T12.1, T12.2, P12.
 
 ## Health
-- CI on dev: fixes PR open (dev → main), waiting for checks. CI on main: green (PR #18).
-- Local checks after fixes: API 792 pass, ruff/mypy clean; web unit 777, typecheck, lint, gen:api clean; recruitment + careers browser specs 5 pass.
+- CI on dev: PR #19 re-run after the company.spec toast locator fix. CI on main: green (PR #18).
+- Local checks: API 796 pass, ruff/mypy clean; web unit 777, lint, typecheck, build, gen:api clean; company, recruitment and careers browser specs pass.
 
 ## Issues / suggestions
-- Public CV refusals are not audit-logged (no signed-in user, and the request writes nothing); staff upload refusals still are.
 - Turnstile: production must set the site key (web) and secret (API) together; with no secret the verifier accepts any token.
 - Accepting an offer does not move the application to Offer Accepted on its own (plan silent).
 - rota.published is missing from notifications/router.py _kinds (pre-existing).
 - Pushing to dev while a gate PR runs restarts its CI; batch pushes during gates.
+- Toast text appears twice (visible + screen-reader announcer): match toasts with exact: true in browser tests.
+- AUDIT-2 should be run by a fresh session; AUDIT-1 rounds 2–3 were checked by the model that wrote the fixes.
 
 ## Strategy / decisions taken
 - Hired is set only by Convert; no stage moves into or out of Hired.
-- Interview invites: the .ics text travels in the encrypted outbox payload under "ics" and is attached as invite.ics (text/calendar; method=REQUEST) at delivery; Message gained attachments (Resend + SMTP).
-- Careers apply is multipart form data; the CV (PDF/DOC/DOCX, 10 MB) uses FileService.store_public, which shares FileService._vet with staff uploads.
-- Careers logo: has_logo + public GET /public/careers/{slug}/logo (copies GET /company/logo), not a signed storage URL, so the CSP is unchanged.
-- Public careers reads: 120 per minute per connection.
+- Interview invites: the .ics travels in the encrypted outbox payload and is attached as invite.ics; staff get the whole panel, the candidate's copy names only them (same UID).
+- Careers apply is multipart; CV (PDF/DOC/DOCX, 10 MB) via FileService.store_public (shared checks with staff uploads). Refused public CVs are not audit-logged.
+- Careers logo: has_logo + public GET /public/careers/{slug}/logo. Only the logo is rate-limited in the API; server-rendered careers pages are limited at the edge.
+- Body limits: BodyLimitMiddleware accepts whole-path regex keys; tests/test_body_limits.py guards every multipart route.
 
 ## Owner actions needed
-- None.
+- Phase 23: add a Cloudflare rate-limit rule for /careers/* (the API cannot tell visitors apart on server-rendered pages).

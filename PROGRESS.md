@@ -357,6 +357,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
   - Decisions: convert needs an accepted offer and a verified check; apply is public with consent, Turnstile and a rate limit; careers responses list their fields.
 - AUDIT-1 round 1: 1/5/1 (P0/P1/P2) — FIX NEEDED. Worst: the stage endpoint could set Hired without convert, or leave Hired so convert made a second employee. All 7 fixed the same day at the owner's request (CV upload, logo, .ics attachment, refusal tests, read rate limit); re-audit (round 2) still due.
 - AUDIT-1 round 2: 0/3/1 (P0/P1/P2) — FIX NEEDED. Worst: the new careers read limit is shared by every visitor (server-rendered pages), and CV and policy uploads over 1 MB hit the body limit.
+- AUDIT-1 round 3: 0/0/1 (P0/P1/P2) — PASS. Round 2 fixes verified; a guard test now fails CI for any upload route without a body limit. One P2 left (interview invites need an ORGANIZER line). Rounds 2 and 3 were checked by the model that wrote the fixes.
 
 ### Phase 12 — Org chart
 - [ ] **T12.1** Tree API and hierarchy levels
