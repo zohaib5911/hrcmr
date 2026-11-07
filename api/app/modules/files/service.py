@@ -259,6 +259,14 @@ class FileService:
                 status_code=422,
                 field="owner_type",
             )
+        if owner_type == "candidate":
+            from app.modules.recruitment.models import Candidate
+
+            found = (
+                await access.db.execute(select(Candidate.id).where(Candidate.id == owner_id))
+            ).first()
+            if found is None:
+                raise NotFoundError
         if access.scope is not Scope.ALL and (
             owner_type != "employee" or not await access.can_reach(owner_id)
         ):

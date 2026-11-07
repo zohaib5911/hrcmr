@@ -164,7 +164,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. Table with public link column (External + Open only, Copy button). Closing asks to confirm.
 - **Done when:** closed posting → its public link field is null; posting on a non-Open requisition refused.
 
-### [ ] T11.3 · S · Candidates
+### [x] T11.3 · S · Candidates
 - **Spec:** plan L974–977, L1419. RTW reuse: `GET/POST /candidates/{id}/rtw-checks` (L1601).
 - **Copy:** RTW forms from `web/components/compliance/` / `api/app/modules/rtw/` (reuse, don't duplicate the forms).
 - **Steps:**

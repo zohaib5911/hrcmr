@@ -10,6 +10,7 @@ from typing import Annotated, Literal, Self
 from pydantic import BaseModel, EmailStr, Field, StringConstraints, model_validator
 
 from app.core.schemas import RequestModel
+from app.modules.rtw.schemas import RTWStatus  # noqa: TC001 (pydantic reads it at run time)
 
 Title = Annotated[
     str,
@@ -152,3 +153,41 @@ class PostingOut(BaseModel):
 class PostingPage(BaseModel):
     items: list[PostingOut]
     total: int
+
+
+Name = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=100)]
+
+
+class CandidateIn(RequestModel):
+    first_name: Name
+    last_name: Name
+    email: EmailStr | None = None
+    phone: Annotated[str, StringConstraints(strip_whitespace=True, max_length=40)] | None = None
+    source: Annotated[str, StringConstraints(strip_whitespace=True, max_length=40)] | None = None
+
+
+class CandidateOut(BaseModel):
+    id: uuid.UUID
+    first_name: str
+    last_name: str
+    email: str | None
+    phone: str | None
+    source: str | None
+    archived: bool
+    rtw_status: RTWStatus
+    created_at: datetime
+    updated_at: datetime
+
+
+class CandidatePage(BaseModel):
+    items: list[CandidateOut]
+    total: int
+
+
+class CandidateFile(BaseModel):
+    id: uuid.UUID
+    name: str
+    mime: str
+    size: int
+    scan_status: str
+    created_at: datetime

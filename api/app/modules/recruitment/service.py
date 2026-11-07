@@ -4,17 +4,19 @@ from __future__ import annotations
 
 import re
 import uuid  # noqa: TC003
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING, cast
 
 from sqlalchemy import and_, select
 
 from app.core.errors import AppError, NotFoundError
 from app.modules.companies.models import Company, Department, Location
+from app.modules.files.models import File
 from app.modules.identity.models import User
-from app.modules.recruitment.models import Posting, Requisition
+from app.modules.recruitment.models import Candidate, Posting, Requisition
 from app.modules.recruitment.schemas import (
     BudgetPer,
+    CandidateOut,
     PostingOut,
     PostingStatus,
     PostingVisibility,
@@ -22,9 +24,12 @@ from app.modules.recruitment.schemas import (
     RequisitionStatus,
     VisaSponsorship,
 )
+from app.modules.rtw.models import RTWCheck
+from app.modules.rtw.router import status_of
 
 if TYPE_CHECKING:
     from app.db.session import TenantSession
+    from app.modules.rtw.schemas import RTWStatus
 
 # Where a requisition may move from. A cancelled requisition moves nowhere.
 NEXT_FROM: dict[RequisitionStatus, frozenset[RequisitionStatus]] = {
@@ -272,6 +277,51 @@ async def posting_out(db: TenantSession, row: Posting, web_origin: str) -> Posti
         visa_sponsorship=cast("VisaSponsorship", row.visa_sponsorship),
         status=cast("PostingStatus", row.status),
         public_link=public_link(company_slug, row, web_origin),
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+    )
+
+
+async def candidate_rtw_status(
+    db: TenantSession, candidate_id: uuid.UUID, today: date
+) -> RTWStatus:
+    """A candidate's current right-to-work status, worked out as an employee's is."""
+    current = (
+        await db.execute(
+            select(RTWCheck).where(
+                RTWCheck.subject_type == "candidate",
+                RTWCheck.subject_id == candidate_id,
+                RTWCheck.superseded_at.is_(None),
+            )
+        )
+    ).scalar_one_or_none()
+    if current is None:
+        return "not_recorded"
+    clean = False
+    if current.evidence_file_id is not None:
+        clean = (
+            await db.execute(
+                select(File.id).where(
+                    File.id == current.evidence_file_id,
+                    File.owner_type == "candidate",
+                    File.owner_id == candidate_id,
+                    File.scan_status == "clean",
+                )
+            )
+        ).first() is not None
+    return status_of(current, today, clean_evidence=clean)
+
+
+async def candidate_out(db: TenantSession, row: Candidate, today: date) -> CandidateOut:
+    return CandidateOut(
+        id=row.id,
+        first_name=row.first_name,
+        last_name=row.last_name,
+        email=row.email,
+        phone=row.phone,
+        source=row.source,
+        archived=row.archived_at is not None,
+        rtw_status=await candidate_rtw_status(db, row.id, today),
         created_at=row.created_at,
         updated_at=row.updated_at,
     )

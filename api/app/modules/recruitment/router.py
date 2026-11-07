@@ -5,16 +5,22 @@ from __future__ import annotations
 import uuid  # noqa: TC003
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query, Request, Response
 from sqlalchemy import func, select
 
 from app.core.errors import AppError, ForbiddenError, NotFoundError
 from app.core.rbac_matrix import Scope, scope_for
 from app.db.ids import uuid7
+from app.modules.companies.compliance_documents import _today as company_today
+from app.modules.files.models import File
 from app.modules.rbac.deps import Access, require
 from app.modules.recruitment import service
 from app.modules.recruitment.models import Application, Candidate, Posting, Requisition
 from app.modules.recruitment.schemas import (
+    CandidateFile,
+    CandidateIn,
+    CandidateOut,
+    CandidatePage,
     PostingIn,
     PostingOut,
     PostingPage,
@@ -32,6 +38,8 @@ router = APIRouter(tags=["recruitment"])
 Reads = Annotated[Access, Depends(require("recruitment.requisition.read"))]
 Writes = Annotated[Access, Depends(require("recruitment.requisition.write"))]
 PostingReads = Annotated[Access, Depends(require("recruitment.posting.read"))]
+CandidateReads = Annotated[Access, Depends(require("recruitment.candidate.read"))]
+CandidateWrites = Annotated[Access, Depends(require("recruitment.candidate.write"))]
 PostingWrites = Annotated[Access, Depends(require("recruitment.posting.write"))]
 
 
@@ -357,3 +365,158 @@ async def set_posting_status(
         )
     await access.db.commit()
     return await service.posting_out(access.db, row, request.app.state.settings.web_origin)
+
+
+async def _candidate_row(access: Access, ident: uuid.UUID, *, lock: bool = False) -> Candidate:
+    query = select(Candidate).where(Candidate.id == ident)
+    if lock:
+        query = query.with_for_update()
+    row = (await access.db.execute(query)).scalar_one_or_none()
+    if row is None:
+        raise NotFoundError
+    return row
+
+
+def _candidate_snapshot(row: Candidate) -> dict[str, Any]:
+    return {
+        "first_name": row.first_name,
+        "last_name": row.last_name,
+        "email": row.email,
+        "phone": row.phone,
+        "source": row.source,
+    }
+
+
+def _apply_candidate(row: Candidate, body: CandidateIn) -> None:
+    row.first_name = body.first_name
+    row.last_name = body.last_name
+    row.email = body.email
+    row.phone = body.phone
+    row.source = body.source
+
+
+@router.get("/candidates", response_model=CandidatePage)
+async def list_candidates(
+    access: CandidateReads,
+    search: Annotated[str, Query(max_length=200)] = "",
+    include_archived: bool = False,
+    offset: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+) -> CandidatePage:
+    company_wide(access)
+    query = select(Candidate)
+    if not include_archived:
+        query = query.where(Candidate.archived_at.is_(None))
+    if search.strip():
+        term = search.strip().lower()
+        query = query.where(
+            func.lower(Candidate.first_name + " " + Candidate.last_name).contains(
+                term, autoescape=True
+            )
+            | func.lower(func.coalesce(Candidate.email, "")).contains(term, autoescape=True)
+        )
+    total = (
+        await access.db.execute(select(func.count()).select_from(query.subquery()))
+    ).scalar_one()
+    rows = (
+        (
+            await access.db.execute(
+                query.order_by(Candidate.last_name, Candidate.first_name, Candidate.id)
+                .offset(offset)
+                .limit(limit)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    today = await company_today(access)
+    return CandidatePage(
+        items=[await service.candidate_out(access.db, row, today) for row in rows], total=total
+    )
+
+
+@router.post("/candidates", status_code=201, response_model=CandidateOut)
+async def create_candidate(body: CandidateIn, access: CandidateWrites) -> CandidateOut:
+    company_wide(access)
+    row = Candidate(id=uuid7(), company_id=access.company_id)
+    _apply_candidate(row, body)
+    access.db.add(row)
+    await access.db.flush()
+    await access.db.refresh(row)
+    await access.audit(
+        "candidate.created",
+        entity_type="candidate",
+        entity_id=row.id,
+        after=_candidate_snapshot(row),
+    )
+    await access.db.commit()
+    return await service.candidate_out(access.db, row, await company_today(access))
+
+
+@router.get("/candidates/{candidate_id}", response_model=CandidateOut)
+async def get_candidate(candidate_id: uuid.UUID, access: CandidateReads) -> CandidateOut:
+    company_wide(access)
+    row = await _candidate_row(access, candidate_id)
+    return await service.candidate_out(access.db, row, await company_today(access))
+
+
+@router.patch("/candidates/{candidate_id}", response_model=CandidateOut)
+async def update_candidate(
+    candidate_id: uuid.UUID, body: CandidateIn, access: CandidateWrites
+) -> CandidateOut:
+    company_wide(access)
+    row = await _candidate_row(access, candidate_id, lock=True)
+    before = _candidate_snapshot(row)
+    _apply_candidate(row, body)
+    await access.db.flush()
+    await access.audit(
+        "candidate.updated",
+        entity_type="candidate",
+        entity_id=row.id,
+        before=before,
+        after=_candidate_snapshot(row),
+    )
+    await access.db.commit()
+    return await service.candidate_out(access.db, row, await company_today(access))
+
+
+@router.delete("/candidates/{candidate_id}", status_code=204)
+async def archive_candidate(candidate_id: uuid.UUID, access: CandidateWrites) -> Response:
+    company_wide(access)
+    row = await _candidate_row(access, candidate_id, lock=True)
+    if row.archived_at is None:
+        row.archived_at = service.now()
+        await access.db.flush()
+        await access.audit("candidate.archived", entity_type="candidate", entity_id=row.id)
+    await access.db.commit()
+    return Response(status_code=204)
+
+
+@router.get("/candidates/{candidate_id}/documents", response_model=list[CandidateFile])
+async def candidate_documents(
+    candidate_id: uuid.UUID, access: CandidateReads
+) -> list[CandidateFile]:
+    company_wide(access)
+    await _candidate_row(access, candidate_id)
+    rows = (
+        (
+            await access.db.execute(
+                select(File)
+                .where(File.owner_type == "candidate", File.owner_id == candidate_id)
+                .order_by(File.created_at.desc(), File.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    return [
+        CandidateFile(
+            id=row.id,
+            name=row.original_name,
+            mime=row.mime,
+            size=row.size,
+            scan_status=row.scan_status,
+            created_at=row.created_at,
+        )
+        for row in rows
+    ]
