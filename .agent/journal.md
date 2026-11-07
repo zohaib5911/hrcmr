@@ -334,3 +334,4 @@
 2026-11-08 02:45 | Claude (Opus) | T15.3 | started; STATUS updated | next engine.py
 2026-11-08 02:49 | Claude (Opus) | T15.3 | step 1+3 done: engine.py (eligibility incl Table 6/1a/2a/3a transitional, ISL/TSL by CoS date+nation, SW 6.1B, options A-K from published columns pro-rated SW 14.4, 48h SW 14.3, verdict short-by/hours, dependants SW 29.1A); 27 golden tests pass | next DB loader load_rules_data + test
 2026-11-08 02:50 | Claude (Opus) | T15.3 | DONE: loader.py + DB test (stored = parsed); engine 27 golden + rules DB 7 + parser 18 pass; ruff/mypy clean | next small model T15.4 (S!)
+2026-11-08 02:53 | Claude (Haiku) | T15.4 | started; STATUS updated | next read soc/anthropic/loader/engine API
