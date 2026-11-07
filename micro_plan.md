@@ -156,7 +156,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. `/recruitment` page shell: intro line, 4 KPIs (`GET /recruitment/summary`), tabs Requisitions/Postings/Candidates/Applications with counts; Requisitions tab with sheet and status select (Cancel asks to confirm).
 - **Done when:** non-approver setting Open → 403; approver → stamped; cross-tenant 404; page works.
 
-### [ ] T11.2 · S · Postings
+### [x] T11.2 · S · Postings
 - **Spec:** plan L966–969, L1418.
 - **Steps:**
   1. Posting CRUD + `PATCH /postings/{id}/status` (Draft/Open/Closed). Create requires an **Open** requisition (else 422). Slug unique per company.

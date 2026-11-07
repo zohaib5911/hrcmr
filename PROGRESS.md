@@ -344,7 +344,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 
 ### Phase 11 — Recruitment and public careers
 - [x] **T11.1** Requisitions — 2026-11-07. Requisition CRUD with status changes; only recruitment.requisition.approve can open one and the approval is stamped; cancelled is final; /recruitment shell with KPIs, tabs and sheet. Also the 0033 migration for all six recruitment tables (plan 6.8). Verified: requisitions/migrations/RLS/guards 64 pass (incl. 3 requisition tests); web unit 777 pass; typecheck/lint clean; recruitment.spec pass; gen:api:check clean.
-- [ ] **T11.2** Postings
+- [x] **T11.2** Postings — 2026-11-07. Posting CRUD and Draft/Open/Closed status; a posting needs an open requisition to be created or opened; unique company slugs; public link only for external open postings, removed on close; postings tab with full sheet, SOC field with disabled Find code, JD template and original 'Writing it safely' guide. Verified: postings and recruitment DB tests 7 pass; route/guard/data-model 32 pass; mypy and ruff clean; web unit 777, typecheck and lint clean; gen:api:check clean.
 - [ ] **T11.3** Candidates
 - [ ] **T11.4** Applications, interviews, offers
 - [ ] **T11.5** Convert to employee

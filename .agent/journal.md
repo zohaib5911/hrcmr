@@ -243,3 +243,4 @@
 2026-11-07 06:13 | Claude | P10 | gate checks green: API 690, web e2e 423 (160 screenshot/design skipped), unit 777, 24 screenshots | next open PR dev->main, wait for CI, merge
 2026-11-07 06:23 | Claude | P10 | PR17 CI red: Semgrep 2 (migration f-string text(), validate_audience len(all)), Trivy HIGH apt CVE in both images; fixed + policy/migration tests 18 pass | next re-check PR17 checks then merge
 2026-11-07 06:32 | Claude | T11.1 | DONE: recruitment models + migration 0033 (6 tables), requisition CRUD/status with approval gate and stamp, summary, /recruitment shell + sheet; requisition DB 3 pass, guards/migrations 64 pass, web unit 777, recruitment.spec pass | next P11 phase work via next.sh
+2026-11-07 06:45 | Claude | T11.2 | DONE: posting CRUD + status (open needs open requisition), slugs, public link rules, postings tab/sheet; postings+recruitment 7 pass, guards 32 pass, mypy/ruff/web checks clean | next T11.3 via next.sh

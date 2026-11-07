@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import uuid  # noqa: TC003
-from datetime import datetime  # noqa: TC003
+from datetime import date, datetime  # noqa: TC003
 from decimal import Decimal
 from typing import Annotated, Literal, Self
 
-from pydantic import BaseModel, Field, StringConstraints, model_validator
+from pydantic import BaseModel, EmailStr, Field, StringConstraints, model_validator
 
 from app.core.schemas import RequestModel
 
@@ -75,3 +75,80 @@ class RecruitmentSummary(BaseModel):
     postings: int
     candidates: int
     applications_in_progress: int
+
+
+PostingVisibility = Literal["internal", "external"]
+VisaSponsorship = Literal["not_stated", "available", "considered", "not_available"]
+PostingStatus = Literal["draft", "open", "closed"]
+SocCode = Annotated[str, StringConstraints(strip_whitespace=True, pattern=r"^[0-9]{4}$")]
+
+
+class PostingIn(RequestModel):
+    requisition_id: uuid.UUID
+    title: Title
+    visibility: PostingVisibility = "internal"
+    location_id: uuid.UUID | None = None
+    job_code: Annotated[str, StringConstraints(strip_whitespace=True, max_length=40)] | None = None
+    soc_code: SocCode | None = None
+    vacancies: int = Field(default=1, ge=1, le=999)
+    posted_on: date | None = None
+    closes_on: date | None = None
+    contact_email: EmailStr | None = None
+    contact_phone: (
+        Annotated[str, StringConstraints(strip_whitespace=True, max_length=40)] | None
+    ) = None
+    salary_from: Money | None = None
+    salary_to: Money | None = None
+    salary_per: BudgetPer | None = None
+    weekly_hours: Decimal | None = Field(default=None, ge=0, le=168, max_digits=4, decimal_places=1)
+    description: Annotated[str, StringConstraints(max_length=20000)] | None = None
+    visa_sponsorship: VisaSponsorship = "not_stated"
+
+    @model_validator(mode="after")
+    def dates_and_pay(self) -> Self:
+        if self.posted_on and self.closes_on and self.closes_on < self.posted_on:
+            raise ValueError("The closing date must be on or after the posted date.")
+        if (
+            self.salary_from is not None
+            and self.salary_to is not None
+            and (self.salary_from > self.salary_to)
+        ):
+            raise ValueError("The salary from must not be more than the salary to.")
+        return self
+
+
+class PostingStatusIn(RequestModel):
+    status: PostingStatus
+
+
+class PostingOut(BaseModel):
+    id: uuid.UUID
+    requisition_id: uuid.UUID
+    requisition_title: str
+    title: str
+    slug: str
+    visibility: PostingVisibility
+    location_id: uuid.UUID | None
+    location: str | None
+    job_code: str | None
+    soc_code: str | None
+    vacancies: int
+    posted_on: date | None
+    closes_on: date | None
+    contact_email: str | None
+    contact_phone: str | None
+    salary_from: Decimal | None
+    salary_to: Decimal | None
+    salary_per: BudgetPer | None
+    weekly_hours: Decimal | None
+    description: str | None
+    visa_sponsorship: VisaSponsorship
+    status: PostingStatus
+    public_link: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class PostingPage(BaseModel):
+    items: list[PostingOut]
+    total: int

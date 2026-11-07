@@ -3073,6 +3073,59 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/postings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Postings */
+        get: operations["recruitment_list_postings"];
+        put?: never;
+        /** Create Posting */
+        post: operations["recruitment_create_posting"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/postings/{posting_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Posting */
+        get: operations["recruitment_get_posting"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Posting */
+        patch: operations["recruitment_update_posting"];
+        trace?: never;
+    };
+    "/postings/{posting_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Set Posting Status */
+        patch: operations["recruitment_set_posting_status"];
+        trace?: never;
+    };
     "/ready": {
         parameters: {
             query?: never;
@@ -7725,6 +7778,146 @@ export interface components {
             county: string | null;
             /** Postcode */
             postcode: string;
+        };
+        /** PostingIn */
+        PostingIn: {
+            /** Closes On */
+            closes_on?: string | null;
+            /** Contact Email */
+            contact_email?: string | null;
+            /** Contact Phone */
+            contact_phone?: string | null;
+            /** Description */
+            description?: string | null;
+            /** Job Code */
+            job_code?: string | null;
+            /** Location Id */
+            location_id?: string | null;
+            /** Posted On */
+            posted_on?: string | null;
+            /**
+             * Requisition Id
+             * Format: uuid
+             */
+            requisition_id: string;
+            /** Salary From */
+            salary_from?: number | string | null;
+            /** Salary Per */
+            salary_per?: ("year" | "month" | "hour") | null;
+            /** Salary To */
+            salary_to?: number | string | null;
+            /** Soc Code */
+            soc_code?: string | null;
+            /** Title */
+            title: string;
+            /**
+             * Vacancies
+             * @default 1
+             */
+            vacancies: number;
+            /**
+             * Visa Sponsorship
+             * @default not_stated
+             * @enum {string}
+             */
+            visa_sponsorship: "not_stated" | "available" | "considered" | "not_available";
+            /**
+             * Visibility
+             * @default internal
+             * @enum {string}
+             */
+            visibility: "internal" | "external";
+            /** Weekly Hours */
+            weekly_hours?: number | string | null;
+        };
+        /** PostingOut */
+        PostingOut: {
+            /** Closes On */
+            closes_on: string | null;
+            /** Contact Email */
+            contact_email: string | null;
+            /** Contact Phone */
+            contact_phone: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Description */
+            description: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Job Code */
+            job_code: string | null;
+            /** Location */
+            location: string | null;
+            /** Location Id */
+            location_id: string | null;
+            /** Posted On */
+            posted_on: string | null;
+            /** Public Link */
+            public_link: string | null;
+            /**
+             * Requisition Id
+             * Format: uuid
+             */
+            requisition_id: string;
+            /** Requisition Title */
+            requisition_title: string;
+            /** Salary From */
+            salary_from: string | null;
+            /** Salary Per */
+            salary_per: ("year" | "month" | "hour") | null;
+            /** Salary To */
+            salary_to: string | null;
+            /** Slug */
+            slug: string;
+            /** Soc Code */
+            soc_code: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "open" | "closed";
+            /** Title */
+            title: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Vacancies */
+            vacancies: number;
+            /**
+             * Visa Sponsorship
+             * @enum {string}
+             */
+            visa_sponsorship: "not_stated" | "available" | "considered" | "not_available";
+            /**
+             * Visibility
+             * @enum {string}
+             */
+            visibility: "internal" | "external";
+            /** Weekly Hours */
+            weekly_hours: string | null;
+        };
+        /** PostingPage */
+        PostingPage: {
+            /** Items */
+            items: components["schemas"]["PostingOut"][];
+            /** Total */
+            total: number;
+        };
+        /** PostingStatusIn */
+        PostingStatusIn: {
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "open" | "closed";
         };
         /** PreviousEmploymentIn */
         PreviousEmploymentIn: {
@@ -18595,6 +18788,219 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_list_postings: {
+        parameters: {
+            query?: {
+                status?: ("draft" | "open" | "closed") | null;
+                search?: string;
+                offset?: number;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostingPage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_create_posting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostingIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostingOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_get_posting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                posting_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostingOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_update_posting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                posting_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostingIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostingOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    recruitment_set_posting_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                posting_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostingStatusIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PostingOut"];
+                };
             };
             /** @description The request could not be completed. `error.code` says why. */
             "4XX": {

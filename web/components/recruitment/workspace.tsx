@@ -18,6 +18,7 @@ import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { formatUk } from "@/lib/ui/dates";
 
+import { PostingsTab } from "./postings-tab";
 import { RequisitionSheet, type Requisition } from "./requisition-sheet";
 
 type Summary = components["schemas"]["RecruitmentSummary"];
@@ -230,7 +231,11 @@ export function RecruitmentWorkspace() {
           />
         </TabsContent>
 
-        {(["postings", "candidates", "applications"] as const).map((name) => (
+        <TabsContent value="postings" className="pt-4">
+          <PostingsTab mayWrite={can("recruitment.posting.write")} />
+        </TabsContent>
+
+        {(["candidates", "applications"] as const).map((name) => (
           <TabsContent key={name} value={name} className="pt-4">
             <EmptyState
               icon={Briefcase}
