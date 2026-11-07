@@ -232,3 +232,4 @@
 2026-11-04 00:33 | Codex | T10.3 | own accept/sign/receipt and authorized scan-gated viewer/download APIs ready; owned/cross-tenant/archive/encryption/audit-rollback plus related32/static/types pass | next reminders/deadline/new-starter worker then UI
 2026-11-07 00:08 | Claude | docs | added micro_plan.md, audit.md, .agent/next.sh; AGENTS.md points to them (slim checkpoints, model tiers, audit stops 11/14/17/20/22) | next T10.3 step 5 via .agent/next.sh
 2026-11-07 00:15 | Claude | docs | agents self-detect tier (BIG=Opus/Fable/Solo 6.1); fixed stop messages; next.sh prints NEXT kind/tier/id | next T10.3 step 5
+2026-11-07 05:23 | Claude | T10.3 | started: docker stack up; STATUS updated | next step 5 remind endpoint
