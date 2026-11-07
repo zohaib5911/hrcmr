@@ -259,3 +259,4 @@
 2026-11-07 09:54 | Claude (Haiku) | C1.3.1 | started: read ics/router/outbox; plan = organizer arg + company name via _invite_text | next edit ics.py
 2026-11-07 09:56 | Claude (Haiku) | C1.3.1 | step done: ORGANIZER from company name + sender_of address in interview_ics/_invite_text (tests: ics 3, interviews db 2, recruitment+interview set 149 pass; ruff/mypy clean) | next tick C1.3.1 and next.sh
 2026-11-07 09:56 | Claude (Haiku) | C1.3.1 | DONE: ticked in changesneeded.md (fix 25c7f7d) | next .agent/next.sh
+2026-11-07 09:58 | Claude (Haiku) | T12.1 | started: read plan 8.13/6.2/6.3/rbac/reports/seed pattern; decisions in STATUS | next step 1 organogram module + GET /organogram
