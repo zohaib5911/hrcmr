@@ -275,3 +275,4 @@
 2026-11-07 11:24 | Claude (Haiku) | T13.1 | web player, platform editor, R6 spec written; typecheck and lint pass; api naming CourseAssignmentOut | next run learning-player e2e
 2026-11-07 11:25 | Claude (Haiku) | T13.1 | DONE: API 6 + player/editor + browser spec pass; ticked micro_plan and PROGRESS | next bash .agent/next.sh (T13.2 S!)
 2026-11-07 11:29 | Claude (Haiku) | T13.2 | course 1 of 8 written (employment-rights-essentials; source gov.uk contracts 2020-04-06); validated schema; unpublished until owner review | next course 2 employment-status (gov.uk 2015-02-12)
+2026-11-07 11:30 | Claude (Haiku) | T13.2 | course 2 of 8 employment-status (gov.uk 2015-02-12) validated | next course 3

@@ -1,0 +1,107 @@
+{
+  "slug": "employment-status",
+  "title": "Employment status: employee, worker or self-employed",
+  "summary": "Why a person's status matters, what each status usually means, and why a label in a contract does not settle the question.",
+  "duration_minutes": 20,
+  "audience": "all_staff",
+  "sections": [
+    {
+      "title": "Why status matters",
+      "body": "A person's employment status shapes their employment rights and their employer's responsibilities towards them.\nTax status can be different from employment status. A person may be treated one way for tax and another way for employment rights.",
+      "key_points": [
+        "Status decides which employment rights apply",
+        "Tax status can be different from employment status"
+      ]
+    },
+    {
+      "title": "Employees",
+      "body": "An employee works under a contract of employment, and is usually required to do the work personally.\nEmployees generally have the widest set of employment rights of the three statuses covered here.",
+      "key_points": [
+        "An employee works under a contract of employment",
+        "Employees generally have the widest set of rights"
+      ]
+    },
+    {
+      "title": "Workers",
+      "body": "A worker has some rights that an employee has, but usually fewer. They typically agree to do work personally, and are not running a business of their own in the same way a self-employed person does.\nBeing called a worker does not mean the arrangement is fixed. The working arrangement decides it.",
+      "key_points": [
+        "A worker usually does work personally",
+        "A worker has some rights, but usually fewer than an employee"
+      ]
+    },
+    {
+      "title": "Self-employed people and contractors",
+      "body": "A self-employed person runs their own business or works as a contractor. They usually control how and when the work is done.\nA contract that says someone is self-employed does not, on its own, make them so. What counts is the way the work is actually done.",
+      "key_points": [
+        "A self-employed person usually runs their own business",
+        "The label in a contract does not decide it on its own"
+      ]
+    },
+    {
+      "title": "Who makes the final decision",
+      "body": "If there is a dispute about status, courts and tribunals can make the final decision.\nAcas gives advice on employment status, on employee rights and on what an employer must do. Getting advice early can prevent a dispute from growing.",
+      "key_points": [
+        "Courts and tribunals make the final decision",
+        "Acas gives advice on employment status"
+      ]
+    },
+    {
+      "title": "What managers should do",
+      "body": "Before engaging someone, decide their status by looking at how the work will be done, not only at the paperwork.\nIf you are not sure, ask for advice before the work starts. Getting the status wrong can affect pay, leave and the protections that apply to the person.",
+      "key_points": [
+        "Look at how the work is done, not only the paperwork",
+        "Ask for advice when unsure, before the work starts"
+      ]
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "prompt": "Who can make the final decision on employment status if it is disputed?",
+        "options": ["The employer alone", "Courts and tribunals", "The tax office only"],
+        "answer": 1,
+        "explanation": "Courts and tribunals can make the final decision. An employer's view or a tax decision does not settle it alone."
+      },
+      {
+        "prompt": "A contract calls someone self-employed. What should decide their status?",
+        "options": [
+          "The label in the contract alone",
+          "The reality of the working arrangement",
+          "The worker's own preference"
+        ],
+        "answer": 1,
+        "explanation": "A label does not decide status on its own. The way the work is actually done matters."
+      },
+      {
+        "prompt": "Which status usually comes with the widest set of employment rights?",
+        "options": ["Self-employed", "Worker", "Employee"],
+        "answer": 2,
+        "explanation": "Employees generally have the widest set of employment rights of the three statuses."
+      },
+      {
+        "prompt": "Can a person have one status for tax and a different one for employment rights?",
+        "options": [
+          "No, the two are always the same",
+          "Yes, the two can be decided differently",
+          "Only if they work abroad"
+        ],
+        "answer": 1,
+        "explanation": "The guidance says a person may have a different employment status in tax law."
+      },
+      {
+        "prompt": "Who can give advice on employment status?",
+        "options": ["Only the employer's lawyer", "Acas", "Nobody; it is not a real issue"],
+        "answer": 1,
+        "explanation": "Acas gives advice on employment status, employee rights and employer responsibilities."
+      }
+    ]
+  },
+  "pass_mark": 80,
+  "source_title": "Employment status",
+  "source_publisher": "GOV.UK",
+  "source_url": "https://www.gov.uk/employment-status",
+  "source_updated_on": "2015-02-12",
+  "content_reviewed_on": "2026-11-07",
+  "licence_note": "Based on GOV.UK guidance, which is published under the Open Government Licence v3.0. The text here is our own summary, not a copy.",
+  "published": false
+}
