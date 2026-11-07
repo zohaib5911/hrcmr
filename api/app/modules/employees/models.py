@@ -227,7 +227,9 @@ class EmployeeAssignment(Base, RecordMixin, TenantMixin):
     location_id: Mapped[uuid.UUID | None] = _optional_fk("locations.id")
     reporting_authority_employee_id: Mapped[uuid.UUID | None] = _optional_fk("employees.id")
     leave_sanctioning_employee_id: Mapped[uuid.UUID | None] = _optional_fk("employees.id")
-    organogram_level_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)  # table comes in T12.1
+    organogram_level_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("organogram_levels.id", ondelete="RESTRICT")
+    )
     employment_type: Mapped[str] = mapped_column(String(12), nullable=False)
     custom_working_days: Mapped[Any | None] = mapped_column(JSONB)
     hours_per_day: Mapped[Decimal | None] = mapped_column(Numeric(4, 2))

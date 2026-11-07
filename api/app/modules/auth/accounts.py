@@ -46,6 +46,7 @@ from app.modules.identity.models import (
     User,
 )
 from app.modules.leave.service import seed_types
+from app.modules.organogram.service import seed_levels
 
 if TYPE_CHECKING:
     import uuid
@@ -200,6 +201,7 @@ async def sign_up(
         return
     await db.scope_to_company(company.id)
     await seed_types(db, company.id)
+    await seed_levels(db, company.id)
     db.add(Membership(user_id=user.id, company_id=company.id, role="company_admin"))
     db.add(TermsAcceptance(user_id=user.id, version=terms.version, ip=ip))
     token = await issue_email_token(db, user.id, "verify", VERIFY_TTL)

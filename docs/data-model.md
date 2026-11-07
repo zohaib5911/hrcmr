@@ -498,7 +498,7 @@ Checks:
 | `location_id` | UUID | yes |  | references `locations` |
 | `reporting_authority_employee_id` | UUID | yes |  | references `employees` |
 | `leave_sanctioning_employee_id` | UUID | yes |  | references `employees` |
-| `organogram_level_id` | UUID | yes |  |  |
+| `organogram_level_id` | UUID | yes |  | references `organogram_levels` |
 | `employment_type` | VARCHAR(12) | no |  |  |
 | `custom_working_days` | JSONB | yes |  |  |
 | `hours_per_day` | NUMERIC(4, 2) | yes |  |  |
@@ -1060,6 +1060,24 @@ Checks:
 - `(reported_at is null and reported_by_user_id is null and reported_reference is null and report_recorded_at is null) or (reported_at is not null and reported_by_user_id is not null and reported_reference is not null and length(trim(reported_reference)) > 0 and report_recorded_at is not null)`
 - `calendar_region in ('england-and-wales', 'scotland', 'northern-ireland')`
 - `change_type in ('address', 'ownership', 'name', 'key_personnel', 'ao_or_key_contact', 'other')`
+
+## `organogram_levels`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `name` | VARCHAR(80) | no |  |  |
+| `rank` | INTEGER | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `length(trim(name)) > 0`
+- `rank >= 1`
 
 ## `pay_bands`
 
