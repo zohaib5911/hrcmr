@@ -1,0 +1,114 @@
+{
+  "slug": "inclusive-recruitment-attracting-candidates",
+  "title": "Inclusive recruitment: attracting candidates",
+  "summary": "How to advertise a role so that a wide range of people see it, and how to give applicants what they need to apply.",
+  "duration_minutes": 15,
+  "audience": "managers",
+  "sections": [
+    {
+      "title": "Why where you advertise matters",
+      "body": "Where a job is advertised decides who sees it. An advert in one place reaches only the people who use that place.\nThe aim is to reach a wide range of people, so that the best candidates for the job are among those who apply.",
+      "key_points": [
+        "Where you advertise decides who sees the job",
+        "The aim is a wide range of candidates"
+      ]
+    },
+    {
+      "title": "Advertise in at least two ways",
+      "body": "Advertise in at least two different ways or places. A print newspaper and a jobs website together reach more people than either one alone.\nCheck that your chosen channels, taken together, reach a mix of people.",
+      "key_points": [
+        "Use at least two different ways or places",
+        "Check that the channels together reach a mix of people"
+      ]
+    },
+    {
+      "title": "Do not rely on social media alone",
+      "body": "Social media is useful, but relying only on it can miss applicants who do not use it.\nOnline adverts may only be seen by certain age groups or backgrounds. Combine online posts with other routes.",
+      "key_points": [
+        "Relying only on social media misses some applicants",
+        "Online adverts may reach only certain groups",
+        "Combine online posts with other routes"
+      ]
+    },
+    {
+      "title": "Neutral job titles and wording",
+      "body": "Use neutral job titles, and describe the skills the role needs rather than the type of person you want.\nAvoid gendered job titles, and avoid wording based on nationality, because both can put people off applying.",
+      "key_points": [
+        "Use neutral job titles",
+        "Describe the skills, not the type of person",
+        "Avoid gendered titles and nationality-based wording"
+      ]
+    },
+    {
+      "title": "Share what applicants need",
+      "body": "Share the job description, the person specification and the equality and diversity monitoring form with applicants.\nWhen applicants can see the role and the process, they understand what is expected and are more likely to apply with confidence.",
+      "key_points": [
+        "Share the job description and person specification",
+        "Share the equality and diversity monitoring form",
+        "Clear information helps people apply with confidence"
+      ]
+    },
+    {
+      "title": "Look at who applies",
+      "body": "After the advert has been out for a while, look at the people who have applied. If the pool is narrow, widen the places you advertise and review the wording of the advert.\nThis is a check that should be repeated for every vacancy, not only the first.",
+      "key_points": [
+        "Look at who has applied",
+        "Widen the channels and review the wording if the pool is narrow"
+      ]
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "prompt": "How many different ways or places should a job be advertised in?",
+        "options": ["One, to save money", "At least two different ways or places", "Only online"],
+        "answer": 1,
+        "explanation": "Advertise in at least two different ways or places, so that more people see the job."
+      },
+      {
+        "prompt": "Why should a job advert not rely only on social media?",
+        "options": [
+          "Social media cannot be used for jobs",
+          "It may miss applicants who do not use it",
+          "Social media posts cannot include a job title"
+        ],
+        "answer": 1,
+        "explanation": "Relying only on social media can miss applicants who do not use it."
+      },
+      {
+        "prompt": "Which job title is neutral?",
+        "options": ["Salesman", "Sales assistant", "Barmaid"],
+        "answer": 1,
+        "explanation": "Sales assistant is a neutral title. Salesman and barmaid are gendered titles."
+      },
+      {
+        "prompt": "What helps applicants understand the process?",
+        "options": [
+          "Keeping the job description secret",
+          "Sharing the job description, person specification and monitoring form",
+          "Asking applicants to guess the requirements"
+        ],
+        "answer": 1,
+        "explanation": "Sharing the job description, the person specification and the monitoring form helps applicants understand the role and the process."
+      },
+      {
+        "prompt": "What should a job advert focus on?",
+        "options": [
+          "The type of person the employer wants",
+          "The skills the role needs",
+          "A personal description of the owner"
+        ],
+        "answer": 1,
+        "explanation": "Describing the skills the role needs keeps the advert focused on the job."
+      }
+    ]
+  },
+  "pass_mark": 80,
+  "source_title": "Advertising a job",
+  "source_publisher": "Acas",
+  "source_url": "https://www.acas.org.uk/recruitment/how-to-advertise-a-job",
+  "source_updated_on": "2026-06-30",
+  "content_reviewed_on": "2026-11-07",
+  "licence_note": "Based on Acas guidance. The text here is our own summary of it, written in our own words; no Acas text is reproduced.",
+  "published": false
+}

@@ -281,3 +281,4 @@
 2026-11-07 11:31 | Claude (Haiku) | T13.2 | course 5 of 8 written (acas bullying-at-work 2025-12-16) and validated | next course 6
 2026-11-07 11:31 | Claude (Haiku) | T13.2 | course 6 of 8 written (gov.uk agency-workers 2015-03-09) and validated | next course 7
 2026-11-07 11:31 | Claude (Haiku) | T13.2 | course 7 of 8 written (acas follow-discrimination-law 2026-06-30) and validated | next course 8
+2026-11-07 11:32 | Claude (Haiku) | T13.2 | course 8 of 8 written (acas how-to-advertise-a-job 2026-06-30) and validated; tests/test_seed_courses.py 5 pass | next tick T13.2 and add owner action to PROGRESS
