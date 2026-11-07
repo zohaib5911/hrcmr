@@ -8,11 +8,15 @@ import uuid
 import zipfile
 from typing import Any
 
+from asgi_lifespan import LifespanManager
 from sqlalchemy import text
 
 from app.ai.redaction import find_restricted
-from tests.db.api_support import fake_claude
+from app.main import create_app
+from tests.db.api_support import fake_claude, sign_in_as
+from tests.db.support import DatabaseUnderTest
 from tests.db.test_employee_documents import rig as rig
+from tests.support import TEST_REDIS_URL, build_settings
 
 API = "/api/v1/ai"
 
@@ -183,3 +187,27 @@ async def test_company_ai_switch_off_means_template_and_no_call(rig: dict[str, A
             text("update companies set ai_features_enabled = true where id = :c"),
             {"c": rig["a"]},
         )
+
+
+async def _ai_available(database: DatabaseUnderTest, rig: dict[str, Any], switch: bool) -> bool:
+    """What /auth/me says about AI for a company admin, on a server that has a key."""
+    app = create_app(
+        build_settings(
+            database_url=database.app_url,
+            redis_url=TEST_REDIS_URL,
+            anthropic_api_key="test-key",
+            ai_features_enabled=switch,
+        )
+    )
+    async with LifespanManager(app):
+        admin = await sign_in_as(database, rig["sessions"], app, "company_admin", rig["a"])
+        me = (await admin.get("/api/v1/auth/me")).json()
+        await admin.aclose()
+    return bool(me["ai_available"])
+
+
+async def test_the_platform_ai_switch_hides_ai_even_when_a_key_is_set(
+    rig: dict[str, Any], database: DatabaseUnderTest
+) -> None:
+    assert await _ai_available(database, rig, switch=True) is True
+    assert await _ai_available(database, rig, switch=False) is False
