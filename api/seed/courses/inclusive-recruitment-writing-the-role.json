@@ -1,0 +1,117 @@
+{
+  "slug": "inclusive-recruitment-writing-the-role",
+  "title": "Inclusive recruitment: writing the role",
+  "summary": "How the way a role is written, and the terms it is offered on, can treat some applicants less favourably, and what to check before advertising.",
+  "duration_minutes": 20,
+  "audience": "managers",
+  "sections": [
+    {
+      "title": "Why the start of recruitment matters",
+      "body": "Discrimination law applies at every stage of recruitment: advertising, interviewing and hiring. The decisions that matter most are often made when the role is written.\nA job that is written badly can exclude people before anyone has seen their application.",
+      "key_points": [
+        "The law applies to advertising, interviewing and hiring",
+        "Problems often start when the role is written"
+      ]
+    },
+    {
+      "title": "Protected characteristics at every stage",
+      "body": "Do not treat applicants less favourably because of a protected characteristic, such as age, disability, race, sex or religion or belief. This applies to how the job is advertised, how candidates are interviewed and who is hired.\nIt is worth checking each stage against the list of protected characteristics before the process begins.",
+      "key_points": [
+        "Do not treat applicants less favourably at any stage",
+        "Check each stage against the protected characteristics"
+      ]
+    },
+    {
+      "title": "Describe the skills, not the person",
+      "body": "Describe the skills and experience the role needs. Avoid describing the sort of person you want.\nUse neutral job titles. Wording such as recent graduate or highly experienced can signal age bias, and gendered job titles can put people off applying.",
+      "key_points": [
+        "Describe the skills and experience the role needs",
+        "Use neutral job titles",
+        "Wording that signals age can put people off"
+      ]
+    },
+    {
+      "title": "Check the job terms and the rules",
+      "body": "A rule that applies to everyone can still disadvantage people with a protected characteristic. Check the hours, the location, the probation terms and any other conditions of the job.\nThe same check applies to decisions to reject someone. Each decision needs a reason that holds up when examined.",
+      "key_points": [
+        "A rule that applies to everyone can still disadvantage some people",
+        "Check the job terms and the reasons for rejection"
+      ]
+    },
+    {
+      "title": "Health and disability questions",
+      "body": "Do not ask about health or disability until you have shortlisted candidates or made a conditional offer, unless a legal exception applies.\nMake reasonable adjustments for disabled applicants at every stage. If you have not been told what someone needs, ask them.",
+      "key_points": [
+        "Ask about health or disability only after shortlisting or a conditional offer",
+        "Make reasonable adjustments at every stage",
+        "Ask applicants what they need if they have not said"
+      ]
+    },
+    {
+      "title": "Equality monitoring forms",
+      "body": "Equality monitoring forms collect information about applicants. They should be kept separate from CVs and applications.\nPeople who decide who is hired must not see the monitoring forms, so that the information cannot influence the decision.",
+      "key_points": [
+        "Keep monitoring forms separate from CVs and applications",
+        "Deciders must not see the monitoring forms"
+      ]
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "prompt": "Which wording in a job advert could signal age bias?",
+        "options": ["Clear skills needed", "Recent graduate", "Open to all applicants"],
+        "answer": 1,
+        "explanation": "Wording such as recent graduate can signal age bias and put some people off applying."
+      },
+      {
+        "prompt": "Should a job advert describe the skills the role needs, or the type of person wanted?",
+        "options": [
+          "The type of person wanted",
+          "The skills and experience the role needs",
+          "Only personal qualities"
+        ],
+        "answer": 1,
+        "explanation": "Describing the skills and experience the role needs keeps the focus on the work, not on the person."
+      },
+      {
+        "prompt": "When should questions about health or disability be asked?",
+        "options": [
+          "In the first advert",
+          "After shortlisting or at a conditional offer, unless a legal exception applies",
+          "At the start of every interview"
+        ],
+        "answer": 1,
+        "explanation": "Health and disability questions wait until shortlisting or a conditional offer, unless a legal exception applies."
+      },
+      {
+        "prompt": "Where should equality monitoring forms be kept?",
+        "options": [
+          "Attached to every CV",
+          "Separate from CVs and applications, and not seen by those deciding",
+          "With the hiring manager"
+        ],
+        "answer": 1,
+        "explanation": "Monitoring forms are kept apart from applications, so that they cannot influence who is hired."
+      },
+      {
+        "prompt": "A rule applies to every candidate. Does it still need checking?",
+        "options": [
+          "No, a rule that applies to everyone is always fine",
+          "Yes, check that it does not disadvantage people with a protected characteristic",
+          "Only for part-time jobs"
+        ],
+        "answer": 1,
+        "explanation": "A rule that applies to everyone can still disadvantage some people, so it needs checking."
+      }
+    ]
+  },
+  "pass_mark": 80,
+  "source_title": "Following discrimination law",
+  "source_publisher": "Acas",
+  "source_url": "https://www.acas.org.uk/recruitment/follow-discrimination-law",
+  "source_updated_on": "2026-06-30",
+  "content_reviewed_on": "2026-11-07",
+  "licence_note": "Based on Acas guidance. The text here is our own summary of it, written in our own words; no Acas text is reproduced.",
+  "published": false
+}
