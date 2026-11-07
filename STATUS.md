@@ -1,12 +1,12 @@
 # STATUS
-Updated: 2026-11-07 18:00, Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: pending (feat T11.6)
-State: IN PROGRESS
+Updated: 2026-11-07, Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: a49307d
+State: IN PROGRESS — AUDIT-1 round 1 (scope f37f781..a49307d); PR #18 waiting on e2e before merge
 
 ## Last completed
 - T11.6 — Public careers: list and posting endpoints (open external only, listed fields), apply endpoint (consent, Turnstile, rate limit, candidate and application created, confirmation and recruiter notice), careers pages.
 
 ## Current task
-- none (T11.6 closed). Next block per next.sh is the P11 Phase 11 gate (R7).
+- AUDIT-1 round 1 (audit.md): run checks, review T10.3–T11.6, write changesneeded.md
 
 ## Next tasks
 - P11 — Phase 11 gate: full API suite once, full web e2e once, phase-11 screenshots (390 and 1280, light and dark; recruitment, candidate, application, careers), 5-line summary, PR dev to main, green CI, merge

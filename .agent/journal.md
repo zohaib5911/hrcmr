@@ -252,3 +252,4 @@
 2026-11-07 07:10 | Claude | T11.4 | DONE: applications + stage rules, interviews + .ics + invite emails, offers, pipeline bar, application page, candidate applications; API 134 pass, rules 65, ics 3, mypy/ruff clean, web unit 777, recruitment.spec 4 pass | next T11.5 via next.sh
 2026-11-07 07:16 | Claude | T11.5 | DONE: convert with both gates, shared add_employee service, documents and RTW check linked, Hired, one audit event; repeat refused; convert 3 pass, related 77 pass, mypy/ruff clean, web unit 777 | next T11.6 via next.sh
 2026-11-07 07:25 | Claude | T11.6 | DONE: public careers list/detail (listed fields), apply with consent + Turnstile + rate limit, candidate/application/confirmation/recruiter notice, careers pages; careers.spec 2 pass; CV upload and logo NOT done | next P11 gate via next.sh
+2026-11-07 03:24 | Claude | AUDIT-1 | start round 1, scope f37f781..a49307d | next run checks per audit.md §2
