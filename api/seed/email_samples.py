@@ -73,6 +73,11 @@ SAMPLES: dict[str, dict[str, str]] = {
         "policy_title": "Data protection policy",
         "link": f"{SAMPLE_BASE}/policies",
     },
+    "application_received": {
+        "first_name": "Ana",
+        "job_title": "Sous chef",
+        "company_name": "Acme HR",
+    },
     "interview_invite": {
         "first_name": "Tom",
         "job_title": "Sous chef",

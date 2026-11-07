@@ -3357,6 +3357,57 @@ export interface paths {
         patch: operations["recruitment_set_posting_status"];
         trace?: never;
     };
+    "/public/careers/{company_slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Careers Page */
+        get: operations["careers_careers_page"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/postings/{company_slug}/{posting_slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Careers Posting */
+        get: operations["careers_careers_posting"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/postings/{company_slug}/{posting_slug}/apply": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Apply */
+        post: operations["careers_apply"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ready": {
         parameters: {
             query?: never;
@@ -4538,6 +4589,35 @@ export interface components {
              */
             stage: "applied" | "shortlisted" | "interview" | "offer_letter" | "offer_accepted" | "hired" | "rejected" | "withdrawn";
         };
+        /** ApplyIn */
+        ApplyIn: {
+            /** Consent */
+            consent: boolean;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** First Name */
+            first_name: string;
+            /** Last Name */
+            last_name: string;
+            /** Phone */
+            phone?: string | null;
+            /** Turnstile Token */
+            turnstile_token: string;
+            /** What You Bring */
+            what_you_bring?: string | null;
+        };
+        /** ApplyOut */
+        ApplyOut: {
+            /**
+             * Received
+             * @default true
+             * @constant
+             */
+            received: true;
+        };
         /** ArchiveChangeIn */
         ArchiveChangeIn: {
             /** Reason */
@@ -5178,6 +5258,49 @@ export interface components {
             items: components["schemas"]["CandidateOut"][];
             /** Total */
             total: number;
+        };
+        /** CareersPage */
+        CareersPage: {
+            /** Company */
+            company: string;
+            /** Postings */
+            postings: components["schemas"]["CareersPostingItem"][];
+        };
+        /** CareersPostingDetail */
+        CareersPostingDetail: {
+            /** Closes On */
+            closes_on: string | null;
+            /** Company */
+            company: string;
+            /** Description */
+            description: string | null;
+            /** Location */
+            location: string | null;
+            /** Salary From */
+            salary_from: string | null;
+            /** Salary Per */
+            salary_per: string | null;
+            /** Salary To */
+            salary_to: string | null;
+            /** Slug */
+            slug: string;
+            /** Title */
+            title: string;
+            /** Visa Sponsorship */
+            visa_sponsorship: string;
+            /** Weekly Hours */
+            weekly_hours: string | null;
+        };
+        /** CareersPostingItem */
+        CareersPostingItem: {
+            /** Closes On */
+            closes_on: string | null;
+            /** Location */
+            location: string | null;
+            /** Slug */
+            slug: string;
+            /** Title */
+            title: string;
         };
         /** CarryOverride */
         CarryOverride: {
@@ -20461,6 +20584,132 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PostingOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    careers_careers_page: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                company_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CareersPage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    careers_careers_posting: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                company_slug: string;
+                posting_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CareersPostingDetail"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    careers_apply: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                company_slug: string;
+                posting_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplyIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplyOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

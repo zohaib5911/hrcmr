@@ -209,6 +209,17 @@ TEMPLATES: dict[str, Template] = {
         button=("Read the policy", "link"),
         fields=_fields("first_name", "policy_title", "link"),
     ),
+    "application_received": Template(
+        subject="We have your application for {job_title}",
+        heading="Thank you for applying",
+        preheader="Your application for {job_title} at {company_name}.",
+        paragraphs=(
+            "Hi {first_name},",
+            "We have received your application for {job_title} at {company_name}. "
+            "Our team will be in touch if it moves forward.",
+        ),
+        fields=_fields("first_name", "job_title", "company_name"),
+    ),
     "interview_invite": Template(
         subject="Interview for {job_title}",
         heading="You are on an interview panel",

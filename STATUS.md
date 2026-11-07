@@ -1,36 +1,38 @@
 # STATUS
-Updated: 2026-11-07 16:00, Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: pending (feat T11.5)
+Updated: 2026-11-07 18:00, Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: pending (feat T11.6)
 State: IN PROGRESS
 
 ## Last completed
-- T11.5 — Convert to employee: both gates (accepted offer, verified RTW), employee created through the shared service, documents and RTW check linked, application Hired, one audit event; the convert sheet is on the application page.
+- T11.6 — Public careers: list and posting endpoints (open external only, listed fields), apply endpoint (consent, Turnstile, rate limit, candidate and application created, confirmation and recruiter notice), careers pages.
 
 ## Current task
-- none (T11.5 closed). Next block per next.sh is T11.6 (S!, public careers and apply form).
+- none (T11.6 closed). Next block per next.sh is the P11 Phase 11 gate (R7).
 
 ## Next tasks
-- T11.6 (S!) public careers pages and apply form (Turnstile, CV scan, confirmation email, recruiter notification) — Recipe R5
-- P11 gate (R7); then AUDIT-1, an audit stop: small models stop with "AUDIT NEEDED FIRST"
+- P11 — Phase 11 gate: full API suite once, full web e2e once, phase-11 screenshots (390 and 1280, light and dark; recruitment, candidate, application, careers), 5-line summary, PR dev to main, green CI, merge
+- AUDIT-1 — audit stop after P11: a big model runs audit.md (small models stop with "AUDIT NEEDED FIRST")
 
 ## Health
-- CI on dev: Phase 10 on main (34f7aee). dev carries T11.1–T11.5 checkpoints, not yet through a PR.
-- Local checks run this session: convert 3, with employees, profile, policies, applications, interviews, offers, postings, candidates, recruitment, RTW, RBAC, guards and data-model doc 77 pass; mypy (335 files) and ruff clean; web unit 777, typecheck, lint, gen:api clean.
+- CI on dev: last PR (#17, Phase 10) merged on main as 34f7aee. dev has T11.1–T11.6 checkpoints, not yet through a PR.
+- Local checks run this session: careers 3 + careers.spec 2; email, notifications, applications, recruitment, candidates, convert, RBAC, guards, data-model doc 36+ pass; mypy (337 files) and ruff clean; web unit 777, typecheck, lint, gen:api clean.
 
 ## Issues / suggestions
-- Convert writes one audit event (recruitment.candidate.converted) and does not write employee.created; the employee id is in its details. Policy new-starter assignments, if any, add their own audit events.
-- The convert sheet is not browser-tested: a real clean scan is needed for the evidence file, which the e2e API cannot seed. Add it when the e2e harness can attach scanned files.
-- Accepting an offer does not move the application on its own; stages are moved by hand until a decision is made.
+- NOT DONE (T11.6 step 2): the optional CV upload. It needs a public upload path through the files service and ClamAV; the apply endpoint takes no file yet. Add it with the scan path in a later step or ask for a decision.
+- NOT DONE (T11.6 page): the company logo. No logo field is exposed on the public pages yet.
+- Turnstile: the test environment has no secret, so the verifier accepts any present token. The rejection path for a bad token is covered by code, not by a test. A test with a Turnstile secret needs a fake verifier.
+- The public careers pages send the placeholder token when no Turnstile site key is set; with a secret configured on the server, the server rejects it. Production must set both keys.
+- Accepting an offer does not move the application on its own (decide before the P11 audit).
 - The candidate profile's header Convert button is still disabled; conversion lives on the application page.
 - Rota publish inserts rota.published notifications but notifications/router.py _kinds omits that kind (left alone).
 - Never overlap DB pytest and Playwright (shared PostgreSQL role passwords).
 
 ## Strategy / decisions taken
-- "Verified" means the candidate's current check is exactly verified (clean evidence, not expiring). An expiring check blocks conversion until renewed.
-- rtw_checks are immutable in the database, so the verified check is copied to the employee (history stays on the candidate) rather than moved.
-- Candidate documents are moved to the employee (owner changed), so the copied check's evidence stays valid.
-- Converting needs the caller to have employee write scope (ALL) as well as recruitment.candidate.convert, so recruiters cannot create employees.
-- Employee creation moved into app/modules/employees/service.py (add_employee); the employees route and the conversion both use it.
-- Conversion moves the application to Hired with a history entry, and a repeat call returns 409 ALREADY_CONVERTED.
+- The public guard allowlist now includes /api/v1/public/careers and /api/v1/public/postings (reviewed: each POST has Turnstile and a rate limit; each response lists its fields, tested).
+- Apply: a repeat application for the same person and posting returns the same 202 and does not create a second one, so the form does not reveal who has applied.
+- Apply: the candidate is found by email (case-insensitive, not archived) or created with source "Careers page".
+- The applicant's confirmation is an email; recruiters get an in-app notification (recruitment.application_received) for roles with recruitment.application.read.
+- Apply records an audit event with actor type system and the visitor's IP (no user).
+- Closed or internal postings return 404 on both the detail page and apply.
 
 ## Owner actions needed
-- None.
+- None for the code. For production: set the Turnstile site key (web) and secret (API) together.

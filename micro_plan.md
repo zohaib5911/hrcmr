@@ -189,7 +189,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   2. UI: Convert button enabled only when both gates pass, with a sheet showing the prefilled data.
 - **Done when:** tests for: no offer → refused; offer not Accepted → refused; RTW not Verified → refused; both OK → employee exists, links set, one audit event; repeat call → refused (no duplicate employee).
 
-### [ ] T11.6 · S! · Public careers pages and apply form
+### [x] T11.6 · S! · Public careers pages and apply form
 - **Spec:** plan L970–973, L1422; public API L1636 (item 24).
 - **Copy:** Recipe R5; `web/app/careers/[company]/` (folder exists, empty); marketing layout `web/app/(marketing)/layout.tsx`.
 - **Steps:**
