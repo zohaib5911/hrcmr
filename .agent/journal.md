@@ -311,3 +311,4 @@
 2026-11-08 01:04 | Claude (Haiku) | C2.1.2 | steps done: leave decision + rota publish e-mail only when mode immediate (notice always); 4 new tests; tests: leave+rota+notifications 43 pass, mutation fails; | next tick C2.1.2, then C2.1.3
 2026-11-08 01:05 | Claude (Haiku) | C2.1.2 | DONE: ticked (fix 5a221ec) | next C2.1.3 course-assigned notice
 2026-11-08 01:07 | Claude (Haiku) | C2.1.3 | steps done: assign_courses returns inserted rows, one learning.assigned notice per person (verified members only), PERSONAL_KINDS; new test; tests: learning+notifications+arch+openapi 22 pass; mypy/ruff clean | next tick C2.1.3, then C2.1.4
+2026-11-08 01:07 | Claude (Haiku) | C2.1.3 | DONE: ticked (fix 2705617) | next C2.1.4 ai_available platform switch
