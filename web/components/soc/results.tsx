@@ -159,35 +159,41 @@ export function SavedCheck({ check, busy, canRun, onConfirm, onDownload }: Saved
         <div>
           <StatusChip tone={tone}>{result.eligibility.label}</StatusChip>
         </div>
-        <section aria-label="Minimum pay" className="overflow-x-auto">
-          <table className="text-callout w-full min-w-[32rem] border-collapse text-left">
-            <thead>
-              <tr className="text-footnote text-label-secondary">
-                <th className="py-2 pr-3 font-medium">Option</th>
-                <th className="py-2 pr-3 font-medium">Criteria</th>
-                <th className="py-2 pr-3 font-medium">Going rate</th>
-                <th className="py-2 pr-3 font-medium">Minimum required</th>
-                <th className="py-2 font-medium">Meets</th>
-              </tr>
-            </thead>
-            <tbody>
-              {result.options.map((option) => (
-                <tr key={option.option} className="border-separator border-t">
-                  <td className="py-2 pr-3">{option.option}</td>
-                  <td className="py-2 pr-3">{option.criteria_key.replace(/_/g, " ")}</td>
-                  <td className="py-2 pr-3">{percent(option.going_rate_pct)}</td>
-                  <td className="py-2 pr-3">
-                    {option.minimum_required === null
-                      ? "Not applicable"
-                      : `£${option.minimum_required}`}
-                  </td>
-                  <td className="py-2">
-                    {option.meets === null ? "Needs a band or role" : option.meets ? "Yes" : "No"}
-                  </td>
+        <section aria-label="Minimum pay" className="overflow-x-auto" tabIndex={0}>
+          {result.options.length === 0 ? (
+            <p className="text-callout text-label-secondary">
+              The published rules give no pay options for this code.
+            </p>
+          ) : (
+            <table className="text-callout w-full min-w-[32rem] border-collapse text-left">
+              <thead>
+                <tr className="text-footnote text-label-secondary">
+                  <th className="py-2 pr-3 font-medium">Option</th>
+                  <th className="py-2 pr-3 font-medium">Criteria</th>
+                  <th className="py-2 pr-3 font-medium">Going rate</th>
+                  <th className="py-2 pr-3 font-medium">Minimum required</th>
+                  <th className="py-2 font-medium">Meets</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {result.options.map((option) => (
+                  <tr key={option.option} className="border-separator border-t">
+                    <td className="py-2 pr-3">{option.option}</td>
+                    <td className="py-2 pr-3">{option.criteria_key.replace(/_/g, " ")}</td>
+                    <td className="py-2 pr-3">{percent(option.going_rate_pct)}</td>
+                    <td className="py-2 pr-3">
+                      {option.minimum_required === null
+                        ? "Not applicable"
+                        : `£${option.minimum_required}`}
+                    </td>
+                    <td className="py-2">
+                      {option.meets === null ? "Needs a band or role" : option.meets ? "Yes" : "No"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </section>
         <p className="text-callout">{verdictText(result.verdict)}</p>
         <p className="text-callout">

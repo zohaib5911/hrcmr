@@ -223,37 +223,43 @@ export function PublicSalaryChecker() {
               actions={<StatusChip tone="neutral">{result.eligibility}</StatusChip>}
             />
             <CardBody className="grid gap-4 pb-5">
-              <div className="overflow-x-auto">
-                <table className="text-callout w-full min-w-[30rem] border-collapse text-left">
-                  <thead>
-                    <tr className="text-footnote text-label-secondary">
-                      <th className="py-2 pr-3 font-medium">Option</th>
-                      <th className="py-2 pr-3 font-medium">Criteria</th>
-                      <th className="py-2 pr-3 font-medium">Minimum required</th>
-                      <th className="py-2 font-medium">Meets</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {result.options.map((option) => (
-                      <tr key={option.option} className="border-separator border-t">
-                        <td className="py-2 pr-3">{option.option}</td>
-                        <td className="py-2 pr-3">{option.criteria_key.replace(/_/g, " ")}</td>
-                        <td className="py-2 pr-3">
-                          {option.minimum_required === null
-                            ? "Not applicable"
-                            : `£${option.minimum_required}`}
-                        </td>
-                        <td className="py-2">
-                          {option.meets === null
-                            ? "Needs a band or role"
-                            : option.meets
-                              ? "Yes"
-                              : "No"}
-                        </td>
+              <div className="overflow-x-auto" tabIndex={0} role="region" aria-label="Options">
+                {result.options.length === 0 ? (
+                  <p className="text-callout text-label-secondary">
+                    The published rules give no pay options for this code.
+                  </p>
+                ) : (
+                  <table className="text-callout w-full min-w-[30rem] border-collapse text-left">
+                    <thead>
+                      <tr className="text-footnote text-label-secondary">
+                        <th className="py-2 pr-3 font-medium">Option</th>
+                        <th className="py-2 pr-3 font-medium">Criteria</th>
+                        <th className="py-2 pr-3 font-medium">Minimum required</th>
+                        <th className="py-2 font-medium">Meets</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {result.options.map((option) => (
+                        <tr key={option.option} className="border-separator border-t">
+                          <td className="py-2 pr-3">{option.option}</td>
+                          <td className="py-2 pr-3">{option.criteria_key.replace(/_/g, " ")}</td>
+                          <td className="py-2 pr-3">
+                            {option.minimum_required === null
+                              ? "Not applicable"
+                              : `£${option.minimum_required}`}
+                          </td>
+                          <td className="py-2">
+                            {option.meets === null
+                              ? "Needs a band or role"
+                              : option.meets
+                                ? "Yes"
+                                : "No"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
               <p className="text-callout">{verdictText(result.verdict)}</p>
               {result.notes.length > 0 ? (
