@@ -1,0 +1,117 @@
+{
+  "slug": "equality-and-discrimination-at-work",
+  "title": "Equality and discrimination at work",
+  "summary": "The protected characteristics, the four forms of discrimination, what protection covers at work, and where to get help.",
+  "duration_minutes": 20,
+  "audience": "all_staff",
+  "sections": [
+    {
+      "title": "The Equality Act 2010",
+      "body": "The Equality Act 2010 protects people from discrimination. At work, that protection covers how people are recruited, paid, promoted, trained, dismissed and made redundant.\nThe same Act protects people in other settings too, such as education, public services and buying or renting property.",
+      "key_points": [
+        "The Equality Act 2010 is the law that protects people from discrimination",
+        "Protection at work covers recruitment, pay, promotion, training, dismissal and redundancy"
+      ]
+    },
+    {
+      "title": "Protected characteristics",
+      "body": "The Act protects people with protected characteristics. These are age, disability, gender reassignment, marriage or civil partnership, pregnancy and maternity, race, religion or belief, sex and sexual orientation.\nProtection also reaches people who are linked to someone with a protected characteristic, such as a family member or friend.",
+      "key_points": [
+        "Protected characteristics include age, disability, race, religion or belief, sex and sexual orientation",
+        "People linked to someone with a protected characteristic are also protected"
+      ]
+    },
+    {
+      "title": "The four forms of discrimination",
+      "body": "The Act recognises four forms of discrimination: direct discrimination, indirect discrimination, harassment and victimisation.\nDirect discrimination is treating someone worse because of a protected characteristic. Indirect discrimination is a rule or practice that puts people with a protected characteristic at a particular disadvantage.",
+      "key_points": [
+        "Direct discrimination treats someone worse because of a protected characteristic",
+        "Indirect discrimination puts people at a particular disadvantage through a rule or practice",
+        "Harassment and victimisation are also forms of discrimination"
+      ]
+    },
+    {
+      "title": "Victimisation and speaking up",
+      "body": "Victimisation is treating someone badly because they complained about discrimination, or because they supported someone else's claim.\nPeople who speak up are protected from this. Raising a concern in good faith is part of keeping the workplace fair.",
+      "key_points": [
+        "Victimisation is treating someone badly for complaining or supporting a claim",
+        "People who speak up are protected"
+      ]
+    },
+    {
+      "title": "Reasonable adjustments and positive action",
+      "body": "Employers should make reasonable adjustments for disabled staff and applicants. This can apply at any stage, from applying for a job to the day-to-day work.\nThe law also allows positive action for people who are at a disadvantage, have particular needs, or are under-represented in a type of work.",
+      "key_points": [
+        "Reasonable adjustments are expected for disabled staff and applicants",
+        "Positive action is allowed for people at a disadvantage or under-represented"
+      ]
+    },
+    {
+      "title": "Where to get help",
+      "body": "A concern can be raised with the organisation first. Mediation, advice from Acas or Citizens Advice, and a claim to a court or an employment tribunal are all possible routes.\nThe GOV.UK page on discrimination sets out these routes. Read it for the detail.",
+      "key_points": [
+        "Raise the concern with the organisation first",
+        "Acas and Citizens Advice can help",
+        "A claim can be made to a court or an employment tribunal"
+      ]
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "prompt": "Which of these is a protected characteristic?",
+        "options": ["Hobbies", "Religion or belief", "Favourite football team"],
+        "answer": 1,
+        "explanation": "Religion or belief is a protected characteristic. Hobbies and favourite teams are not."
+      },
+      {
+        "prompt": "Which is one of the four forms of discrimination the Act recognises?",
+        "options": [
+          "Direct discrimination",
+          "Accidental discrimination",
+          "Friendly discrimination"
+        ],
+        "answer": 0,
+        "explanation": "Direct discrimination is one of the four forms, with indirect discrimination, harassment and victimisation."
+      },
+      {
+        "prompt": "Who is protected from victimisation?",
+        "options": [
+          "Only people with a disability",
+          "Someone who complains about discrimination or supports someone else's claim",
+          "Only managers"
+        ],
+        "answer": 1,
+        "explanation": "Victimisation is treating someone badly for complaining or supporting a claim, and the Act protects people who do either."
+      },
+      {
+        "prompt": "What should an employer make for a disabled member of staff?",
+        "options": [
+          "Reasonable adjustments",
+          "A separate pay scale",
+          "Nothing; the law does not require it"
+        ],
+        "answer": 0,
+        "explanation": "Employers should make reasonable adjustments for disabled staff and applicants."
+      },
+      {
+        "prompt": "Where can a person get help with a discrimination concern?",
+        "options": [
+          "Only from a court",
+          "From Acas or Citizens Advice, or by a tribunal claim",
+          "No help is available"
+        ],
+        "answer": 1,
+        "explanation": "Acas and Citizens Advice can help, and a claim can be made to a court or an employment tribunal."
+      }
+    ]
+  },
+  "pass_mark": 80,
+  "source_title": "Discrimination: your rights",
+  "source_publisher": "GOV.UK",
+  "source_url": "https://www.gov.uk/discrimination-your-rights",
+  "source_updated_on": "2015-03-04",
+  "content_reviewed_on": "2026-11-07",
+  "licence_note": "Based on GOV.UK guidance, which is published under the Open Government Licence v3.0. The text here is our own summary, not a copy.",
+  "published": false
+}

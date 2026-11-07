@@ -229,7 +229,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 13 — Learning
 
-### [ ] T13.1 · S · Course model, minimal editor, course player
+### [x] T13.1 · S · Course model, minimal editor, course player
 - **Spec:** plan L1012–1029, L1429; §6.9 L593–597; API item 17 (L1629).
 - **Steps:**
   1. Global (not tenant) `courses` with sections, quiz, sources (title, publisher, URL, source-updated date), reviewed date, OGL attribution; tenant `learning_assignments`. Migration.
@@ -237,13 +237,13 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. Course player: section by section, progress saved (`POST /learning/assignments/{id}/progress`), keyboard friendly, quiz with pass mark.
 - **Done when:** progress survives reload; quiz below pass mark doesn't complete.
 
-### [ ] T13.2 · S! · Write the 8 original courses
+### [x] T13.2 · S! · Write the 8 original courses
 - **Spec:** plan L1014–1023, L1430.
 - **Steps:** one course per sub-step (8 commits), as seed data files in `api/seed/courses/`. Each: 5–6 sections, 15–25 min, a 5-question check with explanations, sources from GOV.UK / ACAS / EHRC with URL + their updated date, reviewed date = today, OGL attribution if adapted.
 - **Done when:** a test checks every course has ≥5 sections, exactly 5 questions, ≥1 source URL on gov.uk/acas.org.uk/equalityhumanrights.com. Owner action "Review the 8 courses" added to PROGRESS.
 - **Watch:** write fresh text; no copying from GOV.UK/ACAS beyond short quotes; no legal figures unless the source page states them (cite it).
 
-### [ ] T13.3 · S · Assign wizard, report view and export, overdue job, My Learning
+### [x] T13.3 · S · Assign wizard, report view and export, overdue job, My Learning
 - **Spec:** plan L1024–1027, L1431.
 - **Steps:**
   1. `POST /learning/assignments` (courses × people: everyone / departments / named, one due date); report list with filters; `GET /learning/assignments.xlsx` (R4).
@@ -251,14 +251,14 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. UI: `/learning` KPIs, Report and Courses views, 3-step assign wizard; `/learning/my` (Assigned to me / All courses).
 - **Done when:** assigning twice doesn't duplicate; overdue job idempotent; Employee role sees only own.
 
-### [ ] T13.4 · S! · Certificates and public `/verify`
+### [x] T13.4 · S! · Certificates and public `/verify`
 - **Spec:** plan L1027–1028, L1432; API `GET /certificates/{id}.pdf`, `GET /public/certificates/verify?ref=`.
 - **Steps:**
   1. On completion: certificate with random reference (≥ 10 chars, from `secrets`, unguessable), PDF (R4).
   2. Public verify endpoint (R5): returns only holder name, course title, completion date, status. Page `/verify`.
 - **Done when:** test asserts the verify response has exactly those 4 fields; rate limit test; unknown ref → generic "not found".
 
-### [ ] P13 · S · Phase 13 gate
+### [x] P13 · S · Phase 13 gate
 - Recipe R7.
 
 ---

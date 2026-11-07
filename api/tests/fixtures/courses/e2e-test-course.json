@@ -1,0 +1,48 @@
+{
+  "slug": "e2e-test-course",
+  "title": "Test course for the player",
+  "summary": "A short course that only the browser tests use. It is not real training content.",
+  "duration_minutes": 10,
+  "audience": "all_staff",
+  "sections": [
+    {
+      "title": "First section",
+      "body": "This section is only here so the player has something to show.",
+      "key_points": ["The first point", "The second point"]
+    },
+    {
+      "title": "Second section",
+      "body": "A second section, so that moving between sections can be tested.",
+      "key_points": []
+    },
+    {
+      "title": "Third section",
+      "body": "The last section, before the check.",
+      "key_points": ["The last point"]
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "prompt": "Which option is correct for the first question?",
+        "options": ["Option A", "Option B", "Option C"],
+        "answer": 2,
+        "explanation": "Option C is the correct answer to the first question."
+      },
+      {
+        "prompt": "Which option is correct for the second question?",
+        "options": ["Option A", "Option B"],
+        "answer": 1,
+        "explanation": "Option B is the correct answer to the second question."
+      }
+    ]
+  },
+  "pass_mark": 60,
+  "source_title": "Test source",
+  "source_publisher": "Test publisher",
+  "source_url": "https://www.gov.uk/",
+  "source_updated_on": "2026-11-03",
+  "content_reviewed_on": "2026-11-07",
+  "licence_note": null,
+  "published": true
+}

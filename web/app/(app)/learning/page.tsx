@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
-import { PlaceholderPage } from "@/components/app/placeholder-page";
+import { LearningWorkspace } from "@/components/learning/workspace";
 
 export const metadata: Metadata = { title: "Learning" };
 
 export default function Page() {
-  return <PlaceholderPage id="learning" />;
+  return <LearningWorkspace />;
 }

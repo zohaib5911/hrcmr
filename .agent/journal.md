@@ -270,3 +270,21 @@
 2026-11-07 10:28 | Claude (Haiku) | T12.2 | DONE: PDF + canvas + list + inspector + R6 spec (1 pass) ; unit 9 + full vitest pass; typecheck/lint pass; ticked in micro_plan and PROGRESS | next bash .agent/next.sh
 2026-11-07 10:33 | Claude (Haiku) | P12 | API full suite 803 pass; web lint+typecheck pass; screenshot spec phase12 written | next full web e2e (pnpm test:e2e) then screenshots
 2026-11-07 10:52 | Claude (Haiku) | P12 | gate: API 803 pass, web e2e 428 pass, screenshots 8 written; PROGRESS summary; ticked | next PR dev->main, wait for CI, merge when green
+2026-11-07 11:13 | Claude (Haiku) | T13.1 | started after P12 merged (PR 20); STATUS updated | next read plan L1012-1029 and build course model
+2026-11-07 11:21 | Claude (Haiku) | T13.1 | API done: migration 0035 (courses global RLS, course_assignments), learner + platform endpoints, loader, e2e fixture course; tests learning 6, migrations, architecture, openapi, rbac 53 pass | next web: player and platform editor, e2e spec
+2026-11-07 11:24 | Claude (Haiku) | T13.1 | web player, platform editor, R6 spec written; typecheck and lint pass; api naming CourseAssignmentOut | next run learning-player e2e
+2026-11-07 11:25 | Claude (Haiku) | T13.1 | DONE: API 6 + player/editor + browser spec pass; ticked micro_plan and PROGRESS | next bash .agent/next.sh (T13.2 S!)
+2026-11-07 11:29 | Claude (Haiku) | T13.2 | course 1 of 8 written (employment-rights-essentials; source gov.uk contracts 2020-04-06); validated schema; unpublished until owner review | next course 2 employment-status (gov.uk 2015-02-12)
+2026-11-07 11:30 | Claude (Haiku) | T13.2 | course 2 of 8 employment-status (gov.uk 2015-02-12) validated | next course 3
+2026-11-07 11:30 | Claude (Haiku) | T13.2 | course 3 of 8 written (gov.uk discrimination 2015-03-04) and validated | next course 4
+2026-11-07 11:30 | Claude (Haiku) | T13.2 | course 4 of 8 written (acas preventing-harassment 2026-10-30) and validated | next course 5
+2026-11-07 11:31 | Claude (Haiku) | T13.2 | course 5 of 8 written (acas bullying-at-work 2025-12-16) and validated | next course 6
+2026-11-07 11:31 | Claude (Haiku) | T13.2 | course 6 of 8 written (gov.uk agency-workers 2015-03-09) and validated | next course 7
+2026-11-07 11:31 | Claude (Haiku) | T13.2 | course 7 of 8 written (acas follow-discrimination-law 2026-06-30) and validated | next course 8
+2026-11-07 11:32 | Claude (Haiku) | T13.2 | course 8 of 8 written (acas how-to-advertise-a-job 2026-06-30) and validated; tests/test_seed_courses.py 5 pass | next tick T13.2 and add owner action to PROGRESS
+2026-11-07 11:32 | Claude (Haiku) | T13.2 | DONE: 8 courses + test 5 pass; ticked; owner action added to PROGRESS | next bash .agent/next.sh (T13.3 S)
+2026-11-07 11:38 | Claude (Haiku) | T13.3 | API: scoped assignment (everyone/departments/named), report with filters, summary, xlsx export (company-wide only), overdue job learning_overdue 06:15 with one notification; db 42 pass, root 32 pass | next web: /learning KPIs + report + courses, assign wizard, /learning/my
+2026-11-07 11:40 | Claude (Haiku) | T13.3 | DONE: API + web UI; ticked; unit 786 pass; typecheck/lint pass | next bash .agent/next.sh
+2026-11-07 11:45 | Claude (Haiku) | T13.4 | DONE: certificates, PDF, public check, /verify page, player button; ticked | next P13 gate
+2026-11-07 12:05 | Claude (Haiku) | P13 | gate: API 818, web lint/typecheck/unit 786, e2e 429, 16 screenshots; PROGRESS summary; ticked | next PR dev->main
+2026-11-07 20:05 | Claude (Haiku) | P13 | Semgrep on PR 21: len(all()) on the assignment insert; now counted with rowcount; learning tests 10 pass; local Semgrep clean on the learning paths | next re-run PR 21 checks, merge when green

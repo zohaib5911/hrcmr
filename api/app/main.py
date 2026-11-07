@@ -71,6 +71,9 @@ from app.modules.files.router import router as files_router
 from app.modules.files.service import FileService
 from app.modules.health.router import router as health_router
 from app.modules.holidays.router import router as holidays_router
+from app.modules.learning.admin_router import router as learning_admin_router
+from app.modules.learning.certificates import router as certificates_router
+from app.modules.learning.router import router as learning_router
 from app.modules.leave.request_router import router as leave_requests_router
 from app.modules.leave.router import router as leave_router
 from app.modules.leave.workspace_router import router as leave_workspace_router
@@ -264,6 +267,9 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(letters_router, prefix=API_PREFIX)
     app.include_router(recruitment_router, prefix=API_PREFIX)
     app.include_router(organogram_router, prefix=API_PREFIX)
+    app.include_router(learning_router, prefix=API_PREFIX)
+    app.include_router(learning_admin_router, prefix=API_PREFIX)
+    app.include_router(certificates_router, prefix=API_PREFIX)
     app.include_router(careers_router, prefix=API_PREFIX)
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)

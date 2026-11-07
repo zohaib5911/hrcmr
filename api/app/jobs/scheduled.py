@@ -18,6 +18,7 @@ from app.jobs.cloudflare import cloudflare_ranges_weekly
 from app.jobs.compliance import reminders_daily, rtw_status_daily
 from app.jobs.email import deliver_email, sweep_email_outbox
 from app.jobs.holidays import bank_holidays_weekly
+from app.jobs.learning import learning_overdue_daily
 from app.jobs.policies import policies_overdue_daily
 from app.jobs.reports import generate_report, sweep_report_jobs
 from app.modules.email.outbox import MAX_ATTEMPTS
@@ -85,6 +86,7 @@ SCHEDULE: tuple[Schedule, ...] = (
     Schedule("rtw_status_daily", rtw_status_daily, {"hour": 5, "minute": 0}, "T7.4"),
     Schedule("reminders_daily", reminders_daily, {"hour": 6, "minute": 0}, "T7.4"),
     Schedule("policies_overdue_daily", policies_overdue_daily, {"hour": 6, "minute": 15}, "T10.3"),
+    Schedule("learning_overdue", learning_overdue_daily, {"hour": 6, "minute": 15}, "T13.3"),
     Schedule(
         "rules_watch_daily", _nothing_yet("rules_watch_daily"), {"hour": 7, "minute": 0}, "T12.1"
     ),

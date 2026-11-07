@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Certificate of completion</title>
+    <style>
+      @page {
+        size: A4 landscape;
+        margin: 18mm;
+      }
+      body {
+        font-family: "DejaVu Sans", sans-serif;
+        color: #1c1c1e;
+        text-align: center;
+      }
+      .label {
+        font-size: 11pt;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: #555;
+        margin-top: 18mm;
+      }
+      h1 {
+        font-size: 30pt;
+        margin: 6mm 0;
+      }
+      .holder {
+        font-size: 24pt;
+        margin: 8mm 0 4mm;
+      }
+      .course {
+        font-size: 16pt;
+        margin-bottom: 10mm;
+      }
+      .detail {
+        font-size: 10pt;
+        color: #555;
+      }
+      .reference {
+        font-family: "DejaVu Sans Mono", monospace;
+        font-size: 11pt;
+        margin-top: 8mm;
+      }
+    </style>
+  </head>
+  <body>
+    <p class="label">Certificate of completion</p>
+    <p class="detail">This certifies that</p>
+    <p class="holder">{{ holder }}</p>
+    <p class="detail">completed the course</p>
+    <p class="course">{{ course }}</p>
+    <p class="detail">on {{ completed_on }}</p>
+    <p class="reference">Reference {{ reference }}</p>
+    <p class="detail">Check this certificate at {{ verify_url }}</p>
+    <p class="detail">Generated {{ generated }}. This is a record of completing a course; it is not a qualification.</p>
+  </body>
+</html>
