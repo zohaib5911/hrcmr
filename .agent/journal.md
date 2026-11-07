@@ -328,3 +328,4 @@
 2026-11-08 02:32 | Claude (Opus) | T15.2 | started; STATUS updated | next fetch GOV.UK pages
 2026-11-08 02:35 | Claude (Opus) | T15.2 | step 1 done: 3 GOV.UK pages saved (data/raw/rules, sidecars with sha256; 11 tables in Skilled Occupations, ISL 25 rows, TSL 52 codes in SW 6.1A) | next models + migration 0041
 2026-11-08 02:37 | Claude (Opus) | T15.2 | step 2 done: soc_rules models + migration 0041 (6 global tables, tenant SELECT only, one-live index); migrations+data-model+cli+architecture 14 pass | next parsers app/modules/soc_rules/source.py + tests on saved pages
+2026-11-08 02:40 | Claude (Opus) | T15.2 | step 3 done: soc_rules/source.py (stdlib HTML parser: Tables 1-6, ISL, TSL SW 6.1A, options A-K; fails loudly on changed pages); parser tests 18 pass | next importer (draft version, diff, rqf) + CLI data/import_rules.py + DB tests
