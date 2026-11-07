@@ -1,19 +1,25 @@
 # STATUS
-Updated: 2026-11-08 Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: (see git log)
-State: BLOCKED — needs big model (T15.2)
+Updated: 2026-11-08 Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: 32f6d41
+State: IN PROGRESS
 
 ## Last completed
-- T15.1 — ONS SOC 2020 import and local embeddings (S!). Migration 0040; importer and CLI; full ONS load: 412 unit groups, 32,439 index entries, 231 "see" rows skipped; re-run unchanged.
+- T15.1 — ONS SOC 2020 import and local embeddings (S!). 412 unit groups, 32,439 index entries.
 
 ## Current task
-- none
+- T15.2 — Rules-data importer (draft rules version, fixtures, salary rules) (B)
+  - [ ] 1 fetch GOV.UK pages (Appendix Skilled Occupations, ISL, TSL, caseworker guidance) into saved HTML fixtures with sidecars
+  - [ ] 2 models + migration 0041 (rules_versions, going_rates, pay_scale_rates, ineligible_codes, shortage_list_entries, salary_rules)
+  - [ ] 3 HTML table parsers + unit tests on fixtures
+  - [ ] 4 importer into a draft rules_version, diff vs live, rqf_level; CLI data/import_rules.py; DB tests
+  - [ ] 5 full run counts, PROGRESS, tick
+- Resume note: see journal and last commit Next: line.
 
 ## Next tasks
-- T15.2 (B) rules-data importer, then T15.3 (B) rules engine; T15.4 (S!), T15.5 (S!) after them
+- T15.3 (B) rules engine; T15.4 (S!), T15.5 (S!) after it
 
 ## Health
-- CI on dev: not run for this push; the Phase 15 gate PR runs CI.    CI on main: green (last PR #22)
-- Local checks run: ruff check and format, mypy clean on app/modules/soc, data/import_soc.py, the T15.1 migration and tests. SOC tests 17 pass (11 parser, 6 DB import). Migrations, data-model doc, guards, architecture: 12 pass. RLS, identity, tenant session, export isolation: 54 pass.
+- CI on dev: not run since T15.1    CI on main: green (last PR #22)
+- Local checks run: none yet this session
 
 ## Issues / suggestions
 - Test harness: `temporary_database()` sets the cluster-wide roles `app_owner` and `app_user` to a fresh random password each time. Two DB-using runs at once break each other's owner connection. My first full ONS load failed this way (password authentication failed for app_owner, before any rows were written); the re-run, with nothing else using the DB, succeeded. Do not run DB suites in parallel with another DB job. Worth a fix in the harness (per-database roles, or a lock) before Phase 15 gate.
