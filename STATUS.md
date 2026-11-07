@@ -1,9 +1,10 @@
 # STATUS
-Updated: 2026-11-07 20:55 Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: 5a7317e
+Updated: 2026-11-07 21:45 Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: see git log
 
-State: IN PROGRESS
+State: HANDED OVER — small model next
 
 ## Last completed
+- T14.4 — AI server layer: app/integrations/anthropic.py (key-gated, wire guard), app/ai/redaction.py (scrub, Pseudonymiser, assert_clean), app/ai/service.py (ai_ready, generate: platform+company toggle, 30/h/user, metadata log), ai_interactions (0039); Phase 14 fuzz test tests/test_ai_redaction.py 202 pass.
 - T14.3 — live search in the command palette: GET /search (two characters or more, at most eight people and eight candidates, company-wide access only, tenant-scoped); People and Actions groups (736ab45).
 - T14.2 — notifications: personal kinds reach every role; e-mail preferences immediate/daily/off; daily digest once per notice; policy e-mail only to immediate-mode people (3b72126).
 - T14.1 — dashboard cards (company-wide only, so the employee role gets none), set-up checklist with per-person dismiss, /dashboard page (710c2f8).
@@ -12,16 +13,10 @@ State: IN PROGRESS
 - P12 — Phase 12 org chart gate, PR #20 merged.
 
 ## Current task
-- T14.4 — AI server layer (Ask Mady chat panel/tools deferred by owner)
-  - [ ] 1 redaction + pseudonymisation layer (api/app/ai/redaction.py)
-  - [ ] 2 Anthropic client (api/app/integrations/anthropic.py), gated on key + company toggle, rate limit 30/h/user
-  - [ ] 3 ai_interactions metadata log (migration 0039)
-  - [ ] 4 Phase 14 payload fuzz test
-- Resume note: see journal.
+- none. T14.5 (S) is next.
 
 ## Next tasks
-- T14.4 (B): Anthropic integration, redaction layer, tools, assistant panel. A big model does this and also writes the Phase 14 payload fuzz test.
-- Then T14.5 (S): wire AI into letter drafting and reminder wording; P14 gate (S); AUDIT-2 stop (big model): covers T12.1 → P14.
+- T14.5 (S): wire AI into letter drafting and reminder wording — call app.ai.service.ai_ready/generate (never the client directly); reuse build_prompt + assert_clean in the payload test; P14 gate (S); AUDIT-2 stop (big model): covers T12.1 → P14.
 
 ## Health
 - CI on dev: green (PR #21 checks all passed before merge). CI on main: green after PR #21. Latest dev commit 736ab45 has not gone through a PR yet (T14.x work is not gated yet).
@@ -41,6 +36,8 @@ State: IN PROGRESS
 - PR #16 (dependabot, python deps) is still open; not ours, left alone.
 
 ## Strategy / decisions taken
+- T14.4: Ask Mady chat (assistant panel, read-only tools, streaming endpoint) not built: owner deferred it (AGENTS.md §3, memory). Built only the shared server layer T14.5/T15 need. Raw httpx client, no SDK dependency. Fuzz test runs on the redaction + wire body (no tools exist yet).
+- T14.4: redaction over-redacts on purpose (any £ amount, 6/8/9-digit numbers, uppercase 9–12 char codes become [redacted]).
 - Learning: courses are global with RLS (published only for learners); assignments are tenant-scoped; the table is course_assignments (plan 6.9), not micro_plan's learning_assignments.
 - Certificates: the public check uses a row policy keyed by a transaction setting (app.certificate_ref) so no other certificate is opened.
 - The learning report requires company-wide scope (require() also admits own-scope holders, so the handler checks scope).

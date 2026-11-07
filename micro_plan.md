@@ -287,7 +287,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Steps:** API search over employees + candidates **only where the user has read permission**, max 8 each, min 2 chars; add People + Actions groups to palette.
 - **Done when:** user without `employee.profile.read` gets no employees (test); other-tenant names never returned (test).
 
-### [ ] T14.4 · B · Anthropic integration, redaction layer, tools, assistant panel
+### [x] T14.4 · B · Anthropic integration, redaction layer, tools, assistant panel
 - **Spec:** plan L986–1000, L1438, L1440–1441. Big model: also write the Phase 14 payload fuzz test here.
 
 ### [ ] T14.5 · S · Wire AI into letter drafting and reminder wording

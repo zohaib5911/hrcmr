@@ -32,7 +32,7 @@ class AnthropicError(Exception):
 
 @dataclass(frozen=True)
 class Completion:
-    text: str
+    reply: str
     model: str
     input_tokens: int
     output_tokens: int
@@ -114,7 +114,7 @@ class Anthropic:
             )
             usage = data.get("usage", {})
             return Completion(
-                text=text,
+                reply=text,
                 model=str(data.get("model", model)),
                 input_tokens=int(usage.get("input_tokens", 0)),
                 output_tokens=int(usage.get("output_tokens", 0)),

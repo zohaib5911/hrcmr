@@ -375,7 +375,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [ ] **T14.1** Dashboard API, cards and setup checklist
 - [ ] **T14.2** Notifications
 - [ ] **T14.3** Command palette live search
-- [ ] **T14.4** Anthropic integration, redaction layer, tools, assistant panel
+- [x] **T14.4** Anthropic integration, redaction layer — 2026-11-07. Server-only client (key-gated, company + platform toggle), scrub/pseudonymise + wire guard, 30/h/user limit, ai_interactions metadata (0039), app.ai.service.generate for T14.5; fuzz test 202 pass. Ask Mady chat panel, tools and streaming deferred by owner.
 - [ ] **T14.5** Wire AI into letter drafting and reminder wording
 - [ ] **Phase 14 gate** — AI payload fuzz test
 

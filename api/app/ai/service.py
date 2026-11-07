@@ -132,4 +132,4 @@ async def generate(
         started=started,
         usage=(completion.input_tokens, completion.output_tokens),
     )
-    return pseudonymiser.restore(completion.text)
+    return pseudonymiser.restore(completion.reply)

@@ -21,3 +21,8 @@ ignored, so a forged header cannot dodge a rate limit or poison the audit trail.
 
 Every JSON request model inherits `RequestModel` (`api/app/core/schemas.py`), which refuses fields it
 does not declare. A test walks the OpenAPI document and fails for any request body that does not.
+
+## AI requests (T14.4)
+- Only the API calls Anthropic (`api/app/integrations/anthropic.py`); with no `ANTHROPIC_API_KEY`, or the company's AI switch off, nothing is sent.
+- `app.ai.redaction.scrub` drops restricted keys (NI, bank, passport/visa/BRP, share code, CoS, health/sickness, salary, address, date of birth, contact details), labels names (`Employee A`) and redacts identifier-like text; `assert_clean` checks the exact wire body and refuses to send if anything survives.
+- Usage is logged in `ai_interactions` as metadata only (feature, model, status, token counts, duration). Rate limit: 30 per hour per user.
