@@ -56,7 +56,8 @@ export function buildCsp({ nonce, isDev, apiOrigin }: CspOptions): string {
       ...SENTRY,
       ...(isDev ? ["ws://localhost:*", "ws://*.localhost:*"] : []),
     ],
-    "frame-src": [...STRIPE_FRAMES, ...TURNSTILE],
+    // The policy viewer is an iframe of the API's own proxy; no other frame origin is allowed.
+    "frame-src": [...STRIPE_FRAMES, ...TURNSTILE, ...api],
     "worker-src": ["'self'", "blob:"],
     "manifest-src": ["'self'"],
     "media-src": ["'self'"],

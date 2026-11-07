@@ -35,6 +35,8 @@ from app.modules.employees.schemas import (
     Status,
     StatusChange,
 )
+from app.modules.policies import service as policy_service
+from app.modules.policies.models import PolicyAcceptance
 from app.modules.rbac.deps import Access, require
 from app.modules.rtw.models import RTWCheck
 from app.modules.rtw.schemas import FILTER_STATUSES, RTWFilter
@@ -208,7 +210,7 @@ def _number_key(number: str) -> str:
 
 
 @router.post("/employees", status_code=201, response_model=EmployeeRow)
-async def create_employee(body: EmployeeIn, access: Writes) -> EmployeeRow:
+async def create_employee(body: EmployeeIn, request: Request, access: Writes) -> EmployeeRow:
     """A new record with the essentials. The number must be unique in the company, ignoring case
     and spaces ("E 001" and "e001" are the same)."""
     _require_full_write(access)
@@ -249,6 +251,14 @@ async def create_employee(body: EmployeeIn, access: Writes) -> EmployeeRow:
             "status": employee.status,
         },
     )
+    # New starters join sent policies marked "send to new starters", in this same transaction.
+    await policy_service.assign_new_starters(
+        access.db,
+        access.audit_context,
+        await policy_service.company_day(access.db),
+        request.app.state.settings.web_origin,
+        only=[employee.id],
+    )
     await access.db.commit()
     return _row(employee)
 
@@ -277,6 +287,9 @@ async def _agreement_on_file(access: Access, employee_id: uuid.UUID) -> bool:
 async def _delete_blocker(access: Access, employee_id: uuid.UUID) -> str | None:
     """Why this record may not be deleted for good, or None. A record with history is archived."""
     history = {
+        "policy sign-offs or assignments": select(PolicyAcceptance.id).where(
+            PolicyAcceptance.employee_id == employee_id
+        ),
         "change-of-circumstances records": select(ChangeOfCircumstances.id).where(
             ChangeOfCircumstances.employee_id == employee_id
         ),

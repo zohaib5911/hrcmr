@@ -35,6 +35,8 @@ def _may_read_compliance(access: Access) -> bool:
 
 def _kinds(access: Access) -> tuple[str, ...]:
     kinds: tuple[str, ...] = ("compliance.reminder_received", "leave.decision")
+    if scope_for(access.role, "policy.acceptance.read") is not None:
+        kinds += ("policy.assigned", "policy.reminder", "policy.overdue")
     if _may_read_compliance(access):
         kinds += ("compliance.reminders_due",)
     if scope_for(access.role, "leave.request.approve") is not None:

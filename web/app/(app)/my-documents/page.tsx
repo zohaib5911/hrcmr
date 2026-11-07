@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { OwnPolicies } from "@/components/policies/own-documents";
 import { ReceivedRemindersPage } from "@/components/compliance/received-reminders-page";
 import { serverApi } from "@/lib/auth/server";
 
@@ -19,5 +20,12 @@ export default async function Page({
   ]);
   if (!response.data) notFound();
   const selected = Array.isArray(params.reminder) ? params.reminder[0] : params.reminder;
-  return <ReceivedRemindersPage reminders={response.data} selectedId={selected} />;
+  return (
+    <>
+      <ReceivedRemindersPage reminders={response.data} selectedId={selected} />
+      <div className="mt-10">
+        <OwnPolicies />
+      </div>
+    </>
+  );
 }

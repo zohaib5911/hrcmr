@@ -26,7 +26,7 @@ export const NAV_PERMISSIONS: Readonly<Record<string, readonly string[]>> = {
   reminders: ["compliance.reminder.send", "compliance.overview.read"],
   checker: ["soc.check.read", "soc.check.run"],
   documents: ["document.file.read"],
-  policies: ["policy.document.read", "policy.acceptance.read_own"],
+  policies: ["policy.document.read"],
   reports: ["document.report.generate"],
   leave: [
     "leave.request.read",

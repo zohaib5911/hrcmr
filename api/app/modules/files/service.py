@@ -30,6 +30,7 @@ from app.modules.files.validation import (
     safe_filename,
     sniff,
 )
+from app.modules.policies.models import PolicyAcceptance, PolicyDocument
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncEngine
@@ -266,6 +267,37 @@ class FileService:
     @staticmethod
     async def _reaches(access: Access, record: File) -> bool:
         """Everyone with full scope; otherwise what the person uploaded or that is within reach."""
+        if record.owner_type == "policy_document":
+            policy = (
+                await access.db.execute(
+                    select(PolicyDocument).where(PolicyDocument.id == record.owner_id)
+                )
+            ).scalar_one_or_none()
+            if policy is None:
+                return False
+            if scope_for(access.role, "policy.document.read") is Scope.ALL:
+                return True
+            if (
+                scope_for(access.role, "policy.acceptance.read") is None
+                or access.employee_id is None
+                or policy.file_id != record.id
+                or policy.status == "draft"
+            ):
+                return False
+            assigned = select(PolicyAcceptance.id).where(
+                PolicyAcceptance.policy_document_id == policy.id,
+                PolicyAcceptance.employee_id == access.employee_id,
+            )
+            if policy.status == "archived":
+                assigned = assigned.where(PolicyAcceptance.accepted_at.is_not(None))
+            return (await access.db.execute(assigned)).first() is not None
+        if record.owner_type == "report_result":
+            return (
+                scope_for(access.role, "document.report.generate") is Scope.ALL
+                and record.uploaded_by == access.caller.user_id
+            )
+        if record.owner_type == "company_document":
+            return scope_for(access.role, "document.file.read") is Scope.ALL
         if record.owner_type == "attendance_import":
             return scope_for(access.role, "attendance.record.read") is Scope.ALL
         if access.scope is Scope.ALL or record.uploaded_by == access.caller.user_id:

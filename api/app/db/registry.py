@@ -12,6 +12,7 @@ import app.modules.companies.models
 import app.modules.compliance.dossier_models
 import app.modules.compliance.models
 import app.modules.compliance.reminder_models
+import app.modules.documents.models
 import app.modules.email.models
 import app.modules.employees.models
 import app.modules.files.models
@@ -22,6 +23,8 @@ import app.modules.leave.request_models
 import app.modules.leave.year_end_models
 import app.modules.notifications.models
 import app.modules.pay.models
+import app.modules.policies.models
+import app.modules.reports.models
 import app.modules.rota.models
 import app.modules.rota.week_models
 import app.modules.rtw.models

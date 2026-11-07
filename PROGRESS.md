@@ -5,7 +5,7 @@ order. After every task: tick it, add one line saying what was done and anything
 must do, and commit. Never record secret values in this file.
 
 - **Last updated:** 2026-11-03
-- **Current task:** Phase 9 gate (T9.1–T9.6 complete)
+- **Current task:** T10.3 — policies and sign-offs (T10.1–T10.2 complete)
 
 - **2026-11-02 fixes before T4.6:** CI fixed for the two e2e checks the Company pages broke; Dependabot #4 (TypeScript 7, ESLint 10) closed and both majors ignored; client address trusted from `X-Real-IP`/`CF-Connecting-IP` only via Railway's private network and Cloudflare's ranges (`docs/security.md`); lockout and new-device e-mails now sent (`account_locked` template added); e-mail samples moved to `api/seed/` (not in the image); every JSON request model refuses unknown fields (`RequestModel`, checked by a test over the OpenAPI document); password fallback is now the whole NCSC top-100k (the old file held only its 12-character-and-longer entries, which gave the same answers today); fake-secret check run as draft PR #6: the scan failed as it should, PR closed and branch deleted.
 
@@ -323,7 +323,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T9.4** Shift types, late policies, day-off patterns — 2026-11-03. Tenant-safe archived settings CRUD, unique live scopes, overnight break and deduction validation, audited changes; settings tabs/forms with prerequisite links and shift suggestions/live hours. Verified rota/RBAC/doc34, migration7, mypy273, web types/lint/nav22 and production browser/setup2 including mobile axe and archive dependencies.
 - [x] **T9.5** Rota week grid, publish, print, My Shifts — 2026-11-03. Scoped versioned shifts/grid and copy/clear actions; leave/holiday/day-off/48h/rest warnings and published-policy lateness; last-published snapshots, scoped transactional notifications/email digests, landscape PDF, quick-add/cell/menu workspace and My Shifts. Verified affected API61 plus isolated rota9/clock-email12, migration7/static/client/web22, production workspace/setup2 and settings1 including mobile axe, draft snapshots and destructive confirmations.
 - [x] **T9.6** Work Log — 2026-11-03. Scoped own/admin entries and filtered totals, responsibility snapshots, company-local same-day own edits, stale-safe reasoned correction retaining original and soft removal; responsibility deletion preserves log history; own/admin forms/filters/inspection. Verified Work Log10 + related employment/RBAC/doc26, migration7, mypy288/static/client, web type/lint/nav22 and production browser/setup2 including mobile axe.
-- [ ] **Phase 9 gate** — full local validation and 76 reviewed screenshots complete; CI PR pending.
+- [x] **Phase 9 gate** — PR #15 merged as 86c51a5 after all 12 CI checks passed (run 41737189830); 76 reviewed screenshots saved.
   - Delivered scoped attendance recording, scanned imports, bulk grids, exports and monthly absence reporting.
   - Added employee clocking/PWA and optional consented location, with stale-safe report timesheet review.
   - Built rota templates/policies, weekly planning/warnings, retained publication snapshots, notifications, PDF and My Shifts.
@@ -331,11 +331,16 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
   - Captured 76 views at 390/1280 light/dark with axe/overflow checks; corrected mobile long-policy actions and reviewed attendance/import/clock/rota/log sheets.
 
 ### Phase 10 — Documents, policies and reports
-- [ ] **T10.1** Company documents
-- [ ] **T10.2** Reports
-- [ ] **T10.3** Policies and sign-offs
-- [ ] **T10.4** "Draft with AI" UI and API contract (feature-flagged)
+- [x] **T10.1** Company documents — 2026-11-03. Ten categories, company-local review flags, scoped scanned PDF/image/Word uploads, filtered/paged library, metadata editing and retained archives; file download rechecks current full-scope permission after demotion. Verified API5+related49/migration7, Python/web static/client/nav15, production workflow/setup2 plus shell1, mobile form/archive axe and overflow pass.
+- [x] **T10.2** Reports — 2026-11-04. Seven fresh tenant XLSX projections with formula-safe text, explicit non-sensitive employee fields and company-local leave/training cutoffs; durable requests, real ARQ generation/recovery, atomic audited artifacts and requester/current-permission downloads; Reports cards/recent polling/download UI. Verified combined API35+finalworker6/projection2/migration7/static/mypy220/client/webtypes/lint/nav15, actual-worker production workflow/setup2 plus shell1 with mobile axe/overflow.
+- [x] **T10.3** Policies and sign-offs — 2026-11-07. Manual remind for outstanding people, daily overdue job with employee notices, new-starter assignment on hire and by the same daily job, 3-step New document sheet (details, scanned file, recipients and send), /policies list and detail with acceptance progress, My Documents policy viewer with accept/sign and receipt; sponsor reminders kept. Verified: policy API15 (policies/own/schema), related worker/notifications/employees/profile/rbac34, reports6 (mypy-fix), mypy clean, ruff clean, web typecheck/lint, web unit777, policies Playwright spec 1 pass, gen:api:check clean.
+- [x] **T10.4** "Draft with AI" UI and API contract (feature-flagged) — 2026-11-07. `POST /ai/letters/draft` returns placeholder templates (7 letter types, 3 tones, up to 10 key points; no AI call; email/NI key points and unknown fields refused), `POST /ai/letters/docx` builds the Word file, /documents sheet copies, downloads or saves the draft; label follows /auth/me `ai_available`. Verified: letters + auth endpoint/flow tests 47 pass, ruff/mypy (318 files) clean, web typecheck/lint, web unit777, gen:api:check clean.
 - [ ] **Phase 10 gate**
+  - Delivered: policies with remind, overdue job, new-starter assignment, the 3-step wizard, list/detail and My Documents accept/sign with receipts; letter drafts from templates with .docx and save-to-documents; seven XLSX reports.
+  - Verified: full API suite 690 pass; full web e2e 423 pass (160 screenshot/design specs skipped by design); web unit 777 pass; ruff, mypy (strict), web typecheck/lint and gen:api clean.
+  - Browser: policies.spec pass; 24 reviewed screenshots saved in docs/screenshots/phase-10 (390 and 1280 px, light and dark).
+  - Fixed at the gate: mypy strict error in a T10.2 test; data-model doc regenerated; encrypted-column inventory lists policy_acceptances.typed_signature; orphan-cleanup test no longer assumes a clean shared bucket.
+  - Decisions: overdue marking at 06:15 daily; AI label follows /auth/me ai_available; letter drafts are template-only until T14.4.
 
 ### Phase 11 — Recruitment and public careers
 - [ ] **T11.1** Requisitions

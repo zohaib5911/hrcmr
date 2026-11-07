@@ -18,6 +18,8 @@ from app.jobs.cloudflare import cloudflare_ranges_weekly
 from app.jobs.compliance import reminders_daily, rtw_status_daily
 from app.jobs.email import deliver_email, sweep_email_outbox
 from app.jobs.holidays import bank_holidays_weekly
+from app.jobs.policies import policies_overdue_daily
+from app.jobs.reports import generate_report, sweep_report_jobs
 from app.modules.email.outbox import MAX_ATTEMPTS
 from app.modules.files.service import remove_orphans
 
@@ -82,6 +84,7 @@ SCHEDULE: tuple[Schedule, ...] = (
     Schedule("register_ingest", _nothing_yet("register_ingest"), {"hour": 3, "minute": 30}, "T4.2"),
     Schedule("rtw_status_daily", rtw_status_daily, {"hour": 5, "minute": 0}, "T7.4"),
     Schedule("reminders_daily", reminders_daily, {"hour": 6, "minute": 0}, "T7.4"),
+    Schedule("policies_overdue_daily", policies_overdue_daily, {"hour": 6, "minute": 15}, "T10.3"),
     Schedule(
         "rules_watch_daily", _nothing_yet("rules_watch_daily"), {"hour": 7, "minute": 0}, "T12.1"
     ),
@@ -91,6 +94,7 @@ SCHEDULE: tuple[Schedule, ...] = (
         {"minute": 15},
         "T16.4",
     ),
+    Schedule("report_jobs_sweep", sweep_report_jobs, {}, "T10.2", quiet=True),
     Schedule("email_outbox_sweep", sweep_email_outbox, {}, "T2.8", quiet=True),  # every minute
 )
 
@@ -111,5 +115,6 @@ def functions() -> list[Function]:
             name="deliver_email",
             max_tries=MAX_ATTEMPTS + 1,
         ),
+        func(tracked(generate_report, name="generate_report"), name="generate_report", max_tries=1),
         func(tracked(worker_ping, name="worker_ping", quiet=True), name="worker_ping", max_tries=1),
     ]

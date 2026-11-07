@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.ai.letters import router as letters_router
 from app.core.body_limit import LOGO_LIMIT, PROOF_LIMIT, UPLOAD_LIMIT, BodyLimitMiddleware
 from app.core.config import Settings, get_settings
 from app.core.csrf import CsrfMiddleware
@@ -49,6 +50,7 @@ from app.modules.compliance.hub_router import router as compliance_hub_router
 from app.modules.compliance.reminder_router import router as reminders_router
 from app.modules.compliance.router import router as compliance_changes_router
 from app.modules.compliance.sponsor_pdf import router as sponsor_pdf_router
+from app.modules.documents.router import router as documents_router
 from app.modules.email.outbox import OutboxMailer
 from app.modules.employees.activity_router import router as employee_activity_router
 from app.modules.employees.compensation_router import router as compensation_router
@@ -68,6 +70,9 @@ from app.modules.leave.workspace_router import router as leave_workspace_router
 from app.modules.leave.year_end_router import router as leave_year_end_router
 from app.modules.notifications.router import router as notifications_router
 from app.modules.pay.router import router as pay_router
+from app.modules.policies.own_router import router as own_policies_router
+from app.modules.policies.router import router as policies_router
+from app.modules.reports.router import router as reports_router
 from app.modules.rota.action_router import router as rota_action_router
 from app.modules.rota.publish_router import router as rota_publish_router
 from app.modules.rota.router import router as rota_router
@@ -233,6 +238,11 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(employees_router, prefix=API_PREFIX)
     app.include_router(personal_router, prefix=API_PREFIX)
     app.include_router(employment_router, prefix=API_PREFIX)
+    app.include_router(own_policies_router, prefix=API_PREFIX)
+    app.include_router(policies_router, prefix=API_PREFIX)
+    app.include_router(reports_router, prefix=API_PREFIX)
+    app.include_router(documents_router, prefix=API_PREFIX)
+    app.include_router(letters_router, prefix=API_PREFIX)
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)
     app.include_router(employee_activity_router, prefix=API_PREFIX)

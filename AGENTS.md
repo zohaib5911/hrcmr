@@ -3,8 +3,38 @@
 Two agents (Claude Code and Codex) work on this repo **one at a time, in relay**. The owner starts one, it works until its usage limit or a stop point, and then the owner starts the other.
 **You can be cut off at any second without warning.** Work so that a different agent can continue from whatever you left behind, even if you never got to write a handover.
 
+## Quick start — the owner ALWAYS types only "Read AGENTS.md and continue" (any model, Claude Code or Codex)
+The owner never tells you what to do or which tier you are. You decide, from this section, and you tell the owner which model to start next.
+
+**0. Know your tier.** **BIG** = Claude Opus (any version), Claude Fable, Solo 6.1 (the owner may add names to this line).
+Every other model is **SMALL** (Haiku, Sonnet, Luna, any mini model…). If you can't tell which model you are, you are SMALL.
+
+1. Do §1 below (save any cut-off work, sync).
+2. Run `bash .agent/next.sh`. It prints a `NEXT:` line with a kind (`FIX`, `TASK`, `AUDIT`) and the tier tag, then the block.
+3. Act by this table. Repeat steps 2–3 after every finished block until you hit a stop.
+
+| `next.sh` shows | If you are SMALL | If you are BIG |
+|---|---|---|
+| `FIX` tagged S/S!/P* (not `· B`) | do it | stop → **START SMALL MODEL** |
+| `FIX` tagged `· B` | stop → **BIG MODEL TASK** | do it |
+| `TASK` tagged S or S! | do it | stop → **START SMALL MODEL** |
+| `TASK` tagged B | stop → **BIG MODEL TASK** | do it, then keep going while the next block is B |
+| `AUDIT` (an `AUDIT-n` block, or a re-audit after fixes) | stop → **AUDIT NEEDED** | run `audit.md` fully, then go back to step 2 |
+
+**How to stop:** set `STATUS.md` State (`BLOCKED — needs big model (Txx)`, `BLOCKED — audit requested (AUDIT-n)` or
+`HANDED OVER — small model next`), commit `chore(status): <state>` with a `Next:` line, push. Then make your **final message
+exactly one** of these (first line, word for word; one more line with the task id is fine):
+- `⚠ BIG MODEL TASK — start Opus / Solo 6.1 and type: Read AGENTS.md and continue`
+- `⚠ AUDIT NEEDED FIRST — start Opus / Solo 6.1 and type: Read AGENTS.md and continue`
+- `✓ BIG-MODEL WORK DONE — start a small model and type: Read AGENTS.md and continue`
+
+If you are cut off by a usage limit before you can stop, that's fine: the owner starts another model of the same size with the same sentence.
+
 ## Source of truth
-- `plan.md`: what to build and in what order (Section 9). Follow it exactly.
+- `micro_plan.md`: **the task list and steps** for all remaining work (T10.3 onward). Work through it top to bottom.
+- `changesneeded.md`: fixes from the last audit. **Always done before** new `micro_plan.md` tasks. Tick each item (`### [x]`) with its fix commit.
+- `audit.md`: instructions for the auditor (big model) only. Small models don't read it.
+- `plan.md`: the full **spec** (behaviour, rules, data). Read only the lines a `micro_plan.md` block cites. If it conflicts with `micro_plan.md` on behaviour, `plan.md` wins: note it in STATUS.
 - `deployment-requirements.txt`: accounts, keys and env var names.
 - `PROGRESS.md`: permanent log; finished tasks ticked, one line each.
 - `STATUS.md`: live state (current only, overwritten). It may be stale; see Recovery.
@@ -29,24 +59,25 @@ Two agents (Claude Code and Codex) work on this repo **one at a time, in relay**
    - If the rebase hits a conflict, stop: run `git rebase --abort` and set `State: BLOCKED — merge conflict` in STATUS with the file names. Don't guess.
    - Then `git push origin dev`.
 4. Write the corrected state into `STATUS.md` (yourself as the agent, State IN PROGRESS, the task, the sub-steps). Commit and push: `chore(status): start Txx (Codex|Claude)`.
-5. Read only the plan sections the task needs.
+5. Run `bash .agent/next.sh`; read only the `plan.md` lines that block cites.
 6. Run lint, type-check and the tests for the area you'll touch. If `dev` is red, fixing it is your first task.
 
 ## 2. While working: checkpoint constantly
-- **Break each task into sub-steps** (for example: model → migration → service → API → tests → UI → UI test). List them as a checklist under "Current task" in `STATUS.md`.
-- **After every sub-step, do all three together:**
-  1. append one line to `.agent/journal.md`: `YYYY-MM-DD HH:MM | agent | Txx | did X | next Y`;
-  2. tick the sub-step and update the resume note in `STATUS.md`;
-  3. commit **and push** in one go, with STATUS.md and the journal included:
+- **Sub-steps are the numbered Steps of the `micro_plan.md` block.** At task start, copy them as a checklist under "Current task" in `STATUS.md`.
+- **After every sub-step (slim checkpoint), do both together:**
+  1. append one line to `.agent/journal.md`: `YYYY-MM-DD HH:MM | agent | Txx | step N done: X (tests: real counts) | next Y`;
+  2. commit **and push** in one go, with the journal included:
      ```
      wip(Txx): <what was done>
 
      Next: <exact next action, file(s)>
      ```
-  This way the status is never more than one sub-step behind, even if you're cut off.
+  `STATUS.md` is rewritten only at task start, task end, BLOCKED and handover. Between those, the journal and the
+  `Next:` lines are the live state (Recovery in §1 already trusts them over STATUS).
 - **Commit and push before** any long-running command (full test suite, Playwright, builds, big refactors).
 - Don't sit on more than ~20 minutes of unpushed work.
-- When a task is fully done: a final commit `feat(area): <title> (Txx)` with a `Next:` line, then tick it in `PROGRESS.md`.
+- When a task is fully done: tick it in `micro_plan.md` (`### [x]`) and in `PROGRESS.md` (one line), rewrite `STATUS.md`,
+  then a final commit `feat(area): <title> (Txx)` with a `Next:` line.
 
 ## 3. Quality and style
 - One task at a time, in plan order.
@@ -76,7 +107,15 @@ If you are cut off before this, that's fine: the journal, the `Next:` lines and 
   - never use `--admin`, bypass branch protection, or force-push `main`;
   - if CI fails, fix it on `dev` and push; never merge red;
   - after merging, `git pull` on `dev` and continue with the next task. Don't wait for the merge to finish before starting it.
-- After Phases 7, 14 and 20: set `State: BLOCKED — audit requested` and stop. The owner runs an audit with a high-level model, and the fixes come back as tasks in `STATUS.md` "Next tasks".
+- Gate PRs: `--auto` merges instantly on this repo, so wait for checks yourself (`gh pr checks <n> --watch`) and merge only when all are green (`micro_plan.md` Recipe R7).
+- **Audit stops** are the `AUDIT-n` blocks in `micro_plan.md` (after Phases 11, 14, 17, 20 and 22). Stop there with
+  `State: BLOCKED — audit requested (AUDIT-n)`. A big model runs `audit.md` and writes the fixes into `changesneeded.md`;
+  small models fix them first, then the loop repeats until an audit round has no P0/P1 items.
+
+## 7. Model tiers
+- Each `micro_plan.md` block is tagged **S** (small model OK), **S!** (small model OK, high-risk: follow every "Watch" line), or **B** (big model only).
+- Who is BIG and what each tier does on each kind of block: the table in "Quick start". A big model never does S/S! blocks (that wastes the expensive model); it hands back.
+- Small models: never invent figures, never skip/weaken tests, never claim a pass you didn't see. When unsure, set BLOCKED with the question; don't guess.
 
 ## STATUS.md template (overwrite fully each time)
 ```

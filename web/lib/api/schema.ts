@@ -36,6 +36,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/ai/letters/docx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Download Docx */
+        post: operations["ai_download_docx"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/letters/draft": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create Draft */
+        post: operations["ai_create_draft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/attendance-records": {
         parameters: {
             query?: never;
@@ -1207,6 +1241,60 @@ export interface paths {
         head?: never;
         /** Change a job title */
         patch: operations["company_update_designation"];
+        trace?: never;
+    };
+    "/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Company Documents */
+        get: operations["documents_list_company_documents"];
+        put?: never;
+        /** Upload Company Document */
+        post: operations["documents_upload_company_document"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/documents/{document_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Company Document */
+        get: operations["documents_get_company_document"];
+        put?: never;
+        post?: never;
+        /** Archive Company Document */
+        delete: operations["documents_archive_company_document"];
+        options?: never;
+        head?: never;
+        /** Edit Company Document */
+        patch: operations["documents_edit_company_document"];
+        trace?: never;
+    };
+    "/documents/{document_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Download Company Document */
+        get: operations["documents_download_company_document"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/employee-lookups/postcode/{postcode}": {
@@ -2707,6 +2795,284 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/policies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Policies */
+        get: operations["policies_list_policies"];
+        put?: never;
+        /** Create Policy */
+        post: operations["policies_create_policy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/own": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Own Policies */
+        get: operations["policies_own_policies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/own/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Own Policy Summary */
+        get: operations["policies_own_policy_summary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/own/{policy_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Own Policy Download */
+        get: operations["policies_own_policy_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/own/{policy_id}/view": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Own Policy View */
+        get: operations["policies_own_policy_view"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/{policy_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Policy */
+        get: operations["policies_get_policy"];
+        put?: never;
+        post?: never;
+        /** Archive Policy */
+        delete: operations["policies_archive_policy"];
+        options?: never;
+        head?: never;
+        /** Update Policy */
+        patch: operations["policies_update_policy"];
+        trace?: never;
+    };
+    "/policies/{policy_id}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept Policy */
+        post: operations["policies_accept_policy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/{policy_id}/acceptances": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Policy Acceptances */
+        get: operations["policies_policy_acceptances"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/{policy_id}/acceptances/{acceptance_id}/receipt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Employee Receipt */
+        get: operations["policies_employee_receipt"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/{policy_id}/file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload Policy File */
+        post: operations["policies_upload_policy_file"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/{policy_id}/new-version": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** New Policy Version */
+        post: operations["policies_new_policy_version"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/{policy_id}/receipt": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Own Policy Receipt */
+        get: operations["policies_own_policy_receipt"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/{policy_id}/recipients": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Preview Recipients */
+        get: operations["policies_preview_recipients"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/{policy_id}/remind": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Remind Policy
+         * @description Nudge only the people who have not yet accepted or signed this sent version.
+         */
+        post: operations["policies_remind_policy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/{policy_id}/send": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send Policy */
+        post: operations["policies_send_policy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/policies/{policy_id}/view": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Policy File View */
+        get: operations["policies_policy_file_view"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ready": {
         parameters: {
             query?: never;
@@ -2770,6 +3136,57 @@ export interface paths {
         put?: never;
         /** Snooze Reminder */
         post: operations["reminders_snooze_reminder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/jobs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Recent Reports */
+        get: operations["reports_recent_reports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Report Status */
+        get: operations["reports_report_status"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/reports/{report_type}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request Report */
+        post: operations["reports_request_report"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4150,6 +4567,20 @@ export interface components {
             /** File */
             file: string;
         };
+        /** Body_documents_upload_company_document */
+        Body_documents_upload_company_document: {
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "policy_handbook" | "health_safety" | "companies_house" | "hmrc_payroll" | "insurance" | "premises_lease" | "certificate" | "hr_template" | "training" | "other";
+            /** File */
+            file: string;
+            /** Next Review Date */
+            next_review_date?: string | null;
+            /** Title */
+            title: string;
+        };
         /** Body_employees_upload_agreement */
         Body_employees_upload_agreement: {
             /** File */
@@ -4182,6 +4613,11 @@ export interface components {
             owner_id?: string | null;
             /** Owner Type */
             owner_type?: string | null;
+        };
+        /** Body_policies_upload_policy_file */
+        Body_policies_upload_policy_file: {
+            /** File */
+            file: string;
         };
         /** CalendarEntry */
         CalendarEntry: {
@@ -4649,6 +5085,77 @@ export interface components {
             type_of_organisation: string | null;
             /** Website */
             website: string | null;
+        };
+        /** CompanyDocumentEdit */
+        CompanyDocumentEdit: {
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "policy_handbook" | "health_safety" | "companies_house" | "hmrc_payroll" | "insurance" | "premises_lease" | "certificate" | "hr_template" | "training" | "other";
+            /** Next Review Date */
+            next_review_date?: string | null;
+            /** Title */
+            title: string;
+        };
+        /** CompanyDocumentOut */
+        CompanyDocumentOut: {
+            /** Archived At */
+            archived_at: string | null;
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "policy_handbook" | "health_safety" | "companies_house" | "hmrc_payroll" | "insurance" | "premises_lease" | "certificate" | "hr_template" | "training" | "other";
+            /**
+             * File Id
+             * Format: uuid
+             */
+            file_id: string;
+            /** File Name */
+            file_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Next Review Date */
+            next_review_date: string | null;
+            /**
+             * Review Status
+             * @enum {string}
+             */
+            review_status: "no_review_date" | "current" | "review_due" | "overdue";
+            /**
+             * Scan Status
+             * @enum {string}
+             */
+            scan_status: "pending" | "clean" | "infected" | "error";
+            /** Size */
+            size: number;
+            /** Title */
+            title: string;
+            /**
+             * Uploaded At
+             * Format: date-time
+             */
+            uploaded_at: string;
+        };
+        /** CompanyDocuments */
+        CompanyDocuments: {
+            /** Items */
+            items: components["schemas"]["CompanyDocumentOut"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /**
+             * Today
+             * Format: date
+             */
+            today: string;
+            /** Total */
+            total: number;
         };
         /** CompanyHolidayIn */
         CompanyHolidayIn: {
@@ -6319,6 +6826,51 @@ export interface components {
             /** Rule Text */
             rule_text?: string | null;
         };
+        /** LetterDocxIn */
+        LetterDocxIn: {
+            /** Body */
+            body: string;
+            /** Title */
+            title: string;
+        };
+        /** LetterDraftIn */
+        LetterDraftIn: {
+            /** Key Points */
+            key_points?: string[];
+            /**
+             * Letter Type
+             * @enum {string}
+             */
+            letter_type: "offer" | "welcome" | "disciplinary" | "written_warning" | "policy_explainer" | "reference" | "termination";
+            /**
+             * Tone
+             * @default neutral
+             * @enum {string}
+             */
+            tone: "formal" | "neutral" | "friendly";
+        };
+        /** LetterDraftOut */
+        LetterDraftOut: {
+            /** Body */
+            body: string;
+            /**
+             * Letter Type
+             * @enum {string}
+             */
+            letter_type: "offer" | "welcome" | "disciplinary" | "written_warning" | "policy_explainer" | "reference" | "termination";
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "template" | "ai";
+            /** Title */
+            title: string;
+            /**
+             * Tone
+             * @enum {string}
+             */
+            tone: "formal" | "neutral" | "friendly";
+        };
         /** LocationIn */
         LocationIn: {
             /** Address Line1 */
@@ -6421,6 +6973,8 @@ export interface components {
         MeResponse: {
             /** Active Company Id */
             active_company_id: string | null;
+            /** Ai Available */
+            ai_available: boolean;
             /** Companies */
             companies: components["schemas"]["CompanyMembership"][];
             /**
@@ -6638,6 +7192,55 @@ export interface components {
             /** Working Days Left */
             working_days_left: number | null;
         };
+        /** OwnPolicy */
+        OwnPolicy: {
+            /** Accepted At */
+            accepted_at: string | null;
+            /** Archived */
+            archived: boolean;
+            /**
+             * Confirmation Mode
+             * @enum {string}
+             */
+            confirmation_mode: "accept" | "sign";
+            /**
+             * Due On
+             * Format: date
+             */
+            due_on: string;
+            /** File Mime */
+            file_mime: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "accepted" | "signed" | "overdue";
+            /** Title */
+            title: string;
+            /** Version */
+            version: number;
+        };
+        /** OwnPolicyPage */
+        OwnPolicyPage: {
+            /** Items */
+            items: components["schemas"]["OwnPolicy"][];
+            /** Total */
+            total: number;
+        };
+        /** OwnPolicySummary */
+        OwnPolicySummary: {
+            /** Completed */
+            completed: number;
+            /** Overdue */
+            overdue: number;
+            /** Pending */
+            pending: number;
+        };
         /** OwnResponsibility */
         OwnResponsibility: {
             /**
@@ -6850,6 +7453,197 @@ export interface components {
              * @description False when the caller may not see these at all.
              */
             sensitive_visible: boolean;
+        };
+        /** PolicyAccept */
+        PolicyAccept: {
+            /** Confirmed */
+            confirmed: boolean;
+            /** Typed Signature */
+            typed_signature?: string | null;
+        };
+        /** PolicyAction */
+        PolicyAction: {
+            /** Count */
+            count: number;
+        };
+        /** PolicyDraft */
+        PolicyDraft: {
+            /**
+             * Accept Within Days
+             * @default 14
+             */
+            accept_within_days: number;
+            /** Audience Ids */
+            audience_ids?: string[];
+            /**
+             * Audience Type
+             * @default everyone
+             * @enum {string}
+             */
+            audience_type: "everyone" | "departments" | "locations" | "named" | "visa_holders";
+            /**
+             * Auto Send New Starters
+             * @default false
+             */
+            auto_send_new_starters: boolean;
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "employment_contract" | "job_description" | "offer_letter" | "contract_change" | "company_policy" | "employee_handbook" | "code_of_conduct" | "it_email_social_media" | "drugs_alcohol" | "sickness_sick_pay" | "attendance_punctuality" | "holiday_annual_leave" | "flexible_hybrid_working" | "family_leave" | "equality_diversity" | "anti_harassment" | "grievance" | "disciplinary" | "whistleblowing" | "health_safety" | "privacy_notice" | "sponsor_duties" | "other";
+            /**
+             * Confirmation Mode
+             * @default accept
+             * @enum {string}
+             */
+            confirmation_mode: "accept" | "sign";
+            /** Title */
+            title: string;
+        };
+        /** PolicyOut */
+        PolicyOut: {
+            /** Accept Within Days */
+            accept_within_days: number;
+            /** Archived At */
+            archived_at: string | null;
+            /** Audience Ids */
+            audience_ids: string[];
+            /**
+             * Audience Type
+             * @enum {string}
+             */
+            audience_type: "everyone" | "departments" | "locations" | "named" | "visa_holders";
+            /** Auto Send New Starters */
+            auto_send_new_starters: boolean;
+            /**
+             * Category
+             * @enum {string}
+             */
+            category: "employment_contract" | "job_description" | "offer_letter" | "contract_change" | "company_policy" | "employee_handbook" | "code_of_conduct" | "it_email_social_media" | "drugs_alcohol" | "sickness_sick_pay" | "attendance_punctuality" | "holiday_annual_leave" | "flexible_hybrid_working" | "family_leave" | "equality_diversity" | "anti_harassment" | "grievance" | "disciplinary" | "whistleblowing" | "health_safety" | "privacy_notice" | "sponsor_duties" | "other";
+            /** Completed */
+            completed: number;
+            /**
+             * Confirmation Mode
+             * @enum {string}
+             */
+            confirmation_mode: "accept" | "sign";
+            /** File Id */
+            file_id: string | null;
+            /** File Mime */
+            file_mime: string | null;
+            /** File Name */
+            file_name: string | null;
+            /**
+             * Group Id
+             * Format: uuid
+             */
+            group_id: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Overdue */
+            overdue: number;
+            /** Previous Version Id */
+            previous_version_id: string | null;
+            /** Recipients */
+            recipients: number;
+            /** Scan Status */
+            scan_status: string | null;
+            /** Sent At */
+            sent_at: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "draft" | "sent" | "archived";
+            /** Title */
+            title: string;
+            /** Version */
+            version: number;
+        };
+        /** PolicyPage */
+        PolicyPage: {
+            /** Items */
+            items: components["schemas"]["PolicyOut"][];
+            /** Total */
+            total: number;
+        };
+        /** PolicyReceipt */
+        PolicyReceipt: {
+            /**
+             * Accepted At
+             * Format: date-time
+             */
+            accepted_at: string;
+            /**
+             * Confirmation Mode
+             * @enum {string}
+             */
+            confirmation_mode: "accept" | "sign";
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Employee Name */
+            employee_name: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Ip */
+            ip: string | null;
+            /**
+             * Policy Document Id
+             * Format: uuid
+             */
+            policy_document_id: string;
+            /** Title */
+            title: string;
+            /** Typed Signature */
+            typed_signature: string | null;
+            /** User Agent */
+            user_agent: string | null;
+            /** Version */
+            version: number;
+        };
+        /** PolicyRecipient */
+        PolicyRecipient: {
+            /** Accepted At */
+            accepted_at: string | null;
+            /** Due On */
+            due_on: string | null;
+            /**
+             * Employee Id
+             * Format: uuid
+             */
+            employee_id: string;
+            /** Employee Name */
+            employee_name: string;
+            /** Employee Number */
+            employee_number: string;
+            /** Id */
+            id: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "pending" | "accepted" | "signed" | "overdue";
+        };
+        /** PolicyRecipients */
+        PolicyRecipients: {
+            /** Items */
+            items: components["schemas"]["PolicyRecipient"][];
+            /** Preview Token */
+            preview_token: string;
+        };
+        /** PolicySend */
+        PolicySend: {
+            /** Preview Token */
+            preview_token: string;
         };
         /** PostcodeOut */
         PostcodeOut: {
@@ -7089,6 +7883,37 @@ export interface components {
              * Format: date
              */
             renewal_date: string;
+        };
+        /** ReportJobOut */
+        ReportJobOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Error Code */
+            error_code: string | null;
+            /** Expires In */
+            expires_in?: number | null;
+            /** Finished At */
+            finished_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Report Type
+             * @enum {string}
+             */
+            report_type: "employee_directory" | "employee_detail" | "archived_employees" | "company" | "sponsor_workers" | "leave_taken" | "training_completion";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "queued" | "ready" | "failed";
+            /** Url */
+            url?: string | null;
         };
         /** ReportedIn */
         ReportedIn: {
@@ -8129,6 +8954,88 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DossierLinkOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    ai_download_docx: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LetterDocxIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    ai_create_draft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LetterDraftIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LetterDraftOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -11597,6 +12504,255 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["DesignationOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    documents_list_company_documents: {
+        parameters: {
+            query?: {
+                search?: string;
+                category?: ("policy_handbook" | "health_safety" | "companies_house" | "hmrc_payroll" | "insurance" | "premises_lease" | "certificate" | "hr_template" | "training" | "other") | null;
+                show_archived?: boolean;
+                review_due?: boolean;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyDocuments"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    documents_upload_company_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_documents_upload_company_document"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyDocumentOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    documents_get_company_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyDocumentOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    documents_archive_company_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    documents_edit_company_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CompanyDocumentEdit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CompanyDocumentOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    documents_download_company_document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                document_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DownloadOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -16518,6 +17674,781 @@ export interface operations {
             };
         };
     };
+    policies_list_policies: {
+        parameters: {
+            query?: {
+                search?: string;
+                show_archived?: boolean;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyPage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_create_policy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PolicyDraft"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_own_policies: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnPolicyPage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_own_policy_summary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnPolicySummary"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_own_policy_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DownloadOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_own_policy_view: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_get_policy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_archive_policy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_update_policy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PolicyDraft"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_accept_policy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PolicyAccept"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyReceipt"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_policy_acceptances: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyRecipient"][];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_employee_receipt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+                acceptance_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyReceipt"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_upload_policy_file: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_policies_upload_policy_file"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_new_policy_version: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_own_policy_receipt: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyReceipt"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_preview_recipients: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyRecipients"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_remind_policy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyAction"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_send_policy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PolicySend"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PolicyOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_policy_file_view: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     health_ready: {
         parameters: {
             query?: never;
@@ -16715,6 +18646,124 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReminderOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    reports_recent_reports: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportJobOut"][];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    reports_report_status: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportJobOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    reports_request_report: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                report_type: "employee_directory" | "employee_detail" | "archived_employees" | "company" | "sponsor_workers" | "leave_taken" | "training_completion";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportJobOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

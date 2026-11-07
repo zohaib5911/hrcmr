@@ -114,6 +114,8 @@ class MeResponse(BaseModel):
     terms_version: str
     step_up_active: bool
     platform_admin: bool
+    # True only when the server has an AI key and the active company allows AI features.
+    ai_available: bool
 
 
 class LoginResponse(BaseModel):

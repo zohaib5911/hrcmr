@@ -1,48 +1,34 @@
 # STATUS
-Updated: 2026-11-03 22:47, Europe/London    Agent: Codex    Branch: dev    Commit: 37f6f06
+Updated: 2026-11-07 07:10, Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: pending (feat T10.4)
 State: IN PROGRESS
 
 ## Last completed
-- T9.6 — Work Log own/admin/API/forms complete; Work Log10+related26/migration7/static/browser2 pass
+- T10.4 — "Draft with AI" template drafts: letter API (placeholders only, no AI call), .docx download, /documents sheet with copy/download/save.
 
 ## Current task
-- Phase 9 gate — full validation, design evidence and green PR
-  - [x] Full API/static suite (once)
-  - [x] Full web/unit/script/browser suite (sequentially)
-  - [x] 390/1280 light/dark screenshots and visual review
-  - [ ] Five-line phase summary, PR dev→main and green CI merge
-- Resume note: DST readiness plus compliance/leave streaming fixes verified with UTC targeted browser4/4 (/tmp/phase9-ci-targeted.txt). All changes pushed; PR15 now needs all-green CI at final head. Merge only green using gh pr merge 15 --merge --auto, then clean sync dev/start T10.1 (document/file/RBAC baseline34 pass). Screenshot76/local full gate complete; Semgrep already corrected/green.
+- none (T10.4 closed; next block is the Phase 10 gate, P10, per next.sh)
 
 ## Next tasks
-- T10.1 — company documents
-- T10.2 — reports
-- T10.3 — policies and sign-offs
+- P10 — Phase 10 gate (full suite, screenshots, PR dev→main)
+- AUDIT-1 is after P11 (not yet reached)
 
 ## Health
-- CI on dev: pending (browser readiness fixes pass locally4; PR15). CI on main: not rechecked.
-- Local checks run: T9.2 API31/browser4/static; T9.3 API39+attendance27/migration7/doc1/static/web25/browser2; T9.4 API34/migration7/static/web22/browser2; T9.5 affected61+isolated rota9/clock-email12/migration7/static/web22/browser3; T9.6 Work Log10+related26/migration7/mypy288/static/web22/browser2 — pass.
+- CI on dev: mypy --strict fixed in 6e8b92f (T10.2 test); re-check on push
+- CI on main: green (PR15)
+- Local checks run this session: API policies 15, letters+auth 47, related worker/notifications/employees 34, reports 6, Playwright policies.spec 1; ruff/mypy (318 files) clean; web typecheck/lint, unit 777, gen:api:check clean.
 
 ## Issues / suggestions
-- Never run database pytest alongside Playwright: both provision shared PostgreSQL roles with random passwords, so concurrent setup causes app_owner authentication failures. Run them sequentially.
-- Focused pytest invocation must group all tests/db paths before tests outside that directory; interleaving caused a missing database fixture, grouped rerun115 and notification alone1 pass.
-- Remove dependency cooldown exceptions when due: brotli after 2026-11-05, certifi after 2026-11-06, pypdf after 2026-11-12.
-- docs/audits/phase7.md absent from synced dev; F7.1–F7.7 queued findings were implemented and confirmed green in CI.
+- Rota publish inserts rota.published notifications but notifications/router.py _kinds omits that kind (not in T10.3/T10.4; left alone).
+- require("document.file.write") accepts own-only scope (employees hold document.file.write_own); endpoints that are company-wide must check access.scope is Scope.ALL (policies and letters do).
+- Named-people audience picker loads the first employee page only; large companies need server-side search for that picker.
+- Never overlap DB pytest and Playwright (shared PostgreSQL role passwords).
 
 ## Strategy / decisions taken
-- T9.6: work log duration uses the entered HH:MM interval, wrapping overnight. Own edit eligibility uses company-local work date. Responsibility wording is snapshotted; first admin correction retains the complete original, later changes remain audited. Free entry text stays out of audit events. Revision checks prevent overwriting intervening edits.
-- T9.5: preserve last published shifts in a weekly snapshot while draft edits change current rows; manager publication merges only their reports and preserves other employees. Version checks prevent stale destructive actions. Times are UTC instants derived from explicit company-local wall times/fold choices.
-- T9.4: follow existing settings archive conventions; one active late policy/day-off pattern per department/designation/shift, overnight breaks validated within the shift. Deduction settings are stored configuration; no automatic payroll deduction is introduced.
-- T9.3: weekly review uses a deterministic employee/week identifier for read-only projections; only approval writes a stamp with the reviewed record fingerprint. Changed records show review needed again. Location defaults off and requires employee consent per clock action; location/note text never enters audit events.
-- T9.2: scanned import files use attendance_import ownership and require current company-wide attendance read even for their uploader after demotion. Preview/commit is all-or-nothing with per-row errors and stale-record checks. Grid may save worked status with unknown times/hours; it must not invent clock times. Workbook XML hardening follows https://openpyxl.readthedocs.io/en/stable/#security (defusedxml installed); parser limits and formula rejection follow next.
-- T9.1: manual writes require full attendance.record.write; own-write is clock-only for T9.3. Employee row serializes upserts with leave booking. Leave-sync records cannot be overwritten. Company-local times become UTC instants; overnight clock-out rolls to next day, hours deduct unpaid break. Nonexistent wall times fail; repeated-hour entries require an explicit first/second occurrence. Audit excludes note text.
-- T8.5: preview is read-only; commit only after year ends and pending requests resolve. Reconcile closing allowance, carry nonnegative remaining up to type limit (reasoned override may exceed limit up to remaining), expire positive source balances and freeze source-year mutations. Negative fixed-allowance debt requires a reviewed adjustment before closing; unbounded types retain usage history without treating it as allowance debt.
-- T8.4: add missing leave.balance.read to plan/matrix so Company Admin/HR/Auditor can read company balances; existing own/reports remain scoped. Read projections combine immutable ledger with current managed allowance/calendar deltas; GET never writes. Manual actions reconcile and audit atomically.
-- T8.2: balances are sums of signed immutable movements. Corrections append deltas; manual movements survive standard reconciliation. Employee row serializes writers; operation keys preserve retries, including no-op Set. Caller owns audit/commit transaction.
-- Units are standard company days (weekly company hours / working weekdays). Personal shorter days reduce both entitlement and charge. Personal days inherit weekday hours unless overridden; new working weekdays use the company average. Exact fractions avoid rounding drift; entitlement/calendar totals round up once to 0.01 day.
-- Regular-pattern entitlement uses inclusive employment calendar days; assignment end is exclusive. Monthly posts completed leave-months, with partial employment months pro-rata. Null allowances are not zero. Regular automatic calculation rejects zero-hours/casual assignments; reviewed manual grants are available. Sources/policy: data/leave/SOURCES.md.
-- Explicit bank_holidays_included flag seeded true for Annual Leave and exposed in type settings. Regional non-working bank holidays and annual-deducting closures reserve scheduled personal days across the leave year, with overlaps charged once. Missing regional calendar year coverage fails explicitly. Reconciliation may record a negative balance to reflect corrected entitlements/reservations; manual deductions/sets obey the company negative-balance policy.
-- T8.3: advisory minimum staffing warning when a proposed absence leaves nobody in the department; no blocking staffing rule is invented. Shift conflicts connect in Phase 9 once shifts exist. Request counter excludes all closures and non-working regional bank holidays, while ledger reserves annual deductions separately. Re-check snapshots before approval; changed dates/patterns require cancellation/resubmission.
-- AI hidden without ANTHROPIC_API_KEY; Ask Mady deferred.
+- T10.4 .docx: built server-side from a minimal OOXML zip (zipfile + XML escape), no new dependency; the endpoint returns the file for the current text, so edits are kept.
+- T10.4 AI label: `/auth/me` gains `ai_available` = server has ANTHROPIC_API_KEY AND the active company's ai_features_enabled. The draft endpoint itself makes no AI call yet; `source` is always "template" until T14.4.
+- T10.4 letters are company-wide: require("document.file.write") plus a Scope.ALL check, so employees' own-only write is refused (403).
+- T10.4 "Save as company document" uploads the .docx through the existing scanned upload path with category hr_template.
+- T10.3 decisions (kept): overdue flip at 06:15 by policies_overdue_daily; remind includes overdue people; new-starter assignment on hire and by the daily job; /policies gated to policy.document.read.
 
 ## Owner actions needed
-- None. Existing non-blocking setup: protect main and enable private vulnerability reporting.
+- None.
