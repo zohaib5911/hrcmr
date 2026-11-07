@@ -331,7 +331,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Steps:** PDF/DOCX text extraction (pypdf / python-docx), **strip e-mail, phone, address and postcode patterns before sending** (unit tests with many formats), Claude comparison → score, evidence quotes, gaps, suggestions. Honesty guardrail text in the prompt (L1143–1146).
 - **Done when:** stripping tests pass; payload test proves no contact details leave; feature hidden without key.
 
-### [ ] T15.6 · S · Checker UI, "Find code" embeds, PDF report
+### [x] T15.6 · S · Checker UI, "Find code" embeds, PDF report
 - **Spec:** plan L1125–1142, L1143–1146, L1448.
 - **Steps:** 1. `/sponsorship-checker` inputs form. 2. Results page (best match card, 2 alternatives, eligibility chip, salary table, verdict, notes, disclaimer + rules version). 3. "Confirm this code" → `soc_checks` + PDF (R4) + fills posting/sponsor doc/designation SOC. 4. "Find code" embeds (posting sheet, candidate Sponsorship tab, visa form, designation); history list.
 - **Done when:** R6 spec: check → confirm → PDF downloads; disclaimer always visible.

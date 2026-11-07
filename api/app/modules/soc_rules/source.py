@@ -871,7 +871,29 @@ def load_rules_source(pages: dict[str, tuple[Path, Path]]) -> RulesSource:
     """``pages`` maps each kind in PAGE_KINDS to (html file, sidecar json)."""
     if sorted(pages) != sorted(PAGE_KINDS):
         raise ValueError(f"expected pages {PAGE_KINDS}, got {sorted(pages)}")
-    read = {kind: read_page(html, sidecar, kind) for kind, (html, sidecar) in pages.items()}
+    return rules_source_from_read(
+        {kind: read_page(html, sidecar, kind) for kind, (html, sidecar) in pages.items()}
+    )
+
+
+def page_from_bytes(kind: str, url: str, data: bytes, retrieved_on: str) -> tuple[str, SourcePage]:
+    """A page fetched now: its HTML and its provenance, with the SHA-256 of the bytes as fetched."""
+    html = data.decode("utf-8")
+    return html, SourcePage(
+        kind=kind,
+        url=url,
+        file="",
+        sha256=hashlib.sha256(data).hexdigest(),
+        bytes=len(data),
+        govuk_updated_at=_read(html).updated_at,
+        retrieved_on=retrieved_on,
+    )
+
+
+def rules_source_from_read(read: dict[str, tuple[str, SourcePage]]) -> RulesSource:
+    """The parsed rules from pages already read (their HTML and provenance), one per kind."""
+    if sorted(read) != sorted(PAGE_KINDS):
+        raise ValueError(f"expected pages {PAGE_KINDS}, got {sorted(read)}")
     going, pay, ineligible, notes = parse_skilled_occupations(read[SKILLED_OCCUPATIONS][0])
     shortage = [
         *parse_salary_list(read[SALARY_LIST][0]),

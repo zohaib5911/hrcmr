@@ -28,8 +28,9 @@ class PlatformAccess:
 def require_platform(permission: str) -> Callable[..., AsyncIterator[PlatformAccess]]:
     if permission not in PLATFORM_PERMISSIONS:
         raise ValueError(f"unknown platform permission {permission!r}")
-    # Other platform actions get their level-specific policies in Phase 17.
-    if permission != "platform.content.write":
+    # Other platform actions get their level-specific policies in Phase 17. Publishing SOC rules
+    # (T15.7) uses the same policy as the course editor: any platform admin, with MFA and terms.
+    if permission not in {"platform.content.write", "platform.rules.publish"}:
         raise ValueError(f"platform policy is not implemented for {permission!r}")
 
     async def dependency(

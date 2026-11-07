@@ -97,6 +97,7 @@ from app.modules.search.router import router as search_router
 from app.modules.soc.checks_router import router as soc_checks_router
 from app.modules.soc.cv_router import router as soc_cv_router
 from app.modules.soc.router import router as soc_router
+from app.modules.soc_rules.admin_router import router as rules_admin_router
 from app.modules.sponsor_documents.router import router as sponsor_documents_router
 from app.modules.work_log.router import router as work_log_router
 
@@ -284,6 +285,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(soc_router, prefix=API_PREFIX)
     app.include_router(soc_cv_router, prefix=API_PREFIX)
     app.include_router(soc_checks_router, prefix=API_PREFIX)
+    app.include_router(rules_admin_router, prefix=API_PREFIX)
     app.include_router(careers_router, prefix=API_PREFIX)
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)

@@ -12,6 +12,8 @@ import pytest
 from app.modules.soc.ranking import LOW_CONFIDENCE, NOT_AI_RANKED, is_low, parse_ranking, rank
 from app.modules.soc.retrieval import CANDIDATES, Candidate, fuse, normalise_title
 
+NO_ACCESS: Any = None  # the no-AI path never reads the access
+
 GOOD_REPLY = (
     '{"ranking": [{"code": "7111", "confidence": 82, "matched_duties": ["sell goods"], '
     '"reason": "fits"}, {"code": "5111", "confidence": 20, "reason": "farming"}]}'
@@ -104,7 +106,7 @@ async def test_without_ai_the_search_order_is_kept_and_flagged() -> None:
     request: Any = SimpleNamespace(app=SimpleNamespace(state=SimpleNamespace(anthropic=None)))
     outcome = await rank(
         request,
-        None,
+        NO_ACCESS,
         job_title="Adviser, sales",
         job_description="",
         candidates=[candidate("7111"), candidate("5111")],
@@ -118,6 +120,6 @@ async def test_without_ai_the_search_order_is_kept_and_flagged() -> None:
 
 async def test_no_candidates_means_nothing_to_rank() -> None:
     request: Any = SimpleNamespace(app=SimpleNamespace(state=SimpleNamespace(anthropic=None)))
-    outcome = await rank(request, None, job_title="zzz", job_description="", candidates=[])
+    outcome = await rank(request, NO_ACCESS, job_title="zzz", job_description="", candidates=[])
     assert outcome.items == []
     assert outcome.ai_ranked is False

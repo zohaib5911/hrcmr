@@ -356,8 +356,25 @@ async def publish_rules_version(
     version = await db.get(RulesVersion, version_id, with_for_update=True)
     if version is None or version.status != "draft":
         raise RulesImportError("Only a draft rules version can be published.")
+    await _make_live(db, version, published_by)
+
+
+async def rollback_rules_version(
+    db: AsyncSession, version_id: uuid.UUID, published_by: uuid.UUID | None = None
+) -> None:
+    """Retired -> live again, and the live version -> retired (T15.7). The same RQF levels as the
+    restored tables give. In the caller's transaction."""
+    version = await db.get(RulesVersion, version_id, with_for_update=True)
+    if version is None or version.status != "retired":
+        raise RulesImportError("Only a retired rules version can be restored.")
+    await _make_live(db, version, published_by)
+
+
+async def _make_live(
+    db: AsyncSession, version: RulesVersion, published_by: uuid.UUID | None
+) -> None:
     going = await db.execute(
-        select(GoingRate.table, GoingRate.soc_code).where(GoingRate.rules_version_id == version_id)
+        select(GoingRate.table, GoingRate.soc_code).where(GoingRate.rules_version_id == version.id)
     )
     levels = rqf_levels([(t, c) for t, c in going.all()], version.table_notes)
 
