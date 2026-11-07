@@ -201,7 +201,9 @@ async def test_a_cv_is_scanned_and_kept_with_the_candidate(
         )
     assert refused.status_code == 422, refused.text
     assert await applications_for(rig, rig["a"]) == 0
-    sent = await public.post(url, data=APPLY, files={"cv": ("cv.pdf", PDF, "application/pdf")})
+    # About 3 MB: bigger than the 1 MB body limit most endpoints have.
+    large = PDF + b"\n%" + b"0" * 3_000_000
+    sent = await public.post(url, data=APPLY, files={"cv": ("cv.pdf", large, "application/pdf")})
     assert sent.status_code == 202, sent.text
     await public.aclose()
     async with rig["owner"].connect() as db:
@@ -322,15 +324,39 @@ async def test_the_logo_shows_on_the_careers_pages_once_uploaded(rig: dict[str, 
     assert logo.content == picture
 
 
-async def test_too_many_page_views_from_one_connection_are_refused(
+async def test_too_many_logo_fetches_from_one_connection_are_refused(
     rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
     slug = await company_slug(rig, rig["a"])
+    uploaded = await admin.post(
+        API + "/company/logo", files={"file": ("logo.png", png(), "image/png")}
+    )
+    assert uploaded.status_code == 204, uploaded.text
     monkeypatch.setattr(careers, "READ_PER_CONNECTION", (f"careers.read.{uuid.uuid4()}", 2, 60))
     public = anonymous(rig)
     for _ in range(2):
-        assert (await public.get(f"{API}/public/careers/{slug}")).status_code == 200
-    blocked = await public.get(f"{API}/public/careers/{slug}")
+        assert (await public.get(f"{API}/public/careers/{slug}/logo")).status_code == 200
+    blocked = await public.get(f"{API}/public/careers/{slug}/logo")
+    # The server-rendered list shares the web server's address, so it is not limited here.
+    listed = await public.get(f"{API}/public/careers/{slug}")
     await public.aclose()
     assert blocked.status_code == 429
     assert blocked.json()["error"]["code"] == "RATE_LIMITED"
+    assert listed.status_code == 200
+
+
+async def test_a_cv_over_the_limit_is_refused_before_it_is_read(rig: dict[str, Any]) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    slug = await company_slug(rig, rig["a"])
+    await open_posting(admin, "Cashier careers")
+    public = anonymous(rig)
+    huge = PDF + b"\n%" + b"0" * int(11.5 * 1024 * 1024)
+    refused = await public.post(
+        f"{API}/public/postings/{slug}/cashier-careers/apply",
+        data=APPLY,
+        files={"cv": ("cv.pdf", huge, "application/pdf")},
+    )
+    await public.aclose()
+    assert refused.status_code == 413
+    assert await applications_for(rig, rig["a"]) == 0

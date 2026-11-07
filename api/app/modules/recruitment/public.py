@@ -40,7 +40,7 @@ if TYPE_CHECKING:
 router = APIRouter(prefix="/public", tags=["careers"])
 
 APPLY_PER_CONNECTION = ("careers.apply", 20, 3600)  # attempts, per hour, per connection
-READ_PER_CONNECTION = ("careers.read", 120, 60)  # page views, per minute, per connection
+READ_PER_CONNECTION = ("careers.read", 120, 60)  # logo fetches, per minute, per connection
 CV_KINDS = frozenset({"pdf", "doc", "docx"})
 CV_MAX_BYTES = 10 * 1024 * 1024
 
@@ -127,7 +127,11 @@ async def _open_external(tenant: TenantSession, slug: str) -> tuple[Posting, str
 
 
 async def _limit_reads(request: Request) -> None:
-    """Public pages are rate-limited per connection (plan, public API)."""
+    """Reads the browser makes itself (the logo) are rate-limited per connection here.
+
+    The careers list and posting pages are fetched by the web server while it renders them, so
+    every visitor would share its one address; those are limited at the edge (Cloudflare rule,
+    Phase 23), not here."""
     name, limit, window = READ_PER_CONNECTION
     result = await RateLimiter(request.app.state.auth.redis).hit(
         name, client_ip(request) or "unknown", limit=limit, window_seconds=window
@@ -153,7 +157,6 @@ async def _logo(tenant: TenantSession, company: Company) -> File | None:
 
 @router.get("/careers/{company_slug}", response_model=CareersPage)
 async def careers_page(company_slug: str, db: GlobalDb, request: Request) -> CareersPage:
-    await _limit_reads(request)
     company = await _company(db, company_slug)
     async with TenantSession(get_engine(request), company_id=company.id) as tenant:
         logo = await _logo(tenant, company)
@@ -181,7 +184,6 @@ async def careers_page(company_slug: str, db: GlobalDb, request: Request) -> Car
 async def careers_posting(
     company_slug: str, posting_slug: str, db: GlobalDb, request: Request
 ) -> CareersPostingDetail:
-    await _limit_reads(request)
     company = await _company(db, company_slug)
     async with TenantSession(get_engine(request), company_id=company.id) as tenant:
         row, place = await _open_external(tenant, posting_slug)

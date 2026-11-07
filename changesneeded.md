@@ -5,12 +5,12 @@ Round 1 (1 P0 / 5 P1 / 1 P2) is fixed and ticked in git history (16184dc); every
 except C1.1.3 and C1.1.7, which introduced C1.2.1 and C1.2.2 below.
 Note: the round 1 fixes were written by the same model that ran this round; round 3 should be a fresh session.
 
-### [ ] C1.2.1 · P1 · Careers page reads share one rate-limit bucket for every visitor (from C1.1.7)
+### [x] C1.2.1 · P1 · Careers page reads share one rate-limit bucket for every visitor (from C1.1.7)
 - **Problem:** `_limit_reads` (`api/app/modules/recruitment/public.py`) limits `careers_page` and `careers_posting` to 120 a minute per `client_ip`. Those two are fetched by the Next.js server (`web/components/careers/public-client.ts`, server-side render), which sends no visitor address, so every visitor counts against the web server's single address. Once a site gets modest traffic, the careers pages return 429 for everyone.
 - **Fix:** remove the `await _limit_reads(request)` call from `careers_page` and `careers_posting` only. Keep it on `careers_logo`, which the browser fetches directly. Add one line to the `_limit_reads` docstring: the server-rendered pages are limited at the edge (Cloudflare rule, Phase 23), not here. Change `test_too_many_page_views_from_one_connection_are_refused` (`api/tests/db/test_careers.py`) to call `/public/careers/{slug}/logo` after uploading a logo (copy the upload lines from `test_the_logo_shows_on_the_careers_pages_once_uploaded`), and assert the list is still 200 after the limit is reached. Add "Cloudflare rate-limit rule for /careers/*" under Owner actions in STATUS.md, for T23.
 - **Done when:** `uv run pytest tests/db/test_careers.py` passes.
 
-### [ ] C1.2.2 · P1 · A CV over 1 MB is refused before it reaches the endpoint (from C1.1.3)
+### [x] C1.2.2 · P1 · A CV over 1 MB is refused before it reaches the endpoint (from C1.1.3)
 - **Problem:** `BodyLimitMiddleware` (`api/app/main.py:190-196`) has no entry for `/api/v1/public/postings`, so the apply form gets the 1 MB default (`app/core/body_limit.py:20`) and any CV over ~1 MB gets 413. The form says "up to 10 MB", and the round 1 test only used a tiny PDF.
 - **Fix:** add `f"{API_PREFIX}/public/postings": PROOF_LIMIT,` (11 MB) to the `limits` dict in `app/main.py`. In `tests/db/test_careers.py::test_a_cv_is_scanned_and_kept_with_the_candidate`, send a CV of about 3 MB (`PDF + b"\n%" + b"0" * 3_000_000`) for the accepted upload.
 - **Done when:** that test passes with the 3 MB CV, and a test sending an 11.5 MB CV gets 413.

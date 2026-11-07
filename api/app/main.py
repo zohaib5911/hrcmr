@@ -193,6 +193,8 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
             f"{API_PREFIX}/company/logo": LOGO_LIMIT,
             f"{API_PREFIX}/key-personnel": PROOF_LIMIT,
             f"{API_PREFIX}/compliance-documents": UPLOAD_LIMIT,
+            # The careers apply form: a CV of up to 10 MB and its fields.
+            f"{API_PREFIX}/public/postings": PROOF_LIMIT,
         },
     )
     app.add_middleware(
