@@ -307,7 +307,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 15 — Sponsorship Job Checker (SOC)
 
-### [ ] T15.1 · S! · ONS SOC data import and local embeddings
+### [x] T15.1 · S! · ONS SOC data import and local embeddings
 - **Spec:** plan L1151, L1443; §6.10 L598–608.
 - **Steps:**
   1. Add `fastembed` and pgvector (Postgres extension + `pgvector` Python package). Migration for global `soc_unit_groups`, `soc_index_entries` with a vector column and a trigram index.

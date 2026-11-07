@@ -380,7 +380,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [ ] **Phase 14 gate** — AI payload fuzz test
 
 ### Phase 15 — Sponsorship Job Checker (SOC)
-- [ ] **T15.1** ONS SOC data import and local embeddings
+- [x] **T15.1** ONS SOC data import and local embeddings — 2026-11-08. ONS SOC 2020 coding index (Version 14) and unit-group structure, checksummed in data/raw/ (SOURCES.md, sidecars). Migration 0040: soc_unit_groups and soc_index_entries, vector(384), trigram index on index_title, read-only for tenants under RLS. Full ONS load into a temporary migrated database with the real model (BAAI/bge-small-en-v1.5): 412 unit groups; 32,439 index entries (plan estimate was about 30,110); 231 "see" cross-references skipped (no code). A second run left the counts at 412 and 32,439 (no duplicates); each run took about 4 minutes. The importer never writes rqf_level (owned by T15.2). Tests: 17 (11 parser, 6 import, fake embedder, no download); migrations, data-model, guards, architecture and RLS suites pass. Open for T15.2+: 58 index rows have a letter-only title (A, A1, A2…), loaded as published; the natural-word-order title column is not stored (reverse order is index_title).
 - [ ] **T15.2** Rules-data importer (draft rules version, fixtures, salary rules)
 - [ ] **T15.3** Rules engine and 20+ golden tests
 - [ ] **T15.4** Search and match API
