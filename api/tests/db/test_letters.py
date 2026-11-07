@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import io
 import json
+import uuid
 import zipfile
 from typing import Any
 
@@ -122,6 +123,31 @@ async def test_ai_draft_wraps_claude_paragraphs_and_sends_only_type_tone_and_poi
     assert "welcome" in user_message
     assert "friendly" in user_message
     assert "Probation lasts six months" in user_message
+
+
+async def test_employee_names_in_key_points_never_reach_the_ai(rig: dict[str, Any]) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text(
+                "insert into employees (id, company_id, employee_number, first_name, last_name, "
+                "email, hire_date) values (:i, :c, 'ADA-1', 'Ada', 'Morrow', 'ada@example.com', "
+                "'2025-01-06')"
+            ),
+            {"i": uuid.uuid4(), "c": rig["a"]},
+        )
+    sent = fake_claude(rig["app"], reply="Please attend the meeting with Employee A on Monday.")
+    made = await admin.post(
+        API + "/letters/draft",
+        json={"letter_type": "welcome", "key_points": ["Meet Ada Morrow on Monday"]},
+    )
+    assert made.status_code == 200, made.text
+    assert made.json()["source"] == "ai"
+    # The name is labelled before the request leaves; the draft the user sees has it back.
+    assert len(sent) == 1
+    assert "Ada Morrow" not in sent[0]
+    assert "Employee A" in sent[0]
+    assert "Ada Morrow" in made.json()["body"]
 
 
 async def test_ai_failure_and_unsafe_answers_fall_back_to_the_template(

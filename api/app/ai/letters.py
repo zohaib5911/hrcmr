@@ -17,12 +17,14 @@ from xml.sax.saxutils import escape
 
 from fastapi import APIRouter, Depends, Request, Response
 from pydantic import Field, StringConstraints, field_validator
+from sqlalchemy import select
 
 from app.ai.redaction import find_restricted
 from app.ai.service import ai_ready, generate
 from app.core.errors import AppError, ForbiddenError
 from app.core.rbac_matrix import Scope, scope_for
 from app.core.schemas import RequestModel
+from app.modules.employees.models import Employee
 from app.modules.rbac.deps import Access, require
 
 router = APIRouter(prefix="/ai/letters", tags=["ai"])
@@ -158,11 +160,18 @@ def draft_text(body: LetterDraftIn) -> tuple[str, str]:
 async def _ai_paragraphs(request: Request, access: Access, body: LetterDraftIn) -> str | None:
     """Claude's paragraphs for the letter, or None when AI is off, unavailable, failed or unsafe.
 
-    Only the letter type, tone and key points are sent (never names or identifiers). Any AI error,
-    including the rate limit, falls back to the template so the draft still works.
+    Only the letter type, tone and key points are sent. Employee names typed into a key point are
+    swapped for labels first (T14.5 fix C2.1.1), so no name or identifier reaches the AI. Any AI
+    error, including the rate limit, falls back to the template so the draft still works.
     """
     if scope_for(access.role, "ai.letter.draft") is None or not await ai_ready(request, access):
         return None
+    rows = await access.db.execute(
+        select(Employee.first_name, Employee.last_name).where(
+            Employee.company_id == access.company_id
+        )
+    )
+    names = [f"{first} {last}" for first, last in rows.all()]
     try:
         reply = await generate(
             request,
@@ -175,6 +184,7 @@ async def _ai_paragraphs(request: Request, access: Access, body: LetterDraftIn) 
                 "tone": body.tone,
                 "key_points": body.key_points,
             },
+            names=names,
             max_tokens=1200,
         )
     except AppError:
