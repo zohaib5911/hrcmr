@@ -291,3 +291,4 @@
 2026-11-07 20:31 | Claude (Haiku) | T14.1 | written: dashboard API (permission-aware cards), checklist + dismiss (migration 0037), /dashboard UI, specs; db dashboard 4 pass, migrations 7, rbac, openapi, architecture pass | next run dashboard e2e, then tick
 2026-11-07 20:36 | Claude (Haiku) | T14.1 | DONE: dashboard + checklist; tests pass; ticked | next bash .agent/next.sh (T14.2)
 2026-11-07 20:42 | Claude (Haiku) | T14.2 | DONE: prefs, digest, kinds, tests; ticked | next bash .agent/next.sh (T14.3)
+2026-11-07 20:46 | Claude (Haiku) | T14.3 | DONE: search API + palette groups; tests pass; ticked | next bash .agent/next.sh (T14.4 is B: stop)

@@ -28,6 +28,10 @@ interface CommandPaletteProps {
   items: readonly CommandItem[];
   /** Shown first when nothing has been typed: pages visited lately. */
   recent?: readonly CommandItem[];
+  /** People and candidates found by a live search (two characters or more). */
+  remote?: readonly CommandItem[];
+  /** Told each time the text changes, so the caller can search. */
+  onQueryChange?: (query: string) => void;
   onSelect: (item: CommandItem) => void;
 }
 
@@ -46,6 +50,8 @@ export function CommandPalette({
   onOpenChange,
   items,
   recent = [],
+  remote = [],
+  onQueryChange,
   onSelect,
 }: CommandPaletteProps) {
   const listId = useId();
@@ -54,14 +60,20 @@ export function CommandPalette({
   const list = useRef<HTMLUListElement>(null);
 
   const rows: Row[] = useMemo(() => {
+    const sectionOf = (item: CommandItem) => (item.group === "Actions" ? "Actions" : "Pages");
     if (query.trim() === "") {
       return [
         ...recent.map((item) => ({ item, section: "Recent" })),
-        ...items.map((item) => ({ item, section: "Pages" })),
+        ...items.map((item) => ({ item, section: sectionOf(item) })),
       ];
     }
-    return rankPages(query, items).map((item) => ({ item, section: "Pages" }));
-  }, [query, items, recent]);
+    const people =
+      query.trim().length >= 2 ? remote.map((item) => ({ item, section: "People" })) : [];
+    return [
+      ...people,
+      ...rankPages(query, items).map((item) => ({ item, section: sectionOf(item) })),
+    ];
+  }, [query, items, recent, remote]);
 
   const current = Math.min(active, Math.max(rows.length - 1, 0));
   const optionId = (index: number) => `${listId}-option-${index}`;
@@ -118,6 +130,7 @@ export function CommandPalette({
               onChange={(event) => {
                 setQuery(event.target.value);
                 setActive(0);
+                onQueryChange?.(event.target.value);
               }}
               onKeyDown={(event) => {
                 if (event.key === "ArrowDown") {

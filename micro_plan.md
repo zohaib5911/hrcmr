@@ -281,7 +281,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. Bell list with "Needs attention" + personal, mark all read, links.
 - **Done when:** a user never sees another user's notifications (test); digest idempotent.
 
-### [ ] T14.3 · S! · Command palette live search
+### [x] T14.3 · S! · Command palette live search
 - **Spec:** plan L1178, L1437; `GET /search?q=`.
 - **Copy:** existing palette in `web/components/app/` (pages + recent already exist).
 - **Steps:** API search over employees + candidates **only where the user has read permission**, max 8 each, min 2 chars; add People + Actions groups to palette.

@@ -92,6 +92,7 @@ from app.modules.rota.publish_router import router as rota_publish_router
 from app.modules.rota.router import router as rota_router
 from app.modules.rota.week_router import router as rota_week_router
 from app.modules.rtw.router import router as rtw_router
+from app.modules.search.router import router as search_router
 from app.modules.sponsor_documents.router import router as sponsor_documents_router
 from app.modules.work_log.router import router as work_log_router
 
@@ -272,6 +273,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(learning_admin_router, prefix=API_PREFIX)
     app.include_router(certificates_router, prefix=API_PREFIX)
     app.include_router(dashboard_router, prefix=API_PREFIX)
+    app.include_router(search_router, prefix=API_PREFIX)
     app.include_router(careers_router, prefix=API_PREFIX)
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)

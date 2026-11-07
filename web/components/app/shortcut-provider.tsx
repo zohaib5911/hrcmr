@@ -13,8 +13,10 @@ import {
   type ReactNode,
 } from "react";
 
+import { useCan } from "@/components/app/session-context";
 import { CommandPalette, type CommandItem } from "@/components/ui/command-palette";
 import { KeyboardShortcutsSheet } from "@/components/ui/shortcuts-sheet";
+import { attempt } from "@/lib/auth/request";
 import { NAV_ITEMS, findNavItem, type NavGroup } from "@/lib/navigation";
 import { RECENT_PAGES_KEY, parseRecent, pushRecent, serialiseRecent } from "@/lib/recent-pages";
 import { OPEN_PALETTE, OPEN_SHORTCUTS } from "@/lib/shell-events";
@@ -197,6 +199,69 @@ export function ShortcutProvider({ onToggleSidebar, children }: ShortcutProvider
 
   const groups = useNavGroups();
   const pages = useMemo(() => pageItems(groups), [groups]);
+  const can = useCan();
+  // Quick actions the person may use; the palette shows them under "Actions".
+  const actions: CommandItem[] = [
+    ...(can("employee.profile.write")
+      ? [
+          {
+            id: "action-add-employee",
+            label: "Add employee",
+            group: "Actions",
+            href: "/employees/new",
+          },
+        ]
+      : []),
+    ...(can("recruitment.candidate.write")
+      ? [
+          {
+            id: "action-add-candidate",
+            label: "Add candidate",
+            group: "Actions",
+            href: "/recruitment",
+          },
+        ]
+      : []),
+    ...(can("leave.request.create_own")
+      ? [
+          {
+            id: "action-request-leave",
+            label: "Request leave",
+            group: "Actions",
+            href: "/my-leave",
+          },
+        ]
+      : []),
+  ];
+  // Live people and candidates. Only the newest search is shown, so a slow answer never wins.
+  const [remote, setRemote] = useState<CommandItem[]>([]);
+  const latestSearch = useRef(0);
+  const searchPeople = useCallback((query: string) => {
+    const wanted = query.trim();
+    latestSearch.current += 1;
+    const token = latestSearch.current;
+    if (wanted.length < 2) {
+      setRemote([]);
+      return;
+    }
+    void attempt((c) => c.GET("/search", { params: { query: { q: wanted } } })).then((result) => {
+      if (token !== latestSearch.current || !result.ok) return;
+      setRemote([
+        ...result.data.people.map((person) => ({
+          id: `person-${person.id}`,
+          label: person.name,
+          group: "People",
+          href: person.link,
+        })),
+        ...result.data.candidates.map((candidate) => ({
+          id: `candidate-${candidate.id}`,
+          label: `${candidate.name} (candidate)`,
+          group: "People",
+          href: candidate.link,
+        })),
+      ]);
+    });
+  }, []);
   const recentItems = useMemo(
     () =>
       recent
@@ -211,8 +276,10 @@ export function ShortcutProvider({ onToggleSidebar, children }: ShortcutProvider
       <CommandPalette
         open={paletteOpen}
         onOpenChange={setPaletteOpen}
-        items={pages}
+        items={[...pages, ...actions]}
         recent={recentItems}
+        remote={remote}
+        onQueryChange={searchPeople}
         onSelect={(item) => router.push(item.href as Route)}
       />
       <KeyboardShortcutsSheet open={sheetOpen} onOpenChange={setSheetOpen} apple={apple} />

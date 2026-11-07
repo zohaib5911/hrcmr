@@ -4356,6 +4356,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search */
+        get: operations["search_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/security/two-step": {
         parameters: {
             query?: never;
@@ -5653,6 +5670,15 @@ export interface components {
             scan_status: string;
             /** Size */
             size: number;
+        };
+        /** CandidateHitOut */
+        CandidateHitOut: {
+            /** Id */
+            id: string;
+            /** Link */
+            link: string;
+            /** Name */
+            name: string;
         };
         /** CandidateIn */
         CandidateIn: {
@@ -9060,6 +9086,17 @@ export interface components {
              */
             confirm_name: string;
         };
+        /** PersonHitOut */
+        PersonHitOut: {
+            /** Employee Number */
+            employee_number: string;
+            /** Id */
+            id: string;
+            /** Link */
+            link: string;
+            /** Name */
+            name: string;
+        };
         /** PersonalDetails */
         PersonalDetails: {
             /** Alt Phone */
@@ -10126,6 +10163,13 @@ export interface components {
             not_recorded: number;
             /** Verified */
             verified: number;
+        };
+        /** SearchOut */
+        SearchOut: {
+            /** Candidates */
+            candidates: components["schemas"]["CandidateHitOut"][];
+            /** People */
+            people: components["schemas"]["PersonHitOut"][];
         };
         /** SectionIn */
         SectionIn: {
@@ -24555,6 +24599,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ActionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    search_search: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SearchOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
