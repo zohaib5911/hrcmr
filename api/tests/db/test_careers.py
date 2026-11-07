@@ -13,15 +13,17 @@ from sqlalchemy import text
 from app.integrations.clamav import ScanResult
 from app.modules.recruitment import public as careers
 from tests.db.test_applications import open_posting
+from tests.db.test_company import png
 from tests.db.test_employee_documents import _keys as _keys
 from tests.db.test_employee_documents import rig as rig
 from tests.db.test_files import PDF
 
 API = "/api/v1"
-LIST_KEYS = {"company", "postings"}
+LIST_KEYS = {"company", "has_logo", "postings"}
 ITEM_KEYS = {"slug", "title", "location", "closes_on"}
 DETAIL_KEYS = {
     "company",
+    "has_logo",
     "slug",
     "title",
     "location",
@@ -293,6 +295,42 @@ async def test_too_many_applications_from_one_connection_are_refused(
     for _ in range(2):
         assert (await public.post(url, data=APPLY)).status_code == 202
     blocked = await public.post(url, data=APPLY)
+    await public.aclose()
+    assert blocked.status_code == 429
+    assert blocked.json()["error"]["code"] == "RATE_LIMITED"
+
+
+async def test_the_logo_shows_on_the_careers_pages_once_uploaded(rig: dict[str, Any]) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    slug = await company_slug(rig, rig["a"])
+    await open_posting(admin, "Bartender careers")
+    public = anonymous(rig)
+    assert (await public.get(f"{API}/public/careers/{slug}")).json()["has_logo"] is False
+    assert (await public.get(f"{API}/public/careers/{slug}/logo")).status_code == 404
+    picture = png()
+    uploaded = await admin.post(
+        API + "/company/logo", files={"file": ("logo.png", picture, "image/png")}
+    )
+    assert uploaded.status_code == 204, uploaded.text
+    assert (await public.get(f"{API}/public/careers/{slug}")).json()["has_logo"] is True
+    detail = await public.get(f"{API}/public/postings/{slug}/bartender-careers")
+    assert detail.json()["has_logo"] is True
+    logo = await public.get(f"{API}/public/careers/{slug}/logo")
+    await public.aclose()
+    assert logo.status_code == 200
+    assert logo.headers["content-type"] == "image/png"
+    assert logo.content == picture
+
+
+async def test_too_many_page_views_from_one_connection_are_refused(
+    rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    slug = await company_slug(rig, rig["a"])
+    monkeypatch.setattr(careers, "READ_PER_CONNECTION", (f"careers.read.{uuid.uuid4()}", 2, 60))
+    public = anonymous(rig)
+    for _ in range(2):
+        assert (await public.get(f"{API}/public/careers/{slug}")).status_code == 200
+    blocked = await public.get(f"{API}/public/careers/{slug}")
     await public.aclose()
     assert blocked.status_code == 429
     assert blocked.json()["error"]["code"] == "RATE_LIMITED"

@@ -3374,6 +3374,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/careers/{company_slug}/logo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Careers Logo
+         * @description The company logo for its public careers pages (it is shown to anyone who visits them).
+         */
+        get: operations["careers_careers_logo"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/postings/{company_slug}/{posting_slug}": {
         parameters: {
             query?: never;
@@ -5267,6 +5287,8 @@ export interface components {
         CareersPage: {
             /** Company */
             company: string;
+            /** Has Logo */
+            has_logo: boolean;
             /** Postings */
             postings: components["schemas"]["CareersPostingItem"][];
         };
@@ -5278,6 +5300,8 @@ export interface components {
             company: string;
             /** Description */
             description: string | null;
+            /** Has Logo */
+            has_logo: boolean;
             /** Location */
             location: string | null;
             /** Salary From */
@@ -20628,6 +20652,47 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CareersPage"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    careers_careers_logo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                company_slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": unknown;
+                    "image/png": unknown;
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

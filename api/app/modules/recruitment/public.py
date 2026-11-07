@@ -11,7 +11,7 @@ from datetime import UTC, date, datetime
 from decimal import Decimal  # noqa: TC003
 from typing import TYPE_CHECKING, Annotated, Literal
 
-from fastapi import APIRouter, Form, Request, UploadFile
+from fastapi import APIRouter, Form, Request, Response, UploadFile
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, EmailStr, StringConstraints, ValidationError, field_validator
 from sqlalchemy import func, select
@@ -29,6 +29,7 @@ from app.modules.companies.models import Company, Location
 from app.modules.email.models import EmailOutbox
 from app.modules.email.outbox import PAYLOAD_CONTEXT
 from app.modules.email.templates import check
+from app.modules.files.models import File
 from app.modules.identity.models import Membership
 from app.modules.notifications.models import Notification
 from app.modules.recruitment.models import Application, Candidate, Posting
@@ -39,6 +40,7 @@ if TYPE_CHECKING:
 router = APIRouter(prefix="/public", tags=["careers"])
 
 APPLY_PER_CONNECTION = ("careers.apply", 20, 3600)  # attempts, per hour, per connection
+READ_PER_CONNECTION = ("careers.read", 120, 60)  # page views, per minute, per connection
 CV_KINDS = frozenset({"pdf", "doc", "docx"})
 CV_MAX_BYTES = 10 * 1024 * 1024
 
@@ -52,11 +54,13 @@ class CareersPostingItem(BaseModel):
 
 class CareersPage(BaseModel):
     company: str
+    has_logo: bool
     postings: list[CareersPostingItem]
 
 
 class CareersPostingDetail(BaseModel):
     company: str
+    has_logo: bool
     slug: str
     title: str
     location: str | None
@@ -122,10 +126,37 @@ async def _open_external(tenant: TenantSession, slug: str) -> tuple[Posting, str
     return row[0], row[1]
 
 
+async def _limit_reads(request: Request) -> None:
+    """Public pages are rate-limited per connection (plan, public API)."""
+    name, limit, window = READ_PER_CONNECTION
+    result = await RateLimiter(request.app.state.auth.redis).hit(
+        name, client_ip(request) or "unknown", limit=limit, window_seconds=window
+    )
+    if not result.allowed:
+        raise AppError(
+            "RATE_LIMITED",
+            "Too many requests from this connection. Try again later.",
+            status_code=429,
+        )
+
+
+async def _logo(tenant: TenantSession, company: Company) -> File | None:
+    """The company's logo file, only once it has passed the virus scan."""
+    if company.logo_file_id is None:
+        return None
+    return (
+        await tenant.execute(
+            select(File).where(File.id == company.logo_file_id, File.scan_status == "clean")
+        )
+    ).scalar_one_or_none()
+
+
 @router.get("/careers/{company_slug}", response_model=CareersPage)
 async def careers_page(company_slug: str, db: GlobalDb, request: Request) -> CareersPage:
+    await _limit_reads(request)
     company = await _company(db, company_slug)
     async with TenantSession(get_engine(request), company_id=company.id) as tenant:
+        logo = await _logo(tenant, company)
         rows = (
             await tenant.execute(
                 select(Posting, Location.name)
@@ -136,6 +167,7 @@ async def careers_page(company_slug: str, db: GlobalDb, request: Request) -> Car
         ).all()
     return CareersPage(
         company=company.name,
+        has_logo=logo is not None,
         postings=[
             CareersPostingItem(
                 slug=row.slug, title=row.title, location=place, closes_on=row.closes_on
@@ -149,11 +181,14 @@ async def careers_page(company_slug: str, db: GlobalDb, request: Request) -> Car
 async def careers_posting(
     company_slug: str, posting_slug: str, db: GlobalDb, request: Request
 ) -> CareersPostingDetail:
+    await _limit_reads(request)
     company = await _company(db, company_slug)
     async with TenantSession(get_engine(request), company_id=company.id) as tenant:
         row, place = await _open_external(tenant, posting_slug)
+        logo = await _logo(tenant, company)
     return CareersPostingDetail(
         company=company.name,
+        has_logo=logo is not None,
         slug=row.slug,
         title=row.title,
         location=place,
@@ -164,6 +199,34 @@ async def careers_posting(
         description=row.description,
         visa_sponsorship=row.visa_sponsorship,
         closes_on=row.closes_on,
+    )
+
+
+@router.get(
+    "/careers/{company_slug}/logo",
+    response_class=Response,
+    responses={200: {"content": {"image/png": {}, "image/jpeg": {}}}},
+)
+async def careers_logo(company_slug: str, db: GlobalDb, request: Request) -> Response:
+    """The company logo for its public careers pages (it is shown to anyone who visits them)."""
+    await _limit_reads(request)
+    company = await _company(db, company_slug)
+    files: FileService = request.app.state.files
+    if files.storage is None:
+        raise NotFoundError
+    async with TenantSession(get_engine(request), company_id=company.id) as tenant:
+        logo = await _logo(tenant, company)
+    if logo is None:
+        raise NotFoundError
+    body = await files.storage.read(logo.storage_key)
+    return Response(
+        content=body,
+        media_type=logo.mime,
+        headers={
+            "Cache-Control": "public, max-age=300",
+            "X-Content-Type-Options": "nosniff",
+            "Content-Disposition": "inline",
+        },
     )
 
 

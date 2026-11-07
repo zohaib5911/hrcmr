@@ -16,10 +16,11 @@ Scope: f37f781..a49307d   Tests at audit: api __API__, web unit __WEB__, e2e __E
 - **Fix:** make the endpoint accept `multipart/form-data` (fields as today + optional `cv` file). Run the file through the existing files service upload (`app/modules/files/service.py` `upload`: size, extension, magic bytes, ClamAV) with the allowed types PDF/DOC/DOCX, max 10 MB, owner_type `candidate`, owner_id the candidate, uploaded_by None. Infected or invalid → 422 with no candidate/application rows (do the upload before writing rows, or in the same transaction). Web `web/components/careers/apply-form.tsx`: add an optional "CV (PDF or Word, up to 10 MB)" file input using `components/ui` and send `FormData`. Regenerate the client (`pnpm gen:api`).
 - **Done when:** `tests/db/test_careers.py` new test: apply with a small PDF → a `files` row with owner_type `candidate`, scan_status `clean`; apply with the EICAR test string → 422 and no application. `pnpm gen:api:check` clean; `careers.spec.ts` green.
 
-### [ ] C1.1.4 · P1 · Careers posting page shows the company logo (from T11.6, plan L971)
+### [x] C1.1.4 · P1 · Careers posting page shows the company logo (from T11.6, plan L971)
 - **Problem:** `CareersPostingDetail` / `CareersPage` (`public.py:42-61`) carry no logo, and the pages show none. Companies have `logo_file_id` (`companies/models.py:89`).
 - **Fix:** add `logo_url: str | None` to both response models: a short-lived signed URL for the logo file when `logo_file_id` is set and the file is `clean` (copy how `GET /company` serves the logo in `api/app/modules/companies/router.py`), else None. Show it in `web/app/careers/[company]/page.tsx` and `[posting]/page.tsx` (plain `<img>` with the company name as alt, max height 48 px). Add `logo_url` to `LIST_KEYS` / `DETAIL_KEYS` in `tests/db/test_careers.py`. Check the CSP `img-src` allows the storage origin.
 - **Done when:** field-list test passes with `logo_url`; a test with a logo set returns a non-null URL; `pnpm gen:api:check` clean.
+- **As built:** `has_logo` plus a public `GET /public/careers/{slug}/logo` that streams the clean file, copying `GET /company/logo` and `has_logo` (no storage origin added to the CSP).
 
 ### [x] C1.1.5 · P1 · Careers tests for the refusal paths (from T11.6 Done when)
 - **Problem:** `tests/db/test_careers.py` has no test for: Turnstile rejecting a token, an **Internal** open posting being 404 (detail and apply), the 429 rate limit, or another company's posting slug under this company's slug.
@@ -31,7 +32,7 @@ Scope: f37f781..a49307d   Tests at audit: api __API__, web unit __WEB__, e2e __E
 - **Fix:** add a test: a company-B admin calls `POST /applications/{company A app id}/convert` → 404, and company A's application stage is unchanged.
 - **Done when:** the new test passes.
 
-### [ ] C1.1.7 · P2 · Public careers GETs are not rate-limited (from T11.6, plan L1636)
+### [x] C1.1.7 · P2 · Public careers GETs are not rate-limited (from T11.6, plan L1636)
 - **Problem:** plan item 24: public endpoints are rate-limited. Only `apply` uses `RateLimiter`; `careers_page` and `careers_posting` (`public.py:114,138`) have none.
 - **Fix:** add a per-connection limit (e.g. `("careers.read", 120, 60)`) to both GETs using the same `RateLimiter(...).hit` code as `apply`, returning the same 429 envelope.
 - **Done when:** a test hitting the list over the limit gets 429 (monkeypatch the limit low).

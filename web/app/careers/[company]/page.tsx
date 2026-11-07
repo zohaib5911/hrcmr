@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CareersLogo } from "@/components/careers/careers-logo";
 import { publicCareersClient } from "@/components/careers/public-client";
 import { formatUk } from "@/lib/ui/dates";
 
@@ -16,6 +17,7 @@ export default async function Page({ params }: { params: Promise<{ company: stri
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-10">
       <header className="flex flex-col gap-2">
+        <CareersLogo company={company} name={data.company} hasLogo={data.has_logo} />
         <h1 className="text-large-title text-label">{data.company} careers</h1>
         <p className="text-callout text-label-secondary">Open roles at {data.company}.</p>
       </header>
