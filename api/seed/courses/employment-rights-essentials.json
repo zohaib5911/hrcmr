@@ -1,0 +1,122 @@
+{
+  "slug": "employment-rights-essentials",
+  "title": "Employment rights essentials",
+  "summary": "What a contract of employment is, where its terms come from, and what to do when the written details and the contract do not match.",
+  "duration_minutes": 20,
+  "audience": "all_staff",
+  "sections": [
+    {
+      "title": "What a contract of employment is",
+      "body": "Every employee has an employment contract with their employer. It sets out the working conditions, rights, responsibilities and duties that apply to the job.\nA contract begins when a person accepts a job offer. It does not have to be in writing to be valid.\nBoth sides must keep to the contract until it ends, or until its terms change. A change usually needs both sides to agree.",
+      "key_points": [
+        "A contract starts when a job offer is accepted",
+        "A contract does not have to be written down",
+        "Changing its terms usually needs both sides to agree"
+      ]
+    },
+    {
+      "title": "Where the terms come from",
+      "body": "Terms can be written or spoken. They can be in a staff handbook or an offer letter, set by law, or come from a collective agreement.\nSome terms apply even when nobody has written them down. A safe workplace is one example. Long-standing practice that both sides rely on can also become a term.",
+      "key_points": [
+        "Terms can be written or spoken",
+        "Handbooks and offer letters can contain terms",
+        "Some unwritten terms still apply, such as a safe workplace"
+      ]
+    },
+    {
+      "title": "Collective agreements",
+      "body": "Some terms are agreed between an employer and a trade union or a staff association. This is a collective agreement.\nIt can cover pay, working hours, and which staff it applies to. If you are covered by one, it forms part of your terms.",
+      "key_points": [
+        "A collective agreement is negotiated with a union or staff association",
+        "It can cover pay, hours and who is included"
+      ]
+    },
+    {
+      "title": "The written statement of employment particulars",
+      "body": "An employer must give each employee a written statement of employment particulars. This statement sets out the key terms, such as pay and hours.\nThe statement is not the contract itself. It is a document that records the main terms, and a fuller statement can follow. Changes to the terms must also be notified in writing, within the time limits the guidance sets out.",
+      "key_points": [
+        "The written statement records the main terms",
+        "It is not the contract itself",
+        "Changes must be notified in writing"
+      ]
+    },
+    {
+      "title": "When the written details seem wrong",
+      "body": "Sometimes the written statement does not match what was agreed. The usual first step is to try to put it right informally, with the employer.\nIf that does not work, the next step is a grievance. Going to an employment tribunal is the last resort, after the earlier steps have been tried.",
+      "key_points": [
+        "Try an informal conversation first",
+        "Then raise a formal grievance",
+        "An employment tribunal is the last resort"
+      ]
+    },
+    {
+      "title": "Where to get help",
+      "body": "Acas gives advice on employment rights, contracts and disputes. It is a good first stop before you decide on any formal step.\nThe rules on contracts and terms are set out in GOV.UK guidance. Read the source page for the detail, because this course summarises it.",
+      "key_points": ["Acas gives advice", "The GOV.UK guidance has the detail"]
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "prompt": "When does an employment contract start?",
+        "options": [
+          "When the employee signs the contract",
+          "When a job offer is accepted",
+          "On the first day of work",
+          "When the first wages are paid"
+        ],
+        "answer": 1,
+        "explanation": "A contract begins once a job offer is accepted. Signing a document or starting work does not change when it began."
+      },
+      {
+        "prompt": "Must an employment contract be in writing?",
+        "options": [
+          "Yes, always",
+          "No, it does not have to be written down",
+          "Only for part-time staff"
+        ],
+        "answer": 1,
+        "explanation": "A contract does not have to be written to exist. Its terms can be written or spoken."
+      },
+      {
+        "prompt": "Which of these can be a source of contract terms?",
+        "options": [
+          "A staff handbook or an offer letter",
+          "Only the employer's personal promises",
+          "Nothing except the written statement"
+        ],
+        "answer": 0,
+        "explanation": "Terms can come from handbooks, offer letters, the law and collective agreements, as well as from the contract itself."
+      },
+      {
+        "prompt": "What is the written statement of employment particulars?",
+        "options": [
+          "The whole contract, word for word",
+          "A written document that sets out the key terms, and is not itself the contract",
+          "A form the employee signs only at the end of the job",
+          "A tax document"
+        ],
+        "answer": 1,
+        "explanation": "The written statement records the main terms, such as pay and hours. It is not the contract itself."
+      },
+      {
+        "prompt": "If the written details seem wrong, what is the usual first step?",
+        "options": [
+          "Go straight to an employment tribunal",
+          "Try to put it right informally with the employer",
+          "Wait until the contract ends"
+        ],
+        "answer": 1,
+        "explanation": "The usual first step is an informal conversation. A grievance comes next, and a tribunal is the last resort."
+      }
+    ]
+  },
+  "pass_mark": 80,
+  "source_title": "Employment contracts",
+  "source_publisher": "GOV.UK",
+  "source_url": "https://www.gov.uk/employment-contracts-and-conditions",
+  "source_updated_on": "2020-04-06",
+  "content_reviewed_on": "2026-11-07",
+  "licence_note": "Based on GOV.UK guidance, which is published under the Open Government Licence v3.0. The text here is our own summary, not a copy.",
+  "published": false
+}
