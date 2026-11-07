@@ -337,3 +337,4 @@
 2026-11-08 02:53 | Claude (Haiku) | T15.4 | started; STATUS updated | next read soc/anthropic/loader/engine API
 2026-11-08 03:04 | Claude (Haiku) | T15.4 | step 1+2 done: retrieval.py (trigram+FTS+vector, RRF top 10), ranking.py (Claude JSON re-rank, strict parse, fallback), router.py (GET /soc/search, POST /soc/match: rules on top 3, 409 if unpublished), main.py registered; tests: pure 17 + db 13 pass, soc+openapi+arch 112 pass, ruff/mypy clean | next commit, tick T15.4, PROGRESS, handover to next task
 2026-11-08 03:05 | Claude (Haiku) | T15.4 | fix: SOC models renamed Soc* (CandidateOut/CheckIn/SearchOut clashed with recruitment/rtw/search schemas in OpenAPI); schema regenerated, no names removed; tests openapi+arch+soc 43 pass | next commit wip, then tick T15.4
+2026-11-08 03:06 | Claude (Haiku) | T15.4 | DONE: ticked micro_plan + PROGRESS; STATUS rewritten | next T15.5 (S!) CV match

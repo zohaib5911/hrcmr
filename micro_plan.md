@@ -319,7 +319,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T15.2 · B · Rules-data importer (draft rules version, fixtures, salary rules)
 ### [x] T15.3 · B · Rules engine and 20+ golden tests
 
-### [ ] T15.4 · S! · Search and match API
+### [x] T15.4 · S! · Search and match API
 - **Spec:** plan L1127–1131, L1446; API item 20.
 - **Steps:**
   1. `GET /soc/search?q=` (trigram + full-text + vector, top 10).
