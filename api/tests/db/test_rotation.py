@@ -117,6 +117,7 @@ def test_every_encrypted_column_is_found_by_its_type() -> None:
         ("employee_bank_details", "account_number", "employee_bank_details.account_number"),
         ("employees", "ni_number", "employees.ni_number"),
         ("employees", "passport_number", "employees.passport_number"),
+        ("policy_acceptances", "typed_signature", "policy_acceptances.typed_signature"),
         ("rtw_checks", "share_code", "rtw_checks.share_code"),
         ("sponsor_documents", "reference_number", "sponsor_documents.reference_number"),
         ("sponsor_documents", "cos_number", "sponsor_documents.cos_number"),

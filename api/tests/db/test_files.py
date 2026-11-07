@@ -283,9 +283,12 @@ async def test_the_cleanup_removes_only_objects_no_row_points_to(
         assert made.status_code == 201
         (row,) = await _rows(api["db"], api["a"])
         stray = f"{KEY_PREFIX}{api['a']}/{uuid.uuid4().hex}"
-        await storage.put(stray, io.BytesIO(b"left behind"), content_type="text/csv", size=11)
         owner = engine_for(api["db"].owner_url, poolclass=NullPool)
         try:
+            # The bucket is shared across runs, so sweep leftovers from earlier runs first; the checks
+            # below then see only this test's objects.
+            await remove_orphans(storage, owner, now=datetime.now(UTC) + timedelta(days=2))
+            await storage.put(stray, io.BytesIO(b"left behind"), content_type="text/csv", size=11)
             # Recent objects are left alone, in case an upload is still in progress.
             assert await remove_orphans(storage, owner) == 0
             assert await storage.exists(stray)

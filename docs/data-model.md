@@ -240,6 +240,27 @@ Checks:
 
 - `doc_type in ('paye_reference_letter', 'latest_rti', 'employers_liability_insurance', 'premises_proof', 'lease_or_freehold', 'bank_statement_1', 'bank_statement_2', 'bank_statement_3', 'signed_annual_accounts', 'vat_certificate', 'food_hygiene_rating', 'business_licence', 'franchise_agreement', 'governing_body_registration', 'health_safety_rating', 'audited_annual_accounts', 'regulatory_body_certificate', 'other')`
 
+## `company_documents`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `files` |
+| `file_id` | UUID | no |  | references `files` |
+| `title` | VARCHAR(200) | no |  |  |
+| `category` | VARCHAR(40) | no |  |  |
+| `next_review_date` | DATE | yes |  |  |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `category in ('policy_handbook', 'health_safety', 'companies_house', 'hmrc_payroll', 'insurance', 'premises_lease', 'certificate', 'hr_template', 'training', 'other')`
+- `length(trim(title)) > 0`
+
 ## `company_holidays`
 
 | Column | Type | Null | Default | Notes |
@@ -1023,6 +1044,72 @@ Checks:
 
 - `level in ('support', 'owner')`
 
+## `policy_acceptances`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `employees`, references `policy_documents` |
+| `policy_document_id` | UUID | no |  | references `policy_documents` |
+| `employee_id` | UUID | no |  | references `employees` |
+| `due_on` | DATE | no |  |  |
+| `status` | VARCHAR(8) | no | `pending` |  |
+| `accepted_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `accepted_by` | UUID | yes |  | references `users` |
+| `typed_signature` | TEXT | yes |  |  |
+| `ip` | VARCHAR(45) | yes |  |  |
+| `user_agent` | VARCHAR(500) | yes |  |  |
+| `last_reminded_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(status = 'signed') = (typed_signature is not null)`
+- `(status in ('accepted','signed')) = (accepted_at is not null)`
+- `(status in ('accepted','signed')) = (accepted_by is not null)`
+- `status in ('pending','accepted','signed','overdue')`
+
+## `policy_documents`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `files`, references `policy_documents`, references `policy_documents` |
+| `group_id` | UUID | no |  | references `policy_documents` |
+| `previous_version_id` | UUID | yes |  | references `policy_documents` |
+| `version` | INTEGER | no | `1` |  |
+| `title` | VARCHAR(200) | no |  |  |
+| `category` | VARCHAR(40) | no |  |  |
+| `file_id` | UUID | yes |  | references `files` |
+| `confirmation_mode` | VARCHAR(6) | no | `accept` |  |
+| `audience_type` | VARCHAR(12) | no | `everyone` |  |
+| `audience_ids` | UUID[] | no | `{}` |  |
+| `accept_within_days` | INTEGER | no | `14` |  |
+| `auto_send_new_starters` | BOOLEAN | no | `false` |  |
+| `status` | VARCHAR(8) | no | `draft` |  |
+| `sent_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `sent_by` | UUID | yes |  | references `users` |
+| `archived_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `accept_within_days between 1 and 365`
+- `audience_type in ('everyone','departments','locations','named','visa_holders')`
+- `cardinality(audience_ids) <= 500 and ((audience_type in ('departments','locations','named')) = (cardinality(audience_ids) > 0))`
+- `category in ('employment_contract', 'job_description', 'offer_letter', 'contract_change', 'company_policy', 'employee_handbook', 'code_of_conduct', 'it_email_social_media', 'drugs_alcohol', 'sickness_sick_pay', 'attendance_punctuality', 'holiday_annual_leave', 'flexible_hybrid_working', 'family_leave', 'equality_diversity', 'anti_harassment', 'grievance', 'disciplinary', 'whistleblowing', 'health_safety', 'privacy_notice', 'sponsor_duties', 'other')`
+- `confirmation_mode in ('accept','sign')`
+- `length(trim(title)) > 0`
+- `status <> 'sent' or (file_id is not null and sent_at is not null and sent_by is not null)`
+- `status in ('draft','sent','archived')`
+- `version > 0 and ((version=1) = (previous_version_id is null))`
+
 ## `reminders`
 
 | Column | Type | Null | Default | Notes |
@@ -1058,6 +1145,31 @@ Checks:
 - `message_draft is null or (length(trim(message_draft)) > 0 and length(message_draft) <= 2000)`
 - `status in ('scheduled', 'due', 'sent', 'snoozed', 'cancelled')`
 - `threshold_days in (90, 60, 30)`
+
+## `report_jobs`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `files` |
+| `report_type` | VARCHAR(40) | no |  |  |
+| `requested_by` | UUID | no |  | references `users` |
+| `status` | VARCHAR(10) | no | `queued` |  |
+| `file_id` | UUID | yes |  | references `files` |
+| `finished_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `error_code` | VARCHAR(40) | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(status = 'failed') = (error_code is not null)`
+- `(status = 'queued') = (finished_at is null)`
+- `(status = 'ready') = (file_id is not null)`
+- `report_type in ('employee_directory', 'employee_detail', 'archived_employees', 'company', 'sponsor_workers', 'leave_taken', 'training_completion')`
+- `status in ('queued','ready','failed')`
 
 ## `rota_weeks`
 
