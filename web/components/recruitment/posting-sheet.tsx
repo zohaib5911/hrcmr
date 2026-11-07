@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { useCan } from "@/components/app/session-context";
 import { FormSheet } from "@/components/company/form-sheet";
+import { FindCodeButton } from "@/components/soc/find-code";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
@@ -262,14 +263,7 @@ export function PostingSheet({
               error={fieldError(problem, "soc_code")}
               containerClassName="flex-1"
             />
-            <Button
-              type="button"
-              variant="gray"
-              disabled
-              title="The SOC checker is not set up yet."
-            >
-              Find code
-            </Button>
+            <FindCodeButton onFound={setSocCode} />
           </div>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">

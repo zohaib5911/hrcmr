@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 import { useCan } from "@/components/app/session-context";
 import { EmployeeChanges } from "@/components/compliance/change-log";
 import { FormSheet } from "@/components/company/form-sheet";
+import { FindCodeButton } from "@/components/soc/find-code";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -468,14 +468,7 @@ function DocumentSheet({
             inputMode="numeric"
             hint="4 digits."
           />
-          <Link
-            href="/sponsorship-checker"
-            target="_blank"
-            rel="noreferrer"
-            className="text-callout text-tint underline"
-          >
-            Find code
-          </Link>
+          <FindCodeButton onFound={(code) => set("soc_code", code)} />
           <NumberField
             label="Sponsored annual salary"
             name="sponsored_salary"

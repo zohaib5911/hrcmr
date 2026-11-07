@@ -78,10 +78,13 @@ test("Sponsor documents save explicitly, retain versions, plan renewals and with
   await dialog.getByLabel("Visa route", { exact: true }).selectOption("health_care_worker");
   await dialog.getByLabel("CoS number", { exact: true }).fill("COS-987654321");
   await dialog.getByLabel("SOC code", { exact: true }).fill("6135");
-  await expect(dialog.getByRole("link", { name: "Find code", exact: true })).toHaveAttribute(
-    "href",
-    "/sponsorship-checker",
-  );
+  // "Find code" opens the checker in a sheet over the form. Closing it leaves the form as it was.
+  await dialog.getByRole("button", { name: "Find code", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Find the SOC code" })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Job title" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("heading", { name: "Find the SOC code" })).toHaveCount(0);
+  await expect(dialog.getByLabel("SOC code", { exact: true })).toHaveValue("6135");
   await dialog.getByLabel("Sponsored annual salary", { exact: true }).fill("32000");
   await dialog.getByLabel("Expiry date", { exact: true }).fill(dateAfter(120));
   await dialog.locator('input[type="file"]').setInputFiles({

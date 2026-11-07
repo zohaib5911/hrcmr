@@ -8,6 +8,8 @@ test("check a job, confirm the code and download the PDF report", async ({ page 
   await expect(page.getByRole("heading", { name: "Sponsorship job checker" })).toBeVisible();
   await expect(page.getByText(DISCLAIMER).first()).toBeVisible();
 
+  await page.waitForLoadState("networkidle");
+  await expect(page.getByLabel("Offered salary", { exact: true })).toHaveCount(1);
   await page.getByRole("textbox", { name: "Job title" }).fill("Adviser, sales");
   await page.getByLabel("Offered salary", { exact: true }).fill("30000");
   await page.getByRole("button", { name: "Check this job" }).click();

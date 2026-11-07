@@ -7,6 +7,7 @@ import { useState, type FormEvent } from "react";
 
 import { PageHeader } from "@/components/app/page-header";
 import { useCan } from "@/components/app/session-context";
+import { FindCodeButton } from "@/components/soc/find-code";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { GroupedList, GroupedRow } from "@/components/ui/grouped-list";
@@ -219,6 +220,9 @@ function DesignationSheet({
         error={errors.soc_code}
         hint="Four digits. The Sponsorship checker can find the right one."
       />
+      <div>
+        <FindCodeButton onFound={setSoc} />
+      </div>
     </FormSheet>
   );
 }

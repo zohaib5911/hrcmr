@@ -4,7 +4,7 @@ import { ScanSearch } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { PageHeader } from "@/components/app/page-header";
-import { useCan } from "@/components/app/session-context";
+import { useCan, useMe } from "@/components/app/session-context";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -12,6 +12,7 @@ import { attempt, type Problem } from "@/lib/auth/request";
 
 import { CheckForm, type MatchBody } from "./check-form";
 import { CheckHistory, type Summary } from "./history";
+import { CvMatchPanel } from "./cv-match";
 import {
   type Candidate,
   type Check,
@@ -32,9 +33,17 @@ function download(blob: Blob, name: string) {
   setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
+type Props = {
+  /** Inside a sheet from another form: no page heading, no history, one column. */
+  embedded?: boolean;
+  /** Called with the code once it is confirmed (the "Find code" embeds fill their field with it). */
+  onConfirmed?: (code: string) => void;
+};
+
 /** The sponsorship job checker: the job, the ranked codes, a saved check, its confirmation and PDF. */
-export function SponsorshipChecker() {
+export function SponsorshipChecker({ embedded = false, onConfirmed }: Props = {}) {
   const can = useCan();
+  const aiAvailable = useMe()?.ai_available ?? false;
   const mayRead = can("soc.check.read");
   const mayRun = can("soc.check.run");
   const [body, setBody] = useState<MatchBody | null>(null);
@@ -105,6 +114,7 @@ export function SponsorshipChecker() {
     if (!result.ok) return setProblem(result.problem);
     setSaved(result.data);
     void loadHistory();
+    onConfirmed?.(result.data.soc_code);
   }
 
   function startAgain() {
@@ -152,16 +162,22 @@ export function SponsorshipChecker() {
 
   return (
     <>
-      <PageHeader
-        title="Sponsorship job checker"
-        description="Check whether a job can be sponsored, find its occupation code and test the salary."
-      />
+      {embedded ? null : (
+        <PageHeader
+          title="Sponsorship job checker"
+          description="Check whether a job can be sponsored, find its occupation code and test the salary."
+        />
+      )}
       {problem ? (
         <Alert tone="danger" title="That did not work" className="mb-6">
           {problem.message}
         </Alert>
       ) : null}
-      <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+      <div
+        className={
+          embedded ? "grid gap-8" : "grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]"
+        }
+      >
         <section aria-labelledby="job-heading" className="grid content-start gap-4">
           <h2 id="job-heading" className="text-headline text-label">
             The job
@@ -196,6 +212,13 @@ export function SponsorshipChecker() {
               onDownload={downloadReport}
             />
           ) : null}
+          {saved && aiAvailable ? (
+            <CvMatchPanel
+              socCode={saved.soc_code}
+              jobDescription={saved.job_description}
+              canRun={mayRun}
+            />
+          ) : null}
           {!match && !saved && busy !== "match" ? (
             <EmptyState
               icon={ScanSearch}
@@ -203,7 +226,9 @@ export function SponsorshipChecker() {
               description="Enter the job on the left. You will see the best occupation code, whether the job qualifies and the minimum pay."
             />
           ) : null}
-          <CheckHistory items={history} disabled={busy !== null} onOpen={openCheck} />
+          {embedded ? null : (
+            <CheckHistory items={history} disabled={busy !== null} onOpen={openCheck} />
+          )}
         </section>
       </div>
       <p className="text-footnote text-label-secondary mt-10">
