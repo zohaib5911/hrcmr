@@ -1617,6 +1617,44 @@ Checks:
 - `(break_start is null) = (break_end is null)`
 - `starts_at <> ends_at`
 
+## `soc_index_entries`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `index_title` | TEXT | no |  |  |
+| `qualifier_add` | TEXT | no | `` |  |
+| `qualifier_ind` | TEXT | no | `` |  |
+| `soc_code` | VARCHAR(4) | no |  | references `soc_unit_groups` |
+| `embedding` | VECTOR(384) | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+## `soc_unit_groups`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `code` | VARCHAR(4) | no |  | unique |
+| `title` | TEXT | no |  |  |
+| `description` | TEXT | no |  |  |
+| `tasks` | TEXT[] | no |  |  |
+| `entry_requirements` | TEXT | no |  |  |
+| `typical_titles` | TEXT[] | no |  |  |
+| `rqf_level` | VARCHAR(10) | yes |  |  |
+| `embedding` | VECTOR(384) | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `code ~ '^[1-9][0-9]{3}$'`
+- `rqf_level in ('6', '3-5', 'below')`
+
 ## `sponsor_documents`
 
 | Column | Type | Null | Default | Notes |

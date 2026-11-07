@@ -81,6 +81,8 @@ IDENTITY_TABLES = [
     "scheduled_shifts",
     "sessions",
     "shift_types",
+    "soc_index_entries",
+    "soc_unit_groups",
     "sponsor_documents",
     "tax_codes",
     "terms_acceptances",

@@ -33,5 +33,6 @@ import app.modules.reports.models
 import app.modules.rota.models
 import app.modules.rota.week_models
 import app.modules.rtw.models
+import app.modules.soc.models
 import app.modules.sponsor_documents.models
 import app.modules.work_log.models
