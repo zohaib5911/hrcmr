@@ -11,7 +11,7 @@ from __future__ import annotations
 import asyncio
 import os
 import secrets
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Sequence
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 
@@ -33,6 +33,10 @@ from app.main import create_app
 from app.modules.email.outbox import sender_of
 from app.modules.email.templates import render
 from app.modules.learning.loader import load_courses
+from app.modules.soc.importer import load_soc_source
+from app.modules.soc.source import load_source
+from app.modules.soc_rules.importer import import_rules_source, publish_rules_version
+from app.modules.soc_rules.source import PAGE_KINDS, load_rules_source
 from tests.db.support import engine_for, temporary_database
 from tests.reporting_calendar import seed_reporting_calendar
 from tests.support import build_settings
@@ -43,6 +47,9 @@ REDIS_URL = os.environ.get("E2E_REDIS_URL", "redis://127.0.0.1:6379/12")
 SMTP_HOST = os.environ.get("E2E_SMTP_HOST", "127.0.0.1")
 SMTP_PORT = int(os.environ.get("E2E_SMTP_PORT", "1025"))
 S3_SECRET = os.environ.get("RUSTFS_SECRET_KEY", "rustfsadmin")
+ROOT = Path(__file__).resolve().parents[2]
+RULES_PAGES = ROOT / "data" / "raw" / "rules"  # the saved GOV.UK pages (T15.2)
+SOC_FIXTURES = Path(__file__).parent / "fixtures" / "soc"
 
 
 class DirectMailer:
@@ -84,11 +91,44 @@ async def _courses(owner_url: str) -> None:
         await engine.dispose()
 
 
+def _fake_embed(texts: Sequence[str]) -> list[list[float]]:
+    """The browser tests never download the embedding model: the search uses this instead."""
+    return [[1.0 + float((len(text) + dim) % 7) for dim in range(384)] for text in texts]
+
+
+async def _soc_reference(owner_url: str) -> None:
+    """The SOC sample and the saved GOV.UK rules, published, so the sponsorship checker has data."""
+    engine = engine_for(owner_url, poolclass=NullPool)
+    try:
+        async with AsyncSession(engine) as db:
+            source = load_source(
+                SOC_FIXTURES / "soc2020-coding-index-sample.xlsx",
+                SOC_FIXTURES / "soc2020-unit-groups-sample.xlsx",
+            )
+            await load_soc_source(db, source, _fake_embed)
+            rules = load_rules_source(
+                {
+                    kind: (
+                        RULES_PAGES / f"appendix-{kind}-2026-10-29.html",
+                        RULES_PAGES / f"appendix-{kind}-2026-10-29.json",
+                    )
+                    for kind in PAGE_KINDS
+                }
+            )
+            result = await import_rules_source(db, rules)
+            assert result.version_id is not None
+            await publish_rules_version(db, result.version_id)
+            await db.commit()
+    finally:
+        await engine.dispose()
+
+
 def main() -> None:
     configure_logging()
     with temporary_database() as database:
         asyncio.run(_calendar(database.owner_url))
         asyncio.run(_courses(database.owner_url))
+        asyncio.run(_soc_reference(database.owner_url))
         settings = build_settings(
             database_url=database.app_url,
             redis_url=REDIS_URL,
@@ -116,6 +156,7 @@ def main() -> None:
         app = create_app(
             settings, mailer=DirectMailer(SmtpTransport(SMTP_HOST, SMTP_PORT), settings)
         )
+        app.state.soc_embedder = _fake_embed
         original_lifespan = app.router.lifespan_context
 
         @asynccontextmanager
