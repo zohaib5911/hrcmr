@@ -230,3 +230,4 @@
 2026-11-04 00:20 | Codex | T10.3 | scoped draft/file/audience/token-send/version/archive API implemented with atomic notifications/outbox, policy file guards and deletion blocker; lint/types clean, behavior tests next | next API regression verification then own receipts/viewer
 2026-11-04 00:24 | Codex | T10.3 | draft/audience/send/version APIs verified; combined46+corrected linked-notification rollback/basic2/schema/migration/static pass | next own sign-offs/receipt/viewer then worker/UI
 2026-11-04 00:33 | Codex | T10.3 | own accept/sign/receipt and authorized scan-gated viewer/download APIs ready; owned/cross-tenant/archive/encryption/audit-rollback plus related32/static/types pass | next reminders/deadline/new-starter worker then UI
+2026-11-07 00:08 | Claude | docs | added micro_plan.md, audit.md, .agent/next.sh; AGENTS.md points to them (slim checkpoints, model tiers, audit stops 11/14/17/20/22) | next T10.3 step 5 via .agent/next.sh
