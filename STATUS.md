@@ -1,19 +1,22 @@
 # STATUS
-Updated: 2026-11-07 17:07 Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: 7fd75f4
+Updated: 2026-11-07 17:14 Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: cce2539
 
 State: IN PROGRESS
 
 ## Last completed
+- T14.5 — AI in letter drafting (Claude paragraphs, template fallback) and reminder wording (Draft with AI button, document type and days only); API 16 DB tests pass, browser 8 pass (PROGRESS.md).
 - T14.4 — AI server layer (app/integrations/anthropic.py, app/ai/redaction.py, app/ai/service.py, ai_interactions 0039); fuzz test 202 pass (cd2ff53).
 - T14.3, T14.2, T14.1 — search, notifications, dashboard (see PROGRESS.md).
 
 ## Current task
-- T14.5 — Wire AI into letter drafting and reminder wording (S)
-  - [ ] step 1: /ai/letters/draft uses Claude when available (source "ai"), else template; only type, tone, key points sent
-  - [ ] step 2: reminder review drawer gets AI-worded message when available, else template
-  - [ ] tests: no-key path works; outgoing payload has no names/identifiers (assert_clean / find_restricted)
-  - [ ] tick T14.5 in micro_plan and PROGRESS
-- Resume note: start at api/app/ai/letters.py (create_draft) and api/app/modules/compliance/reminder_router.py. Verify with: cd api && uv run pytest -q tests/db/test_letters.py tests/db/test_reminders.py tests/test_ai_redaction.py
+- P14 — Phase 14 gate (S): full API suite, full web checks and e2e, screenshots 390+1280 light+dark, PROGRESS summary, PR dev->main, merge when green. Then AUDIT-2 stop (big model).
+  - [ ] full API suite (cd api && uv run pytest -q)
+  - [ ] web lint, typecheck, unit, e2e (full)
+  - [ ] fuzz test tests/test_ai_redaction.py (202)
+  - [ ] screenshots phase-14
+  - [ ] PROGRESS phase summary
+  - [ ] PR dev->main, CI green, merge
+- Resume note: run the full API suite first (no Playwright at the same time), then web e2e.
 
 ## Next tasks
 - P14 (S): phase gate (R7 + T14.4 fuzz test), then AUDIT-2 (big model stop).

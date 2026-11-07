@@ -290,7 +290,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T14.4 · B · Anthropic integration, redaction layer, tools, assistant panel
 - **Spec:** plan L986–1000, L1438, L1440–1441. Big model: also write the Phase 14 payload fuzz test here.
 
-### [ ] T14.5 · S · Wire AI into letter drafting and reminder wording
+### [x] T14.5 · S · Wire AI into letter drafting and reminder wording
 - **Spec:** plan L1439. Needs T14.4 done.
 - **Copy:** `api/app/integrations/anthropic.py` (from T14.4) and its redaction helper — call them; never call the SDK directly.
 - **Steps:**

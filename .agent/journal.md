@@ -300,3 +300,4 @@
 2026-11-07 17:07 | Claude (Haiku) | T14.5 | started; STATUS updated | next api/app/ai/letters.py AI path
 2026-11-07 17:10 | Claude (Haiku) | T14.5 | steps 1-2 API done: letters AI paragraphs (source ai, template fallback), POST /reminders/{id}/wording; tests letters 6 + reminders 10 pass; mypy 378 clean; openapi/arch/fuzz 215 pass | next web: pnpm gen:api, reminder drawer button, letter note
 2026-11-07 17:12 | Claude (Haiku) | T14.5 | web: Draft with AI button in reminder drawer (only when ai_available), template note on letter sheet; lint, typecheck, unit 786 pass | next run reminders + letters browser specs, then tick
+2026-11-07 17:14 | Claude (Haiku) | T14.5 | DONE: ticked micro_plan and PROGRESS; browser 8 pass, API 16 DB pass | next P14 gate (full API suite, web e2e, screenshots, PR)
