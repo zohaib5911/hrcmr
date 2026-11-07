@@ -19,7 +19,7 @@ from sqlalchemy import select
 from app.core.crypto import DecryptionError, decrypt, encrypt
 from app.core.logging import get_logger
 from app.db.session import GlobalSession
-from app.integrations.email import Message, TransportError
+from app.integrations.email import Attachment, Message, TransportError
 from app.modules.email.models import EmailOutbox
 from app.modules.email.templates import TemplateError, check, render
 
@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 logger = get_logger("app.email")
 
 PAYLOAD_CONTEXT = "email_outbox.payload"
+ICS_KEY = "ics"  # payload key for a calendar invite sent as an attachment
 MAX_ATTEMPTS = 5
 # The wait after the 1st, 2nd, 3rd... failed attempt; the last value repeats.
 BACKOFF = (timedelta(minutes=1), timedelta(minutes=5), timedelta(minutes=30), timedelta(hours=2))
@@ -135,7 +136,14 @@ class EmailDelivery:
         if row.payload is None:
             raise ValueError("no payload")
         data = json.loads(decrypt(row.payload, context=PAYLOAD_CONTEXT))
+        # A calendar invite travels with the message, not through the template.
+        invite = data.pop(ICS_KEY, None)
         rendered = render(row.template, data, self._settings)
+        attachments = (
+            (Attachment("invite.ics", "text/calendar; method=REQUEST", str(invite).encode()),)
+            if invite
+            else ()
+        )
         return Message(
             to=row.to_address,
             subject=rendered.subject,
@@ -144,6 +152,7 @@ class EmailDelivery:
             sender=sender_of(self._settings),
             reply_to=self._settings.email_reply_to or self._settings.support_email,
             idempotency_key=f"outbox-{row.id}",
+            attachments=attachments,
         )
 
     @staticmethod
