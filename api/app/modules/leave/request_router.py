@@ -33,6 +33,7 @@ from app.modules.leave.request_schemas import (
 )
 from app.modules.leave.requests import RequestPlan, conflicts, plan_request
 from app.modules.notifications.models import Notification
+from app.modules.notifications.preferences import email_modes
 from app.modules.rbac.deps import Access, require
 
 router = APIRouter(prefix="/leave", tags=["leave"])
@@ -152,6 +153,8 @@ async def _notify_decision(access: Access, row: LeaveRequest, request: Request) 
         .scalars()
         .all()
     )
+    # Only "immediate" people get the e-mail now; "daily" and "off" see the in-app notice.
+    modes = await email_modes(access.db, [user.id for user in recipients])
     for user in recipients:
         access.db.add(
             Notification(
@@ -170,13 +173,14 @@ async def _notify_decision(access: Access, row: LeaveRequest, request: Request) 
             "link": f"{request.app.state.settings.web_origin}/my-leave",
         }
         check("leave_decision", data)
-        access.db.add(
-            EmailOutbox(
-                to_address=user.email,
-                template="leave_decision",
-                payload=encrypt(json.dumps(data), context=PAYLOAD_CONTEXT),
+        if modes.get(user.id, "immediate") == "immediate":
+            access.db.add(
+                EmailOutbox(
+                    to_address=user.email,
+                    template="leave_decision",
+                    payload=encrypt(json.dumps(data), context=PAYLOAD_CONTEXT),
+                )
             )
-        )
 
 
 async def _notify_approvers(access: Access, row: LeaveRequest) -> None:

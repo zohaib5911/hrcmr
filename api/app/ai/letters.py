@@ -161,7 +161,7 @@ async def _ai_paragraphs(request: Request, access: Access, body: LetterDraftIn) 
     """Claude's paragraphs for the letter, or None when AI is off, unavailable, failed or unsafe.
 
     Only the letter type, tone and key points are sent. Employee names typed into a key point are
-    swapped for labels first (T14.5 fix C2.1.1), so no name or identifier reaches the AI. Any AI
+    swapped for labels first, so no name or identifier reaches the AI. Any AI
     error, including the rate limit, falls back to the template so the draft still works.
     """
     if scope_for(access.role, "ai.letter.draft") is None or not await ai_ready(request, access):

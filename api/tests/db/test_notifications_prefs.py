@@ -8,13 +8,19 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
+import pytest
 from sqlalchemy import text
 
 from app.core.crypto import KeyRing, set_keyring
 from app.jobs.notifications import reconcile_digests
 from tests.db.test_employee_documents import rig as rig
+from tests.db.test_leave_requests import BASE, linked
+from tests.db.test_leave_requests import ready as ready
+from tests.db.test_leave_settings import seeded as seeded
+from tests.db.test_reminders import _keys as _keys
 
 API = "/api/v1"
+ROTA = "/api/v1/rota"
 
 
 async def _me(client: Any) -> dict[str, Any]:
@@ -130,3 +136,76 @@ async def test_the_daily_digest_is_sent_once_per_notice(rig: dict[str, Any]) -> 
         ).scalar_one()
     assert sent == 1
     assert waiting == 0
+
+
+async def _delivery(
+    ready: dict[str, Any], user_id: str, kind: str, template: str
+) -> tuple[int, int]:
+    """(in-app notices, e-mails queued to that person's address) for one kind of notice."""
+    async with ready["owner"].connect() as c:
+        notices = (
+            await c.execute(
+                text("select count(*) from notifications where user_id = :u and kind = :k"),
+                {"u": user_id, "k": kind},
+            )
+        ).scalar_one()
+        emails = (
+            await c.execute(
+                text(
+                    "select count(*) from email_outbox where template = :t "
+                    "and to_address = (select email from users where id = :u)"
+                ),
+                {"t": template, "u": user_id},
+            )
+        ).scalar_one()
+    return int(notices), int(emails)
+
+
+@pytest.mark.parametrize("mode", ["off", "daily"])
+async def test_leave_decision_e_mail_follows_the_preference(
+    ready: dict[str, Any], mode: str
+) -> None:
+    quiet = await linked(ready, "employee", ready["employee"])
+    plain = await linked(ready, "employee", ready["other"])
+    quiet_user = (await _me(quiet))["user_id"]
+    plain_user = (await _me(plain))["user_id"]
+    saved = await quiet.put(API + "/me/notification-preferences", json={"mode": mode})
+    assert saved.status_code == 200, saved.text
+    body = {"leave_type_id": ready["annual"], "start_date": "2026-01-05", "end_date": "2026-01-09"}
+    for client in (quiet, plain):
+        made = await client.post(BASE + "/requests/own", json=body)
+        assert made.status_code == 201, made.text
+        decided = await ready["admin"].post(
+            BASE + f"/requests/{made.json()['id']}/approve", json={"note": "Approved"}
+        )
+        assert decided.status_code == 200, decided.text
+    # The in-app notice always goes; the e-mail goes only to a person on "immediate".
+    assert await _delivery(ready, quiet_user, "leave.decision", "leave_decision") == (1, 0)
+    assert await _delivery(ready, plain_user, "leave.decision", "leave_decision") == (1, 1)
+
+
+@pytest.mark.parametrize("mode", ["off", "daily"])
+async def test_rota_publish_e_mail_follows_the_preference(ready: dict[str, Any], mode: str) -> None:
+    admin = ready["admin"]
+    quiet = await linked(ready, "employee", ready["employee"])
+    plain = await linked(ready, "employee", ready["other"])
+    quiet_user = (await _me(quiet))["user_id"]
+    plain_user = (await _me(plain))["user_id"]
+    saved = await quiet.put(API + "/me/notification-preferences", json={"mode": mode})
+    assert saved.status_code == 200, saved.text
+    for version, employee in enumerate((ready["employee"], ready["other"])):
+        made = await admin.post(
+            ROTA + "/scheduled-shifts",
+            json={
+                "employee_id": str(employee),
+                "date": "2026-01-05",
+                "starts_at": "09:00",
+                "ends_at": "17:00",
+                "version": version,
+            },
+        )
+        assert made.status_code == 201, made.text
+    published = await admin.post(ROTA + "/weeks/2026-01-05/publish", json={"version": 2})
+    assert published.status_code == 200, published.text
+    assert await _delivery(ready, quiet_user, "rota.published", "rota_published") == (1, 0)
+    assert await _delivery(ready, plain_user, "rota.published", "rota_published") == (1, 1)

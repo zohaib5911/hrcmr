@@ -308,3 +308,4 @@
 2026-11-08 00:59 | Claude (Haiku) | C2.1.1 | started; STATUS updated | next api/app/ai/service.py names kwarg
 2026-11-08 01:01 | Claude (Haiku) | C2.1.1 | steps 1-3 done: names kwarg in generate, letters loads company names, new test; tests: letters+redaction 209 pass, arch/openapi 32 pass, mutation (names off) fails | next tick C2.1.1 in changesneeded, then C2.1.2
 2026-11-08 01:01 | Claude (Haiku) | C2.1.1 | DONE: ticked in changesneeded (fix 499e2f3) | next C2.1.2 (leave/rota e-mail preference)
+2026-11-08 01:04 | Claude (Haiku) | C2.1.2 | steps done: leave decision + rota publish e-mail only when mode immediate (notice always); 4 new tests; tests: leave+rota+notifications 43 pass, mutation fails; | next tick C2.1.2, then C2.1.3
