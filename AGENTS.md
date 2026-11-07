@@ -3,14 +3,32 @@
 Two agents (Claude Code and Codex) work on this repo **one at a time, in relay**. The owner starts one, it works until its usage limit or a stop point, and then the owner starts the other.
 **You can be cut off at any second without warning.** Work so that a different agent can continue from whatever you left behind, even if you never got to write a handover.
 
-## Quick start (the owner's whole instruction is "Read AGENTS.md and continue")
+## Quick start — the owner ALWAYS types only "Read AGENTS.md and continue" (any model, Claude Code or Codex)
+The owner never tells you what to do or which tier you are. You decide, from this section, and you tell the owner which model to start next.
+
+**0. Know your tier.** **BIG** = Claude Opus (any version), Claude Fable, Solo 6.1 (the owner may add names to this line).
+Every other model is **SMALL** (Haiku, Sonnet, Luna, any mini model…). If you can't tell which model you are, you are SMALL.
+
 1. Do §1 below (save any cut-off work, sync).
-2. Run `bash .agent/next.sh`. It prints the **one** block to do next: open items in `changesneeded.md` first, then the next block in `micro_plan.md`.
-3. Do that block exactly (read `micro_plan.md` §A–B once per session for the rules and recipes). Checkpoint after every step (§2).
-4. Block tagged **B** (big-model only) and you are not told "big model" by the owner → set `BLOCKED — needs big model (Txx)`, commit, push, stop.
-   Block **AUDIT-n** → set `BLOCKED — audit requested (AUDIT-n)`, commit, push, stop.
-5. After the last open item in `changesneeded.md` is ticked: if that file says `## Result: PASS`, carry on with `micro_plan.md`;
-   otherwise set `BLOCKED — re-audit requested`, commit, push, stop.
+2. Run `bash .agent/next.sh`. It prints a `NEXT:` line with a kind (`FIX`, `TASK`, `AUDIT`) and the tier tag, then the block.
+3. Act by this table. Repeat steps 2–3 after every finished block until you hit a stop.
+
+| `next.sh` shows | If you are SMALL | If you are BIG |
+|---|---|---|
+| `FIX` tagged S/S!/P* (not `· B`) | do it | stop → **START SMALL MODEL** |
+| `FIX` tagged `· B` | stop → **BIG MODEL TASK** | do it |
+| `TASK` tagged S or S! | do it | stop → **START SMALL MODEL** |
+| `TASK` tagged B | stop → **BIG MODEL TASK** | do it, then keep going while the next block is B |
+| `AUDIT` (an `AUDIT-n` block, or a re-audit after fixes) | stop → **AUDIT NEEDED** | run `audit.md` fully, then go back to step 2 |
+
+**How to stop:** set `STATUS.md` State (`BLOCKED — needs big model (Txx)`, `BLOCKED — audit requested (AUDIT-n)` or
+`HANDED OVER — small model next`), commit `chore(status): <state>` with a `Next:` line, push. Then make your **final message
+exactly one** of these (first line, word for word; one more line with the task id is fine):
+- `⚠ BIG MODEL TASK — start Opus / Solo 6.1 and type: Read AGENTS.md and continue`
+- `⚠ AUDIT NEEDED FIRST — start Opus / Solo 6.1 and type: Read AGENTS.md and continue`
+- `✓ BIG-MODEL WORK DONE — start a small model and type: Read AGENTS.md and continue`
+
+If you are cut off by a usage limit before you can stop, that's fine: the owner starts another model of the same size with the same sentence.
 
 ## Source of truth
 - `micro_plan.md`: **the task list and steps** for all remaining work (T10.3 onward). Work through it top to bottom.
@@ -96,7 +114,7 @@ If you are cut off before this, that's fine: the journal, the `Next:` lines and 
 
 ## 7. Model tiers
 - Each `micro_plan.md` block is tagged **S** (small model OK), **S!** (small model OK, high-risk: follow every "Watch" line), or **B** (big model only).
-- A big model does B blocks only when the owner's start message says "big model"; it then continues through consecutive B blocks and hands back at the next S block.
+- Who is BIG and what each tier does on each kind of block: the table in "Quick start". A big model never does S/S! blocks (that wastes the expensive model); it hands back.
 - Small models: never invent figures, never skip/weaken tests, never claim a pass you didn't see. When unsure, set BLOCKED with the question; don't guess.
 
 ## STATUS.md template (overwrite fully each time)

@@ -3,7 +3,9 @@
 You are the **auditor**. Small models built the work below, following `micro_plan.md`.
 Your job: find what is wrong or missing, and write it down as **small, exact fix tasks** in `changesneeded.md`
 so a small model can fix them. **You don't fix code yourself** (exception: a one-line fix that makes CI green, noted in the report).
-Owner's start message: "Read audit.md and run the audit".
+You get here from AGENTS.md "Quick start" (the owner only ever types "Read AGENTS.md and continue").
+When the audit is written and pushed, go back to AGENTS.md Quick start step 2: if the next block is B, do it; otherwise
+stop with the `✓ BIG-MODEL WORK DONE` message.
 
 Don't trust anything a small model *wrote* about its work (journal, STATUS, PROGRESS, commit messages).
 Trust only what you run and read yourself.
@@ -108,4 +110,5 @@ then stop with `BLOCKED — re-audit requested` → owner runs this audit again 
 done by a big model (mark it `· B` in `changesneeded.md`), not handed back to a small model again.
 
 ## 7. Final message to the owner (max 5 lines)
-Result (PASS / FIX NEEDED), counts P0/P1/P2, the single worst finding, and whether any item needs a big model or an owner decision.
+First line: the stop message from AGENTS.md Quick start (normally `✓ BIG-MODEL WORK DONE — start a small model…`).
+Then: result (PASS / FIX NEEDED), counts P0/P1/P2, the single worst finding, and any owner decision needed.

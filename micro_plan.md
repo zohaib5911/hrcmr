@@ -22,11 +22,10 @@ Tasks T0.1–T10.2 are done and are not listed here.
 ### Tier tags (in every block title)
 - **S**: a small model may do it.
 - **S!**: a small model may do it, but it is high-risk. Follow every "Watch" line exactly; the auditor checks these first.
-- **B**: **BIG-MODEL ONLY.** A small model must **not** start it. Set `State: BLOCKED — needs big model (Txx)`,
-  commit `chore(status): blocked on Txx (needs big model)`, push, and stop.
-  A big model does B blocks only when the owner's start message says "big model".
-- **AUDIT STOP**: stop. Set `State: BLOCKED — audit requested (AUDIT-n)`, commit, push, stop.
-  Only the auditor (see `audit.md`) ticks AUDIT blocks.
+- **B**: **BIG-MODEL ONLY.** A small model must **not** start it; it stops with the "BIG MODEL TASK" message (AGENTS.md Quick start).
+- **AUDIT STOP**: small models stop with the "AUDIT NEEDED FIRST" message; a big model runs `audit.md`.
+  Only the auditor ticks AUDIT blocks.
+- Which models are BIG or SMALL, and the exact stop messages: AGENTS.md "Quick start".
 
 ### Hard rules for every task (small models: these are where mistakes happen)
 - **Never invent a figure.** No rate, fee, threshold, date rule or legal fact may be typed from memory. It comes from
