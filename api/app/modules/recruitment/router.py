@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid  # noqa: TC003
-from typing import Annotated, Any
+from typing import Annotated, Any, cast
 
 from fastapi import APIRouter, Depends, Query, Request, Response
 from sqlalchemy import func, select
@@ -15,12 +15,19 @@ from app.modules.companies.compliance_documents import _today as company_today
 from app.modules.files.models import File
 from app.modules.rbac.deps import Access, require
 from app.modules.recruitment import service
+from app.modules.recruitment.applications import LABELS, STAGES, check_move
 from app.modules.recruitment.models import Application, Candidate, Posting, Requisition
 from app.modules.recruitment.schemas import (
+    ApplicationIn,
+    ApplicationOut,
+    ApplicationPage,
+    ApplicationStageIn,
     CandidateFile,
     CandidateIn,
     CandidateOut,
     CandidatePage,
+    Pipeline,
+    PipelineStage,
     PostingIn,
     PostingOut,
     PostingPage,
@@ -32,6 +39,7 @@ from app.modules.recruitment.schemas import (
     RequisitionPage,
     RequisitionStatus,
     RequisitionStatusIn,
+    Stage,
 )
 
 router = APIRouter(tags=["recruitment"])
@@ -39,6 +47,8 @@ Reads = Annotated[Access, Depends(require("recruitment.requisition.read"))]
 Writes = Annotated[Access, Depends(require("recruitment.requisition.write"))]
 PostingReads = Annotated[Access, Depends(require("recruitment.posting.read"))]
 CandidateReads = Annotated[Access, Depends(require("recruitment.candidate.read"))]
+ApplicationReads = Annotated[Access, Depends(require("recruitment.application.read"))]
+ApplicationWrites = Annotated[Access, Depends(require("recruitment.application.write"))]
 CandidateWrites = Annotated[Access, Depends(require("recruitment.candidate.write"))]
 PostingWrites = Annotated[Access, Depends(require("recruitment.posting.write"))]
 
@@ -520,3 +530,167 @@ async def candidate_documents(
         )
         for row in rows
     ]
+
+
+async def _application(access: Access, ident: uuid.UUID, *, lock: bool = False) -> Application:
+    query = select(Application).where(Application.id == ident)
+    if lock:
+        query = query.with_for_update()
+    row = (await access.db.execute(query)).scalar_one_or_none()
+    if row is None:
+        raise NotFoundError
+    return row
+
+
+@router.get("/applications", response_model=ApplicationPage)
+async def list_applications(
+    access: ApplicationReads,
+    stage: Stage | None = None,
+    posting_id: uuid.UUID | None = None,
+    offset: Annotated[int, Query(ge=0)] = 0,
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+) -> ApplicationPage:
+    company_wide(access)
+    query = select(Application)
+    if stage is not None:
+        query = query.where(Application.stage == stage)
+    if posting_id is not None:
+        query = query.where(Application.posting_id == posting_id)
+    total = (
+        await access.db.execute(select(func.count()).select_from(query.subquery()))
+    ).scalar_one()
+    rows = (
+        (
+            await access.db.execute(
+                query.order_by(Application.created_at.desc(), Application.id)
+                .offset(offset)
+                .limit(limit)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    today = await company_today(access)
+    return ApplicationPage(
+        items=[await service.application_out(access.db, row, today) for row in rows], total=total
+    )
+
+
+@router.post("/applications", status_code=201, response_model=ApplicationOut)
+async def create_application(body: ApplicationIn, access: ApplicationWrites) -> ApplicationOut:
+    company_wide(access)
+    candidate = (
+        await access.db.execute(
+            select(Candidate.id).where(
+                Candidate.id == body.candidate_id, Candidate.archived_at.is_(None)
+            )
+        )
+    ).first()
+    if candidate is None:
+        raise AppError(
+            "VALIDATION_ERROR",
+            "Choose a current candidate from this company.",
+            status_code=422,
+            field="candidate_id",
+        )
+    posting = (
+        await access.db.execute(select(Posting.status).where(Posting.id == body.posting_id))
+    ).first()
+    if posting is None or posting[0] != "open":
+        raise AppError(
+            "POSTING_NOT_OPEN",
+            "Applications are closed for this posting.",
+            status_code=422,
+            field="posting_id",
+        )
+    existing = (
+        await access.db.execute(
+            select(Application.id).where(
+                Application.candidate_id == body.candidate_id,
+                Application.posting_id == body.posting_id,
+            )
+        )
+    ).first()
+    if existing is not None:
+        raise AppError(
+            "APPLICATION_EXISTS",
+            "This candidate has already applied for this posting.",
+            status_code=409,
+        )
+    moment = service.now()
+    row = Application(
+        id=uuid7(),
+        company_id=access.company_id,
+        candidate_id=body.candidate_id,
+        posting_id=body.posting_id,
+        stage="applied",
+        stage_history=[
+            {"stage": "applied", "at": moment.isoformat(), "by": str(access.caller.user_id)}
+        ],
+        cover_note=body.cover_note,
+        applied_via="admin",
+    )
+    access.db.add(row)
+    await access.db.flush()
+    await access.db.refresh(row)
+    await access.audit(
+        "recruitment.application.created",
+        entity_type="application",
+        entity_id=row.id,
+        after={"candidate_id": str(row.candidate_id), "posting_id": str(row.posting_id)},
+    )
+    await access.db.commit()
+    return await service.application_out(access.db, row, await company_today(access))
+
+
+@router.get("/applications/{application_id}", response_model=ApplicationOut)
+async def get_application(application_id: uuid.UUID, access: ApplicationReads) -> ApplicationOut:
+    company_wide(access)
+    row = await _application(access, application_id)
+    return await service.application_out(access.db, row, await company_today(access))
+
+
+@router.post("/applications/{application_id}/stage", response_model=ApplicationOut)
+async def move_application(
+    application_id: uuid.UUID, body: ApplicationStageIn, access: ApplicationWrites
+) -> ApplicationOut:
+    company_wide(access)
+    row = await _application(access, application_id, lock=True)
+    previous = row.stage
+    if body.stage != previous:
+        check_move(previous, body.stage)
+        moment = service.now()
+        row.stage = body.stage
+        row.stage_history = [
+            *row.stage_history,
+            {"stage": body.stage, "at": moment.isoformat(), "by": str(access.caller.user_id)},
+        ]
+        await access.db.flush()
+        await access.audit(
+            "recruitment.application.stage_changed",
+            entity_type="application",
+            entity_id=row.id,
+            before={"stage": previous},
+            after={"stage": row.stage},
+        )
+    await access.db.commit()
+    return await service.application_out(access.db, row, await company_today(access))
+
+
+@router.get("/recruitment/pipeline", response_model=Pipeline)
+async def pipeline(access: ApplicationReads) -> Pipeline:
+    company_wide(access)
+    counts = dict(
+        (
+            await access.db.execute(
+                select(Application.stage, func.count()).group_by(Application.stage)
+            )
+        ).all()
+    )
+    stages = [
+        PipelineStage(
+            stage=cast("Stage", stage), label=LABELS[stage], count=int(counts.get(stage, 0))
+        )
+        for stage in STAGES
+    ]
+    return Pipeline(stages=stages, total=sum(item.count for item in stages))

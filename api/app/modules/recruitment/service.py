@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import re
-import uuid  # noqa: TC003
+import uuid
 from datetime import UTC, date, datetime
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Literal, cast
 
 from sqlalchemy import and_, select
 
@@ -13,8 +13,10 @@ from app.core.errors import AppError, NotFoundError
 from app.modules.companies.models import Company, Department, Location
 from app.modules.files.models import File
 from app.modules.identity.models import User
-from app.modules.recruitment.models import Candidate, Posting, Requisition
+from app.modules.recruitment.applications import LABELS
+from app.modules.recruitment.models import Application, Candidate, Posting, Requisition
 from app.modules.recruitment.schemas import (
+    ApplicationOut,
     BudgetPer,
     CandidateOut,
     PostingOut,
@@ -22,6 +24,8 @@ from app.modules.recruitment.schemas import (
     PostingVisibility,
     RequisitionOut,
     RequisitionStatus,
+    Stage,
+    StageEntry,
     VisaSponsorship,
 )
 from app.modules.rtw.models import RTWCheck
@@ -322,6 +326,41 @@ async def candidate_out(db: TenantSession, row: Candidate, today: date) -> Candi
         source=row.source,
         archived=row.archived_at is not None,
         rtw_status=await candidate_rtw_status(db, row.id, today),
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+    )
+
+
+async def application_out(db: TenantSession, row: Application, today: date) -> ApplicationOut:
+    candidate = (
+        await db.execute(
+            select(Candidate.first_name, Candidate.last_name).where(
+                Candidate.id == row.candidate_id
+            )
+        )
+    ).one()
+    posting_title = (
+        await db.execute(select(Posting.title).where(Posting.id == row.posting_id))
+    ).scalar_one()
+    return ApplicationOut(
+        id=row.id,
+        candidate_id=row.candidate_id,
+        candidate_name=f"{candidate[0]} {candidate[1]}",
+        posting_id=row.posting_id,
+        posting_title=posting_title,
+        stage=cast("Stage", row.stage),
+        stage_label=LABELS[row.stage],
+        stage_history=[
+            StageEntry(
+                stage=cast("Stage", entry["stage"]),
+                at=datetime.fromisoformat(entry["at"]),
+                by=uuid.UUID(entry["by"]) if entry.get("by") else None,
+            )
+            for entry in row.stage_history
+        ],
+        cover_note=row.cover_note,
+        applied_via=cast("Literal['admin', 'careers_page']", row.applied_via),
+        candidate_rtw_status=await candidate_rtw_status(db, row.candidate_id, today),
         created_at=row.created_at,
         updated_at=row.updated_at,
     )

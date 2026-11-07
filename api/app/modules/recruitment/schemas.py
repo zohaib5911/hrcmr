@@ -191,3 +191,63 @@ class CandidateFile(BaseModel):
     size: int
     scan_status: str
     created_at: datetime
+
+
+Stage = Literal[
+    "applied",
+    "shortlisted",
+    "interview",
+    "offer_letter",
+    "offer_accepted",
+    "hired",
+    "rejected",
+    "withdrawn",
+]
+
+
+class ApplicationIn(RequestModel):
+    candidate_id: uuid.UUID
+    posting_id: uuid.UUID
+    cover_note: Annotated[str, StringConstraints(max_length=5000)] | None = None
+
+
+class ApplicationStageIn(RequestModel):
+    stage: Stage
+
+
+class StageEntry(BaseModel):
+    stage: Stage
+    at: datetime
+    by: uuid.UUID | None
+
+
+class ApplicationOut(BaseModel):
+    id: uuid.UUID
+    candidate_id: uuid.UUID
+    candidate_name: str
+    posting_id: uuid.UUID
+    posting_title: str
+    stage: Stage
+    stage_label: str
+    stage_history: list[StageEntry]
+    cover_note: str | None
+    applied_via: Literal["admin", "careers_page"]
+    candidate_rtw_status: RTWStatus
+    created_at: datetime
+    updated_at: datetime
+
+
+class ApplicationPage(BaseModel):
+    items: list[ApplicationOut]
+    total: int
+
+
+class PipelineStage(BaseModel):
+    stage: Stage
+    label: str
+    count: int
+
+
+class Pipeline(BaseModel):
+    stages: list[PipelineStage]
+    total: int
