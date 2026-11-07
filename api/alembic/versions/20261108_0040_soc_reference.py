@@ -87,7 +87,9 @@ def upgrade() -> None:
     add_updated_at_trigger("soc_index_entries")
 
     # Global reference data, like courses: every company may read it, nobody but the owner writes it.
+    # The grant is SELECT only; the policy and the grant together keep app_user read-only.
     for table in ("soc_unit_groups", "soc_index_entries"):
+        op.execute(f"GRANT SELECT ON {table} TO app_user")
         op.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
         op.execute(f"CREATE POLICY {table}_read ON {table} FOR SELECT TO app_user USING (true)")
 
