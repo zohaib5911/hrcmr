@@ -30,7 +30,7 @@ Result: FIX NEEDED: 0 P0 / 3 P1 / 3 P2. AUDIT-2 stays open; re-audit after C2.1.
 - **Fix:** compare `is Scope.ALL` (import `Scope` from `app.core.rbac_matrix`) in both places.
 - **Done when:** `uv run pytest tests/db/test_organogram.py -q` passes.
 
-### [ ] C2.1.6 · P2 · Small polish
+### [x] C2.1.6 · P2 · Small polish — fixed in 6379894, cd24ba5, f169827
 - **Problem / Fix:**
   - Certificate check is case-sensitive: `verify_certificate` (`api/app/modules/learning/certificates.py`) should use `ref = ref.strip().upper()` before the length check. Test: a lower-case reference still verifies.
   - Palette live search fires on every keystroke: in `web/components/app/shortcut-provider.tsx` `searchPeople`, wait 200 ms (setTimeout, cleared on the next call) before the request.

@@ -1,29 +1,47 @@
 # STATUS
-Updated: 2026-11-08 01:00 Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: 00e2651
+Updated: 2026-11-07 20:16 Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: f169827
 
-State: IN PROGRESS — C2.1.1 (small model fix)
+State: BLOCKED — audit requested (AUDIT-2 round 2)
 
 ## Last completed
-- AUDIT-2 round 1 — 0 P0 / 3 P1 / 3 P2; findings in changesneeded.md. All runs green: api 1036, web unit 786, e2e 430 (176 skipped), CI green.
+- C2.1.1 – C2.1.6 (all six AUDIT-2 round 1 fixes, changesneeded.md ticked):
+  - C2.1.1 letter key-point names pseudonymised before AI — 499e2f3
+  - C2.1.2 leave and rota e-mails honour the e-mail preference — 5a221ec
+  - C2.1.3 learning.assigned notice on new course assignment — 2705617
+  - C2.1.4 ai_available honours the platform switch — 52fc451
+  - C2.1.5 org chart RTW chips only for company-wide RTW readers — 47f6b51
+  - C2.1.6 small polish (certificate ref case, palette debounce, empty distribution card, confirm before AI replaces typed reminder) — 6379894, cd24ba5, f169827
 
 ## Current task
-- changesneeded.md C2.1.1 — P1 letter key points: pseudonymise company employee names before AI
-  - [ ] step 1: `generate` in api/app/ai/service.py takes `names` and labels them before building the prompt
-  - [ ] step 2: `_ai_paragraphs` in api/app/ai/letters.py loads company employee names and passes them in
-  - [ ] step 3: new test in api/tests/db/test_letters.py (Ada Morrow case); run pytest for letters + redaction
-- Resume note: if step 1 or 2 is half-done, `git diff` shows it. Verify with `cd api && uv run pytest tests/db/test_letters.py tests/test_ai_redaction.py -q`.
+- AUDIT-2 round 2: big model runs audit.md "Re-audit" over the C2.1 fixes (commits 499e2f3..f169827), then writes round-2 findings into changesneeded.md.
+  - [ ] re-audit round 2 (big model)
+- Resume note: `bash .agent/next.sh` shows `AUDIT`. A big model runs audit.md §1 'Re-audit', then decides P0/P1 items (fix loop) or closes AUDIT-2 and starts Phase 15.
 
 ## Next tasks
-- C2.1.2 → C2.1.6 (changesneeded.md, in order), then re-audit AUDIT-2 round 2 (big model).
+- AUDIT-2 round 2 (big model). If it has no P0/P1: Phase 15 (T15.1 S!, T15.2 B, T15.3 B).
 
 ## Health
-- CI on dev: green    CI on main: green (PR #22)
-- Local checks run: none yet for C2.1.1
+- CI on dev: last completed run on dev is green ("Phase 14: dashboard…", success). CI for the C2.1 pushes not checked.    CI on main: green (PR #22)
+- Local checks run (small model, this round):
+  - api: ruff check/format on changed files clean; mypy on changed modules clean
+  - api tests: letters + redaction 209 pass; leave + rota + notifications 43 pass; learning + notifications + arch + openapi 22 pass; auth endpoints + letters + openapi 37 pass; organogram 7 pass; certificates 3 pass
+  - web: lint and typecheck clean; prettier clean; unit 786 pass (56 files); shortcut-provider 40 pass
+  - e2e: tests/e2e/dashboard.spec.ts 2 pass (28.1 s)
+  - NOT run this round: full API suite (1036) and full browser suite (430). The re-audit should run them.
+  - Mutation checks (fix removed → new test fails, then restored): C2.1.1, C2.1.2, C2.1.4.
 
 ## Issues / suggestions
-- C2.1.1: the fix pseudonymises full names only ("First Last"). A single first or last name in a key point ("Ada has a meeting") is not replaced. Not in the fix spec; left for the auditor.
+- C2.1.1: only full names ("First Last") are pseudonymised. A single first or last name in a key point (e.g. "Ada has a meeting") is not replaced. Not in the fix spec; for the auditor to decide.
+- C2.1.5: no new test that a company's own-only RTW reader gets no chips. The done-when was the existing organogram tests, which pass. A test would need a role with employee.rtw.read_own and organogram.level.read.
 
 ## Strategy / decisions taken
+- C2.1.1: `generate` takes `names`; `_ai_paragraphs` loads every employee's full name (all statuses) for the company.
+- C2.1.2: the in-app notice always goes; the e-mail only when mode is "immediate". The compliance reminder e-mail is unchanged.
+- C2.1.3: one learning.assigned notice per person per assign request (not per course). Recipients use the overdue job's filter (active membership, active user, verified e-mail). Assignments are read back with RETURNING, so a repeat assign notifies nobody. Added to PERSONAL_KINDS.
+- C2.1.4: a `_ai_key(auth)` helper in api/app/modules/auth/router.py used at the three build_me calls.
+- C2.1.5: `Scope.ALL` comparison in both the org chart and its PDF.
+- C2.1.6 reminder: ConfirmDialog only when the textarea differs from record.message_draft; otherwise the button runs directly.
+- Audit IDs (C2.x.y) are kept out of code comments.
 - check-rls is run through tests/db/test_cli.py (the bare CLI needs the full app env).
 
 ## Owner actions needed

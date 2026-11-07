@@ -317,3 +317,4 @@
 2026-11-08 01:12 | Claude (Haiku) | C2.1.6 | part 1/4 done: certificate reference trimmed and upper-cased; test typed-lower-case verifies; certificates 3 pass | next palette debounce (web/components/app/shortcut-provider.tsx)
 2026-11-08 01:13 | Claude (Haiku) | C2.1.6 | part 2/4 done: palette people search waits 200 ms (cleared on next keystroke and unmount); provider unit 40 pass; web lint + typecheck clean | next dashboard empty-state (web/app/(app)/dashboard)
 2026-11-08 01:15 | Claude (Haiku) | C2.1.6 | parts 3-4 done: dashboard distribution shows 'No employees yet' when empty; reminder drawer asks before replacing typed text (ConfirmDialog); web lint, typecheck clean; unit 786 pass | next run e2e dashboard spec, tick C2.1.6, then full API+web checks and handover
+2026-11-07 20:16 | Claude (Haiku) | AUDIT-2 | C2.1 DONE: all 6 items ticked; dashboard e2e 2 pass; STATUS BLOCKED | next big model: Read AGENTS.md and continue (AUDIT-2 round 2)
