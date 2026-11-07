@@ -23,6 +23,13 @@ class ReminderMessageIn(RequestModel):
         return value.strip() if isinstance(value, str) else value
 
 
+class ReminderWordingOut(RequestModel):
+    """A suggested message for the review drawer. Nothing is saved until HR sends or saves it."""
+
+    source: Literal["template", "ai"]
+    message: str
+
+
 class ReminderOut(BaseModel):
     id: uuid.UUID
     employee_id: uuid.UUID

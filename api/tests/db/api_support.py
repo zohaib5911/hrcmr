@@ -11,6 +11,7 @@ from sqlalchemy.pool import NullPool
 
 from app.db.ids import uuid7
 from app.db.session import GlobalSession
+from app.integrations.anthropic import Anthropic
 from tests.db.support import engine_for
 
 if TYPE_CHECKING:
@@ -78,3 +79,29 @@ async def sign_in_as(
     browser.cookies.set("csrf", "t")
     browser.headers["X-CSRF-Token"] = "t"
     return browser
+
+
+def fake_claude(app: Any, *, reply: str = "", status: int = 200) -> list[str]:
+    """Point the app at a fake Anthropic that answers ``reply``; returns each request body sent."""
+    sent: list[str] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        sent.append(request.content.decode("utf-8"))
+        if status != 200:
+            return httpx.Response(status, json={"type": "error"})
+        return httpx.Response(
+            200,
+            json={
+                "model": "claude-haiku-5-5",
+                "content": [{"type": "text", "text": reply}],
+                "usage": {"input_tokens": 12, "output_tokens": 34},
+            },
+        )
+
+    app.state.anthropic = Anthropic(
+        "test-key",
+        model_main="claude-sonnet-5-5",
+        model_fast="claude-haiku-5-5",
+        client=httpx.AsyncClient(transport=httpx.MockTransport(handler)),
+    )
+    return sent

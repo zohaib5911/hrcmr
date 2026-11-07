@@ -3936,6 +3936,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/reminders/{reminder_id}/wording": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reminder Wording Draft
+         * @description A suggested message for the review drawer: AI when available, else the template.
+         *
+         *     Read-only: nothing is saved. No row lock is taken, because the AI call can take seconds.
+         */
+        post: operations["reminders_reminder_wording_draft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/reports/jobs": {
         parameters: {
             query?: never;
@@ -9850,6 +9872,19 @@ export interface components {
              * Format: uuid
              */
             source_id: string;
+        };
+        /**
+         * ReminderWordingOut
+         * @description A suggested message for the review drawer. Nothing is saved until HR sends or saves it.
+         */
+        ReminderWordingOut: {
+            /** Message */
+            message: string;
+            /**
+             * Source
+             * @enum {string}
+             */
+            source: "template" | "ai";
         };
         /** RenewalIn */
         RenewalIn: {
@@ -23227,6 +23262,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReminderOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    reminders_reminder_wording_draft: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                reminder_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReminderWordingOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

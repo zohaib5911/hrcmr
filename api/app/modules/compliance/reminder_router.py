@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, Request
 from sqlalchemy import select
 
+from app.ai.reminders import reminder_wording
 from app.core.config import Settings  # noqa: TC001
 from app.core.crypto import encrypt
 from app.core.errors import ConflictError, NotFoundError
@@ -26,6 +27,7 @@ from app.modules.compliance.reminder_schemas import (
     ReminderOut,
     ReminderSlot,
     ReminderStatus,
+    ReminderWordingOut,
 )
 from app.modules.compliance.reminder_service import (
     COVERED_REASON,
@@ -42,6 +44,7 @@ from app.modules.email.outbox import PAYLOAD_CONTEXT
 from app.modules.email.templates import check
 from app.modules.employees.employment_router import _locked_employee
 from app.modules.employees.models import Employee
+from app.modules.employees.router import _employee as reachable_employee
 from app.modules.identity.models import Membership, User
 from app.modules.notifications.models import Notification
 from app.modules.rbac.deps import Access, require
@@ -270,6 +273,32 @@ async def reminder(reminder_id: uuid.UUID, access: Reads) -> ReminderOut:
     if row is None:
         raise NotFoundError
     return _out(access, row, await _view(access, [row], row.employee_id))
+
+
+@router.post("/reminders/{reminder_id}/wording", response_model=ReminderWordingOut)
+async def reminder_wording_draft(
+    reminder_id: uuid.UUID, request: Request, access: Sends
+) -> ReminderWordingOut:
+    """A suggested message for the review drawer: AI when available, else the template.
+
+    Read-only: nothing is saved. No row lock is taken, because the AI call can take seconds.
+    """
+    row = (
+        await access.db.execute(select(Reminder).where(Reminder.id == reminder_id))
+    ).scalar_one_or_none()
+    if row is None:
+        raise NotFoundError
+    await reachable_employee(access, row.employee_id)
+    view = await _view(access, [row], row.employee_id)
+    if _out(access, row, view).status in {"sent", "cancelled"}:
+        raise ConflictError("This reminder is already sent or no longer current.")
+    target = view.sources[target_key(row)]
+    message = await reminder_wording(
+        request, access, document=target.label, threshold_days=row.threshold_days
+    )
+    if message is None:
+        return ReminderWordingOut(source="template", message=template_message(target))
+    return ReminderWordingOut(source="ai", message=message)
 
 
 @router.patch("/reminders/{reminder_id}", response_model=ReminderOut)

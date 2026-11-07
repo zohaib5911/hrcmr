@@ -298,3 +298,4 @@
 2026-11-07 21:35 | Claude (Opus) | T14.4 | step 4 done: payload fuzz test 202 pass (mutation with redaction off fails) | next migrations/data-model/architecture/openapi tests, tick
 2026-11-07 21:45 | Claude (Opus) | T14.4 | DONE: ticked; arch/openapi/config 41, migrations 7, data-model, fuzz 202 pass | next T14.5 (S): small model
 2026-11-07 17:07 | Claude (Haiku) | T14.5 | started; STATUS updated | next api/app/ai/letters.py AI path
+2026-11-07 17:10 | Claude (Haiku) | T14.5 | steps 1-2 API done: letters AI paragraphs (source ai, template fallback), POST /reminders/{id}/wording; tests letters 6 + reminders 10 pass; mypy 378 clean; openapi/arch/fuzz 215 pass | next web: pnpm gen:api, reminder drawer button, letter note
