@@ -12,6 +12,7 @@ import app.modules.companies.models
 import app.modules.compliance.dossier_models
 import app.modules.compliance.models
 import app.modules.compliance.reminder_models
+import app.modules.dashboard.models
 import app.modules.documents.models
 import app.modules.email.models
 import app.modules.employees.models

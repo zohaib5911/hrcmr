@@ -61,6 +61,7 @@ IDENTITY_TABLES = [
     "memberships",
     "notifications",
     "offers",
+    "onboarding_dismissals",
     "org_changes",
     "organogram_levels",
     "pay_bands",

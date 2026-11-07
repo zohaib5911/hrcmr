@@ -1,43 +1,44 @@
 # STATUS
-Updated: 2026-11-07 06:20 UTC (Europe/London 06:20)    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: 16f8152
+Updated: 2026-11-07 15:30 UTC    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: 2b81ea7
 
 State: IN PROGRESS
 
 ## Last completed
-- P12 — Phase 12 org chart gate. PR #20 (dev -> main) merged with all 12 checks green (merge commit on main). Full API suite 803 pass; web e2e 428 pass; screenshots in docs/screenshots/phase-12.
-- T12.2 — org chart canvas, list view, Unassigned section, GET /organogram.pdf (7cb5219).
-- T12.1 — org chart tree API and hierarchy levels CRUD (eb26aef).
-- C1.3.1 — interview invites carry ORGANIZER (fix 25c7f7d). AUDIT-1 PASS on round 3.
+- P13 — Phase 13 learning gate. PR #21 (dev -> main) merged, all 12 checks green. Full API suite 818 pass; web lint/typecheck/unit 786 pass; browser 429 pass; screenshots docs/screenshots/phase-13.
+- T13.4 — certificates and public /verify (0fd8ff0). T13.3 — report, assign wizard, overdue job, My learning (6dac93f, 8c4d6f4). T13.2 — eight launch courses in api/seed/courses, unpublished pending owner review (1d560cb). T13.1 — course model, player, editor (e7c662a).
+- P12 — Phase 12 org chart gate, PR #20 merged (16f8152).
 
 ## Current task
-- T13.1 — Course model, minimal editor, course player (micro_plan.md, tier S)
-  - [ ] 1. global courses (sections, quiz, sources, reviewed date, OGL attribution) + tenant learning_assignments; migration
-  - [ ] 2. minimal super-admin course editor under web/app/(admin)/platform/courses/ (copy platform/dossier-links)
-  - [ ] 3. course player: section by section, progress saved, keyboard friendly, quiz with pass mark
-  - [ ] tests: progress survives reload; quiz below pass mark does not complete
-- Resume note: nothing written yet for T13.1 at this point. `git status`; if partial files exist, finish the unchecked steps.
+- T14.1 — Dashboard API, cards and setup checklist (micro_plan.md, tier S)
+  - [ ] 1. GET /dashboard: one aggregated, permission-aware response (cards omitted without permission)
+  - [ ] 2. GET /onboarding/checklist + dismiss
+- Resume note: nothing written yet for T14.1. Read plan §8.2 (`grep -n '### 8.2' plan.md`) before starting.
 
 ## Next tasks
-- T13.2 (if present), P13 gate, then Phase 14. AUDIT-2 stop is after P14 (big model).
+- T14.2 (S), T14.3 (S!). Then T14.4 is tier B: a SMALL model stops there with "BLOCKED — needs big model (T14.4)" and the BIG MODEL TASK message. T14.5, P14 and AUDIT-2 come after it.
 
 ## Health
-- CI on dev: green (PR #20 all checks). CI on main: green (after the merge).
-- Local checks: T12.x — API full suite 803 pass; web lint/typecheck/unit/e2e pass.
+- CI on dev: green (PR #21 checks all passed before merge). CI on main: green after PR #21.
+- Local checks: T13.x — API full suite 818 pass; web lint, typecheck, unit 786 pass; browser e2e 429 pass.
 
 ## Issues / suggestions
-- No UI yet to create or edit hierarchy levels (plan 8.13 wants an editable list). Change role sheet has no level picker (employment-tab still says "available with the organogram"). Owner or a later task to decide where this goes.
-- Org chart card text is small on wide charts until zoomed (the chart now opens at 100%, which helps on phones).
-- ORGANIZER/ATTENDEE CN values use backslash escaping (as the attendee CN already did); RFC 5545 wants parameter values quoted. Not changed.
-- Test-order issue: running tests/db/test_employee_employment.py + tests/test_openapi.py + tests/db/test_auth_endpoints.py together gives 18 auth errors. The full suite in default order passes. Not investigated.
+- Eight launch courses (api/seed/courses) are unpublished; owner must review them. Nothing loads seed courses into production yet (owner decision: owner-role load or import through the editor).
+- EHRC sources could not be verified (site returned 403 to the fetch), so the courses cite GOV.UK and Acas only.
+- Certificate download and the public check: the verify page runs a sanity length check and returns the same generic answer for every unknown reference.
+- Learning report is company-wide only; people managers with read_reports do not see their team's report yet (plan allows it; not built).
+- Hierarchy levels: no UI to create or edit them yet (plan 8.13 wants an editable list); Change role sheet has no level picker.
+- Test-order issue: some root-level test files mixed with tests/db/* give "fixture 'database' not found". Run them in separate pytest invocations; the default full run passes.
 - Turnstile: production must set the site key (web) and secret (API) together.
 - PR #16 (dependabot, python deps) is still open; not ours, left alone.
 
 ## Strategy / decisions taken
-- Org chart permission: GET /organogram and /organogram/levels need organogram.level.read; writes need organogram.level.write.
-- Tree: current assignment = effective today; people in active or on_leave only. No manager in the chart, or a loop of managers, puts a person under `unassigned`.
-- Assignments validate organogram_level_id against the company (FK RESTRICT, migration 0034).
-- Org chart UI: SVG canvas (CSP forbids inline styles, so cards are foreignObject with transform). Opens at 100%; "Fit the whole chart" button for overview. Search centres via an imperative handle, not an effect.
-- The chart's top-level people (no manager) are shown under "Unassigned", per the plan's wording.
+- Learning: courses are global with RLS (published only for learners); assignments are tenant-scoped; the table is course_assignments (plan 6.9), not micro_plan's learning_assignments.
+- Certificates: public check uses a row policy keyed by a transaction setting (app.certificate_ref) so no other certificate is opened.
+- The learning report requires company-wide scope (require() also admits own-scope holders, so the handler checks scope).
+- RBAC guard: one reviewed public prefix added for /api/v1/public/certificates/ (tests/db/test_rbac_enforcement.py).
+- Overdue job: company-local date; in-app notification only (no email).
 
 ## Owner actions needed
+- Review the eight launch courses before publishing them (api/seed/courses). See PROGRESS.md.
+- Decide how seed courses reach production.
 - Phase 23: add a Cloudflare rate-limit rule for /careers/* (the API cannot tell visitors apart on server-rendered pages).

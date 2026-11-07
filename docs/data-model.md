@@ -1108,6 +1108,19 @@ Checks:
 - `salary_per in ('year','month','hour')`
 - `status in ('draft','sent','accepted','declined','withdrawn')`
 
+## `onboarding_dismissals`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `user_id` | UUID | no |  | references `users` |
+| `dismissed_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
 ## `org_changes`
 
 | Column | Type | Null | Default | Notes |
