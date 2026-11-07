@@ -1,0 +1,122 @@
+{
+  "slug": "preventing-sexual-harassment-employer-duty",
+  "title": "Preventing sexual harassment: the employer duty",
+  "summary": "What the employer duty to prevent sexual harassment asks of managers, how it changed on 30 October 2026, and how to handle a complaint fairly.",
+  "duration_minutes": 20,
+  "audience": "managers",
+  "sections": [
+    {
+      "title": "What the duty is",
+      "body": "Employers have a duty to prevent sexual harassment of their workers. It is a duty to prevent harassment, not only to respond to it once it has happened.\nFrom 30 October 2026 the standard is higher. The employer must take all reasonable steps, rather than reasonable steps.",
+      "key_points": [
+        "The duty is about prevention, not only about responding",
+        "From 30 October 2026 the standard is all reasonable steps"
+      ]
+    },
+    {
+      "title": "Where the duty reaches",
+      "body": "Prevention is not limited to the office. It reaches remote work, business trips, client visits, external training and work social events.\nIf a worker is harassed while doing their job somewhere else, the duty still applies.",
+      "key_points": [
+        "The duty covers remote work, trips, client visits, training and social events",
+        "It does not stop at the office door"
+      ]
+    },
+    {
+      "title": "Harassment by outsiders",
+      "body": "Outsiders include customers and other people a worker meets through their job. From 30 October 2026 an employer can be held responsible for harassment by outsiders such as customers.\nThe employer is protected only if they have done everything reasonable to stop it.",
+      "key_points": [
+        "Outsiders such as customers are included",
+        "The employer is responsible unless they have done everything reasonable to stop it"
+      ]
+    },
+    {
+      "title": "Practical steps",
+      "body": "Practical steps include regular checks of the risks, keeping a record of incidents and how they were handled, and a clear policy against harassment.\nStaff can be trained to de-escalate difficult situations. Customer terms can say what happens if a customer harasses staff.",
+      "key_points": [
+        "Check the risks regularly",
+        "Log incidents and the responses to them",
+        "Have a clear anti-harassment policy",
+        "Train staff to de-escalate, and state consequences in customer terms"
+      ]
+    },
+    {
+      "title": "Building the right culture",
+      "body": "Make it clear to everyone that harassment is unacceptable. Managers set the tone by how they listen, how they act and how they respond when a concern is raised.\nEncouraging diversity and inclusion helps people feel able to speak up.",
+      "key_points": [
+        "Everyone should understand that harassment is unacceptable",
+        "Managers set the tone for speaking up"
+      ]
+    },
+    {
+      "title": "Handling a complaint",
+      "body": "Take every complaint seriously and look into it promptly. A complaint that is ignored can lead to a formal grievance or a tribunal claim.\nHandle it through a fair and thorough process that follows the Acas disciplinary and grievance code, and check your organisation's own policy first.",
+      "key_points": [
+        "Take every complaint seriously and act promptly",
+        "Use a fair, thorough process that follows the Acas code",
+        "Check the organisation's policy first"
+      ]
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "prompt": "From 30 October 2026, what standard applies to the duty to prevent sexual harassment?",
+        "options": [
+          "Some steps",
+          "All reasonable steps",
+          "No steps are needed for small employers"
+        ],
+        "answer": 1,
+        "explanation": "From 30 October 2026 the employer must take all reasonable steps to prevent sexual harassment of workers."
+      },
+      {
+        "prompt": "Can an employer be held responsible for harassment by a customer?",
+        "options": [
+          "No, never",
+          "Yes, unless they have done everything reasonable to stop it",
+          "Only if the customer is under 18"
+        ],
+        "answer": 1,
+        "explanation": "From 30 October 2026 an employer can be held responsible for harassment by outsiders such as customers, unless they have done everything reasonable to stop it."
+      },
+      {
+        "prompt": "Does the duty apply only in the office?",
+        "options": [
+          "Yes, only on the employer's premises",
+          "No, it covers remote work, business trips and work social events",
+          "Only during core working hours"
+        ],
+        "answer": 1,
+        "explanation": "The duty reaches remote work, business trips, client visits, external training and work social events."
+      },
+      {
+        "prompt": "Which of these is a practical prevention step?",
+        "options": [
+          "Regular checks of the risks, with incidents logged",
+          "Ignoring reports to avoid gossip",
+          "Removing the anti-harassment policy"
+        ],
+        "answer": 0,
+        "explanation": "Regular risk checks and a log of incidents and responses are practical steps the duty calls for."
+      },
+      {
+        "prompt": "How should a complaint of sexual harassment be handled?",
+        "options": [
+          "Dismissed quickly if the complainant seems unreliable",
+          "Through a fair and thorough process that follows the Acas code",
+          "Only by the person complained about"
+        ],
+        "answer": 1,
+        "explanation": "A complaint should go through a fair and thorough process that follows the Acas disciplinary and grievance code."
+      }
+    ]
+  },
+  "pass_mark": 80,
+  "source_title": "Preventing harassment at work",
+  "source_publisher": "Acas",
+  "source_url": "https://www.acas.org.uk/harassment-at-work/preventing-harassment",
+  "source_updated_on": "2026-10-30",
+  "content_reviewed_on": "2026-11-07",
+  "licence_note": "Based on Acas guidance. The text here is our own summary of it, written in our own words; no Acas text is reproduced.",
+  "published": false
+}

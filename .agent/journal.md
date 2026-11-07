@@ -277,3 +277,4 @@
 2026-11-07 11:29 | Claude (Haiku) | T13.2 | course 1 of 8 written (employment-rights-essentials; source gov.uk contracts 2020-04-06); validated schema; unpublished until owner review | next course 2 employment-status (gov.uk 2015-02-12)
 2026-11-07 11:30 | Claude (Haiku) | T13.2 | course 2 of 8 employment-status (gov.uk 2015-02-12) validated | next course 3
 2026-11-07 11:30 | Claude (Haiku) | T13.2 | course 3 of 8 written (gov.uk discrimination 2015-03-04) and validated | next course 4
+2026-11-07 11:30 | Claude (Haiku) | T13.2 | course 4 of 8 written (acas preventing-harassment 2026-10-30) and validated | next course 5
