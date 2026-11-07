@@ -3884,6 +3884,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/soc/salary-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Salary Check */
+        post: operations["public_soc_salary_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/soc/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search */
+        get: operations["public_soc_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/soc/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Code Detail */
+        get: operations["public_soc_code_detail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ready": {
         parameters: {
             query?: never;
@@ -9866,6 +9917,82 @@ export interface components {
             expires_in: number;
             /** Url */
             url: string;
+        };
+        /** PublicCheckIn */
+        PublicCheckIn: {
+            /** Cos Assignment Date */
+            cos_assignment_date?: string | null;
+            /** Offered Salary */
+            offered_salary: number | string;
+            /**
+             * Salary Per
+             * @enum {string}
+             */
+            salary_per: "year" | "month" | "week" | "hour";
+            /** Soc Code */
+            soc_code: string;
+            /** Turnstile Token */
+            turnstile_token: string;
+            /** Weekly Hours */
+            weekly_hours: number | string;
+            /**
+             * Work Nation
+             * @enum {string}
+             */
+            work_nation: "England" | "Scotland" | "Wales" | "Northern Ireland";
+        };
+        /**
+         * PublicCheckOut
+         * @description The salary table for a code, and nothing about the person who asked.
+         */
+        PublicCheckOut: {
+            /** Dependants Allowed */
+            dependants_allowed: boolean;
+            /** Eligibility */
+            eligibility: string;
+            /** Going Rate */
+            going_rate: string | null;
+            /** Notes */
+            notes: string[];
+            /** Options */
+            options: components["schemas"]["OptionResult"][];
+            /**
+             * Rules Effective From
+             * Format: date
+             */
+            rules_effective_from: string;
+            /** Rules Version Name */
+            rules_version_name: string;
+            /** Soc Code */
+            soc_code: string;
+            /** Title */
+            title: string;
+            verdict: components["schemas"]["Verdict"];
+        };
+        /** PublicCodeOut */
+        PublicCodeOut: {
+            /** Code */
+            code: string;
+            /** Description */
+            description: string;
+            /** Tasks */
+            tasks: string[];
+            /** Title */
+            title: string;
+            /** Typical Titles */
+            typical_titles: string[];
+        };
+        /** PublicHitOut */
+        PublicHitOut: {
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+        };
+        /** PublicSearchOut */
+        PublicSearchOut: {
+            /** Results */
+            results: components["schemas"]["PublicHitOut"][];
         };
         /** QuestionAdminOut */
         QuestionAdminOut: {
@@ -23648,6 +23775,128 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApplyOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_soc_salary_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublicCheckIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicCheckOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_soc_search: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicSearchOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_soc_code_detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicCodeOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

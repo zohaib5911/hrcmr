@@ -117,7 +117,7 @@ class SocMatchOut(BaseModel):
     checks: list[CheckResult]  # the rules engine's answer for the top three codes
 
 
-async def _vector(request: Request, text: str) -> list[float]:
+async def query_embedding(request: Request, text: str) -> list[float]:
     """The query embedding. The local model loads on first use and is then kept on the app."""
     try:
         embed: Embedder | None = getattr(request.app.state, "soc_embedder", None)
@@ -166,7 +166,7 @@ async def search(
     title = normalise_title(q)
     if len(title) < 2:
         return SocSearchOut(results=[])
-    vector = await _vector(request, title)
+    vector = await query_embedding(request, title)
     found = await retrieve(access.db, title, vector, CANDIDATES)
     return SocSearchOut(
         results=[
@@ -197,7 +197,7 @@ async def match(body: SocMatchIn, request: Request, access: Matcher) -> SocMatch
             field="job_title",
         )
     description = normalise_title(body.job_description)[:DESCRIPTION_CHARS]
-    vector = await _vector(request, f"{title} {description}".strip())
+    vector = await query_embedding(request, f"{title} {description}".strip())
     candidates = await retrieve(access.db, title, vector, CANDIDATES)
     outcome = await rank(
         request,

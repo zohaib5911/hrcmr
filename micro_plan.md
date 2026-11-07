@@ -336,7 +336,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Steps:** 1. `/sponsorship-checker` inputs form. 2. Results page (best match card, 2 alternatives, eligibility chip, salary table, verdict, notes, disclaimer + rules version). 3. "Confirm this code" → `soc_checks` + PDF (R4) + fills posting/sponsor doc/designation SOC. 4. "Find code" embeds (posting sheet, candidate Sponsorship tab, visa form, designation); history list.
 - **Done when:** R6 spec: check → confirm → PDF downloads; disclaimer always visible.
 
-### [ ] T15.7 · S! · Daily rules watcher and super-admin diff/publish/rollback
+### [x] T15.7 · S! · Daily rules watcher and super-admin diff/publish/rollback
 - **Spec:** plan L1147–1150, L1449.
 - **Steps:** `rules_watch_daily` 07:00 (R3) using ETag/hash → imports into a **draft** via T15.2's importer; admin screen under `web/app/(admin)/platform/rules/` with diff, Publish, Rollback (Platform Admin only, audited).
 - **Done when:** unchanged pages → no new draft; publish requires platform permission (test); old checks keep their rules version.
