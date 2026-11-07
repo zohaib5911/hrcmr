@@ -256,3 +256,17 @@
 2026-11-07 03:54 | Claude | AUDIT-1 | round 1 written (1/5/1) and all 7 fixed at owner request; API 792, web unit 777, recruitment+careers e2e 5 pass; PR18 merged | next push, open fixes PR, re-audit round 2
 2026-11-07 03:58 | Claude | AUDIT-1 | round 2 written: 0/3/1 (careers read limit shared via SSR; 1 MB body limit on CV and policy/employee uploads; candidate ics lists panel emails) | next small model fixes C1.2.1 via next.sh
 2026-11-07 04:23 | Claude | AUDIT-1 | round 2 fixed (C1.2.1-4); round 3 PASS 0/0/1; API 796, web unit 777, e2e 426/1 flaky toast fixed (company.spec 15 pass) | next small model C1.3.1 then T12.1
+2026-11-07 09:54 | Claude (Haiku) | C1.3.1 | started: read ics/router/outbox; plan = organizer arg + company name via _invite_text | next edit ics.py
+2026-11-07 09:56 | Claude (Haiku) | C1.3.1 | step done: ORGANIZER from company name + sender_of address in interview_ics/_invite_text (tests: ics 3, interviews db 2, recruitment+interview set 149 pass; ruff/mypy clean) | next tick C1.3.1 and next.sh
+2026-11-07 09:56 | Claude (Haiku) | C1.3.1 | DONE: ticked in changesneeded.md (fix 25c7f7d) | next .agent/next.sh
+2026-11-07 09:58 | Claude (Haiku) | T12.1 | started: read plan 8.13/6.2/6.3/rbac/reports/seed pattern; decisions in STATUS | next step 1 organogram module + GET /organogram
+2026-11-07 10:02 | Claude (Haiku) | T12.1 | step 1+2 written: organogram models/schemas/service/router, migration 0034 (levels + FK + Director seed), signup seed, change_role validates level; ruff/mypy clean | next tests/db/test_organogram.py, run migrations+organogram+employment
+2026-11-07 10:04 | Claude (Haiku) | T12.1 | step 1+2 tests: tests/db/test_organogram.py 6 pass (tree, loop, RTW chips, level CRUD+perms, cross-company level, cross-tenant) | next migrations/rbac/openapi/employment/signup suites
+2026-11-07 10:11 | Claude (Haiku) | T12.1 | migration test table list updated (organogram_levels); targeted suites pass; odd 3-file subset errors in auth tests (order-dependent) | next full API suite in default order
+2026-11-07 10:17 | Claude (Haiku) | T12.1 | DONE: full API suite 802 pass, 0 fail; ticked in micro_plan and PROGRESS | next bash .agent/next.sh
+2026-11-07 10:17 | Claude (Haiku) | T12.2 | started: STATUS with sub-steps 1-4 | next step 1 GET /organogram.pdf (copy record_pdf.py)
+2026-11-07 10:19 | Claude (Haiku) | T12.2 | step 1 done: GET /organogram.pdf (WeasyPrint, template, audit) ; organogram 7 pass incl 60-person multi-page PDF; openapi+rbac enforcement 40 pass | next web canvas (step 2)
+2026-11-07 10:26 | Claude (Haiku) | T12.2 | step 2 written: canvas (SVG, pan/zoom/pinch, ResizeObserver fit, centreOn), list view, inspector, workspace, page; typecheck/lint/vitest 9 pass | next R6 e2e spec tests/e2e/organogram.spec.ts
+2026-11-07 10:28 | Claude (Haiku) | T12.2 | DONE: PDF + canvas + list + inspector + R6 spec (1 pass) ; unit 9 + full vitest pass; typecheck/lint pass; ticked in micro_plan and PROGRESS | next bash .agent/next.sh
+2026-11-07 10:33 | Claude (Haiku) | P12 | API full suite 803 pass; web lint+typecheck pass; screenshot spec phase12 written | next full web e2e (pnpm test:e2e) then screenshots
+2026-11-07 10:52 | Claude (Haiku) | P12 | gate: API 803 pass, web e2e 428 pass, screenshots 8 written; PROGRESS summary; ticked | next PR dev->main, wait for CI, merge when green

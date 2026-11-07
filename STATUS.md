@@ -1,36 +1,42 @@
 # STATUS
-Updated: 2026-11-07 04:23, Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: see git log
-State: HANDED OVER — audit passed (AUDIT-1 round 3: 0 P0 / 0 P1 / 1 P2); small model next
+Updated: 2026-11-07 11:30, Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: eb26aef
+
+State: IN PROGRESS
 
 ## Last completed
-- AUDIT-1: round 1 (1/5/1), round 2 (0/3/1) and round 3 (0/0/1, PASS). All P0/P1 fixed on dev; tag audit-pass-1.
-- PR #18 (Phase 11) merged to main. PR #19 (audit fixes) merges once its CI is green.
+- T12.1 — org chart tree API and hierarchy levels CRUD (eb26aef). Full API suite 802 pass.
+- C1.3.1 — interview invites carry ORGANIZER (fix 25c7f7d). AUDIT-1 PASS on round 3 (0 P0 / 0 P1).
 
 ## Current task
-- none.
+- T12.2 — Canvas, list view, unassigned section, PDF export (micro_plan.md, tier S)
+  - [ ] 1. GET /organogram.pdf (R4, WeasyPrint, multi-page) with a 60-person API test
+  - [ ] 2. web /organogram: canvas (pan drag, zoom buttons + pinch, search, inspector, visa toggle), plain SVG/CSS
+  - [ ] 3. list view toggle, unassigned section, keyboard reachable; nav entry gated by permission
+  - [ ] 4. R6 browser spec: search finds a person and opens inspector; typecheck/lint/unit checks
+- Resume note: check `git status` and the last `wip(T12.2)` commit; finish the unchecked steps in order.
 
 ## Next tasks
-- C1.3.1 (P2, small model): ORGANIZER line in interview invites (changesneeded.md).
-- Then Phase 12: T12.1, T12.2, P12.
+- P12 (Phase 12 gate, S), then Phase 13.
 
 ## Health
 - CI on dev: PR #19 re-run after the company.spec toast locator fix. CI on main: green (PR #18).
-- Local checks: API 796 pass, ruff/mypy clean; web unit 777, lint, typecheck, build, gen:api clean; company, recruitment and careers browser specs pass.
+- Local checks: T12.1 — full API suite 802 pass; ruff/mypy clean; gen:api clean.
 
 ## Issues / suggestions
 - Turnstile: production must set the site key (web) and secret (API) together; with no secret the verifier accepts any token.
 - Accepting an offer does not move the application to Offer Accepted on its own (plan silent).
 - rota.published is missing from notifications/router.py _kinds (pre-existing).
-- Pushing to dev while a gate PR runs restarts its CI; batch pushes during gates.
 - Toast text appears twice (visible + screen-reader announcer): match toasts with exact: true in browser tests.
-- AUDIT-2 should be run by a fresh session; AUDIT-1 rounds 2–3 were checked by the model that wrote the fixes.
+- ORGANIZER/ATTENDEE CN values use backslash escaping (as the attendee CN already did); RFC 5545 wants parameter values quoted. Not changed; consider later.
+- Test-order issue: running tests/db/test_employee_employment.py + tests/test_openapi.py + tests/db/test_auth_endpoints.py together gives 18 auth errors (RATE_LIMITED/CSRF assertions). The full suite in default order passes (802). Likely global state from test_openapi; not investigated.
 
 ## Strategy / decisions taken
 - Hired is set only by Convert; no stage moves into or out of Hired.
 - Interview invites: the .ics travels in the encrypted outbox payload and is attached as invite.ics; staff get the whole panel, the candidate's copy names only them (same UID).
-- Careers apply is multipart; CV (PDF/DOC/DOCX, 10 MB) via FileService.store_public (shared checks with staff uploads). Refused public CVs are not audit-logged.
-- Careers logo: has_logo + public GET /public/careers/{slug}/logo. Only the logo is rate-limited in the API; server-rendered careers pages are limited at the edge.
-- Body limits: BodyLimitMiddleware accepts whole-path regex keys; tests/test_body_limits.py guards every multipart route.
+- Organizer: company name plus the address part of sender_of(settings) (parseaddr).
+- Org chart permission: GET /organogram and GET /organogram/levels need organogram.level.read; level writes need organogram.level.write.
+- Org chart tree: current assignment = effective today (same rule as ReportsGraph); people in active or on_leave status only. A person with no manager, or whose manager is not in the tree, sits at the top under `unassigned`. People in a loop of managers are also put at the top so nobody disappears.
+- Assignments: organogram_level_id now validated against the company's levels (was refused as "not available yet"); FK added in migration 0034 with RESTRICT.
 
 ## Owner actions needed
 - Phase 23: add a Cloudflare rate-limit rule for /careers/* (the API cannot tell visitors apart on server-rendered pages).

@@ -2918,6 +2918,76 @@ export interface paths {
         patch: operations["recruitment_update_offer"];
         trace?: never;
     };
+    "/organogram": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Org Chart */
+        get: operations["organogram_org_chart"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/organogram.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Org Chart Pdf */
+        get: operations["organogram_org_chart_pdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/organogram/levels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Levels */
+        get: operations["organogram_list_levels"];
+        put?: never;
+        /** Create Level */
+        post: operations["organogram_create_level"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/organogram/levels/{level_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Level */
+        delete: operations["organogram_delete_level"];
+        options?: never;
+        head?: never;
+        /** Update Level */
+        patch: operations["organogram_update_level"];
+        trace?: never;
+    };
     "/pay-bands": {
         parameters: {
             query?: never;
@@ -7663,6 +7733,32 @@ export interface components {
              */
             tone: "formal" | "neutral" | "friendly";
         };
+        /** LevelIn */
+        LevelIn: {
+            /** Name */
+            name: string;
+            /** Rank */
+            rank?: number | null;
+        };
+        /** LevelOut */
+        LevelOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Rank */
+            rank: number;
+        };
+        /** LevelPatch */
+        LevelPatch: {
+            /** Name */
+            name?: string | null;
+            /** Rank */
+            rank?: number | null;
+        };
         /** LocationIn */
         LocationIn: {
             /** Address Line1 */
@@ -8051,6 +8147,33 @@ export interface components {
             status: "unreported" | "overdue" | "reported" | "prompt";
             /** Working Days Left */
             working_days_left: number | null;
+        };
+        /** OrgChartOut */
+        OrgChartOut: {
+            /** Rtw Visible */
+            rtw_visible: boolean;
+            /** Unassigned */
+            unassigned: components["schemas"]["OrgPerson"][];
+        };
+        /** OrgPerson */
+        OrgPerson: {
+            /** Department */
+            department: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Job Title */
+            job_title: string | null;
+            /** Level */
+            level: string | null;
+            /** Name */
+            name: string;
+            /** Reports */
+            reports: components["schemas"]["OrgPerson"][];
+            /** Rtw Status */
+            rtw_status: string | null;
         };
         /** OwnPolicy */
         OwnPolicy: {
@@ -19138,6 +19261,244 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OfferOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    organogram_org_chart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrgChartOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    organogram_org_chart_pdf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The org chart as a PDF */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/pdf": unknown;
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    organogram_list_levels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LevelOut"][];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    organogram_create_level: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LevelIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LevelOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    organogram_delete_level: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                level_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    organogram_update_level: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                level_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LevelPatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LevelOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

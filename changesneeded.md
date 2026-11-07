@@ -6,7 +6,7 @@ Round 1 (1/5/1) and round 2 (0/3/1) are fixed and ticked in git history (16184dc
 Caveat: rounds 2 and 3 were run by the same model that wrote the fixes. The guard test below makes the round 2 body-limit
 class of bug fail CI from now on.
 
-### [ ] C1.3.1 · P2 · Interview invites have no ORGANIZER (from T11.4 / C1.1.2)
+### [x] C1.3.1 · P2 · Interview invites have no ORGANIZER (from T11.4 / C1.1.2) — fixed in 25c7f7d
 - **Problem:** `interview_ics` (`api/app/modules/recruitment/ics.py`) writes `METHOD:REQUEST` with no `ORGANIZER` line. RFC 5546 requires an organizer on a REQUEST, so some clients (notably Outlook) show the e-mailed invite as a plain attachment instead of an Accept/Decline invite.
 - **Fix:** add an `organizer: tuple[str, str]` argument (name, e-mail) to `interview_ics` and write `ORGANIZER;CN=<name>:mailto:<address>` after `DTSTAMP` (escaped like the attendee CN). In `_invite_text` (`api/app/modules/recruitment/router.py`), pass the company name and the sending address from `sender_of(request.app.state.settings)` (`app/modules/email/outbox.py`); use only the address part if it has a display name.
 - **Done when:** `tests/test_interview_ics.py` asserts the `ORGANIZER` line; `tests/db/test_interviews.py` still passes.

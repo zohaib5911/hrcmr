@@ -50,9 +50,11 @@ def interview_ics(
     location: str,
     description: str,
     attendees: list[tuple[str, str]],
+    organizer: tuple[str, str],
     stamp: datetime,
 ) -> str:
-    """One VEVENT in a VCALENDAR. ``attendees`` are (name, email) pairs."""
+    """One VEVENT in a VCALENDAR. ``attendees`` and ``organizer`` are (name, email) pairs."""
+    organizer_name, organizer_email = organizer
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
@@ -62,6 +64,7 @@ def interview_ics(
         "BEGIN:VEVENT",
         f"UID:{_escape(uid)}",
         f"DTSTAMP:{_stamp(stamp)}",
+        f"ORGANIZER;CN={_escape(organizer_name)}:mailto:{organizer_email}",
         f"DTSTART:{_stamp(starts)}",
         f"DTEND:{_stamp(starts + timedelta(minutes=duration_minutes))}",
         f"SUMMARY:{_escape(summary)}",

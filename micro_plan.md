@@ -207,14 +207,14 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 12 — Org chart
 
-### [ ] T12.1 · S · Tree API and hierarchy levels
+### [x] T12.1 · S · Tree API and hierarchy levels
 - **Spec:** plan L1001–1011, L1425; API item 16 (L1628).
 - **Steps:**
   1. `GET /organogram`: tree from Reporting Authority on **current** assignments; people without a manager under `unassigned`; cycle-safe (test a cycle doesn't hang). Visa/RTW chips only if the user has `employee.rtw.read`.
   2. Hierarchy levels CRUD (ordered list, default "Director"), labels only.
 - **Done when:** tree matches a seeded 3-level fixture; cycle test passes; cross-tenant isolation test.
 
-### [ ] T12.2 · S · Canvas, list view, unassigned section, PDF export
+### [x] T12.2 · S · Canvas, list view, unassigned section, PDF export
 - **Spec:** plan L1003–1010, L1426.
 - **Steps:**
   1. `/organogram` canvas: pan by drag, zoom buttons + pinch, search jumps to a name, click opens inspector, "Show visa status" toggle. Build with plain SVG/CSS transforms (no new library).
@@ -222,7 +222,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   3. `GET /organogram.pdf` (R4), multi-page for large teams.
 - **Done when:** R6 spec: search finds a person and opens inspector; PDF endpoint returns a PDF for a 60-person fixture.
 
-### [ ] P12 · S · Phase 12 gate
+### [x] P12 · S · Phase 12 gate
 - Recipe R7.
 
 ---

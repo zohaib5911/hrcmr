@@ -39,6 +39,7 @@ from app.modules.employees.models import (
 )
 from app.modules.employees.router import _employee as reachable_employee
 from app.modules.employees.schemas import twelve_months_from
+from app.modules.organogram.models import OrganogramLevel
 from app.modules.rbac.deps import Access, require
 from app.modules.work_log.models import WorkLogEntry
 
@@ -172,9 +173,18 @@ async def change_role(employee_id: uuid.UUID, body: AssignmentIn, access: Writes
     employee = await _locked_employee(access, employee_id)
     if body.effective_from < employee.hire_date:
         raise ConflictError("The role cannot start before the hire date.", field="effective_from")
-    # Hierarchy levels are introduced in T12.1. Never accept an unvalidated identifier.
+    # Never accept an unvalidated identifier: the level must be one of this company's.
     if body.organogram_level_id is not None:
-        raise ConflictError("Hierarchy levels are not available yet.", field="organogram_level_id")
+        level = (
+            await access.db.execute(
+                select(OrganogramLevel.id).where(
+                    OrganogramLevel.id == body.organogram_level_id,
+                    OrganogramLevel.company_id == access.company_id,
+                )
+            )
+        ).scalar_one_or_none()
+        if level is None:
+            raise NotFoundError
     for model, ident in (
         (Department, body.department_id),
         (Designation, body.designation_id),
