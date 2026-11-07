@@ -349,3 +349,4 @@
 2026-11-08 04:07 | Claude (Haiku) | P15 | gate: phase 15 screenshots (12 files in docs/screenshots/phase-15), a11y fixes (scrollable tables focusable; empty option lists say so); next: full API suite then web suites, then PR
 2026-11-08 04:17 | Claude (Haiku) | P15 | full API suite: 1199 passed, 1 failed (RBAC guard: public SOC prefix not on the reviewed list); fixed by adding /api/v1/public/soc/ to the reviewed list; re-running full suite | next: full API suite, web e2e, PR
 2026-11-08 04:24 | Claude (Haiku) | P15 | full API suite green (1200 passed) after the RBAC allowlist fix; running full web e2e
+2026-11-08 04:41 | Claude (Haiku) | P15 | full web e2e run 1: 432 passed, 184 skipped, 1 failed (shell spec: sidebar page heading must match its nav label); fixed heading to 'Sponsorship checker'; re-running full e2e

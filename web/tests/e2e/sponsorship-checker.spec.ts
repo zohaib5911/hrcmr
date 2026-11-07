@@ -5,7 +5,7 @@ const DISCLAIMER = "General guidance, not legal or immigration advice.";
 
 test("check a job, confirm the code and download the PDF report", async ({ page }) => {
   await page.goto("/sponsorship-checker");
-  await expect(page.getByRole("heading", { name: "Sponsorship job checker" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sponsorship checker" })).toBeVisible();
   await expect(page.getByText(DISCLAIMER).first()).toBeVisible();
 
   await page.waitForLoadState("networkidle");

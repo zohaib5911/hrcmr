@@ -164,7 +164,7 @@ export function SponsorshipChecker({ embedded = false, onConfirmed }: Props = {}
     <>
       {embedded ? null : (
         <PageHeader
-          title="Sponsorship job checker"
+          title="Sponsorship checker"
           description="Check whether a job can be sponsored, find its occupation code and test the salary."
         />
       )}

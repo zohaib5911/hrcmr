@@ -36,7 +36,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         test.setTimeout(180_000);
         await page.setViewportSize({ width, height: 900 });
         await page.goto("/sponsorship-checker");
-        await expect(page.getByRole("heading", { name: "Sponsorship job checker" })).toBeVisible();
+        await expect(page.getByRole("heading", { name: "Sponsorship checker" })).toBeVisible();
         await page.waitForLoadState("networkidle");
         await shoot(page, `checker-empty-${colorScheme}-${width}`);
 
