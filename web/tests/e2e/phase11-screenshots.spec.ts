@@ -118,7 +118,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         await expect(page.getByText(title, { exact: true }).first()).toBeVisible();
         await shoot(page, `recruitment-requisitions-${suffix}`);
         await page.getByRole("tab", { name: /^Postings/ }).click();
-        await expect(page.getByRole("cell", { name: title, exact: true }).first()).toBeVisible();
+        await expect(page.getByText(title, { exact: true }).first()).toBeVisible();
         await shoot(page, `recruitment-postings-${suffix}`);
         await page.getByRole("tab", { name: /^Candidates/ }).click();
         await expect(page.getByText(`Priya Shah${width}`, { exact: true })).toBeVisible();
