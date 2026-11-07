@@ -114,7 +114,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 10 — Documents, policies and reports (finish)
 
-### [ ] T10.3 · S! · Policies and sign-offs (finish; steps 1–4 already done by Codex)
+### [x] T10.3 · S! · Policies and sign-offs (finish; steps 1–4 already done by Codex)
 - **Spec:** plan L945–955 (8.10 policies + My Documents), L1414, API §11 item 14 (L1624).
 - **Copy:** `api/app/modules/policies/*` (already built), `api/app/jobs/compliance.py`, `web/components/documents/`, `web/app/(app)/my-documents/page.tsx`.
 - **Steps:**
