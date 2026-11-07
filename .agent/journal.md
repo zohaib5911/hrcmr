@@ -270,3 +270,4 @@
 2026-11-07 10:28 | Claude (Haiku) | T12.2 | DONE: PDF + canvas + list + inspector + R6 spec (1 pass) ; unit 9 + full vitest pass; typecheck/lint pass; ticked in micro_plan and PROGRESS | next bash .agent/next.sh
 2026-11-07 10:33 | Claude (Haiku) | P12 | API full suite 803 pass; web lint+typecheck pass; screenshot spec phase12 written | next full web e2e (pnpm test:e2e) then screenshots
 2026-11-07 10:52 | Claude (Haiku) | P12 | gate: API 803 pass, web e2e 428 pass, screenshots 8 written; PROGRESS summary; ticked | next PR dev->main, wait for CI, merge when green
+2026-11-07 11:13 | Claude (Haiku) | T13.1 | started after P12 merged (PR 20); STATUS updated | next read plan L1012-1029 and build course model
