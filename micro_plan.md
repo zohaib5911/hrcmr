@@ -214,7 +214,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
   2. Hierarchy levels CRUD (ordered list, default "Director"), labels only.
 - **Done when:** tree matches a seeded 3-level fixture; cycle test passes; cross-tenant isolation test.
 
-### [ ] T12.2 · S · Canvas, list view, unassigned section, PDF export
+### [x] T12.2 · S · Canvas, list view, unassigned section, PDF export
 - **Spec:** plan L1003–1010, L1426.
 - **Steps:**
   1. `/organogram` canvas: pan by drag, zoom buttons + pinch, search jumps to a name, click opens inspector, "Show visa status" toggle. Build with plain SVG/CSS transforms (no new library).

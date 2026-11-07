@@ -267,3 +267,4 @@
 2026-11-07 10:17 | Claude (Haiku) | T12.2 | started: STATUS with sub-steps 1-4 | next step 1 GET /organogram.pdf (copy record_pdf.py)
 2026-11-07 10:19 | Claude (Haiku) | T12.2 | step 1 done: GET /organogram.pdf (WeasyPrint, template, audit) ; organogram 7 pass incl 60-person multi-page PDF; openapi+rbac enforcement 40 pass | next web canvas (step 2)
 2026-11-07 10:26 | Claude (Haiku) | T12.2 | step 2 written: canvas (SVG, pan/zoom/pinch, ResizeObserver fit, centreOn), list view, inspector, workspace, page; typecheck/lint/vitest 9 pass | next R6 e2e spec tests/e2e/organogram.spec.ts
+2026-11-07 10:28 | Claude (Haiku) | T12.2 | DONE: PDF + canvas + list + inspector + R6 spec (1 pass) ; unit 9 + full vitest pass; typecheck/lint pass; ticked in micro_plan and PROGRESS | next bash .agent/next.sh
