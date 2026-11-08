@@ -1,7 +1,7 @@
 # STATUS
-Updated: 2026-11-08 09:30 (Europe/London)    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: see git log
+Updated: 2026-11-08 (Europe/London)    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: see git log
 
-State: BLOCKED — owner action (Stripe test keys in `.env` for the P16 Stripe test-mode E2E)
+State: HANDED OVER — small model next (P16 R7 step 4: PR dev → main)
 
 ## Last completed
 - P16 gate, partly — R7 steps 1–3 done (API 1254, web lint/typecheck/unit 786, full web e2e 436 passed; 16/16 screenshots; PROGRESS summary written). Gate tick and PR held.
@@ -18,12 +18,13 @@ State: BLOCKED — owner action (Stripe test keys in `.env` for the P16 Stripe t
   - [x] R7 step 1b: web lint (0 warnings), typecheck clean, unit 786 passed; full web e2e 436 passed, 200 skipped, exit 0
   - [x] R7 step 2: screenshots docs/screenshots/phase-16/ — 16 of 16
   - [x] R7 step 3: phase summary in PROGRESS.md (heading + 4 bullets, with the open item)
-  - [ ] R7 step 4: PR dev → main — held until the Stripe E2E passes (gate incomplete)
-  - [ ] Stripe test-mode E2E (both plans, refund, cancel, failed payment, webhook replay) — BLOCKED: no Stripe test keys (no `.env`; STRIPE_* not set in the environment)
-- Resume note: all local P16 checks are green. Only the Stripe test-mode E2E remains. When the owner adds the keys to `.env`, run the Stripe E2E (both plans, refund, cancel, failed payment, webhook replay, using `stripe listen` for the webhook secret). Then tick P16 in micro_plan.md and PROGRESS.md, rewrite STATUS, and open the PR dev → main (`gh pr create --base main --head dev`), wait for checks, and merge only when green.
+  - [ ] R7 step 4: PR dev → main, wait for checks, merge when green   <- here
+  - [~] Stripe test-mode E2E — PARKED in `leftover.md` L1 (owner has no test keys yet)
+- Resume note: open the PR (`gh pr create --base main --head dev`), `gh pr checks <n> --watch`, merge only when all green (R7), then tick P16 in micro_plan.md + PROGRESS.md and go on to T17.1. Stripe E2E is not part of this anymore (leftover.md L1).
 
 ## Next tasks
-- P16: Stripe E2E (owner keys), then gate tick and PR.
+- P16: PR dev → main and tick.
+- leftover.md L1 (Stripe E2E) when the owner has test keys; before Phase 23.
 - P17 (after P16 gate): T17.1 (S!) platform admin auth and admin host routing.
 
 ## Health
@@ -44,9 +45,9 @@ State: BLOCKED — owner action (Stripe test keys in `.env` for the P16 Stripe t
 ## Strategy / decisions taken
 - (T16.6) Only `deletion_code` moved to the app mailer (sent after commit). The other three deletion notices stay as outbox rows in the same transaction: they are notices, not a way in, so a minute's delay is fine and they commit atomically with the state change.
 - (P16) Stripe E2E is not faked: stays BLOCKED until the owner's test keys exist. No mocked run is counted as the test-mode E2E.
-- (P16) The PR dev → main is not opened until the gate is complete (Stripe E2E), so the gate is not merged half-done.
+- (P16, owner 2026-11-08) Owner has no Stripe test keys: the Stripe E2E is parked in `leftover.md` (L1) and the P16 gate continues without it.
 - (P16) Heading fix: page-level cards use `headingLevel={2}` (existing convention); cards inside the "Choose a plan" h2 section keep h3.
 
 ## Owner actions needed
-- Add Stripe **test-mode** keys to `.env` (there is no `.env` in the repo yet; copy `.env.example`): STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_PRICE_ANNUAL, STRIPE_PRICE_TEN_YEAR (names in deployment-requirements.txt). Paste the values into the file yourself, not into chat. Then type "Read AGENTS.md and continue" in a small model.
+- When you have Stripe test keys: put them in `.env` (names in leftover.md L1) and tell an agent to do leftover.md L1. Not blocking.
 - Confirm (from T16.3/T16.4): 10-year plans cannot be cancelled in-app after 14 days; bank numbers and sort codes are left out of the export; the export e-mail link needs a signed-in session.

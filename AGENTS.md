@@ -33,6 +33,7 @@ If you are cut off by a usage limit before you can stop, that's fine: the owner 
 ## Source of truth
 - `micro_plan.md`: **the task list and steps** for all remaining work (T10.3 onward). Work through it top to bottom.
 - `changesneeded.md`: fixes from the last audit. **Always done before** new `micro_plan.md` tasks. Tick each item (`### [x]`) with its fix commit.
+- `leftover.md`: work parked until the owner supplies something (e.g. keys). Don't block on it; must be done before Phase 23.
 - `audit.md`: instructions for the auditor (big model) only. Small models don't read it.
 - `plan.md`: the full **spec** (behaviour, rules, data). Read only the lines a `micro_plan.md` block cites. If it conflicts with `micro_plan.md` on behaviour, `plan.md` wins: note it in STATUS.
 - `deployment-requirements.txt`: accounts, keys and env var names.

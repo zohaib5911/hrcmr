@@ -377,7 +377,8 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Done when:** `account-deletion.spec.ts` passes (code arrives, confirm, scheduled date, withdraw); `tests/db/test_deletion.py` and the email/guards suites pass. No skip, no weakened assertion.
 
 ### [ ] P16 · S · Phase 16 gate
-- Recipe R7 + Stripe test-mode E2E (both plans, refund, cancel, failed payment, webhook replay). Needs owner's Stripe **test** keys in `.env`; if missing → BLOCKED with owner action.
+- Recipe R7. **Stripe test-mode E2E is parked in `leftover.md` (L1)** — owner has no test keys yet; do not block on it.
+- Already done (2026-11-08): R7 steps 1–3 (API 1254, web lint/typecheck/unit 786, web e2e 436, screenshots 16/16, PROGRESS summary). **Left:** R7 step 4 — PR `dev → main`, wait for checks, merge when green, then tick P16.
 
 ---
 
