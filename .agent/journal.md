@@ -432,3 +432,4 @@
 2026-11-09 01:29 | Claude (Haiku) | AUDIT-3 | C3.1.12 done: support admin cannot lock a platform admin (403, owner can); test_a_support_admin_cannot_lock_a_platform_admin...; platform_admin 8 pass | next C3.1.16 (code_hash in exports), then C3.1.13 (watcher URLs)
 2026-11-09 01:30 | Claude (Haiku) | AUDIT-3 | C3.1.16 done: code_hash in NEVER_EXPORTED + every tables/*.csv header checked; test_exports 3 pass | next C3.1.13 (watcher fetches only PAGE_URLS)
 2026-11-09 01:31 | Claude (Haiku) | AUDIT-3 | C3.1.13 done: watch fetches PAGE_URLS only, stored URLs compared first (fetch_failed, no request); test_rules_watch 4 pass | next C3.1.14 (comp alert on billing page), C3.1.11 (export card), C3.1.15 (admin token)
+2026-11-09 01:33 | Claude (Haiku) | AUDIT-3 | C3.1.14 done: billing page shows Complimentary access until <date> when comp_until is in the future; billing-page.test 2 pass; lint/typecheck clean | next C3.1.15 (admin red token), then C3.1.11 (export card)

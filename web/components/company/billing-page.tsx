@@ -191,6 +191,11 @@ export function BillingPage({
           You can cancel until {onDay(billing.cooling_off_ends_at)} for a full refund.
         </Alert>
       ) : null}
+      {before(billing.comp_until, moment) ? (
+        <Alert tone="info" title="Complimentary access">
+          Complimentary access until {onDay(billing.comp_until)}.
+        </Alert>
+      ) : null}
 
       <Card>
         <CardHeader title="Your plan" headingLevel={2} />

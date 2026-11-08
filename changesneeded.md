@@ -78,7 +78,7 @@ Each screen needs loading, empty and error states, works at 360 px and in dark m
 - **Fix:** in `router.py` `lock_user`, if the target user has a `platform_admins` row and the caller is not an owner (`_is_owner(access)`), raise `ForbiddenError("Only an owner can lock a platform admin.")`.
 - **Done when:** test in `api/tests/db/test_platform_admin.py`: support admin locking an owner → 403 and the owner stays active; owner locking a support admin → 200.
 
-### [ ] C3.1.13 · P2 · The rules watcher fetches whatever URLs the live version stored (from T15.7)
+### [x] C3.1.13 · P2 · The rules watcher fetches whatever URLs the live version stored (from T15.7) — fixed in c8b1719
 - **Problem:** `api/app/modules/soc_rules/watch.py` line ~53 takes the URLs from `live.source_urls` in the database. Only `PAGE_URLS` (www.gov.uk) should ever be fetched (SSRF rule).
 - **Fix:** fetch `PAGE_URLS[kind]` from `soc_rules/source.py` instead; still compare against the stored list and return `fetch_failed` if a stored URL differs.
 - **Done when:** a test in the watcher's test file: a live version whose `source_urls` names another host → `fetch_failed` and no request is sent (use the existing fake client).
