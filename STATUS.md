@@ -1,8 +1,9 @@
 # STATUS
 Updated: 2026-11-09 (Europe/London)    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: 55153b7
-State: IN PROGRESS — AUDIT-3 round 1 (scope audit-pass-2..55153b7)
+State: HANDED OVER — audit fixes ready (AUDIT-3 round 1: 0 P0 / 10 P1 / 6 P2)
 
 ## Last completed
+- AUDIT-3 round 1 (Opus) — api 1319 pass, web unit 802, e2e 437 (200 skipped), all lint/types/build clean, CI green. FIX NEEDED: 10 P1 (admin screens never built; 10-year platform refund; session start IP), 6 P2.
 - P17 gate (R7) — PR #26 dev -> main merged (merge commit 38537c1) after all 12 checks were green on 2ec407e. API full 1319 pass, web unit 802 pass, web e2e 437 pass (200 screenshot-only skipped). Phase 17 summary in PROGRESS.md. Screenshots parked as leftover.md L2.
 - T17.6 — Jobs dashboard, platform audit log, rules screens, retry from an allow-list (Haiku). Register status moved to T20.5. Migrations 0055, 0056.
 - T17.5 — Terms publish (owner), feature flags, announcement banners, dossier links and courses reused; templates and guides moved to T19.17 and T19.16. Migrations 0052–0054.
@@ -12,8 +13,8 @@ State: IN PROGRESS — AUDIT-3 round 1 (scope audit-pass-2..55153b7)
 - T17.1 — Platform admin auth and admin host routing (Haiku).
 
 ## Current task
-- None. The next block is AUDIT-3 (B, big model only). A small model stops here.
-- Resume note: a big model (Opus / Solo 6.1) runs `audit.md` for AUDIT-3 (covers T15.1 → P17), writes the fixes into `changesneeded.md`, then hands back. Start from `bash .agent/next.sh`.
+- None. AUDIT-3 round 1 written to changesneeded.md (C3.1.1 to C3.1.16). Small models fix them top to bottom, ticking each, then stop with BLOCKED — re-audit requested.
+- Resume note: run `bash .agent/next.sh`; it prints C3.1.1 first.
 
 ## Next tasks
 - AUDIT-3 (big model), then the fixes in `changesneeded.md`, then the next micro_plan block.

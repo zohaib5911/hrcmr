@@ -422,6 +422,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T17.5** Content tools and feature flags — 2026-11-08. Terms version publish (owner only, forces re-acceptance); feature flags; announcement banners per region (API and app banner); dossier links and courses reused. Templates and guides are repo content: listing in T19.17, guides in T19.16 (owner answers 1–2). Migrations 0052–0054.
 - [x] **T17.6** Jobs dashboard, register status, rules data screens, platform audit log — 2026-11-08. Platform audit log with CSV export (migration 0055); job dashboard with queue depth and failures; retry from an allow-list (`app/jobs/rerun.py`, migration 0056); rules screens from T15.7. Register status moved to T20.5 (owner answer 4). Tests: platform audit log 3, platform jobs 7.
 - [ ] **Phase 17 gate**
+- AUDIT-3 round 1: 0/10/6 (P0/P1/P2) — FIX NEEDED. Admin screens missing (API only), 10-year platform refund leaves the plan on, session start sees the server IP. api 1319, web unit 802, e2e 437 pass.
 
 ### Phase 18 — Public marketing site
 - [ ] **T18.1** Home, Features, Pricing, Security, About, Contact, Accessibility, Careers, Sponsor compliance
