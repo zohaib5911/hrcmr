@@ -6,10 +6,15 @@ State: IN PROGRESS
 - T16.1 — Stripe integration and webhooks: client (api/app/integrations/stripe.py), migration 0044 (subscriptions, stripe_events), billing router (GET subscription, checkout, portal), POST /webhooks/stripe. Tests 13 pure + 6 DB pass.
 
 ## Current task
-- T16.2 — Entitlements and payment-failed grace (B). Not started.
+- T16.2 — Entitlements and payment-failed grace (B)
+  - [ ] 1. entitlements: is_entitled (annual by status, 10-year by end date, past_due within 7-day grace); 402 PLAN_REQUIRED gate in rbac require() for writes
+  - [ ] 2. migration 0045: companies.payment_grace_ends_at; webhook sets it on first invoice.payment_failed, clears it when paid; e-mail + notification to company admins
+  - [ ] 3. tests: pure entitlement rules, DB gate + grace; existing test companies made paid (two_companies), e2e helper marks accounts paid
+  - [ ] 4. full API suite; affected e2e specs
+- Resume note: see .agent/journal.md last line.
 
 ## Next tasks
-- T16.2 (B), T16.3 (S!), T16.4 (S!), T16.5 (B), P16
+- T16.3 (S!), T16.4 (S!), T16.5 (B), P16
 
 ## Health
 - CI on dev: PR 23 (Phase 15) re-running after the status push; merges when green    CI on main: green (PR #22)
