@@ -29,6 +29,8 @@ INPUT_LABELS = (
     ("cos_assignment_date", "Certificate of Sponsorship assignment date"),
     ("situation", "Applicant situation"),
 )
+# A constant template; every value is escaped (autoescape), and WeasyPrint fetches no resources.
+# nosemgrep: python.flask.security.xss.audit.direct-use-of-jinja2.direct-use-of-jinja2
 TEMPLATE = Environment(autoescape=True).from_string(
     """<!doctype html>
 <html lang="en-GB">

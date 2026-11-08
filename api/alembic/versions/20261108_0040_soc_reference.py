@@ -88,9 +88,13 @@ def upgrade() -> None:
 
     # Global reference data, like courses: every company may read it, nobody but the owner writes it.
     # The grant is SELECT only; the policy and the grant together keep app_user read-only.
+    # The table is one of the two names in this tuple, never input, and these are DDL statements.
     for table in ("soc_unit_groups", "soc_index_entries"):
+        # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
         op.execute(f"GRANT SELECT ON {table} TO app_user")
+        # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
         op.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
+        # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
         op.execute(f"CREATE POLICY {table}_read ON {table} FOR SELECT TO app_user USING (true)")
 
 

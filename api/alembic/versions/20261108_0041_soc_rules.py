@@ -182,10 +182,14 @@ def upgrade() -> None:
     )
 
     # Global reference data, like soc_unit_groups: every company may read it, only the owner writes.
+    # The table is one of the names in TABLES, never input, and these are DDL statements.
     for table in TABLES:
         add_updated_at_trigger(table)
+        # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
         op.execute(f"GRANT SELECT ON {table} TO app_user")
+        # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
         op.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
+        # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
         op.execute(f"CREATE POLICY {table}_read ON {table} FOR SELECT TO app_user USING (true)")
 
 

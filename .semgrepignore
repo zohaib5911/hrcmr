@@ -1,0 +1,11 @@
+# Saved GOV.UK pages, kept byte for byte for provenance: their SHA-256 is in the sidecar files and
+# the rules importer refuses a changed page. They are data, not code, and the links are the publisher's.
+data/raw/
+
+# Semgrep's own defaults, kept so test code and dependencies stay out of the scan as before this file
+# existed (a .semgrepignore replaces the defaults, so they are listed here).
+.*
+node_modules/
+*.min.js
+**/tests/
+**/test/
