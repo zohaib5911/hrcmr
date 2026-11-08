@@ -16,10 +16,12 @@ from sqlalchemy import select
 
 from app.core.errors import AppError, ForbiddenError
 from app.modules.identity.models import PlatformAdmin
-from app.modules.platform_admin import billing, companies, metrics, users
+from app.modules.platform_admin import billing, companies, metrics, queues, users
 from app.modules.platform_admin.schemas import (
     CompaniesOut,
     CompanyDetailOut,
+    DataExportsOut,
+    DeletionRequestsOut,
     ExtendIn,
     MetricsOut,
     OptionalReasonIn,
@@ -171,6 +173,29 @@ async def issue_refund(body: RefundIn, request: Request, access: Refunder) -> Re
         subscription=await billing.row_for(access.db, subscription),
         stripe_refund_id=refund_id,
     )
+
+
+@router.get("/platform/deletion-requests", response_model=DeletionRequestsOut)
+async def list_deletion_requests(
+    access: Reader,
+    status: Annotated[
+        str | None,
+        Query(pattern="^(awaiting_code|scheduled|withdrawn|completed)$"),
+    ] = None,
+    limit: Annotated[int, Query(ge=1, le=queues.PAGE_MAX)] = 50,
+    offset: Annotated[int, Query(ge=0, le=100_000)] = 0,
+) -> DeletionRequestsOut:
+    return await queues.deletion_requests(access.db, status=status, limit=limit, offset=offset)
+
+
+@router.get("/platform/data-exports", response_model=DataExportsOut)
+async def list_data_exports(
+    access: Reader,
+    status: Annotated[str | None, Query(pattern="^(queued|ready|failed)$")] = None,
+    limit: Annotated[int, Query(ge=1, le=queues.PAGE_MAX)] = 50,
+    offset: Annotated[int, Query(ge=0, le=100_000)] = 0,
+) -> DataExportsOut:
+    return await queues.data_exports(access.db, status=status, limit=limit, offset=offset)
 
 
 @router.get("/platform/users", response_model=UsersOut)

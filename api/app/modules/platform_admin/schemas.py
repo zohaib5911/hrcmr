@@ -139,3 +139,36 @@ class RefundIn(RequestModel):
 class RefundOut(BaseModel):
     subscription: SubscriptionRow
     stripe_refund_id: str
+
+
+class DeletionRequestRow(BaseModel):
+    id: uuid.UUID
+    company_id: uuid.UUID
+    company_name: str
+    status: str  # awaiting_code | scheduled | withdrawn | completed
+    requested_at: datetime
+    scheduled_for: datetime | None
+    withdrawn_at: datetime | None
+    completed_at: datetime | None
+    export_requested: bool
+
+
+class DeletionRequestsOut(BaseModel):
+    items: list[DeletionRequestRow]
+    total: int
+
+
+class DataExportRow(BaseModel):
+    id: uuid.UUID
+    company_id: uuid.UUID
+    company_name: str
+    status: str  # queued | ready | failed
+    requested_at: datetime
+    finished_at: datetime | None
+    expires_at: datetime | None
+    error_code: str | None
+
+
+class DataExportsOut(BaseModel):
+    items: list[DataExportRow]
+    total: int

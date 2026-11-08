@@ -3733,6 +3733,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/data-exports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Data Exports */
+        get: operations["platform_admin_list_data_exports"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/deletion-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Deletion Requests */
+        get: operations["platform_admin_list_deletion_requests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/platform/impersonation/{support_id}/end": {
         parameters: {
             query?: never;
@@ -7896,6 +7930,41 @@ export interface components {
             /** Status Line */
             status_line: string;
         };
+        /** DataExportRow */
+        DataExportRow: {
+            /**
+             * Company Id
+             * Format: uuid
+             */
+            company_id: string;
+            /** Company Name */
+            company_name: string;
+            /** Error Code */
+            error_code: string | null;
+            /** Expires At */
+            expires_at: string | null;
+            /** Finished At */
+            finished_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Requested At
+             * Format: date-time
+             */
+            requested_at: string;
+            /** Status */
+            status: string;
+        };
+        /** DataExportsOut */
+        DataExportsOut: {
+            /** Items */
+            items: components["schemas"]["DataExportRow"][];
+            /** Total */
+            total: number;
+        };
         /** DayOffPatternIn */
         DayOffPatternIn: {
             /**
@@ -8001,6 +8070,43 @@ export interface components {
              * @enum {string}
              */
             status: "awaiting_code" | "scheduled";
+        };
+        /** DeletionRequestRow */
+        DeletionRequestRow: {
+            /**
+             * Company Id
+             * Format: uuid
+             */
+            company_id: string;
+            /** Company Name */
+            company_name: string;
+            /** Completed At */
+            completed_at: string | null;
+            /** Export Requested */
+            export_requested: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Requested At
+             * Format: date-time
+             */
+            requested_at: string;
+            /** Scheduled For */
+            scheduled_for: string | null;
+            /** Status */
+            status: string;
+            /** Withdrawn At */
+            withdrawn_at: string | null;
+        };
+        /** DeletionRequestsOut */
+        DeletionRequestsOut: {
+            /** Items */
+            items: components["schemas"]["DeletionRequestRow"][];
+            /** Total */
+            total: number;
         };
         /** DepartmentIn */
         DepartmentIn: {
@@ -24262,6 +24368,90 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CompanyDetailOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_admin_list_data_exports: {
+        parameters: {
+            query?: {
+                status?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DataExportsOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_admin_list_deletion_requests: {
+        parameters: {
+            query?: {
+                status?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionRequestsOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

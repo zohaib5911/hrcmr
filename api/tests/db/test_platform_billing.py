@@ -9,6 +9,7 @@ database, as the webhook would have written them."""
 from __future__ import annotations
 
 import uuid
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import httpx
@@ -247,3 +248,86 @@ async def test_payments_not_set_up_refuse_the_refund(rig: dict[str, Any]) -> Non
     assert made.status_code == 503, made.text
     assert made.json()["error"]["code"] == "PAYMENTS_NOT_SET_UP"
     assert await _refunded_at(rig, row) is None
+
+
+async def _user_id(admin: Any) -> uuid.UUID:
+    return uuid.UUID((await admin.get(f"{API}/auth/me")).json()["user"]["id"])
+
+
+async def _seed_deletion(
+    rig: dict[str, Any], company: uuid.UUID, *, confirmed: bool = False, withdrawn: bool = False
+) -> None:
+    now = datetime.now(UTC)
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text(
+                "insert into deletion_requests (id, company_id, confirmed_at, scheduled_for, "
+                "withdrawn_at, code_hash) values (:i, :c, :confirmed, :scheduled, :withdrawn, "
+                ":hash)"
+            ),
+            {
+                "i": uuid.uuid4(),
+                "c": company,
+                "confirmed": now if confirmed else None,
+                "scheduled": now + timedelta(days=7) if confirmed else None,
+                "withdrawn": now if withdrawn else None,
+                "hash": "a" * 64,
+            },
+        )
+
+
+async def _seed_export(
+    rig: dict[str, Any], company: uuid.UUID, requested_by: uuid.UUID, *, status: str
+) -> None:
+    failed = status == "failed"
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text(
+                "insert into data_exports (id, company_id, requested_by, status, finished_at, "
+                "error_code) values (:i, :c, :u, :s, :f, :e)"
+            ),
+            {
+                "i": uuid.uuid4(),
+                "c": company,
+                "u": requested_by,
+                "s": status,
+                "f": datetime.now(UTC) if status != "queued" else None,
+                "e": "EXPORT_FAILED" if failed else None,
+            },
+        )
+
+
+async def test_only_a_platform_admin_reads_the_queues(rig: dict[str, Any]) -> None:
+    company_admin = await rig["person"]("company_admin", rig["a"])
+    for path in ("/platform/deletion-requests", "/platform/data-exports"):
+        assert (await company_admin.get(f"{API}{path}")).status_code == 403
+
+
+async def test_the_deletion_queue_shows_each_status_and_never_the_code(rig: dict[str, Any]) -> None:
+    await _seed_deletion(rig, rig["a"], confirmed=True)
+    await _seed_deletion(rig, rig["b"], withdrawn=True)
+    admin = await _platform_admin(rig, "support")
+    everything = await admin.get(f"{API}/platform/deletion-requests")
+    assert everything.status_code == 200, everything.text
+    assert everything.json()["total"] == 2
+    assert "code_hash" not in everything.text
+    assert "a" * 64 not in everything.text
+    statuses = {item["status"] for item in everything.json()["items"]}
+    assert statuses == {"scheduled", "withdrawn"}
+    scheduled = (await admin.get(f"{API}/platform/deletion-requests?status=scheduled")).json()
+    assert [item["company_id"] for item in scheduled["items"]] == [str(rig["a"])]
+    assert scheduled["items"][0]["scheduled_for"] is not None
+
+
+async def test_the_export_queue_shows_each_status(rig: dict[str, Any]) -> None:
+    admin = await _platform_admin(rig, "owner")
+    user = await _user_id(admin)
+    await _seed_export(rig, rig["a"], user, status="queued")
+    await _seed_export(rig, rig["b"], user, status="failed")
+    everything = (await admin.get(f"{API}/platform/data-exports")).json()
+    assert everything["total"] == 2
+    failed = (await admin.get(f"{API}/platform/data-exports?status=failed")).json()
+    assert [item["error_code"] for item in failed["items"]] == ["EXPORT_FAILED"]
+    assert failed["items"][0]["company_id"] == str(rig["b"])
+    queued = (await admin.get(f"{API}/platform/data-exports?status=queued")).json()
+    assert [item["status"] for item in queued["items"]] == ["queued"]
