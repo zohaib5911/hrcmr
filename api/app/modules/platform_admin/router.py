@@ -16,10 +16,13 @@ from sqlalchemy import select
 
 from app.core.errors import AppError, ForbiddenError
 from app.modules.identity.models import PlatformAdmin
-from app.modules.platform_admin import billing, companies, metrics, queues, users
+from app.modules.platform_admin import billing, companies, contact, metrics, queues, users
 from app.modules.platform_admin.schemas import (
     CompaniesOut,
     CompanyDetailOut,
+    ContactMessageRow,
+    ContactMessagesOut,
+    ContactUpdateIn,
     DataExportsOut,
     DeletionRequestsOut,
     ExtendIn,
@@ -196,6 +199,28 @@ async def list_data_exports(
     offset: Annotated[int, Query(ge=0, le=100_000)] = 0,
 ) -> DataExportsOut:
     return await queues.data_exports(access.db, status=status, limit=limit, offset=offset)
+
+
+@router.get("/platform/contact-messages", response_model=ContactMessagesOut)
+async def list_contact_messages(
+    access: Reader,
+    handled: bool | None = None,
+    limit: Annotated[int, Query(ge=1, le=contact.PAGE_MAX)] = 50,
+    offset: Annotated[int, Query(ge=0, le=100_000)] = 0,
+) -> ContactMessagesOut:
+    return await contact.messages(access.db, handled=handled, limit=limit, offset=offset)
+
+
+@router.patch("/platform/contact-messages/{message_id}", response_model=ContactMessageRow)
+async def mark_contact_message(
+    message_id: uuid.UUID, body: ContactUpdateIn, access: Writer
+) -> ContactMessageRow:
+    message = await contact.message_or_404(access.db, message_id)
+    await contact.set_handled(
+        access.db, access.audit_context, message, handled=body.handled, now=datetime.now(UTC)
+    )
+    await access.db.commit()
+    return contact.row(message)
 
 
 @router.get("/platform/users", response_model=UsersOut)

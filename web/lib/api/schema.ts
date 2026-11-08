@@ -3733,6 +3733,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/contact-messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Contact Messages */
+        get: operations["platform_admin_list_contact_messages"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/contact-messages/{message_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Mark Contact Message */
+        patch: operations["platform_admin_mark_contact_message"];
+        trace?: never;
+    };
     "/platform/data-exports": {
         parameters: {
             query?: never;
@@ -7566,6 +7600,38 @@ export interface components {
              */
             relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
         };
+        /** ContactMessageRow */
+        ContactMessageRow: {
+            /** Company */
+            company: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Email */
+            email: string;
+            /** Handled At */
+            handled_at: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Message */
+            message: string;
+            /** Name */
+            name: string;
+            /** Topic */
+            topic: string;
+        };
+        /** ContactMessagesOut */
+        ContactMessagesOut: {
+            /** Items */
+            items: components["schemas"]["ContactMessageRow"][];
+            /** Total */
+            total: number;
+        };
         /** ContactOut */
         ContactOut: {
             /** Address */
@@ -7588,6 +7654,11 @@ export interface components {
              * @enum {string}
              */
             relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
+        };
+        /** ContactUpdateIn */
+        ContactUpdateIn: {
+            /** Handled */
+            handled: boolean;
         };
         /** ConvertIn */
         ConvertIn: {
@@ -24368,6 +24439,92 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CompanyDetailOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_admin_list_contact_messages: {
+        parameters: {
+            query?: {
+                handled?: boolean | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactMessagesOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_admin_mark_contact_message: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                message_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactUpdateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactMessageRow"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

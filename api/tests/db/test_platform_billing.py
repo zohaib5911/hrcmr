@@ -66,6 +66,13 @@ def fake(rig: dict[str, Any]) -> FakeStripe:
     return fake
 
 
+@pytest.fixture(autouse=True)
+async def _empty_inbox(rig: dict[str, Any]) -> None:
+    """``contact_messages`` is global, so the rig does not clear it: each test starts empty."""
+    async with rig["owner"].begin() as c:
+        await c.execute(text("truncate contact_messages"))
+
+
 async def _platform_admin(rig: dict[str, Any], level: str) -> Any:
     """A signed-in company administrator made a platform admin at ``level``, with MFA, and the
     platform cookie started, as the admin pages need (T17.1)."""
@@ -331,3 +338,70 @@ async def test_the_export_queue_shows_each_status(rig: dict[str, Any]) -> None:
     assert failed["items"][0]["company_id"] == str(rig["b"])
     queued = (await admin.get(f"{API}/platform/data-exports?status=queued")).json()
     assert [item["status"] for item in queued["items"]] == ["queued"]
+
+
+async def _seed_message(rig: dict[str, Any], *, topic: str) -> uuid.UUID:
+    message = uuid.uuid4()
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text(
+                "insert into contact_messages (id, name, company, email, topic, message, ip_hash) "
+                "values (:i, 'Sam', 'Acme', 'sam@example.com', :t, 'Please help', :h)"
+            ),
+            {"i": message, "t": topic, "h": "b" * 64},
+        )
+    return message
+
+
+async def _handled_at(rig: dict[str, Any], message: uuid.UUID) -> Any:
+    async with rig["owner"].connect() as c:
+        return (
+            await c.execute(
+                text("select handled_at from contact_messages where id = :i"), {"i": message}
+            )
+        ).scalar_one()
+
+
+async def test_only_a_platform_admin_reads_and_marks_the_contact_inbox(rig: dict[str, Any]) -> None:
+    company_admin = await rig["person"]("company_admin", rig["a"])
+    message = await _seed_message(rig, topic="setup_help")
+    assert (await company_admin.get(f"{API}/platform/contact-messages")).status_code == 403
+    marked = await company_admin.patch(
+        f"{API}/platform/contact-messages/{message}", json={"handled": True}
+    )
+    assert marked.status_code == 403
+    assert await _handled_at(rig, message) is None
+
+
+async def test_the_inbox_lists_marks_and_audits_each_change(rig: dict[str, Any]) -> None:
+    first = await _seed_message(rig, topic="setup_help")
+    await _seed_message(rig, topic="data_protection")
+    admin = await _platform_admin(rig, "support")
+    everything = (await admin.get(f"{API}/platform/contact-messages")).json()
+    assert everything["total"] == 2
+    assert {item["topic"] for item in everything["items"]} == {"setup_help", "data_protection"}
+    marked = await admin.patch(f"{API}/platform/contact-messages/{first}", json={"handled": True})
+    assert marked.status_code == 200, marked.text
+    assert marked.json()["handled_at"] is not None
+    open_ones = (await admin.get(f"{API}/platform/contact-messages?handled=false")).json()
+    assert [item["topic"] for item in open_ones["items"]] == ["data_protection"]
+    handled = (await admin.get(f"{API}/platform/contact-messages?handled=true")).json()
+    assert [item["id"] for item in handled["items"]] == [str(first)]
+    # Marking it handled again changes nothing, so nothing new is audited.
+    again = await admin.patch(f"{API}/platform/contact-messages/{first}", json={"handled": True})
+    assert again.status_code == 200
+    assert await _audit(rig, first) == [("platform.contact_updated", None)]
+    reopened = await admin.patch(
+        f"{API}/platform/contact-messages/{first}", json={"handled": False}
+    )
+    assert reopened.json()["handled_at"] is None
+    assert await _handled_at(rig, first) is None
+    assert len(await _audit(rig, first)) == 2
+
+
+async def test_an_unknown_contact_message_is_not_found(rig: dict[str, Any]) -> None:
+    admin = await _platform_admin(rig, "support")
+    missing = await admin.patch(
+        f"{API}/platform/contact-messages/{uuid.uuid4()}", json={"handled": True}
+    )
+    assert missing.status_code == 404

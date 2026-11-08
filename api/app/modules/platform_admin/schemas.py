@@ -172,3 +172,23 @@ class DataExportRow(BaseModel):
 class DataExportsOut(BaseModel):
     items: list[DataExportRow]
     total: int
+
+
+class ContactMessageRow(BaseModel):
+    id: uuid.UUID
+    name: str
+    company: str | None
+    email: str
+    topic: str
+    message: str
+    created_at: datetime
+    handled_at: datetime | None
+
+
+class ContactMessagesOut(BaseModel):
+    items: list[ContactMessageRow]
+    total: int
+
+
+class ContactUpdateIn(RequestModel):
+    handled: bool
