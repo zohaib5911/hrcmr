@@ -105,3 +105,75 @@ async def test_the_list_marks_the_newest_version_current_and_audits_the_publish(
     assert await _audit(rig, uuid.UUID(made.json()["id"])) == [
         ("platform.terms_published", "Annual refresh")
     ]
+
+
+async def _flag_value(rig: dict[str, Any], key: str) -> Any:
+    async with rig["owner"].connect() as c:
+        return (
+            await c.execute(text("select enabled from feature_flags where key = :k"), {"k": key})
+        ).scalar_one_or_none()
+
+
+async def _flag_reasons(rig: dict[str, Any], key: str) -> list[str | None]:
+    async with rig["owner"].connect() as c:
+        rows = await c.execute(
+            text(
+                "select reason from audit_events where action = 'platform.feature_flag_changed' "
+                "and after->>'key' = :k order by created_at"
+            ),
+            {"k": key},
+        )
+        return [reason for (reason,) in rows.all()]
+
+
+async def test_only_platform_admins_read_and_set_feature_flags(rig: dict[str, Any]) -> None:
+    company_admin = await rig["person"]("company_admin", rig["a"])
+    assert (await company_admin.get(f"{API}/platform/feature-flags")).status_code == 403
+    refused = await company_admin.put(
+        f"{API}/platform/feature-flags/ai_drafts", json={"enabled": True, "reason": "Trial start"}
+    )
+    assert refused.status_code == 403
+    assert await _flag_value(rig, "ai_drafts") is None
+
+
+async def test_a_flag_is_set_read_and_audited_only_when_it_changes(rig: dict[str, Any]) -> None:
+    admin = await _platform_admin(rig, "support")
+    made = await admin.put(
+        f"{API}/platform/feature-flags/new_courses",
+        json={
+            "enabled": True,
+            "description": "New course editor",
+            "reason": "Pilot with two firms",
+        },
+    )
+    assert made.status_code == 200, made.text
+    assert made.json()["enabled"] is True
+    assert await _flag_value(rig, "new_courses") is True
+    listed = (await admin.get(f"{API}/platform/feature-flags")).json()
+    assert [item["key"] for item in listed["items"]] == ["new_courses"]
+    same = await admin.put(
+        f"{API}/platform/feature-flags/new_courses",
+        json={
+            "enabled": True,
+            "description": "New course editor",
+            "reason": "Pilot with two firms",
+        },
+    )
+    assert same.status_code == 200
+    off = await admin.put(
+        f"{API}/platform/feature-flags/new_courses",
+        json={"enabled": False, "reason": "Pilot over"},
+    )
+    assert off.json()["enabled"] is False
+    assert await _flag_value(rig, "new_courses") is False
+    # The unchanged save is not audited; the two real changes are, with their reasons.
+    assert await _flag_reasons(rig, "new_courses") == ["Pilot with two firms", "Pilot over"]
+
+
+async def test_a_bad_flag_name_is_refused(rig: dict[str, Any]) -> None:
+    admin = await _platform_admin(rig, "support")
+    bad = await admin.put(
+        f"{API}/platform/feature-flags/Bad-Name", json={"enabled": True, "reason": "Trial start"}
+    )
+    assert bad.status_code == 422, bad.text
+    assert await _flag_value(rig, "Bad-Name") is None

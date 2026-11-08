@@ -51,6 +51,7 @@ IDENTITY_TABLES = [
     "employee_responsibilities",
     "employee_training_records",
     "employees",
+    "feature_flags",
     "files",
     "going_rates",
     "holiday_types",

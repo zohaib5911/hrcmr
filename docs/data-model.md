@@ -866,6 +866,20 @@ Checks:
 
 - `status in ('active', 'on_leave', 'leaver', 'archived')`
 
+## `feature_flags`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `key` | VARCHAR(60) | no |  | primary key |
+| `enabled` | BOOLEAN | no | `false` |  |
+| `description` | VARCHAR(300) | no | `` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_by` | UUID | yes |  | references `users` |
+
+Checks:
+
+- `key ~ '^[a-z][a-z0-9_]{2,59}$'`
+
 ## `files`
 
 | Column | Type | Null | Default | Notes |

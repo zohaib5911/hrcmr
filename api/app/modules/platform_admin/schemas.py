@@ -211,3 +211,21 @@ class TermsVersionRow(BaseModel):
 class TermsVersionsOut(BaseModel):
     items: list[TermsVersionRow]
     total: int
+
+
+class FeatureFlagRow(BaseModel):
+    key: str
+    enabled: bool
+    description: str
+    updated_at: datetime
+
+
+class FeatureFlagsOut(BaseModel):
+    items: list[FeatureFlagRow]
+    total: int
+
+
+class FeatureFlagIn(RequestModel):
+    enabled: bool
+    description: str | None = Field(default=None, max_length=300)
+    reason: str = Field(min_length=REASON_MIN, max_length=REASON_MAX)

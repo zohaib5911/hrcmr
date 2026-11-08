@@ -14,12 +14,21 @@ import uuid  # noqa: TC003  (FastAPI reads the path parameter type at runtime)
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Path, Query, Request
 from sqlalchemy import select
 
 from app.core.errors import AppError, ForbiddenError
 from app.modules.identity.models import PlatformAdmin
-from app.modules.platform_admin import billing, companies, contact, metrics, queues, terms, users
+from app.modules.platform_admin import (
+    billing,
+    companies,
+    contact,
+    flags,
+    metrics,
+    queues,
+    terms,
+    users,
+)
 from app.modules.platform_admin.schemas import (
     CompaniesOut,
     CompanyDetailOut,
@@ -29,6 +38,9 @@ from app.modules.platform_admin.schemas import (
     DataExportsOut,
     DeletionRequestsOut,
     ExtendIn,
+    FeatureFlagIn,
+    FeatureFlagRow,
+    FeatureFlagsOut,
     MetricsOut,
     OptionalReasonIn,
     ReasonIn,
@@ -250,6 +262,32 @@ async def publish_terms_version(body: TermsIn, access: Content) -> TermsVersionR
     )
     await access.db.commit()
     return terms.row(published, current=True)
+
+
+@router.get("/platform/feature-flags", response_model=FeatureFlagsOut)
+async def list_feature_flags(access: Reader) -> FeatureFlagsOut:
+    return await flags.flags(access.db)
+
+
+@router.put("/platform/feature-flags/{key}", response_model=FeatureFlagRow)
+async def set_feature_flag(
+    key: Annotated[str, Path(pattern=r"^[a-z][a-z0-9_]{2,59}$")],
+    body: FeatureFlagIn,
+    access: Content,
+) -> FeatureFlagRow:
+    """Turn a feature on or off for everyone, with a reason (T17.5)."""
+    flag = await flags.set_flag(
+        access.db,
+        access.audit_context,
+        key,
+        enabled=body.enabled,
+        description=body.description,
+        reason=body.reason,
+        actor=access.caller.user_id,
+        now=datetime.now(UTC),
+    )
+    await access.db.commit()
+    return flags.row(flag)
 
 
 @router.get("/platform/users", response_model=UsersOut)
