@@ -53,6 +53,7 @@ IDENTITY_TABLES = [
     "files",
     "going_rates",
     "holiday_types",
+    "impersonation_sessions",
     "ineligible_codes",
     "interviews",
     "invitations",
