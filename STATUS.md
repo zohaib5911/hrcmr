@@ -1,6 +1,6 @@
 # STATUS
-Updated: 2026-11-08 17:30 (Europe/London)    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: see git log
-State: IN PROGRESS — the owner's five questions are answered and built (see Strategy). Next: the P17 gate (R7), which the owner has not yet asked for.
+Updated: 2026-11-08 18:00 (Europe/London)    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: see git log
+State: HANDED OVER — small model next. The owner has approved the P17 gate (R7); run it now.
 
 ## Last completed
 - T17.6 — Jobs dashboard, platform audit log, rules screens, retry from an allow-list (Haiku). Register status moved to T20.5. Migrations 0055, 0056.
@@ -21,7 +21,7 @@ State: IN PROGRESS — the owner's five questions are answered and built (see St
 - leftover.md L1 (Stripe E2E) when the owner has test keys; before Phase 23.
 
 ## Health
-- CI on dev: not run since P16 (PR 25, green).
+- CI on dev: not run since P16 (PR 25, green). The Actions minutes ran out on the private repo; the owner made the repo PUBLIC on 2026-11-08, so standard runners are now free. A full history secret scan (533 commits) found no real secrets before the switch.
 - Local checks, last run: platform admin, session, billing, content, audit log, jobs, comp, migrations, data-model doc, audit, guards, RBAC enforcement, worker: all pass (the last batches: 79 and 58 and 10 and 7 and 3). OpenAPI and architecture pass (run as a separate command). Web unit 802 pass; typecheck, eslint, prettier clean.
 - Not run: the full API suite and the web e2e (the phase gate's R7 does that). The admin session start has NOT been checked in a browser with an MFA-enabled admin; it needs one manual check.
 - Known test-order issue (not mine): running tests/test_architecture.py or tests/test_openapi.py before tests/db in one pytest command breaks the `database` fixture. Run them as a separate command.
@@ -48,4 +48,4 @@ State: IN PROGRESS — the owner's five questions are answered and built (see St
 8. Design: `--on-fixed` (white in both themes) is the token for text on the fixed admin red. It replaces `text-white`, which the switched-off Tailwind palette renders as nothing.
 
 ## Owner actions needed
-- Nothing is blocking. Two checks only: (a) sign in to the admin host as an MFA-enabled platform admin and confirm the session start and the refusal page; (b) say whether to run the P17 gate (R7) now.
+- Nothing is blocking. Two checks only: (a) sign in to the admin host as an MFA-enabled platform admin and confirm the session start and the refusal page; (b) done: the owner approved the P17 gate.
