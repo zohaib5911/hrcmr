@@ -174,7 +174,10 @@ async def test_export_holds_only_the_requesters_company_and_no_secrets(
         mail = (
             (
                 await c.execute(
-                    text("select to_address from email_outbox where template = 'data_export_ready'")
+                    text(
+                        "select to_address from email_outbox where template = 'data_export_ready' "
+                        "and to_address like 'company_admin-%'"  # not the e-mail samples' address
+                    )
                 )
             )
             .scalars()
