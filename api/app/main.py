@@ -72,6 +72,7 @@ from app.modules.employees.personal_router import router as personal_router
 from app.modules.employees.photo_router import router as employee_photo_router
 from app.modules.employees.record_pdf import router as employee_pdf_router
 from app.modules.employees.router import router as employees_router
+from app.modules.exports.router import router as exports_router
 from app.modules.files.router import router as files_router
 from app.modules.files.service import FileService
 from app.modules.health.router import router as health_router
@@ -278,6 +279,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(own_policies_router, prefix=API_PREFIX)
     app.include_router(policies_router, prefix=API_PREFIX)
     app.include_router(reports_router, prefix=API_PREFIX)
+    app.include_router(exports_router, prefix=API_PREFIX)
     app.include_router(documents_router, prefix=API_PREFIX)
     app.include_router(letters_router, prefix=API_PREFIX)
     app.include_router(recruitment_router, prefix=API_PREFIX)

@@ -30,6 +30,7 @@ IDENTITY_TABLES = [
     "company_holidays",
     "course_assignments",
     "courses",
+    "data_exports",
     "day_off_patterns",
     "departments",
     "designations",

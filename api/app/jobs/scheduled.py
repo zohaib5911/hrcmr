@@ -17,6 +17,7 @@ from app.jobs.audit import tracked
 from app.jobs.cloudflare import cloudflare_ranges_weekly
 from app.jobs.compliance import reminders_daily, rtw_status_daily
 from app.jobs.email import deliver_email, sweep_email_outbox
+from app.jobs.exports import generate_export, sweep_export_jobs
 from app.jobs.holidays import bank_holidays_weekly
 from app.jobs.learning import learning_overdue_daily
 from app.jobs.notifications import notifications_digest_daily
@@ -98,6 +99,7 @@ SCHEDULE: tuple[Schedule, ...] = (
         "T16.4",
     ),
     Schedule("report_jobs_sweep", sweep_report_jobs, {}, "T10.2", quiet=True),
+    Schedule("export_jobs_sweep", sweep_export_jobs, {}, "T16.4", quiet=True),
     Schedule("email_outbox_sweep", sweep_email_outbox, {}, "T2.8", quiet=True),  # every minute
 )
 
@@ -119,5 +121,6 @@ def functions() -> list[Function]:
             max_tries=MAX_ATTEMPTS + 1,
         ),
         func(tracked(generate_report, name="generate_report"), name="generate_report", max_tries=1),
+        func(tracked(generate_export, name="generate_export"), name="generate_export", max_tries=1),
         func(tracked(worker_ping, name="worker_ping", quiet=True), name="worker_ping", max_tries=1),
     ]

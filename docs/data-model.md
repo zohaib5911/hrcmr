@@ -430,6 +430,31 @@ Checks:
 - `source_url like 'https://%'`
 - `version >= 1`
 
+## `data_exports`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `files` |
+| `requested_by` | UUID | no |  | references `users` |
+| `status` | VARCHAR(10) | no | `queued` |  |
+| `file_id` | UUID | yes |  | references `files` |
+| `finished_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `expires_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `error_code` | VARCHAR(40) | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(status = 'failed') = (error_code is not null)`
+- `(status = 'queued') = (finished_at is null)`
+- `(status = 'ready') = (expires_at is not null)`
+- `(status = 'ready') = (file_id is not null)`
+- `status in ('queued','ready','failed')`
+
 ## `day_off_patterns`
 
 | Column | Type | Null | Default | Notes |

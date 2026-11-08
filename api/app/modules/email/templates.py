@@ -257,6 +257,19 @@ TEMPLATES: dict[str, Template] = {
         button=("Update payment details", "link"),
         fields=_fields("first_name", "grace_end", "link"),
     ),
+    "data_export_ready": Template(
+        subject="Your data export is ready",
+        heading="Your data export is ready",
+        preheader="The download link works until {expires_on}.",
+        paragraphs=(
+            "Hi {first_name},",
+            "Your {brand_name} data export is ready. It holds your company's records as CSV files, "
+            "and the documents you uploaded.",
+            "The link below works until {expires_on}. You need to be signed in to download it.",
+        ),
+        button=("Download your export", "link"),
+        fields=_fields("first_name", "expires_on", "link"),
+    ),
     "deletion_code": Template(
         subject="Your confirmation code",
         heading="Your confirmation code",
