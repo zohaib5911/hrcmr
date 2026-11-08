@@ -90,6 +90,7 @@ from app.modules.organogram.router import router as organogram_router
 from app.modules.pay.router import router as pay_router
 from app.modules.policies.own_router import router as own_policies_router
 from app.modules.policies.router import router as policies_router
+from app.modules.rbac.platform_session import router as platform_session_router
 from app.modules.recruitment.public import router as careers_router
 from app.modules.recruitment.router import router as recruitment_router
 from app.modules.reports.router import router as reports_router
@@ -288,6 +289,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(organogram_router, prefix=API_PREFIX)
     app.include_router(learning_router, prefix=API_PREFIX)
     app.include_router(learning_admin_router, prefix=API_PREFIX)
+    app.include_router(platform_session_router, prefix=API_PREFIX)
     app.include_router(certificates_router, prefix=API_PREFIX)
     app.include_router(dashboard_router, prefix=API_PREFIX)
     app.include_router(search_router, prefix=API_PREFIX)

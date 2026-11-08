@@ -10,7 +10,7 @@ from fastapi import Depends, Request
 from sqlalchemy import select
 
 from app.core.client_ip import client_ip_of
-from app.core.errors import AppError
+from app.core.errors import AppError, ForbiddenError
 from app.db.session import GlobalDb  # noqa: TC001  (FastAPI reads the annotation at run time)
 from app.modules.auth.container import AuthContainer
 from app.modules.auth.policy import MfaState, mfa_state, require_mfa_satisfied
@@ -50,11 +50,17 @@ def unauthenticated() -> AppError:
 
 
 def set_session_cookie(
-    response: Response, settings: Settings, token: str, expires_at: datetime
+    response: Response,
+    settings: Settings,
+    token: str,
+    expires_at: datetime,
+    *,
+    name: str | None = None,
 ) -> None:
+    """Sets the tenant session cookie, or the platform one when ``name`` is given (T17.1)."""
     deployed = settings.app_env.is_deployed
     response.set_cookie(
-        settings.session_cookie_name,
+        name or settings.session_cookie_name,
         token,
         expires=expires_at,
         path="/",
@@ -65,10 +71,12 @@ def set_session_cookie(
     )
 
 
-def clear_session_cookie(response: Response, settings: Settings) -> None:
+def clear_session_cookie(
+    response: Response, settings: Settings, *, name: str | None = None
+) -> None:
     deployed = settings.app_env.is_deployed
     response.delete_cookie(
-        settings.session_cookie_name,
+        name or settings.session_cookie_name,
         path="/",
         domain=f".{settings.domain}" if deployed else None,
         secure=deployed,
@@ -95,10 +103,21 @@ class Caller:
         return uuid.UUID(self.session.company_id) if self.session.company_id else None
 
 
-async def _caller(request: Request, db: GlobalDb, auth: AuthContainer) -> Caller:
-    token = request.cookies.get(auth.settings.session_cookie_name)
+async def _caller(
+    request: Request, db: GlobalDb, auth: AuthContainer, *, platform: bool = False
+) -> Caller:
+    """The caller for the tenant cookie, or for the platform cookie when ``platform`` is set.
+
+    The token kind must match the cookie: a platform session is refused on the tenant routes and a
+    tenant session on the platform routes, whichever cookie carries it (T17.1)."""
+    name = (
+        auth.settings.platform_session_cookie_name
+        if platform
+        else auth.settings.session_cookie_name
+    )
+    token = request.cookies.get(name)
     data = await auth.sessions.get(token)
-    if token is None or data is None:
+    if token is None or data is None or data.platform is not platform:
         raise unauthenticated()
     user = (
         await db.execute(select(User).where(User.id == uuid.UUID(data.user_id)))
@@ -117,6 +136,24 @@ async def _caller(request: Request, db: GlobalDb, auth: AuthContainer) -> Caller
 async def session_caller(request: Request, db: GlobalDb, auth: Auth) -> Caller:
     """Anyone with a live session, even one that still owes the second step."""
     return await _caller(request, db, auth)
+
+
+async def platform_caller(request: Request, db: GlobalDb, auth: Auth) -> Caller:
+    """A platform session (T17.1), from the platform cookie only.
+
+    A tenant session is never accepted here. A person signed in on the tenant cookie but without a
+    platform session gets 403 FORBIDDEN (as a non-admin always has); no session at all gets 401."""
+    try:
+        return await _caller(request, db, auth, platform=True)
+    except AppError as error:
+        if error.code != "UNAUTHENTICATED":
+            raise
+        tenant = await auth.sessions.get(request.cookies.get(auth.settings.session_cookie_name))
+        if tenant is not None and not tenant.platform:
+            raise ForbiddenError(
+                "Platform admin access is needed for that page. Start a platform session first."
+            ) from error
+        raise
 
 
 async def signed_in_caller(request: Request, db: GlobalDb, auth: Auth) -> Caller:

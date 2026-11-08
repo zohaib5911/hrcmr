@@ -54,13 +54,18 @@ async def test_official_dossier_checklist_and_platform_edits_require_mfa(
             text("insert into platform_admins (user_id,level) values (:u,'support')"),
             {"u": platform_id},
         )
-    enrol = await admin.get(API + "/admin/dossier-links")
+    # The platform session (T17.1) is what refuses an admin with no authenticator set up.
+    enrol = await admin.post(API + "/auth/platform-session")
     assert enrol.status_code == 403
     assert enrol.json()["error"]["code"] == "MFA_ENROLMENT_REQUIRED"
+    # Without a platform session the signed-in tenant session is refused on the admin page.
+    assert (await admin.get(API + "/admin/dossier-links")).status_code == 403
     async with rig["owner"].begin() as c:
         await c.execute(text("update users set mfa_enabled=true where id=:u"), {"u": platform_id})
     # This fixture's signed session already passed MFA; setting the enrolled flag makes the
     # otherwise unchanged session satisfy the mandatory platform policy.
+    started = await admin.post(API + "/auth/platform-session")
+    assert started.status_code == 201, started.text
     assert (await admin.get(API + "/admin/dossier-links")).status_code == 200
     for url in (
         "javascript:alert(1)",

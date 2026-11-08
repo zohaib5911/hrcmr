@@ -54,6 +54,10 @@ class SessionData:
     mfa_passed_at: str | None = None
     step_up_at: str | None = None
     db_seen_at: str = ""
+    # A platform session (T17.1) is issued only by POST /auth/platform-session, to a platform
+    # admin who has passed MFA. Only the platform cookie carries it, and only the platform routes
+    # accept it.
+    platform: bool = False
 
     def _when(self, value: str | None) -> datetime | None:
         return datetime.fromisoformat(value) if value else None
@@ -114,6 +118,7 @@ class SessionStore:
         user_agent: str | None,
         mfa_passed: bool,
         absolute_expiry: datetime | None = None,
+        platform: bool = False,
     ) -> tuple[str, SessionData]:
         """Start a session. Returns the token to put in the cookie, and what is known about it."""
         now = self._now()
@@ -139,6 +144,7 @@ class SessionStore:
             expires_at=expires.isoformat(),
             mfa_passed_at=now.isoformat() if mfa_passed else None,
             db_seen_at=now.isoformat(),
+            platform=platform,
         )
         await self._save(token, data)
         return token, data
@@ -205,6 +211,7 @@ class SessionStore:
             user_agent=user_agent,
             mfa_passed=data.mfa_passed if mfa_passed is None else mfa_passed,
             absolute_expiry=data.absolute_expiry,
+            platform=data.platform,
         )
 
     async def revoke(self, db: AsyncSession, token: str, data: SessionData | None = None) -> None:
