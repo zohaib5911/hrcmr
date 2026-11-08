@@ -1,20 +1,25 @@
 # STATUS
-Updated: 2026-11-08 Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: pending (T15.5 close)
+Updated: 2026-11-08 Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: aa38247
 State: IN PROGRESS
 
 ## Last completed
-- T15.5 — CV match: POST /soc/resume-match (PDF/DOCX up to 10 MB; contact details stripped before sending; Claude score, evidence quotes checked against the CV, gaps, suggestions; AI off = 409). Tests: 43 pure + 2 DB.
-- T15.4 — Search and match API: GET /soc/search, POST /soc/match (Claude re-rank, low_confidence < 60, rules engine on top 3, 409 until rules published). Tests: 17 pure + 13 DB.
+- P15 — Phase 15 gate; PR 23 (dev -> main) CI green except Playwright pending; merging when all green.
 
 ## Current task
-- T15.6 — Checker UI, "Find code" embeds, PDF report (S). Not started. Read micro_plan T15.6 block and the recipes it cites (R4 PDF, R6 done-when) before starting.
+- T16.1 — Stripe integration and webhooks (B)
+  - [ ] 1. migration: subscriptions + stripe_events tables
+  - [ ] 2. api/app/integrations/stripe.py (server-only client, httpx, idempotency keys, signature check)
+  - [ ] 3. billing module: checkout-session (annual / ten_year), portal-session, GET subscription
+  - [ ] 4. POST /webhooks/stripe: signature + store event id (idempotent) + apply to company
+  - [ ] 5. tests (signature, replay, both plans), openapi regen
+- Resume note: see .agent/journal.md last line.
 
 ## Next tasks
-- T15.6 (S), T15.7 (daily rules watcher, super-admin diff/publish/rollback)
+- T16.2 (B), T16.3 (S!), T16.4 (S!), T16.5 (B), P16
 
 ## Health
-- CI on dev: not run since T15.1 (Phase 15 gate PR runs it)    CI on main: green (last PR #22)
-- Last local checks: ruff check + format, mypy (app/modules/soc, app/main.py) clean. Non-DB API tests: 624 pass. SOC DB tests (match, cv, import, rules import): pass. Pre-commit hooks passed on 21e5d8b (client schema regenerated).
+- CI on dev: green on PR 23 except e2e pending    CI on main: green (PR #22)
+- Local checks run: none yet this session
 
 ## Issues / suggestions
 - OpenAPI component names must be unique. Pydantic qualifies a clashing name, which drops the original from web/lib/api/schema.ts. SOC models use the Soc prefix (SocCandidateOut, SocCvMatchOut, ...). After any new endpoint run `pnpm gen:api` in web and check that no names disappear.
