@@ -1,10 +1,11 @@
 # STATUS
-Updated: 2026-11-08 09:46 (Europe/London)    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: see git log
+Updated: 2026-11-08 10:45 (Europe/London)    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: see git log
 
-State: IN PROGRESS
+State: HANDED OVER — small model next (T17.2)
 
 ## Last completed
-- P16 gate R7 steps 1–3 — API 1254, web lint/typecheck/unit 786, web e2e 436 passed, 16/16 screenshots, PROGRESS summary (Opus parked Stripe E2E in leftover.md L1).
+- T17.1 — Platform admin auth and admin host routing (Haiku). Platform cookie `brand_platform_session`, issued by `POST /api/v1/auth/platform-session` after MFA and inside `ADMIN_IP_ALLOWLIST`; tenant session refused on admin routes, platform token refused on tenant routes; every platform request audited as `platform.access` (migration 0048); red `PlatformBar` on every admin page.
+- P16 — Phase 16 gate: PR #25 (dev → main) merged, all checks green. Stripe E2E parked in leftover.md L1.
 - T16.6 — Deletion code e-mail sent after commit through the app mailer (Opus).
 - T16.5 — Delete account (Opus).
 - T16.4 — Data export.
@@ -13,36 +14,36 @@ State: IN PROGRESS
 - T16.1 — Stripe integration and webhooks.
 
 ## Current task
-- P16 — Phase 16 gate (S), not ticked
-  - [x] R7 steps 1–3 (see Last completed)
-  - [ ] R7 step 4: PR dev → main, watch checks, merge only when all green, tick P16   <- here
-  - [~] Stripe test-mode E2E — PARKED in `leftover.md` L1 (owner has no test keys)
-- Resume note: `gh pr create --base main --head dev` (body from the P16 summary in PROGRESS.md); `gh pr checks <n> --watch`; merge with `gh pr merge <n> --merge` only when every check is green; then tick P16 in micro_plan.md and PROGRESS.md; then T17.1 (S!).
-- Check before opening: main has 11 merge commits and no non-merge commits that dev lacks; the main-only lines are stale copies of files dev has since changed, so the PR carries dev's content.
+- None. Stopped after T17.1 at the owner's request ("start the next one").
 
 ## Next tasks
-- P16: PR dev → main and tick.
-- T17.1 (S!) platform admin auth and admin host routing (micro_plan L387).
+- T17.2 (S) Overview metrics, companies, users search (micro_plan). Admin pages do not call the API yet; the first one that does needs the platform session step (`POST /api/v1/auth/platform-session`) from a signed-in platform admin.
 - leftover.md L1 (Stripe E2E) when the owner has test keys; before Phase 23.
 
 ## Health
-- CI on dev: not run yet for P16 (PR about to open). Workflows: ci.yml, security.yml.
-- CI on main: green at PR #23 (P15). Open Dependabot PRs #24 (uv) and #5 (npm) — not part of this gate.
-- Local checks run this session: API full 1254 pass; web lint 0 warnings; typecheck clean; unit 786 pass; full web e2e 436 pass, 200 skipped, 0 fail.
+- CI on dev: not run for T17.1 (no PR open). Last merge to main: PR #25 (P16), all checks green.
+- CI on main: green at PR #25.
+- Open Dependabot PRs #24 (uv) and #5 (npm): not part of this work.
+- Local checks run for T17.1: full API suite 1270 passed (exit 0); web lint 0 warnings, typecheck clean, unit (platform-bar) pass; host-routing e2e 13 pass; guard suites 205 pass.
 
 ## Issues / suggestions
-- (T16.6) The delete-account page header breadcrumb reads "Company / Company" with title "Company"; the page h1 is right. Cosmetic, for the auditor.
-- (T16.6) `deletion_scheduled`(+support), `deletion_withdrawn` and `account_deleted` still use the outbox-in-transaction helper; e2e cannot see them until the minute sweep runs.
-- (T16.5) Test isolation: tests/db/test_billing.py counts payment_failed mail across the whole outbox.
-- (T16.3) Stripe's API version is not pinned; verify the invoice payment-intent field in test mode (leftover.md L1).
+- Running a mixed subset of root-level and DB tests in one pytest call can give "fixture 'database' not found" (pre-existing; seen again with the new DB test file). The full suite does not show it. Use the full suite as the check, or run DB files separately.
+- The platform guard commits its audit row before the handler runs, so a page view is kept even if the handler fails. Failed actions therefore leave a `platform.access` row, not an action row.
+- The platform session has no column in `sessions`; its audit trail is the `platform.session.started`/`ended` events and the `platform.access` rows.
+- (T16.6) The breadcrumb reads "Company / Company" on delete-account (cosmetic).
+- (T16.6) `deletion_scheduled`(+support), `deletion_withdrawn`, `account_deleted` still use the outbox helper (minute sweep).
+- (T16.3) Stripe API version not pinned; verify the invoice payment-intent field in test mode (leftover.md L1).
 - (T16.2) A lapsed annual plan still says "annual" in /auth/me.
-- (pre-existing) tests/test_openapi.py + tests/db/test_reports.py in one pytest call gives "fixture 'database' not found".
 
 ## Strategy / decisions taken
+- (T17.1) Endpoint at `/api/v1/auth/platform-session`: the RBAC rule only exempts `/auth/`, `/health`, `/ready`, `/public/`, `/webhooks/` from needing a permission dependency, and session management belongs with auth. The router file lives in `rbac/` because it reuses the platform guard helpers.
+- (T17.1) Tenant session on the admin routes → 403 FORBIDDEN (a signed-in non-admin always got 403 there); no session at all → 401. A token of the wrong kind is refused whichever cookie carries it.
+- (T17.1) Platform session lifetime 8 hours absolute (tenant session 14 days), idle timeout as the store's 8 hours. Issued only after MFA; the IP allowlist (`ADMIN_IP_ALLOWLIST`, already in the settings and env docs) is checked at issuance and on every platform request. Unparseable allowlist entries match nothing.
+- (T17.1) Audit inserts for platform admins need per-action RLS policies (as 0019, 0035 and 0043 did). Migration 0048 adds `platform.access`, `platform.session.started`, `platform.session.ended`.
+- (T17.1) No web sign-in for the platform session yet: the admin pages call no API at this point. T17.2 will need the step, and it goes in that task.
 - (T16.6) Only `deletion_code` moved to the app mailer (sent after commit); the other three deletion notices stay as outbox rows in the same transaction.
-- (P16, owner) No Stripe test keys yet: Stripe E2E parked in leftover.md L1; the P16 gate continues without it. No mocked run is counted as the test-mode E2E.
-- (P16) Heading fix: page-level cards use `headingLevel={2}`; cards inside the "Choose a plan" h2 section keep h3.
+- (P16) Stripe E2E stays parked in leftover.md L1; no mocked run counts as the test-mode E2E.
 
 ## Owner actions needed
-- When you have Stripe test keys: put them in `.env` (names in leftover.md L1) and tell an agent to do leftover.md L1. Not blocking.
+- None blocking. Stripe test keys go in `.env` when available (names in leftover.md L1); not blocking.
 - Confirm (from T16.3/T16.4): 10-year plans cannot be cancelled in-app after 14 days; bank numbers and sort codes are left out of the export; the export e-mail link needs a signed-in session.

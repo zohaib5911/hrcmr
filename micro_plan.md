@@ -384,11 +384,12 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 17 — Super-admin back office
 
-### [ ] T17.1 · S! · Platform admin auth and admin host routing
+### [x] T17.1 · S! · Platform admin auth and admin host routing
 - **Spec:** plan L1155–1158, L1464.
 - **Copy:** `api/app/modules/rbac/platform.py`, `web/app/(admin)/`, `web/tests/e2e/host-routing.spec.ts` (parts exist — extend, don't rebuild).
 - **Steps:** separate cookie name, mandatory MFA, optional IP allowlist (env), every page view audited, red "Platform admin" bar.
 - **Done when:** tenant session cookie on admin host → refused; no MFA → refused; tests.
+- **Done (2026-11-08):** platform cookie `brand_platform_session` (`PLATFORM_SESSION_COOKIE_NAME`), issued only by `POST /api/v1/auth/platform-session` after MFA and inside `ADMIN_IP_ALLOWLIST`; guard refuses a tenant session (403 with a tenant session, 401 without), a platform token on tenant routes, no MFA, and addresses outside the allowlist; every platform request audited as `platform.access` (migration 0048); red `PlatformBar` on every admin page. Tests: `tests/db/test_platform_session.py` (7), `tests/test_platform_network.py` (8), platform tests updated to start a platform session; full API 1270 pass; web unit, lint, typecheck clean; host-routing e2e 13 pass.
 
 ### [ ] T17.2 · S · Overview metrics, companies, users search
 - **Spec:** plan L1160–1164, L1168, L1465. Steps: metrics endpoint, companies list/detail/actions (suspend/reactivate with reason, extend plan, mark for deletion), users search + lock/unlock. All audited.
