@@ -35,11 +35,15 @@ async def _platform_admin(rig: dict[str, Any], level: str) -> Any:
 
 async def _exports(rig: dict[str, Any]) -> int:
     async with rig["owner"].connect() as c:
-        return (
-            await c.execute(
-                text("select count(*) from audit_events where action = 'platform.audit_exported'")
-            )
-        ).scalar_one()
+        return int(
+            (
+                await c.execute(
+                    text(
+                        "select count(*) from audit_events where action = 'platform.audit_exported'"
+                    )
+                )
+            ).scalar_one()
+        )
 
 
 async def _suspend(admin: Any, company: uuid.UUID, reason: str) -> None:

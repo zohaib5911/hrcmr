@@ -79,7 +79,7 @@ async def test_a_comp_turns_a_free_company_writable_until_it_ends(rig: dict[str,
     assert again.json()["error"]["code"] == "PLAN_REQUIRED"
 
 
-def _company(**values: Any) -> SimpleNamespace:
+def _company(**values: Any) -> Any:
     base = {
         "plan": "free",
         "subscription_status": None,
