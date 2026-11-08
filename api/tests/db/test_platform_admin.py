@@ -278,3 +278,21 @@ async def test_users_search_lock_and_unlock(rig: dict[str, Any]) -> None:
         ("platform.user_locked", "Suspected account sharing"),
         ("platform.user_unlocked", None),
     ]
+
+
+async def test_a_support_admin_cannot_lock_a_platform_admin_but_an_owner_can_lock_support(
+    rig: dict[str, Any],
+) -> None:
+    owner, owner_id = await _platform_admin(rig, "owner")
+    support, support_id = await _platform_admin(rig, "support")
+    refused = await support.post(f"{API}/platform/users/{owner_id}/lock", json={"reason": "test"})
+    assert refused.status_code == 403, refused.text
+    assert refused.json()["error"]["message"] == "Only an owner can lock a platform admin."
+    async with rig["owner"].connect() as c:
+        active = (
+            await c.execute(text("select is_active from users where id = :u"), {"u": owner_id})
+        ).scalar_one()
+    assert active is True
+    allowed = await owner.post(f"{API}/platform/users/{support_id}/lock", json={})
+    assert allowed.status_code == 200, allowed.text
+    assert allowed.json()["locked"] is True

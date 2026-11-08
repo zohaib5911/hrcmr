@@ -436,6 +436,17 @@ async def lock_user(
     user_id: uuid.UUID, access: Writer, body: OptionalReasonIn | None = None
 ) -> UserRow:
     user = await users.user_or_404(access.db, user_id)
+    # A support admin cannot lock another platform admin, owners included (C3.1.12). Locking
+    # yourself is refused by users.lock (SELF_LOCK), so it is left to that check.
+    target_level = await access.db.scalar(
+        select(PlatformAdmin.level).where(PlatformAdmin.user_id == user.id)
+    )
+    if (
+        target_level is not None
+        and user.id != access.caller.user_id
+        and not await _is_owner(access)
+    ):
+        raise ForbiddenError("Only an owner can lock a platform admin.")
     await users.lock(access.db, access.audit_context, user, body.reason if body else None)
     await access.db.commit()
     return await users.row(access.db, user)
