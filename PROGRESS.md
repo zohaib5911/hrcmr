@@ -414,8 +414,8 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [ ] **Stripe E2E** (parked, leftover.md L1) — Stripe test-mode E2E for both plans, refund, cancel, failed payment, webhook replay. Needs owner test keys; before Phase 23.
 
 ### Phase 17 — Super-admin back office
-- [ ] **T17.1** Platform admin auth and admin host routing
-- [ ] **T17.2** Overview metrics, companies, users search
+- [x] **T17.1** Platform admin auth and admin host routing
+- [x] **T17.2** Overview metrics, companies, users search — 2026-11-08. API only: GET /platform/metrics; GET /platform/companies (search, filter, paged) and /{id}; suspend, reactivate, extend-plan (10-year, active only) and mark-for-deletion (owner) with reasons; GET /platform/users?q=, lock and unlock (users.is_active). Every change audited under the platform admin (migration 0049). Tests: tests/db/test_platform_admin.py 7 pass. Admin screens and the web platform-session step are not in this block.
 - [ ] **T17.3** Support mode (impersonation)
 - [ ] **T17.4** Subscriptions and refunds, deletion and export queue, contact inbox
 - [ ] **T17.5** Content tools and feature flags
