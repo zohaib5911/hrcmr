@@ -529,3 +529,9 @@ Do not start until the owner says so: US site, Australia, native wrapper, passke
 - Open: the Ask Mady assistant panel is still deferred by the owner. The AI wording button and AI letter path are covered by API tests only, not browser tests (the e2e server has no AI key). Owner: review the eight launch courses before publishing.
 - AUDIT-2 round 1: 0/3/3 (P0/P1/P2) — FIX NEEDED. Worst: employee names typed into letter key points are sent to Claude unredacted; leave and rota e-mails ignore the e-mail preference; no course-assigned notice.
 - AUDIT-2 round 2: 0/0/0 (P0/P1/P2) — PASS. All six round-1 fixes verified; api 1043, web unit 786, e2e 430 pass.
+
+## Phase 16 summary (billing and account lifecycle) — gate open: Stripe E2E blocked on owner keys
+- Built: Stripe client and signed webhooks (T16.1); entitlements, 402 on writes when free or lapsed, 7-day payment grace (T16.2); billing page with cancel and refund within 14 days (T16.3); data export zip (T16.4); account deletion with e-mailed code, 7-day schedule and hourly purge (T16.5); deletion code sent through the app mailer (T16.6).
+- Gate so far: API full suite 1254 passed, 0 failed; web lint 0 warnings, typecheck clean, unit 786 passed; full web e2e 436 passed, 200 skipped, exit 0; screenshots docs/screenshots/phase-16, 16 of 16 (390 and 1280 px, light and dark).
+- Decisions: 10-year plans cannot be cancelled in-app after 14 days (409); exports leave out bank numbers, sort codes and sessions; the other three deletion notices stay in the outbox, sent by the minute sweep.
+- Open: Stripe test-mode E2E (both plans, refund, cancel, failed payment, webhook replay) is BLOCKED: no test keys in `.env` or the environment. The gate tick and the PR dev → main wait for it.
