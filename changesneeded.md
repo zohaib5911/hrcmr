@@ -88,7 +88,7 @@ Each screen needs loading, empty and error states, works at 360 px and in dark m
 - **Fix:** when `comp_until` is in the future, show an info `Alert` "Complimentary access until <date>" above the plan card.
 - **Done when:** unit test with a fixture that has `comp_until` set.
 
-### [ ] C3.1.15 · P2 · Admin red is a raw hex colour (from T17.1, T17.3)
+### [x] C3.1.15 · P2 · Admin red is a raw hex colour (from T17.1, T17.3) — fixed in c177fd7
 - **Problem:** `web/components/platform/platform-bar.tsx:12` and `web/components/app/support-banner.tsx:40` use `bg-[#b00010]`; every other colour is a token in `web/app/globals.css`.
 - **Fix:** add `--fixed-admin: #b00010` next to `--on-fixed` in each theme block of `globals.css` and `--color-fixed-admin: var(--fixed-admin)` in the `@theme` block; use `bg-fixed-admin` in both files. Add the token to `web/tests/support/expected-tokens.ts` if that file lists them.
 - **Done when:** `pnpm lint && pnpm typecheck && pnpm test` pass; no `#b00010` left outside `globals.css`.
