@@ -1,6 +1,6 @@
 # STATUS
-Updated: 2026-11-08 19:38 (Europe/London)    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: 38537c1
-State: BLOCKED — audit requested (AUDIT-3)
+Updated: 2026-11-09 (Europe/London)    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: 55153b7
+State: IN PROGRESS — AUDIT-3 round 1 (scope audit-pass-2..55153b7)
 
 ## Last completed
 - P17 gate (R7) — PR #26 dev -> main merged (merge commit 38537c1) after all 12 checks were green on 2ec407e. API full 1319 pass, web unit 802 pass, web e2e 437 pass (200 screenshot-only skipped). Phase 17 summary in PROGRESS.md. Screenshots parked as leftover.md L2.
