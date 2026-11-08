@@ -362,7 +362,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Steps:** `/company/billing` plan card, 14-day banner with end date, Cancel (≤14 days → full refund via Refunds API; after → cancel at period end), "Payment details & invoices" → portal session, "Contact support" for plan change.
 - **Done when:** tests with mocked Stripe for day 13 vs day 15; idempotency key on refund; audit event.
 
-### [ ] T16.4 · S! · Data export
+### [x] T16.4 · S! · Data export
 - **Spec:** plan L1091, L1460; API item 22.
 - **Steps:** step-up required; worker builds zip (CSV per tenant table + documents) to private storage; e-mail link valid 7 days; `GET /companies/me/exports/{id}`.
 - **Done when:** export contains only the requesting company's rows (test with two tenants); no step-up → refused.
