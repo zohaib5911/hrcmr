@@ -11,6 +11,7 @@ export default function PlatformAdminPage() {
     <main>
       <h1>Platform admin</h1>
       <Link href="/dossier-links">Dossier links</Link>
+      <Link href="/platform/rules">SOC rules</Link>
     </main>
   );
 }

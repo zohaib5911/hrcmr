@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState, type FormEvent } from "react";
 
 import { useCan, useMe } from "@/components/app/session-context";
+import { SponsorshipChecker } from "@/components/soc/checker";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -138,9 +139,7 @@ export function CandidateProfile({ candidateId }: { candidateId: string }) {
         </TabsContent>
 
         <TabsContent value="sponsorship" className="pt-4">
-          <p className="text-callout text-label-secondary">
-            Available after the sponsorship checker launches.
-          </p>
+          <SponsorshipChecker embedded />
         </TabsContent>
       </Tabs>
     </div>

@@ -78,6 +78,23 @@ test("designations: add a title with a SOC code, refuse a bad code, and a depart
   await expect(page.getByText("Archive or move this department's job titles first.")).toBeVisible();
 });
 
+test("designations: Find code runs the checker and fills in the confirmed SOC code", async ({
+  page,
+}) => {
+  // Uses the department the departments test made, as the designation test above does.
+  await open(page, "/company/designations", "Designations");
+  await page.getByRole("button", { name: "Add job title" }).first().click();
+  const form = sheet(page, "Add job title");
+  await form.getByRole("button", { name: "Find code", exact: true }).click();
+  const finder = sheet(page, "Find the SOC code");
+  await finder.getByRole("textbox", { name: "Job title" }).fill("Adviser, sales");
+  await finder.getByLabel("Offered salary", { exact: true }).fill("30000");
+  await finder.getByRole("button", { name: "Check this job" }).click();
+  await finder.getByRole("button", { name: "Check this code" }).first().click();
+  await finder.getByRole("button", { name: "Confirm this code" }).click();
+  await expect(form.getByLabel("SOC code (optional)", { exact: true })).toHaveValue("7111");
+});
+
 test("locations: the first is the main one, a new main one takes over, and one can be archived", async ({
   page,
 }) => {

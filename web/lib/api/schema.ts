@@ -3405,6 +3405,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/rules": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Versions */
+        get: operations["platform_rules_list_versions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/rules/{version_id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Publish */
+        post: operations["platform_rules_publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/rules/{version_id}/rollback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rollback */
+        post: operations["platform_rules_rollback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/policies": {
         parameters: {
             query?: never;
@@ -3827,6 +3878,57 @@ export interface paths {
          *     The fields are checked by ``ApplyIn``, the same rules as before the CV was added.
          */
         post: operations["careers_apply"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/soc/salary-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Salary Check */
+        post: operations["public_soc_salary_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/soc/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Search */
+        get: operations["public_soc_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/soc/{code}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Code Detail */
+        get: operations["public_soc_code_detail"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -4410,6 +4512,137 @@ export interface paths {
          *     covers are asked to set it up on their next request.
          */
         put: operations["access_set_two_step_policy"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/soc/checks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Checks */
+        get: operations["soc_list_checks"];
+        put?: never;
+        /**
+         * Create Check
+         * @description Saves a draft: the rules engine's answer for this code, on the live rules version.
+         */
+        post: operations["soc_create_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/soc/checks/{check_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Check */
+        get: operations["soc_read_check"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/soc/checks/{check_id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Check */
+        post: operations["soc_confirm_check"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/soc/checks/{check_id}/report.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Check Report */
+        get: operations["soc_check_report"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/soc/match": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Match
+         * @description Ranks the codes for a job, then checks the top three against the published rules.
+         *
+         *     Answers 409 until a rules version is published, because the eligibility check needs it.
+         */
+        post: operations["soc_match"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/soc/resume-match": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resume Match */
+        post: operations["soc_resume_match"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/soc/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Search
+         * @description Up to ten unit groups for a job title. Under two characters returns nothing.
+         */
+        get: operations["soc_search"];
+        put?: never;
         post?: never;
         delete?: never;
         options?: never;
@@ -5642,6 +5875,18 @@ export interface components {
             /** File */
             file: string;
         };
+        /** Body_soc_resume_match */
+        Body_soc_resume_match: {
+            /** Cv */
+            cv: string;
+            /**
+             * Job Description
+             * @default
+             */
+            job_description: string;
+            /** Soc Code */
+            soc_code: string;
+        };
         /** CalendarEntry */
         CalendarEntry: {
             /** Colour */
@@ -6132,6 +6377,36 @@ export interface components {
             superseded_at: string | null;
             /** Superseded By */
             superseded_by: string | null;
+        };
+        /** CheckResult */
+        CheckResult: {
+            /** Dependants Allowed */
+            dependants_allowed: boolean;
+            eligibility: components["schemas"]["Eligibility"];
+            /** Going Rate */
+            going_rate: string | null;
+            /** Notes */
+            notes: string[];
+            /** Offered Annual */
+            offered_annual: string;
+            /** Options */
+            options: components["schemas"]["OptionResult"][];
+            /**
+             * Rules Effective From
+             * Format: date
+             */
+            rules_effective_from: string;
+            /** Rules Version Id */
+            rules_version_id: string | null;
+            /** Rules Version Name */
+            rules_version_name: string;
+            /** Salary For Threshold */
+            salary_for_threshold: string;
+            /** Soc Code */
+            soc_code: string;
+            /** Title */
+            title: string;
+            verdict: components["schemas"]["Verdict"];
         };
         /** ChecklistItemOut */
         ChecklistItemOut: {
@@ -7309,6 +7584,21 @@ export interface components {
             subject?: string | null;
             /** Year */
             year?: number | null;
+        };
+        /** Eligibility */
+        Eligibility: {
+            /** Isl Until */
+            isl_until: string | null;
+            /** Label */
+            label: string;
+            /** Routes */
+            routes: string[];
+            /** Status */
+            status: string;
+            /** Tables */
+            tables: string[];
+            /** Tsl Until */
+            tsl_until: string | null;
         };
         /** EmailRequest */
         EmailRequest: {
@@ -8818,6 +9108,25 @@ export interface components {
             /** Value */
             value: string;
         };
+        /** OptionResult */
+        OptionResult: {
+            /** Criteria Key */
+            criteria_key: string;
+            /** General Threshold */
+            general_threshold: string;
+            /** Going Rate */
+            going_rate: string | null;
+            /** Going Rate Pct */
+            going_rate_pct: number;
+            /** Meets */
+            meets: boolean | null;
+            /** Minimum Required */
+            minimum_required: string | null;
+            /** Option */
+            option: string;
+            /** Table */
+            table: string | null;
+        };
         /** OrgChangeIn */
         OrgChangeIn: {
             /**
@@ -9609,6 +9918,82 @@ export interface components {
             /** Url */
             url: string;
         };
+        /** PublicCheckIn */
+        PublicCheckIn: {
+            /** Cos Assignment Date */
+            cos_assignment_date?: string | null;
+            /** Offered Salary */
+            offered_salary: number | string;
+            /**
+             * Salary Per
+             * @enum {string}
+             */
+            salary_per: "year" | "month" | "week" | "hour";
+            /** Soc Code */
+            soc_code: string;
+            /** Turnstile Token */
+            turnstile_token: string;
+            /** Weekly Hours */
+            weekly_hours: number | string;
+            /**
+             * Work Nation
+             * @enum {string}
+             */
+            work_nation: "England" | "Scotland" | "Wales" | "Northern Ireland";
+        };
+        /**
+         * PublicCheckOut
+         * @description The salary table for a code, and nothing about the person who asked.
+         */
+        PublicCheckOut: {
+            /** Dependants Allowed */
+            dependants_allowed: boolean;
+            /** Eligibility */
+            eligibility: string;
+            /** Going Rate */
+            going_rate: string | null;
+            /** Notes */
+            notes: string[];
+            /** Options */
+            options: components["schemas"]["OptionResult"][];
+            /**
+             * Rules Effective From
+             * Format: date
+             */
+            rules_effective_from: string;
+            /** Rules Version Name */
+            rules_version_name: string;
+            /** Soc Code */
+            soc_code: string;
+            /** Title */
+            title: string;
+            verdict: components["schemas"]["Verdict"];
+        };
+        /** PublicCodeOut */
+        PublicCodeOut: {
+            /** Code */
+            code: string;
+            /** Description */
+            description: string;
+            /** Tasks */
+            tasks: string[];
+            /** Title */
+            title: string;
+            /** Typical Titles */
+            typical_titles: string[];
+        };
+        /** PublicHitOut */
+        PublicHitOut: {
+            /** Code */
+            code: string;
+            /** Title */
+            title: string;
+        };
+        /** PublicSearchOut */
+        PublicSearchOut: {
+            /** Results */
+            results: components["schemas"]["PublicHitOut"][];
+        };
         /** QuestionAdminOut */
         QuestionAdminOut: {
             /** Answer */
@@ -10199,6 +10584,40 @@ export interface components {
             /** Verified */
             verified: number;
         };
+        /** RulesVersionOut */
+        RulesVersionOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Diff Summary */
+            diff_summary: {
+                [key: string]: unknown;
+            };
+            /**
+             * Effective From
+             * Format: date
+             */
+            effective_from: string;
+            /** Id */
+            id: string;
+            /** Name */
+            name: string;
+            /** Pages */
+            pages: {
+                [key: string]: unknown;
+            }[];
+            /** Published At */
+            published_at: string | null;
+            /** Status */
+            status: string;
+        };
+        /** RulesVersionsOut */
+        RulesVersionsOut: {
+            /** Items */
+            items: components["schemas"]["RulesVersionOut"][];
+        };
         /** SearchOut */
         SearchOut: {
             /** Candidates */
@@ -10398,6 +10817,264 @@ export interface components {
             password: string;
             /** Turnstile Token */
             turnstile_token?: string | null;
+        };
+        /**
+         * SocApplicantIn
+         * @description The applicant's situation and qualifiers (plan 8.17 step 1). Each flag defaults to no.
+         */
+        SocApplicantIn: {
+            /**
+             * Phd Relevant
+             * @default false
+             */
+            phd_relevant: boolean;
+            /**
+             * Postdoctoral
+             * @default false
+             */
+            postdoctoral: boolean;
+            /**
+             * Previous Isl Same Job
+             * @default false
+             */
+            previous_isl_same_job: boolean;
+            /**
+             * Professional Training
+             * @default false
+             */
+            professional_training: boolean;
+            /**
+             * Recent Uk Student Or Graduate
+             * @default false
+             */
+            recent_uk_student_or_graduate: boolean;
+            /**
+             * Same Sponsor
+             * @default false
+             */
+            same_sponsor: boolean;
+            /**
+             * Situation
+             * @default outside_uk
+             * @enum {string}
+             */
+            situation: "outside_uk" | "switching_graduate" | "switching_student" | "switching_other" | "extending" | "changing_employer";
+            /**
+             * Skilled Worker Before 2024 04 04
+             * @default false
+             */
+            skilled_worker_before_2024_04_04: boolean;
+            /**
+             * Skilled Worker Before 2025 07 22
+             * @default false
+             */
+            skilled_worker_before_2025_07_22: boolean;
+            /**
+             * Stem Phd
+             * @default false
+             */
+            stem_phd: boolean;
+            /**
+             * Under 26
+             * @default false
+             */
+            under_26: boolean;
+        };
+        /** SocCandidateOut */
+        SocCandidateOut: {
+            /** Code */
+            code: string;
+            /** Confidence */
+            confidence: number | null;
+            /** Matched Duties */
+            matched_duties: string[];
+            /** Matched Title */
+            matched_title: string;
+            /** Rank */
+            rank: number;
+            /** Reason */
+            reason: string | null;
+            /** Title */
+            title: string;
+        };
+        /** SocCheckCreateIn */
+        SocCheckCreateIn: {
+            check: components["schemas"]["SocCheckIn"];
+            /**
+             * Job Description
+             * @default
+             */
+            job_description: string;
+            /** Job Title */
+            job_title: string;
+            /** Soc Code */
+            soc_code: string;
+        };
+        /** SocCheckIn */
+        SocCheckIn: {
+            applicant?: components["schemas"]["SocApplicantIn"];
+            /** Cos Assignment Date */
+            cos_assignment_date?: string | null;
+            /** Offered Salary */
+            offered_salary: number | string;
+            /** Pay Scale Administration */
+            pay_scale_administration?: string | null;
+            /** Pay Scale Role */
+            pay_scale_role?: string | null;
+            /**
+             * Salary Per
+             * @enum {string}
+             */
+            salary_per: "year" | "month" | "week" | "hour";
+            /** Weekly Hours */
+            weekly_hours: number | string;
+            /**
+             * Work Nation
+             * @enum {string}
+             */
+            work_nation: "England" | "Scotland" | "Wales" | "Northern Ireland";
+        };
+        /** SocCheckListOut */
+        SocCheckListOut: {
+            /** Items */
+            items: components["schemas"]["SocCheckSummaryOut"][];
+        };
+        /** SocCheckOut */
+        SocCheckOut: {
+            /** Confirmed At */
+            confirmed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Eligibility */
+            eligibility: string;
+            /** Id */
+            id: string;
+            /** Inputs */
+            inputs: {
+                [key: string]: unknown;
+            };
+            /** Job Description */
+            job_description: string;
+            /** Job Title */
+            job_title: string;
+            result: components["schemas"]["CheckResult"];
+            /**
+             * Rules Effective From
+             * Format: date
+             */
+            rules_effective_from: string;
+            /** Rules Version Name */
+            rules_version_name: string;
+            /** Soc Code */
+            soc_code: string;
+            /** Soc Title */
+            soc_title: string;
+            /** Status */
+            status: string;
+            /** Verdict Meets */
+            verdict_meets: boolean | null;
+        };
+        /** SocCheckSummaryOut */
+        SocCheckSummaryOut: {
+            /** Confirmed At */
+            confirmed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Eligibility */
+            eligibility: string;
+            /** Id */
+            id: string;
+            /** Job Title */
+            job_title: string;
+            /**
+             * Rules Effective From
+             * Format: date
+             */
+            rules_effective_from: string;
+            /** Rules Version Name */
+            rules_version_name: string;
+            /** Soc Code */
+            soc_code: string;
+            /** Soc Title */
+            soc_title: string;
+            /** Status */
+            status: string;
+            /** Verdict Meets */
+            verdict_meets: boolean | null;
+        };
+        /** SocCvEvidenceOut */
+        SocCvEvidenceOut: {
+            /** Point */
+            point: string;
+            /** Quote */
+            quote: string;
+        };
+        /** SocCvMatchOut */
+        SocCvMatchOut: {
+            /** Disclaimer */
+            disclaimer: string;
+            /** Evidence */
+            evidence: components["schemas"]["SocCvEvidenceOut"][];
+            /** Gaps */
+            gaps: string[];
+            /** Low Confidence */
+            low_confidence: boolean;
+            /** Removed */
+            removed: string[];
+            /** Score */
+            score: number;
+            /** Soc Code */
+            soc_code: string;
+            /** Suggestions */
+            suggestions: string[];
+            /** Title */
+            title: string;
+        };
+        /** SocMatchIn */
+        SocMatchIn: {
+            check: components["schemas"]["SocCheckIn"];
+            /**
+             * Job Description
+             * @default
+             */
+            job_description: string;
+            /** Job Title */
+            job_title: string;
+        };
+        /** SocMatchOut */
+        SocMatchOut: {
+            /** Ai Ranked */
+            ai_ranked: boolean;
+            /** Candidates */
+            candidates: components["schemas"]["SocCandidateOut"][];
+            /** Checks */
+            checks: components["schemas"]["CheckResult"][];
+            /** Confidence */
+            confidence: number | null;
+            /** Low Confidence */
+            low_confidence: boolean;
+            /** Notice */
+            notice: string | null;
+        };
+        /** SocSearchHitOut */
+        SocSearchHitOut: {
+            /** Code */
+            code: string;
+            /** Matched Title */
+            matched_title: string;
+            /** Title */
+            title: string;
+        };
+        /** SocSearchOut */
+        SocSearchOut: {
+            /** Results */
+            results: components["schemas"]["SocSearchHitOut"][];
         };
         /** SponsorDocumentIn */
         SponsorDocumentIn: {
@@ -10727,6 +11404,19 @@ export interface components {
              * @enum {string}
              */
             policy: "optional" | "admins" | "all";
+        };
+        /** Verdict */
+        Verdict: {
+            /** Hours Needed */
+            hours_needed: string | null;
+            /** Meets */
+            meets: boolean | null;
+            /** Minimum Required */
+            minimum_required: string | null;
+            /** Option */
+            option: string | null;
+            /** Short By */
+            short_by: string | null;
         };
         /** WageCheck */
         WageCheck: {
@@ -21794,6 +22484,124 @@ export interface operations {
             };
         };
     };
+    platform_rules_list_versions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RulesVersionsOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_rules_publish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RulesVersionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_rules_rollback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RulesVersionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     policies_list_policies: {
         parameters: {
             query?: {
@@ -22967,6 +23775,128 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApplyOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_soc_salary_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PublicCheckIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicCheckOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_soc_search: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicSearchOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_soc_code_detail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                code: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublicCodeOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -24794,6 +25724,328 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["TwoStepPolicy"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_list_checks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SocCheckListOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_create_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SocCheckCreateIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SocCheckOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_read_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                check_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SocCheckOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_confirm_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                check_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SocCheckOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_check_report: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                check_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_match: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SocMatchIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SocMatchOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_resume_match: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_soc_resume_match"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SocCvMatchOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    soc_search: {
+        parameters: {
+            query?: {
+                q?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SocSearchOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

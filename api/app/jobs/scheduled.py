@@ -22,6 +22,7 @@ from app.jobs.learning import learning_overdue_daily
 from app.jobs.notifications import notifications_digest_daily
 from app.jobs.policies import policies_overdue_daily
 from app.jobs.reports import generate_report, sweep_report_jobs
+from app.jobs.rules import rules_watch_daily
 from app.modules.email.outbox import MAX_ATTEMPTS
 from app.modules.files.service import remove_orphans
 
@@ -89,9 +90,7 @@ SCHEDULE: tuple[Schedule, ...] = (
     Schedule("policies_overdue_daily", policies_overdue_daily, {"hour": 6, "minute": 15}, "T10.3"),
     Schedule("learning_overdue", learning_overdue_daily, {"hour": 6, "minute": 15}, "T13.3"),
     Schedule("notifications_digest", notifications_digest_daily, {"hour": 7, "minute": 0}, "T14.2"),
-    Schedule(
-        "rules_watch_daily", _nothing_yet("rules_watch_daily"), {"hour": 7, "minute": 0}, "T12.1"
-    ),
+    Schedule("rules_watch_daily", rules_watch_daily, {"hour": 7, "minute": 0}, "T15.7"),
     Schedule(
         "deletion_executor_hourly",
         _nothing_yet("deletion_executor_hourly"),

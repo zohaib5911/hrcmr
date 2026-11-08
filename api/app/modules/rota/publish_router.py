@@ -24,6 +24,7 @@ from app.modules.email.templates import check
 from app.modules.employees.record_pdf import render_pdf
 from app.modules.identity.models import Membership, User
 from app.modules.notifications.models import Notification
+from app.modules.notifications.preferences import email_modes
 from app.modules.rbac.deps import Access, require
 from app.modules.rota.week_models import RotaWeek
 from app.modules.rota.week_router import Reads, Writes  # noqa: TC001
@@ -85,6 +86,8 @@ async def publish(
         if changed
         else []
     )
+    # Only "immediate" people get the e-mail now; "daily" and "off" see the in-app notice.
+    modes = await email_modes(access.db, [user.id for user, _ in recipients])
     for user, employee_id in recipients:
         count = sum(r["employee_id"] == str(employee_id) for r in combined)
         data = {
@@ -104,13 +107,14 @@ async def publish(
                 link=f"/my-shifts?week={week_start}",
             )
         )
-        access.db.add(
-            EmailOutbox(
-                to_address=user.email,
-                template="rota_published",
-                payload=encrypt(json.dumps(data), context=PAYLOAD_CONTEXT),
+        if modes.get(user.id, "immediate") == "immediate":
+            access.db.add(
+                EmailOutbox(
+                    to_address=user.email,
+                    template="rota_published",
+                    payload=encrypt(json.dumps(data), context=PAYLOAD_CONTEXT),
+                )
             )
-        )
     await access.audit(
         "rota.week_published",
         after={

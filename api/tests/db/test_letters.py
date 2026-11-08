@@ -4,14 +4,19 @@ from __future__ import annotations
 
 import io
 import json
+import uuid
 import zipfile
 from typing import Any
 
+from asgi_lifespan import LifespanManager
 from sqlalchemy import text
 
 from app.ai.redaction import find_restricted
-from tests.db.api_support import fake_claude
+from app.main import create_app
+from tests.db.api_support import fake_claude, sign_in_as
+from tests.db.support import DatabaseUnderTest
 from tests.db.test_employee_documents import rig as rig
+from tests.support import TEST_REDIS_URL, build_settings
 
 API = "/api/v1/ai"
 
@@ -124,6 +129,31 @@ async def test_ai_draft_wraps_claude_paragraphs_and_sends_only_type_tone_and_poi
     assert "Probation lasts six months" in user_message
 
 
+async def test_employee_names_in_key_points_never_reach_the_ai(rig: dict[str, Any]) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text(
+                "insert into employees (id, company_id, employee_number, first_name, last_name, "
+                "email, hire_date) values (:i, :c, 'ADA-1', 'Ada', 'Morrow', 'ada@example.com', "
+                "'2025-01-06')"
+            ),
+            {"i": uuid.uuid4(), "c": rig["a"]},
+        )
+    sent = fake_claude(rig["app"], reply="Please attend the meeting with Employee A on Monday.")
+    made = await admin.post(
+        API + "/letters/draft",
+        json={"letter_type": "welcome", "key_points": ["Meet Ada Morrow on Monday"]},
+    )
+    assert made.status_code == 200, made.text
+    assert made.json()["source"] == "ai"
+    # The name is labelled before the request leaves; the draft the user sees has it back.
+    assert len(sent) == 1
+    assert "Ada Morrow" not in sent[0]
+    assert "Employee A" in sent[0]
+    assert "Ada Morrow" in made.json()["body"]
+
+
 async def test_ai_failure_and_unsafe_answers_fall_back_to_the_template(
     rig: dict[str, Any],
 ) -> None:
@@ -157,3 +187,27 @@ async def test_company_ai_switch_off_means_template_and_no_call(rig: dict[str, A
             text("update companies set ai_features_enabled = true where id = :c"),
             {"c": rig["a"]},
         )
+
+
+async def _ai_available(database: DatabaseUnderTest, rig: dict[str, Any], switch: bool) -> bool:
+    """What /auth/me says about AI for a company admin, on a server that has a key."""
+    app = create_app(
+        build_settings(
+            database_url=database.app_url,
+            redis_url=TEST_REDIS_URL,
+            anthropic_api_key="test-key",
+            ai_features_enabled=switch,
+        )
+    )
+    async with LifespanManager(app):
+        admin = await sign_in_as(database, rig["sessions"], app, "company_admin", rig["a"])
+        me = (await admin.get("/api/v1/auth/me")).json()
+        await admin.aclose()
+    return bool(me["ai_available"])
+
+
+async def test_the_platform_ai_switch_hides_ai_even_when_a_key_is_set(
+    rig: dict[str, Any], database: DatabaseUnderTest
+) -> None:
+    assert await _ai_available(database, rig, switch=True) is True
+    assert await _ai_available(database, rig, switch=False) is False

@@ -301,13 +301,13 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] P14 · S · Phase 14 gate
 - Recipe R7 + run the T14.4 fuzz test.
 
-### [ ] AUDIT-2 · AUDIT STOP · covers T12.1 → P14 (and T14.4 by the big model)
+### [x] AUDIT-2 · AUDIT STOP · covers T12.1 → P14 (and T14.4 by the big model)
 
 ---
 
 ## Phase 15 — Sponsorship Job Checker (SOC)
 
-### [ ] T15.1 · S! · ONS SOC data import and local embeddings
+### [x] T15.1 · S! · ONS SOC data import and local embeddings
 - **Spec:** plan L1151, L1443; §6.10 L598–608.
 - **Steps:**
   1. Add `fastembed` and pgvector (Postgres extension + `pgvector` Python package). Migration for global `soc_unit_groups`, `soc_index_entries` with a vector column and a trigram index.
@@ -316,37 +316,37 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Done when:** importer is re-runnable (no duplicates); fixture import test passes; row counts recorded in PROGRESS.
 - **Watch:** find the ONS download URLs from the ONS site and record them; if not found, BLOCKED.
 
-### [ ] T15.2 · B · Rules-data importer (draft rules version, fixtures, salary rules)
-### [ ] T15.3 · B · Rules engine and 20+ golden tests
+### [x] T15.2 · B · Rules-data importer (draft rules version, fixtures, salary rules)
+### [x] T15.3 · B · Rules engine and 20+ golden tests
 
-### [ ] T15.4 · S! · Search and match API
+### [x] T15.4 · S! · Search and match API
 - **Spec:** plan L1127–1131, L1446; API item 20.
 - **Steps:**
   1. `GET /soc/search?q=` (trigram + full-text + vector, top 10).
   2. `POST /soc/match`: retrieval → Claude re-rank via the T14.4 integration with a JSON schema (confidence 0–100, matched duties, why runner-ups lost) → rules engine (T15.3) on top 3. Without AI: return retrieval order with `confidence: null` and a "not AI-ranked" flag.
 - **Done when:** works with and without key (tests mock the AI client); confidence < 60 flagged `low_confidence`.
 
-### [ ] T15.5 · S! · CV match
+### [x] T15.5 · S! · CV match
 - **Spec:** plan L1139–1141, L997.
 - **Steps:** PDF/DOCX text extraction (pypdf / python-docx), **strip e-mail, phone, address and postcode patterns before sending** (unit tests with many formats), Claude comparison → score, evidence quotes, gaps, suggestions. Honesty guardrail text in the prompt (L1143–1146).
 - **Done when:** stripping tests pass; payload test proves no contact details leave; feature hidden without key.
 
-### [ ] T15.6 · S · Checker UI, "Find code" embeds, PDF report
+### [x] T15.6 · S · Checker UI, "Find code" embeds, PDF report
 - **Spec:** plan L1125–1142, L1143–1146, L1448.
 - **Steps:** 1. `/sponsorship-checker` inputs form. 2. Results page (best match card, 2 alternatives, eligibility chip, salary table, verdict, notes, disclaimer + rules version). 3. "Confirm this code" → `soc_checks` + PDF (R4) + fills posting/sponsor doc/designation SOC. 4. "Find code" embeds (posting sheet, candidate Sponsorship tab, visa form, designation); history list.
 - **Done when:** R6 spec: check → confirm → PDF downloads; disclaimer always visible.
 
-### [ ] T15.7 · S! · Daily rules watcher and super-admin diff/publish/rollback
+### [x] T15.7 · S! · Daily rules watcher and super-admin diff/publish/rollback
 - **Spec:** plan L1147–1150, L1449.
 - **Steps:** `rules_watch_daily` 07:00 (R3) using ETag/hash → imports into a **draft** via T15.2's importer; admin screen under `web/app/(admin)/platform/rules/` with diff, Publish, Rollback (Platform Admin only, audited).
 - **Done when:** unchanged pages → no new draft; publish requires platform permission (test); old checks keep their rules version.
 
-### [ ] T15.8 · S · Public free version
+### [x] T15.8 · S · Public free version
 - **Spec:** plan L1152, L1450; public SOC endpoints (item 24).
 - **Steps:** R5 endpoints `/public/soc/search`, `/public/soc/{code}`, `/public/soc/salary-check`; page `/resources/tools/sponsorship-job-checker` (title search + salary table, no CV, no AI unless Turnstile passes).
 - **Done when:** rate limit test; no tenant data reachable.
 
-### [ ] P15 · S · Phase 15 gate
+### [x] P15 · S · Phase 15 gate
 - Recipe R7.
 
 ---

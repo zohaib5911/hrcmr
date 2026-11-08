@@ -820,6 +820,36 @@ Checks:
 - `scan_status in ('pending', 'clean', 'infected', 'error')`
 - `size >= 0`
 
+## `going_rates`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `rules_version_id` | UUID | no |  | references `rules_versions` |
+| `soc_code` | VARCHAR(4) | no |  |  |
+| `table` | VARCHAR(3) | no |  |  |
+| `title` | TEXT | no |  |  |
+| `administration` | TEXT | no | `` |  |
+| `related_titles` | TEXT[] | no |  |  |
+| `soc2010_codes` | TEXT[] | no |  |  |
+| `annual_rate` | NUMERIC(10, 2) | yes |  |  |
+| `hourly_rate` | NUMERIC(8, 2) | yes |  |  |
+| `rate_90` | NUMERIC(10, 2) | yes |  |  |
+| `rate_80` | NUMERIC(10, 2) | yes |  |  |
+| `rate_70` | NUMERIC(10, 2) | yes |  |  |
+| `phd_points_eligible` | BOOLEAN | yes |  |  |
+| `basis_hours` | NUMERIC(4, 1) | yes |  |  |
+| `notes` | TEXT | no | `` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `"table" in ('1', '1a', '2', '2a', '2aa', '2b', '3', '3a')`
+- `soc_code ~ '^[1-9][0-9]{3}$'`
+
 ## `holiday_types`
 
 | Column | Type | Null | Default | Notes |
@@ -837,6 +867,25 @@ Checks:
 Checks:
 
 - `colour in ('blue', 'green', 'orange', 'red', 'gray')`
+
+## `ineligible_codes`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `rules_version_id` | UUID | no |  | references `rules_versions` |
+| `soc_code` | VARCHAR(4) | no |  |  |
+| `title` | TEXT | no |  |  |
+| `related_titles` | TEXT[] | no |  |  |
+| `reason` | TEXT | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `soc_code ~ '^[1-9][0-9]{3}$'`
 
 ## `interviews`
 
@@ -1232,6 +1281,28 @@ Checks:
 - `currency ~ '^[A-Z]{3}$'`
 - `min_annual >= 0 and max_annual >= min_annual`
 
+## `pay_scale_rates`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `rules_version_id` | UUID | no |  | references `rules_versions` |
+| `source_table` | VARCHAR(2) | no |  |  |
+| `soc_code` | VARCHAR(4) | yes |  |  |
+| `administration` | TEXT | no |  |  |
+| `band_or_role` | TEXT | no |  |  |
+| `annual_rate` | NUMERIC(10, 2) | no |  |  |
+| `basis_hours` | NUMERIC(4, 1) | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `soc_code is null or soc_code ~ '^[1-9][0-9]{3}$'`
+- `source_table in ('3', '3a', '4', '5')`
+
 ## `pay_schedules`
 
 | Column | Type | Null | Default | Notes |
@@ -1552,6 +1623,52 @@ Checks:
 - `subject_type <> 'employee' or (check_date is not null and checked_by_user_id is not null)`
 - `subject_type in ('employee', 'candidate')`
 
+## `rules_versions`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `name` | TEXT | no |  |  |
+| `status` | VARCHAR(10) | no | `draft` |  |
+| `source_urls` | JSONB | no |  |  |
+| `effective_from` | DATE | no |  |  |
+| `published_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `published_by` | UUID | yes |  | references `users` |
+| `diff_summary` | JSONB | no |  |  |
+| `table_notes` | JSONB | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `status in ('draft', 'live', 'retired')`
+
+## `salary_rules`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `rules_version_id` | UUID | no |  | references `rules_versions` |
+| `option` | VARCHAR(1) | no |  |  |
+| `general_threshold` | NUMERIC(10, 2) | no |  |  |
+| `going_rate_pct` | SMALLINT | no |  |  |
+| `criteria_key` | VARCHAR(20) | no |  |  |
+| `applies_to` | VARCHAR(30) | no |  |  |
+| `requirement_text` | TEXT | no |  |  |
+| `further_rules` | TEXT | no | `` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `applies_to in ('new', 'transitional_pre_2024', 'transitional_pre_jul_2025', 'health_care')`
+- `going_rate_pct between 1 and 100`
+- `option in ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K')`
+
 ## `scheduled_shifts`
 
 | Column | Type | Null | Default | Notes |
@@ -1616,6 +1733,97 @@ Checks:
 
 - `(break_start is null) = (break_end is null)`
 - `starts_at <> ends_at`
+
+## `shortage_list_entries`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `rules_version_id` | UUID | no |  | references `rules_versions` |
+| `list` | VARCHAR(3) | no |  |  |
+| `soc_code` | VARCHAR(4) | no |  |  |
+| `title` | TEXT | no |  |  |
+| `condition_text` | TEXT | no | `` |  |
+| `job_types` | TEXT[] | no |  |  |
+| `nations` | TEXT[] | no |  |  |
+| `removal_date` | DATE | no |  |  |
+| `dependants_allowed` | BOOLEAN | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `list in ('TSL', 'ISL')`
+- `soc_code ~ '^[1-9][0-9]{3}$'`
+
+## `soc_checks`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `status` | VARCHAR(12) | no | `draft` |  |
+| `job_title` | VARCHAR(200) | no |  |  |
+| `job_description` | TEXT | no | `` |  |
+| `soc_code` | VARCHAR(4) | no |  | references `soc_unit_groups` |
+| `soc_title` | TEXT | no |  |  |
+| `rules_version_id` | UUID | no |  | references `rules_versions` |
+| `rules_version_name` | VARCHAR(200) | no |  |  |
+| `rules_effective_from` | DATE | no |  |  |
+| `inputs` | JSONB | no |  |  |
+| `result` | JSONB | no |  |  |
+| `confirmed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `confirmed_by` | UUID | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(status = 'confirmed') = (confirmed_at is not null)`
+- `soc_code ~ '^[1-9][0-9]{3}$'`
+- `status in ('draft', 'confirmed')`
+
+## `soc_index_entries`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `index_title` | TEXT | no |  |  |
+| `qualifier_add` | TEXT | no | `` |  |
+| `qualifier_ind` | TEXT | no | `` |  |
+| `soc_code` | VARCHAR(4) | no |  | references `soc_unit_groups` |
+| `embedding` | VECTOR(384) | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+## `soc_unit_groups`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `code` | VARCHAR(4) | no |  | unique |
+| `title` | TEXT | no |  |  |
+| `description` | TEXT | no |  |  |
+| `tasks` | TEXT[] | no |  |  |
+| `entry_requirements` | TEXT | no |  |  |
+| `typical_titles` | TEXT[] | no |  |  |
+| `rqf_level` | VARCHAR(10) | yes |  |  |
+| `embedding` | VECTOR(384) | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `code ~ '^[1-9][0-9]{3}$'`
+- `rqf_level in ('6', '3-5', 'below')`
 
 ## `sponsor_documents`
 

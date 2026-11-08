@@ -83,9 +83,11 @@ async def generate(
     task: str,
     instruction: str,
     data: Any = None,
+    names: list[str] | None = None,
     fast: bool = True,
     max_tokens: int = 1024,
 ) -> str:
+    """``names`` are full names the instruction or data may hold; each is labelled before send."""
     client = client_for(request)
     if client is None or not await ai_ready(request, access):
         raise AppError("AI_UNAVAILABLE", "AI features are turned off.", status_code=409)
@@ -100,6 +102,8 @@ async def generate(
             status_code=429,
         )
     pseudonymiser = Pseudonymiser()
+    for name in names or []:
+        pseudonymiser.label(name)
     prompt = build_prompt(instruction, data, pseudonymiser)
     model = client.model_fast if fast else client.model_main
     started = time.monotonic()

@@ -59,6 +59,11 @@ TURNSTILE_AFTER_FAILURES = 3
 _MFA_PENDING_SECONDS = 600
 
 
+def _ai_key(auth: Auth) -> bool:
+    """AI is offered only when the server has a key and the platform switch is on."""
+    return auth.settings.anthropic_api_key is not None and auth.settings.ai_features_enabled
+
+
 async def _audit(
     db: GlobalDb, request: Request, caller: Caller, action: str, **details: object
 ) -> None:
@@ -83,7 +88,7 @@ async def _me(db: GlobalDb, auth: Auth, token: str) -> MeResponse:
     return await accounts.build_me(
         db,
         Caller(token=token, session=data, user=user),
-        ai_key=auth.settings.anthropic_api_key is not None,
+        ai_key=_ai_key(auth),
     )
 
 
@@ -187,7 +192,7 @@ async def logout(
 
 @router.get("/me", summary="Who is signed in, and where they stand")
 async def me(db: GlobalDb, auth: Auth, caller: SessionCaller) -> MeResponse:
-    return await accounts.build_me(db, caller, ai_key=auth.settings.anthropic_api_key is not None)
+    return await accounts.build_me(db, caller, ai_key=_ai_key(auth))
 
 
 # --- passwords -----------------------------------------------------------------------------
@@ -405,7 +410,7 @@ async def step_up(
     return await accounts.build_me(
         db,
         Caller(caller.token, data, caller.user),
-        ai_key=auth.settings.anthropic_api_key is not None,
+        ai_key=_ai_key(auth),
     )
 
 
