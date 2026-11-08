@@ -39,6 +39,7 @@ logger = get_logger("app.stripe")
 BASE_URL = "https://api.stripe.com"
 TIMEOUT_SECONDS = 15.0
 ATTEMPTS = 3
+RETRY_WAIT_SECONDS = 0.5  # times the attempt number
 SIGNATURE_TOLERANCE_SECONDS = 300  # Stripe's own default: older signed payloads are replays
 PLANS = ("annual", "ten_year")
 _OBJECT_ID = re.compile(r"[A-Za-z0-9_]{1,255}")
@@ -267,7 +268,7 @@ class Stripe:
                     if not retry or attempt == ATTEMPTS:
                         logger.warning("stripe_refused", path=path, status=response.status_code)
                         raise StripeError(f"Stripe refused the request ({response.status_code})")
-                await asyncio.sleep(0.5 * attempt)
+                await asyncio.sleep(RETRY_WAIT_SECONDS * attempt)
         finally:
             if self._client is None:
                 await client.aclose()

@@ -91,6 +91,8 @@ IDENTITY_TABLES = [
     "soc_index_entries",
     "soc_unit_groups",
     "sponsor_documents",
+    "stripe_events",
+    "subscriptions",
     "tax_codes",
     "terms_acceptances",
     "terms_versions",

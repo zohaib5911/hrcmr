@@ -353,7 +353,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 16 — Billing and account lifecycle
 
-### [ ] T16.1 · B · Stripe integration and webhooks
+### [x] T16.1 · B · Stripe integration and webhooks
 ### [ ] T16.2 · B · Entitlements and payment-failed grace
 
 ### [ ] T16.3 · S! · Billing page, cancel with refund

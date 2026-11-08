@@ -403,7 +403,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [ ] **Phase 15 gate**
 
 ### Phase 16 — Billing, plans and account lifecycle
-- [ ] **T16.1** Stripe integration and webhooks
+- [x] **T16.1** Stripe integration and webhooks — 2026-11-08. Server-only Stripe client (api/app/integrations/stripe.py: httpx, restricted key, Idempotency-Key on every write, retried with the same key on network/429/5xx, signature check on the raw body with a 300 s window). Migration 0044: subscriptions (tenant, RLS) and stripe_events (global, event id unique). GET /billing/subscription, POST /billing/checkout-session (annual = subscription, 10-year = one-off payment; company id in metadata; one customer per company), POST /billing/portal-session (all billing.manage), POST /webhooks/stripe (signature, each event id applied once, subscriptions read back live from Stripe, audited as system). Tests: 13 pure + 6 DB.
 - [ ] **T16.2** Entitlements and payment-failed grace
 - [ ] **T16.3** Billing page, cancel with refund
 - [ ] **T16.4** Data export

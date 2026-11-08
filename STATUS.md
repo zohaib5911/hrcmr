@@ -3,25 +3,22 @@ Updated: 2026-11-08 Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branc
 State: IN PROGRESS
 
 ## Last completed
-- P15 — Phase 15 gate; PR 23 (dev -> main) CI green except Playwright pending; merging when all green.
+- T16.1 — Stripe integration and webhooks: client (api/app/integrations/stripe.py), migration 0044 (subscriptions, stripe_events), billing router (GET subscription, checkout, portal), POST /webhooks/stripe. Tests 13 pure + 6 DB pass.
 
 ## Current task
-- T16.1 — Stripe integration and webhooks (B)
-  - [ ] 1. migration: subscriptions + stripe_events tables
-  - [ ] 2. api/app/integrations/stripe.py (server-only client, httpx, idempotency keys, signature check)
-  - [ ] 3. billing module: checkout-session (annual / ten_year), portal-session, GET subscription
-  - [ ] 4. POST /webhooks/stripe: signature + store event id (idempotent) + apply to company
-  - [ ] 5. tests (signature, replay, both plans), openapi regen
-- Resume note: see .agent/journal.md last line.
+- T16.2 — Entitlements and payment-failed grace (B). Not started.
 
 ## Next tasks
 - T16.2 (B), T16.3 (S!), T16.4 (S!), T16.5 (B), P16
 
 ## Health
-- CI on dev: green on PR 23 except e2e pending    CI on main: green (PR #22)
-- Local checks run: none yet this session
+- CI on dev: PR 23 (Phase 15) re-running after the status push; merges when green    CI on main: green (PR #22)
+- Local checks run: billing pure 13 + DB 6; migrations, RBAC enforcement/matrix, openapi, architecture, data-model, RLS, identity, body limits, config pass; ruff/mypy clean; Semgrep (CI rulesets) clean on new files.
 
 ## Issues / suggestions
+- (T16.1) invoice.payment_failed only syncs the subscription status (past_due) and audits billing.payment_failed. The 7-day grace and e-mails are T16.2's.
+- (T16.1) The billing page (T16.3) must use /company/billing: Checkout's success and cancel URLs and the portal return URL point there (?checkout=success|cancelled).
+- (T16.1) T16.3 cancel/refund: add cancel_subscription and create_refund to api/app/integrations/stripe.py (same _post with an idempotency key); the webhook already ends a refunded 10-year plan (charge.refunded) and an annual plan on customer.subscription.deleted.
 - OpenAPI component names must be unique. Pydantic qualifies a clashing name, which drops the original from web/lib/api/schema.ts. SOC models use the Soc prefix (SocCandidateOut, SocCvMatchOut, ...). After any new endpoint run `pnpm gen:api` in web and check that no names disappear.
 - Body limits: every upload route must be in the limits table in api/app/main.py. The SOC CV route is there (PROOF_LIMIT). tests/test_body_limits.py enforces it.
 - Architecture rule: app code may not use any `.text` attribute (it is taken for raw SQL text()). Use itertext() or other names (the stripping result field is `cleaned`).
@@ -37,6 +34,11 @@ State: IN PROGRESS
 - Pre-existing: OpenAPI already had five qualified AddressOut names (app__modules__companies__..., app__modules__employees__personal_schemas__...). Not from SOC.
 
 ## Strategy / decisions taken
+- (T16.1) Stripe is called with httpx (no stripe SDK), like the other integrations; tests swap the transport. No Stripe-Version is pinned; the webhook reads both the old and the 2025 shapes (period on items, invoice subscription under parent).
+- (T16.1) The webhook finds the company from metadata.company_id (set on the Checkout session, the subscription and the payment intent), else from the Stripe customer's metadata, then scopes the transaction to it. If the company already holds a different customer id, the event is ignored.
+- (T16.1) Subscription events re-read the live subscription from Stripe, so out-of-order delivery cannot roll the state back. An event id is stored in the same transaction as its change; a Stripe outage while applying returns 502 and nothing is stored, so Stripe's retry applies it.
+- (T16.1) A 10-year plan runs from the event time (paid) for 10 calendar years; the cooling-off end is start + 14 days for both plans. Checkout is refused (409 PLAN_ALREADY_ACTIVE) while a plan is live; plan changes go through support (plan 8.16).
+- (T16.1) The customer id is committed as soon as it is made, so a failed Checkout call never leads to a second customer.
 - (T15.4) Search needs soc.check.read; match needs soc.check.run (auditors can search, not match). Retrieval: 30 hits per leg (trigram, FTS, vector on index titles, vector on unit groups), fused by reciprocal rank (k = 60), top 10. Re-rank: fast=False (ANTHROPIC_MODEL_MAIN), 1,500 max tokens, strict JSON (unique candidate codes). Any unusable reply, AI error or rate limit: search order with notice, ai_ranked false.
 - (T15.4) The plan's "JSON schema" is enforced by pydantic on the reply, not by an API schema feature.
 - (T15.4) Response `checks` = engine CheckResult. Decimal values serialise as strings (pydantic v2 default).

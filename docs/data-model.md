@@ -1868,6 +1868,40 @@ Checks:
 - `version > 0`
 - `visa_route is null or visa_route in ('skilled_worker', 'health_care_worker', 'global_business_mobility', 'scale_up', 'temporary_worker', 'graduate', 'student', 'euss_settled', 'euss_pre_settled', 'family', 'other')`
 
+## `stripe_events`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `event_id` | VARCHAR(255) | no |  | unique |
+| `type` | VARCHAR(100) | no |  |  |
+| `payload_hash` | VARCHAR(64) | no |  |  |
+| `processed_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+## `subscriptions`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `plan` | VARCHAR(10) | no |  |  |
+| `status` | VARCHAR(30) | no |  |  |
+| `stripe_subscription_id` | VARCHAR(80) | yes |  | unique |
+| `stripe_payment_intent_id` | VARCHAR(80) | yes |  | unique |
+| `current_period_start` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `current_period_end` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `cancel_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `refunded_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(plan = 'annual' and stripe_subscription_id is not null and stripe_payment_intent_id is null) or (plan = 'ten_year' and stripe_payment_intent_id is not null and stripe_subscription_id is null)`
+- `plan in ('annual', 'ten_year')`
+
 ## `tax_codes`
 
 | Column | Type | Null | Default | Notes |
