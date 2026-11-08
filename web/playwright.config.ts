@@ -36,7 +36,13 @@ export default defineConfig({
       name: "production",
       testIgnore: DESIGN_SPECS,
       dependencies: ["setup"],
-      use: { baseURL: `http://127.0.0.1:${WEB_PORT}`, storageState: SESSION_FILE },
+      use: {
+        baseURL: `http://127.0.0.1:${WEB_PORT}`,
+        storageState: SESSION_FILE,
+        // The admin host (T17.1) is a name the browser resolves to the local web server, so a page can
+        // open http://admin.example.test:3100/ (C3.1.3). Only that name is mapped.
+        launchOptions: { args: ["--host-resolver-rules=MAP admin.example.test 127.0.0.1"] },
+      },
     },
     {
       name: "design",
