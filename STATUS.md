@@ -1,21 +1,22 @@
 # STATUS
-Updated: 2026-11-08 11:20 (Europe/London)    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: see git log
-
-State: BLOCKED — needs big model (T17.3)
+Updated: 2026-11-08 12:00 (Europe/London)    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: 2631be7
+State: IN PROGRESS
 
 ## Last completed
-- T17.2 — Overview metrics, companies and users search (Haiku). API only, as the micro_plan steps read: `GET /platform/metrics`; `GET /platform/companies` (search, filter, paged) and `/{id}` (profile, people, last platform actions); `suspend`, `reactivate` (reason required), `extend-plan` (10-year plan with an active subscription only), `mark-for-deletion` (owner only; erases nothing); `GET /platform/users?q=`, `lock` and `unlock`. Every change audited under the platform admin (migration 0049). Tests: `tests/db/test_platform_admin.py` 7 pass.
-- T17.1 — Platform admin auth and admin host routing (Haiku). Platform cookie `brand_platform_session`, issued by `POST /api/v1/auth/platform-session` after MFA and inside `ADMIN_IP_ALLOWLIST`; red `PlatformBar` on every admin page.
-- P16 — Phase 16 gate: PR #25 merged, all checks green. Stripe E2E parked in leftover.md L1.
+- T17.2 — Overview metrics, companies and users search (Haiku). API only.
+- T17.1 — Platform admin auth and admin host routing (Haiku).
 
 ## Current task
-- None. T17.2 is ticked. The next block in micro_plan is T17.3 (B, support mode): needs a big model.
+- T17.3 — Support mode (impersonation) (plan L1165, L1466, L1638)
+  - [ ] 1. migration 0050 impersonation_sessions + RLS + audit policies; model
+  - [ ] 2. support session: separate cookie, tenant guard (read-only unless write-enabled), 30 min expiry
+  - [ ] 3. platform routes: start (reason + ticket), write-enable (owner + confirm), end; tenant end
+  - [ ] 4. /auth/me support block; web banner in the tenant shell
+  - [ ] 5. tests (tests/db/test_support_mode.py), web unit, typecheck, gen:api; tick
+- Resume note: see journal and last commit Next line.
 
 ## Next tasks
-- T17.3 (B) Support mode (impersonation). Start a big model (Opus / Solo 6.1) and type: Read AGENTS.md and continue.
-- Before any admin screen is built: the web platform-session step (Issues below).
-- T17.4 (S!) subscriptions, refunds, deletion and export queue, contact inbox.
-- leftover.md L1 (Stripe E2E) when the owner has test keys; before Phase 23.
+- T17.4 (S!), T17.5 (S), T17.6 (S), P17, AUDIT-3
 
 ## Health
 - CI on dev: not run for T17.2 (no PR; PR waits for the Phase 17 gate). Last merge to main: PR #25 (P16), all checks green.
