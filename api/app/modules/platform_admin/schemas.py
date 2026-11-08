@@ -289,3 +289,8 @@ class JobFailuresOut(BaseModel):
 
 class JobQueueOut(BaseModel):
     waiting: int
+
+
+class JobRerunOut(BaseModel):
+    job: str
+    job_id: str  # the queue's id for the re-run

@@ -3981,6 +3981,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/jobs/failures/{failure_id}/rerun": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rerun Failed Job
+         * @description Run a failed job once more, if it is on the re-run list (T17.6). Reason required.
+         */
+        post: operations["platform_admin_rerun_failed_job"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/platform/jobs/queue": {
         parameters: {
             query?: never;
@@ -9474,6 +9494,13 @@ export interface components {
         JobQueueOut: {
             /** Waiting */
             waiting: number;
+        };
+        /** JobRerunOut */
+        JobRerunOut: {
+            /** Job */
+            job: string;
+            /** Job Id */
+            job_id: string;
         };
         /** KeyPersonIn */
         KeyPersonIn: {
@@ -25462,6 +25489,50 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["JobFailuresOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_admin_rerun_failed_job: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                failure_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReasonIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobRerunOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

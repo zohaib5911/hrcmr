@@ -24,6 +24,7 @@ from app.jobs.learning import learning_overdue_daily
 from app.jobs.notifications import notifications_digest_daily
 from app.jobs.policies import policies_overdue_daily
 from app.jobs.reports import generate_report, sweep_report_jobs
+from app.jobs.rerun import RERUNNABLE, rerun_name
 from app.jobs.rules import rules_watch_daily
 from app.modules.email.outbox import MAX_ATTEMPTS
 from app.modules.files.service import remove_orphans
@@ -124,4 +125,10 @@ def functions() -> list[Function]:
         func(tracked(generate_report, name="generate_report"), name="generate_report", max_tries=1),
         func(tracked(generate_export, name="generate_export"), name="generate_export", max_tries=1),
         func(tracked(worker_ping, name="worker_ping", quiet=True), name="worker_ping", max_tries=1),
+        # Re-runs an admin asks for (T17.6): only the jobs listed in app/jobs/rerun.py.
+        *[
+            func(tracked(s.job, name=s.name, quiet=s.quiet), name=rerun_name(s.name), max_tries=1)
+            for s in SCHEDULE
+            if s.name in RERUNNABLE
+        ],
     ]

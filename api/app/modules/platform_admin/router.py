@@ -18,6 +18,7 @@ from fastapi import APIRouter, Depends, Path, Query, Request, Response
 from sqlalchemy import select
 
 from app.core.errors import AppError, ForbiddenError
+from app.jobs.queue import open_queue
 from app.modules.identity.models import PlatformAdmin
 from app.modules.platform_admin import (
     announcements,
@@ -50,6 +51,7 @@ from app.modules.platform_admin.schemas import (
     FeatureFlagsOut,
     JobFailuresOut,
     JobQueueOut,
+    JobRerunOut,
     MetricsOut,
     OptionalReasonIn,
     ReasonIn,
@@ -69,6 +71,7 @@ Reader = Annotated[PlatformAccess, Depends(require_platform("platform.companies.
 Writer = Annotated[PlatformAccess, Depends(require_platform("platform.companies.write"))]
 Refunder = Annotated[PlatformAccess, Depends(require_platform("platform.billing.refund"))]
 Content = Annotated[PlatformAccess, Depends(require_platform("platform.content.write"))]
+Rerunner = Annotated[PlatformAccess, Depends(require_platform("platform.jobs.run"))]
 PLAN_PATTERN = "^(free|annual|ten_year)$"
 STATUS_PATTERN = "^(active|suspended|pending_deletion|deleted)$"
 
@@ -395,6 +398,24 @@ async def list_job_failures(
     offset: Annotated[int, Query(ge=0, le=100_000)] = 0,
 ) -> JobFailuresOut:
     return await jobs.failures(access.db, limit=limit, offset=offset)
+
+
+@router.post(
+    "/platform/jobs/failures/{failure_id}/rerun", status_code=202, response_model=JobRerunOut
+)
+async def rerun_failed_job(
+    failure_id: uuid.UUID, body: ReasonIn, request: Request, access: Rerunner
+) -> JobRerunOut:
+    """Run a failed job once more, if it is on the re-run list (T17.6). Reason required."""
+    queue = await open_queue(request.app.state.settings)
+    try:
+        made = await jobs.rerun(
+            access.db, access.audit_context, failure_id, reason=body.reason, queue=queue
+        )
+    finally:
+        await queue.close()
+    await access.db.commit()
+    return made
 
 
 @router.get("/platform/jobs/queue", response_model=JobQueueOut)
