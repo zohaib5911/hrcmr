@@ -193,7 +193,7 @@ export function BillingPage({
       ) : null}
 
       <Card>
-        <CardHeader title="Your plan" />
+        <CardHeader title="Your plan" headingLevel={2} />
         <CardBody>
           <dl className="grid grid-cols-[max-content_1fr] gap-x-6 gap-y-3">
             <dt className="text-label-secondary">Plan</dt>
@@ -247,7 +247,7 @@ export function BillingPage({
 
       {live && plan !== null ? (
         <Card>
-          <CardHeader title="Cancel your plan" />
+          <CardHeader title="Cancel your plan" headingLevel={2} />
           <CardBody className="flex flex-col gap-4">
             {refundable ? (
               <>
@@ -297,6 +297,7 @@ export function BillingPage({
         <Card>
           <CardHeader
             title="Changing plan"
+            headingLevel={2}
             description="Switching between 1 year and 10 years is done by support for now."
             actions={
               <Button asChild variant="gray">
@@ -315,6 +316,7 @@ export function BillingPage({
         <Card>
           <CardHeader
             title="Payment details and invoices"
+            headingLevel={2}
             description="Update your card and see your invoices, in Stripe's secure page."
             actions={
               <Button variant="gray" disabled={busy} onClick={() => void openPortal()}>

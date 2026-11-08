@@ -163,7 +163,7 @@ export function DeleteAccountPage({
       ) : null}
 
       <Card>
-        <CardHeader title="What is deleted" />
+        <CardHeader title="What is deleted" headingLevel={2} />
         <CardBody className="flex flex-col gap-3">
           <ul className="text-label-secondary list-disc pl-5">
             {DELETED.map((line) => (
@@ -181,6 +181,7 @@ export function DeleteAccountPage({
         <Card>
           <CardHeader
             title="Delete the account"
+            headingLevel={2}
             description="We e-mail you a 6-digit code. Once you enter it, the account is deleted 7 days later."
           />
           <CardBody className="flex flex-col gap-4">
@@ -213,6 +214,7 @@ export function DeleteAccountPage({
         <Card>
           <CardHeader
             title="Enter the code"
+            headingLevel={2}
             description={`We e-mailed you a 6-digit code. It works until ${request.code_expires_at ? new Date(request.code_expires_at).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" }) : "it expires"}.`}
           />
           <CardBody>
