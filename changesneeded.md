@@ -83,7 +83,7 @@ Each screen needs loading, empty and error states, works at 360 px and in dark m
 - **Fix:** fetch `PAGE_URLS[kind]` from `soc_rules/source.py` instead; still compare against the stored list and return `fetch_failed` if a stored URL differs.
 - **Done when:** a test in the watcher's test file: a live version whose `source_urls` names another host → `fetch_failed` and no request is sent (use the existing fake client).
 
-### [ ] C3.1.14 · P2 · Comp access is not shown on the billing page (from T17.6 comp)
+### [x] C3.1.14 · P2 · Comp access is not shown on the billing page (from T17.6 comp) — fixed in 5bd8b10
 - **Problem:** `GET /billing/subscription` returns `comp_until`; `web/components/company/billing-page.tsx` ignores it, so a company with comp access looks like a free plan and is offered Checkout.
 - **Fix:** when `comp_until` is in the future, show an info `Alert` "Complimentary access until <date>" above the plan card.
 - **Done when:** unit test with a fixture that has `comp_until` set.

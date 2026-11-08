@@ -433,3 +433,4 @@
 2026-11-09 01:30 | Claude (Haiku) | AUDIT-3 | C3.1.16 done: code_hash in NEVER_EXPORTED + every tables/*.csv header checked; test_exports 3 pass | next C3.1.13 (watcher fetches only PAGE_URLS)
 2026-11-09 01:31 | Claude (Haiku) | AUDIT-3 | C3.1.13 done: watch fetches PAGE_URLS only, stored URLs compared first (fetch_failed, no request); test_rules_watch 4 pass | next C3.1.14 (comp alert on billing page), C3.1.11 (export card), C3.1.15 (admin token)
 2026-11-09 01:33 | Claude (Haiku) | AUDIT-3 | C3.1.14 done: billing page shows Complimentary access until <date> when comp_until is in the future; billing-page.test 2 pass; lint/typecheck clean | next C3.1.15 (admin red token), then C3.1.11 (export card)
+2026-11-09 01:36 | Claude (Haiku) | AUDIT-3 | C3.1.15 done: --fixed-admin token (3 theme blocks + @theme + catalog + expected), bg-fixed-admin in platform-bar and support-banner; web unit 806 pass, lint/typecheck clean | next C3.1.11 (export card in billing page)
