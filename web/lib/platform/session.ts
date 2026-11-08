@@ -2,9 +2,10 @@
  * Starting a platform session from the admin host (T17.1; owner answer 5, 2026-11-08).
  *
  * A platform admin's pages need the platform cookie, which only POST /auth/platform-session sets,
- * after MFA. The start is a route handler (app/(admin)/platform/session), because a server component
- * cannot set a cookie. It forwards the API's Set-Cookie to the browser. Every redirect uses the PUBLIC
- * admin path (`/session`, `/rules`), never `/platform/...`, which the proxy refuses from a browser.
+ * after MFA. The start is made by the browser (components/platform/session-start.tsx), so the API
+ * sees the admin's own address and the cookie is set on the admin host. Every redirect uses the
+ * PUBLIC admin path (`/session`, `/rules`), never `/platform/...`, which the proxy refuses from a
+ * browser.
  */
 
 /** The platform cookie the API sets (PLATFORM_SESSION_COOKIE_NAME, default in app/core/config.py). */
@@ -28,49 +29,6 @@ export function safeNextPath(raw: string | null): string {
   if (/[\\\u0000-\u001f\u007f]/.test(raw)) return "/";
   if (raw === INTERNAL_PREFIX || raw.startsWith(`${INTERNAL_PREFIX}/`)) return "/";
   return raw;
-}
-
-export type StartOutcome = { ok: true; setCookies: string[] } | { ok: false; code: string };
-
-/**
- * Ask the API to start the session for the person whose cookies are in `cookieHeader`. A 201 gives
- * the Set-Cookie headers to forward; a refusal gives the API's error code, for the refusal page.
- */
-export async function startPlatformSession(options: {
-  apiBase: string;
-  cookieHeader: string;
-  csrfToken?: string;
-  fetchImpl?: typeof fetch;
-}): Promise<StartOutcome> {
-  const fetchImpl = options.fetchImpl ?? fetch;
-  const headers: Record<string, string> = {
-    accept: "application/json",
-    cookie: options.cookieHeader,
-  };
-  if (options.csrfToken) headers["X-CSRF-Token"] = options.csrfToken;
-  try {
-    const response = await fetchImpl(`${options.apiBase}/auth/platform-session`, {
-      method: "POST",
-      headers,
-      cache: "no-store",
-    });
-    if (response.status === 201) {
-      return { ok: true, setCookies: response.headers.getSetCookie() };
-    }
-    return { ok: false, code: await errorCode(response) };
-  } catch {
-    return { ok: false, code: "UNREACHABLE" };
-  }
-}
-
-async function errorCode(response: Response): Promise<string> {
-  try {
-    const body: unknown = await response.json();
-    const code = (body as { error?: { code?: unknown } } | null)?.error?.code;
-    return typeof code === "string" ? code : "UNKNOWN";
-  } catch {
-    return "UNKNOWN";
-  }
 }
 
 /** What the person is told when the session does not start. Plain words; no internal detail. */
