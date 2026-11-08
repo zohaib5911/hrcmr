@@ -3,6 +3,8 @@ Scope: audit-pass-2..55153b7 (128 commits, T15.1 → P17)   Tests at audit: api 
 Counts: 0 P0 / 10 P1 / 6 P2. FIX NEEDED.
 
 Order: do the items top to bottom. C3.1.3 (the e2e seed) comes before the admin screens, because their e2e tests need it.
+**BLOCKED (2026-11-09, Haiku): C3.1.4 to C3.1.10 wait for a decision on the e2e admin host.** The admin host cannot run client JavaScript in e2e (CSP upgrade-insecure-requests on plain http) and its browser calls to the API are cross-site (SameSite cookies not sent). Both are in STATUS Issues. Every item here needs a client screen and an e2e test, so none is ticked. C3.1.11 to C3.1.16 are done.
+
 Admin screens (C3.1.4 to C3.1.10): copy `web/components/platform/rules-editor.tsx` (components/ui only, `attempt()` from
 `lib/auth/request`, `PageHeader`, `ConfirmDialog`, `formatUk`) and its page `web/app/(admin)/platform/rules/page.tsx`.
 Pages live under `web/app/(admin)/platform/<name>/page.tsx`; the browser sees them at `/<name>` on the admin host.
@@ -68,7 +70,7 @@ Each screen needs loading, empty and error states, works at 360 px and in dark m
 - **Fix:** `/jobs` (queue depth, failures table, "Run again" for allow-listed jobs with a required reason) and `/audit` (filters: action family, actor, date range; paged table; "Export CSV" link to `/platform/audit/export` with the same filters). Then add the admin pages to a `web/tests/e2e/phase17-screenshots.spec.ts` (copy `phase16-screenshots.spec.ts`; 390 and 1280 px, both themes) and run it once. Tick leftover.md L2.
 - **Done when:** unit tests; e2e opens both pages; the screenshots exist under the same folder as phase 16's.
 
-### [ ] C3.1.11 · P2 · A data export can only be asked for inside the delete-account flow (from T16.4)
+### [x] C3.1.11 · P2 · A data export can only be asked for inside the delete-account flow (from T16.4) — fixed in 625dd58
 - **Problem:** nothing in `web/` calls `POST /companies/me/export`; the only way to get an export is to start deleting the company (`delete-account-page.tsx`). Plan 8.16 lists the export as its own feature.
 - **Fix:** add an "Export all your data" card to `web/components/company/billing-page.tsx` (Company Admins only, as the rest of the page): button → the same password step-up dialog `delete-account-page.tsx` uses → `POST /companies/me/export`; show "We are preparing your export. We will e-mail you a link." and the `EXPORT_IN_PROGRESS` message on 409.
 - **Done when:** unit test for the card (step-up asked, success and 409 messages); `pnpm test` pass.
