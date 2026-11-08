@@ -6,9 +6,12 @@ dashboard is one click away, and no Stripe call is made per row.
 A refund is one full refund of the latest payment behind a purchase: an annual plan's latest
 invoice, or a 10-year payment. It goes through the T16 Stripe client with the same idempotency key
 the self-serve refund uses (``refund-{payment_intent}``), so one payment is refunded at most once,
-however the two paths race or a request is retried. The refund is recorded and audited here. The
-plan itself changes when Stripe's ``charge.refunded`` event arrives, as it does for a refund made
-in Stripe's dashboard (billing/service.py).
+however the two paths race or a request is retried. The refund is recorded and audited here.
+
+A 10-year refund ends the company's plan in the same step (the same change as ``_refunded`` in
+billing/service.py); the later ``charge.refunded`` webhook then changes nothing. An annual refund
+only records the refund of one payment (for example a duplicate charge). The annual subscription
+keeps running.
 """
 
 from __future__ import annotations
@@ -112,6 +115,9 @@ async def refund(
 ) -> str:
     """Refund the latest payment behind ``subscription`` in full. Returns Stripe's refund id.
 
+    A 10-year refund also ends the company's plan now; an annual refund does not cancel the
+    subscription (see the module docstring).
+
     Nothing is committed here: the caller commits once the refund is recorded. If that commit
     fails after Stripe refunded, a retry sends the same idempotency key and Stripe answers with the
     first refund, so the payment is still refunded once."""
@@ -140,6 +146,11 @@ async def refund(
     subscription.refunded_at = now
     if subscription.plan == "ten_year":
         subscription.status = "refunded"
+        company = await db.get(Company, subscription.company_id)
+        if company is not None and company.plan == "ten_year":
+            company.plan = "free"
+            company.subscription_status = "refunded"
+            company.subscription_ends_at = now
     await record(
         db,
         context,

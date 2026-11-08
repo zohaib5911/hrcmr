@@ -424,3 +424,4 @@
 2026-11-08 19:38 | Claude (Haiku) | P17 | gate PR #26 merged into main (38537c1) after 12/12 checks green on 2ec407e; dev fast-forwarded to main | next AUDIT-3 (B): stop, big model runs audit.md
 2026-11-09 09:00 | Claude (Opus) | AUDIT-3 | start round 1, scope audit-pass-2..55153b7 (128 commits, T15.1-P17) | next: full checks per audit.md §2
 2026-11-09 10:30 | Claude (Opus) | AUDIT-3 | round 1 written: 0/10/6, api 1319, web 802, e2e 437 pass; tag audit-3-r1 | next: small model fixes C3.1.1
+2026-11-09 01:13 | Claude (Haiku) | AUDIT-3 | C3.1.1 done: platform 10-year refund ends the company plan (billing.py refund + docstrings); test_a_ten_year_refund_ends_the_plan_and_the_later_webhook_changes_nothing; tests: platform_billing+billing 29 pass | next: commit, push, tick C3.1.1 then C3.1.2 (browser session start)
