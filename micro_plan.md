@@ -405,6 +405,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [ ] T17.5 · S · Content tools and feature flags
 - **Spec:** plan L1170, L1175, L1468. Full course editor, templates, guides (MDX upload + sanitised preview), dossier links, announcement banner, terms version publish (forces re-acceptance), feature flags.
 - **Watch:** MDX/Markdown preview must be sanitised (no raw HTML/script).
+- **Status (2026-11-08): BLOCKED — owner decision for templates and guides (see STATUS, Owner actions).** Built: terms version publish (owner only, forces re-acceptance); feature flags (`/platform/feature-flags`); announcement banners per region (platform create and end, tenant banner in the app shell); dossier links (existing `/admin/dossier-links`, audited); course editor (existing `/admin/courses`, sections, quiz, sources, review date, publish; tests pass). Not built: templates and guides with MDX upload and sanitised preview. Tests: `tests/db/test_platform_content.py` 10 pass; web `announcement-banner` 3 pass.
 
 ### [ ] T17.6 · S · Jobs dashboard, register status, rules screens, platform audit log
 - **Spec:** plan L1169, L1171–1174, L1469.
