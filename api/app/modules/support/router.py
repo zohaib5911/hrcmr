@@ -155,7 +155,7 @@ async def leave_support(request: Request, db: GlobalDb, auth: Auth) -> Response:
             )
         )
     ).scalar_one_or_none()
-    if row is None:
+    if row is None or not service.is_live(row, service.now()):
         await auth.sessions.revoke(db, token, data)
         await db.commit()
         return response
