@@ -73,7 +73,7 @@ Each screen needs loading, empty and error states, works at 360 px and in dark m
 - **Fix:** add an "Export all your data" card to `web/components/company/billing-page.tsx` (Company Admins only, as the rest of the page): button → the same password step-up dialog `delete-account-page.tsx` uses → `POST /companies/me/export`; show "We are preparing your export. We will e-mail you a link." and the `EXPORT_IN_PROGRESS` message on 409.
 - **Done when:** unit test for the card (step-up asked, success and 409 messages); `pnpm test` pass.
 
-### [ ] C3.1.12 · P2 · A support-level platform admin can lock an owner (from T17.2)
+### [x] C3.1.12 · P2 · A support-level platform admin can lock an owner (from T17.2) — fixed in 1c72492
 - **Problem:** `api/app/modules/platform_admin/users.py` `lock()` only refuses your own account. Any platform admin can lock another platform admin, including an owner.
 - **Fix:** in `router.py` `lock_user`, if the target user has a `platform_admins` row and the caller is not an owner (`_is_owner(access)`), raise `ForbiddenError("Only an owner can lock a platform admin.")`.
 - **Done when:** test in `api/tests/db/test_platform_admin.py`: support admin locking an owner → 403 and the owner stays active; owner locking a support admin → 200.
@@ -93,7 +93,7 @@ Each screen needs loading, empty and error states, works at 360 px and in dark m
 - **Fix:** add `--fixed-admin: #b00010` next to `--on-fixed` in each theme block of `globals.css` and `--color-fixed-admin: var(--fixed-admin)` in the `@theme` block; use `bg-fixed-admin` in both files. Add the token to `web/tests/support/expected-tokens.ts` if that file lists them.
 - **Done when:** `pnpm lint && pnpm typecheck && pnpm test` pass; no `#b00010` left outside `globals.css`.
 
-### [ ] C3.1.16 · P2 · The deletion code hash is in the data export (from T16.4)
+### [x] C3.1.16 · P2 · The deletion code hash is in the data export (from T16.4) — fixed in c2f474d
 - **Problem:** `api/app/modules/exports/archive.py` `NEVER_EXPORTED` does not list `code_hash`, so `tables/deletion_requests.csv` carries it while a request is waiting for its code.
 - **Fix:** add `"code_hash"` to `NEVER_EXPORTED`.
 - **Done when:** a check in `api/tests/db/test_exports.py` that no exported header is `code_hash`; that file passes.

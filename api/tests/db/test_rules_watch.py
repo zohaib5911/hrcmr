@@ -73,8 +73,15 @@ async def _publish_first(url: str) -> None:
         await engine.dispose()
 
 
-async def _watch(url: str, bodies: dict[str, bytes], status: int = 200) -> WatchResult:
+async def _watch(
+    url: str,
+    bodies: dict[str, bytes],
+    status: int = 200,
+    requested: list[str] | None = None,
+) -> WatchResult:
     def handler(request: httpx.Request) -> httpx.Response:
+        if requested is not None:
+            requested.append(str(request.url))
         if status != 200:
             return httpx.Response(status)
         return httpx.Response(200, content=bodies[str(request.url)])
@@ -86,6 +93,23 @@ async def _watch(url: str, bodies: dict[str, bytes], status: int = 200) -> Watch
                 result = await watch_rules(db, client, today=dt.date(2026, 11, 8))
             await db.commit()
         return result
+    finally:
+        await engine.dispose()
+
+
+async def _stored_url_moved(url: str, kind: str, moved_to: str) -> None:
+    """Points the live version's stored address for ``kind`` at another host (as bad data could)."""
+    engine = engine_for(url, poolclass=NullPool)
+    try:
+        async with engine.begin() as connection:
+            await connection.execute(
+                text(
+                    "update rules_versions set source_urls = (select jsonb_agg(case "
+                    "when e->>'kind' = :kind then jsonb_set(e, '{url}', to_jsonb(cast(:to as text))) "
+                    "else e end) from jsonb_array_elements(source_urls) e) where status = 'live'"
+                ),
+                {"kind": kind, "to": moved_to},
+            )
     finally:
         await engine.dispose()
 
@@ -131,4 +155,19 @@ def test_a_changed_page_adds_a_draft_and_the_live_version_stays(
 def test_a_failed_fetch_changes_nothing(rules_database: DatabaseUnderTest) -> None:
     result = asyncio.run(_watch(rules_database.owner_url, _bodies(), status=503))
     assert result.status == "fetch_failed"
+    assert asyncio.run(_statuses(rules_database.owner_url)) == ["live"]
+
+
+def test_a_stored_address_on_another_host_is_never_requested(
+    rules_database: DatabaseUnderTest,
+) -> None:
+    asyncio.run(
+        _stored_url_moved(
+            rules_database.owner_url, SKILLED_OCCUPATIONS, "https://evil.example/rules"
+        )
+    )
+    requested: list[str] = []
+    result = asyncio.run(_watch(rules_database.owner_url, _bodies(), requested=requested))
+    assert result.status == "fetch_failed"
+    assert requested == []
     assert asyncio.run(_statuses(rules_database.owner_url)) == ["live"]

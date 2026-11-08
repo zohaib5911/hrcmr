@@ -19,6 +19,7 @@ from app.modules.soc_rules.importer import import_rules_source
 from app.modules.soc_rules.models import RulesVersion
 from app.modules.soc_rules.source import (
     PAGE_KINDS,
+    PAGE_URLS,
     page_from_bytes,
     rules_source_from_read,
 )
@@ -53,15 +54,22 @@ async def watch_rules(
     urls = {str(page["kind"]): str(page["url"]) for page in live.source_urls}
     if sorted(urls) != sorted(PAGE_KINDS):
         return WatchResult("fetch_failed", detail="The live version does not list all three pages.")
+    # Only the pages this code names are fetched. The stored addresses are compared, never followed,
+    # so the database cannot make the watch request another host (C3.1.13).
+    if any(urls[kind] != PAGE_URLS[kind] for kind in PAGE_KINDS):
+        return WatchResult(
+            "fetch_failed",
+            detail="The live version lists a page this watch does not read.",
+        )
     retrieved = (today or dt.datetime.now(dt.UTC).date()).isoformat()
     read = {}
     for kind in PAGE_KINDS:
         try:
-            response = await client.get(urls[kind], timeout=PAGE_TIMEOUT_SECONDS)
+            response = await client.get(PAGE_URLS[kind], timeout=PAGE_TIMEOUT_SECONDS)
             response.raise_for_status()
         except httpx.HTTPError:
             return WatchResult("fetch_failed", detail=f"Could not fetch the {kind} page.")
-        read[kind] = page_from_bytes(kind, urls[kind], response.content, retrieved)
+        read[kind] = page_from_bytes(kind, PAGE_URLS[kind], response.content, retrieved)
     try:
         source = rules_source_from_read(read)
     except ValueError as exc:
