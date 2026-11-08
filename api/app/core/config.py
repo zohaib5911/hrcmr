@@ -108,6 +108,9 @@ class Settings(BaseSettings):
     # The platform admin's own session cookie (T17.1). A tenant session never works on the admin
     # routes, and a platform session never works on the tenant routes.
     platform_session_cookie_name: str = "brand_platform_session"
+    # Support mode (T17.3): a platform admin's 30-minute view of one company, in its own cookie so
+    # the admin's own tenant session is untouched and comes back when support mode ends.
+    support_session_cookie_name: str = "brand_support_session"
     # The product name in e-mails and in an authenticator app's list (as in brand.config.ts).
     brand_name: str = "Brand"
     field_encryption_keys: SecretStr
@@ -194,6 +197,11 @@ class Settings(BaseSettings):
     def _fail_closed_when_deployed(self) -> Settings:
         if self.platform_session_cookie_name == self.session_cookie_name:
             raise ValueError("PLATFORM_SESSION_COOKIE_NAME must differ from SESSION_COOKIE_NAME")
+        if self.support_session_cookie_name in {
+            self.session_cookie_name,
+            self.platform_session_cookie_name,
+        }:
+            raise ValueError("SUPPORT_SESSION_COOKIE_NAME must differ from the other cookie names")
         if self.app_env.is_deployed:
             missing = [name.upper() for name in _REQUIRED_WHEN_DEPLOYED if not getattr(self, name)]
             if missing:

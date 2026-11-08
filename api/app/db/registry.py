@@ -39,4 +39,5 @@ import app.modules.rtw.models
 import app.modules.soc.models
 import app.modules.soc_rules.models
 import app.modules.sponsor_documents.models
+import app.modules.support.models
 import app.modules.work_log.models
