@@ -45,10 +45,22 @@ test.describe("main host", () => {
 });
 
 test.describe("admin host", () => {
-  test("serves the back office at the root", async ({ request }) => {
+  test("sends the back office root to start a platform session first", async ({ request }) => {
+    // Owner answer 5 (T17.1): a platform admin's pages need the platform cookie, so the frame sends
+    // a visitor without one to /session, which starts it (or explains why it cannot).
+    const response = await request.get("/", { headers: admin, maxRedirects: 0 });
+    expect(response.status()).toBe(307);
+    expect(response.headers()["location"]).toBe("/session?next=%2F");
+  });
+
+  test("a visitor without a platform session sees the refusal page on the admin host", async ({
+    request,
+  }) => {
     const response = await request.get("/", { headers: admin });
     expect(response.status()).toBe(200);
-    expect(await headingOf(response)).toBe("Platform admin");
+    // The redirect must stay on the host the browser asked for, never the server's bind address.
+    expect(new URL(response.url()).origin).toBe(new URL(BASE_URL).origin);
+    expect(await headingOf(response)).toBe("Platform session not started");
   });
 
   test("is kept out of search engines", async ({ request }) => {
@@ -97,8 +109,11 @@ test.describe("behind Cloudflare and Railway", () => {
 
     const back = await request.get("/", {
       headers: { ...admin, ...forwarded, "x-forwarded-host": ADMIN_HOST },
+      maxRedirects: 0,
     });
-    expect(await headingOf(back)).toBe("Platform admin");
+    // Still the admin host, so the admin frame's session gate applies (the same redirect as above).
+    expect(back.status()).toBe(307);
+    expect(back.headers()["location"]).toBe("/session?next=%2F");
   });
 
   test("a spoofed X-Forwarded-Host cannot turn the main host into the admin host", async ({

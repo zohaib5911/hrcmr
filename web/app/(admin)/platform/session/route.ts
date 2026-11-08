@@ -17,9 +17,18 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   });
   if (!outcome.ok) {
     const code = encodeURIComponent(outcome.code);
-    return NextResponse.redirect(new URL(`/session-required?code=${code}`, request.url));
+    return redirectTo(`/session-required?code=${code}`);
   }
-  const response = NextResponse.redirect(new URL(next, request.url));
+  const response = redirectTo(next);
   for (const cookie of outcome.setCookies) response.headers.append("set-cookie", cookie);
   return response;
+}
+
+/**
+ * A 307 with a RELATIVE Location. An absolute URL built from `request.url` carries the server's bind
+ * address (0.0.0.0 behind the proxy), so the browser would be sent to an address nobody can reach
+ * and land on the main host's 404. A relative one is resolved against the host the browser asked for.
+ */
+function redirectTo(path: string): NextResponse {
+  return new NextResponse(null, { status: 307, headers: { location: path } });
 }
