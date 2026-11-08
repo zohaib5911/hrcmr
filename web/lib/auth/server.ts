@@ -15,11 +15,13 @@ export type Me = components["schemas"]["MeResponse"];
 
 /** The API sets this cookie (SESSION_COOKIE_NAME in the API's settings). */
 export const SESSION_COOKIE = "brand_session";
+/** Support mode (T17.3, SUPPORT_SESSION_COOKIE_NAME): a platform admin viewing one company. */
+export const SUPPORT_COOKIE = "brand_support_session";
 
 /** An API client that speaks for the person looking at the page, or `null` if nobody is signed in. */
 export async function serverApi(): Promise<ApiClient | null> {
   const jar = await cookies();
-  if (!jar.has(SESSION_COOKIE)) return null;
+  if (!jar.has(SESSION_COOKIE) && !jar.has(SUPPORT_COOKIE)) return null;
   return createApiClient({
     baseUrl: serverApiBaseUrl(),
     headers: { cookie: jar.toString() },

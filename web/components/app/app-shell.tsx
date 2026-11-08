@@ -9,6 +9,7 @@ import type { ThemeChoice } from "@/lib/theme";
 
 import { MobileTabBar } from "./mobile-tab-bar";
 import { PlanBanner } from "./plan-banner";
+import { SupportBanner } from "./support-banner";
 import { ShortcutProvider } from "./shortcut-provider";
 import type { ShellSession } from "./shell-types";
 import { Sidebar } from "./sidebar";
@@ -65,6 +66,7 @@ export function AppShell({
             </a>
             <Sidebar collapsed={collapsed} onToggle={toggle} session={session} badges={badges} />
             <div className="flex min-h-dvh flex-col transition-[padding] motion-sheet motion-reduce:transition-none md:pl-[260px] md:group-data-[collapsed=true]/shell:pl-[72px]">
+              <SupportBanner />
               <Toolbar
                 user={session?.user ?? null}
                 theme={theme}

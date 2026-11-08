@@ -398,3 +398,4 @@
 2026-11-08 12:45 | Claude (Opus) | T17.3 | step 3-4 API: support router (impersonate, writes, end, DELETE /auth/support-session), registered; platform.impersonate policy; company detail shows support events; /auth/me support block; ruff+mypy clean, tests not yet | next step 5 tests tests/db/test_support_mode.py
 2026-11-08 13:05 | Claude (Opus) | T17.3 | step 5 part: tests/db/test_support_mode.py 5 pass; leave route ends only live sessions | next related suites (auth, rbac, platform, guards, migrations, openapi, exports, deletion)
 2026-11-08 13:10 | Claude (Opus) | T17.3 | related suites: 190 pass + migrations 7 pass (added impersonation_sessions to expected tables) | next web banner
+2026-11-08 13:30 | Claude (Opus) | T17.3 | DONE: support mode API + tenant banner; tests 5 DB + 2 unit pass; related suites 197 pass; ruff/mypy/web lint/typecheck clean; semgrep clean; ticked micro_plan + PROGRESS; STATUS handed over | next T17.4 (S!) small model

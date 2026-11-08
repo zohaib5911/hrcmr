@@ -416,6 +416,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 ### Phase 17 — Super-admin back office
 - [x] **T17.1** Platform admin auth and admin host routing
 - [x] **T17.2** Overview metrics, companies, users search — 2026-11-08. API only: GET /platform/metrics; GET /platform/companies (search, filter, paged) and /{id}; suspend, reactivate, extend-plan (10-year, active only) and mark-for-deletion (owner) with reasons; GET /platform/users?q=, lock and unlock (users.is_active). Every change audited under the platform admin (migration 0049). Tests: tests/db/test_platform_admin.py 7 pass. Admin screens and the web platform-session step are not in this block.
+- [x] **T17.3** Support mode (impersonation) — 2026-11-08. Reason + ticket ref, separate support cookie, read-only by default, owner-only confirmed write toggle, 30 min expiry, company-visible audit, tenant banner (migration 0050). Tests: tests/db/test_support_mode.py 5 pass, banner unit 2 pass.
 - [ ] **T17.3** Support mode (impersonation)
 - [ ] **T17.4** Subscriptions and refunds, deletion and export queue, contact inbox
 - [ ] **T17.5** Content tools and feature flags

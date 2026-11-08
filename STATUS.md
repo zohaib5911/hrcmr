@@ -1,29 +1,27 @@
 # STATUS
-Updated: 2026-11-08 12:00 (Europe/London)    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: 2631be7
-State: IN PROGRESS
+Updated: 2026-11-08 13:30 (Europe/London)    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: see git log
+State: HANDED OVER — small model next
 
 ## Last completed
+- T17.3 — Support mode (impersonation) (Opus). Start with reason + ticket ref → separate `brand_support_session` cookie, 30 min, company seen as `company_admin`, read-only unless an owner turns writes on (own session, `confirm: true`); end from admin side or the tenant banner; company-visible audit `support.session.*` + platform `platform.support_*`. Migration 0050. Tests: `tests/db/test_support_mode.py` 5 pass; banner unit 2 pass.
 - T17.2 — Overview metrics, companies and users search (Haiku). API only.
 - T17.1 — Platform admin auth and admin host routing (Haiku).
 
 ## Current task
-- T17.3 — Support mode (impersonation) (plan L1165, L1466, L1638)
-  - [ ] 1. migration 0050 impersonation_sessions + RLS + audit policies; model
-  - [ ] 2. support session: separate cookie, tenant guard (read-only unless write-enabled), 30 min expiry
-  - [ ] 3. platform routes: start (reason + ticket), write-enable (owner + confirm), end; tenant end
-  - [ ] 4. /auth/me support block; web banner in the tenant shell
-  - [ ] 5. tests (tests/db/test_support_mode.py), web unit, typecheck, gen:api; tick
-- Resume note: see journal and last commit Next line.
+- None. T17.3 ticked. Next block T17.4 (S!).
 
 ## Next tasks
-- T17.4 (S!), T17.5 (S), T17.6 (S), P17, AUDIT-3
+- T17.4 (S!) subscriptions, refunds, deletion and export queue, contact inbox.
+- T17.5 (S), T17.6 (S), P17 gate, AUDIT-3.
+- leftover.md L1 (Stripe E2E) when the owner has test keys; before Phase 23.
 
 ## Health
-- CI on dev: not run for T17.2 (no PR; PR waits for the Phase 17 gate). Last merge to main: PR #25 (P16), all checks green.
-- Local checks run for T17.2: platform admin tests 7 pass; platform session, rules and network 19 pass; architecture, OpenAPI, RBAC matrix, audit, guards, migrations 73 pass; ruff, mypy (strict, platform_admin + rbac/platform), web typecheck clean; gen:api:check up to date.
-- Not run: the full API suite and web e2e (not a phase gate; the rule is affected tests only).
+- CI on dev: not run (no PR until the P17 gate). Last merge to main: PR #25 (P16), all green.
+- Local checks for T17.3: support mode 5 pass; audit, auth endpoints/flows, deletion, exports, guards, migrations, platform admin/session, rules admin, tenant session, RBAC enforcement, OpenAPI, architecture, config, platform network, RBAC matrix: 197 pass; ruff, ruff format, mypy (app, 321 files) clean; web typecheck, lint, prettier clean; shell + banner unit 21 pass; gen:api:check up to date; Semgrep (CI rule packs) clean on migrations 0048-0050 and the support module.
 
 ## Issues / suggestions
+- T17.3 support mode has no admin-side screen to start it yet (the admin pages still lack the web platform-session step, see below). The API and the tenant banner are done; the start form (reason, ticket ref) and the write toggle with its confirm dialog belong with the admin Companies screens.
+- In support mode "Sign out" in the avatar menu gets SUPPORT_READ_ONLY (account routes never write in support mode); the banner's "End support mode" is the way out. Could make the avatar menu end support instead when `me.support` is set.
 - **Admin pages are unreachable since T17.1 (found in T17.2).** Nothing in the web calls `POST /auth/platform-session`, so the platform cookie is never set. `web/app/(admin)/platform/rules/page.tsx` and `.../courses/page.tsx` call `/platform/*` through `serverApi()` with only the tenant cookie, get 403, and `notFound()` runs. The step (a button in the admin frame that starts the session, and what to show when MFA is missing) is a UI decision; it is not in the T17.2 steps, so it is not built. Needs an owner call or its own task before any admin screen is shown.
 - The admin screens for T17.2 (Overview, Companies list and detail, Users) are not built: the steps are API-only. Decide whether they belong in T17.2 or in a follow-up.
 - Not in T17.2 (spec 8.18, plan L1640): overview error rate, job queue health and register freshness (these come with T17.6); company detail notes and users reset MFA / resend verification (`/notes`, `/users/{id}/reset-mfa`); company storage used.
@@ -35,6 +33,10 @@ State: IN PROGRESS
 - (T16.2) A lapsed annual plan still says "annual" in /auth/me.
 
 ## Strategy / decisions taken
+- T17.3: support mode uses its own cookie (`SUPPORT_SESSION_COOKIE_NAME`, default `brand_support_session`) so the admin's own tenant session is untouched and returns when support ends. While it is live it wins on every tenant route.
+- T17.3: the support view is role `company_admin` with no employee record; writes are blocked in `require()` until turned on. Only the owner who started the session can turn writes on (simplest safe reading of "owner level + second confirmation"; the confirmation is `confirm: true`, the UI's dialog). Anyone platform-level may end any session or turn writes off.
+- T17.3: one live support session per admin; starting another ends the previous. Support starts only on an active company. A stale support cookie is ignored for reads (own session takes over) but refuses writes with SUPPORT_SESSION_ENDED.
+- T17.3: tenant reads in support mode are not audited one by one (the start entry with reason and ticket is the company-visible record; changes are audited as usual with `impersonation_session_id`).
 - (T17.2) Routes use the `/platform` prefix that T15.7 set (`/platform/rules`), not the spec's `/admin`.
 - (T17.2) Lock = `users.is_active` false, the existing "account is off" flag (sign-in and every session refuse it). Unlock sets it back. A platform admin cannot lock their own account (409 SELF_LOCK).
 - (T17.2) Any platform admin (support or owner) may read, suspend, reactivate, extend and lock. Mark for deletion is owner only, checked in the handler: the spec does not say, and it is the most destructive action here.
