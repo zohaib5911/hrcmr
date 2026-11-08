@@ -92,6 +92,11 @@ SAMPLES: dict[str, dict[str, str]] = {
         "where": "video call",
     },
     "deletion_code": {"first_name": "Amira", "code": "482 915", "minutes": "15"},
+    "payment_failed": {
+        "first_name": "Amira",
+        "grace_end": "15 November 2026",
+        "link": "https://app.example.com/company/billing",
+    },
 }
 
 
