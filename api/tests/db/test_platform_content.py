@@ -8,6 +8,7 @@ version names and never assume the table is empty."""
 from __future__ import annotations
 
 import uuid
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import text
@@ -177,3 +178,87 @@ async def test_a_bad_flag_name_is_refused(rig: dict[str, Any]) -> None:
     )
     assert bad.status_code == 422, bad.text
     assert await _flag_value(rig, "Bad-Name") is None
+
+
+def _at(hours: float) -> str:
+    return (datetime.now(UTC) + timedelta(hours=hours)).isoformat()
+
+
+def _banner(region: str, title: str, starts: float, ends: float) -> dict[str, Any]:
+    return {
+        "region": region,
+        "title": title,
+        "body": "Planned work on Saturday.",
+        "starts_at": _at(starts),
+        "ends_at": _at(ends),
+        "reason": "Planned maintenance notice",
+    }
+
+
+async def test_banners_are_scheduled_per_region_and_companies_see_only_their_live_ones(
+    rig: dict[str, Any],
+) -> None:
+    company_admin = await rig["person"]("company_admin", rig["a"])
+    refused = await company_admin.post(
+        f"{API}/platform/announcements", json=_banner("uk", "Refused", -1, 24)
+    )
+    assert refused.status_code == 403
+    admin = await _platform_admin(rig, "support")
+    for body in (
+        _banner("uk", "Live for uk", -1, 24),
+        _banner("uk", "Scheduled for uk", 24, 48),
+        _banner("us", "Live for us", -1, 24),
+    ):
+        made = await admin.post(f"{API}/platform/announcements", json=body)
+        assert made.status_code == 201, made.text
+    listed = (await admin.get(f"{API}/platform/announcements")).json()
+    assert {item["title"]: item["status"] for item in listed["items"]} == {
+        "Live for uk": "live",
+        "Scheduled for uk": "scheduled",
+        "Live for us": "live",
+    }
+    employee = await rig["person"]("employee", rig["a"])
+    seen = (await employee.get(f"{API}/company/announcements")).json()
+    assert [item["title"] for item in seen["items"]] == ["Live for uk"]
+
+
+async def test_ending_a_banner_removes_it_and_is_audited(rig: dict[str, Any]) -> None:
+    admin = await _platform_admin(rig, "support")
+    made = await admin.post(
+        f"{API}/platform/announcements", json=_banner("uk", "Ends early", -1, 24)
+    )
+    assert made.status_code == 201, made.text
+    banner = uuid.UUID(made.json()["id"])
+    ended = await admin.post(
+        f"{API}/platform/announcements/{banner}/end",
+        json={"reason": "Notice no longer needed"},
+    )
+    assert ended.status_code == 200, ended.text
+    assert ended.json()["status"] == "ended"
+    employee = await rig["person"]("employee", rig["a"])
+    assert (await employee.get(f"{API}/company/announcements")).json()["items"] == []
+    again = await admin.post(
+        f"{API}/platform/announcements/{banner}/end", json={"reason": "Ending twice"}
+    )
+    assert again.status_code == 409, again.text
+    assert again.json()["error"]["code"] == "ALREADY_ENDED"
+    assert await _audit(rig, banner) == [
+        ("platform.announcement_created", "Planned maintenance notice"),
+        ("platform.announcement_ended", "Notice no longer needed"),
+    ]
+
+
+async def test_a_banner_needs_a_time_zone_a_period_and_an_end_in_the_future(
+    rig: dict[str, Any],
+) -> None:
+    admin = await _platform_admin(rig, "support")
+    naive = _banner("uk", "Naive", -1, 24) | {"ends_at": "2030-01-01T10:00:00"}
+    no_zone = await admin.post(f"{API}/platform/announcements", json=naive)
+    assert no_zone.json()["error"]["code"] == "NEEDS_TIME_ZONE"
+    backwards = await admin.post(
+        f"{API}/platform/announcements", json=_banner("uk", "Backwards", 24, 2)
+    )
+    assert backwards.status_code == 422
+    assert backwards.json()["error"]["code"] == "INVALID_PERIOD"
+    past = await admin.post(f"{API}/platform/announcements", json=_banner("uk", "Past", -48, -24))
+    assert past.json()["error"]["code"] == "ENDS_IN_PAST"

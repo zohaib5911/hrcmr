@@ -41,6 +41,7 @@ from app.integrations.stripe import Stripe
 from app.integrations.turnstile import Turnstile
 from app.jobs.queue import open_queue
 from app.modules.access.router import router as access_router
+from app.modules.announcements.router import router as announcements_router
 from app.modules.attendance.batch_router import router as attendance_batch_router
 from app.modules.attendance.clock_router import router as attendance_clock_router
 from app.modules.attendance.import_router import router as attendance_import_router
@@ -258,6 +259,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(audit_router, prefix=API_PREFIX)
     app.include_router(files_router, prefix=API_PREFIX)
     app.include_router(company_router, prefix=API_PREFIX)
+    app.include_router(announcements_router, prefix=API_PREFIX)
     app.include_router(key_personnel_router, prefix=API_PREFIX)
     app.include_router(compliance_router, prefix=API_PREFIX)
     app.include_router(holidays_router, prefix=API_PREFIX)

@@ -229,3 +229,28 @@ class FeatureFlagIn(RequestModel):
     enabled: bool
     description: str | None = Field(default=None, max_length=300)
     reason: str = Field(min_length=REASON_MIN, max_length=REASON_MAX)
+
+
+class AnnouncementIn(RequestModel):
+    region: str = Field(pattern=r"^(uk|us|au)$")
+    title: str = Field(min_length=1, max_length=120)
+    body: str = Field(min_length=1, max_length=500)
+    starts_at: datetime
+    ends_at: datetime
+    reason: str = Field(min_length=REASON_MIN, max_length=REASON_MAX)
+
+
+class AnnouncementRow(BaseModel):
+    id: uuid.UUID
+    region: str
+    title: str
+    body: str
+    starts_at: datetime
+    ends_at: datetime
+    ended_at: datetime | None
+    status: str  # scheduled | live | ended
+
+
+class AnnouncementsOut(BaseModel):
+    items: list[AnnouncementRow]
+    total: int

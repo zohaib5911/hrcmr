@@ -7,6 +7,7 @@ from __future__ import annotations
 
 # ruff: noqa: F401 -- These imports register models for Alembic and are intentionally unused.
 import app.ai.models
+import app.modules.announcements.models
 import app.modules.attendance.models
 import app.modules.audit.models
 import app.modules.billing.models

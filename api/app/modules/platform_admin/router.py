@@ -20,6 +20,7 @@ from sqlalchemy import select
 from app.core.errors import AppError, ForbiddenError
 from app.modules.identity.models import PlatformAdmin
 from app.modules.platform_admin import (
+    announcements,
     billing,
     companies,
     contact,
@@ -30,6 +31,9 @@ from app.modules.platform_admin import (
     users,
 )
 from app.modules.platform_admin.schemas import (
+    AnnouncementIn,
+    AnnouncementRow,
+    AnnouncementsOut,
     CompaniesOut,
     CompanyDetailOut,
     ContactMessageRow,
@@ -288,6 +292,42 @@ async def set_feature_flag(
     )
     await access.db.commit()
     return flags.row(flag)
+
+
+@router.get("/platform/announcements", response_model=AnnouncementsOut)
+async def list_announcements(access: Reader) -> AnnouncementsOut:
+    return await announcements.announcements(access.db, datetime.now(UTC))
+
+
+@router.post("/platform/announcements", status_code=201, response_model=AnnouncementRow)
+async def create_announcement(body: AnnouncementIn, access: Content) -> AnnouncementRow:
+    """Schedule a banner for one region (T17.5). Companies in that region see it while live."""
+    now = datetime.now(UTC)
+    item = await announcements.create(
+        access.db,
+        access.audit_context,
+        region=body.region,
+        title=body.title,
+        body=body.body,
+        starts_at=body.starts_at,
+        ends_at=body.ends_at,
+        reason=body.reason,
+        now=now,
+    )
+    await access.db.commit()
+    return announcements.row(item, now)
+
+
+@router.post("/platform/announcements/{announcement_id}/end", response_model=AnnouncementRow)
+async def end_announcement(
+    announcement_id: uuid.UUID, body: ReasonIn, access: Content
+) -> AnnouncementRow:
+    now = datetime.now(UTC)
+    item = await announcements.end(
+        access.db, access.audit_context, announcement_id, reason=body.reason, now=now
+    )
+    await access.db.commit()
+    return announcements.row(item, now)
 
 
 @router.get("/platform/users", response_model=UsersOut)

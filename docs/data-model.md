@@ -25,6 +25,25 @@ Checks:
 
 - `status in ('ok', 'error', 'refused')`
 
+## `announcements`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `region` | VARCHAR(2) | no |  |  |
+| `title` | VARCHAR(120) | no |  |  |
+| `body` | VARCHAR(500) | no |  |  |
+| `starts_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `ends_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `ended_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `created_by` | UUID | yes |  | references `users` |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+Checks:
+
+- `ends_at > starts_at`
+- `region in ('uk', 'us', 'au')`
+
 ## `applications`
 
 | Column | Type | Null | Default | Notes |
