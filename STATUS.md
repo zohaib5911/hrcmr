@@ -1,7 +1,7 @@
 # STATUS
-Updated: 2026-11-08 Europe/London    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: see git log
+Updated: 2026-11-08 Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: see git log
 
-State: BLOCKED — needs big model (T16.5)
+State: IN PROGRESS
 
 ## Last completed
 - T16.4 — Data export. POST /companies/me/export (company.export, step-up, one at a time, 202) queues generate_export; the worker writes a zip (README, documents.csv, documents/, tables/<table>.csv for the 68 company-scoped tables plus the company row) to a private file. Secrets, storage keys, IP/user agent, bank account numbers and sort codes are never exported. Link valid 7 days (data_exports.expires_at, migration 0046, RLS). GET /companies/me/exports/{id} (status); GET /companies/me/exports/{id}/download → 302 to a 60-second link (requester's session needed). E-mail data_export_ready. Tests: 3 DB (two tenants, refusals, expiry); guards and worker tests pass.
@@ -11,8 +11,13 @@ State: BLOCKED — needs big model (T16.5)
 - P15 — PR 23 merged to main (all checks green).
 
 ## Current task
-- T16.5 — Delete account (B). Not started. Big model only (purge executor deletes tenant data). Read micro_plan T16.5 and plan.md L1091–1096, L1460, API item 22 (`POST /companies/me/deletion-request`, `.../confirm`, `DELETE .../deletion-request`).
-- Resume note: nothing written for T16.5. The deletion_requests table (plan 6.x L612) and the `deletion_executor_hourly` cron (scheduled.py, currently _nothing_yet) are the starting points. The export from T16.4 (`export_requested`, `export_file_id`) is the offer-an-export step.
+- T16.5 — Delete account (B)
+  - [ ] 1. migration 0047: deletion_requests table (RLS) + purge bypass on the immutable-table triggers (owner role + app.purge_company_id only)
+  - [ ] 2. API: GET/POST /companies/me/deletion-request, POST .../confirm (6-digit code), DELETE (withdraw); notifications to other admins + support
+  - [ ] 3. purge executor (deletion_executor_hourly): Stripe stop, storage objects, tenant rows, users with no other company, company stub, audit stub, final e-mail
+  - [ ] 4. tests (DB): code flow, withdraw, purge leaves other tenant intact; guards; schema regen
+  - [ ] 5. web page /company/delete-account (explain, offer export, code, withdraw)
+- Resume note: see journal and the latest Next: line.
 
 ## Next tasks
 - T16.5 (B), then the Phase 16 gate (full API suite, e2e for both plans, PR dev → main)
