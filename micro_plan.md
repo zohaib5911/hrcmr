@@ -409,6 +409,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ### [ ] T17.6 · S · Jobs dashboard, register status, rules screens, platform audit log
 - **Spec:** plan L1169, L1171–1174, L1469.
+- **Status (2026-11-08): BLOCKED on two items (see STATUS, Owner actions).** Built: platform audit log with filters and CSV export, recorded (`/platform/audit`, `/platform/audit/export`, migration 0055); job dashboard with the queue depth and the failures, no arguments (`/platform/jobs/queue`, `/platform/jobs/failures`); rules screens already built in T15.7 (versions with `diff_summary`, publish, rollback). Not built: **retry** (a job's arguments are never kept, so a failure cannot be replayed; owner decision); **register status and rerun** (the sponsor register ingest is Phase 20, after this gate; move it there). Tests: `tests/db/test_platform_audit_log.py` 3 pass, `tests/db/test_platform_jobs.py` 3 pass.
 
 ### [ ] P17 · S · Phase 17 gate
 - Recipe R7.
