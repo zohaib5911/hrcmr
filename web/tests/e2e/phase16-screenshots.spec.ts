@@ -116,7 +116,9 @@ for (const colorScheme of ["light", "dark"] as const) {
         try {
           await page.setViewportSize({ width, height: 900 });
           await page.goto("/company/delete-account");
-          await expect(page.getByText("This account will be deleted on")).toBeVisible();
+          await expect(
+            page.locator("#main").getByText("This account will be deleted on"),
+          ).toBeVisible();
           await page.waitForLoadState("networkidle");
           await shoot(page, `delete-scheduled-${colorScheme}-${width}`);
         } finally {

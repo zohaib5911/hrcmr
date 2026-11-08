@@ -369,7 +369,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ### [x] T16.5 · B · Delete account (purge executor deletes all tenant data — big model only)
 
-### [ ] T16.6 · B · Deletion code e-mail goes through the app mailer (found at the P16 gate)
+### [x] T16.6 · B · Deletion code e-mail goes through the app mailer (found at the P16 gate)
 - **Spec:** plan L1091 (account deletion by e-mailed code); the e2e `web/tests/e2e/account-deletion.spec.ts` needs the code to arrive.
 - **Problem:** `_send_code` in `api/app/modules/deletion/router.py` (and `_email` for `deletion_scheduled`, `deletion_withdrawn`, `account_deleted`) only inserts an `EmailOutbox` row inside the request transaction. Nothing enqueues it, so it leaves only when the minute sweep runs (`email_outbox_sweep`). The e2e server runs no sweep (its worker has only `generate_report`; the auth flow uses `DirectMailer`), so the code never reaches Mailpit there. Production works within about a minute, but the code is the only way in and the page says "We have e-mailed you a code" at once.
 - **Copy:** the auth routers send with `auth.mailer.send_template(...)` after the commit (`api/app/modules/access/router.py` `_send_invite` is the pattern; the mailer is `request.app.state.auth.mailer`).
