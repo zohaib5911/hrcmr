@@ -254,3 +254,21 @@ class AnnouncementRow(BaseModel):
 class AnnouncementsOut(BaseModel):
     items: list[AnnouncementRow]
     total: int
+
+
+class AuditLogRow(BaseModel):
+    id: uuid.UUID
+    created_at: datetime
+    actor_type: str  # platform_admin | system
+    actor: str  # the platform admin's e-mail, or the actor type for a system run
+    action: str
+    entity_type: str | None
+    entity_id: uuid.UUID | None
+    summary: str | None
+    reason: str | None
+    request_id: str | None
+
+
+class AuditLogOut(BaseModel):
+    items: list[AuditLogRow]
+    total: int

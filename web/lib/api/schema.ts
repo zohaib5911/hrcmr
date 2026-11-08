@@ -3669,6 +3669,43 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/audit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Platform Audit
+         * @description The platform's own audit trail (T17.6). A trailing dot in ``action`` matches a family.
+         */
+        get: operations["platform_admin_list_platform_audit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/audit/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Export Platform Audit */
+        get: operations["platform_admin_export_platform_audit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/platform/companies": {
         parameters: {
             query?: never;
@@ -6320,6 +6357,42 @@ export interface components {
             summary: string | null;
             /** User Agent */
             user_agent: string | null;
+        };
+        /** AuditLogOut */
+        AuditLogOut: {
+            /** Items */
+            items: components["schemas"]["AuditLogRow"][];
+            /** Total */
+            total: number;
+        };
+        /** AuditLogRow */
+        AuditLogRow: {
+            /** Action */
+            action: string;
+            /** Actor */
+            actor: string;
+            /** Actor Type */
+            actor_type: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Entity Id */
+            entity_id: string | null;
+            /** Entity Type */
+            entity_type: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Reason */
+            reason: string | null;
+            /** Request Id */
+            request_id: string | null;
+            /** Summary */
+            summary: string | null;
         };
         /** AuditPage */
         AuditPage: {
@@ -24551,6 +24624,96 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AnnouncementRow"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_admin_list_platform_audit: {
+        parameters: {
+            query?: {
+                action?: string | null;
+                entity_type?: string | null;
+                actor_type?: string | null;
+                since?: string | null;
+                until?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditLogOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_admin_export_platform_audit: {
+        parameters: {
+            query?: {
+                action?: string | null;
+                entity_type?: string | null;
+                actor_type?: string | null;
+                since?: string | null;
+                until?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

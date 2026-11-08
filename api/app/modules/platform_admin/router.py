@@ -14,13 +14,14 @@ import uuid  # noqa: TC003  (FastAPI reads the path parameter type at runtime)
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query, Request
+from fastapi import APIRouter, Depends, Path, Query, Request, Response
 from sqlalchemy import select
 
 from app.core.errors import AppError, ForbiddenError
 from app.modules.identity.models import PlatformAdmin
 from app.modules.platform_admin import (
     announcements,
+    audit_log,
     billing,
     companies,
     contact,
@@ -34,6 +35,7 @@ from app.modules.platform_admin.schemas import (
     AnnouncementIn,
     AnnouncementRow,
     AnnouncementsOut,
+    AuditLogOut,
     CompaniesOut,
     CompanyDetailOut,
     ContactMessageRow,
@@ -328,6 +330,59 @@ async def end_announcement(
     )
     await access.db.commit()
     return announcements.row(item, now)
+
+
+@router.get("/platform/audit", response_model=AuditLogOut)
+async def list_platform_audit(
+    access: Reader,
+    action: Annotated[str | None, Query(max_length=100)] = None,
+    entity_type: Annotated[str | None, Query(max_length=60)] = None,
+    actor_type: Annotated[str | None, Query(pattern="^(platform_admin|system)$")] = None,
+    since: datetime | None = None,
+    until: datetime | None = None,
+    limit: Annotated[int, Query(ge=1, le=audit_log.PAGE_MAX)] = 50,
+    offset: Annotated[int, Query(ge=0, le=100_000)] = 0,
+) -> AuditLogOut:
+    """The platform's own audit trail (T17.6). A trailing dot in ``action`` matches a family."""
+    return await audit_log.events(
+        access.db,
+        action=action,
+        entity_type=entity_type,
+        actor_type=actor_type,
+        since=since,
+        until=until,
+        limit=limit,
+        offset=offset,
+    )
+
+
+@router.get("/platform/audit/export")
+async def export_platform_audit(
+    access: Reader,
+    action: Annotated[str | None, Query(max_length=100)] = None,
+    entity_type: Annotated[str | None, Query(max_length=60)] = None,
+    actor_type: Annotated[str | None, Query(pattern="^(platform_admin|system)$")] = None,
+    since: datetime | None = None,
+    until: datetime | None = None,
+) -> Response:
+    body = await audit_log.export_csv(
+        access.db,
+        access.audit_context,
+        action=action,
+        entity_type=entity_type,
+        actor_type=actor_type,
+        since=since,
+        until=until,
+    )
+    await access.db.commit()
+    return Response(
+        body,
+        media_type="text/csv; charset=utf-8",
+        headers={
+            "Content-Disposition": 'attachment; filename="platform-audit-events.csv"',
+            "Cache-Control": "no-store",
+        },
+    )
 
 
 @router.get("/platform/users", response_model=UsersOut)
