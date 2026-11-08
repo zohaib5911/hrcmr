@@ -18,6 +18,7 @@ from __future__ import annotations
 import hashlib
 import json
 import uuid
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
@@ -116,7 +117,7 @@ async def _company_for(stripe: Stripe, obj: dict[str, Any]) -> uuid.UUID | None:
     )
 
 
-def _summary(company: Company) -> dict[str, Any]:
+def summary(company: Company) -> dict[str, Any]:
     return {name: getattr(company, name) for name in SUMMARY}
 
 
@@ -173,7 +174,7 @@ async def _apply(
     event: dict[str, Any],
     web_origin: str,
 ) -> None:
-    before = _summary(company)
+    before = summary(company)
     customer = _id(obj.get("customer"))
     if customer and company.stripe_customer_id is None:
         company.stripe_customer_id = customer
@@ -199,7 +200,7 @@ async def _apply(
         action = "billing.refunded"
         if not await _refunded(db, company, obj, event):
             return
-    after = _summary(company)
+    after = summary(company)
     if after != before or action != "billing.subscription_updated":
         await record(
             db,
@@ -224,7 +225,7 @@ async def subscription_row(
 
 
 async def _sync_subscription(
-    db: GlobalSession, stripe: Stripe, company: Company, subscription_id: str
+    db: GlobalSession | TenantSession, stripe: Stripe, company: Company, subscription_id: str
 ) -> None:
     """Copy the live Stripe subscription onto its row and, if it is the company's plan, onto the
     company."""
@@ -376,3 +377,153 @@ async def _start_grace(
                 payload=encrypt(json.dumps(data), context=PAYLOAD_CONTEXT),
             )
         )
+
+
+ENDED = frozenset({"canceled", "incomplete_expired"})
+REFUND_NOT_FOUND = "We could not find the payment to refund. Contact support."
+
+
+class CancelError(Exception):
+    """The plan cannot be cancelled as asked. ``code`` is the API error code the request gets."""
+
+    def __init__(self, code: str, message: str) -> None:
+        super().__init__(message)
+        self.code = code
+        self.message = message
+
+
+@dataclass(frozen=True)
+class Cancellation:
+    refunded: bool
+    ends_at: datetime | None
+
+
+async def cancel_plan(
+    db: TenantSession,
+    stripe: Stripe,
+    company: Company,
+    context: AuditContext,
+    *,
+    now: datetime,
+) -> Cancellation:
+    """Plan 8.16. Within 14 days of the start the first payment is refunded in full and the plan
+    ends now. After 14 days an annual plan ends at the end of its period, with no refund. A 10-year
+    plan does not renew, so after its 14 days there is nothing to cancel."""
+    before = summary(company)
+    if company.cooling_off_ends_at is not None and now < company.cooling_off_ends_at:
+        await _refund_and_end(db, stripe, company, context, now=now)
+        cancellation = Cancellation(refunded=True, ends_at=company.subscription_ends_at)
+    elif company.plan == "annual" and company.stripe_subscription_id:
+        subscription_id = company.stripe_subscription_id
+        await stripe.cancel_at_period_end(
+            subscription_id, idempotency_key=f"cancel-period-{subscription_id}"
+        )
+        await _sync_subscription(db, stripe, company, subscription_id)
+        cancellation = Cancellation(refunded=False, ends_at=company.subscription_ends_at)
+    else:
+        raise CancelError(
+            "NOTHING_TO_CANCEL",
+            "This plan does not renew, so there is nothing to cancel. "
+            "Contact support to end it early.",
+        )
+    await record(
+        db,
+        context,
+        "billing.cancelled",
+        entity_type="company",
+        entity_id=company.id,
+        before=before,
+        after=summary(company),
+        summary=(
+            "Plan cancelled with a full refund"
+            if cancellation.refunded
+            else "Plan cancelled at the end of its period"
+        ),
+    )
+    await db.commit()
+    return cancellation
+
+
+async def _refund_and_end(
+    db: TenantSession,
+    stripe: Stripe,
+    company: Company,
+    context: AuditContext,
+    *,
+    now: datetime,
+) -> None:
+    """A full refund of the first payment, then the plan ends at once. The refund is committed
+    before the subscription is ended, so a retry after a failed call finds it refunded and does not
+    ask Stripe again."""
+    subscription_id = company.stripe_subscription_id if company.plan == "annual" else None
+    if subscription_id:
+        row = await subscription_row(db, stripe_subscription_id=subscription_id)
+    else:
+        row = await _live_ten_year(db, company)
+    if row is None:
+        raise CancelError("NOTHING_TO_REFUND", REFUND_NOT_FOUND)
+    if row.refunded_at is None:
+        if subscription_id:
+            payment_intent = await _first_payment_intent(stripe, subscription_id)
+        else:
+            payment_intent = row.stripe_payment_intent_id
+        if payment_intent is None:
+            raise CancelError("NOTHING_TO_REFUND", REFUND_NOT_FOUND)
+        await stripe.create_refund(
+            payment_intent=payment_intent, idempotency_key=f"refund-{payment_intent}"
+        )
+        row.refunded_at = now
+        if row.plan == "ten_year":
+            row.status = "refunded"
+        await record(
+            db,
+            context,
+            "billing.refunded",
+            entity_type="company",
+            entity_id=company.id,
+            summary="Full refund of the first payment, within the 14 days",
+        )
+        await db.commit()
+    if subscription_id:
+        live = await stripe.retrieve_subscription(subscription_id)
+        if live.get("status") not in ENDED:
+            await stripe.cancel_now(subscription_id)
+        await _sync_subscription(db, stripe, company, subscription_id)
+    else:
+        company.plan = "free"
+        company.subscription_status = "refunded"
+        company.subscription_ends_at = now
+
+
+async def _live_ten_year(db: TenantSession, company: Company) -> Subscription | None:
+    return (
+        (
+            await db.execute(
+                select(Subscription).where(
+                    Subscription.company_id == company.id,
+                    Subscription.plan == "ten_year",
+                    Subscription.refunded_at.is_(None),
+                )
+            )
+        )
+        .scalars()
+        .first()
+    )
+
+
+async def _first_payment_intent(stripe: Stripe, subscription_id: str) -> str | None:
+    """The payment behind the subscription's latest invoice (the first one, within 14 days)."""
+    live = await stripe.retrieve_subscription(subscription_id)
+    invoice_id = _id(live.get("latest_invoice"))
+    if invoice_id is None:
+        return None
+    invoice = await stripe.retrieve_invoice(invoice_id)
+    direct = _id(invoice.get("payment_intent"))
+    if direct:
+        return direct
+    # Stripe's 2025 API versions list an invoice's payments under ``payments``.
+    for entry in (invoice.get("payments") or {}).get("data") or []:
+        intent = _id((entry.get("payment") or {}).get("payment_intent"))
+        if entry.get("status") == "paid" and intent:
+            return intent
+    return None

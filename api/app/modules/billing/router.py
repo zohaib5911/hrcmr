@@ -43,8 +43,14 @@ class BillingOut(BaseModel):
     started_at: datetime | None
     ends_at: datetime | None
     cooling_off_ends_at: datetime | None
+    payment_grace_ends_at: datetime | None
     cancel_at: datetime | None
     has_billing_account: bool
+
+
+class CancelOut(BaseModel):
+    refunded: bool  # True: the first payment was refunded and the plan ended now
+    ends_at: datetime | None  # when access ends: now after a refund, else the end of the period
 
 
 class CheckoutIn(RequestModel):
@@ -109,6 +115,7 @@ async def read_subscription(request: Request, access: Manager) -> BillingOut:
         started_at=company.subscription_started_at,
         ends_at=company.subscription_ends_at,
         cooling_off_ends_at=company.cooling_off_ends_at,
+        payment_grace_ends_at=company.payment_grace_ends_at,
         cancel_at=latest.cancel_at if isinstance(latest, Subscription) else None,
         has_billing_account=company.stripe_customer_id is not None,
     )
@@ -183,6 +190,27 @@ async def create_portal_session(request: Request, access: Manager) -> RedirectOu
     except StripeError as exc:
         raise _unavailable(exc) from exc
     return RedirectOut(url=str(portal["url"]))
+
+
+@router.post("/billing/cancel", response_model=CancelOut)
+async def cancel_plan(request: Request, access: Manager) -> CancelOut:
+    """Cancels the plan. Within 14 days of the start: a full refund through Stripe, and the plan
+    ends now. After that: an annual plan ends at the end of its period, with no refund."""
+    stripe = _stripe(request)
+    if not stripe.enabled:
+        raise _not_set_up()
+    company = await _company(access)
+    if not _has_live_plan(company):
+        raise AppError("NO_PLAN_TO_CANCEL", "There is no active plan to cancel.", status_code=409)
+    try:
+        done = await service.cancel_plan(
+            access.db, stripe, company, access.audit_context, now=datetime.now(UTC)
+        )
+    except service.CancelError as exc:
+        raise AppError(exc.code, exc.message, status_code=409) from exc
+    except StripeError as exc:
+        raise _unavailable(exc) from exc
+    return CancelOut(refunded=done.refunded, ends_at=done.ends_at)
 
 
 @webhook_router.post("/webhooks/stripe", response_model=WebhookOut)

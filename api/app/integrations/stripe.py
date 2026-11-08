@@ -53,6 +53,14 @@ class StripeSignatureError(Exception):
     """A webhook body that Stripe did not sign with our endpoint secret, or signed too long ago."""
 
 
+def _checked(object_id: str) -> str:
+    """Ids come from signed events or our own rows; still, only a plain id may become part of a path
+    or a body."""
+    if not _OBJECT_ID.fullmatch(object_id):
+        raise StripeError("unexpected Stripe id")
+    return object_id
+
+
 def form_fields(data: Mapping[str, Any], prefix: str = "") -> list[tuple[str, str]]:
     """Stripe's nested form encoding: ``{"metadata": {"a": 1}}`` becomes ``metadata[a]=1``."""
     fields: list[tuple[str, str]] = []
@@ -216,6 +224,35 @@ class Stripe:
     async def retrieve_customer(self, customer_id: str) -> dict[str, Any]:
         return await self._get("/v1/customers", customer_id)
 
+    async def retrieve_invoice(self, invoice_id: str) -> dict[str, Any]:
+        return await self._get("/v1/invoices", invoice_id)
+
+    async def create_refund(self, *, payment_intent: str, idempotency_key: str) -> dict[str, Any]:
+        """A full refund of one payment. The key is the payment's own, so a retry never
+        refunds twice."""
+        return await self._post(
+            "/v1/refunds",
+            {"payment_intent": _checked(payment_intent)},
+            idempotency_key=idempotency_key,
+        )
+
+    async def cancel_at_period_end(
+        self, subscription_id: str, *, idempotency_key: str
+    ) -> dict[str, Any]:
+        return await self._post(
+            f"/v1/subscriptions/{_checked(subscription_id)}",
+            {"cancel_at_period_end": True},
+            idempotency_key=idempotency_key,
+        )
+
+    async def cancel_now(self, subscription_id: str) -> dict[str, Any]:
+        """Ends the subscription at once. Stripe keys only POST requests, so this carries no
+        Idempotency-Key: the caller reads the subscription first and does not call again once it has
+        ended."""
+        return await self._send(
+            "DELETE", f"/v1/subscriptions/{_checked(subscription_id)}", None, None
+        )
+
     # --- Transport -------------------------------------------------------------------------------
 
     async def _post(
@@ -224,10 +261,7 @@ class Stripe:
         return await self._send("POST", path, form_fields(data), idempotency_key)
 
     async def _get(self, collection: str, object_id: str) -> dict[str, Any]:
-        # Ids come from signed events; still, only a plain id may become part of the path.
-        if not _OBJECT_ID.fullmatch(object_id):
-            raise StripeError("unexpected Stripe id")
-        return await self._send("GET", f"{collection}/{object_id}", None, None)
+        return await self._send("GET", f"{collection}/{_checked(object_id)}", None, None)
 
     async def _send(
         self,

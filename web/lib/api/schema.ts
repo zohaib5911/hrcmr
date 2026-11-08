@@ -931,6 +931,27 @@ export interface paths {
         patch: operations["pay_update_bank_account"];
         trace?: never;
     };
+    "/billing/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel Plan
+         * @description Cancels the plan. Within 14 days of the start: a full refund through Stripe, and the plan
+         *     ends now. After that: an annual plan ends at the end of its period, with no refund.
+         */
+        post: operations["billing_cancel_plan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/billing/checkout-session": {
         parameters: {
             query?: never;
@@ -5867,6 +5888,8 @@ export interface components {
             ends_at: string | null;
             /** Has Billing Account */
             has_billing_account: boolean;
+            /** Payment Grace Ends At */
+            payment_grace_ends_at: string | null;
             /** Payments Enabled */
             payments_enabled: boolean;
             /** Plan */
@@ -6014,6 +6037,13 @@ export interface components {
             items: components["schemas"]["CalendarEntry"][];
             /** Month */
             month: string;
+        };
+        /** CancelOut */
+        CancelOut: {
+            /** Ends At */
+            ends_at: string | null;
+            /** Refunded */
+            refunded: boolean;
         };
         /** CandidateFile */
         CandidateFile: {
@@ -14440,6 +14470,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BankAccountOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    billing_cancel_plan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CancelOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
