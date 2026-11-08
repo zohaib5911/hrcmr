@@ -23,6 +23,8 @@ State: IN PROGRESS — AUDIT-3 fixes (changesneeded.md C3.1.1 to C3.1.16), small
 - Local checks: C3.1.1 — tests/db/test_platform_billing.py + tests/db/test_billing.py 29 pass; ruff, ruff format, mypy clean on touched files.
 
 ## Issues / suggestions
+- **E2E admin host has no client JavaScript (found in C3.1.3).** The admin host is plain http in the tests, and the production CSP adds `upgrade-insecure-requests` (lib/security/csp.ts), so the browser upgrades the admin page's `_next` script and CSS requests to https, and they fail (ERR_SSL_PROTOCOL_ERROR). Server-rendered admin pages still work. Any C3.1.4 to C3.1.10 screen with a client component cannot be exercised in e2e until this is solved. Options for the owner or a big model: serve the e2e admin host over https, or a test-only CSP switch. Do not just drop the CSP directive.
+- **E2E admin host cannot call the API from the browser (found in C3.1.3).** The API is on 127.0.0.1:8100 and the admin host is a different site, so the SameSite=Lax session cookies are not sent. In production both are one site. The admin screens' API calls will fail in e2e for the same reason. tests/support/platform.ts copies the platform cookie to the admin host.
 - Run tests/test_architecture.py and tests/test_openapi.py as separate commands from tests/db (known fixture order issue).
 
 ## Strategy / decisions taken

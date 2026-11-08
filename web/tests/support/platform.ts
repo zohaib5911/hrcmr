@@ -6,6 +6,11 @@
  * The browser start at /session is not used here: that call goes from the admin host to the API on
  * another origin, and the SameSite=Lax session cookie does not go with a cross-site call. In production
  * both are one site, so the start works there (components/platform/session-start.test.tsx covers it).
+ *
+ * Client code cannot run on the admin host in these tests: it is plain http, and the production CSP's
+ * upgrade-insecure-requests turns its script and style requests into https, which the local server does
+ * not answer. Pages that need JavaScript on the admin host cannot be tested here until that is solved
+ * (STATUS, Issues). The server-rendered admin pages can.
  */
 import { expect, type Page } from "@playwright/test";
 

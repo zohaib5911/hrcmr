@@ -19,13 +19,17 @@ test.describe("platform admin host", () => {
     await expect(page.getByTestId("platform-bar")).toBeVisible();
   });
 
-  test("without a platform session the admin host sends the browser to start one, and a start that fails shows the refusal page", async ({
+  test("without a platform session the admin host sends the browser to the start page", async ({
     page,
   }) => {
-    // No platform cookie: the frame sends the browser to /session. Its start is a cross-site call
-    // from this host to the API, so it is refused, and the refusal page says why.
+    // The start itself runs in the browser. These local tests cannot run client code on the admin host
+    // (see tests/support/platform.ts), so this stops at the redirect to the start page.
     await page.goto(`${ADMIN_ORIGIN}/`);
-    await expect(page).toHaveURL(/\/session-required\?code=/);
+    await expect(page).toHaveURL(/\/session\?next=%2F$/);
+  });
+
+  test("the refusal page is shown on the admin host", async ({ page }) => {
+    await page.goto(`${ADMIN_ORIGIN}/session-required?code=UNAUTHENTICATED`);
     await expect(
       page.getByRole("heading", { level: 1, name: "Platform session not started" }),
     ).toBeVisible();
