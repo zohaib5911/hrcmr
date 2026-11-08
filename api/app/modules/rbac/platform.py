@@ -63,7 +63,14 @@ def require_platform(permission: str) -> Callable[..., AsyncIterator[PlatformAcc
         raise ValueError(f"unknown platform permission {permission!r}")
     # Other platform actions get their level-specific policies in Phase 17. Publishing SOC rules
     # (T15.7) uses the same policy as the course editor: any platform admin, with MFA and terms.
-    if permission not in {"platform.content.write", "platform.rules.publish"}:
+    # Company and user administration (T17.2): any platform admin reads and changes them. Marking a
+    # company for deletion is the one owner-only action, checked in its handler.
+    if permission not in {
+        "platform.content.write",
+        "platform.rules.publish",
+        "platform.companies.read",
+        "platform.companies.write",
+    }:
         raise ValueError(f"platform policy is not implemented for {permission!r}")
 
     async def dependency(

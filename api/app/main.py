@@ -88,6 +88,7 @@ from app.modules.leave.year_end_router import router as leave_year_end_router
 from app.modules.notifications.router import router as notifications_router
 from app.modules.organogram.router import router as organogram_router
 from app.modules.pay.router import router as pay_router
+from app.modules.platform_admin.router import router as platform_admin_router
 from app.modules.policies.own_router import router as own_policies_router
 from app.modules.policies.router import router as policies_router
 from app.modules.rbac.platform_session import router as platform_session_router
@@ -298,6 +299,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(soc_checks_router, prefix=API_PREFIX)
     app.include_router(soc_public_router, prefix=API_PREFIX)
     app.include_router(rules_admin_router, prefix=API_PREFIX)
+    app.include_router(platform_admin_router, prefix=API_PREFIX)
     app.include_router(careers_router, prefix=API_PREFIX)
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)
