@@ -879,6 +879,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/support-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Leave support mode (the support cookie's own session; the tenant session is kept)
+         * @description Always clears the support cookie. Ends the session behind it when it is still live, so the
+         *     banner's button works even after the 30 minutes are up.
+         */
+        delete: operations["support_mode_leave_support"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/switch-company": {
         parameters: {
             query?: never;
@@ -3644,6 +3665,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/companies/{company_id}/impersonate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start support mode on a company (read-only, 30 minutes) */
+        post: operations["support_mode_start_support"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/platform/companies/{company_id}/mark-for-deletion": {
         parameters: {
             query?: never;
@@ -3689,6 +3727,40 @@ export interface paths {
         put?: never;
         /** Suspend Company */
         post: operations["platform_admin_suspend_company"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/impersonation/{support_id}/end": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** End a support session */
+        post: operations["support_mode_end_support"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/impersonation/{support_id}/writes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Turn changes on (owner level, confirmed) or off in a support session */
+        post: operations["support_mode_set_support_writes"];
         delete?: never;
         options?: never;
         head?: never;
@@ -9478,6 +9550,7 @@ export interface components {
             role: ("company_admin" | "hr_admin" | "people_manager" | "recruiter" | "employee" | "read_only_auditor") | null;
             /** Step Up Active */
             step_up_active: boolean;
+            support?: components["schemas"]["SupportModeInfo"] | null;
             /** Terms Acceptance Required */
             terms_acceptance_required: boolean;
             /** Terms Version */
@@ -11899,6 +11972,72 @@ export interface components {
             code?: string | null;
             /** Password */
             password?: string | null;
+        };
+        /**
+         * SupportModeInfo
+         * @description Present while a platform admin is in support mode (T17.3): the tenant app shows a banner.
+         */
+        SupportModeInfo: {
+            /** Company Name */
+            company_name: string;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Ticket Ref */
+            ticket_ref: string;
+            /** Write Enabled */
+            write_enabled: boolean;
+        };
+        /** SupportSessionOut */
+        SupportSessionOut: {
+            /**
+             * Company Id
+             * Format: uuid
+             */
+            company_id: string;
+            /** Company Name */
+            company_name: string;
+            /** Ended At */
+            ended_at: string | null;
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Ticket Ref */
+            ticket_ref: string;
+            /** Write Enabled */
+            write_enabled: boolean;
+        };
+        /** SupportStartIn */
+        SupportStartIn: {
+            /** Reason */
+            reason: string;
+            /** Ticket Ref */
+            ticket_ref: string;
+        };
+        /** SupportWritesIn */
+        SupportWritesIn: {
+            /**
+             * Confirm
+             * @description The second confirmation: must be true to turn writes on.
+             * @default false
+             */
+            confirm: boolean;
+            /** Enabled */
+            enabled: boolean;
         };
         /** SwitchCompanyRequest */
         SwitchCompanyRequest: {
@@ -14867,6 +15006,42 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["MeResponse"];
                 };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    support_mode_leave_support: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             /** @description The request could not be completed. `error.code` says why. */
             "4XX": {
@@ -23834,6 +24009,50 @@ export interface operations {
             };
         };
     };
+    support_mode_start_support: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                company_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SupportStartIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportSessionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     platform_admin_mark_company_for_deletion: {
         parameters: {
             query?: never;
@@ -23944,6 +24163,90 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CompanyDetailOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    support_mode_end_support: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                support_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportSessionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    support_mode_set_support_writes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                support_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SupportWritesIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SupportSessionOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

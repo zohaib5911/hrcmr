@@ -35,6 +35,9 @@ COMPANY_ACTIONS = (
     "platform.company_reactivated",
     "platform.company_plan_extended",
     "platform.company_marked_for_deletion",
+    "platform.support_started",
+    "platform.support_writes_changed",
+    "platform.support_ended",
 )
 
 

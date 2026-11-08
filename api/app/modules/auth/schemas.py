@@ -100,6 +100,16 @@ class MeUser(BaseModel):
     theme_pref: Literal["system", "light", "dark"]
 
 
+class SupportModeInfo(BaseModel):
+    """Present while a platform admin is in support mode (T17.3): the tenant app shows a banner."""
+
+    id: uuid.UUID
+    company_name: str
+    ticket_ref: str
+    expires_at: datetime
+    write_enabled: bool
+
+
 class MeResponse(BaseModel):
     user: MeUser
     companies: list[CompanyMembership]
@@ -116,6 +126,7 @@ class MeResponse(BaseModel):
     platform_admin: bool
     # True only when the server has an AI key and the active company allows AI features.
     ai_available: bool
+    support: SupportModeInfo | None = None
 
 
 class LoginResponse(BaseModel):

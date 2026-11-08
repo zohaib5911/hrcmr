@@ -33,6 +33,7 @@ from app.modules.auth.schemas import (
     CompanyMembership,
     MeResponse,
     MeUser,
+    SupportModeInfo,
 )
 from app.modules.auth.service import RateLimitedError
 from app.modules.auth.tokens import hash_token, new_token
@@ -316,14 +317,34 @@ async def reset_password(
 
 async def build_me(db: GlobalSession, caller: Caller, *, ai_key: bool = False) -> MeResponse:
     user = caller.user
-    rows = (
-        await db.execute(
-            select(Membership, Company)
-            .join(Company, Company.id == Membership.company_id)
-            .where(Membership.user_id == user.id)
-            .order_by(Company.name)
+    support = None
+    if caller.support is not None:
+        # Support mode (T17.3): the one company being looked at, seen as its administrator.
+        from app.modules.rbac.deps import SUPPORT_ROLE
+
+        company = (
+            await db.execute(select(Company).where(Company.id == caller.support.company_id))
+        ).scalar_one()
+        rows = [(Membership(role=SUPPORT_ROLE, status="active"), company)]
+        support = SupportModeInfo(
+            id=caller.support.id,
+            company_name=company.name,
+            ticket_ref=caller.support.ticket_ref,
+            expires_at=caller.support.expires_at,
+            write_enabled=caller.support.write_enabled,
         )
-    ).all()
+    else:
+        rows = [
+            (membership, company)
+            for membership, company in (
+                await db.execute(
+                    select(Membership, Company)
+                    .join(Company, Company.id == Membership.company_id)
+                    .where(Membership.user_id == user.id)
+                    .order_by(Company.name)
+                )
+            ).all()
+        ]
     companies = [
         CompanyMembership(
             company_id=company.id,
@@ -376,6 +397,7 @@ async def build_me(db: GlobalSession, caller: Caller, *, ai_key: bool = False) -
         step_up_active=caller.session.has_recent_step_up(utcnow()),
         platform_admin=platform_admin,
         ai_available=ai_key and active is not None and active[1].ai_features_enabled,
+        support=support,
     )
 
 

@@ -70,6 +70,7 @@ def require_platform(permission: str) -> Callable[..., AsyncIterator[PlatformAcc
         "platform.rules.publish",
         "platform.companies.read",
         "platform.companies.write",
+        "platform.impersonate",  # support mode (T17.3); writes on is owner-only, in its handler
     }:
         raise ValueError(f"platform policy is not implemented for {permission!r}")
 
