@@ -1,23 +1,19 @@
 # STATUS
-Updated: 2026-11-08 13:45 (Europe/London)    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: see git log
+Updated: 2026-11-08 14:30 (Europe/London)    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: see git log
 State: IN PROGRESS
 
 ## Last completed
+- T17.4 — Subscriptions and refunds (owner, Stripe client, idempotent, audited), deletion and export queues, contact inbox (Haiku). Migration 0051. Tests: tests/db/test_platform_billing.py 15 pass.
 - T17.3 — Support mode (impersonation) (Opus). Tenant banner, support cookie, audit. Migration 0050.
 - T17.2 — Overview metrics, companies and users search (Haiku). API only.
 - T17.1 — Platform admin auth and admin host routing (Haiku).
 
 ## Current task
-- T17.4 — Subscriptions and refunds, deletion and export queue, contact inbox (S!). API only, as T17.2 and T17.3's API.
-  - [ ] 1. Migration 0051: `contact_messages` (global, GRANT like `stripe_events`), platform read on `deletion_requests` and `data_exports`, audit policies for `platform.refund_issued` and `platform.contact_updated`; model + registry + migration test list
-  - [ ] 2. `GET /platform/subscriptions` (DB list) and `POST /platform/refunds` (owner only, confirm, reason; Stripe refund via client, key `refund-{payment_intent}`; audited; refused if already refunded)
-  - [ ] 3. `GET /platform/deletion-requests` and `GET /platform/data-exports` (queues with status; no code hash)
-  - [ ] 4. `GET /platform/contact-messages` and `PATCH /platform/contact-messages/{id}` (mark handled, audited)
-  - [ ] 5. Tests `api/tests/db/test_platform_billing.py`; OpenAPI + web `gen:api`; ruff/mypy; related suites; PROGRESS + micro_plan tick; handover
-- Resume note: start at step 1. Models of reference: `api/app/modules/billing/`, `api/app/modules/platform_admin/`, migrations `0049`, `0050`.
+- T17.5 — Content tools and feature flags (S). Not started at this commit.
+- Resume note: read plan L1170, L1175, L1468 and the existing learning/courses and terms modules before writing.
 
 ## Next tasks
-- T17.5 (S), T17.6 (S), P17 gate, AUDIT-3.
+- T17.5 (S), T17.6 (S), P17 gate (R7, PR dev -> main), AUDIT-3 (stop, big model).
 - leftover.md L1 (Stripe E2E) when the owner has test keys; before Phase 23.
 
 ## Health

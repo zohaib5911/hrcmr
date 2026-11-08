@@ -3,6 +3,9 @@ detail, suspend, reactivate, extend the 10-year plan, mark for deletion) and use
 e-mail, lock, unlock). Every page view is audited by the guard; every change is audited here.
 
 Marking a company for deletion is owner-only. The rest is open to any platform admin with MFA.
+
+T17.4 adds the subscriptions and refunds (owner only, billing.py), the deletion and export queues
+(queues.py) and the contact inbox (contact.py).
 """
 
 from __future__ import annotations

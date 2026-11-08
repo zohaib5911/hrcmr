@@ -372,6 +372,25 @@ Checks:
 
 - `end_date >= start_date`
 
+## `contact_messages`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `name` | VARCHAR(120) | no |  |  |
+| `company` | VARCHAR(160) | yes |  |  |
+| `email` | VARCHAR(254) | no |  |  |
+| `topic` | VARCHAR(40) | no |  |  |
+| `message` | TEXT | no |  |  |
+| `ip_hash` | VARCHAR(64) | yes |  |  |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `handled_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+Checks:
+
+- `char_length(message) between 1 and 5000`
+- `topic in ('sponsor_compliance', 'simple_hr', 'pricing_billing', 'setup_help', 'partnership', 'other', 'data_protection')`
+
 ## `course_assignments`
 
 | Column | Type | Null | Default | Notes |
@@ -921,6 +940,30 @@ Checks:
 Checks:
 
 - `colour in ('blue', 'green', 'orange', 'red', 'gray')`
+
+## `impersonation_sessions`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `started_by` | UUID | yes |  | references `users` |
+| `reason` | VARCHAR(500) | no |  |  |
+| `ticket_ref` | VARCHAR(80) | no |  |  |
+| `session_id` | UUID | yes |  |  |
+| `expires_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `write_enabled_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `write_enabled_by` | UUID | yes |  | references `users` |
+| `ended_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `ended_by` | UUID | yes |  | references `users` |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(write_enabled_at is null) = (write_enabled_by is null)`
 
 ## `ineligible_codes`
 
