@@ -374,3 +374,4 @@
 2026-11-08 07:26 | Claude (Opus) | T16.5 | DONE: web /company/delete-account + Company link (web typecheck, lint, unit 77 pass); audit/guards/identity/rbac DB 46 pass; ticked micro_plan + PROGRESS; STATUS handed over | next P16 (S) small model
 2026-11-08 02:59 | Claude (Haiku) | P16 | start: Stripe keys not in .env (BLOCKED for step 7); doing R7 step 1 (full suites), delete-account e2e, billing e2e, screenshots, summary | next: cd api && uv run pytest -q (background)
 2026-11-08 03:01 | Claude (Haiku) | P16 | step 3+4 written: e2e account-deletion.spec.ts (start, code from Mailpit, schedule, withdraw), billing.spec.ts (paid + free); phase16-screenshots.spec.ts (4 states × 390/1280 × light/dark); eslint clean; not yet run (API suite running) | next: wait for API suite, then run new specs
+2026-11-08 03:09 | Claude (Haiku) | P16 | R7 step 1: full API suite 1254 passed, 0 failed (614 s, exit 0) | next: run account-deletion + billing e2e specs
