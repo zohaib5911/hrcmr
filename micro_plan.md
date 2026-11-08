@@ -376,9 +376,9 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Steps:** 1. Send `deletion_code` after `db.commit()` through the app mailer; keep the code hash in the transaction and return the code to the caller only for the send. 2. Check the DB test rig's mailer (`tests/db/test_deletion.py` `_mail` reads `email_outbox`); change `_code_for` to capture the message the way the rig can. 3. Decide in the same change whether the three other `_email` mails move too (same defect); record the choice under Strategy in STATUS. 4. Run `web/tests/e2e/account-deletion.spec.ts` and `SCREENSHOTS=1 ... phase16-screenshots.spec.ts --grep scheduled`.
 - **Done when:** `account-deletion.spec.ts` passes (code arrives, confirm, scheduled date, withdraw); `tests/db/test_deletion.py` and the email/guards suites pass. No skip, no weakened assertion.
 
-### [ ] P16 · S · Phase 16 gate
+### [x] P16 · S · Phase 16 gate
 - Recipe R7. **Stripe test-mode E2E is parked in `leftover.md` (L1)** — owner has no test keys yet; do not block on it.
-- Already done (2026-11-08): R7 steps 1–3 (API 1254, web lint/typecheck/unit 786, web e2e 436, screenshots 16/16, PROGRESS summary). **Left:** R7 step 4 — PR `dev → main`, wait for checks, merge when green, then tick P16.
+- Done (2026-11-08): R7 steps 1–4 (API 1254, web lint/typecheck/unit 786, web e2e 436, screenshots 16/16, PROGRESS summary, PR #25 merged to main with all checks green). Stripe E2E stays in leftover.md L1.
 
 ---
 

@@ -387,3 +387,4 @@
 2026-11-08 09:45 | Claude (Haiku) | P16 | start R7 step 4: main has no non-merge commits dev lacks (stale merges only); opening PR dev -> main | next: gh pr create, watch checks
 2026-11-08 09:51 | Claude (Haiku) | P16 | PR 25 Semgrep red: 6 blocking findings in 0047 migration (DDL from constants); added reasoned nosemgrep (as 0040/0041); ruff ok; local CI-equivalent scan running | next: verify rc=0, push fix, watch checks
 2026-11-08 09:52 | Claude (Haiku) | P16 | Semgrep local CI-equivalent scan rc=0 after 0047 nosemgrep fix (ruff ok) | next: push, re-watch PR 25 checks
+2026-11-08 10:14 | Claude (Haiku) | P16 | DONE: PR 25 merged (CI 12/12 green on 6114115); P16 ticked in micro_plan + PROGRESS; Stripe E2E in leftover L1 | next T17.1 (S!)
