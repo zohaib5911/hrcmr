@@ -368,3 +368,4 @@
 2026-11-08 02:02 | Claude (Haiku) | T16.4 | DONE: ticked micro_plan + PROGRESS; STATUS handed over | next T16.5 (B) needs big model; stopping
 2026-11-08 07:07 | Claude (Opus) | T16.5 | started; STATUS updated | next migration 0047
 2026-11-08 07:09 | Claude (Opus) | T16.5 | step 1 done: migration 0047 (deletion_requests, RLS no DELETE; app_purge_allowed + delete-only triggers split on 10 history tables), model, data-model doc (tests: migrations+rls 36 pass, data-model 1 pass) | next API router app/modules/deletion/router.py
+2026-11-08 07:13 | Claude (Opus) | T16.5 | step 2 code: router GET/POST/confirm/DELETE deletion-request (HMAC code, 5 tries, 60s resend, export with step-up), templates deletion_scheduled(+_support)/withdrawn/account_deleted + samples (also data_export_ready sample missing since T16.4); tests: email 7, guards 55 pass | next purge executor app/jobs/deletion.py

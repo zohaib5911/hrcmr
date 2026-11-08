@@ -287,6 +287,54 @@ TEMPLATES: dict[str, Template] = {
         ),
         fields=_fields("first_name", "code", "minutes"),
     ),
+    "deletion_scheduled": Template(
+        subject="{company_name} is due to be deleted on {deletion_date}",
+        heading="Your company account is due to be deleted",
+        preheader="A Company Admin can withdraw the request until {deletion_date}.",
+        paragraphs=(
+            "Hi {first_name},",
+            "{requester} asked to delete the {company_name} account in {brand_name}. All of its "
+            "records and documents will be deleted on {deletion_date}, and this cannot be undone.",
+            "If this is a mistake, any Company Admin can withdraw the request until then.",
+        ),
+        button=("Review the request", "link"),
+        fields=_fields("first_name", "requester", "company_name", "deletion_date", "link"),
+    ),
+    "deletion_scheduled_support": Template(
+        subject="Account deletion scheduled: {company_name}",
+        heading="An account deletion is scheduled",
+        preheader="Company {company_id} is due to be deleted on {deletion_date}.",
+        paragraphs=(
+            "A Company Admin of {company_name} (company {company_id}) confirmed the deletion of "
+            "the account.",
+            "The data will be deleted on {deletion_date} unless the request is withdrawn.",
+        ),
+        fields=_fields("company_name", "company_id", "deletion_date"),
+    ),
+    "deletion_withdrawn": Template(
+        subject="The deletion of {company_name} was withdrawn",
+        heading="The deletion request was withdrawn",
+        preheader="Your company account stays open.",
+        paragraphs=(
+            "Hi {first_name},",
+            "{actor} withdrew the request to delete the {company_name} account. Nothing will be "
+            "deleted, and the account stays open.",
+        ),
+        fields=_fields("first_name", "actor", "company_name"),
+    ),
+    "account_deleted": Template(
+        subject="Your {brand_name} account has been deleted",
+        heading="Your company account has been deleted",
+        preheader="The {company_name} records and documents are gone.",
+        paragraphs=(
+            "Hi {first_name},",
+            "As requested, we deleted the {company_name} account on {deletion_date}: its records, "
+            "documents and user accounts. We keep only what the law requires, such as payment and "
+            "invoice records, and a note that the account was deleted.",
+            "Thank you for using {brand_name}.",
+        ),
+        fields=_fields("first_name", "company_name", "deletion_date"),
+    ),
 }
 
 

@@ -62,6 +62,7 @@ from app.modules.compliance.reminder_router import router as reminders_router
 from app.modules.compliance.router import router as compliance_changes_router
 from app.modules.compliance.sponsor_pdf import router as sponsor_pdf_router
 from app.modules.dashboard.router import router as dashboard_router
+from app.modules.deletion.router import router as deletion_router
 from app.modules.documents.router import router as documents_router
 from app.modules.email.outbox import OutboxMailer
 from app.modules.employees.activity_router import router as employee_activity_router
@@ -280,6 +281,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(policies_router, prefix=API_PREFIX)
     app.include_router(reports_router, prefix=API_PREFIX)
     app.include_router(exports_router, prefix=API_PREFIX)
+    app.include_router(deletion_router, prefix=API_PREFIX)
     app.include_router(documents_router, prefix=API_PREFIX)
     app.include_router(letters_router, prefix=API_PREFIX)
     app.include_router(recruitment_router, prefix=API_PREFIX)

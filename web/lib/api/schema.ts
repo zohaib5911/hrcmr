@@ -1117,6 +1117,45 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/companies/me/deletion-request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Deletion Request */
+        get: operations["account_lifecycle_deletion_request"];
+        put?: never;
+        /**
+         * Request Deletion
+         * @description Starts a request and e-mails its code, or sends a new code for the person's own request.
+         */
+        post: operations["account_lifecycle_request_deletion"];
+        /** Withdraw Deletion */
+        delete: operations["account_lifecycle_withdraw_deletion"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/companies/me/deletion-request/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm Deletion */
+        post: operations["account_lifecycle_confirm_deletion"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/companies/me/export": {
         parameters: {
             query?: never;
@@ -7088,6 +7127,11 @@ export interface components {
              */
             today: string;
         };
+        /** ConfirmIn */
+        ConfirmIn: {
+            /** Code */
+            code: string;
+        };
         /** ContactIn */
         ContactIn: {
             /** Address */
@@ -7535,6 +7579,46 @@ export interface components {
             calendar_region: string;
             /** Deadline Date */
             deadline_date: string | null;
+        };
+        /** DeletionIn */
+        DeletionIn: {
+            /**
+             * Export Requested
+             * @default false
+             */
+            export_requested: boolean;
+        };
+        /** DeletionOut */
+        DeletionOut: {
+            /** Code Expires At */
+            code_expires_at: string | null;
+            /** Confirmed At */
+            confirmed_at: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Export Id */
+            export_id: string | null;
+            /** Export Requested */
+            export_requested: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Requested By Me */
+            requested_by_me: boolean;
+            /** Requested By Name */
+            requested_by_name: string | null;
+            /** Scheduled For */
+            scheduled_for: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "awaiting_code" | "scheduled";
         };
         /** DepartmentIn */
         DepartmentIn: {
@@ -15118,6 +15202,164 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ChangeOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    account_lifecycle_deletion_request: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionOut"] | null;
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    account_lifecycle_request_deletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeletionIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    account_lifecycle_withdraw_deletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    account_lifecycle_confirm_deletion: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConfirmIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeletionOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

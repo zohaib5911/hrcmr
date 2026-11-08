@@ -92,6 +92,33 @@ SAMPLES: dict[str, dict[str, str]] = {
         "where": "video call",
     },
     "deletion_code": {"first_name": "Amira", "code": "482 915", "minutes": "15"},
+    "data_export_ready": {
+        "first_name": "Amira",
+        "expires_on": "15 November 2026",
+        "link": "https://api.example.com/api/v1/companies/me/exports/0190f3c2/download",
+    },
+    "deletion_scheduled": {
+        "first_name": "Sam",
+        "requester": "Amira Khan",
+        "company_name": "Northwind Care Ltd",
+        "deletion_date": "15 November 2026",
+        "link": "https://app.example.com/company/delete-account",
+    },
+    "deletion_scheduled_support": {
+        "company_name": "Northwind Care Ltd",
+        "company_id": "0190f3c2-6f1e-7c4b-9a51-2d8e5b7c1a90",
+        "deletion_date": "15 November 2026",
+    },
+    "deletion_withdrawn": {
+        "first_name": "Sam",
+        "actor": "Amira Khan",
+        "company_name": "Northwind Care Ltd",
+    },
+    "account_deleted": {
+        "first_name": "Amira",
+        "company_name": "Northwind Care Ltd",
+        "deletion_date": "15 November 2026",
+    },
     "payment_failed": {
         "first_name": "Amira",
         "grace_end": "15 November 2026",
