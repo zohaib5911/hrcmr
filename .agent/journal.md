@@ -384,3 +384,4 @@
 2026-11-08 09:08 | Claude (Haiku) | P16 | R7 1b part: web lint 0 warnings, typecheck clean, unit 786 passed (56 files); full web e2e starting | next: read e2e result, then screenshots check and PROGRESS summary
 2026-11-08 09:24 | Claude (Haiku) | P16 | R7 1b done: full web e2e 436 passed, 200 skipped, exit 0; phase 16 summary written in PROGRESS | next: Stripe E2E BLOCKED (owner keys); gate not ticked, PR held
 2026-11-08 04:43 | Claude (Opus) | P16 | owner has no Stripe test keys: Stripe E2E parked in leftover.md L1; P16 left = PR dev -> main | next small model: R7 step 4
+2026-11-08 09:45 | Claude (Haiku) | P16 | start R7 step 4: main has no non-merge commits dev lacks (stale merges only); opening PR dev -> main | next: gh pr create, watch checks
