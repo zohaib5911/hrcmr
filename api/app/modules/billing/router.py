@@ -46,6 +46,7 @@ class BillingOut(BaseModel):
     payment_grace_ends_at: datetime | None
     cancel_at: datetime | None
     has_billing_account: bool
+    support_email: str  # for plan changes, which support does by hand in v1
 
 
 class CancelOut(BaseModel):
@@ -68,6 +69,11 @@ class WebhookOut(BaseModel):
 def _stripe(request: Request) -> Stripe:
     stripe: Stripe = request.app.state.stripe
     return stripe
+
+
+def _support_email(request: Request) -> str:
+    settings = request.app.state.settings  # the same address the e-mails give
+    return settings.support_email or f"support@{settings.domain}"
 
 
 def _not_set_up() -> AppError:
@@ -118,6 +124,7 @@ async def read_subscription(request: Request, access: Manager) -> BillingOut:
         payment_grace_ends_at=company.payment_grace_ends_at,
         cancel_at=latest.cancel_at if isinstance(latest, Subscription) else None,
         has_billing_account=company.stripe_customer_id is not None,
+        support_email=_support_email(request),
     )
 
 

@@ -543,6 +543,7 @@ async def test_cancel_inside_14_days_refunds_the_first_payment_then_ends_the_pla
     assert (await hr.post(f"{API}/billing/cancel")).status_code == 403  # billing.manage only
     shown = (await admin.get(f"{API}/billing/subscription")).json()
     assert shown["cooling_off_ends_at"] is not None
+    assert "@" in shown["support_email"]
 
     cancelled = await admin.post(f"{API}/billing/cancel")
     assert cancelled.status_code == 200, cancelled.text

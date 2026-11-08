@@ -5898,6 +5898,8 @@ export interface components {
             started_at: string | null;
             /** Subscription Status */
             subscription_status: string | null;
+            /** Support Email */
+            support_email: string;
         };
         /** Body_attendance_preview */
         Body_attendance_preview: {
