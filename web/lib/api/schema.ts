@@ -931,6 +931,65 @@ export interface paths {
         patch: operations["pay_update_bank_account"];
         trace?: never;
     };
+    "/billing/checkout-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Checkout Session
+         * @description A Stripe Checkout page for the plan. The plan starts when Stripe's webhook says it is paid,
+         *     not when the browser comes back.
+         */
+        post: operations["billing_create_checkout_session"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/portal-session": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Create Portal Session
+         * @description Stripe's Billing Portal: card details and invoices. Cancelling is done on our billing page,
+         *     so the 14-day refund rule applies (the portal's own cancel is switched off in Stripe).
+         */
+        post: operations["billing_create_portal_session"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/subscription": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Subscription */
+        get: operations["billing_read_subscription"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/candidates": {
         parameters: {
             query?: never;
@@ -4951,6 +5010,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/webhooks/stripe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Stripe Webhook
+         * @description Stripe's events. Verified on the raw body; each event id is applied once.
+         */
+        post: operations["webhooks_stripe_webhook"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/work-log": {
         parameters: {
             query?: never;
@@ -5778,6 +5857,25 @@ export interface components {
             /** Sort Code */
             sort_code: string;
         };
+        /** BillingOut */
+        BillingOut: {
+            /** Cancel At */
+            cancel_at: string | null;
+            /** Cooling Off Ends At */
+            cooling_off_ends_at: string | null;
+            /** Ends At */
+            ends_at: string | null;
+            /** Has Billing Account */
+            has_billing_account: boolean;
+            /** Payments Enabled */
+            payments_enabled: boolean;
+            /** Plan */
+            plan: string;
+            /** Started At */
+            started_at: string | null;
+            /** Subscription Status */
+            subscription_status: string | null;
+        };
         /** Body_attendance_preview */
         Body_attendance_preview: {
             /** File */
@@ -6427,6 +6525,14 @@ export interface components {
             total: number;
             /** Visible */
             visible: boolean;
+        };
+        /** CheckoutIn */
+        CheckoutIn: {
+            /**
+             * Plan
+             * @enum {string}
+             */
+            plan: "annual" | "ten_year";
         };
         /** ClearWeek */
         ClearWeek: {
@@ -10151,6 +10257,11 @@ export interface components {
             /** Requisitions */
             requisitions: number;
         };
+        /** RedirectOut */
+        RedirectOut: {
+            /** Url */
+            url: string;
+        };
         /** ReminderMessageIn */
         ReminderMessageIn: {
             /** Message */
@@ -11433,6 +11544,11 @@ export interface components {
              * @default https://www.gov.uk/national-minimum-wage-rates
              */
             source: string;
+        };
+        /** WebhookOut */
+        WebhookOut: {
+            /** Received */
+            received: boolean;
         };
         /** WeekOut */
         WeekOut: {
@@ -14324,6 +14440,124 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BankAccountOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    billing_create_checkout_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CheckoutIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RedirectOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    billing_create_portal_session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RedirectOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    billing_read_subscription: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BillingOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -26834,6 +27068,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AccessUser"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    webhooks_stripe_webhook: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WebhookOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

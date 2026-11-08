@@ -37,6 +37,7 @@ from app.integrations.companies_house import CompaniesHouse
 from app.integrations.email import LoggingMailer, Mailer, transport_from_settings
 from app.integrations.postcodes import Postcodes
 from app.integrations.storage import Storage
+from app.integrations.stripe import Stripe
 from app.integrations.turnstile import Turnstile
 from app.jobs.queue import open_queue
 from app.modules.access.router import router as access_router
@@ -47,6 +48,8 @@ from app.modules.attendance.router import router as attendance_router
 from app.modules.audit.router import router as audit_router
 from app.modules.auth.container import build_container
 from app.modules.auth.router import router as auth_router
+from app.modules.billing.router import router as billing_router
+from app.modules.billing.router import webhook_router as stripe_webhook_router
 from app.modules.companies.compliance_documents import router as compliance_router
 from app.modules.companies.key_personnel_router import router as key_personnel_router
 from app.modules.companies.router import router as company_router
@@ -171,6 +174,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
         )
         app.state.companies_house = CompaniesHouse.from_settings(settings)
         app.state.anthropic = Anthropic.from_settings(settings)
+        app.state.stripe = Stripe.from_settings(settings)
         app.state.postcodes = Postcodes()
         app.state.files = FileService(
             Storage.from_settings(settings), ClamAV.from_settings(settings)
@@ -304,5 +308,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(employee_photo_router, prefix=API_PREFIX)
     app.include_router(compensation_router, prefix=API_PREFIX)
     app.include_router(structure_router, prefix=API_PREFIX)
+    app.include_router(billing_router, prefix=API_PREFIX)
+    app.include_router(stripe_webhook_router, prefix=API_PREFIX)
     _install_openapi(app)
     return app

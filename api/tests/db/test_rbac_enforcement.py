@@ -282,6 +282,7 @@ def test_no_real_endpoint_skips_authorisation() -> None:
         "/api/v1/public/postings/",  # (see test_careers)
         "/api/v1/public/certificates/",  # no-login certificate check: rate limited, four fields only (see test_certificates)
         "/api/v1/public/soc/",  # no-login free checker: reference data only, rate limited, Turnstile on the salary check (see test_soc_public)
+        "/api/v1/webhooks/",  # server-to-server: Stripe's signature on the raw body is the credential (see test_billing)
     )
 
     app: FastAPI = create_app(build_settings())
@@ -326,7 +327,13 @@ async def test_every_real_routes_permission_dependencies_match_the_matrix(
             required = permissions(dependant)
             if not required:
                 assert path.startswith(
-                    ("/api/v1/auth/", "/api/v1/health", "/api/v1/ready", "/api/v1/public/")
+                    (
+                        "/api/v1/auth/",
+                        "/api/v1/health",
+                        "/api/v1/ready",
+                        "/api/v1/public/",
+                        "/api/v1/webhooks/",
+                    )
                 ), path
                 continue
             expected = {permission: scope_for(role, permission) for permission in required}
