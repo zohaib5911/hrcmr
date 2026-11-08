@@ -3784,6 +3784,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/refunds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Issue Refund
+         * @description A full refund of the latest payment on a purchase. Owner only (T17.4).
+         */
+        post: operations["platform_admin_issue_refund"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/platform/rules": {
         parameters: {
             query?: never;
@@ -3829,6 +3849,23 @@ export interface paths {
         put?: never;
         /** Rollback */
         post: operations["platform_rules_rollback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/platform/subscriptions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Subscriptions */
+        get: operations["platform_admin_list_subscriptions"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -10890,6 +10927,27 @@ export interface components {
             /** Url */
             url: string;
         };
+        /** RefundIn */
+        RefundIn: {
+            /**
+             * Confirm
+             * @description The second confirmation: must be true to issue the refund.
+             */
+            confirm: boolean;
+            /** Reason */
+            reason: string;
+            /**
+             * Subscription Id
+             * Format: uuid
+             */
+            subscription_id: string;
+        };
+        /** RefundOut */
+        RefundOut: {
+            /** Stripe Refund Id */
+            stripe_refund_id: string;
+            subscription: components["schemas"]["SubscriptionRow"];
+        };
         /** ReminderMessageIn */
         ReminderMessageIn: {
             /** Message */
@@ -11972,6 +12030,47 @@ export interface components {
             code?: string | null;
             /** Password */
             password?: string | null;
+        };
+        /** SubscriptionRow */
+        SubscriptionRow: {
+            /** Cancel At */
+            cancel_at: string | null;
+            /**
+             * Company Id
+             * Format: uuid
+             */
+            company_id: string;
+            /** Company Name */
+            company_name: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Current Period End */
+            current_period_end: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Plan */
+            plan: string;
+            /** Refunded At */
+            refunded_at: string | null;
+            /** Status */
+            status: string;
+            /** Stripe Payment Intent Id */
+            stripe_payment_intent_id: string | null;
+            /** Stripe Subscription Id */
+            stripe_subscription_id: string | null;
+        };
+        /** SubscriptionsOut */
+        SubscriptionsOut: {
+            /** Items */
+            items: components["schemas"]["SubscriptionRow"][];
+            /** Total */
+            total: number;
         };
         /**
          * SupportModeInfo
@@ -24307,6 +24406,48 @@ export interface operations {
             };
         };
     };
+    platform_admin_issue_refund: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RefundIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RefundOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
     platform_rules_list_versions: {
         parameters: {
             query?: never;
@@ -24403,6 +24544,49 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RulesVersionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_admin_list_subscriptions: {
+        parameters: {
+            query?: {
+                plan?: string | null;
+                refunded?: boolean | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubscriptionsOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

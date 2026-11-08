@@ -109,3 +109,33 @@ class UserRow(BaseModel):
 
 class UsersOut(BaseModel):
     items: list[UserRow]
+
+
+class SubscriptionRow(BaseModel):
+    id: uuid.UUID
+    company_id: uuid.UUID
+    company_name: str
+    plan: str  # annual | ten_year
+    status: str  # Stripe's status for an annual plan; active or refunded for a 10-year payment
+    created_at: datetime
+    current_period_end: datetime | None
+    cancel_at: datetime | None
+    refunded_at: datetime | None
+    stripe_subscription_id: str | None
+    stripe_payment_intent_id: str | None
+
+
+class SubscriptionsOut(BaseModel):
+    items: list[SubscriptionRow]
+    total: int
+
+
+class RefundIn(RequestModel):
+    subscription_id: uuid.UUID
+    reason: str = Field(min_length=REASON_MIN, max_length=REASON_MAX)
+    confirm: bool = Field(description="The second confirmation: must be true to issue the refund.")
+
+
+class RefundOut(BaseModel):
+    subscription: SubscriptionRow
+    stripe_refund_id: str

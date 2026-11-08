@@ -38,6 +38,7 @@ COMPANY_ACTIONS = (
     "platform.support_started",
     "platform.support_writes_changed",
     "platform.support_ended",
+    "platform.refund_issued",
 )
 
 

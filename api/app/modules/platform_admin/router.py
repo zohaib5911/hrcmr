@@ -11,12 +11,12 @@ import uuid  # noqa: TC003  (FastAPI reads the path parameter type at runtime)
 from datetime import UTC, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Request
 from sqlalchemy import select
 
-from app.core.errors import ForbiddenError
+from app.core.errors import AppError, ForbiddenError
 from app.modules.identity.models import PlatformAdmin
-from app.modules.platform_admin import companies, metrics, users
+from app.modules.platform_admin import billing, companies, metrics, users
 from app.modules.platform_admin.schemas import (
     CompaniesOut,
     CompanyDetailOut,
@@ -24,6 +24,9 @@ from app.modules.platform_admin.schemas import (
     MetricsOut,
     OptionalReasonIn,
     ReasonIn,
+    RefundIn,
+    RefundOut,
+    SubscriptionsOut,
     UserRow,
     UsersOut,
 )
@@ -32,6 +35,7 @@ from app.modules.rbac.platform import PlatformAccess, require_platform
 router = APIRouter(tags=["platform-admin"])
 Reader = Annotated[PlatformAccess, Depends(require_platform("platform.companies.read"))]
 Writer = Annotated[PlatformAccess, Depends(require_platform("platform.companies.write"))]
+Refunder = Annotated[PlatformAccess, Depends(require_platform("platform.billing.refund"))]
 PLAN_PATTERN = "^(free|annual|ten_year)$"
 STATUS_PATTERN = "^(active|suspended|pending_deletion|deleted)$"
 
@@ -126,6 +130,47 @@ async def mark_company_for_deletion(
     await companies.mark_for_deletion(access.db, access.audit_context, company, body.reason)
     await access.db.commit()
     return await companies.detail(access.db, company)
+
+
+@router.get("/platform/subscriptions", response_model=SubscriptionsOut)
+async def list_subscriptions(
+    access: Reader,
+    plan: Annotated[str | None, Query(pattern="^(annual|ten_year)$")] = None,
+    refunded: bool | None = None,
+    limit: Annotated[int, Query(ge=1, le=billing.PAGE_MAX)] = 50,
+    offset: Annotated[int, Query(ge=0, le=100_000)] = 0,
+) -> SubscriptionsOut:
+    return await billing.subscriptions(
+        access.db, plan=plan, refunded=refunded, limit=limit, offset=offset
+    )
+
+
+@router.post("/platform/refunds", response_model=RefundOut)
+async def issue_refund(body: RefundIn, request: Request, access: Refunder) -> RefundOut:
+    """A full refund of the latest payment on a purchase. Owner only (T17.4)."""
+    if not await _is_owner(access):
+        raise ForbiddenError("Only an owner can issue a refund.")
+    if not body.confirm:
+        raise AppError(
+            "CONFIRMATION_REQUIRED",
+            "Confirm that this payment should be refunded in full.",
+            status_code=422,
+            field="confirm",
+        )
+    subscription = await billing.subscription_or_404(access.db, body.subscription_id)
+    refund_id = await billing.refund(
+        access.db,
+        request.app.state.stripe,
+        access.audit_context,
+        subscription,
+        reason=body.reason,
+        now=datetime.now(UTC),
+    )
+    await access.db.commit()
+    return RefundOut(
+        subscription=await billing.row_for(access.db, subscription),
+        stripe_refund_id=refund_id,
+    )
 
 
 @router.get("/platform/users", response_model=UsersOut)
