@@ -16,6 +16,7 @@ from arq import func
 from app.jobs.audit import tracked
 from app.jobs.cloudflare import cloudflare_ranges_weekly
 from app.jobs.compliance import reminders_daily, rtw_status_daily
+from app.jobs.deletion import deletion_executor_hourly
 from app.jobs.email import deliver_email, sweep_email_outbox
 from app.jobs.exports import generate_export, sweep_export_jobs
 from app.jobs.holidays import bank_holidays_weekly
@@ -94,9 +95,9 @@ SCHEDULE: tuple[Schedule, ...] = (
     Schedule("rules_watch_daily", rules_watch_daily, {"hour": 7, "minute": 0}, "T15.7"),
     Schedule(
         "deletion_executor_hourly",
-        _nothing_yet("deletion_executor_hourly"),
+        deletion_executor_hourly,
         {"minute": 15},
-        "T16.4",
+        "T16.5",
     ),
     Schedule("report_jobs_sweep", sweep_report_jobs, {}, "T10.2", quiet=True),
     Schedule("export_jobs_sweep", sweep_export_jobs, {}, "T16.4", quiet=True),
