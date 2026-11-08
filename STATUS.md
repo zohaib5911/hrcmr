@@ -1,26 +1,27 @@
 # STATUS
 Updated: 2026-11-08 Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: aa38247
-State: IN PROGRESS
+State: HANDED OVER — small model next
 
 ## Last completed
-- T16.1 — Stripe integration and webhooks: client (api/app/integrations/stripe.py), migration 0044 (subscriptions, stripe_events), billing router (GET subscription, checkout, portal), POST /webhooks/stripe. Tests 13 pure + 6 DB pass.
+- T16.2 — Entitlements (402 PLAN_REQUIRED gate in rbac require(), app/modules/billing/entitlements.py) and payment-failed grace (7 days, admin e-mail + notification). Full API 1242 pass; full e2e 433 pass (184 skipped).
+- T16.1 — Stripe integration and webhooks (api/app/integrations/stripe.py, app/modules/billing/).
+- P15 — PR 23 merged to main (all checks green).
 
 ## Current task
-- T16.2 — Entitlements and payment-failed grace (B)
-  - [ ] 1. entitlements: is_entitled (annual by status, 10-year by end date, past_due within 7-day grace); 402 PLAN_REQUIRED gate in rbac require() for writes
-  - [ ] 2. migration 0045: companies.payment_grace_ends_at; webhook sets it on first invoice.payment_failed, clears it when paid; e-mail + notification to company admins
-  - [ ] 3. tests: pure entitlement rules, DB gate + grace; existing test companies made paid (two_companies), e2e helper marks accounts paid
-  - [ ] 4. full API suite; affected e2e specs
-- Resume note: see .agent/journal.md last line.
+- T16.3 — Billing page, cancel with refund (S!). Not started. Read micro_plan T16.3 block; copy the Stripe client in api/app/integrations/stripe.py.
 
 ## Next tasks
 - T16.3 (S!), T16.4 (S!), T16.5 (B), P16
 
 ## Health
-- CI on dev: PR 23 (Phase 15) re-running after the status push; merges when green    CI on main: green (PR #22)
-- Local checks run: billing pure 13 + DB 6; migrations, RBAC enforcement/matrix, openapi, architecture, data-model, RLS, identity, body limits, config pass; ruff/mypy clean; Semgrep (CI rulesets) clean on new files.
+- CI on dev: pushed, not watched (no PR open)    CI on main: green (PR #23)
+- Local checks run: full API suite 1242 pass; full e2e 433 pass, 184 skipped; ruff/mypy/web lint+typecheck clean.
 
 ## Issues / suggestions
+- (T16.2) Test companies (tests/db/api_support.two_companies and other raw inserts) are on annual/active. A test of free-plan behaviour must set plan = 'free' itself (see tests/db/test_billing.py fixture `free`).
+- (T16.2) Browser tests: createSignedInAdmin(request, account, { plan: "free" }) for a free account; default is paid via the e2e-only route POST /api/v1/e2e/paid-plan (api/tests/e2e_server.py, hidden from OpenAPI).
+- (T16.2) /auth/me shows `plan` only. A lapsed annual plan (past_due after grace) still says "annual", so the free-plan banner does not show; the 402 upgrade sheet does. T16.3's billing page should show the status and grace end (company.payment_grace_ends_at; add it to GET /billing/subscription).
+- (T16.2) The company card labels annual as "1 year plan".
 - (T16.1) invoice.payment_failed only syncs the subscription status (past_due) and audits billing.payment_failed. The 7-day grace and e-mails are T16.2's.
 - (T16.1) The billing page (T16.3) must use /company/billing: Checkout's success and cancel URLs and the portal return URL point there (?checkout=success|cancelled).
 - (T16.1) T16.3 cancel/refund: add cancel_subscription and create_refund to api/app/integrations/stripe.py (same _post with an idempotency key); the webhook already ends a refunded 10-year plan (charge.refunded) and an annual plan on customer.subscription.deleted.
@@ -39,6 +40,10 @@ State: IN PROGRESS
 - Pre-existing: OpenAPI already had five qualified AddressOut names (app__modules__companies__..., app__modules__employees__personal_schemas__...). Not from SOC.
 
 ## Strategy / decisions taken
+- (T16.2) "profile" in plan 8.16's exemption list is read as the company profile (company.profile.write), so a free company can complete its details before paying. /auth (own account) is never gated.
+- (T16.2) The gate is by permission, not only by method: POST routes named by a .read permission (reveal, notification marks) are not writes.
+- (T16.2) Annual entitlement follows Stripe's status, not the stored period end (renewal moves it); past_due with no grace date yet counts as within grace.
+- (T16.2) The payment_failed e-mail ignores the e-mail preference (account matter); it is sent once per failure episode.
 - (T16.1) Stripe is called with httpx (no stripe SDK), like the other integrations; tests swap the transport. No Stripe-Version is pinned; the webhook reads both the old and the 2025 shapes (period on items, invoice subscription under parent).
 - (T16.1) The webhook finds the company from metadata.company_id (set on the Checkout session, the subscription and the payment intent), else from the Stripe customer's metadata, then scopes the transaction to it. If the company already holds a different customer id, the event is ignored.
 - (T16.1) Subscription events re-read the live subscription from Stripe, so out-of-order delivery cannot roll the state back. An event id is stored in the same transaction as its change; a Stripe outage while applying returns 502 and nothing is stored, so Stripe's retry applies it.

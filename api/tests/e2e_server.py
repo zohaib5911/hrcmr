@@ -145,7 +145,7 @@ def _plan_route(app: FastAPI, owner_url: str) -> None:
             await engine.dispose()
         return {"companies": changed.rowcount}
 
-    app.add_api_route("/api/v1/e2e/paid-plan", paid_plan, methods=["POST"])
+    app.add_api_route("/api/v1/e2e/paid-plan", paid_plan, methods=["POST"], include_in_schema=False)
 
 
 def main() -> None:
