@@ -179,16 +179,18 @@ async def test_suspend_stops_the_company_and_reactivate_restores_it(
     ]
 
 
-async def test_extend_plan_comps_days_only_on_an_active_ten_year_plan(
+async def test_extend_plan_comps_days_on_any_plan_and_moves_a_ten_year_end_date(
     rig: dict[str, Any],
 ) -> None:
     admin, _ = await _platform_admin(rig, "support")
     company = str(rig["a"])
     body = {"days": 30, "reason": "Goodwill comp for the outage"}
 
+    # An annual company gets a complimentary end date, separate from Stripe (owner answer 5).
     annual = await admin.post(f"{API}/platform/companies/{company}/extend-plan", json=body)
-    assert annual.status_code == 409
-    assert annual.json()["error"]["code"] == "COMP_NOT_AVAILABLE"
+    assert annual.status_code == 200, annual.text
+    assert annual.json()["events"][0]["action"] == "platform.company_comp_granted"
+    assert annual.json()["events"][0]["summary"] == "Complimentary access extended by 30 days"
 
     end = datetime.now(UTC) + timedelta(days=365 * 9)
     async with rig["owner"].begin() as c:

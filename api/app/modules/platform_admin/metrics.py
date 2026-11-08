@@ -57,13 +57,17 @@ async def overview(db: GlobalSession, now: datetime | None = None) -> MetricsOut
             select(Company).where(Company.status == "active", Company.plan == "annual")
         )
     ).scalars()
-    annual_entitled = sum(1 for company in annual if is_entitled(company, moment))
+    annual_entitled = sum(
+        1 for company in annual if is_entitled(company, moment, include_comp=False)
+    )
     ten_year = (
         await db.execute(
             select(Company).where(Company.status == "active", Company.plan == "ten_year")
         )
     ).scalars()
-    ten_year_entitled = sum(1 for company in ten_year if is_entitled(company, moment))
+    ten_year_entitled = sum(
+        1 for company in ten_year if is_entitled(company, moment, include_comp=False)
+    )
 
     churn_30d = await _count(
         db,

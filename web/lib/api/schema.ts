@@ -6633,6 +6633,8 @@ export interface components {
         BillingOut: {
             /** Cancel At */
             cancel_at: string | null;
+            /** Comp Until */
+            comp_until: string | null;
             /** Cooling Off Ends At */
             cooling_off_ends_at: string | null;
             /** Ends At */

@@ -34,6 +34,7 @@ COMPANY_ACTIONS = (
     "platform.company_suspended",
     "platform.company_reactivated",
     "platform.company_plan_extended",
+    "platform.company_comp_granted",
     "platform.company_marked_for_deletion",
     "platform.support_started",
     "platform.support_writes_changed",
@@ -242,35 +243,47 @@ async def extend_plan(
     reason: str,
     now: datetime,
 ) -> None:
-    """Comp extra days on a 10-year plan: its end date is the access date (plan 8.16).
+    """Give extra days of access for free (a comp, plan 8.16).
 
-    Only a 10-year plan whose subscription is active. An annual plan's access follows Stripe, so a
-    comp there would need a status change, not a date; a free company has no plan to extend. Both
-    are refused rather than guessed at (see STATUS, strategy)."""
+    An active 10-year plan: its end date is the access date, so the date moves (as built in T17.2).
+    Any other company (annual, free, or a lapsed plan): a complimentary end date (``comp_until``)
+    moves, separate from Stripe, so no Stripe record is changed and billing history stays true
+    (owner answer 5, 2026-11-08). Both are audited with the reason."""
     if company.status in ("pending_deletion", "deleted"):
         raise AppError(
             "COMPANY_CLOSED", "This company is closing; it cannot be extended.", status_code=409
         )
-    if company.plan != "ten_year" or company.subscription_status != "active":
-        raise AppError(
-            "COMP_NOT_AVAILABLE",
-            "Only an active 10-year plan can be extended by comp. Annual access follows Stripe.",
-            status_code=409,
+    if company.plan == "ten_year" and company.subscription_status == "active":
+        old_end = company.subscription_ends_at
+        start = old_end if old_end is not None and old_end > now else now
+        new_end = start + timedelta(days=days)
+        company.subscription_ends_at = new_end
+        await record(
+            db,
+            context,
+            "platform.company_plan_extended",
+            entity_type="company",
+            entity_id=company.id,
+            before={"subscription_ends_at": old_end.isoformat() if old_end else None},
+            after={"subscription_ends_at": new_end.isoformat()},
+            reason=reason,
+            summary=f"Extended by {days} days",
         )
-    old_end = company.subscription_ends_at
-    start = old_end if old_end is not None and old_end > now else now
-    new_end = start + timedelta(days=days)
-    company.subscription_ends_at = new_end
+        return
+    old_comp = company.comp_until
+    start = old_comp if old_comp is not None and old_comp > now else now
+    new_comp = start + timedelta(days=days)
+    company.comp_until = new_comp
     await record(
         db,
         context,
-        "platform.company_plan_extended",
+        "platform.company_comp_granted",
         entity_type="company",
         entity_id=company.id,
-        before={"subscription_ends_at": old_end.isoformat() if old_end else None},
-        after={"subscription_ends_at": new_end.isoformat()},
+        before={"comp_until": old_comp.isoformat() if old_comp else None},
+        after={"comp_until": new_comp.isoformat()},
         reason=reason,
-        summary=f"Extended by {days} days",
+        summary=f"Complimentary access extended by {days} days",
     )
 
 
