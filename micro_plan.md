@@ -369,6 +369,13 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ### [x] T16.5 · B · Delete account (purge executor deletes all tenant data — big model only)
 
+### [ ] T16.6 · B · Deletion code e-mail goes through the app mailer (found at the P16 gate)
+- **Spec:** plan L1091 (account deletion by e-mailed code); the e2e `web/tests/e2e/account-deletion.spec.ts` needs the code to arrive.
+- **Problem:** `_send_code` in `api/app/modules/deletion/router.py` (and `_email` for `deletion_scheduled`, `deletion_withdrawn`, `account_deleted`) only inserts an `EmailOutbox` row inside the request transaction. Nothing enqueues it, so it leaves only when the minute sweep runs (`email_outbox_sweep`). The e2e server runs no sweep (its worker has only `generate_report`; the auth flow uses `DirectMailer`), so the code never reaches Mailpit there. Production works within about a minute, but the code is the only way in and the page says "We have e-mailed you a code" at once.
+- **Copy:** the auth routers send with `auth.mailer.send_template(...)` after the commit (`api/app/modules/access/router.py` `_send_invite` is the pattern; the mailer is `request.app.state.auth.mailer`).
+- **Steps:** 1. Send `deletion_code` after `db.commit()` through the app mailer; keep the code hash in the transaction and return the code to the caller only for the send. 2. Check the DB test rig's mailer (`tests/db/test_deletion.py` `_mail` reads `email_outbox`); change `_code_for` to capture the message the way the rig can. 3. Decide in the same change whether the three other `_email` mails move too (same defect); record the choice under Strategy in STATUS. 4. Run `web/tests/e2e/account-deletion.spec.ts` and `SCREENSHOTS=1 ... phase16-screenshots.spec.ts --grep scheduled`.
+- **Done when:** `account-deletion.spec.ts` passes (code arrives, confirm, scheduled date, withdraw); `tests/db/test_deletion.py` and the email/guards suites pass. No skip, no weakened assertion.
+
 ### [ ] P16 · S · Phase 16 gate
 - Recipe R7 + Stripe test-mode E2E (both plans, refund, cancel, failed payment, webhook replay). Needs owner's Stripe **test** keys in `.env`; if missing → BLOCKED with owner action.
 

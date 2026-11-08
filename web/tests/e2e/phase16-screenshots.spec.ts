@@ -72,7 +72,7 @@ for (const colorScheme of ["light", "dark"] as const) {
           await page.setViewportSize({ width, height: 900 });
           await page.goto("/company/billing");
           await expect(page.getByRole("heading", { level: 1, name: "Billing" })).toBeVisible();
-          await expect(page.getByText("1 year plan", { exact: true })).toBeVisible();
+          await expect(page.getByText("1 year plan", { exact: true }).first()).toBeVisible();
           await page.waitForLoadState("networkidle");
           await shoot(page, `billing-paid-${colorScheme}-${width}`);
         } finally {

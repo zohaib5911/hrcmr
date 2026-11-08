@@ -13,7 +13,8 @@ test("a paid company sees its plan and can open the cancel dialog without cancel
 }) => {
   await page.goto("/company/billing");
   await expect(page.getByRole("heading", { level: 1, name: "Billing" })).toBeVisible();
-  await expect(page.getByText("1 year plan", { exact: true })).toBeVisible();
+  // The plan name appears more than once on the page; the first match is enough here.
+  await expect(page.getByText("1 year plan", { exact: true }).first()).toBeVisible();
 
   await page.getByRole("button", { name: "Cancel subscription" }).click();
   const dialog = page.getByRole("alertdialog", { name: "Cancel your subscription?" });
