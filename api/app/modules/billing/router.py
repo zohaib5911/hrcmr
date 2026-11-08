@@ -200,7 +200,9 @@ async def stripe_webhook(request: Request, db: GlobalDb) -> WebhookOut:
             "WEBHOOK_SIGNATURE_INVALID", "The signature is not valid.", status_code=400
         ) from exc
     try:
-        outcome = await service.handle_event(db, stripe, event, payload)
+        outcome = await service.handle_event(
+            db, stripe, event, payload, request.app.state.settings.web_origin
+        )
     except StripeError as exc:
         # Nothing was stored, so Stripe's retry will apply it once Stripe answers again.
         raise _unavailable(exc) from exc

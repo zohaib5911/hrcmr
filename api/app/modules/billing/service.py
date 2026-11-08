@@ -16,6 +16,7 @@ of order; the live subscription is always the latest state.
 from __future__ import annotations
 
 import hashlib
+import json
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
@@ -23,10 +24,17 @@ from typing import TYPE_CHECKING, Any
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert
 
+from app.core.crypto import encrypt
 from app.core.logging import get_logger
 from app.modules.audit.service import AuditContext, record
+from app.modules.billing.entitlements import GRACE
 from app.modules.billing.models import StripeEvent, Subscription
 from app.modules.companies.models import Company
+from app.modules.email.models import EmailOutbox
+from app.modules.email.outbox import PAYLOAD_CONTEXT
+from app.modules.email.templates import check
+from app.modules.identity.models import Membership, User
+from app.modules.notifications.models import Notification
 
 if TYPE_CHECKING:
     from app.db.session import GlobalSession, TenantSession
@@ -49,7 +57,8 @@ HANDLED = frozenset(
         "charge.refunded",
     }
 )
-SUMMARY = ("plan", "subscription_status", "subscription_ends_at")
+SUMMARY = ("plan", "subscription_status", "subscription_ends_at", "payment_grace_ends_at")
+BILLING_PAGE = "/company/billing"
 
 
 def _when(seconds: Any) -> datetime | None:
@@ -112,7 +121,7 @@ def _summary(company: Company) -> dict[str, Any]:
 
 
 async def handle_event(
-    db: GlobalSession, stripe: Stripe, event: dict[str, Any], payload: bytes
+    db: GlobalSession, stripe: Stripe, event: dict[str, Any], payload: bytes, web_origin: str
 ) -> str:
     """Applies one verified event. Returns what happened: ``applied``, ``duplicate`` or
     ``ignored`` (a type we do not act on, or an object that is not one of our companies')."""
@@ -138,7 +147,7 @@ async def handle_event(
             await db.scope_to_company(company_id)
             company = await db.get(Company, company_id)
             if company is not None and _belongs(company, obj):
-                await _apply(db, stripe, company, str(kind), obj, event)
+                await _apply(db, stripe, company, str(kind), obj, event, web_origin)
                 outcome = "applied"
     if outcome == "ignored":
         logger.info("stripe_event_ignored", event_id=event["id"], type=kind)
@@ -162,6 +171,7 @@ async def _apply(
     kind: str,
     obj: dict[str, Any],
     event: dict[str, Any],
+    web_origin: str,
 ) -> None:
     before = _summary(company)
     customer = _id(obj.get("customer"))
@@ -182,6 +192,7 @@ async def _apply(
             await _sync_subscription(db, stripe, company, subscription)
         if kind == "invoice.payment_failed":
             action = "billing.payment_failed"
+            await _start_grace(db, company, event, web_origin)
     elif kind.startswith("customer.subscription."):
         await _sync_subscription(db, stripe, company, str(_id(obj.get("id"))))
     elif kind == "charge.refunded":
@@ -249,6 +260,8 @@ async def _sync_subscription(
     company.stripe_subscription_id = subscription_id
     company.subscription_status = status
     company.subscription_ends_at = end
+    if status in ("active", "trialing"):
+        company.payment_grace_ends_at = None  # paid again: the grace period is over
     if status in LIVE_STATUSES:
         company.plan = "annual"
         if started and company.subscription_started_at != started:
@@ -312,3 +325,54 @@ async def _refunded(
             company.subscription_ends_at = refunded_at
     await db.flush()
     return True
+
+
+async def _start_grace(
+    db: GlobalSession, company: Company, event: dict[str, Any], web_origin: str
+) -> None:
+    """The first failed renewal starts 7 days of grace and tells the company admins. Stripe's
+    later retries that fail again do not move the date or send more mail."""
+    if company.plan != "annual" or company.subscription_status != "past_due":
+        return  # the retry already went through, or this is not the company's plan
+    if company.payment_grace_ends_at is not None:
+        return
+    failed_at = _when(event.get("created")) or datetime.now(UTC)
+    company.payment_grace_ends_at = failed_at + GRACE
+    grace_end = f"{company.payment_grace_ends_at:%-d %B %Y}"
+    admins = (
+        await db.execute(
+            select(User)
+            .join(Membership, Membership.user_id == User.id)
+            .where(
+                Membership.company_id == company.id,
+                Membership.role == "company_admin",
+                Membership.status == "active",
+                User.is_active.is_(True),
+            )
+        )
+    ).scalars()
+    for user in admins:
+        db.add(
+            Notification(
+                company_id=company.id,
+                user_id=user.id,
+                kind="billing.payment_failed",
+                title="Your payment did not go through",
+                body=f"Update your card details by {grace_end} to keep full access.",
+                link=BILLING_PAGE,
+            )
+        )
+        # Sent whatever the e-mail preference: losing write access is an account matter.
+        data = {
+            "first_name": user.first_name,
+            "grace_end": grace_end,
+            "link": f"{web_origin}{BILLING_PAGE}",
+        }
+        check("payment_failed", data)
+        db.add(
+            EmailOutbox(
+                to_address=user.email,
+                template="payment_failed",
+                payload=encrypt(json.dumps(data), context=PAYLOAD_CONTEXT),
+            )
+        )

@@ -243,6 +243,20 @@ TEMPLATES: dict[str, Template] = {
         ),
         fields=_fields("first_name", "job_title", "when", "where"),
     ),
+    "payment_failed": Template(
+        subject="Your payment did not go through",
+        heading="Your payment did not go through",
+        preheader="Update your card by {grace_end} to keep full access.",
+        paragraphs=(
+            "Hi {first_name},",
+            "We could not take the payment for your {brand_name} annual plan. Please update your "
+            "card details by {grace_end}.",
+            "After that date your account becomes read-only until the payment goes through. You "
+            "can still see everything, and nothing is deleted.",
+        ),
+        button=("Update payment details", "link"),
+        fields=_fields("first_name", "grace_end", "link"),
+    ),
     "deletion_code": Template(
         subject="Your confirmation code",
         heading="Your confirmation code",

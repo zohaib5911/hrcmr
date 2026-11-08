@@ -38,6 +38,7 @@ from app.modules.auth.deps import (
     user_agent,
 )
 from app.modules.auth.policy import mfa_state, require_mfa_satisfied
+from app.modules.billing.entitlements import is_entitled, is_gated
 from app.modules.companies.models import Company
 from app.modules.identity.models import Membership, TermsAcceptance
 from app.modules.rbac.reports import Relation, ReportsGraph
@@ -166,6 +167,12 @@ def require(permission: str) -> Callable[..., AsyncIterator[Access]]:
         scope = scope_for(membership.role, permission)
         if scope is None:
             raise ForbiddenError
+        if is_gated(request.method, permission) and not is_entitled(company):
+            raise AppError(
+                "PLAN_REQUIRED",
+                "This needs a paid plan. Your data is safe and you can still view it.",
+                status_code=402,
+            )
         role, employee_id = membership.role, membership.employee_id
         await db.commit()  # free this connection before the endpoint takes its own
 

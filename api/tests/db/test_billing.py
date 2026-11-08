@@ -16,7 +16,7 @@ from urllib.parse import parse_qsl
 import httpx
 import pytest
 from pydantic import SecretStr
-from sqlalchemy import text
+from sqlalchemy import column, table, text, update
 
 from app.integrations.stripe import Stripe, sign
 from tests.db.test_careers import anonymous
@@ -60,6 +60,13 @@ class FakeStripe:
         if path == "/v1/customers/cus_1":
             return httpx.Response(200, json={"id": "cus_1", "metadata": self.customer_company})
         return httpx.Response(404, json={})
+
+
+@pytest.fixture(autouse=True)
+async def free(rig: dict[str, Any]) -> None:
+    """Both companies start on the free plan, as a new sign-up does."""
+    async with rig["owner"].begin() as c:
+        await c.execute(text("update companies set plan = 'free', subscription_status = null"))
 
 
 @pytest.fixture
@@ -343,3 +350,112 @@ async def test_an_event_for_another_customer_is_ignored(
     )
     assert (await _deliver(rig, stray)).status_code == 200
     assert (await _company(rig))["plan"] == "free"
+
+
+async def _set_plan(rig: dict[str, Any], **values: Any) -> None:
+    companies = table("companies", column("id"), *(column(name) for name in values))
+    async with rig["owner"].begin() as c:
+        await c.execute(update(companies).where(companies.c.id == rig["a"]).values(**values))
+
+
+async def test_a_free_or_lapsed_company_is_read_only_but_can_pay_and_keep_its_profile(
+    rig: dict[str, Any], fake: FakeStripe
+) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    assert (await admin.get(f"{API}/company")).status_code == 200
+    refused = await admin.post(f"{API}/departments", json={"name": "Sales"})
+    assert refused.status_code == 402
+    assert refused.json()["error"]["code"] == "PLAN_REQUIRED"
+    # Billing, the company profile and reads made by POST are not gated.
+    assert (await admin.patch(f"{API}/company", json={"trading_name": "Co"})).status_code == 200
+    assert (await admin.post(f"{API}/notifications/read-all")).status_code != 402
+    assert (
+        await admin.post(f"{API}/billing/checkout-session", json={"plan": "annual"})
+    ).status_code == 200
+
+    now = datetime.now(UTC)
+    await _set_plan(rig, plan="annual", subscription_status="active")
+    assert (await admin.post(f"{API}/departments", json={"name": "Sales"})).status_code == 201
+    # A failed renewal keeps working through the grace period, then is read-only.
+    await _set_plan(
+        rig, subscription_status="past_due", payment_grace_ends_at=now + timedelta(days=1)
+    )
+    assert (await admin.post(f"{API}/departments", json={"name": "Ops"})).status_code == 201
+    await _set_plan(rig, payment_grace_ends_at=now - timedelta(minutes=1))
+    assert (await admin.post(f"{API}/departments", json={"name": "HR"})).status_code == 402
+    await _set_plan(rig, subscription_status="canceled", plan="free")
+    assert (await admin.post(f"{API}/departments", json={"name": "HR"})).status_code == 402
+    # A 10-year plan works until its end date.
+    await _set_plan(
+        rig,
+        plan="ten_year",
+        subscription_status="active",
+        subscription_ends_at=now + timedelta(days=1),
+    )
+    assert (await admin.post(f"{API}/departments", json={"name": "HR"})).status_code == 201
+    await _set_plan(rig, subscription_ends_at=now - timedelta(days=1))
+    assert (await admin.post(f"{API}/departments", json={"name": "IT"})).status_code == 402
+
+
+async def test_a_failed_renewal_starts_seven_days_of_grace_once_and_tells_the_admins(
+    rig: dict[str, Any], fake: FakeStripe
+) -> None:
+    await _clear_events(rig)
+    admin = await rig["person"]("company_admin", rig["a"])
+    await rig["person"]("hr_admin", rig["a"])  # not told: billing is the company admin's
+    await rig["person"]("company_admin", rig["b"])  # another company's admin: not told
+    await _set_plan(rig, stripe_customer_id="cus_1")
+    metadata = {"company_id": str(rig["a"])}
+    fake.subscription["status"] = "past_due"
+
+    def failed(event_id: str) -> dict[str, Any]:
+        return _event(
+            event_id,
+            "invoice.payment_failed",
+            {
+                "object": "invoice",
+                "customer": "cus_1",
+                "subscription": "sub_1",
+                "subscription_details": {"metadata": metadata},
+            },
+        )
+
+    assert (await _deliver(rig, failed("evt_fail_1"))).status_code == 200
+    company = await _company(rig)
+    assert company["subscription_status"] == "past_due"
+    async with rig["owner"].connect() as c:
+        grace = (
+            await c.execute(
+                text("select payment_grace_ends_at from companies where id = :c"), {"c": rig["a"]}
+            )
+        ).scalar_one()
+    assert grace == datetime.fromtimestamp(START, UTC) + timedelta(days=7)
+    mail = "select count(*) from email_outbox where template = 'payment_failed'"
+    notices = "select count(*) from notifications where company_id = :c and kind = 'billing.payment_failed'"
+    assert (await _count(rig, mail), await _count(rig, notices)) == (1, 1)
+
+    # Stripe's next retry fails too: the date stays, and nobody is mailed again.
+    assert (await _deliver(rig, failed("evt_fail_2"))).status_code == 200
+    assert (await _count(rig, mail), await _count(rig, notices)) == (1, 1)
+
+    # The card is fixed: the grace period is over and writes need nothing more.
+    fake.subscription["status"] = "active"
+    paid = _event(
+        "evt_paid",
+        "invoice.paid",
+        {
+            "object": "invoice",
+            "customer": "cus_1",
+            "subscription": "sub_1",
+            "subscription_details": {"metadata": metadata},
+        },
+    )
+    assert (await _deliver(rig, paid)).status_code == 200
+    async with rig["owner"].connect() as c:
+        grace = (
+            await c.execute(
+                text("select payment_grace_ends_at from companies where id = :c"), {"c": rig["a"]}
+            )
+        ).scalar_one()
+    assert grace is None
+    assert (await admin.post(f"{API}/departments", json={"name": "Sales"})).status_code == 201

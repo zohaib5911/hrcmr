@@ -162,7 +162,9 @@ async def setup(database: DatabaseUnderTest) -> AsyncIterator[Setup]:
             ctx = Setup(client, database, SessionStore(redis))
             await ctx.owner("truncate users, companies cascade")
             await ctx.owner(
-                "insert into companies (id, name, slug) values (:i, 'Co', 'co')", i=ctx.company
+                "insert into companies (id, name, slug, plan, subscription_status) "
+                "values (:i, 'Co', 'co', 'annual', 'active')",
+                i=ctx.company,
             )
             yield ctx
     await redis.flushdb()
@@ -516,7 +518,11 @@ async def test_a_company_always_keeps_one_active_company_admin(database: Databas
     async with owner.begin() as c:
         await c.execute(text("truncate users, companies cascade"))
         await c.execute(
-            text("insert into companies (id, name, slug) values (:i, 'Co', 'co')"), {"i": company}
+            text(
+                "insert into companies (id, name, slug, plan, subscription_status) "
+                "values (:i, 'Co', 'co', 'annual', 'active')"
+            ),
+            {"i": company},
         )
         for membership, role in ((admin_1, "company_admin"), (member, "employee")):
             user = uuid7()

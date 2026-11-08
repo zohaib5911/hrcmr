@@ -20,14 +20,18 @@ if TYPE_CHECKING:
 
 
 async def two_companies(database: DatabaseUnderTest) -> tuple[uuid.UUID, uuid.UUID]:
-    """Empties the people and companies, then makes companies "a" and "b"."""
+    """Empties the people and companies, then makes companies "a" and "b", both on a paid plan (a
+    free company is read-only, T16.2; tests of that set the plan themselves)."""
     a, b = uuid7(), uuid7()
     owner = engine_for(database.owner_url, poolclass=NullPool)
     async with owner.begin() as c:
         await c.execute(text("truncate users, companies cascade"))
         for ident, slug in ((a, "a"), (b, "b")):
             await c.execute(
-                text("insert into companies (id, name, slug) values (:i, :n, :s)"),
+                text(
+                    "insert into companies (id, name, slug, plan, subscription_status) "
+                    "values (:i, :n, :s, 'annual', 'active')"
+                ),
                 {"i": ident, "n": f"Company {slug}", "s": slug},
             )
     await owner.dispose()
