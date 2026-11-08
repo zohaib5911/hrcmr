@@ -56,15 +56,26 @@ test.describe("admin host", () => {
   test("a visitor without a platform session sees the refusal page on the admin host", async ({
     request,
   }) => {
-    const response = await request.get("/", { headers: admin });
-    expect(response.status()).toBe(200);
-    // The redirect must stay on the host the browser asked for, never the server's bind address.
-    expect(new URL(response.url()).origin).toBe(new URL(BASE_URL).origin);
-    expect(await headingOf(response)).toBe("Platform session not started");
+    // Each hop is requested by hand, with the admin Host header, as the browser would send it.
+    const first = await request.get("/", { headers: admin, maxRedirects: 0 });
+    expect(first.status()).toBe(307);
+    const session = await request.get(first.headers()["location"] ?? "", {
+      headers: admin,
+      maxRedirects: 0,
+    });
+    expect(session.status()).toBe(307);
+    // A RELATIVE location: an absolute one would carry the server's bind address, not this host.
+    const location = session.headers()["location"] ?? "";
+    expect(location.startsWith("/session-required?code=")).toBe(true);
+    const refusal = await request.get(location, { headers: admin, maxRedirects: 0 });
+    expect(refusal.status()).toBe(200);
+    expect(refusal.headers()["x-robots-tag"]).toBe("noindex, nofollow");
+    expect(await headingOf(refusal)).toBe("Platform session not started");
   });
 
   test("is kept out of search engines", async ({ request }) => {
-    const response = await request.get("/", { headers: admin });
+    // No redirect-following: the first answer from the admin host carries the header.
+    const response = await request.get("/", { headers: admin, maxRedirects: 0 });
     expect(response.headers()["x-robots-tag"]).toBe("noindex, nofollow");
     const publicSite = await request.get("/", { headers: main });
     expect(publicSite.headers()["x-robots-tag"]).toBeUndefined();
