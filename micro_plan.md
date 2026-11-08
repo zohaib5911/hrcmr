@@ -411,8 +411,9 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Spec:** plan L1169, L1171–1174, L1469.
 - **Done (2026-11-08), owner answers 3–4 applied:** platform audit log with filters and CSV export, recorded (`/platform/audit`, `/platform/audit/export`; migration 0055); job dashboard with queue depth and failures, no arguments (`/platform/jobs/queue`, `/platform/jobs/failures`); **retry** from an allow-list of five jobs that send nothing and keep no arguments (`app/jobs/rerun.py`; queued as `rerun_<name>`; a reason is required; audited; migration 0056; `POST /platform/jobs/failures/{id}/rerun`); rules screens already built in T15.7 (versions with `diff_summary`, publish, rollback). **Register status** moved to T20.5 (owner answer 4). Tests: `tests/db/test_platform_audit_log.py` 3 pass, `tests/db/test_platform_jobs.py` 7 pass.
 
-### [ ] P17 · S · Phase 17 gate
+### [x] P17 · S · Phase 17 gate
 - Recipe R7.
+- Done (2026-11-09): R7 steps 1, 3 and 4 done (API full suite 1319 pass; web unit 802 pass; web e2e 437 pass, 200 screenshot-only skipped; lint and typecheck clean). Step 2 (screenshots) is parked in leftover.md L2: the new admin screens need a platform-admin seed in the e2e harness.
 
 ### [ ] AUDIT-3 · AUDIT STOP · covers T15.1 → P17 (and the B tasks in them)
 

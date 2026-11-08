@@ -10,3 +10,10 @@ Tick an item (`### [x]`) with its commit when done.
 - **Steps:** run `stripe listen` for the webhook secret; then test both plans (annual, ten-year), refund within 14 days, cancel, failed payment (grace + `payment_failed` mail), webhook replay (idempotent).
 - **Also check (T16.3):** Stripe API version is not pinned — confirm the invoice payment-intent field in test mode.
 - **Done when:** all five flows pass against Stripe test mode; result logged in `PROGRESS.md` under Phase 16. No mocked run counts.
+
+### [ ] L2 · S · Phase 17 screenshots (parked from the P17 gate, 2026-11-09)
+- **Why parked:** the new admin screens (platform bar, admin landing, session-required, session start) need a signed-in platform admin in the browser. The e2e server has no seed for one (only `/api/v1/e2e/paid-plan`), and no browser test reaches `admin.example.test` (the host-routing spec sends API requests with a Host header). The tenant support and announcement banners need an announcement or a support session, which the same seed makes possible. Everything else in the P17 gate is green (API 1319, web unit 802, web e2e 437).
+- **Needs:** an e2e-only route in `api/tests/e2e_server.py`, like `paid-plan`, that makes a signed-in user a platform admin with MFA; a browser host mapping for `admin.example.test` in `web/playwright.config.ts`; then `web/tests/e2e/phase17-screenshots.spec.ts` modelled on `phase16-screenshots.spec.ts`.
+- **Steps:** capture the session-required page, the platform bar with the admin landing, the announcement banner and the support banner at 390 and 1280 px, light and dark, into `docs/screenshots/phase-17/`; run the spec with `SCREENSHOTS=1`.
+- **Done when:** a screenshot exists for each screen at both widths and both schemes, the spec passes with `SCREENSHOTS=1`, and the result is logged in `PROGRESS.md` under Phase 17. No skipped checks.
+- Must be done before Phase 23.
