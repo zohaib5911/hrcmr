@@ -19,6 +19,7 @@ def _company(**values: Any) -> Any:
         "subscription_status": None,
         "subscription_ends_at": None,
         "payment_grace_ends_at": None,
+        "comp_until": None,
     }
     return SimpleNamespace(**(base | values))
 

@@ -32,9 +32,11 @@ from app.db.session import GlobalDb, TenantSession, get_engine
 from app.modules.audit.service import AuditContext
 from app.modules.audit.service import record as record_audit
 from app.modules.auth.deps import (
+    SAFE_METHODS,
     Auth,
-    SignedIn,
+    TenantCaller,
     client_ip,
+    support_read_only,
     user_agent,
 )
 from app.modules.auth.policy import mfa_state, require_mfa_satisfied
@@ -47,6 +49,8 @@ if TYPE_CHECKING:
     from app.modules.auth.deps import Caller
 
 PERMISSION_ATTRIBUTE = "rbac_permission"
+# Support mode (T17.3) sees the company as its administrator does; changes still need writes on.
+SUPPORT_ROLE = "company_admin"
 
 
 @dataclass
@@ -65,12 +69,16 @@ class Access:
 
     @property
     def audit_context(self) -> AuditContext:
+        """In support mode the change is the platform admin's, marked with the support session."""
+        support = self.caller.support
         return AuditContext(
             company_id=self.company_id,
             actor_user_id=self.caller.user_id,
+            actor_type="platform_admin" if support else "user",
             ip=self.ip,
             user_agent=self.user_agent,
             request_id=self.request_id,
+            impersonation_session_id=support.id if support else None,
         )
 
     async def audit(
@@ -120,22 +128,36 @@ def require(permission: str) -> Callable[..., AsyncIterator[Access]]:
         raise ValueError(f"unknown permission {permission!r}")
 
     async def dependency(
-        request: Request, caller: SignedIn, db: GlobalDb, auth: Auth
+        request: Request, caller: TenantCaller, db: GlobalDb, auth: Auth
     ) -> AsyncIterator[Access]:
         company_id = caller.company_id
         if company_id is None:
             raise AppError("NO_COMPANY", "Choose a company to continue.", status_code=403)
-        row = (
-            await db.execute(
-                select(Membership, Company)
-                .join(Company, Company.id == Membership.company_id)
-                .where(Membership.user_id == caller.user_id, Membership.company_id == company_id)
-            )
-        ).first()
-        if row is None:
-            raise ForbiddenError
-        membership, company = row
-        if membership.status != "active" or company.status != "active":
+        if caller.support is not None:
+            # Support mode (T17.3): no membership; the grant was checked in tenant_caller.
+            if request.method not in SAFE_METHODS and not caller.support.write_enabled:
+                raise support_read_only()
+            company = (
+                await db.execute(select(Company).where(Company.id == company_id))
+            ).scalar_one_or_none()
+            if company is None:
+                raise ForbiddenError
+            role, status, employee_id = SUPPORT_ROLE, "active", None
+        else:
+            row = (
+                await db.execute(
+                    select(Membership, Company)
+                    .join(Company, Company.id == Membership.company_id)
+                    .where(
+                        Membership.user_id == caller.user_id, Membership.company_id == company_id
+                    )
+                )
+            ).first()
+            if row is None:
+                raise ForbiddenError
+            membership, company = row
+            role, status, employee_id = membership.role, membership.status, membership.employee_id
+        if status != "active" or company.status != "active":
             raise AppError("ACCOUNT_SUSPENDED", "This account is not active.", status_code=403)
         if caller.user.email_verified_at is None:
             raise AppError(
@@ -146,7 +168,7 @@ def require(permission: str) -> Callable[..., AsyncIterator[Access]]:
                 enrolled=caller.user.mfa_enabled,
                 passed=caller.session.mfa_passed,
                 policy=company.mfa_policy,
-                role=membership.role,
+                role=role,
             )
         )
         from app.modules.auth.accounts import current_terms
@@ -164,7 +186,7 @@ def require(permission: str) -> Callable[..., AsyncIterator[Access]]:
             raise AppError(
                 "TERMS_ACCEPTANCE_REQUIRED", "Accept the new terms to continue.", status_code=403
             )
-        scope = scope_for(membership.role, permission)
+        scope = scope_for(role, permission)
         if scope is None:
             raise ForbiddenError
         if is_gated(request.method, permission) and not is_entitled(company):
@@ -173,7 +195,6 @@ def require(permission: str) -> Callable[..., AsyncIterator[Access]]:
                 "This needs a paid plan. Your data is safe and you can still view it.",
                 status_code=402,
             )
-        role, employee_id = membership.role, membership.employee_id
         await db.commit()  # free this connection before the endpoint takes its own
 
         async with TenantSession(

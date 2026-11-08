@@ -1,48 +1,51 @@
 # STATUS
-Updated: 2026-11-08 09:46 (Europe/London)    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: see git log
-
-State: IN PROGRESS
+Updated: 2026-11-08 18:00 (Europe/London)    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: see git log
+State: HANDED OVER — small model next. The owner has approved the P17 gate (R7); run it now.
 
 ## Last completed
-- P16 gate R7 steps 1–3 — API 1254, web lint/typecheck/unit 786, web e2e 436 passed, 16/16 screenshots, PROGRESS summary (Opus parked Stripe E2E in leftover.md L1).
-- T16.6 — Deletion code e-mail sent after commit through the app mailer (Opus).
-- T16.5 — Delete account (Opus).
-- T16.4 — Data export.
-- T16.3 — Billing page and cancel with refund.
-- T16.2 — Entitlements and payment-failed grace.
-- T16.1 — Stripe integration and webhooks.
+- T17.6 — Jobs dashboard, platform audit log, rules screens, retry from an allow-list (Haiku). Register status moved to T20.5. Migrations 0055, 0056.
+- T17.5 — Terms publish (owner), feature flags, announcement banners, dossier links and courses reused; templates and guides moved to T19.17 and T19.16 (repo content). Migrations 0052–0054.
+- T17.4 — Subscriptions, owner refunds (Stripe client, idempotent, audited), deletion and export queues, contact inbox. Migration 0051.
+- T17.3 — Support mode (impersonation) (Opus). Migration 0050.
+- T17.2 — Overview metrics, companies and users search (Haiku). API only.
+- T17.1 — Platform admin auth and admin host routing (Haiku).
+- Owner answers (2026-11-08): comp access (migration 0057), platform session start in the admin frame (web), retry allow-list, templates and guides as repo content, register status to Phase 20.
 
 ## Current task
-- P16 — Phase 16 gate (S), not ticked
-  - [x] R7 steps 1–3 (see Last completed)
-  - [ ] R7 step 4: PR dev → main, watch checks, merge only when all green, tick P16   <- here
-  - [~] Stripe test-mode E2E — PARKED in `leftover.md` L1 (owner has no test keys)
-- Resume note: `gh pr create --base main --head dev` (body from the P16 summary in PROGRESS.md); `gh pr checks <n> --watch`; merge with `gh pr merge <n> --merge` only when every check is green; then tick P16 in micro_plan.md and PROGRESS.md; then T17.1 (S!).
-- Check before opening: main has 11 merge commits and no non-merge commits that dev lacks; the main-only lines are stale copies of files dev has since changed, so the PR carries dev's content.
+- None in the micro-plan. P17 gate is next: R7 (full API and web suites, screenshots at phase gates, phase summary, PR dev -> main, merge when green).
 
 ## Next tasks
-- P16: PR dev → main and tick.
-- T17.1 (S!) platform admin auth and admin host routing (micro_plan L387).
+- P17 gate (R7), then AUDIT-3 (stop, big model).
+- T20.5 (register status and rerun) belongs to Phase 20, after the register ingest T20.1.
+- T19.16 (guides, MDX in content/guides) and T19.17 (templates, content/templates with a manifest and a read-only admin list).
 - leftover.md L1 (Stripe E2E) when the owner has test keys; before Phase 23.
 
 ## Health
-- CI on dev: not run yet for P16 (PR about to open). Workflows: ci.yml, security.yml.
-- CI on main: green at PR #23 (P15). Open Dependabot PRs #24 (uv) and #5 (npm) — not part of this gate.
-- Local checks run this session: API full 1254 pass; web lint 0 warnings; typecheck clean; unit 786 pass; full web e2e 436 pass, 200 skipped, 0 fail.
+- CI on dev: not run since P16 (PR 25, green). The Actions minutes ran out on the private repo; the owner made the repo PUBLIC on 2026-11-08, so standard runners are now free. A full history secret scan (533 commits) found no real secrets before the switch.
+- Local checks, last run: platform admin, session, billing, content, audit log, jobs, comp, migrations, data-model doc, audit, guards, RBAC enforcement, worker: all pass (the last batches: 79 and 58 and 10 and 7 and 3). OpenAPI and architecture pass (run as a separate command). Web unit 802 pass; typecheck, eslint, prettier clean.
+- Not run: the full API suite and the web e2e (the phase gate's R7 does that). The admin session start has NOT been checked in a browser with an MFA-enabled admin; it needs one manual check.
+- Known test-order issue (not mine): running tests/test_architecture.py or tests/test_openapi.py before tests/db in one pytest command breaks the `database` fixture. Run them as a separate command.
 
 ## Issues / suggestions
-- (T16.6) The delete-account page header breadcrumb reads "Company / Company" with title "Company"; the page h1 is right. Cosmetic, for the auditor.
-- (T16.6) `deletion_scheduled`(+support), `deletion_withdrawn` and `account_deleted` still use the outbox-in-transaction helper; e2e cannot see them until the minute sweep runs.
-- (T16.5) Test isolation: tests/db/test_billing.py counts payment_failed mail across the whole outbox.
-- (T16.3) Stripe's API version is not pinned; verify the invoice payment-intent field in test mode (leftover.md L1).
+- The platform admin pages call the API with the platform cookie; if that cookie expires mid-session, the page shows a 404 (notFound) rather than sending the person to start again. Worth handling in the admin frame.
+- Route prefixes are mixed: `/platform/*` and the older `/admin/*` (courses, dossier links). Both are platform-guarded. One consistent prefix before the admin screens are built.
+- contact_messages has no RLS (global, the 0044 convention). Only platform code reads it.
+- The platform audit read policy (0055) shows every company-less platform and system row to platform admins. Intended for the platform staff log.
+- Comp access is not shown on the billing page yet (the API returns `comp_until`; the web does not display it).
+- Retry runs a job once more under a new id; the job's own arguments are not needed because the five listed jobs take none.
+- (T16.6) The breadcrumb reads "Company / Company" on delete-account (cosmetic).
+- (T16.3) Stripe API version not pinned; verify the invoice payment-intent field in test mode (leftover.md L1).
 - (T16.2) A lapsed annual plan still says "annual" in /auth/me.
-- (pre-existing) tests/test_openapi.py + tests/db/test_reports.py in one pytest call gives "fixture 'database' not found".
 
-## Strategy / decisions taken
-- (T16.6) Only `deletion_code` moved to the app mailer (sent after commit); the other three deletion notices stay as outbox rows in the same transaction.
-- (P16, owner) No Stripe test keys yet: Stripe E2E parked in leftover.md L1; the P16 gate continues without it. No mocked run is counted as the test-mode E2E.
-- (P16) Heading fix: page-level cards use `headingLevel={2}`; cards inside the "Choose a plan" h2 section keep h3.
+## Strategy / decisions taken (owner answers, recorded 2026-11-08; the agent chose them at the owner's request, and the owner can override any of them)
+1. Templates: DOCX/PDF files in the repo under `content/templates/`, reviewed in pull requests; the admin lists them (T19.17). No upload.
+2. Guides: MDX files in the repo under `content/guides/`, compiled at build time (T19.16). No MDX upload, because MDX runs JSX and an upload would be script injection.
+3. Job retry: only the jobs in `app/jobs/rerun.py` (rtw_status_daily, bank_holidays_weekly, cloudflare_ranges_weekly, files_orphans_daily, report_jobs_sweep), which send nothing and keep no arguments. A re-run is queued under `rerun_<name>`, needs a reason, and is audited. Mail-sending jobs (reminders, digests, deletion and export e-mails, the email sweep) and rules_watch are never listed.
+4. Register status and rerun: moved to Phase 20 as T20.5.
+5. Comp access: `companies.comp_until` (migration 0057) gives free access until its end date for any plan. It is never written by Stripe. The paid count in the metrics excludes it. An active 10-year plan keeps its own end-date extension.
+6. Owner-only: refunds, terms publish, mark-for-deletion (as built).
+7. Platform session: the admin frame sends a person without the platform cookie to `/session`, which calls POST /auth/platform-session and forwards Set-Cookie. A refusal goes to `/session-required` with the reason. Redirects use public paths, because the proxy refuses `/platform/...` from a browser.
+8. Design: `--on-fixed` (white in both themes) is the token for text on the fixed admin red. It replaces `text-white`, which the switched-off Tailwind palette renders as nothing.
 
 ## Owner actions needed
-- When you have Stripe test keys: put them in `.env` (names in leftover.md L1) and tell an agent to do leftover.md L1. Not blocking.
-- Confirm (from T16.3/T16.4): 10-year plans cannot be cancelled in-app after 14 days; bank numbers and sort codes are left out of the export; the export e-mail link needs a signed-in session.
+- Nothing is blocking. Two checks only: (a) sign in to the admin host as an MFA-enabled platform admin and confirm the session start and the refusal page; (b) done: the owner approved the P17 gate.

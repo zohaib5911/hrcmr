@@ -54,6 +54,13 @@ class SessionData:
     mfa_passed_at: str | None = None
     step_up_at: str | None = None
     db_seen_at: str = ""
+    # A platform session (T17.1) is issued only by POST /auth/platform-session, to a platform
+    # admin who has passed MFA. Only the platform cookie carries it, and only the platform routes
+    # accept it.
+    platform: bool = False
+    # A support-mode session (T17.3) names its ``impersonation_sessions`` row. Only the support
+    # cookie carries it; the row says whether it is still live and whether writes are on.
+    support_id: str | None = None
 
     def _when(self, value: str | None) -> datetime | None:
         return datetime.fromisoformat(value) if value else None
@@ -114,6 +121,8 @@ class SessionStore:
         user_agent: str | None,
         mfa_passed: bool,
         absolute_expiry: datetime | None = None,
+        platform: bool = False,
+        support_id: uuid.UUID | None = None,
     ) -> tuple[str, SessionData]:
         """Start a session. Returns the token to put in the cookie, and what is known about it."""
         now = self._now()
@@ -139,6 +148,8 @@ class SessionStore:
             expires_at=expires.isoformat(),
             mfa_passed_at=now.isoformat() if mfa_passed else None,
             db_seen_at=now.isoformat(),
+            platform=platform,
+            support_id=str(support_id) if support_id else None,
         )
         await self._save(token, data)
         return token, data
@@ -205,6 +216,7 @@ class SessionStore:
             user_agent=user_agent,
             mfa_passed=data.mfa_passed if mfa_passed is None else mfa_passed,
             absolute_expiry=data.absolute_expiry,
+            platform=data.platform,
         )
 
     async def revoke(self, db: AsyncSession, token: str, data: SessionData | None = None) -> None:
@@ -213,6 +225,22 @@ class SessionStore:
             update(Session)
             .where(Session.token_hash == hash_token(token), Session.revoked_at.is_(None))
             .values(revoked_at=self._now())
+        )
+
+    async def revoke_id(self, db: AsyncSession, session_id: uuid.UUID) -> None:
+        """End a session known only by its row (a support session ended from the admin side)."""
+        token_hash = (
+            await db.execute(
+                select(Session.token_hash).where(
+                    Session.id == session_id, Session.revoked_at.is_(None)
+                )
+            )
+        ).scalar_one_or_none()
+        if token_hash is None:
+            return
+        await self._redis.delete(_KEY + token_hash)
+        await db.execute(
+            update(Session).where(Session.id == session_id).values(revoked_at=self._now())
         )
 
     async def revoke_all(

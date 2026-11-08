@@ -28,8 +28,14 @@ UNGATED_PERMISSIONS = frozenset(
 )
 
 
-def is_entitled(company: Company, now: datetime | None = None) -> bool:
+def is_entitled(
+    company: Company, now: datetime | None = None, *, include_comp: bool = True
+) -> bool:
+    """May the company write now. A complimentary end date (``comp_until``, T17.6) counts for any
+    plan; the paid count in the platform metrics leaves it out (``include_comp=False``)."""
     moment = now or datetime.now(UTC)
+    if include_comp and company.comp_until is not None and company.comp_until > moment:
+        return True
     status = company.subscription_status
     if company.plan == "ten_year":
         return status == "active" and (

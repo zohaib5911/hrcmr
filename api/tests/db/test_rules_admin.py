@@ -93,6 +93,9 @@ async def _as_platform_admin(rig: dict[str, Any], admin: Any) -> None:
             {"u": platform_id},
         )
         await c.execute(text("update users set mfa_enabled=true where id=:u"), {"u": platform_id})
+    # The platform cookie (T17.1): the admin pages accept nothing else.
+    started = await admin.post(f"{API}/auth/platform-session")
+    assert started.status_code == 201, started.text
 
 
 async def _draft(database: DatabaseUnderTest) -> str:

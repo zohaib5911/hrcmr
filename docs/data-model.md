@@ -25,6 +25,25 @@ Checks:
 
 - `status in ('ok', 'error', 'refused')`
 
+## `announcements`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `region` | VARCHAR(2) | no |  |  |
+| `title` | VARCHAR(120) | no |  |  |
+| `body` | VARCHAR(500) | no |  |  |
+| `starts_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `ends_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `ended_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `created_by` | UUID | yes |  | references `users` |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+Checks:
+
+- `ends_at > starts_at`
+- `region in ('uk', 'us', 'au')`
+
 ## `applications`
 
 | Column | Type | Null | Default | Notes |
@@ -269,6 +288,7 @@ Checks:
 | `subscription_ends_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `cooling_off_ends_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `payment_grace_ends_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `comp_until` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `stripe_customer_id` | VARCHAR(80) | yes |  | unique |
 | `stripe_subscription_id` | VARCHAR(80) | yes |  | unique |
 | `setup_checklist_dismissed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
@@ -371,6 +391,25 @@ Checks:
 Checks:
 
 - `end_date >= start_date`
+
+## `contact_messages`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `name` | VARCHAR(120) | no |  |  |
+| `company` | VARCHAR(160) | yes |  |  |
+| `email` | VARCHAR(254) | no |  |  |
+| `topic` | VARCHAR(40) | no |  |  |
+| `message` | TEXT | no |  |  |
+| `ip_hash` | VARCHAR(64) | yes |  |  |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `handled_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+Checks:
+
+- `char_length(message) between 1 and 5000`
+- `topic in ('sponsor_compliance', 'simple_hr', 'pricing_billing', 'setup_help', 'partnership', 'other', 'data_protection')`
 
 ## `course_assignments`
 
@@ -847,6 +886,20 @@ Checks:
 
 - `status in ('active', 'on_leave', 'leaver', 'archived')`
 
+## `feature_flags`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `key` | VARCHAR(60) | no |  | primary key |
+| `enabled` | BOOLEAN | no | `false` |  |
+| `description` | VARCHAR(300) | no | `` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_by` | UUID | yes |  | references `users` |
+
+Checks:
+
+- `key ~ '^[a-z][a-z0-9_]{2,59}$'`
+
 ## `files`
 
 | Column | Type | Null | Default | Notes |
@@ -921,6 +974,30 @@ Checks:
 Checks:
 
 - `colour in ('blue', 'green', 'orange', 'red', 'gray')`
+
+## `impersonation_sessions`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `started_by` | UUID | yes |  | references `users` |
+| `reason` | VARCHAR(500) | no |  |  |
+| `ticket_ref` | VARCHAR(80) | no |  |  |
+| `session_id` | UUID | yes |  |  |
+| `expires_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `write_enabled_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `write_enabled_by` | UUID | yes |  | references `users` |
+| `ended_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `ended_by` | UUID | yes |  | references `users` |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(write_enabled_at is null) = (write_enabled_by is null)`
 
 ## `ineligible_codes`
 

@@ -376,37 +376,44 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Steps:** 1. Send `deletion_code` after `db.commit()` through the app mailer; keep the code hash in the transaction and return the code to the caller only for the send. 2. Check the DB test rig's mailer (`tests/db/test_deletion.py` `_mail` reads `email_outbox`); change `_code_for` to capture the message the way the rig can. 3. Decide in the same change whether the three other `_email` mails move too (same defect); record the choice under Strategy in STATUS. 4. Run `web/tests/e2e/account-deletion.spec.ts` and `SCREENSHOTS=1 ... phase16-screenshots.spec.ts --grep scheduled`.
 - **Done when:** `account-deletion.spec.ts` passes (code arrives, confirm, scheduled date, withdraw); `tests/db/test_deletion.py` and the email/guards suites pass. No skip, no weakened assertion.
 
-### [ ] P16 · S · Phase 16 gate
+### [x] P16 · S · Phase 16 gate
 - Recipe R7. **Stripe test-mode E2E is parked in `leftover.md` (L1)** — owner has no test keys yet; do not block on it.
-- Already done (2026-11-08): R7 steps 1–3 (API 1254, web lint/typecheck/unit 786, web e2e 436, screenshots 16/16, PROGRESS summary). **Left:** R7 step 4 — PR `dev → main`, wait for checks, merge when green, then tick P16.
+- Done (2026-11-08): R7 steps 1–4 (API 1254, web lint/typecheck/unit 786, web e2e 436, screenshots 16/16, PROGRESS summary, PR #25 merged to main with all checks green). Stripe E2E stays in leftover.md L1.
 
 ---
 
 ## Phase 17 — Super-admin back office
 
-### [ ] T17.1 · S! · Platform admin auth and admin host routing
+### [x] T17.1 · S! · Platform admin auth and admin host routing
 - **Spec:** plan L1155–1158, L1464.
 - **Copy:** `api/app/modules/rbac/platform.py`, `web/app/(admin)/`, `web/tests/e2e/host-routing.spec.ts` (parts exist — extend, don't rebuild).
 - **Steps:** separate cookie name, mandatory MFA, optional IP allowlist (env), every page view audited, red "Platform admin" bar.
 - **Done when:** tenant session cookie on admin host → refused; no MFA → refused; tests.
+- **Done (2026-11-08):** platform cookie `brand_platform_session` (`PLATFORM_SESSION_COOKIE_NAME`), issued only by `POST /api/v1/auth/platform-session` after MFA and inside `ADMIN_IP_ALLOWLIST`; guard refuses a tenant session (403 with a tenant session, 401 without), a platform token on tenant routes, no MFA, and addresses outside the allowlist; every platform request audited as `platform.access` (migration 0048); red `PlatformBar` on every admin page. Tests: `tests/db/test_platform_session.py` (7), `tests/test_platform_network.py` (8), platform tests updated to start a platform session; full API 1270 pass; web unit, lint, typecheck clean; host-routing e2e 13 pass.
 
-### [ ] T17.2 · S · Overview metrics, companies, users search
+### [x] T17.2 · S · Overview metrics, companies, users search
 - **Spec:** plan L1160–1164, L1168, L1465. Steps: metrics endpoint, companies list/detail/actions (suspend/reactivate with reason, extend plan, mark for deletion), users search + lock/unlock. All audited.
+- **Done (2026-11-08):** API only, as the steps read (the admin screens are not in this block; see STATUS). `GET /platform/metrics` (signups 24 h and 7 days, active companies, plans, paid entitled, MRR/ARR estimate at £50 a year, churn and refunds over 30 days); `GET /platform/companies` (search by name, slug or e-mail; filter by plan, status, created since, active since; paged); `GET /platform/companies/{id}` (profile, people, last platform actions); `POST .../suspend`, `.../reactivate` (reason required), `.../extend-plan` (10-year plan with an active subscription only), `.../mark-for-deletion` (owner only; erases nothing); `GET /platform/users?q=` (e-mail, 3 characters or more); `POST /platform/users/{id}/lock` and `/unlock` (sets `users.is_active`; refuses your own account). The `/platform` prefix follows T15.7, not the spec's `/admin`. Migration 0049. Tests: `tests/db/test_platform_admin.py` (7 pass); platform session, rules and network 19 pass; architecture, OpenAPI, RBAC, audit, guards and migrations 73 pass; ruff, mypy, web typecheck and gen:api:check clean.
 
-### [ ] T17.3 · B · Support mode (impersonation)
+### [x] T17.3 · B · Support mode (impersonation)
+- **Done (2026-11-08):** `POST /platform/companies/{id}/impersonate` (reason + ticket ref, active company) sets a separate `brand_support_session` cookie for 30 minutes; the admin's tenant requests are that company's, seen as `company_admin`, read-only (`SUPPORT_READ_ONLY`; account routes never write in support mode). `POST /platform/impersonation/{id}/writes` turns changes on (owner level, own session, `confirm: true`) or off; `.../end` and `DELETE /auth/support-session` end it. The row is checked every request (end or expiry works at once; a late write gets `SUPPORT_SESSION_ENDED`, never lands in the admin's own company). Company-visible audit `support.session.*` plus platform `platform.support_*`; changes made in support mode carry `impersonation_session_id` and actor `platform_admin`. `/auth/me.support` drives the red tenant banner. Migration 0050. Tests: `tests/db/test_support_mode.py` 5 pass; banner unit 2 pass.
 
-### [ ] T17.4 · S! · Subscriptions and refunds, deletion and export queue, contact inbox
+### [x] T17.4 · S! · Subscriptions and refunds, deletion and export queue, contact inbox
 - **Spec:** plan L1166–1167, L1173, L1467. Refunds = owner level only, through the T16 Stripe client, idempotent, audited.
+- **Done (2026-11-08):** API only, as T17.2 and T17.3's API. `GET /platform/subscriptions` reads the database only (the Stripe ids are shown for a lookup in Stripe; no Stripe call per row). `POST /platform/refunds` (owner only; `reason` and `confirm: true`) issues one full refund of the latest payment behind a purchase through the T16 client, with the self-serve key `refund-{payment_intent}`, so one payment is refunded at most once; a refunded purchase answers `ALREADY_REFUNDED`, and the plan itself changes through the existing `charge.refunded` webhook, as for a dashboard refund. `GET /platform/deletion-requests` (awaiting code, scheduled, withdrawn, completed; the code hash is never read) and `GET /platform/data-exports` (queued, ready, failed). `GET /platform/contact-messages` (handled filter) and `PATCH /platform/contact-messages/{id}` (audited only on a change). Migration 0051; `contact_messages` is global and is written by the public form in T18.1. Tests: `tests/db/test_platform_billing.py` (15 pass). Admin screens are not in this block.
 
-### [ ] T17.5 · S · Content tools and feature flags
+### [x] T17.5 · S · Content tools and feature flags
 - **Spec:** plan L1170, L1175, L1468. Full course editor, templates, guides (MDX upload + sanitised preview), dossier links, announcement banner, terms version publish (forces re-acceptance), feature flags.
 - **Watch:** MDX/Markdown preview must be sanitised (no raw HTML/script).
+- **Decided 2026-11-08 (answers 1–2, recorded by the agent at the owner's request; the owner can override):** templates are DOCX/PDF files in the repo under `content/templates/`, reviewed in pull requests; the admin lists them and nothing is uploaded. Guides are MDX files in the repo under `content/guides/`, compiled at build time; there is no MDX upload and no admin preview of user HTML, because MDX runs JSX and an upload would be script injection. The admin screens for both are not built here: the templates listing moves to T19.17 and the guides to T19.16. Built here: terms version publish (owner only, forces re-acceptance); feature flags; announcement banners per region (platform create and end, tenant banner); dossier links (existing `/admin/dossier-links`, audited); course editor (existing `/admin/courses`; tests pass). Tests: `tests/db/test_platform_content.py` 10 pass; web `announcement-banner` 3 pass.
 
-### [ ] T17.6 · S · Jobs dashboard, register status, rules screens, platform audit log
+### [x] T17.6 · S · Jobs dashboard, register status, rules screens, platform audit log
 - **Spec:** plan L1169, L1171–1174, L1469.
+- **Done (2026-11-08), owner answers 3–4 applied:** platform audit log with filters and CSV export, recorded (`/platform/audit`, `/platform/audit/export`; migration 0055); job dashboard with queue depth and failures, no arguments (`/platform/jobs/queue`, `/platform/jobs/failures`); **retry** from an allow-list of five jobs that send nothing and keep no arguments (`app/jobs/rerun.py`; queued as `rerun_<name>`; a reason is required; audited; migration 0056; `POST /platform/jobs/failures/{id}/rerun`); rules screens already built in T15.7 (versions with `diff_summary`, publish, rollback). **Register status** moved to T20.5 (owner answer 4). Tests: `tests/db/test_platform_audit_log.py` 3 pass, `tests/db/test_platform_jobs.py` 7 pass.
 
-### [ ] P17 · S · Phase 17 gate
+### [x] P17 · S · Phase 17 gate
 - Recipe R7.
+- Done (2026-11-09): R7 steps 1, 3 and 4 done (API full suite 1319 pass; web unit 802 pass; web e2e 437 pass, 200 screenshot-only skipped; lint and typecheck clean). Step 2 (screenshots) is parked in leftover.md L2: the new admin screens need a platform-admin seed in the e2e harness.
 
 ### [ ] AUDIT-3 · AUDIT STOP · covers T15.1 → P17 (and the B tasks in them)
 
@@ -461,9 +468,11 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [ ] T19.15 · S · Tool 14: risk-assessment-template (browser-only, PDF/DOCX download, saved in localStorage with try/catch)
 
 ### [ ] T19.16 · S! · Guides, including the 26-question audit self-test
+- **Decided 2026-11-08 (owner answer 2):** guides are MDX files in the repo under `content/guides/`, compiled at build time, reviewed in pull requests. No upload and no admin editor; the Watch rule (no raw HTML or script) applies to the MDX source, which is trusted content, and the renderer must not allow raw HTML.
 - **Spec:** plan L1213. MDX, original, sources + last-reviewed date + disclaimer on each; the self-test is client-side with a score.
 
 ### [ ] T19.17 · S · Templates
+- **Decided 2026-11-08 (owner answer 1):** templates are DOCX/PDF files in the repo under `content/templates/` with a manifest (title, file, version, reviewed on). The platform admin lists them read-only (built here, from the manifest); nothing is uploaded. Each template is original work and needs a human review before it is published (offer letters especially).
 - **Spec:** plan L1214. Original DOCX/PDF generated from MDX sources at build or by a script.
 
 ### [ ] T19.18 · S · Resources hub pages
@@ -489,6 +498,10 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ### [ ] T20.4 · S · Region pages, change bulletins, profiles, methodology, report form, sitemaps
 - **Spec:** plan L1243–1251, L1488. Profiles use ISR (revalidate 6 h); sitemaps split ≤45k URLs; attribution text exactly as L1247; report form R5.
+
+### [ ] T20.5 · S · Register status and rerun (moved from T17.6)
+- **Spec:** plan L1171 (sponsor register: last import, row counts, errors, rerun import). Owner answer 4 (2026-11-08): this moved here from T17.6, because the register ingest is built in T20.1.
+- **Steps:** `GET /platform/register/status` (last publication, row counts, errors) and `POST /platform/register/run` (rerun through the ingest job, with a reason, audited as `platform.register_rerun`). The import sends nothing, so a rerun is safe; it goes through the same job allow-list as T17.6.
 
 ### [ ] P20 · S · Phase 20 gate
 - Recipe R7.

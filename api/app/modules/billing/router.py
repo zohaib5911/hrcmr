@@ -45,6 +45,7 @@ class BillingOut(BaseModel):
     cooling_off_ends_at: datetime | None
     payment_grace_ends_at: datetime | None
     cancel_at: datetime | None
+    comp_until: datetime | None  # complimentary access a platform admin granted, if any
     has_billing_account: bool
     support_email: str  # for plan changes, which support does by hand in v1
 
@@ -123,6 +124,7 @@ async def read_subscription(request: Request, access: Manager) -> BillingOut:
         cooling_off_ends_at=company.cooling_off_ends_at,
         payment_grace_ends_at=company.payment_grace_ends_at,
         cancel_at=latest.cancel_at if isinstance(latest, Subscription) else None,
+        comp_until=company.comp_until,
         has_billing_account=company.stripe_customer_id is not None,
         support_email=_support_email(request),
     )

@@ -41,6 +41,7 @@ from app.integrations.stripe import Stripe
 from app.integrations.turnstile import Turnstile
 from app.jobs.queue import open_queue
 from app.modules.access.router import router as access_router
+from app.modules.announcements.router import router as announcements_router
 from app.modules.attendance.batch_router import router as attendance_batch_router
 from app.modules.attendance.clock_router import router as attendance_clock_router
 from app.modules.attendance.import_router import router as attendance_import_router
@@ -88,8 +89,10 @@ from app.modules.leave.year_end_router import router as leave_year_end_router
 from app.modules.notifications.router import router as notifications_router
 from app.modules.organogram.router import router as organogram_router
 from app.modules.pay.router import router as pay_router
+from app.modules.platform_admin.router import router as platform_admin_router
 from app.modules.policies.own_router import router as own_policies_router
 from app.modules.policies.router import router as policies_router
+from app.modules.rbac.platform_session import router as platform_session_router
 from app.modules.recruitment.public import router as careers_router
 from app.modules.recruitment.router import router as recruitment_router
 from app.modules.reports.router import router as reports_router
@@ -105,6 +108,7 @@ from app.modules.soc.public_router import router as soc_public_router
 from app.modules.soc.router import router as soc_router
 from app.modules.soc_rules.admin_router import router as rules_admin_router
 from app.modules.sponsor_documents.router import router as sponsor_documents_router
+from app.modules.support.router import router as support_router
 from app.modules.work_log.router import router as work_log_router
 
 if TYPE_CHECKING:
@@ -255,6 +259,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(audit_router, prefix=API_PREFIX)
     app.include_router(files_router, prefix=API_PREFIX)
     app.include_router(company_router, prefix=API_PREFIX)
+    app.include_router(announcements_router, prefix=API_PREFIX)
     app.include_router(key_personnel_router, prefix=API_PREFIX)
     app.include_router(compliance_router, prefix=API_PREFIX)
     app.include_router(holidays_router, prefix=API_PREFIX)
@@ -288,6 +293,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(organogram_router, prefix=API_PREFIX)
     app.include_router(learning_router, prefix=API_PREFIX)
     app.include_router(learning_admin_router, prefix=API_PREFIX)
+    app.include_router(platform_session_router, prefix=API_PREFIX)
     app.include_router(certificates_router, prefix=API_PREFIX)
     app.include_router(dashboard_router, prefix=API_PREFIX)
     app.include_router(search_router, prefix=API_PREFIX)
@@ -296,6 +302,8 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(soc_checks_router, prefix=API_PREFIX)
     app.include_router(soc_public_router, prefix=API_PREFIX)
     app.include_router(rules_admin_router, prefix=API_PREFIX)
+    app.include_router(platform_admin_router, prefix=API_PREFIX)
+    app.include_router(support_router, prefix=API_PREFIX)
     app.include_router(careers_router, prefix=API_PREFIX)
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)

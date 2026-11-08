@@ -7,8 +7,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { saveSidebarState } from "@/lib/sidebar-dom";
 import type { ThemeChoice } from "@/lib/theme";
 
+import { AnnouncementBanner } from "./announcement-banner";
 import { MobileTabBar } from "./mobile-tab-bar";
 import { PlanBanner } from "./plan-banner";
+import { SupportBanner } from "./support-banner";
 import { ShortcutProvider } from "./shortcut-provider";
 import type { ShellSession } from "./shell-types";
 import { Sidebar } from "./sidebar";
@@ -65,6 +67,7 @@ export function AppShell({
             </a>
             <Sidebar collapsed={collapsed} onToggle={toggle} session={session} badges={badges} />
             <div className="flex min-h-dvh flex-col transition-[padding] motion-sheet motion-reduce:transition-none md:pl-[260px] md:group-data-[collapsed=true]/shell:pl-[72px]">
+              <SupportBanner />
               <Toolbar
                 user={session?.user ?? null}
                 theme={theme}
@@ -76,6 +79,7 @@ export function AppShell({
                 className="page-app w-full flex-1 pt-6 pb-28 outline-none md:pb-10"
               >
                 <PlanBanner />
+                <AnnouncementBanner />
                 {children}
               </main>
             </div>
