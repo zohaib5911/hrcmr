@@ -358,3 +358,4 @@
 2026-11-08 00:53 | Claude (Opus) | T16.2 | e2e: test-only POST /api/v1/e2e/paid-plan on the e2e server; createSignedInAdmin puts accounts on annual by default; session shell/banner + dashboard screenshot use their own free account; company spec expects Annual plan; web lint/typecheck clean | next: full API suite result, then e2e run
 2026-11-08 01:01 | Claude (Opus) | T16.2 | full API suite: 1239 passed, 3 failed (payment_failed e-mail sample missing; company overview expected free plan); fixed, email+company 19 pass | next: full e2e
 2026-11-08 01:19 | Claude (Opus) | T16.2 | DONE: full e2e 431 pass + 2 fixed (api-client contract: e2e route hidden from schema; company card label '1 year plan') re-run 23 pass; ticked; STATUS handed over | next T16.3 (S!) small model
+2026-11-08 01:34 | Claude (Haiku) | T16.3 | started; STATUS updated | next stripe.py methods (retrieve_invoice, create_refund, cancel_subscription_now, cancel_at_period_end)
