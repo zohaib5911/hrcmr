@@ -19,7 +19,7 @@ from sqlalchemy import select
 
 from app.core.errors import AppError, ForbiddenError
 from app.modules.identity.models import PlatformAdmin
-from app.modules.platform_admin import billing, companies, contact, metrics, queues, users
+from app.modules.platform_admin import billing, companies, contact, metrics, queues, terms, users
 from app.modules.platform_admin.schemas import (
     CompaniesOut,
     CompanyDetailOut,
@@ -35,6 +35,9 @@ from app.modules.platform_admin.schemas import (
     RefundIn,
     RefundOut,
     SubscriptionsOut,
+    TermsIn,
+    TermsVersionRow,
+    TermsVersionsOut,
     UserRow,
     UsersOut,
 )
@@ -44,6 +47,7 @@ router = APIRouter(tags=["platform-admin"])
 Reader = Annotated[PlatformAccess, Depends(require_platform("platform.companies.read"))]
 Writer = Annotated[PlatformAccess, Depends(require_platform("platform.companies.write"))]
 Refunder = Annotated[PlatformAccess, Depends(require_platform("platform.billing.refund"))]
+Content = Annotated[PlatformAccess, Depends(require_platform("platform.content.write"))]
 PLAN_PATTERN = "^(free|annual|ten_year)$"
 STATUS_PATTERN = "^(active|suspended|pending_deletion|deleted)$"
 
@@ -224,6 +228,28 @@ async def mark_contact_message(
     )
     await access.db.commit()
     return contact.row(message)
+
+
+@router.get("/platform/terms-versions", response_model=TermsVersionsOut)
+async def list_terms_versions(access: Reader) -> TermsVersionsOut:
+    return await terms.versions(access.db)
+
+
+@router.post("/platform/terms-versions", status_code=201, response_model=TermsVersionRow)
+async def publish_terms_version(body: TermsIn, access: Content) -> TermsVersionRow:
+    """Publish a new terms version. Everyone must accept it before using the product (T17.5)."""
+    if not await _is_owner(access):
+        raise ForbiddenError("Only an owner can publish a terms version.")
+    published = await terms.publish(
+        access.db,
+        access.audit_context,
+        version=body.version,
+        url=body.url,
+        reason=body.reason,
+        now=datetime.now(UTC),
+    )
+    await access.db.commit()
+    return terms.row(published, current=True)
 
 
 @router.get("/platform/users", response_model=UsersOut)

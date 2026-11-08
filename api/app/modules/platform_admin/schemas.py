@@ -192,3 +192,22 @@ class ContactMessagesOut(BaseModel):
 
 class ContactUpdateIn(RequestModel):
     handled: bool
+
+
+class TermsIn(RequestModel):
+    version: str = Field(pattern=r"^[A-Za-z0-9._-]{1,40}$")
+    url: str = Field(min_length=1, max_length=300, pattern=r"^(https://|/)")
+    reason: str = Field(min_length=REASON_MIN, max_length=REASON_MAX)
+
+
+class TermsVersionRow(BaseModel):
+    id: uuid.UUID
+    version: str
+    url: str
+    published_at: datetime
+    current: bool  # the newest published version: everyone accepts this one
+
+
+class TermsVersionsOut(BaseModel):
+    items: list[TermsVersionRow]
+    total: int

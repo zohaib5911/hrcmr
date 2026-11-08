@@ -3940,6 +3940,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/terms-versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Terms Versions */
+        get: operations["platform_admin_list_terms_versions"];
+        put?: never;
+        /**
+         * Publish Terms Version
+         * @description Publish a new terms version. Everyone must accept it before using the product (T17.5).
+         */
+        post: operations["platform_admin_publish_terms_version"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/platform/users": {
         parameters: {
             query?: never;
@@ -12345,6 +12366,41 @@ export interface components {
             id: string;
             /** Reference */
             reference: string | null;
+        };
+        /** TermsIn */
+        TermsIn: {
+            /** Reason */
+            reason: string;
+            /** Url */
+            url: string;
+            /** Version */
+            version: string;
+        };
+        /** TermsVersionRow */
+        TermsVersionRow: {
+            /** Current */
+            current: boolean;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Published At
+             * Format: date-time
+             */
+            published_at: string;
+            /** Url */
+            url: string;
+            /** Version */
+            version: string;
+        };
+        /** TermsVersionsOut */
+        TermsVersionsOut: {
+            /** Items */
+            items: components["schemas"]["TermsVersionRow"][];
+            /** Total */
+            total: number;
         };
         /** TimesheetApprove */
         TimesheetApprove: {
@@ -24934,6 +24990,86 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SubscriptionsOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_admin_list_terms_versions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TermsVersionsOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_admin_publish_terms_version: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TermsIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TermsVersionRow"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
