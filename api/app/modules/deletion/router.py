@@ -134,17 +134,22 @@ async def _other_admins(db: TenantSession, company_id: uuid.UUID, me: uuid.UUID)
     )
 
 
-def _send_code(db: TenantSession, row: DeletionRequest, user: User, now: datetime) -> None:
+def _new_code(row: DeletionRequest, now: datetime) -> str:
+    """Stores a fresh code's keyed hash on the request and returns the code, for the e-mail only."""
     code = f"{secrets.randbelow(10**6):06d}"
     row.code_hash = _code_hash(row, code)
     row.code_expires_at = now + timedelta(minutes=CODE_MINUTES)
     row.code_attempts = 0
-    # Sent whatever the e-mail preference: the person asked for it, and it is the only way in.
-    _email(
-        db,
-        user.email,
-        "deletion_code",
-        {"first_name": user.first_name, "code": f"{code[:3]} {code[3:]}", "minutes": "15"},
+    return code
+
+
+async def _send_code(request: Request, user: User, code: str) -> None:
+    # Sent after the commit through the app mailer, so it leaves at once (the page says so), and
+    # whatever the e-mail preference: the person asked for it, and it is the only way in.
+    await request.app.state.auth.mailer.send_template(
+        to=user.email,
+        template="deletion_code",
+        data={"first_name": user.first_name, "code": f"{code[:3]} {code[3:]}", "minutes": "15"},
     )
 
 
@@ -203,8 +208,9 @@ async def request_deletion(body: DeletionIn, request: Request, access: Deleter) 
         row.export_id = export.id
         await access.audit("export.requested", entity_type="data_export", entity_id=export.id)
     row.export_requested = row.export_requested or body.export_requested
-    _send_code(db, row, access.caller.user, now)
+    code = _new_code(row, now)
     await db.commit()
+    await _send_code(request, access.caller.user, code)
     if export is not None:
         await enqueue_export(request, export)
     return await _out(db, row, me)

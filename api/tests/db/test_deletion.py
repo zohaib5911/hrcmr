@@ -64,8 +64,23 @@ async def _mail(rig: dict[str, Any], template: str) -> list[tuple[str, dict[str,
     return out
 
 
+@pytest.fixture(autouse=True)
+def _sent(
+    rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> list[tuple[str, str, dict[str, str]]]:
+    """The code goes out through the app mailer (not the outbox): keep what it is asked to send."""
+    sent: list[tuple[str, str, dict[str, str]]] = []
+
+    async def record(*, to: str, template: str, data: dict[str, str]) -> None:
+        sent.append((to, template, data))
+
+    monkeypatch.setattr(rig["app"].state.auth.mailer, "send_template", record)
+    rig["sent"] = sent
+    return sent
+
+
 async def _code_for(rig: dict[str, Any], address_start: str) -> str:
-    sent = [data for to, data in await _mail(rig, "deletion_code") if to.startswith(address_start)]
+    sent = [d for to, t, d in rig["sent"] if t == "deletion_code" and to.startswith(address_start)]
     return str(sent[-1]["code"])
 
 
