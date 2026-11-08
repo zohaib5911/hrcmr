@@ -402,10 +402,10 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Spec:** plan L1166–1167, L1173, L1467. Refunds = owner level only, through the T16 Stripe client, idempotent, audited.
 - **Done (2026-11-08):** API only, as T17.2 and T17.3's API. `GET /platform/subscriptions` reads the database only (the Stripe ids are shown for a lookup in Stripe; no Stripe call per row). `POST /platform/refunds` (owner only; `reason` and `confirm: true`) issues one full refund of the latest payment behind a purchase through the T16 client, with the self-serve key `refund-{payment_intent}`, so one payment is refunded at most once; a refunded purchase answers `ALREADY_REFUNDED`, and the plan itself changes through the existing `charge.refunded` webhook, as for a dashboard refund. `GET /platform/deletion-requests` (awaiting code, scheduled, withdrawn, completed; the code hash is never read) and `GET /platform/data-exports` (queued, ready, failed). `GET /platform/contact-messages` (handled filter) and `PATCH /platform/contact-messages/{id}` (audited only on a change). Migration 0051; `contact_messages` is global and is written by the public form in T18.1. Tests: `tests/db/test_platform_billing.py` (15 pass). Admin screens are not in this block.
 
-### [ ] T17.5 · S · Content tools and feature flags
+### [x] T17.5 · S · Content tools and feature flags
 - **Spec:** plan L1170, L1175, L1468. Full course editor, templates, guides (MDX upload + sanitised preview), dossier links, announcement banner, terms version publish (forces re-acceptance), feature flags.
 - **Watch:** MDX/Markdown preview must be sanitised (no raw HTML/script).
-- **Status (2026-11-08): BLOCKED — owner decision for templates and guides (see STATUS, Owner actions).** Built: terms version publish (owner only, forces re-acceptance); feature flags (`/platform/feature-flags`); announcement banners per region (platform create and end, tenant banner in the app shell); dossier links (existing `/admin/dossier-links`, audited); course editor (existing `/admin/courses`, sections, quiz, sources, review date, publish; tests pass). Not built: templates and guides with MDX upload and sanitised preview. Tests: `tests/db/test_platform_content.py` 10 pass; web `announcement-banner` 3 pass.
+- **Decided 2026-11-08 (answers 1–2, recorded by the agent at the owner's request; the owner can override):** templates are DOCX/PDF files in the repo under `content/templates/`, reviewed in pull requests; the admin lists them and nothing is uploaded. Guides are MDX files in the repo under `content/guides/`, compiled at build time; there is no MDX upload and no admin preview of user HTML, because MDX runs JSX and an upload would be script injection. The admin screens for both are not built here: the templates listing moves to T19.17 and the guides to T19.16. Built here: terms version publish (owner only, forces re-acceptance); feature flags; announcement banners per region (platform create and end, tenant banner); dossier links (existing `/admin/dossier-links`, audited); course editor (existing `/admin/courses`; tests pass). Tests: `tests/db/test_platform_content.py` 10 pass; web `announcement-banner` 3 pass.
 
 ### [ ] T17.6 · S · Jobs dashboard, register status, rules screens, platform audit log
 - **Spec:** plan L1169, L1171–1174, L1469.
@@ -467,9 +467,11 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [ ] T19.15 · S · Tool 14: risk-assessment-template (browser-only, PDF/DOCX download, saved in localStorage with try/catch)
 
 ### [ ] T19.16 · S! · Guides, including the 26-question audit self-test
+- **Decided 2026-11-08 (owner answer 2):** guides are MDX files in the repo under `content/guides/`, compiled at build time, reviewed in pull requests. No upload and no admin editor; the Watch rule (no raw HTML or script) applies to the MDX source, which is trusted content, and the renderer must not allow raw HTML.
 - **Spec:** plan L1213. MDX, original, sources + last-reviewed date + disclaimer on each; the self-test is client-side with a score.
 
 ### [ ] T19.17 · S · Templates
+- **Decided 2026-11-08 (owner answer 1):** templates are DOCX/PDF files in the repo under `content/templates/` with a manifest (title, file, version, reviewed on). The platform admin lists them read-only (built here, from the manifest); nothing is uploaded. Each template is original work and needs a human review before it is published (offer letters especially).
 - **Spec:** plan L1214. Original DOCX/PDF generated from MDX sources at build or by a script.
 
 ### [ ] T19.18 · S · Resources hub pages
@@ -495,6 +497,10 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ### [ ] T20.4 · S · Region pages, change bulletins, profiles, methodology, report form, sitemaps
 - **Spec:** plan L1243–1251, L1488. Profiles use ISR (revalidate 6 h); sitemaps split ≤45k URLs; attribution text exactly as L1247; report form R5.
+
+### [ ] T20.5 · S · Register status and rerun (moved from T17.6)
+- **Spec:** plan L1171 (sponsor register: last import, row counts, errors, rerun import). Owner answer 4 (2026-11-08): this moved here from T17.6, because the register ingest is built in T20.1.
+- **Steps:** `GET /platform/register/status` (last publication, row counts, errors) and `POST /platform/register/run` (rerun through the ingest job, with a reason, audited as `platform.register_rerun`). The import sends nothing, so a rerun is safe; it goes through the same job allow-list as T17.6.
 
 ### [ ] P20 · S · Phase 20 gate
 - Recipe R7.
