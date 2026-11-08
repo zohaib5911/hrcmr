@@ -400,3 +400,4 @@
 2026-11-08 13:10 | Claude (Opus) | T17.3 | related suites: 190 pass + migrations 7 pass (added impersonation_sessions to expected tables) | next web banner
 2026-11-08 13:30 | Claude (Opus) | T17.3 | DONE: support mode API + tenant banner; tests 5 DB + 2 unit pass; related suites 197 pass; ruff/mypy/web lint/typecheck clean; semgrep clean; ticked micro_plan + PROGRESS; STATUS handed over | next T17.4 (S!) small model
 2026-11-08 11:24 | Claude (Haiku) | T17.4 | start: design = admin refund of latest payment (Stripe key refund-{pi}), queues read-only, contact_messages global; STATUS rewritten | next step 1 migration 0051
+2026-11-08 11:24 | Claude (Haiku) | T17.4 | step 1 done: migration 0051 (contact_messages global, platform read deletion/exports, subscriptions platform update, audit policies), model app/modules/contact, registry + test list; tests: migrations 7 pass | next step 2 subscriptions + refunds
