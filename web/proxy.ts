@@ -53,6 +53,8 @@ export function proxy(request: NextRequest): NextResponse {
   // Next.js reads the nonce from the request's CSP header while it renders the page.
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
+  // The public path, for the admin frame: it sends a person with no platform session to start one.
+  requestHeaders.set("x-pathname", pathname);
   requestHeaders.set("Content-Security-Policy", csp);
 
   let response: NextResponse;

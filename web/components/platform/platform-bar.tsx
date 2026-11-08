@@ -9,7 +9,7 @@ export function PlatformBar() {
   return (
     <div
       data-testid="platform-bar"
-      className="bg-[#b00010] px-4 py-3 text-center text-sm font-semibold tracking-wide text-white"
+      className="bg-[#b00010] px-4 py-3 text-center text-sm font-semibold tracking-wide text-on-fixed"
     >
       Platform admin
     </div>

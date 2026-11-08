@@ -37,7 +37,7 @@ export function SupportBanner() {
     <div
       role="status"
       data-testid="support-banner"
-      className="sticky top-0 z-[80] flex flex-wrap items-center justify-center gap-x-4 gap-y-2 bg-[#b00010] px-4 py-2 text-sm text-white"
+      className="sticky top-0 z-[80] flex flex-wrap items-center justify-center gap-x-4 gap-y-2 bg-[#b00010] px-4 py-2 text-sm text-on-fixed"
     >
       <p>
         <span className="font-semibold">Support mode</span>: you are viewing {support.company_name}{" "}
@@ -49,7 +49,7 @@ export function SupportBanner() {
         type="button"
         onClick={leave}
         disabled={leaving}
-        className="rounded-control border border-white px-3 py-1 font-medium hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white disabled:opacity-70"
+        className="rounded-control border border-on-fixed px-3 py-1 font-medium hover:bg-on-fixed/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-on-fixed disabled:opacity-70"
       >
         {leaving ? "Ending…" : "End support mode"}
       </button>
