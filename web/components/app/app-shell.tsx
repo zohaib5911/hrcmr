@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { saveSidebarState } from "@/lib/sidebar-dom";
 import type { ThemeChoice } from "@/lib/theme";
 
+import { AnnouncementBanner } from "./announcement-banner";
 import { MobileTabBar } from "./mobile-tab-bar";
 import { PlanBanner } from "./plan-banner";
 import { SupportBanner } from "./support-banner";
@@ -78,6 +79,7 @@ export function AppShell({
                 className="page-app w-full flex-1 pt-6 pb-28 outline-none md:pb-10"
               >
                 <PlanBanner />
+                <AnnouncementBanner />
                 {children}
               </main>
             </div>
