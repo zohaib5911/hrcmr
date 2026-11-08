@@ -14,6 +14,7 @@ import {
   MapPin,
   Percent,
   ShieldCheck,
+  Trash2,
   Users,
   Wallet,
 } from "lucide-react";
@@ -204,6 +205,13 @@ export function CompanyOverview({
             icon={<Icon icon={CreditCard} />}
             href="/company/billing"
           />
+          {can("company.delete") ? (
+            <GroupedRow
+              title="Delete company account"
+              icon={<Icon icon={Trash2} />}
+              href="/company/delete-account"
+            />
+          ) : null}
         </GroupedList>
       </div>
 

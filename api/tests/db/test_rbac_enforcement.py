@@ -162,7 +162,9 @@ async def setup(database: DatabaseUnderTest) -> AsyncIterator[Setup]:
             ctx = Setup(client, database, SessionStore(redis))
             await ctx.owner("truncate users, companies cascade")
             await ctx.owner(
-                "insert into companies (id, name, slug) values (:i, 'Co', 'co')", i=ctx.company
+                "insert into companies (id, name, slug, plan, subscription_status) "
+                "values (:i, 'Co', 'co', 'annual', 'active')",
+                i=ctx.company,
             )
             yield ctx
     await redis.flushdb()
@@ -282,6 +284,7 @@ def test_no_real_endpoint_skips_authorisation() -> None:
         "/api/v1/public/postings/",  # (see test_careers)
         "/api/v1/public/certificates/",  # no-login certificate check: rate limited, four fields only (see test_certificates)
         "/api/v1/public/soc/",  # no-login free checker: reference data only, rate limited, Turnstile on the salary check (see test_soc_public)
+        "/api/v1/webhooks/",  # server-to-server: Stripe's signature on the raw body is the credential (see test_billing)
     )
 
     app: FastAPI = create_app(build_settings())
@@ -326,7 +329,13 @@ async def test_every_real_routes_permission_dependencies_match_the_matrix(
             required = permissions(dependant)
             if not required:
                 assert path.startswith(
-                    ("/api/v1/auth/", "/api/v1/health", "/api/v1/ready", "/api/v1/public/")
+                    (
+                        "/api/v1/auth/",
+                        "/api/v1/health",
+                        "/api/v1/ready",
+                        "/api/v1/public/",
+                        "/api/v1/webhooks/",
+                    )
                 ), path
                 continue
             expected = {permission: scope_for(role, permission) for permission in required}
@@ -509,7 +518,11 @@ async def test_a_company_always_keeps_one_active_company_admin(database: Databas
     async with owner.begin() as c:
         await c.execute(text("truncate users, companies cascade"))
         await c.execute(
-            text("insert into companies (id, name, slug) values (:i, 'Co', 'co')"), {"i": company}
+            text(
+                "insert into companies (id, name, slug, plan, subscription_status) "
+                "values (:i, 'Co', 'co', 'annual', 'active')"
+            ),
+            {"i": company},
         )
         for membership, role in ((admin_1, "company_admin"), (member, "employee")):
             user = uuid7()

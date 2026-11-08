@@ -30,7 +30,9 @@ IDENTITY_TABLES = [
     "company_holidays",
     "course_assignments",
     "courses",
+    "data_exports",
     "day_off_patterns",
+    "deletion_requests",
     "departments",
     "designations",
     "dossier_links",
@@ -91,6 +93,8 @@ IDENTITY_TABLES = [
     "soc_index_entries",
     "soc_unit_groups",
     "sponsor_documents",
+    "stripe_events",
+    "subscriptions",
     "tax_codes",
     "terms_acceptances",
     "terms_versions",
@@ -111,6 +115,7 @@ IDENTITY_FUNCTIONS = {
     "leave_year_end_immutable",
     "policy_documents_frozen",
     "policy_acceptances_frozen",
+    "app_purge_allowed",
 }
 
 

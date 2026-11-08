@@ -68,6 +68,7 @@ export function tokenIn(text: string, path: string): string {
 export async function createSignedInAdmin(
   request: APIRequestContext,
   account: Account = newAccount(),
+  { plan = "annual" }: { plan?: "free" | "annual" } = {},
 ): Promise<Account> {
   const headers = await csrfHeaders(request);
   // The test API trusts X-Real-IP from this machine (api/tests/e2e_server.py), so a sign-up made here
@@ -92,5 +93,14 @@ export async function createSignedInAdmin(
     data: { token: tokenIn(mail, "/verify-email") },
   });
   expect(verified.status(), await verified.text()).toBe(200);
+  if (plan === "annual") {
+    // A new company is on the free plan, which is read-only (T16.2). The test API stands in for
+    // Stripe's webhook and puts it on a paid plan (api/tests/e2e_server.py).
+    const paid = await request.post(`${API}/e2e/paid-plan`, {
+      headers,
+      data: { email: account.email },
+    });
+    expect(paid.status(), await paid.text()).toBe(200);
+  }
   return account;
 }

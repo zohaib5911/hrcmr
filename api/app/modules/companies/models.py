@@ -138,6 +138,8 @@ class Company(Base, RecordMixin):
     subscription_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     subscription_ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     cooling_off_ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Set at the first failed renewal; the annual plan keeps working until then (T16.2).
+    payment_grace_ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     stripe_customer_id: Mapped[str | None] = mapped_column(String(80), unique=True)
     stripe_subscription_id: Mapped[str | None] = mapped_column(String(80), unique=True)
     setup_checklist_dismissed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

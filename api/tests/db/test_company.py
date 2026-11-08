@@ -105,7 +105,7 @@ async def test_the_overview_is_this_companys_own_and_says_what_the_server_can_do
     seen = (await admin.get("/api/v1/company")).json()
     assert seen["company"]["id"] == str(rig["a"])
     assert seen["company"]["name"] == "Company a"
-    assert seen["company"]["plan"] == "free"
+    assert seen["company"]["plan"] == "annual"  # the test companies are on a paid plan
     assert seen["users"] == 1
     assert seen["features"] == {"companies_house_lookup": False, "ai": False}
     assert (await other.get("/api/v1/company")).json()["company"]["id"] == str(rig["b"])

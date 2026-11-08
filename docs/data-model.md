@@ -268,6 +268,7 @@ Checks:
 | `subscription_started_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `subscription_ends_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `cooling_off_ends_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `payment_grace_ends_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `stripe_customer_id` | VARCHAR(80) | yes |  | unique |
 | `stripe_subscription_id` | VARCHAR(80) | yes |  | unique |
 | `setup_checklist_dismissed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
@@ -429,6 +430,31 @@ Checks:
 - `source_url like 'https://%'`
 - `version >= 1`
 
+## `data_exports`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies`, references `files` |
+| `requested_by` | UUID | no |  | references `users` |
+| `status` | VARCHAR(10) | no | `queued` |  |
+| `file_id` | UUID | yes |  | references `files` |
+| `finished_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `expires_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `error_code` | VARCHAR(40) | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(status = 'failed') = (error_code is not null)`
+- `(status = 'queued') = (finished_at is null)`
+- `(status = 'ready') = (expires_at is not null)`
+- `(status = 'ready') = (file_id is not null)`
+- `status in ('queued','ready','failed')`
+
 ## `day_off_patterns`
 
 | Column | Type | Null | Default | Notes |
@@ -449,6 +475,34 @@ Checks:
 Checks:
 
 - `weekdays_off <@ ARRAY[1,2,3,4,5,6,7] AND array_position(weekdays_off, NULL) IS NULL`
+
+## `deletion_requests`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `requested_by` | UUID | yes |  | references `users` |
+| `code_hash` | VARCHAR(64) | yes |  |  |
+| `code_expires_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `code_attempts` | SMALLINT | no | `0` |  |
+| `confirmed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `scheduled_for` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `withdrawn_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `withdrawn_by` | UUID | yes |  | references `users` |
+| `export_requested` | BOOLEAN | no | `false` |  |
+| `export_id` | UUID | yes |  |  |
+| `completed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(confirmed_at is null) = (scheduled_for is null)`
+- `code_attempts between 0 and 10`
+- `completed_at is null or (confirmed_at is not null and withdrawn_at is null)`
 
 ## `departments`
 
@@ -1867,6 +1921,40 @@ Checks:
 - `sponsored_salary is null or sponsored_salary >= 0`
 - `version > 0`
 - `visa_route is null or visa_route in ('skilled_worker', 'health_care_worker', 'global_business_mobility', 'scale_up', 'temporary_worker', 'graduate', 'student', 'euss_settled', 'euss_pre_settled', 'family', 'other')`
+
+## `stripe_events`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `event_id` | VARCHAR(255) | no |  | unique |
+| `type` | VARCHAR(100) | no |  |  |
+| `payload_hash` | VARCHAR(64) | no |  |  |
+| `processed_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+## `subscriptions`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `plan` | VARCHAR(10) | no |  |  |
+| `status` | VARCHAR(30) | no |  |  |
+| `stripe_subscription_id` | VARCHAR(80) | yes |  | unique |
+| `stripe_payment_intent_id` | VARCHAR(80) | yes |  | unique |
+| `current_period_start` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `current_period_end` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `cancel_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `refunded_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(plan = 'annual' and stripe_subscription_id is not null and stripe_payment_intent_id is null) or (plan = 'ten_year' and stripe_payment_intent_id is not null and stripe_subscription_id is null)`
+- `plan in ('annual', 'ten_year')`
 
 ## `tax_codes`
 

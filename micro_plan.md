@@ -353,24 +353,32 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 16 — Billing and account lifecycle
 
-### [ ] T16.1 · B · Stripe integration and webhooks
-### [ ] T16.2 · B · Entitlements and payment-failed grace
+### [x] T16.1 · B · Stripe integration and webhooks
+### [x] T16.2 · B · Entitlements and payment-failed grace
 
-### [ ] T16.3 · S! · Billing page, cancel with refund
+### [x] T16.3 · S! · Billing page, cancel with refund
 - **Spec:** plan L1084–1090, L1459.
 - **Copy:** the Stripe client from T16.1 (`api/app/integrations/stripe*.py`); never call Stripe elsewhere.
 - **Steps:** `/company/billing` plan card, 14-day banner with end date, Cancel (≤14 days → full refund via Refunds API; after → cancel at period end), "Payment details & invoices" → portal session, "Contact support" for plan change.
 - **Done when:** tests with mocked Stripe for day 13 vs day 15; idempotency key on refund; audit event.
 
-### [ ] T16.4 · S! · Data export
+### [x] T16.4 · S! · Data export
 - **Spec:** plan L1091, L1460; API item 22.
 - **Steps:** step-up required; worker builds zip (CSV per tenant table + documents) to private storage; e-mail link valid 7 days; `GET /companies/me/exports/{id}`.
 - **Done when:** export contains only the requesting company's rows (test with two tenants); no step-up → refused.
 
-### [ ] T16.5 · B · Delete account (purge executor deletes all tenant data — big model only)
+### [x] T16.5 · B · Delete account (purge executor deletes all tenant data — big model only)
+
+### [x] T16.6 · B · Deletion code e-mail goes through the app mailer (found at the P16 gate)
+- **Spec:** plan L1091 (account deletion by e-mailed code); the e2e `web/tests/e2e/account-deletion.spec.ts` needs the code to arrive.
+- **Problem:** `_send_code` in `api/app/modules/deletion/router.py` (and `_email` for `deletion_scheduled`, `deletion_withdrawn`, `account_deleted`) only inserts an `EmailOutbox` row inside the request transaction. Nothing enqueues it, so it leaves only when the minute sweep runs (`email_outbox_sweep`). The e2e server runs no sweep (its worker has only `generate_report`; the auth flow uses `DirectMailer`), so the code never reaches Mailpit there. Production works within about a minute, but the code is the only way in and the page says "We have e-mailed you a code" at once.
+- **Copy:** the auth routers send with `auth.mailer.send_template(...)` after the commit (`api/app/modules/access/router.py` `_send_invite` is the pattern; the mailer is `request.app.state.auth.mailer`).
+- **Steps:** 1. Send `deletion_code` after `db.commit()` through the app mailer; keep the code hash in the transaction and return the code to the caller only for the send. 2. Check the DB test rig's mailer (`tests/db/test_deletion.py` `_mail` reads `email_outbox`); change `_code_for` to capture the message the way the rig can. 3. Decide in the same change whether the three other `_email` mails move too (same defect); record the choice under Strategy in STATUS. 4. Run `web/tests/e2e/account-deletion.spec.ts` and `SCREENSHOTS=1 ... phase16-screenshots.spec.ts --grep scheduled`.
+- **Done when:** `account-deletion.spec.ts` passes (code arrives, confirm, scheduled date, withdraw); `tests/db/test_deletion.py` and the email/guards suites pass. No skip, no weakened assertion.
 
 ### [ ] P16 · S · Phase 16 gate
-- Recipe R7 + Stripe test-mode E2E (both plans, refund, cancel, failed payment, webhook replay). Needs owner's Stripe **test** keys in `.env`; if missing → BLOCKED with owner action.
+- Recipe R7. **Stripe test-mode E2E is parked in `leftover.md` (L1)** — owner has no test keys yet; do not block on it.
+- Already done (2026-11-08): R7 steps 1–3 (API 1254, web lint/typecheck/unit 786, web e2e 436, screenshots 16/16, PROGRESS summary). **Left:** R7 step 4 — PR `dev → main`, wait for checks, merge when green, then tick P16.
 
 ---
 

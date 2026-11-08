@@ -81,7 +81,10 @@ async def api(database: DatabaseUnderTest) -> AsyncIterator[dict[str, Any]]:
         await c.execute(text("truncate users, companies cascade"))
         for ident, slug in ((a, "a"), (b, "b")):
             await c.execute(
-                text("insert into companies (id, name, slug) values (:i, :n, :s)"),
+                text(
+                    "insert into companies (id, name, slug, plan, subscription_status) "
+                    "values (:i, :n, :s, 'annual', 'active')"
+                ),
                 {"i": ident, "n": f"Company {slug}", "s": slug},
             )
     await owner.dispose()

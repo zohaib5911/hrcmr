@@ -243,6 +243,33 @@ TEMPLATES: dict[str, Template] = {
         ),
         fields=_fields("first_name", "job_title", "when", "where"),
     ),
+    "payment_failed": Template(
+        subject="Your payment did not go through",
+        heading="Your payment did not go through",
+        preheader="Update your card by {grace_end} to keep full access.",
+        paragraphs=(
+            "Hi {first_name},",
+            "We could not take the payment for your {brand_name} annual plan. Please update your "
+            "card details by {grace_end}.",
+            "After that date your account becomes read-only until the payment goes through. You "
+            "can still see everything, and nothing is deleted.",
+        ),
+        button=("Update payment details", "link"),
+        fields=_fields("first_name", "grace_end", "link"),
+    ),
+    "data_export_ready": Template(
+        subject="Your data export is ready",
+        heading="Your data export is ready",
+        preheader="The download link works until {expires_on}.",
+        paragraphs=(
+            "Hi {first_name},",
+            "Your {brand_name} data export is ready. It holds your company's records as CSV files, "
+            "and the documents you uploaded.",
+            "The link below works until {expires_on}. You need to be signed in to download it.",
+        ),
+        button=("Download your export", "link"),
+        fields=_fields("first_name", "expires_on", "link"),
+    ),
     "deletion_code": Template(
         subject="Your confirmation code",
         heading="Your confirmation code",
@@ -259,6 +286,54 @@ TEMPLATES: dict[str, Template] = {
             "password, then contact {support_email}.",
         ),
         fields=_fields("first_name", "code", "minutes"),
+    ),
+    "deletion_scheduled": Template(
+        subject="{company_name} is due to be deleted on {deletion_date}",
+        heading="Your company account is due to be deleted",
+        preheader="A Company Admin can withdraw the request until {deletion_date}.",
+        paragraphs=(
+            "Hi {first_name},",
+            "{requester} asked to delete the {company_name} account in {brand_name}. All of its "
+            "records and documents will be deleted on {deletion_date}, and this cannot be undone.",
+            "If this is a mistake, any Company Admin can withdraw the request until then.",
+        ),
+        button=("Review the request", "link"),
+        fields=_fields("first_name", "requester", "company_name", "deletion_date", "link"),
+    ),
+    "deletion_scheduled_support": Template(
+        subject="Account deletion scheduled: {company_name}",
+        heading="An account deletion is scheduled",
+        preheader="Company {company_id} is due to be deleted on {deletion_date}.",
+        paragraphs=(
+            "A Company Admin of {company_name} (company {company_id}) confirmed the deletion of "
+            "the account.",
+            "The data will be deleted on {deletion_date} unless the request is withdrawn.",
+        ),
+        fields=_fields("company_name", "company_id", "deletion_date"),
+    ),
+    "deletion_withdrawn": Template(
+        subject="The deletion of {company_name} was withdrawn",
+        heading="The deletion request was withdrawn",
+        preheader="Your company account stays open.",
+        paragraphs=(
+            "Hi {first_name},",
+            "{actor} withdrew the request to delete the {company_name} account. Nothing will be "
+            "deleted, and the account stays open.",
+        ),
+        fields=_fields("first_name", "actor", "company_name"),
+    ),
+    "account_deleted": Template(
+        subject="Your {brand_name} account has been deleted",
+        heading="Your company account has been deleted",
+        preheader="The {company_name} records and documents are gone.",
+        paragraphs=(
+            "Hi {first_name},",
+            "As requested, we deleted the {company_name} account on {deletion_date}: its records, "
+            "documents and user accounts. We keep only what the law requires, such as payment and "
+            "invoice records, and a note that the account was deleted.",
+            "Thank you for using {brand_name}.",
+        ),
+        fields=_fields("first_name", "company_name", "deletion_date"),
     ),
 }
 

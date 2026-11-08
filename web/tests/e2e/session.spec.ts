@@ -5,11 +5,13 @@
  */
 import { expect, test } from "@playwright/test";
 
-import { createSignedInAdmin } from "../support/accounts";
+import { createSignedInAdmin, newAccount } from "../support/accounts";
 
 test("the shell shows the person, their role, the company and its plan, and the whole menu", async ({
   page,
 }) => {
+  // A free company of its own: the shared account is on a paid plan so the other tests can write.
+  await createSignedInAdmin(page.request, newAccount(), { plan: "free" });
   await page.goto("/dashboard");
   await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();
   const sidebar = page.locator("#app-sidebar");
@@ -26,6 +28,7 @@ test("the shell shows the person, their role, the company and its plan, and the 
 test("the free-plan banner offers to subscribe and can be put away for the visit", async ({
   page,
 }) => {
+  await createSignedInAdmin(page.request, newAccount(), { plan: "free" });
   await page.goto("/dashboard");
   await page.waitForLoadState("networkidle");
   const banner = page.getByRole("status").filter({ hasText: "You're on the free plan" });

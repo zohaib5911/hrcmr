@@ -1,50 +1,48 @@
 # STATUS
-Updated: 2026-11-08 Europe/London    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev    Commit: aa38247
+Updated: 2026-11-08 09:46 (Europe/London)    Agent: Claude Code (Haiku 5.5, SMALL)    Branch: dev    Commit: see git log
+
 State: IN PROGRESS
 
 ## Last completed
-- P15 — Phase 15 gate; PR 23 (dev -> main) CI green except Playwright pending; merging when all green.
+- P16 gate R7 steps 1–3 — API 1254, web lint/typecheck/unit 786, web e2e 436 passed, 16/16 screenshots, PROGRESS summary (Opus parked Stripe E2E in leftover.md L1).
+- T16.6 — Deletion code e-mail sent after commit through the app mailer (Opus).
+- T16.5 — Delete account (Opus).
+- T16.4 — Data export.
+- T16.3 — Billing page and cancel with refund.
+- T16.2 — Entitlements and payment-failed grace.
+- T16.1 — Stripe integration and webhooks.
 
 ## Current task
-- T16.1 — Stripe integration and webhooks (B)
-  - [ ] 1. migration: subscriptions + stripe_events tables
-  - [ ] 2. api/app/integrations/stripe.py (server-only client, httpx, idempotency keys, signature check)
-  - [ ] 3. billing module: checkout-session (annual / ten_year), portal-session, GET subscription
-  - [ ] 4. POST /webhooks/stripe: signature + store event id (idempotent) + apply to company
-  - [ ] 5. tests (signature, replay, both plans), openapi regen
-- Resume note: see .agent/journal.md last line.
+- P16 — Phase 16 gate (S), not ticked
+  - [x] R7 steps 1–3 (see Last completed)
+  - [ ] R7 step 4: PR dev → main, watch checks, merge only when all green, tick P16   <- here
+  - [~] Stripe test-mode E2E — PARKED in `leftover.md` L1 (owner has no test keys)
+- Resume note: `gh pr create --base main --head dev` (body from the P16 summary in PROGRESS.md); `gh pr checks <n> --watch`; merge with `gh pr merge <n> --merge` only when every check is green; then tick P16 in micro_plan.md and PROGRESS.md; then T17.1 (S!).
+- Check before opening: main has 11 merge commits and no non-merge commits that dev lacks; the main-only lines are stale copies of files dev has since changed, so the PR carries dev's content.
 
 ## Next tasks
-- T16.2 (B), T16.3 (S!), T16.4 (S!), T16.5 (B), P16
+- P16: PR dev → main and tick.
+- T17.1 (S!) platform admin auth and admin host routing (micro_plan L387).
+- leftover.md L1 (Stripe E2E) when the owner has test keys; before Phase 23.
 
 ## Health
-- CI on dev: green on PR 23 except e2e pending    CI on main: green (PR #22)
-- Local checks run: none yet this session
+- CI on dev: not run yet for P16 (PR about to open). Workflows: ci.yml, security.yml.
+- CI on main: green at PR #23 (P15). Open Dependabot PRs #24 (uv) and #5 (npm) — not part of this gate.
+- Local checks run this session: API full 1254 pass; web lint 0 warnings; typecheck clean; unit 786 pass; full web e2e 436 pass, 200 skipped, 0 fail.
 
 ## Issues / suggestions
-- OpenAPI component names must be unique. Pydantic qualifies a clashing name, which drops the original from web/lib/api/schema.ts. SOC models use the Soc prefix (SocCandidateOut, SocCvMatchOut, ...). After any new endpoint run `pnpm gen:api` in web and check that no names disappear.
-- Body limits: every upload route must be in the limits table in api/app/main.py. The SOC CV route is there (PROOF_LIMIT). tests/test_body_limits.py enforces it.
-- Architecture rule: app code may not use any `.text` attribute (it is taken for raw SQL text()). Use itertext() or other names (the stripping result field is `cleaned`).
-- Test harness: the rig's `two_companies` runs `truncate users, companies cascade`, which also truncates rules_versions (rows refer to users). Tests that need published rules publish them after the rig (tests/db/test_soc_match.py).
-- Test harness: temporary_database() re-provisions app_owner/app_user; do not run DB suites in parallel.
-- pypdf is now a runtime dependency (moved from dev). types-defusedxml is a dev stub.
-- CV stripping is pattern based. It does not remove names (the plan does not ask for it), and a street address with no street type word is not caught. The redaction layer in app/ai still runs on the request body.
-- CV match does not suggest other SOC codes ("Code 3544 fits better"). That would need the search retrieval on the job title; not done in T15.5.
-- The CV match response has no rules version (the disclaimer in T15.6 must show rules version and date from the checker).
-- PROGRESS.md ends with an old unchecked Phase 15 list (T15.2–T15.7). The [x] lines above it are the record.
-- AI ranking gating: ai_ready only. ai.ask.use is in the matrix but no code checks it (same as letters).
-- Job descriptions with personal data are redacted before the call, not refused (only a body with restricted data left after redaction gets AI_REFUSED).
-- Pre-existing: OpenAPI already had five qualified AddressOut names (app__modules__companies__..., app__modules__employees__personal_schemas__...). Not from SOC.
+- (T16.6) The delete-account page header breadcrumb reads "Company / Company" with title "Company"; the page h1 is right. Cosmetic, for the auditor.
+- (T16.6) `deletion_scheduled`(+support), `deletion_withdrawn` and `account_deleted` still use the outbox-in-transaction helper; e2e cannot see them until the minute sweep runs.
+- (T16.5) Test isolation: tests/db/test_billing.py counts payment_failed mail across the whole outbox.
+- (T16.3) Stripe's API version is not pinned; verify the invoice payment-intent field in test mode (leftover.md L1).
+- (T16.2) A lapsed annual plan still says "annual" in /auth/me.
+- (pre-existing) tests/test_openapi.py + tests/db/test_reports.py in one pytest call gives "fixture 'database' not found".
 
 ## Strategy / decisions taken
-- (T15.4) Search needs soc.check.read; match needs soc.check.run (auditors can search, not match). Retrieval: 30 hits per leg (trigram, FTS, vector on index titles, vector on unit groups), fused by reciprocal rank (k = 60), top 10. Re-rank: fast=False (ANTHROPIC_MODEL_MAIN), 1,500 max tokens, strict JSON (unique candidate codes). Any unusable reply, AI error or rate limit: search order with notice, ai_ranked false.
-- (T15.4) The plan's "JSON schema" is enforced by pydantic on the reply, not by an API schema feature.
-- (T15.4) Response `checks` = engine CheckResult. Decimal values serialise as strings (pydantic v2 default).
-- (T15.4) The embedder loads on first use (fastembed in a thread) and is kept on app.state.soc_embedder; tests set a fake there. A failure gives 503 SOC_SEARCH_UNAVAILABLE.
-- (T15.5) Endpoint order: AI on (409), size (10 MB, 413), empty (422), PDF or DOCX by name (422), magic bytes (415), virus scan through app.state.files.scanner (422 infected, 503 scan down), readable text (422), SOC code exists (404), Claude (502 if the reply is unusable: no fallback, the feature is AI-only). The CV is held in memory only; nothing is stored.
-- (T15.5) Quotes: every evidence quote must appear in the cleaned CV (case and spacing folded). Quotes that do not are dropped, not shown.
-- (T15.5) Phone rule: a leading + with 8-13 digits, or a UK national number of 10-11 digits starting 0. A 12-digit CV date range is not treated as a phone number.
-- (T15.5) Street rule: a house number, up to three capitalised words, then a street type on the same line. green, row and view are left out.
+- (T16.6) Only `deletion_code` moved to the app mailer (sent after commit); the other three deletion notices stay as outbox rows in the same transaction.
+- (P16, owner) No Stripe test keys yet: Stripe E2E parked in leftover.md L1; the P16 gate continues without it. No mocked run is counted as the test-mode E2E.
+- (P16) Heading fix: page-level cards use `headingLevel={2}`; cards inside the "Choose a plan" h2 section keep h3.
 
 ## Owner actions needed
-- None for T15.5. Reminder: the AI features need ANTHROPIC_API_KEY (the CV match is hidden without it).
+- When you have Stripe test keys: put them in `.env` (names in leftover.md L1) and tell an agent to do leftover.md L1. Not blocking.
+- Confirm (from T16.3/T16.4): 10-year plans cannot be cancelled in-app after 14 days; bank numbers and sort codes are left out of the export; the export e-mail link needs a signed-in session.

@@ -56,12 +56,12 @@ test("the card, the groups and the counts are there, and the lookup is off witho
   await expect(page.getByRole("region", { name: "Your company" })).toContainText(
     "Harbourside Care",
   );
-  await expect(page.getByRole("region", { name: "Your company" })).toContainText("Free plan");
+  await expect(page.getByRole("region", { name: "Your company" })).toContainText("1 year plan");
   await expect(page.getByRole("main").getByRole("link", { name: /User access/ })).toContainText(
     "1 person",
   );
   await expect(page.getByRole("main").getByRole("link", { name: /Billing/ })).toContainText(
-    "Free plan",
+    "1 year plan",
   );
   await page.getByRole("button", { name: /^Details/ }).click();
   const sheet = page.getByRole("dialog", { name: "Company details" });

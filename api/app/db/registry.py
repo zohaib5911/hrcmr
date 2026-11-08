@@ -9,14 +9,17 @@ from __future__ import annotations
 import app.ai.models
 import app.modules.attendance.models
 import app.modules.audit.models
+import app.modules.billing.models
 import app.modules.companies.models
 import app.modules.compliance.dossier_models
 import app.modules.compliance.models
 import app.modules.compliance.reminder_models
 import app.modules.dashboard.models
+import app.modules.deletion.models
 import app.modules.documents.models
 import app.modules.email.models
 import app.modules.employees.models
+import app.modules.exports.models
 import app.modules.files.models
 import app.modules.holidays.models
 import app.modules.identity.models
