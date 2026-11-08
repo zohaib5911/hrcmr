@@ -476,6 +476,34 @@ Checks:
 
 - `weekdays_off <@ ARRAY[1,2,3,4,5,6,7] AND array_position(weekdays_off, NULL) IS NULL`
 
+## `deletion_requests`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `requested_by` | UUID | yes |  | references `users` |
+| `code_hash` | VARCHAR(64) | yes |  |  |
+| `code_expires_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `code_attempts` | SMALLINT | no | `0` |  |
+| `confirmed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `scheduled_for` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `withdrawn_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `withdrawn_by` | UUID | yes |  | references `users` |
+| `export_requested` | BOOLEAN | no | `false` |  |
+| `export_id` | UUID | yes |  |  |
+| `completed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
+Checks:
+
+- `(confirmed_at is null) = (scheduled_for is null)`
+- `code_attempts between 0 and 10`
+- `completed_at is null or (confirmed_at is not null and withdrawn_at is null)`
+
 ## `departments`
 
 | Column | Type | Null | Default | Notes |

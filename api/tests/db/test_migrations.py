@@ -32,6 +32,7 @@ IDENTITY_TABLES = [
     "courses",
     "data_exports",
     "day_off_patterns",
+    "deletion_requests",
     "departments",
     "designations",
     "dossier_links",
@@ -114,6 +115,7 @@ IDENTITY_FUNCTIONS = {
     "leave_year_end_immutable",
     "policy_documents_frozen",
     "policy_acceptances_frozen",
+    "app_purge_allowed",
 }
 
 
