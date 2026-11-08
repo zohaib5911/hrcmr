@@ -130,6 +130,9 @@ def upgrade() -> None:
     enable_tenant_rls("deletion_requests", privileges=("SELECT", "INSERT", "UPDATE"))
     add_updated_at_trigger("deletion_requests")
 
+    # PURGE_FUNCTION and the names in GUARDED are module constants (OWNER_ROLE and fixed table
+    # and trigger names), never input; these are DDL statements, so they cannot be parameterised.
+    # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
     op.execute(PURGE_FUNCTION)
     for trigger, table, function, events in GUARDED:
         for statement in _split(trigger, table, function, events):
@@ -137,8 +140,11 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
+    # Same reasoning as upgrade(): the names come from the GUARDED constant, never from input.
     for trigger, table, function, events in GUARDED:
+        # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
         op.execute(f"DROP TRIGGER {trigger}_delete ON {table}")
+        # nosemgrep: python.lang.security.audit.formatted-sql-query.formatted-sql-query, python.sqlalchemy.security.sqlalchemy-execute-raw-query.sqlalchemy-execute-raw-query
         op.execute(f"DROP TRIGGER {trigger} ON {table}")
         op.execute(
             f"CREATE TRIGGER {trigger} BEFORE {events} OR DELETE ON {table} "

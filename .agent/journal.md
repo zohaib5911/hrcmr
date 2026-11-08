@@ -385,3 +385,5 @@
 2026-11-08 09:24 | Claude (Haiku) | P16 | R7 1b done: full web e2e 436 passed, 200 skipped, exit 0; phase 16 summary written in PROGRESS | next: Stripe E2E BLOCKED (owner keys); gate not ticked, PR held
 2026-11-08 04:43 | Claude (Opus) | P16 | owner has no Stripe test keys: Stripe E2E parked in leftover.md L1; P16 left = PR dev -> main | next small model: R7 step 4
 2026-11-08 09:45 | Claude (Haiku) | P16 | start R7 step 4: main has no non-merge commits dev lacks (stale merges only); opening PR dev -> main | next: gh pr create, watch checks
+2026-11-08 09:51 | Claude (Haiku) | P16 | PR 25 Semgrep red: 6 blocking findings in 0047 migration (DDL from constants); added reasoned nosemgrep (as 0040/0041); ruff ok; local CI-equivalent scan running | next: verify rc=0, push fix, watch checks
+2026-11-08 09:52 | Claude (Haiku) | P16 | Semgrep local CI-equivalent scan rc=0 after 0047 nosemgrep fix (ruff ok) | next: push, re-watch PR 25 checks
