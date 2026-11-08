@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import uuid  # noqa: TC003  (pydantic reads the field types at runtime)
 from datetime import datetime  # noqa: TC003  (pydantic reads the field types at runtime)
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -272,3 +273,19 @@ class AuditLogRow(BaseModel):
 class AuditLogOut(BaseModel):
     items: list[AuditLogRow]
     total: int
+
+
+class JobFailureRow(BaseModel):
+    id: uuid.UUID
+    created_at: datetime
+    job: str  # the job's name
+    detail: dict[str, Any]  # the run's try number, error kind and seconds; never its arguments
+
+
+class JobFailuresOut(BaseModel):
+    items: list[JobFailureRow]
+    total: int
+
+
+class JobQueueOut(BaseModel):
+    waiting: int

@@ -26,6 +26,7 @@ from app.modules.platform_admin import (
     companies,
     contact,
     flags,
+    jobs,
     metrics,
     queues,
     terms,
@@ -47,6 +48,8 @@ from app.modules.platform_admin.schemas import (
     FeatureFlagIn,
     FeatureFlagRow,
     FeatureFlagsOut,
+    JobFailuresOut,
+    JobQueueOut,
     MetricsOut,
     OptionalReasonIn,
     ReasonIn,
@@ -383,6 +386,20 @@ async def export_platform_audit(
             "Cache-Control": "no-store",
         },
     )
+
+
+@router.get("/platform/jobs/failures", response_model=JobFailuresOut)
+async def list_job_failures(
+    access: Reader,
+    limit: Annotated[int, Query(ge=1, le=jobs.PAGE_MAX)] = 50,
+    offset: Annotated[int, Query(ge=0, le=100_000)] = 0,
+) -> JobFailuresOut:
+    return await jobs.failures(access.db, limit=limit, offset=offset)
+
+
+@router.get("/platform/jobs/queue", response_model=JobQueueOut)
+async def job_queue(request: Request, access: Reader) -> JobQueueOut:
+    return JobQueueOut(waiting=await jobs.waiting(request.app.state.auth.redis))
 
 
 @router.get("/platform/users", response_model=UsersOut)
