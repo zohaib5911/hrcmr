@@ -28,6 +28,7 @@ State: IN PROGRESS — AUDIT-3 fixes (changesneeded.md C3.1.1 to C3.1.16), small
 ## Strategy / decisions taken
 - Fix one changesneeded item per commit, then one `chore(audit)` commit that ticks it with the fix commit's sha.
 - C3.1.1: a 10-year refund ends the plan in the same step as `_refunded()` (plan free, status refunded, ends now); annual refunds stay as they are.
+- C3.1.2 (replaces owner answer 7's "forwards Set-Cookie"): the session start is made by the browser. `/session` is a server page rendering `components/platform/session-start.tsx`, which calls the API with `createApiClient` (no enrolment redirect, so a refusal reaches `/session-required`). The layout lets `/session` through. The cookie is set on the shared `.<domain>`, so the admin host sees it.
 
 ## Owner actions needed
 - None for the audit fixes. Before Phase 23: leftover.md L1 (Stripe test keys).
