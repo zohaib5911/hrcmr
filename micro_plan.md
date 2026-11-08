@@ -367,7 +367,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Steps:** step-up required; worker builds zip (CSV per tenant table + documents) to private storage; e-mail link valid 7 days; `GET /companies/me/exports/{id}`.
 - **Done when:** export contains only the requesting company's rows (test with two tenants); no step-up → refused.
 
-### [ ] T16.5 · B · Delete account (purge executor deletes all tenant data — big model only)
+### [x] T16.5 · B · Delete account (purge executor deletes all tenant data — big model only)
 
 ### [ ] P16 · S · Phase 16 gate
 - Recipe R7 + Stripe test-mode E2E (both plans, refund, cancel, failed payment, webhook replay). Needs owner's Stripe **test** keys in `.env`; if missing → BLOCKED with owner action.
