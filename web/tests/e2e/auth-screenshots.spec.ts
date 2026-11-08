@@ -10,6 +10,7 @@ import path from "node:path";
 import { expect, test } from "@playwright/test";
 
 import { PAGES, answerApi } from "../support/auth-screens";
+import { createSignedInAdmin, newAccount } from "../support/accounts";
 
 const OUT = path.resolve(__dirname, "../../../docs/screenshots/phase-3");
 const SIZES = [
@@ -60,6 +61,8 @@ for (const colorScheme of ["light", "dark"] as const) {
 
     for (const size of SIZES) {
       test(`the signed-in dashboard (${size.name})`, async ({ page }) => {
+        // A free company of its own, to show the free-plan banner (the shared account is paid).
+        await createSignedInAdmin(page.request, newAccount(), { plan: "free" });
         await page.setViewportSize({ width: size.width, height: size.height });
         await page.goto("/dashboard");
         await expect(page.getByRole("heading", { level: 1, name: "Dashboard" })).toBeVisible();

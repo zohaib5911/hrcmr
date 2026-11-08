@@ -17,8 +17,9 @@ from pathlib import Path
 
 import uvicorn
 from arq.worker import Worker
-from fastapi import FastAPI
+from fastapi import Body, FastAPI
 from redis import Redis
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.pool import NullPool
 
@@ -123,6 +124,30 @@ async def _soc_reference(owner_url: str) -> None:
         await engine.dispose()
 
 
+def _plan_route(app: FastAPI, owner_url: str) -> None:
+    """Test-only: put the company of the account with this e-mail on a paid plan, as Stripe's webhook
+    would. A new sign-up is on the free plan, which is read-only (T16.2); the browser tests that write
+    use a paid account (web/tests/support/accounts.ts), and the free-plan tests keep a free one."""
+
+    async def paid_plan(email: str = Body(embed=True)) -> dict[str, int]:
+        engine = engine_for(owner_url, poolclass=NullPool)
+        try:
+            async with engine.begin() as c:
+                changed = await c.execute(
+                    text(
+                        "update companies set plan = 'annual', subscription_status = 'active' "
+                        "where id in (select m.company_id from memberships m "
+                        "join users u on u.id = m.user_id where u.email = :e)"
+                    ),
+                    {"e": email},
+                )
+        finally:
+            await engine.dispose()
+        return {"companies": changed.rowcount}
+
+    app.add_api_route("/api/v1/e2e/paid-plan", paid_plan, methods=["POST"])
+
+
 def main() -> None:
     configure_logging()
     with temporary_database() as database:
@@ -157,6 +182,7 @@ def main() -> None:
             settings, mailer=DirectMailer(SmtpTransport(SMTP_HOST, SMTP_PORT), settings)
         )
         app.state.soc_embedder = _fake_embed
+        _plan_route(app, database.owner_url)
         original_lifespan = app.router.lifespan_context
 
         @asynccontextmanager
