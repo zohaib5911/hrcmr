@@ -1,5 +1,6 @@
-import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+// @vitest-environment jsdom
+import { cleanup, render } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ComparisonTemplate } from "@/components/marketing/comparison-template";
 import { comparisonDrafts } from "./comparison-drafts";
@@ -18,10 +19,13 @@ import CompetitorPage, {
 } from "@/app/(marketing)/vs/[competitor]/page";
 
 describe("unpublished comparison templates", () => {
+  afterEach(cleanup);
+
   for (const [key, draft] of Object.entries(comparisonDrafts)) {
     it(`renders the ${key} evidence worksheet without prices or product claims`, () => {
-      const html = renderToStaticMarkup(<ComparisonTemplate draft={draft} />);
-      expect(html).toContain(draft.title.replaceAll("&", "&amp;"));
+      const { container, getByRole } = render(<ComparisonTemplate draft={draft} />);
+      const html = container.innerHTML;
+      expect(getByRole("heading", { level: 1 }).textContent).toBe(draft.title);
       expect(html).toContain("DRAFT — unpublished; owner approval required");
       expect(html).toContain("Public pricing source URL");
       expect(html).toContain("Date checked");
