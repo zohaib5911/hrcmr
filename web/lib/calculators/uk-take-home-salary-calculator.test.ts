@@ -72,6 +72,73 @@ describe("take-home salary calculator", () => {
     );
   });
 
+  // Hand-worked: £30,000 times the code's flat rate, without an allowance.
+  // Code meanings: GOV.UK /tax-codes/what-your-tax-code-means;
+  // percentages: GOV.UK /guidance/rates-and-thresholds-for-employers-2026-to-2027.
+  it.each([
+    ["england", "BR", 6000],
+    ["england", "D0", 12000],
+    ["england", "D1", 13500],
+    ["wales", "BR", 6000],
+    ["wales", "CBR", 6000],
+    ["wales", "D0", 12000],
+    ["wales", "CD0", 12000],
+    ["wales", "D1", 13500],
+    ["wales", "CD1", 13500],
+    ["scotland", "BR", 6000],
+    ["scotland", "SBR", 6000],
+    ["scotland", "SD0", 6300],
+    ["scotland", "SD1", 12600],
+    ["scotland", "SD2", 13500],
+    ["scotland", "SD3", 14400],
+    ["england", "NT", 0],
+    ["wales", "NT", 0],
+    ["scotland", "NT", 0],
+  ] as const)("maps %s code %s explicitly", (region, taxCode, tax) => {
+    expect(get({ ...base, region, taxCode }, "Income tax")).toBe(-tax);
+  });
+
+  it.each([
+    ["england", "0T", 6000],
+    ["wales", "C0T", 6000],
+    ["scotland", "S0T", 6090.77],
+  ] as const)("uses no allowance for %s %s", (region, taxCode, tax) => {
+    expect(get({ ...base, region, taxCode }, "Income tax")).toBe(-tax);
+  });
+
+  it.each([
+    ["england", "SBR"],
+    ["england", "CD0"],
+    ["england", "SD1"],
+    ["england", "S1257L"],
+    ["england", "C0T"],
+    ["wales", "S0T"],
+    ["wales", "SD1"],
+    ["wales", "CD2"],
+    ["scotland", "CD1"],
+    ["scotland", "D0"],
+    ["scotland", "D1"],
+    ["scotland", "SD4"],
+    ["scotland", "SNT"],
+    ["scotland", "SAUTO"],
+    ["england", "1257L W1"],
+    ["england", "1257L M1"],
+    ["england", "1257LX"],
+    ["england", "1257Y"],
+    ["england", "D2"],
+  ] as const)("rejects unsupported %s code %s", (region, taxCode) => {
+    expect(calculateTakeHome({ ...base, region, taxCode })).toBeNull();
+  });
+
+  it("preserves regional numeric codes, normalization and other-jobs basic rate", () => {
+    expect(get({ ...base, region: "scotland", taxCode: "S1000L" }, "Income tax")).toBe(
+      get({ ...base, region: "scotland", taxCode: "1000L" }, "Income tax"),
+    );
+    expect(get({ ...base, region: "wales", taxCode: "C1000L" }, "Income tax")).toBe(-3998.2);
+    expect(get({ ...base, region: "scotland", taxCode: " sd1 " }, "Income tax")).toBe(-12600);
+    expect(get({ ...base, region: "scotland", otherJobs: true }, "Income tax")).toBe(-6000);
+  });
+
   it("rejects invalid input", () => {
     expect(calculateTakeHome({ ...base, salary: 0 })).toBeNull();
     expect(calculateTakeHome({ ...base, taxCode: "ZZ" })).toBeNull();

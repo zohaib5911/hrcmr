@@ -91,7 +91,7 @@ export function UkTakeHomeSalaryCalculator() {
           setError(
             calculated
               ? null
-              : "Check your answers: enter a salary above zero, a valid tax code (such as 1257L, BR, D0 or auto) and percentages from 0 to 100.",
+              : "Check your answers: enter a salary above zero, a supported tax code for your region (such as 1257L, BR, D0, SD1 or auto) and percentages from 0 to 100.",
           );
         }}
       >
@@ -108,7 +108,7 @@ export function UkTakeHomeSalaryCalculator() {
         {field("salary", "Annual salary (£)")}
         <TextField
           label="Tax code"
-          hint="Type auto to use the standard allowance."
+          hint="Type auto for the standard allowance. Scottish non-basic flat codes use SD0–SD3. S/C prefixes must match your region. Emergency codes are not supported."
           clearable={false}
           value={form.taxCode}
           onChange={(event) => update("taxCode", event.target.value)}

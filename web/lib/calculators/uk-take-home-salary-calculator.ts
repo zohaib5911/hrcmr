@@ -1,5 +1,6 @@
 import income from "@/rates/income-tax.json";
 import payroll from "@/rates/payroll-2026-27.json";
+import taxCodes from "@/rates/tax-codes-2026-27.json";
 
 export type Region = "england" | "scotland" | "wales";
 export type PensionMethod = "none" | "net_pay" | "salary_sacrifice" | "relief_at_source";
@@ -30,7 +31,7 @@ export type TakeHomeResult = {
 
 const V = payroll.values;
 
-export const takeHomeSources = [payroll, income].map((file) => ({
+export const takeHomeSources = [payroll, income, taxCodes].map((file) => ({
   title: file.title,
   url: file.source_url,
   checkedOn: file.checked_on,
@@ -82,20 +83,26 @@ function taxOnBands(taxable: number, bands: Band[], bandShift: number) {
 function parseCode(
   code: string,
   income: number,
-): { allowance: number } | { flat: "BR" | "D0" | "D1" | "NT" } | null {
-  const clean = code.trim().toUpperCase().replace(/^[SC]/, "");
+  region: Region,
+): { allowance: number } | { rate: number } | null {
+  let clean = code.trim().toUpperCase();
   if (clean === "AUTO" || clean === "") {
     const reduction =
       Math.max(0, income - income_values.allowance_taper_start_adjusted_net_income) *
       income_values.allowance_reduction_per_pound_over_threshold;
     return { allowance: Math.max(0, V.personal_allowance_annual - reduction) };
   }
-  if (clean === "BR" || clean === "D0" || clean === "D1" || clean === "NT") {
-    return { flat: clean };
+  const rates: Record<string, number> = taxCodes.values.flat_rates[region];
+  if (Object.hasOwn(rates, clean)) return { rate: rates[clean]! };
+  if (/^[SC]/.test(clean)) {
+    const prefix = region === "scotland" ? "S" : region === "wales" ? "C" : null;
+    if (!prefix || !clean.startsWith(prefix)) return null;
+    clean = clean.slice(1);
   }
+  if (clean === "0T") return { allowance: 0 };
   const k = /^K(\d{1,4})$/.exec(clean);
   if (k) return { allowance: -Number(k[1]) * 10 };
-  const match = /^(\d{1,4})[LMNTY]$/.exec(clean);
+  const match = /^(\d{1,4})[LMNT]$/.exec(clean);
   if (match) return { allowance: Number(match[1]) * 10 + 9 };
   return null;
 }
@@ -117,15 +124,12 @@ export function calculateTakeHome(input: TakeHomeInput): TakeHomeResult | null {
   const grossPay = salary - sacrifice; // pay subject to NI and loans
   const taxablePay = Math.max(0, grossPay - netPay + benefits);
 
-  const parsed = parseCode(input.otherJobs ? "BR" : input.taxCode, taxablePay);
+  const parsed = parseCode(input.otherJobs ? "BR" : input.taxCode, taxablePay, input.region);
   if (!parsed) return null;
   const bands = BANDS[input.region];
   let tax = 0;
-  if ("flat" in parsed) {
-    const higher = bands[bands.length - 3]?.rate ?? 0.4;
-    const top = bands[bands.length - 1]?.rate ?? 0.45;
-    const rate = { BR: bands[0]?.rate ?? 0.2, D0: higher, D1: top, NT: 0 }[parsed.flat];
-    tax = taxablePay * rate;
+  if ("rate" in parsed) {
+    tax = taxablePay * parsed.rate;
   } else {
     // A negative (K code) allowance increases taxable pay.
     tax = taxOnBands(Math.max(0, taxablePay - parsed.allowance), bands, 0);
