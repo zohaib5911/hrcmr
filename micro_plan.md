@@ -455,7 +455,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T19.2 · S! · Calculator 1: right-to-work-october-2026-checker (+ build the shared calculator template)
 ### [x] T19.3 · S! · Calculator 2: sponsor-licence-cost-calculator
 ### [x] T19.4 · S! · Calculator 3: sponsor-reporting-deadline-calculator (reuse the working-day logic semantics from `api/tests/test_working_days.py`)
-### [ ] T19.5 · S! · Calculator 4: skilled-worker-visa-checker (SOC data via public SOC API, no AI)
+### [x] T19.5 · S! · Calculator 4: skilled-worker-visa-checker (SOC data via public SOC API, no AI)
 ### [x] T19.6 · S! · Calculator 5: ilr-citizenship-checker
 ### [x] T19.7 · S! · Calculator 6: skilled-worker-ilr-salary-calculator
 ### [x] T19.8 · S! · Calculator 7: holiday-entitlement-calculator
