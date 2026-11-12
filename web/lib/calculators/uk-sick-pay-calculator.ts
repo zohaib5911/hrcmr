@@ -1,5 +1,6 @@
 import sickChanges from "@/rates/sick-changes.json";
 import sickEligibility from "@/rates/sick-eligibility.json";
+import payroll from "@/rates/payroll-2026-27.json";
 import sickPay from "@/rates/sick-pay.json";
 
 export type SickPayInput = {
@@ -8,6 +9,7 @@ export type SickPayInput = {
   endDate: string; // YYYY-MM-DD, last day of sickness absence (inclusive)
   qualifyingDays: number[]; // Weekdays worked normally, 0 = Sunday … 6 = Saturday
   weeklyEarnings: number; // Average weekly earnings over the 8-week reference period
+  workedPartOfFirstDay: boolean; // A worked part-day is not a full day of sickness, so is not paid
 };
 export type SickPayWeek = {
   week: number;
@@ -16,7 +18,7 @@ export type SickPayWeek = {
   payableDays: number;
   amount: number;
 };
-export const sickPaySources = [sickPay, sickChanges, sickEligibility].map((source) => ({
+export const sickPaySources = [payroll, sickPay, sickChanges, sickEligibility].map((source) => ({
   title: source.title,
   url: source.source_url,
   checkedOn: source.checked_on,
@@ -31,6 +33,15 @@ const parse = (value: string) => {
 };
 const iso = (date: Date) => date.toISOString().slice(0, 10);
 const addDays = (date: Date, days: number) => new Date(date.getTime() + days * 86_400_000);
+const rateYearEnd = new Date(`${payroll.valid_to}T00:00:00Z`);
+/**
+ * HMRC's 2026–27 SSP payment table (payroll-2026-27.json) pays the unrounded daily rate
+ * × days, rounded up to the next penny (e.g. 7 qualifying days, 2 days = £35.22; 6 days,
+ * 4 days = £82.17). The SSP manual's prose example rounds the daily rate first (£82.16);
+ * we follow the dated payment table. Whole pennies avoid floating-point drift.
+ */
+const partWeekPay = (weeklyPence: number, days: number, qualifying: number) =>
+  Math.ceil((weeklyPence * days) / qualifying) / 100;
 
 /** SSP under the rules for absences starting on or after the reform commencement date. */
 export function calculateSickPay(input: SickPayInput) {
@@ -54,6 +65,10 @@ export function calculateSickPay(input: SickPayInput) {
     throw new Error(
       "This calculator only covers absences starting on or after 6 April 2026. Earlier absences follow the old rules (waiting days and lower earnings limit); check GOV.UK.",
     );
+  if (end > rateYearEnd)
+    throw new Error(
+      "This calculator only has verified SSP rates for 6 April 2026 to 5 April 2027. Enter a last day on or before 5 April 2027, or check GOV.UK for later rates.",
+    );
   if (input.employeeStatus === "other")
     return {
       eligible: false as const,
@@ -69,26 +84,26 @@ export function calculateSickPay(input: SickPayInput) {
 
   const v = sickPay.values;
   const weeklyRate = money(
-    Math.min(v.weekly_cap, input.weeklyEarnings * v.average_weekly_earnings_rate),
+    Math.min(payroll.values.ssp_weekly_cap, input.weeklyEarnings * v.average_weekly_earnings_rate),
   );
+  const weeklyPence = Math.round(weeklyRate * 100);
   const dailyRate = weeklyRate / days.length;
   const maxDays = v.maximum_weeks * days.length;
   const weeks: SickPayWeek[] = [];
   let paid = 0;
   let maxReached = false;
-  for (let offset = 0, week = 1; addDays(start, offset) <= end; offset += 7, week += 1) {
+  // SSP weeks run Sunday to Saturday; the first and last rows can be part weeks.
+  let weekStart = input.workedPartOfFirstDay ? addDays(start, 1) : start;
+  for (let week = 1; weekStart <= end; week += 1) {
     let payable = 0;
-    const weekStart = addDays(start, offset);
     let weekEnd = weekStart;
-    for (let i = 0; i < 7 && addDays(weekStart, i) <= end; i += 1) {
-      const day = addDays(weekStart, i);
+    for (let day = weekStart; day <= end; day = addDays(day, 1)) {
       weekEnd = day;
-      if (!days.includes(day.getUTCDay())) continue;
-      if (paid + payable >= maxDays) {
-        maxReached = true;
-        continue;
+      if (days.includes(day.getUTCDay())) {
+        if (paid + payable >= maxDays) maxReached = true;
+        else payable += 1;
       }
-      payable += 1;
+      if (day.getUTCDay() === 6) break;
     }
     paid += payable;
     weeks.push({
@@ -96,8 +111,9 @@ export function calculateSickPay(input: SickPayInput) {
       from: iso(weekStart),
       to: iso(weekEnd),
       payableDays: payable,
-      amount: money(payable * dailyRate),
+      amount: partWeekPay(weeklyPence, payable, days.length),
     });
+    weekStart = addDays(weekEnd, 1);
   }
   return {
     eligible: true as const,

@@ -12,6 +12,7 @@ const initial = {
   startDate: "",
   endDate: "",
   weeklyEarnings: "",
+  workedPartOfFirstDay: false,
   days: [1, 2, 3, 4, 5],
 };
 const gbp = (amount: number) =>
@@ -43,6 +44,7 @@ export function SickPayCalculator() {
                 endDate: form.endDate,
                 qualifyingDays: form.days,
                 weeklyEarnings: Number(form.weeklyEarnings),
+                workedPartOfFirstDay: form.workedPartOfFirstDay,
               } as SickPayInput),
             );
             setError(null);
@@ -68,6 +70,14 @@ export function SickPayCalculator() {
           value={form.startDate}
           onChange={(event) => update("startDate", event.target.value)}
         />
+        <label className="text-callout text-label flex items-center gap-2">
+          <input
+            type="checkbox"
+            checked={form.workedPartOfFirstDay}
+            onChange={(event) => update("workedPartOfFirstDay", event.target.checked)}
+          />
+          I worked part of the first day (it is not paid)
+        </label>
         <TextField
           label="Last day of sickness"
           type="date"
@@ -194,7 +204,9 @@ export function SickPayCalculator() {
         <p className="text-footnote text-label-secondary mt-5">
           For absences starting on or after 6 April 2026: SSP is paid from the first qualifying day
           with no waiting days and no lower earnings limit, at the lower of the weekly rate or 80%
-          of average weekly earnings, for up to 28 weeks. Part days are not payable.
+          of average weekly earnings, for up to 28 weeks. Part days are not payable. SSP weeks run
+          Sunday to Saturday; part weeks use HMRC&apos;s 2026 to 2027 payment table (unrounded daily
+          rate × days, rounded up to the penny). Covers absences up to 5 April 2027.
         </p>
         <p className="text-footnote text-label-secondary mt-3">
           Linked periods of sickness, SSP already paid, Statutory Maternity Pay, late notification
