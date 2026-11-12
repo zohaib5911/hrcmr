@@ -2,7 +2,7 @@
 Scope: f986a6c..0d1addd (C3.1.1–C3.1.16 fixes and regressions; Phase 18–20 additions excluded). Tests at audit: api incomplete (stalled at 42%, interrupted; no final p/f/s summary), RLS CLI passed; web unit 1255/0, e2e 473/0/220 skipped; CI latest dev run green.
 Counts: 1 P0 / 4 P1 / 1 P2. FIX NEEDED.
 
-### [ ] C3.2.1 · P0 · Make the required full API suite finish (from AUDIT-3) · B
+### [x] C3.2.1 · P0 · Make the required full API suite finish (from AUDIT-3) · B — fixed in PR #70
 - **Problem:** `cd api && uv run pytest -q` stopped advancing after 584 progress dots (42%, around the transition into `tests/db/test_soc_public.py`) for several minutes. Interrupt also stalled during pytest-asyncio runner teardown; process required SIGTERM. No final counts were produced. STATUS already notes a test-order problem involving architecture/OpenAPI collection, but the cause of this hang is unconfirmed.
 - **Fix:** reproduce with verbose test names and a bounded traceback timer (`pytest -vv -o faulthandler_timeout=120`); inspect fixture/background-task teardown around the stalled test and collection side effects in `tests/test_architecture.py` / `tests/test_openapi.py`. Correct the resource/task lifecycle or collection pollution found; do not skip tests, weaken assertions or split away tests merely to hide the required command's failure. Capture exact stalled test and cause in the PR.
 - **Done when:** `bash /home/zohaib/cmr_hr/.agent/bus.sh serial -- bash -c 'cd api && uv run pytest -q'` exits 0 with real counts and no hung teardown.
