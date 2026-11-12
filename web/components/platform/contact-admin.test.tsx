@@ -38,7 +38,7 @@ afterEach(() => {
 describe("ContactAdmin", () => {
   it("opens a message and marks it handled, which removes it from the not handled list", async () => {
     render(<ContactAdmin />);
-    expect(get.mock.calls[0]?.[1].params.query).toEqual({ handled: false });
+    expect(get.mock.calls[0]?.[1].params.query).toEqual({ limit: 50, offset: 0, handled: false });
     await userEvent.click(await screen.findByRole("button", { name: "Open" }));
     expect(screen.getByText("Do you do rotas?")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Mark handled" }));
@@ -51,5 +51,38 @@ describe("ContactAdmin", () => {
     get.mockResolvedValue({ data: { items: [], total: 0 } });
     render(<ContactAdmin />);
     expect(await screen.findByText("No messages.")).toBeInTheDocument();
+  });
+
+  it("pages past 50 messages and resets to the first page on a filter change", async () => {
+    get.mockResolvedValue({ data: { items: [message], total: 120 } });
+    render(<ContactAdmin />);
+    await screen.findByText("Sam Jones");
+    expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
+    await userEvent.click(screen.getByRole("button", { name: "Next" }));
+    await waitFor(() =>
+      expect(get.mock.calls.at(-1)?.[1].params.query).toEqual({
+        limit: 50,
+        offset: 50,
+        handled: false,
+      }),
+    );
+    await screen.findByText("Sam Jones");
+    await userEvent.selectOptions(screen.getByLabelText("Show"), "true");
+    await waitFor(() =>
+      expect(get.mock.calls.at(-1)?.[1].params.query).toEqual({
+        limit: 50,
+        offset: 0,
+        handled: true,
+      }),
+    );
+  });
+
+  it("shows an error when a later page fails", async () => {
+    get.mockResolvedValueOnce({ data: { items: [message], total: 120 } });
+    get.mockResolvedValueOnce({ error: { code: "SERVER", message: "Page failed" } });
+    render(<ContactAdmin />);
+    await screen.findByText("Sam Jones");
+    await userEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(await screen.findByText("Page failed")).toBeInTheDocument();
   });
 });
