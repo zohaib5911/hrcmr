@@ -1,13 +1,14 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { CalculatorTemplate } from "@/components/calculators/calculator-template";
 import { RedundancyPayCalculator } from "@/components/calculators/uk-redundancy-pay-calculator";
 import { redundancySources } from "@/lib/calculators/uk-redundancy-pay-calculator";
 
-export const metadata: Metadata = {
-  title: "UK redundancy pay calculator",
-  description:
-    "Estimate statutory redundancy pay in Great Britain or Northern Ireland with age bands, completed service and capped weekly pay.",
-};
+export const metadata: Metadata = pageMetadata(
+  "/resources/tools/uk-redundancy-pay-calculator",
+  "UK redundancy pay calculator",
+  "Estimate statutory redundancy pay in Great Britain or Northern Ireland with age bands, completed service and capped weekly pay.",
+);
 
 export default function Page() {
   return (
