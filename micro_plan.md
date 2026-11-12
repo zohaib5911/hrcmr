@@ -432,7 +432,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [ ] T18.3 · S · SEO and Lighthouse ≥ 95
 - **Spec:** plan L1223–1228, L1474. Metadata, OG images, JSON-LD, sitemap, robots; analytics only after consent.
 
-### [ ] T18.4 · S · Comparison page templates (unpublished)
+### [x] T18.4 · S · Comparison page templates (unpublished)
 - **Spec:** plan L1216. Templates only, unpublished by default; no competitor prices typed in.
 
 ### [ ] P18 · S · Phase 18 gate
