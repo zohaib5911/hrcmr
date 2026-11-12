@@ -12,7 +12,7 @@ from datetime import date  # noqa: TC003  (pydantic reads the field types at run
 from statistics import median
 from typing import Annotated
 
-from fastapi import APIRouter, Path, Query, Request
+from fastapi import APIRouter, Depends, Path, Query, Request
 from pydantic import BaseModel, EmailStr, StringConstraints
 from sqlalchemy import func, select
 
@@ -32,7 +32,25 @@ from app.modules.register.models import (
     Sponsor,
 )
 
-router = APIRouter(prefix="/public/register", tags=["public-register"])
+READ_PER_CONNECTION = ("public.register.read", 120, 60)  # page reads, per minute
+
+
+async def _limit_reads(request: Request) -> None:
+    name, limit, window = READ_PER_CONNECTION
+    result = await RateLimiter(request.app.state.auth.redis).hit(
+        name, client_ip(request) or "unknown", limit=limit, window_seconds=window
+    )
+    if not result.allowed:
+        raise AppError(
+            "RATE_LIMITED",
+            "Too many requests from this connection. Try again later.",
+            status_code=429,
+        )
+
+
+router = APIRouter(
+    prefix="/public/register", tags=["public-register"], dependencies=[Depends(_limit_reads)]
+)
 REPORT_PER_CONNECTION = ("public.register.report", 5, 3600)  # reports, per hour
 SITEMAP_PAGE = 45_000
 BULLETIN_LIMIT = 500
