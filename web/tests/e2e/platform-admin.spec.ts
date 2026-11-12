@@ -36,3 +36,11 @@ test.describe("platform admin host", () => {
     ).toBeVisible();
   });
 });
+
+// C3.1.6: the admin host runs no client JavaScript here, so only the server-rendered page is checked.
+// Lock and unlock are covered by components/platform/users-admin.test.tsx with the API mocked.
+test("a platform owner opens the users page", async ({ page }) => {
+  await signInPlatformAdmin(page, "owner");
+  await page.goto(`${ADMIN_ORIGIN}/users`);
+  await expect(page.getByRole("heading", { level: 1, name: "Users" })).toBeVisible();
+});
