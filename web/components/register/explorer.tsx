@@ -10,7 +10,7 @@ import { REGIONS, RegionMap, type RegionCount } from "./region-map";
 type Data = components["schemas"]["ExploreOut"];
 type Sponsor = components["schemas"]["SponsorOut"];
 type Bucket = components["schemas"]["Bucket"];
-type Query = NonNullable<paths["/api/v1/public/register/explore"]["get"]["parameters"]["query"]>;
+type Query = NonNullable<paths["/public/register/explore"]["get"]["parameters"]["query"]>;
 type View = "Map" | "Trend" | "Table" | "List";
 const control =
   "bg-elevated border-separator text-label rounded-control min-h-11 w-full border px-3 py-2";
@@ -101,7 +101,13 @@ function SponsorList({ rows }: { rows: Sponsor[] }) {
   );
 }
 
-function HistoryChart({ points, trend = false }: { points: Data["timeline"]; trend?: boolean }) {
+function HistoryChart({
+  points,
+  trend = false,
+}: {
+  points: NonNullable<Data["timeline"]>;
+  trend?: boolean;
+}) {
   const peak = Math.max(1, ...points.map((p) => (trend ? p.count : Math.max(p.added, p.removed))));
   return (
     <figure className="min-w-0">
@@ -216,12 +222,12 @@ export function RegisterExplorer() {
     setQuery((current) => ({ ...current, page: 1, ...patch }));
   const selectedIndex = Math.max(
     0,
-    data?.publications.findIndex((p) => p.id === data.selected?.id) ?? 0,
+    data?.publications?.findIndex((p) => p.id === data.selected?.id) ?? 0,
   );
   const counts: Record<string, RegionCount> = {};
   for (const region of REGIONS) {
-    const count = data?.sections.regions?.find((r) => r.label === region.name)?.count ?? 0;
-    const previous = data?.daily_previous_regions.find((r) => r.label === region.name)?.count ?? 0;
+    const count = data?.sections?.regions?.find((r) => r.label === region.name)?.count ?? 0;
+    const previous = data?.daily_previous_regions?.find((r) => r.label === region.name)?.count ?? 0;
     counts[region.name] = { count, delta: count - previous };
   }
   return (
@@ -262,7 +268,7 @@ export function RegisterExplorer() {
               onChange={(event) => update({ [key]: event.target.value })}
             >
               <option value="">All {label.toLowerCase()}</option>
-              {(data?.facets[key] ?? []).map((value) => (
+              {(data?.facets?.[key] ?? []).map((value) => (
                 <option key={value} value={value}>
                   {key === "industry" ? industryName(value) : value}
                 </option>
@@ -287,7 +293,7 @@ export function RegisterExplorer() {
             ? ""
             : !data?.selected
               ? "No register publications are available yet."
-              : `${number(data.total)} matching sponsors in the selected publication.`}
+              : `${number(data.total ?? 0)} matching sponsors in the selected publication.`}
       </div>
       {!loading && response?.error && (
         <div role="alert" className="space-y-3">
@@ -329,12 +335,12 @@ export function RegisterExplorer() {
               type="range"
               className="mt-2 w-full"
               min={0}
-              max={Math.max(0, data.publications.length - 1)}
+              max={Math.max(0, (data.publications?.length ?? 0) - 1)}
               step={1}
               value={selectedIndex}
-              disabled={data.publications.length < 2}
+              disabled={(data.publications?.length ?? 0) < 2}
               onChange={(event) =>
-                update({ publication_id: data.publications[Number(event.target.value)]?.id })
+                update({ publication_id: data.publications?.[Number(event.target.value)]?.id })
               }
             />
           </label>
@@ -351,9 +357,9 @@ export function RegisterExplorer() {
             <CardHeader title="Then and now" headingLevel={2} />
             <CardBody>
               <p className="text-title-2 tabular-nums">
-                {number(data.previous_total)} → {number(data.total)} sponsors{" "}
+                {number(data.previous_total ?? 0)} → {number(data.total ?? 0)} sponsors{" "}
                 <span className="text-label-secondary">
-                  ({signed(data.total - data.previous_total)})
+                  ({signed((data.total ?? 0) - (data.previous_total ?? 0))})
                 </span>
               </p>
               <p className="text-footnote mt-2">
@@ -365,7 +371,7 @@ export function RegisterExplorer() {
           <Card>
             <CardHeader title="Register pulse" headingLevel={2} />
             <CardBody>
-              <HistoryChart points={data.timeline} />
+              <HistoryChart points={data.timeline ?? []} />
             </CardBody>
           </Card>
           <div role="group" aria-label="Register view" className="flex flex-wrap gap-2">
@@ -391,7 +397,8 @@ export function RegisterExplorer() {
                       <div className="flex justify-between gap-3" key={r.name}>
                         <dt>{r.name}</dt>
                         <dd>
-                          {number(counts[r.name].count)} ({signed(counts[r.name].delta ?? 0)})
+                          {number(counts[r.name]?.count ?? 0)} ({signed(counts[r.name]?.delta ?? 0)}
+                          )
                         </dd>
                       </div>
                     ))}
@@ -402,7 +409,7 @@ export function RegisterExplorer() {
                 </div>
               </div>
             )}
-            {view === "Trend" && <HistoryChart points={data.timeline} trend />}
+            {view === "Trend" && <HistoryChart points={data.timeline ?? []} trend />}
             {view === "Table" && (
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-subheadline">
@@ -419,7 +426,7 @@ export function RegisterExplorer() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.results.map((s) => (
+                    {data.results?.map((s) => (
                       <tr key={s.id} className="border-separator border-t">
                         <th scope="row" className="p-3">
                           {s.name}
@@ -434,7 +441,7 @@ export function RegisterExplorer() {
                 </table>
               </div>
             )}
-            {view === "List" && <SponsorList rows={data.results} />}
+            {view === "List" && <SponsorList rows={data.results ?? []} />}
             {data.total === 0 && (
               <p className="mt-4">
                 No sponsors match these filters. Try a broader search or reset filters.
@@ -445,18 +452,19 @@ export function RegisterExplorer() {
             <nav aria-label="Sponsor result pages" className="flex flex-wrap items-center gap-3">
               <Button
                 variant="gray"
-                disabled={data.page <= 1}
-                onClick={() => update({ page: data.page - 1 })}
+                disabled={(data.page ?? 1) <= 1}
+                onClick={() => update({ page: (data.page ?? 1) - 1 })}
               >
                 Previous page
               </Button>
               <span>
-                Page {data.page} of {Math.max(1, Math.ceil(data.total / data.page_size))}
+                Page {data.page} of{" "}
+                {Math.max(1, Math.ceil((data.total ?? 0) / (data.page_size ?? 50)))}
               </span>
               <Button
                 variant="gray"
-                disabled={data.page * data.page_size >= data.total}
-                onClick={() => update({ page: data.page + 1 })}
+                disabled={(data.page ?? 1) * (data.page_size ?? 50) >= (data.total ?? 0)}
+                onClick={() => update({ page: (data.page ?? 1) + 1 })}
               >
                 Next page
               </Button>
@@ -477,7 +485,7 @@ export function RegisterExplorer() {
               <Breakdown
                 key={key}
                 title={title}
-                rows={data.sections[key] ?? []}
+                rows={data.sections?.[key] ?? []}
                 industry={key === "industries"}
               />
             ))}
@@ -489,7 +497,7 @@ export function RegisterExplorer() {
               headingLevel={2}
             />
             <CardBody>
-              <SponsorList rows={data.newest} />
+              <SponsorList rows={data.newest ?? []} />
             </CardBody>
           </Card>
         </div>
