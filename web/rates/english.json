@@ -1,0 +1,162 @@
+{
+  "source_url": "https://www.gov.uk/skilled-worker-visa/knowledge-of-english",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "Skilled Worker visa: Knowledge of English - GOV.UK",
+  "content": [
+    {
+      "p": "You’ll usually need to prove your knowledge of the English language when you apply. You can prove it in one of the following ways, by:"
+    },
+    {
+      "li": "having a UK school qualification"
+    },
+    {
+      "li": "having a degree from a UK institution"
+    },
+    {
+      "li": "having a degree from an institution that was outside the UK and taught in English"
+    },
+    {
+      "li": "passing an English test from an approved provider"
+    },
+    {
+      "p": "If you have already proved your knowledge of English in a previous successful visa application, you may not have to prove it again."
+    },
+    {
+      "h2": "If you have a UK school qualification"
+    },
+    {
+      "p": "You can prove your knowledge of English if you have a qualification from a UK school that you began when you were under 18. You must have one of the following qualifications:"
+    },
+    {
+      "li": "a GCSE"
+    },
+    {
+      "li": "an A Level"
+    },
+    {
+      "li": "Scottish National Qualification level 4 or 5"
+    },
+    {
+      "li": "Scottish Higher or Advanced Higher in English"
+    },
+    {
+      "h2": "If you have a degree from a UK institution"
+    },
+    {
+      "p": "You can prove your knowledge of English if you have a degree-level qualification that was both:"
+    },
+    {
+      "li": "taught in English"
+    },
+    {
+      "li": "awarded by a UK institution, even if you studied outside the UK"
+    },
+    {
+      "h2": "If you have a degree from an institution outside the UK"
+    },
+    {
+      "p": "If your degree was taught in English and was not awarded by a UK institution, you’ll need to apply for an assessment from Ecctis ."
+    },
+    {
+      "p": "Ecctis will give you a code to confirm that your qualification is equivalent to a UK bachelor’s degree or higher and was taught in English."
+    },
+    {
+      "h2": "Passing an English test"
+    },
+    {
+      "p": "If you do not have any qualifications that prove your knowledge of English, you will need to pass a Secure English Language Test (SELT) with an approved provider."
+    },
+    {
+      "p": "You must prove you can read, write, speak and understand English to at least level B2 on the Common European Framework of Reference for Languages ( CEFR ) scale ."
+    },
+    {
+      "h3": "If you’re extending, updating or switching your visa"
+    },
+    {
+      "p": "If you had this visa before 8 January 2026 and you’re applying to extend or update it, you need level B1 English. You do not need to prove your knowledge of English again."
+    },
+    {
+      "p": "If you’re switching from a Health and Care Worker visa, you also do not need to provide proof again."
+    },
+    {
+      "p": "If you’re applying to switch from a different visa, you need level B2."
+    },
+    {
+      "h2": "Who does not need to prove their knowledge of English"
+    },
+    {
+      "p": "You do not need to prove your knowledge of English if you’re a national of one of the following countries or territories:"
+    },
+    {
+      "li": "Antigua and Barbuda"
+    },
+    {
+      "li": "Australia"
+    },
+    {
+      "li": "the Bahamas"
+    },
+    {
+      "li": "Barbados"
+    },
+    {
+      "li": "Belize"
+    },
+    {
+      "li": "the British overseas territories"
+    },
+    {
+      "li": "Canada"
+    },
+    {
+      "li": "Dominica"
+    },
+    {
+      "li": "Grenada"
+    },
+    {
+      "li": "Guyana"
+    },
+    {
+      "li": "Jamaica"
+    },
+    {
+      "li": "Malta"
+    },
+    {
+      "li": "New Zealand"
+    },
+    {
+      "li": "St Kitts and Nevis"
+    },
+    {
+      "li": "St Lucia"
+    },
+    {
+      "li": "St Vincent and the Grenadines"
+    },
+    {
+      "li": "Trinidad and Tobago"
+    },
+    {
+      "li": "USA"
+    },
+    {
+      "h3": "If you’re a doctor, dentist, nurse, midwife or vet"
+    },
+    {
+      "p": "You do not need to prove your knowledge of English if you’ve already passed an English Language assessment that is accepted by the relevant regulated professional body."
+    },
+    {
+      "p": "If you’re a vet, you may need to prove that you passed an English Language assessment with the Royal College of Veterinary Surgeons."
+    }
+  ],
+  "values": {
+    "new_applications_cefr": "B2",
+    "existing_before_date": "2026-01-08",
+    "existing_extensions_updates_cefr": "B1"
+  }
+}

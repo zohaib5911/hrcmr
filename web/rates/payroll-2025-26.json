@@ -1,0 +1,447 @@
+{
+  "source_url": "https://www.gov.uk/guidance/rates-and-thresholds-for-employers-2025-to-2026",
+  "checked_on": "2026-11-12",
+  "valid_from": "2025-04-06",
+  "valid_to": "2026-04-05",
+  "validity_basis": "statutory_period",
+  "title": "Rates and thresholds for employers 2025 to 2026 - GOV.UK",
+  "content": [
+    {
+      "h2": "PAYE tax and Class 1 National Insurance contributions"
+    },
+    {
+      "h2": "Tax thresholds, rates and codes"
+    },
+    {
+      "h3": "England and Northern Ireland"
+    },
+    {
+      "table": [
+        [
+          "PAYE tax rate",
+          "Rate of tax",
+          "Annual earnings the rate applies to (above the PAYE threshold)"
+        ],
+        ["Basic tax rate", "20%", "Up to £37,700"],
+        ["Higher tax rate", "40%", "From £37,701 to £125,140"],
+        ["Additional tax rate", "45%", "Above £125,140"]
+      ]
+    },
+    {
+      "h3": "Scotland"
+    },
+    {
+      "table": [
+        [
+          "PAYE tax rate",
+          "Rate of tax",
+          "Annual earnings the rate applies to (above the PAYE threshold)"
+        ],
+        ["Starter tax rate", "19%", "Up to £2,827"],
+        ["Basic tax rate", "20%", "From £2,828 to £14,921"],
+        ["Intermediate tax rate", "21%", "From £14,922 to £31,092"],
+        ["Higher tax rate", "42%", "From £31,093 to £62,430"],
+        ["Advanced tax rate", "45%", "From £62,431 to £125,140"],
+        ["Top tax rate", "48%", "Above £125,140"]
+      ]
+    },
+    {
+      "h3": "Wales"
+    },
+    {
+      "table": [
+        [
+          "PAYE tax rate",
+          "Rate of tax",
+          "Annual earnings the rate applies to (above the PAYE threshold)"
+        ],
+        ["Basic tax rate", "20%", "Up to £37,700"],
+        ["Higher tax rate", "40%", "From £37,701 to £125,140"],
+        ["Additional tax rate", "45%", "Above £125,140"]
+      ]
+    },
+    {
+      "h3": "Emergency tax codes"
+    },
+    {
+      "h2": "Class 1 National Insurance thresholds"
+    },
+    {
+      "table": [
+        ["Class 1 National Insurance thresholds", "2025 to 2026"],
+        ["Lower earnings limit", "£125 per week £542 per month £6,500 per year"],
+        ["Primary threshold", "£242 per week £1,048 per month £12,570 per year"],
+        ["Secondary threshold", "£96 per week £417 per month £5,000 per year"],
+        ["Freeport upper secondary threshold", "£481 per week £2,083 per month £25,000 per year"],
+        [
+          "Investment Zone upper secondary threshold",
+          "£481 per week £2,083 per month £25,000 per year"
+        ],
+        ["Upper secondary threshold (under 21)", "£967 per week £4,189 per month £50,270 per year"],
+        [
+          "Apprentice upper secondary threshold (apprentice under 25)",
+          "£967 per week £4,189 per month £50,270 per year"
+        ],
+        ["Veterans upper secondary threshold", "£967 per week £4,189 per month £50,270 per year"],
+        ["Upper earnings limit", "£967 per week £4,189 per month £50,270 per year"]
+      ]
+    },
+    {
+      "h2": "Class 1 National Insurance rates"
+    },
+    {
+      "h3": "Employee (primary) contribution rates"
+    },
+    {
+      "table": [
+        [
+          "National Insurance category letter",
+          "Earnings at or above lower earnings limit up to and including primary threshold",
+          "Earnings above primary threshold up to and including upper earnings limit",
+          "Balance of earnings above upper earnings limit"
+        ],
+        ["A", "0%", "8%", "2%"],
+        ["B", "0%", "1.85%", "2%"],
+        ["C", "nil", "nil", "nil"],
+        ["D (Investment Zone — deferment)", "0%", "2%", "2%"],
+        ["E (Investment Zone — married women and widows reduced rate)", "0%", "1.85%", "2%"],
+        ["F (Freeport)", "0%", "8%", "2%"],
+        ["H (apprentice under 25)", "0%", "8%", "2%"],
+        ["I (Freeport — married women and widows reduced rate)", "0%", "1.85%", "2%"],
+        ["J", "0%", "2%", "2%"],
+        ["K (Investment Zone — state pensioner)", "nil", "nil", "nil"],
+        ["L (Freeport — deferment)", "0%", "2%", "2%"],
+        ["M (under 21)", "0%", "8%", "2%"],
+        ["N (Investment Zone)", "0%", "8%", "2%"],
+        ["S (Freeport — state pensioner)", "nil", "nil", "nil"],
+        ["V (veteran)", "0%", "8%", "2%"],
+        ["Z (under 21 — deferment)", "0%", "2%", "2%"]
+      ]
+    },
+    {
+      "h3": "Employer (secondary) contribution rates"
+    },
+    {
+      "table": [
+        [
+          "National Insurance category letter",
+          "Earnings above secondary threshold up to and including lower earnings limit",
+          "Earnings above lower earnings limit up to and including Freeport and Investment Zone upper secondary thresholds",
+          "Earnings above Freeport and Investment Zone upper secondary thresholds up to and including upper earnings limit, upper secondary thresholds for under 21s, apprentices and veterans",
+          "Balance of earnings above upper earnings limit, upper secondary thresholds for under 21s, apprentices and veterans"
+        ],
+        ["A", "15%", "15%", "15%", "15%"],
+        ["B", "15%", "15%", "15%", "15%"],
+        ["C", "15%", "15%", "15%", "15%"],
+        ["D (Investment Zone — deferment)", "0%", "0%", "15%", "15%"],
+        ["E (Investment Zone — married women and widows reduced rate)", "0%", "0%", "15%", "15%"],
+        ["F (Freeport)", "0%", "0%", "15%", "15%"],
+        ["H (apprentice under 25)", "0%", "0%", "0%", "15%"],
+        ["I (Freeport — married women and widows reduced rate)", "0%", "0%", "15%", "15%"],
+        ["J", "15%", "15%", "15%", "15%"],
+        ["K (Investment Zone — state pensioner)", "0%", "0%", "15%", "15%"],
+        ["L (Freeport — deferment)", "0%", "0%", "15%", "15%"],
+        ["M (under 21)", "0%", "0%", "0%", "15%"],
+        ["N (Investment Zone)", "0%", "0%", "15%", "15%"],
+        ["S (Freeport — state pensioner)", "0%", "0%", "15%", "15%"],
+        ["V (veteran)", "0%", "0%", "0%", "15%"],
+        ["Z (under 21 — deferment)", "0%", "0%", "0%", "15%"]
+      ]
+    },
+    {
+      "h3": "Director’s contribution rates"
+    },
+    {
+      "h2": "Class 1A National Insurance: expenses and benefits"
+    },
+    {
+      "h2": "Class 1A National Insurance: termination awards and sporting testimonial payments"
+    },
+    {
+      "h2": "Class 1B National Insurance: PAYE Settlement Agreements ( PSAs )"
+    },
+    {
+      "h2": "National Minimum Wage"
+    },
+    {
+      "table": [
+        ["Category of worker", "Hourly rate"],
+        ["Aged 21 and above (national living wage rate)", "£12.21"],
+        ["Aged 18 to 20 inclusive", "£10"],
+        ["Aged under 18 (but above compulsory school leaving age)", "£7.55"],
+        ["Apprentices aged under 19", "£7.55"],
+        ["Apprentices aged 19 and over, but in the first year of their apprenticeship", "£7.55"]
+      ]
+    },
+    {
+      "h2": "Statutory Maternity, Paternity, Adoption, Shared Parental, Parental Bereavement and Neonatal Care Pay"
+    },
+    {
+      "h2": "Statutory Sick Pay ( SSP )"
+    },
+    {
+      "table": [
+        ["Unrounded daily rates", "Number of qualifying days in week"],
+        ["£16.9642", "7"],
+        ["£19.7916", "6"],
+        ["£23.75", "5"],
+        ["£29.6875", "4"],
+        ["£39.5833", "3"],
+        ["£59.375", "2"],
+        ["£118.75", "1"]
+      ]
+    },
+    {
+      "h3": "7 qualifying days in a week"
+    },
+    {
+      "table": [
+        ["Number of days to pay", "Amount to pay"],
+        ["1", "£16.97"],
+        ["2", "£33.93"],
+        ["3", "£50.90"],
+        ["4", "£67.86"],
+        ["5", "£84.83"],
+        ["6", "£101.79"],
+        ["7", "£118.75"]
+      ]
+    },
+    {
+      "h3": "6 qualifying days in a week"
+    },
+    {
+      "table": [
+        ["Number of days to pay", "Amount to pay"],
+        ["1", "£19.80"],
+        ["2", "£39.59"],
+        ["3", "£59.38"],
+        ["4", "£79.17"],
+        ["5", "£98.96"],
+        ["6", "£118.75"]
+      ]
+    },
+    {
+      "h3": "5 qualifying days in a week"
+    },
+    {
+      "table": [
+        ["Number of days to pay", "Amount to pay"],
+        ["1", "£23.75"],
+        ["2", "£47.50"],
+        ["3", "£71.25"],
+        ["4", "£95"],
+        ["5", "£118.75"]
+      ]
+    },
+    {
+      "h3": "4 qualifying days in a week"
+    },
+    {
+      "table": [
+        ["Number of days to pay", "Amount to pay"],
+        ["1", "£29.69"],
+        ["2", "£59.38"],
+        ["3", "£89.07"],
+        ["4", "£118.75"]
+      ]
+    },
+    {
+      "h3": "3 qualifying days in a week"
+    },
+    {
+      "table": [
+        ["Number of days to pay", "Amount to pay"],
+        ["1", "£39.59"],
+        ["2", "£79.17"],
+        ["3", "£118.75"]
+      ]
+    },
+    {
+      "h3": "2 qualifying days in a week"
+    },
+    {
+      "table": [
+        ["Number of days to pay", "Amount to pay"],
+        ["1", "£59.38"],
+        ["2", "£118.75"]
+      ]
+    },
+    {
+      "h3": "One qualifying day in a week"
+    },
+    {
+      "table": [
+        ["Number of days to pay", "Amount to pay"],
+        ["1", "£118.75"]
+      ]
+    },
+    {
+      "h2": "Student loan and postgraduate loan recovery"
+    },
+    {
+      "table": [
+        ["Rate or threshold", "2025 to 2026 rate"],
+        [
+          "Employee earnings threshold for student loan plan 1",
+          "£26,065 per year £2,172.08 per month £501.25 per week"
+        ],
+        [
+          "Employee earnings threshold for student loan plan 2",
+          "£28,470 per year £2,372.50 per month £547.50 per week"
+        ],
+        [
+          "Employee earnings threshold for student loan plan 4",
+          "£32,745 per year £2,728.75 per month £629.71 per week"
+        ],
+        ["Student loan deductions", "9%"],
+        [
+          "Employee earnings threshold for postgraduate loan",
+          "£21,000 per year £1,750 per month £403.84 per week"
+        ],
+        ["Postgraduate loan deductions", "6%"]
+      ]
+    },
+    {
+      "h2": "Company cars: advisory fuel rates"
+    },
+    {
+      "h3": "Advisory electricity rate for fully electric cars from 1 March 2026"
+    },
+    {
+      "h2": "Employee vehicles: mileage allowance payments"
+    },
+    {
+      "h2": "Employment Allowance"
+    },
+    {
+      "h2": "Apprenticeship Levy"
+    },
+    {
+      "table": [
+        ["Allowance or charge", "2025 to 2026 rate"],
+        ["Apprenticeship Levy allowance", "£15,000"],
+        ["Apprenticeship Levy charge", "0.5%"]
+      ]
+    },
+    {
+      "h2": "Updates to this page"
+    }
+  ],
+  "tax_year": "2025-2026",
+  "values": {
+    "currency": "GBP",
+    "personal_allowance_annual": 12570,
+    "ni_thresholds": {
+      "Lower earnings limit": {
+        "week": 125,
+        "month": 542,
+        "year": 6500
+      },
+      "Primary threshold": {
+        "week": 242,
+        "month": 1048,
+        "year": 12570
+      },
+      "Secondary threshold": {
+        "week": 96,
+        "month": 417,
+        "year": 5000
+      },
+      "Freeport upper secondary threshold": {
+        "week": 481,
+        "month": 2083,
+        "year": 25000
+      },
+      "Investment Zone upper secondary threshold": {
+        "week": 481,
+        "month": 2083,
+        "year": 25000
+      },
+      "Upper secondary threshold (under 21)": {
+        "week": 967,
+        "month": 4189,
+        "year": 50270
+      },
+      "Apprentice upper secondary threshold (apprentice under 25)": {
+        "week": 967,
+        "month": 4189,
+        "year": 50270
+      },
+      "Veterans upper secondary threshold": {
+        "week": 967,
+        "month": 4189,
+        "year": 50270
+      },
+      "Upper earnings limit": {
+        "week": 967,
+        "month": 4189,
+        "year": 50270
+      }
+    },
+    "employee_ni_rates": {
+      "A": [0.0, 0.08, 0.02],
+      "B": [0.0, 0.018500000000000003, 0.02],
+      "C": [0, 0, 0],
+      "D": [0.0, 0.02, 0.02],
+      "E": [0.0, 0.018500000000000003, 0.02],
+      "F": [0.0, 0.08, 0.02],
+      "H": [0.0, 0.08, 0.02],
+      "I": [0.0, 0.018500000000000003, 0.02],
+      "J": [0.0, 0.02, 0.02],
+      "K": [0, 0, 0],
+      "L": [0.0, 0.02, 0.02],
+      "M": [0.0, 0.08, 0.02],
+      "N": [0.0, 0.08, 0.02],
+      "S": [0, 0, 0],
+      "V": [0.0, 0.08, 0.02],
+      "Z": [0.0, 0.02, 0.02]
+    },
+    "employer_ni_rates": {
+      "A": [0.15, 0.15, 0.15, 0.15],
+      "B": [0.15, 0.15, 0.15, 0.15],
+      "C": [0.15, 0.15, 0.15, 0.15],
+      "D": [0.0, 0.0, 0.15, 0.15],
+      "E": [0.0, 0.0, 0.15, 0.15],
+      "F": [0.0, 0.0, 0.15, 0.15],
+      "H": [0.0, 0.0, 0.0, 0.15],
+      "I": [0.0, 0.0, 0.15, 0.15],
+      "J": [0.15, 0.15, 0.15, 0.15],
+      "K": [0.0, 0.0, 0.15, 0.15],
+      "L": [0.0, 0.0, 0.15, 0.15],
+      "M": [0.0, 0.0, 0.0, 0.15],
+      "N": [0.0, 0.0, 0.15, 0.15],
+      "S": [0.0, 0.0, 0.15, 0.15],
+      "V": [0.0, 0.0, 0.0, 0.15],
+      "Z": [0.0, 0.0, 0.0, 0.15]
+    },
+    "student_loans": {
+      "student loan plan 1": {
+        "year": 26065.0,
+        "month": 2172.08,
+        "week": 501.25
+      },
+      "student loan plan 2": {
+        "year": 28470.0,
+        "month": 2372.5,
+        "week": 547.5
+      },
+      "student loan plan 4": {
+        "year": 32745.0,
+        "month": 2728.75,
+        "week": 629.71
+      },
+      "postgraduate loan": {
+        "year": 21000.0,
+        "month": 1750.0,
+        "week": 403.84
+      }
+    },
+    "student_loan_rate": 0.09,
+    "postgraduate_loan_rate": 0.06,
+    "employment_allowance_annual": 10500,
+    "apprenticeship_levy_rate": 0.005,
+    "apprenticeship_levy_allowance_annual": 15000,
+    "apprenticeship_levy_pay_bill_threshold": 3000000,
+    "ssp_weekly_cap": 118.75
+  }
+}

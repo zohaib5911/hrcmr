@@ -16,7 +16,7 @@ exec 7>"$BUS/.prlock"; flock -n 7 || { echo "prs.sh: another run is in progress"
 cd "$COORD"
 
 checks_state() {   # green | red | pending
-  local b; b=$(gh pr checks "$1" --json bucket --jq '[.[].bucket] | join(" ")' 2>/dev/null || true)
+  local b; b=$(gh pr checks "$1" --json bucket --jq '[.[].bucket] | join(" ")' </dev/null 2>/dev/null || true)
   if [ -z "$b" ]; then echo pending
   elif grep -qE 'fail|cancel' <<<"$b"; then echo red
   elif grep -q pending <<<"$b"; then echo pending
@@ -49,7 +49,11 @@ while IFS=$'\t' read -r n head base mergeable; do
     case $(checks_state "$n") in
       green)
         [ "$mergeable" = MERGEABLE ] || continue
-        if gh pr merge "$n" --merge --delete-branch >/dev/null 2>&1; then
+        # No --delete-branch: it also deletes the local branch, which fails while an agent's worktree has it
+        # checked out, and then the merge looked failed. Judge by the PR state; delete the remote branch only.
+        gh pr merge "$n" --merge </dev/null >/dev/null 2>&1 || true
+        if [ "$(gh pr view "$n" --json state --jq .state </dev/null)" = MERGED ]; then
+          git push -q origin --delete "$head" </dev/null 2>/dev/null || true
           case $id in AUDIT-*) ;; *) tick "$id" "$n" || true;; esac   # the auditor ticks AUDIT-n itself
           bash "$HERE/bus.sh" set "$id" merged "$n"
           bash "$HERE/bus.sh" say prs all INFO "PR #$n ($id) merged into dev" >/dev/null
@@ -68,7 +72,7 @@ while IFS=$'\t' read -r n head base mergeable; do
     esac
   elif [ "$base" = main ] && [ "$head" = dev ]; then
     if [ "$(checks_state "$n")" = green ] && [ "$mergeable" = MERGEABLE ]; then
-      gh pr merge "$n" --merge >/dev/null 2>&1 && {
+      gh pr merge "$n" --merge </dev/null >/dev/null 2>&1 && {
         bash "$HERE/bus.sh" say prs all INFO "gate PR #$n merged into main" >/dev/null; echo "merged gate #$n"; }
     fi
   fi
