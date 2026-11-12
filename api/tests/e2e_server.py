@@ -98,7 +98,7 @@ async def _courses(owner_url: str) -> None:
 
 
 async def _register_reference(owner_url: str) -> None:
-    """Saved publications for phase-gate screenshots, through the real ingest (no network)."""
+    """Saved publications for register browser tests, through the real ingest (no network)."""
     fixtures = Path(__file__).parent / "fixtures" / "register"
     current = "first.csv"
 
@@ -236,8 +236,7 @@ def main() -> None:
         asyncio.run(_calendar(database.owner_url))
         asyncio.run(_courses(database.owner_url))
         asyncio.run(_soc_reference(database.owner_url))
-        if os.environ.get("SCREENSHOTS"):
-            asyncio.run(_register_reference(database.owner_url))
+        asyncio.run(_register_reference(database.owner_url))
         settings = build_settings(
             database_url=database.app_url,
             redis_url=REDIS_URL,

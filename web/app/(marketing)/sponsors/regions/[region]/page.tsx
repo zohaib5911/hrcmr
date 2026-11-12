@@ -9,7 +9,6 @@ import { pageMetadata } from "@/lib/seo";
 import { formatUk } from "@/lib/ui/dates";
 
 export const revalidate = 3600;
-export const generateStaticParams = () => [];
 
 type Props = { params: Promise<{ region: string }> };
 

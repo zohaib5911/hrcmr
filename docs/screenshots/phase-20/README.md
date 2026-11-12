@@ -12,7 +12,7 @@ Run from `web/`:
 SCREENSHOTS=1 bash /home/zohaib/cmr_hr/.agent/bus.sh serial -- pnpm exec playwright test phase20-screenshots.spec.ts --project=production
 ```
 
-`SCREENSHOTS` makes the isolated browser-test API ingest the saved `first.csv`
+The isolated browser-test API ingests the saved `first.csv`
 and `second.csv` publications, dated 10 and 11 November 2026, using the real
 ingest with an HTTP mock. Synthetic place coordinates are applied through the
 geocoding function. SSR pages and the explorer use that API; no browser API
