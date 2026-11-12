@@ -4584,6 +4584,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/contact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send Message */
+        post: operations["contact_send_message"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/postings/{company_slug}/{posting_slug}": {
         parameters: {
             query?: never;
@@ -7902,24 +7919,6 @@ export interface components {
             /** Code */
             code: string;
         };
-        /** ContactIn */
-        ContactIn: {
-            /** Address */
-            address?: string | null;
-            /** Details */
-            details?: string | null;
-            /** Email */
-            email?: string | null;
-            /** Name */
-            name: string;
-            /** Phone */
-            phone: string;
-            /**
-             * Relationship
-             * @enum {string}
-             */
-            relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
-        };
         /** ContactMessageRow */
         ContactMessageRow: {
             /** Company */
@@ -7951,29 +7950,6 @@ export interface components {
             items: components["schemas"]["ContactMessageRow"][];
             /** Total */
             total: number;
-        };
-        /** ContactOut */
-        ContactOut: {
-            /** Address */
-            address: string | null;
-            /** Details */
-            details: string | null;
-            /** Email */
-            email: string | null;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Name */
-            name: string;
-            /** Phone */
-            phone: string;
-            /**
-             * Relationship
-             * @enum {string}
-             */
-            relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
         };
         /** ContactUpdateIn */
         ContactUpdateIn: {
@@ -10801,7 +10777,7 @@ export interface components {
             address: components["schemas"]["app__modules__employees__personal_schemas__AddressOut"] | null;
             bank: components["schemas"]["BankMasked"] | null;
             /** Contacts */
-            contacts: components["schemas"]["ContactOut"][];
+            contacts: components["schemas"]["app__modules__employees__personal_schemas__ContactOut"][];
             details: components["schemas"]["PersonalDetails"];
             identity: components["schemas"]["IdentityMasked"] | null;
             /**
@@ -13263,6 +13239,32 @@ export interface components {
             /** Postcode */
             postcode: string | null;
         };
+        /** ContactIn */
+        app__modules__contact__public__ContactIn: {
+            /** Company */
+            company?: string | null;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Message */
+            message: string;
+            /** Name */
+            name: string;
+            /**
+             * Topic
+             * @enum {string}
+             */
+            topic: "sponsor_compliance" | "simple_hr" | "pricing_billing" | "setup_help" | "partnership" | "other" | "data_protection";
+            /** Turnstile Token */
+            turnstile_token: string;
+        };
+        /** ContactOut */
+        app__modules__contact__public__ContactOut: {
+            /** Received */
+            received: boolean;
+        };
         /** AddressOut */
         app__modules__employees__personal_schemas__AddressOut: {
             /** City County */
@@ -13277,6 +13279,47 @@ export interface components {
             line3: string | null;
             /** Postcode */
             postcode: string | null;
+        };
+        /** ContactIn */
+        app__modules__employees__personal_schemas__ContactIn: {
+            /** Address */
+            address?: string | null;
+            /** Details */
+            details?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /**
+             * Relationship
+             * @enum {string}
+             */
+            relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
+        };
+        /** ContactOut */
+        app__modules__employees__personal_schemas__ContactOut: {
+            /** Address */
+            address: string | null;
+            /** Details */
+            details: string | null;
+            /** Email */
+            email: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /**
+             * Relationship
+             * @enum {string}
+             */
+            relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
         };
     };
     responses: never;
@@ -19475,7 +19518,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ContactIn"];
+                "application/json": components["schemas"]["app__modules__employees__personal_schemas__ContactIn"];
             };
         };
         responses: {
@@ -19485,7 +19528,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ContactOut"];
+                    "application/json": components["schemas"]["app__modules__employees__personal_schemas__ContactOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -19520,7 +19563,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["ContactIn"];
+                "application/json": components["schemas"]["app__modules__employees__personal_schemas__ContactIn"];
             };
         };
         responses: {
@@ -19530,7 +19573,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ContactOut"];
+                    "application/json": components["schemas"]["app__modules__employees__personal_schemas__ContactOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -27131,6 +27174,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CertificateCheckOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    contact_send_message: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["app__modules__contact__public__ContactIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["app__modules__contact__public__ContactOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
