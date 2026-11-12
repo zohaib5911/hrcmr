@@ -499,7 +499,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T20.4 · S · Region pages, change bulletins, profiles, methodology, report form, sitemaps
 - **Spec:** plan L1243–1251, L1488. Profiles use ISR (revalidate 6 h); sitemaps split ≤45k URLs; attribution text exactly as L1247; report form R5.
 
-### [ ] T20.5 · S · Register status and rerun (moved from T17.6)
+### [x] T20.5 · S · Register status and rerun (moved from T17.6)
 - **Spec:** plan L1171 (sponsor register: last import, row counts, errors, rerun import). Owner answer 4 (2026-11-08): this moved here from T17.6, because the register ingest is built in T20.1.
 - **Steps:** `GET /platform/register/status` (last publication, row counts, errors) and `POST /platform/register/run` (rerun through the ingest job, with a reason, audited as `platform.register_rerun`). The import sends nothing, so a rerun is safe; it goes through the same job allow-list as T17.6.
 
