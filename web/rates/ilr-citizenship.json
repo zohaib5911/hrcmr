@@ -1,0 +1,244 @@
+{
+  "source_url": "https://www.gov.uk/indefinite-leave-to-remain-tier-2-t2-skilled-worker-visa",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "title": "Indefinite leave to remain if you have a Skilled Worker, Health and Care Worker, T2 or Tier 2 visa: Overview - GOV.UK",
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "values": {
+    "routes": [
+      {
+        "id": "skilled_worker",
+        "label": "Skilled Worker",
+        "years": 5,
+        "rolling_absence_check": true,
+        "note": "Confirm qualifying visa combinations, continuing sponsorship, salary and job requirements.",
+        "source": {
+          "source_url": "https://www.gov.uk/indefinite-leave-to-remain-tier-2-t2-skilled-worker-visa",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Indefinite leave to remain if you have a Skilled Worker, Health and Care Worker, T2 or Tier 2 visa: Overview - GOV.UK"
+        }
+      },
+      {
+        "id": "health_care",
+        "label": "Health and Care Worker",
+        "years": 5,
+        "rolling_absence_check": true,
+        "note": "Confirm qualifying visa combinations, continuing sponsorship, salary and job requirements.",
+        "source": {
+          "source_url": "https://www.gov.uk/indefinite-leave-to-remain-tier-2-t2-skilled-worker-visa",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Indefinite leave to remain if you have a Skilled Worker, Health and Care Worker, T2 or Tier 2 visa: Overview - GOV.UK"
+        }
+      },
+      {
+        "id": "scale_up",
+        "label": "Scale-up Worker",
+        "years": 5,
+        "rolling_absence_check": true,
+        "note": "Check qualifying visa combinations and earnings requirements.",
+        "source": {
+          "source_url": "https://www.gov.uk/indefinite-leave-to-remain-scale-up-worker-visa",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Indefinite leave to remain if you have a Scale-up Worker visa: Overview - GOV.UK"
+        }
+      },
+      {
+        "id": "ancestry",
+        "label": "UK Ancestry",
+        "years": 5,
+        "rolling_absence_check": true,
+        "note": "Only qualifying Ancestry residence counts; check work and ancestry requirements.",
+        "source": {
+          "source_url": "https://www.gov.uk/ancestry-visa/indefinite-leave-to-remain",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "UK Ancestry visa: Apply for indefinite leave to remain ('settlement') - GOV.UK"
+        }
+      },
+      {
+        "id": "innovator",
+        "label": "Innovator Founder",
+        "years": 3,
+        "rolling_absence_check": true,
+        "note": "Only Innovator or Innovator Founder time counts; a settlement endorsement and business criteria are required.",
+        "source": {
+          "source_url": "https://www.gov.uk/indefinite-leave-to-remain-innovator-founder-visa",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Indefinite leave to remain if you have an Innovator Founder or Innovator visa: Overview - GOV.UK"
+        }
+      },
+      {
+        "id": "talent_3",
+        "label": "Global Talent \u2014 qualifying endorsement or award",
+        "years": 3,
+        "rolling_absence_check": true,
+        "note": "Check your endorsement or eligible award permits this pathway; earnings evidence is required. Research absence exceptions may apply.",
+        "source": {
+          "source_url": "https://www.gov.uk/indefinite-leave-to-remain-business-investor-global-talent/eligibility",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Indefinite leave to remain if you have a business, investor or talent visa: Time in the UK and financial requirements - GOV.UK"
+        }
+      },
+      {
+        "id": "talent_5",
+        "label": "Global Talent \u2014 Arts Council / Tech Nation exceptional promise",
+        "years": 5,
+        "rolling_absence_check": true,
+        "note": "Check your endorsement category and earnings evidence.",
+        "source": {
+          "source_url": "https://www.gov.uk/indefinite-leave-to-remain-business-investor-global-talent/eligibility",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Indefinite leave to remain if you have a business, investor or talent visa: Time in the UK and financial requirements - GOV.UK"
+        }
+      },
+      {
+        "id": "family_2",
+        "label": "Family partner \u2014 legacy 2-year route",
+        "years": 2,
+        "rolling_absence_check": false,
+        "note": "Use only if your Home Office grant confirms this legacy route. Relationship, residence and maintenance conditions apply.",
+        "source": {
+          "source_url": "https://www.gov.uk/indefinite-leave-to-remain-family/partner-family-visa",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Indefinite leave to remain if you have family in the UK: Apply as a partner (family visa) - GOV.UK"
+        }
+      },
+      {
+        "id": "family_5",
+        "label": "Family partner \u2014 5-year route",
+        "years": 5,
+        "rolling_absence_check": false,
+        "note": "Partner visa time only, excluding fianc\u00e9 permission. Check relationship, residence and financial requirements.",
+        "source": {
+          "source_url": "https://www.gov.uk/indefinite-leave-to-remain-family/partner-family-visa",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Indefinite leave to remain if you have family in the UK: Apply as a partner (family visa) - GOV.UK"
+        }
+      },
+      {
+        "id": "family_10",
+        "label": "Family partner \u2014 10-year route",
+        "years": 10,
+        "rolling_absence_check": false,
+        "note": "Specialist review required for qualifying visa combinations, relationship permission and transitional absence rules.",
+        "source": {
+          "source_url": "https://www.gov.uk/indefinite-leave-to-remain-family/partner-family-visa",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Indefinite leave to remain if you have family in the UK: Apply as a partner (family visa) - GOV.UK"
+        }
+      },
+      {
+        "id": "long_residence",
+        "label": "Long residence",
+        "years": 10,
+        "rolling_absence_check": false,
+        "note": "Specialist review required for qualifying permission, gaps, current-route requirements and historical absence rules.",
+        "source": {
+          "source_url": "https://www.gov.uk/long-residence",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Indefinite leave to remain if you\u2019ve been in the UK for 10 years (long residence): Overview - GOV.UK"
+        }
+      },
+      {
+        "id": "bno",
+        "label": "Hong Kong BNO",
+        "years": 5,
+        "rolling_absence_check": true,
+        "note": "Check qualifying permission combinations and continuous residence.",
+        "source": {
+          "source_url": "https://www.gov.uk/british-national-overseas-bno-visa/living-permanently-in-the-uk",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "British National (Overseas) visa: Overview - GOV.UK"
+        }
+      },
+      {
+        "id": "investor",
+        "label": "Tier 1 Investor \u2014 standard pathway",
+        "years": 5,
+        "rolling_absence_check": true,
+        "note": "Legacy route: investment and visa-grant-date conditions apply. Accelerated pathways need a separate review.",
+        "source": {
+          "source_url": "https://www.gov.uk/indefinite-leave-to-remain-business-investor-global-talent/eligibility",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Indefinite leave to remain if you have a business, investor or talent visa: Time in the UK and financial requirements - GOV.UK"
+        }
+      },
+      {
+        "id": "entrepreneur",
+        "label": "Tier 1 Entrepreneur \u2014 standard pathway",
+        "years": 5,
+        "rolling_absence_check": true,
+        "note": "Legacy route: job creation, business and application-deadline conditions apply. Accelerated pathways need a separate review.",
+        "source": {
+          "source_url": "https://www.gov.uk/indefinite-leave-to-remain-business-investor-global-talent/eligibility",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Indefinite leave to remain if you have a business, investor or talent visa: Time in the UK and financial requirements - GOV.UK"
+        }
+      }
+    ],
+    "settlement_absence_days": 180,
+    "citizenship": {
+      "standard": {
+        "years": 5,
+        "settled_months": 12,
+        "total_absence_days": 450,
+        "source": {
+          "source_url": "https://www.gov.uk/apply-citizenship-indefinite-leave-to-remain",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Apply for citizenship if you have indefinite leave to remain or 'settled status': Eligibility and fees - GOV.UK"
+        }
+      },
+      "british_spouse": {
+        "years": 3,
+        "settled_months": 0,
+        "total_absence_days": 270,
+        "source": {
+          "source_url": "https://www.gov.uk/apply-citizenship-spouse",
+          "checked_on": "2026-11-12",
+          "valid_from": "2026-11-12",
+          "valid_to": null,
+          "title": "Apply for citizenship if your spouse is a British citizen: Eligibility and fees - GOV.UK"
+        }
+      },
+      "last_year_absence_days": 90
+    },
+    "continuous_residence_source": {
+      "source_url": "https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-continuous-residence",
+      "checked_on": "2026-11-12",
+      "valid_from": "2026-11-12",
+      "valid_to": null,
+      "title": "Immigration Rules - Immigration Rules Appendix Continuous Residence - Guidance - GOV.UK"
+    }
+  },
+  "normalization_note": "Numeric inputs normalized from existing T19.1 evidence snapshots; linked GOV.UK guidance rechecked 2026-11-12. No early-application allowance is applied. Legacy and complex routes require review."
+}
