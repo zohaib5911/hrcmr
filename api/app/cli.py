@@ -172,10 +172,11 @@ async def _load_places(content: bytes, source: str, version: str) -> int:
                 )
             except ValueError as error:
                 raise SystemExit(f"Refused: {error}") from None
+            rows = dataset.row_count
             await db.commit()
     finally:
         await engine.dispose()
-    print(f"Loaded {dataset.row_count} places ({version}); {placed} sponsors placed.")  # noqa: T201
+    print(f"Loaded {rows} places ({version}); {placed} sponsors placed.")  # noqa: T201
     return 0
 
 
