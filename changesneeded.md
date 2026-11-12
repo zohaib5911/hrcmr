@@ -1,17 +1,82 @@
-# changesneeded.md — audit AUDIT-3 round 4 (2026-11-12, gpt-6.1-sol)
-## Result: PASS
+# changesneeded.md — audit AUDIT-4 round 1 (2026-11-13, gpt-6.1-sol)
+Scope: audit-pass-3..b660e57 plus T18.1–T20.5 implementations previously excluded from AUDIT-3. Tests at audit: ordered verification in progress (not a completed audit).
 
-Scope: b83da48..462a184 (C3.3.1–C3.3.2 fixes and regressions; Phase 18–20 additions excluded). Tests at audit: api 1363/0/0, RLS CLI passed; web unit 1309/0; e2e 485/0/220 expected skips; CI latest listed dev run green and both merged fix PRs green (12 checks each); lint/types/schema/build/bundle passed.
-Counts: 0 P0 / 0 P1 / 1 P2. PASS (no P0/P1).
+### [ ] C4.1.1 · P0 · Restore rate limiting on every public register read (from T20.4)
+- **Problem:** `api/app/modules/register/public.py:44` lost the router dependency from c955b58. Only `/explore` calls `_limit`; region, bulletin, profile and sitemap queries are publicly unbounded. No middleware provides a replacement.
+- **Fix:** restore a shared dependency using `RateLimiter`, `client_ip` and the existing error envelope, as c955b58 did. Retain the report-specific write limit/Turnstile and explorer's own limit. Add denial/boundary tests for all read route families in `api/tests/db/test_register_public.py` so a future route merge cannot remove protection unnoticed.
+- **Done when:** anonymous reads receive 429 after the connection budget; another connection remains allowed; report protection still passes. Run the affected API register tests, Ruff and mypy.
 
-### [x] C3.4.1 · P2 · Assert contact total and pager changes after removal (from C3.3.1) — fixed in PR #77
-- **Problem:** `web/components/platform/contact-admin.test.tsx`, test `removes the handled row from the active page`, checks the remaining rows but never asserts the total. C3.3.1 required total coverage. Reverting the production total decrement would leave this test green and permit incorrect paging. Current production behavior is correct; an isolated audit probe verified it.
-- **Fix:** extend that existing test with total 51, assert `51 in total` and enabled Next before marking, then `50 in total` and disabled Next after the handled row disappears. Retain both row assertions. Copy the current test's userEvent/waitFor pattern; no product change is needed.
-- **Done when:** the collected contact test checks row removal, total 51→50 and the Next-button boundary; `cd web && pnpm exec vitest run components/platform/contact-admin.test.tsx`, lint and typecheck pass.
+### [ ] C4.1.2 · P1 · Import an exact earlier register file when it becomes current again (from T20.1)
+- **Problem:** `api/app/modules/register/ingest.py:109` treats a hash found anywhere in history as unchanged, and `Publication.sha256` is unique. Exact fixtures A→B→A leave the register at B. The existing return test adds a newline to A, hiding this case.
+- **Fix:** skip only when the downloaded hash matches the latest committed snapshot. Allow an earlier hash in a new publication, with a migration removing the global hash uniqueness (retain an ordinary lookup index). Preserve the writer lock and atomic rollback. Extend `api/tests/db/test_register_ingest.py` with byte-identical A→B→A and then A again, without modifying fixture bytes.
+- **Done when:** first three imports create three snapshots with A current and expected returned/removed changes; the fourth creates none. Existing idempotency and rollback tests pass.
+
+### [ ] C4.1.3 · P1 · Connect ONS geocoding to production register imports (from T20.2)
+- **Problem:** `api/app/modules/register/geo.py:144` has no production caller. The CLI and register jobs never load place data or apply enrichment; only tests/e2e seeding do. Real imports therefore leave every region/precision unset while methodology claims ONS placement.
+- **Fix:** add a documented operator path to load a versioned local ONS bulk dataset, normalize its real columns into the existing parser's format, and retain that dataset for subsequent scheduled/manual imports. Call the existing geocoding service on newly imported/missing sponsors. Do not add per-sponsor network lookups; keep unknown/ambiguous towns unplaced. Record the source/version and handle missing dataset explicitly. Use the existing CLI/config/job patterns.
+- **Done when:** an integration test invokes the actual production entry point with saved ONS-shaped data, imports a new sponsor, and sees its region/precision through `/public/register/explore` and `/regions`; a later import also enriches new towns without a test-only call to `apply_geocoding`. Document acquisition and configuration without secrets.
+
+### [ ] C4.1.4 · P1 · Make daily bulletins and current profiles consistent across two imports (from T20.4)
+- **Problem:** `api/app/modules/register/public.py:272` lists each publication as a date bulletin, so two same-day files produce duplicate links with different totals; the detail handler picks one file. `profile:382` orders by date alone and may show the morning entry after the afternoon changes its rating/routes.
+- **Fix:** define one consistent daily bulletin (compare the last complete snapshot of that day with the last complete snapshot before that day), with one list row/date and matching detail totals. Use deterministic date/fetched_at/id ordering for profile entries and timelines; apply the same daily definition to the previous-28-days median. Preserve removed/returned distinctions and existing public response contracts where possible.
+- **Done when:** saved-fixture tests ingest a prior day and two changed files on one date; one bulletin/date has matching list/detail counts, profiles show the final same-day entries, and the daily median excludes duplicate intraday samples. Existing register tests and client checks pass.
+
+### [ ] C4.1.5 · P1 · Correct explicit PAYE tax-code rate mappings (from T19.9)
+- **Problem:** `web/lib/calculators/uk-take-home-salary-calculator.ts` uses `bands[length-3]` for D0 and the first Scottish band for BR; SD1 becomes the top Scottish rate. At £30,000 it reports tax £6,000 for England D0 (should £12,000), £5,700 for Scottish BR (should £6,000), and £14,400 for SD1 (should £12,600). 0T incorrectly grants £9 allowance. See GOV.UK `/tax-codes/what-your-tax-code-means`.
+- **Fix:** replace positional band guesses with sourced explicit code mappings by jurisdiction (including supported Scottish SD codes); special-case zero-allowance codes. Reject codes the tool does not model instead of silently reinterpreting them. Put any additional mappings in dated rates evidence; preserve the ordinary automatic-code path.
+- **Done when:** unit cases assert these four exact amounts and supported-code boundaries; component tests cover choosing a custom code and error handling; existing tax calculator tests, lint and typecheck pass.
+
+### [ ] C4.1.6 · P1 · Provide the specified take-home tax-year selection (from T19.9)
+- **Problem:** the take-home module imports only `payroll-2026-27.json`; its input and form have no tax year despite plan §10 requiring selection where relevant and both supported payroll years being present. A visitor cannot calculate 2025–26 deductions.
+- **Fix:** copy `employerCostYears`/tax-year select from the employer calculator. Select bands, NI and student-loan thresholds from the chosen year's evidence, show that year in results and sources, and reject Plan5 for 2025–26 rather than inventing a threshold. Keep calculations local.
+- **Done when:** unit/component tests switch between both years and show the correct loan/Scottish-band differences, reject unsupported year/loan combinations, and existing examples pass.
+
+### [ ] C4.1.7 · P1 · Remove the blanket Health and Care ISC exemption (from T19.3)
+- **Problem:** `web/lib/calculators/sponsor-licence-cost-calculator.ts:125` makes every Health and Care Worker exempt from Immigration Skills Charge. GOV.UK ISC guidance does not grant that exemption; for a medium/large sponsor, nurse SOC2231 and24months require £2,640, but the tool returns0. The current unit test encodes the error.
+- **Fix:** determine ISC exemption from the verified exemption conditions, not the health-care fee/IHS route flag. Retain genuinely exempt SOCs and short outside-UK stays. Update the incorrect health-care assertion and add a non-exempt nursing case; do not change the genuine Health and Care IHS exemption.
+- **Done when:** nursing24months returns2640 for large and960 for small sponsors; exempt SOCs, dependants and inside/outside cases pass; component totals reflect the charge.
+
+### [ ] C4.1.8 · P1 · Calculate IHS from visa duration and show the required fourteen-day note (from T19.3)
+- **Problem:** `web/lib/calculators/sponsor-licence-cost-calculator.ts:149` feeds certificate months directly into IHS. SW18.1 adds14days after CoS end (GP training has a separate exception), which can cross a six-month/year boundary; neither form nor result shows the plan's14days note. A36month certificate currently quotes only3years IHS.
+- **Fix:** distinguish CoS employment length (ISC) from estimated visa length (IHS), using sourced date/extension rules and disclosed assumptions. Add the14day explanation and handle the GP exception only when relevant verified data supports it; request missing facts or return review for unsupported cases. Keep CoS duration fee selection governed by its own published fee rule. Reuse the existing cost comparison table.
+- **Done when:** sourced boundary examples at6/12/36months and an under18 dependant assert IHS based on the visa period; employer ISC duration remains correct; Health/Care IHS remains0; result and comparison show matching assumptions. Run the cost unit/component tests.
+
+### [ ] C4.1.9 · P1 · Stop declaring eligible unmodelled occupations ineligible (from T19.5)
+- **Problem:** `web/lib/calculators/skilled-worker-visa-checker.ts` loads only Tables1/1a, then says other codes are not eligible for Skilled Worker. Eligible Table3 healthcare occupations therefore get a false rejection or cannot be selected. The spec calls for the same approved SOC data/public API as the existing job checker.
+- **Fix:** reuse the approved public SOC lookup/client for occupation selection instead of presenting a two-table subset as complete. Apply the appropriate verified model where implemented; for unsupported salary options/tables show an explicit needs-review result with official source, never an ineligible verdict caused only by missing local data. Distinguish an invalid code from an eligible unmodelled code, and do not send salary/personal answers to the lookup.
+- **Done when:** a sourced Table3 nurse can be selected and gets the correct supported result or explicit needs-review state; an invalid code and Table1a new applicant remain distinguishable; A–E salary boundaries and local-input privacy tests pass.
+
+### [ ] C4.1.10 · P1 · Move immigration calculator rule constants into dated rates data (from T19.5, T19.7)
+- **Problem:** visa-checker `THRESHOLDS`, dependant funds and37.5/48hour bases, plus ILR `transitionalSalaryList:25000`, are executable hardcoded legal figures. Editing the verified `web/rates` data would leave results stale, contrary to T19's explicit data-only rule. The values checked here are published, not invented.
+- **Fix:** normalize these figures into their existing source JSON files with provenance/validity, then consume them in both modules and result copy. Remove monetary/rule fallback literals that silently manufacture a figure when evidence is absent. Extend the rates integrity tests to cover the normalized fields.
+- **Done when:** targeted tests demonstrate data drives the constants without an alternate executable copy; existing visa/ILR examples, rates tests, lint and typecheck pass. Preserve the official source tables.
+
+### [ ] C4.1.11 · P1 · Require going-rate evidence before giving an ILR salary verdict (from T19.7)
+- **Problem:** `calculateIlrSalary` uses `going ?? 0` in its result helper. SOC3214 exists only in a lower-rate table; selecting Usual shows “At least £41,700” despite no standard rate. The UI labels Usual as covering Health and Care but does not model its separate ASHE salary branch.
+- **Fix:** return an explicit review/unsupported state when the selected branch requires a missing going rate; do not substitute0. Either implement the sourced Health/Care branch with the necessary inputs or clearly route it to review. Preserve actual national-pay-scale handling and differentiate “depends on pay scale” from other missing evidence. Apply the same guard to a missing lower rate.
+- **Done when:** SOC3214 standard and a missing-lower-rate transitional case produce no numeric eligibility requirement, with useful guidance; sourced supported usual/transitional examples still pass; component tests assert review copy instead of the misleading amount.
+
+### [ ] C4.1.12 · P1 · Match SSP calendar weeks and official partial-week penny amounts (from T19.13)
+- **Problem:** `web/lib/calculators/uk-sick-pay-calculator.ts:99` rounds normally;7qualifying days and2sick days return35.21 rather than HMRC's35.22. Its weeks start on the sickness date rather than Sunday, changing partial-week rounding across week boundaries. The captured `sick-pay.json` is a verification snapshot with no statutory-year bound even though HMRC explicitly dates the rates to2026–27.
+- **Fix:** capture the relevant HMRC employer rate/payment tables in dated rates evidence, use Sunday–Saturday SSP weeks and the published partial-week rounding rule, retain the28week cap, and reject uncovered dates instead of extrapolating current rates. Add a first-part-day input or require the first full day explicitly so a worked part-day is not paid. Copy existing validation/error patterns.
+- **Done when:** published7day/2day and6day/4day examples match35.22 and82.17, a midweek cross-Sunday absence has correct weekly rows/totals, full weeks remain capped, unsupported tax years and worked first part-days are handled explicitly. Existing SSP unit/component tests pass.
+
+### [ ] C4.1.13 · P1 · Clamp notice-service month anniversaries at month end (from T19.12)
+- **Problem:** `hasOneMonth` in `web/lib/calculators/uk-notice-pay-calculator.ts:93` lets JavaScript overflow January31+1month into March. An employee starting2026-01-31 and given notice2026-02-28 is incorrectly assigned zero statutory notice. Date parsing also silently normalizes impossible dates.
+- **Fix:** use explicit validated ISO-date parsing and UTC calendar-month addition clamped to month end, following the existing settlement calculator helper pattern. Retain separate employee/employer scales and GB/NI source notes.
+- **Done when:** tests cover January29–31 to February in normal/leap years, a date immediately before completion, ordinary anniversaries and impossible dates; the end-of-month employee receives the statutory minimum, and existing notice tests pass.
+
+### [ ] C4.1.14 · P1 · Reject reporting deadlines outside captured holiday coverage (from T19.4)
+- **Problem:** `calculateDeadline` checks only whether the result exceeds `bankHolidays.valid_to`. Event2018-12-24 is accepted even though data starts2019; Christmas2018 is treated as a working day and a false deadline is returned. Long days-left ranges can likewise extend beyond captured data.
+- **Fix:** validate the event→deadline and today→deadline ranges against the selected nation's stored coverage, including its lower bound. Return an explanation without a numeric deadline/days-left where the required range is unsupported. Keep trigger dates and event-day exclusion unchanged.
+- **Done when:** tests cover before-first-date, beyond-last-date and a today value outside coverage, plus valid national holiday crossings; no unsupported range yields a reliable-looking number. Existing deadline tests pass.
+
+### [ ] C4.1.15 · P2 · Validate persisted risk-assessment structure before restoring it (from T19.15)
+- **Problem:** `loadAssessment` in `web/lib/calculators/risk-assessment-template.ts:70` checks only that `hazards` is an array. Valid JSON such as `{ "organisation": null, "hazards": [null] }` is returned as a typed assessment and can crash form rendering/export rather than recovering from a damaged draft.
+- **Fix:** validate scalar fields and each hazard's fields/status before merging saved data. Reject malformed records or safely restore known valid fields using the existing defaults; keep all storage calls guarded. Show a usable empty form on invalid storage.
+- **Done when:** unit tests cover null/wrong-type fields and invalid hazard entries/status, plus a component restoration test; valid drafts and blocked/full storage cases still pass.
 
 ## Notes (no action needed)
-- C3.3.1 preserves the active contact page/filter after a delayed PATCH; both regression cases pass. The active list removes the handled row and decrements total correctly.
-- C3.3.2 preserves all sixteen session assertions in normal Vitest discovery; all sixteen executed successfully in the targeted run.
-- A temporary copy of the contact tests added the total/pager assertions above. Targeted run: 34 passed (16 page-entry, 9 original contact, 9 scratch contact); scratch removed. This evidence is separate from the unmodified full suite.
-- No new endpoints, tables, permissions, legal figures, skipped tests or weakened assertions in the scoped fixes. Authenticated ingress, signed SSR identity and production-CSP deployment requirements remain as documented.
-- Detailed evidence: `docs/audits/audit-3-r4-review.md`. No product code changed during this audit. Stripe test-mode E2E remains parked in leftover L1; no owner decision is needed here.
+- Audit verification and scratch reproductions are still running; this checkpoint is not a completed result.
+- The owner already scheduled true ONS map geometry/keyboard interaction in T25.2; do not duplicate that work here.
+- Templates remain unpublished pending human review, legal documents remain drafts, and parked Stripe credentials remain in leftover.md.
