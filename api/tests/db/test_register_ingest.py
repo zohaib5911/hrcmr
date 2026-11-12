@@ -15,13 +15,12 @@ from tests.test_register_ingest import FIXTURES
 async def test_snapshots_idempotency_diff_return_and_rollback(database: DatabaseUnderTest) -> None:
     engine = engine_for(database.owner_url)
     fixture = "first.csv"
-    restored = False
 
     def handler(request: httpx.Request) -> httpx.Response:
         content = (
             FIXTURES / (fixture if request.url.path.endswith(".csv") else "publication.html")
         ).read_bytes()
-        return httpx.Response(200, content=content + (b"\n" if restored else b""))
+        return httpx.Response(200, content=content)
 
     try:
         async with (
@@ -45,11 +44,26 @@ async def test_snapshots_idempotency_diff_return_and_rollback(database: Database
                 await db.scalar(select(func.count()).select_from(Sponsor).where(Sponsor.current))
                 == 3
             )
-            fixture, restored = "first.csv", True
+            fixture = "first.csv"
             assert await ingest(db, client, date(2026, 11, 12)) == "imported"
             kinds = list((await db.scalars(select(Change.change))).all())
             assert kinds.count("returned") == 2
             assert kinds.count("route_removed") == 1
+            assert kinds.count("removed") == 4
+            publications = list(
+                (await db.scalars(select(Publication).order_by(Publication.id))).all()
+            )
+            assert len(publications) == 3
+            assert publications[0].sha256 == publications[2].sha256
+            assert publications[0].sha256 != publications[1].sha256
+            assert set(
+                (await db.scalars(select(Sponsor.organisation_name).where(Sponsor.current))).all()
+            ) == {"Example Care Ltd", "Stable Ltd", "Gone Ltd"}
+            assert await db.scalar(select(func.count()).select_from(Entry)) == 10
+            assert await ingest(db, client, date(2026, 11, 13)) == "unchanged"
+            assert await db.scalar(select(func.count()).select_from(Publication)) == 3
+            assert await db.scalar(select(func.count()).select_from(Entry)) == 10
+            assert len((await db.scalars(select(Change))).all()) == len(kinds)
             # Rollback includes publication, entries, sponsor flags and diffs together.
             await db.rollback()
             assert await db.scalar(select(func.count()).select_from(Publication)) == 0
