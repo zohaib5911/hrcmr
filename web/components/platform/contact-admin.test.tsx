@@ -136,11 +136,15 @@ describe("ContactAdmin delayed update", () => {
   });
 
   it("removes the handled row from the active page", async () => {
-    get.mockResolvedValue({ data: { items: [message, other], total: 2 } });
+    get.mockResolvedValue({ data: { items: [message, other], total: 51 } });
     render(<ContactAdmin />);
     await userEvent.click((await screen.findAllByRole("button", { name: "Open" }))[0]!);
+    expect(screen.getByText("51 in total")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Next" })).toBeEnabled();
     await userEvent.click(screen.getByRole("button", { name: "Mark handled" }));
     await waitFor(() => expect(screen.queryByText("Sam Jones")).not.toBeInTheDocument());
     expect(screen.getByText("Page Two")).toBeInTheDocument();
+    expect(screen.getByText("50 in total")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Next" })).toBeDisabled();
   });
 });
