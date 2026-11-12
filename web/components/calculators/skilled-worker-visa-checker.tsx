@@ -192,7 +192,7 @@ export function SkilledWorkerVisaChecker() {
         aria-label="Checker result"
         aria-live="polite"
         aria-atomic="true"
-        className="bg-fill-secondary rounded-control p-5 sm:p-6"
+        className="bg-elevated rounded-control p-5 sm:p-6"
       >
         {result ? (
           <>

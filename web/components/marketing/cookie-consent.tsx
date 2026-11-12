@@ -68,10 +68,10 @@ export function CookieConsentManager() {
             switched on until you choose.
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Button variant="tinted" size="sm" onClick={() => decide(false)}>
+            <Button variant="tinted" size="sm" className="text-label" onClick={() => decide(false)}>
               Reject all
             </Button>
-            <Button variant="tinted" size="sm" onClick={() => decide(true)}>
+            <Button variant="tinted" size="sm" className="text-label" onClick={() => decide(true)}>
               Accept all
             </Button>
             <Button variant="plain" size="sm" onClick={() => openPreferences(consent)}>
