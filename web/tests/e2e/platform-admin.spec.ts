@@ -10,6 +10,7 @@ test.describe("platform admin host", () => {
     await page.goto(`${ADMIN_ORIGIN}/`);
     await expect(page.getByRole("heading", { level: 1, name: "Platform admin" })).toBeVisible();
     await expect(page.getByTestId("platform-bar")).toContainText("Platform admin");
+    await expect(page.getByText("Active companies")).toBeVisible();
   });
 
   test("a support admin is let in the same way", async ({ page }) => {
