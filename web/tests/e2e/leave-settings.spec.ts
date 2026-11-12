@@ -69,6 +69,9 @@ test("verified defaults, saved settings and type add/edit/archive are usable", a
   await expect(archive.getByLabel("Days a year", { exact: true })).toHaveValue("");
   await archive.getByRole("button", { name: "Archive", exact: true }).click();
   await page.getByRole("alertdialog").getByRole("button", { name: "Archive", exact: true }).click();
+  // The table is inert while confirmation is open, so an absent role alone can pass
+  // before DELETE finishes. Wait for the success acknowledgement before reloading.
+  await expect(page.getByText("Leave type archived", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Professional Study", exact: true })).toHaveCount(
     0,
   );
