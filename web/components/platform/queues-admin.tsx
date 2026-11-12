@@ -35,7 +35,7 @@ export function QueuesAdmin() {
 
   const fail = useCallback((p: Problem) => {
     // An expired platform session: start again and come back here.
-    if (p.code === "UNAUTHENTICATED") {
+    if (p.code === "UNAUTHENTICATED" || p.code === "FORBIDDEN") {
       window.location.replace(`/session?next=${encodeURIComponent("/queues")}`);
       return;
     }

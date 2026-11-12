@@ -71,3 +71,16 @@ describe("UsersAdmin", () => {
     expect(await screen.findByText(/No user matches/)).toBeInTheDocument();
   });
 });
+
+describe("UsersAdmin expired platform session", () => {
+  it.each(["UNAUTHENTICATED", "FORBIDDEN"])("returns to the start page on %s", async (code) => {
+    const replace = vi.fn();
+    vi.stubGlobal("location", { ...window.location, replace });
+    get.mockResolvedValue({ error: { code, message: "no" } });
+    render(<UsersAdmin />);
+    await userEvent.type(screen.getByLabelText("E-mail address"), "ada");
+    await userEvent.click(screen.getByRole("button", { name: "Search" }));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/session?next=%2Fusers"));
+    vi.unstubAllGlobals();
+  });
+});

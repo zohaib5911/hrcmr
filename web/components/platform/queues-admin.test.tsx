@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -52,5 +52,16 @@ describe("QueuesAdmin", () => {
     await screen.findByText("Acme Care");
     const last = get.mock.calls.filter((c) => c[0] === "/platform/deletion-requests").at(-1);
     expect(last?.[1].params.query).toEqual({ status: "completed" });
+  });
+});
+
+describe("QueuesAdmin expired platform session", () => {
+  it.each(["UNAUTHENTICATED", "FORBIDDEN"])("returns to the start page on %s", async (code) => {
+    const replace = vi.fn();
+    vi.stubGlobal("location", { ...window.location, replace });
+    get.mockResolvedValue({ error: { code, message: "no" } });
+    render(<QueuesAdmin />);
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/session?next=%2Fqueues"));
+    vi.unstubAllGlobals();
   });
 });

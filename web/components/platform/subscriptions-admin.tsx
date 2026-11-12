@@ -31,7 +31,7 @@ export function SubscriptionsAdmin({ isOwner }: { isOwner: boolean }) {
   const [notice, setNotice] = useState<string | null>(null);
 
   function fail(p: Problem) {
-    if (p.code === "UNAUTHENTICATED") {
+    if (p.code === "UNAUTHENTICATED" || p.code === "FORBIDDEN") {
       window.location.replace(`/session?next=${encodeURIComponent("/subscriptions")}`);
       return;
     }
