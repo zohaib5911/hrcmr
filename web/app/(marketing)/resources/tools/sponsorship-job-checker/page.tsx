@@ -1,12 +1,13 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
 import { PublicSalaryChecker } from "@/components/soc/public-checker";
 
-export const metadata: Metadata = {
-  title: "Sponsorship job checker",
-  description:
-    "Find the SOC 2020 occupation code for a job and see the Skilled Worker salary table. General guidance, not legal or immigration advice.",
-};
+export const metadata: Metadata = pageMetadata(
+  "/resources/tools/sponsorship-job-checker",
+  "Sponsorship job checker",
+  "Find the SOC 2020 occupation code for a job and see the Skilled Worker salary table. General guidance, not legal or immigration advice.",
+);
 
 export default function Page() {
   return (

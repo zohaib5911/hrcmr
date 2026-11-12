@@ -1,3 +1,5 @@
+import { StructuredData } from "@/components/marketing/structured-data";
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
 import { brand } from "@brand";
@@ -8,10 +10,11 @@ import { CtaBand, Hero, Section, SectionHeading } from "@/components/marketing/s
 import { PRICING, pounds } from "@/lib/marketing-pricing";
 import { SIGN_UP } from "@/lib/marketing-nav";
 
-export const metadata: Metadata = {
-  title: "Pricing",
-  description: `Two simple plans for ${brand.name}, with unlimited employees on both and a ${PRICING.refundDays}-day money-back guarantee.`,
-};
+export const metadata: Metadata = pageMetadata(
+  "/pricing",
+  "Pricing",
+  `Two simple plans for ${brand.name}, with unlimited employees on both and a ${PRICING.refundDays}-day money-back guarantee.`,
+);
 
 const INCLUDED = [
   "Unlimited employees",
@@ -102,6 +105,17 @@ export default function PricingPage() {
       <Section tone="page" id="faq">
         <SectionHeading title="Questions about pricing" className="mb-10" />
         <Faq items={FAQ} />
+        <StructuredData
+          data={{
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: FAQ.map(({ question, answer }) => ({
+              "@type": "Question",
+              name: question,
+              acceptedAnswer: { "@type": "Answer", text: answer },
+            })),
+          }}
+        />
       </Section>
       <CtaBand
         title="Start with the free plan"

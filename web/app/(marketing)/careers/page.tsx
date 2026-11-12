@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -7,10 +8,11 @@ import { publicCareersClient } from "@/components/careers/public-client";
 import { Section, SectionHeading } from "@/components/marketing/sections";
 import { formatUk } from "@/lib/ui/dates";
 
-export const metadata: Metadata = {
-  title: "Careers",
-  description: `Open roles at ${brand.name}.`,
-};
+export const metadata: Metadata = pageMetadata(
+  "/careers",
+  "Careers",
+  `Open roles at ${brand.name}.`,
+);
 
 // Read at request time: the slug of our own company in the product, so its careers come from the module.
 export const dynamic = "force-dynamic";

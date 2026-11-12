@@ -1,14 +1,15 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
 import { CalculatorTemplate } from "@/components/calculators/calculator-template";
 import { RightToWorkChecker } from "@/components/calculators/right-to-work-checker";
 import { rightToWorkSource } from "@/lib/calculators/right-to-work-october-2026-checker";
 
-export const metadata: Metadata = {
-  title: "Right-to-work October 2026 checker",
-  description:
-    "Check how the October 2026 right-to-work rules may apply to employees, workers, individual sub-contractors and online matching services.",
-};
+export const metadata: Metadata = pageMetadata(
+  "/resources/tools/right-to-work-october-2026-checker",
+  "Right-to-work October 2026 checker",
+  "Check how the October 2026 right-to-work rules may apply to employees, workers, individual sub-contractors and online matching services.",
+);
 
 export default function Page() {
   return (

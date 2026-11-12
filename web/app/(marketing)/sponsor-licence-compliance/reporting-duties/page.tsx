@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
 import { brand } from "@brand";
@@ -5,10 +6,11 @@ import { brand } from "@brand";
 import { CtaBand, Section, SectionHeading } from "@/components/marketing/sections";
 import { SIGN_UP } from "@/lib/marketing-nav";
 
-export const metadata: Metadata = {
-  title: "Sponsor reporting duties",
-  description: `The changes a sponsor must report and how ${brand.name} tracks the deadlines.`,
-};
+export const metadata: Metadata = pageMetadata(
+  "/sponsor-licence-compliance/reporting-duties",
+  "Sponsor reporting duties",
+  `The changes a sponsor must report and how ${brand.name} tracks the deadlines.`,
+);
 
 const WORKER_CHANGES = [
   "A worker does not start work.",

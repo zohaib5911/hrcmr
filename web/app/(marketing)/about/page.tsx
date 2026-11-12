@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
 import { brand } from "@brand";
@@ -5,10 +6,11 @@ import { brand } from "@brand";
 import { CtaBand, Hero, Section, SectionHeading } from "@/components/marketing/sections";
 import { SIGN_UP } from "@/lib/marketing-nav";
 
-export const metadata: Metadata = {
-  title: "About",
-  description: `Why ${brand.name} exists and how we think about it.`,
-};
+export const metadata: Metadata = pageMetadata(
+  "/about",
+  "About",
+  `Why ${brand.name} exists and how we think about it.`,
+);
 
 const PRINCIPLES = [
   {

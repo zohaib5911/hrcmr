@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import { FileCheck2, KeyRound, Lock, ScrollText, ShieldCheck, Users } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -11,10 +12,11 @@ import {
   SectionHeading,
 } from "@/components/marketing/sections";
 
-export const metadata: Metadata = {
-  title: "Security",
-  description: `How ${brand.name} protects your people's records.`,
-};
+export const metadata: Metadata = pageMetadata(
+  "/security",
+  "Security",
+  `How ${brand.name} protects your people's records.`,
+);
 
 const FEATURES = [
   {
