@@ -10,6 +10,7 @@ import type { components } from "@/lib/api/client";
 import { attempt } from "@/lib/auth/request";
 import {
   checkSkilledWorkerVisa,
+  FULL_TIME_HOURS,
   visaCheckerSources,
   type Situation,
   type VisaInput,
@@ -21,7 +22,7 @@ type Hit = components["schemas"]["PublicHitOut"];
 const initial: VisaInput = {
   code: "",
   salary: 0,
-  weeklyHours: 37.5,
+  weeklyHours: FULL_TIME_HOURS,
   situation: "new",
   phdRelevant: false,
   phdStem: false,
@@ -263,7 +264,7 @@ export function SkilledWorkerVisaChecker() {
             {result.occupation ? (
               <p className="text-callout text-label-secondary mt-2">
                 {result.occupation.code} {result.occupation.title}. Going rate{" "}
-                {gbp(result.occupation.goingRate)} for 37.5 hours a week.
+                {gbp(result.occupation.goingRate)} for {FULL_TIME_HOURS} hours a week.
               </p>
             ) : null}
             <div className="text-callout text-label-secondary mt-3 space-y-3">

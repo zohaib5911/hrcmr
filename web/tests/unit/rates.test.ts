@@ -106,6 +106,72 @@ describe("verified calculator sources", () => {
     expect(read("payroll-2026-27.json").values.student_loans).toHaveProperty("student loan plan 5");
   });
 
+  it("skilled-worker.json normalized rule figures match the Appendix Skilled Worker text", () => {
+    // https://www.gov.uk/guidance/immigration-rules/immigration-rules-appendix-skilled-worker
+    const data = read("skilled-worker.json");
+    const text = (prefix: string): string => {
+      const block = data.content.find((b: { p?: string; li?: string }) =>
+        (b.p ?? b.li ?? "").startsWith(prefix),
+      );
+      expect(block, prefix).toBeTruthy();
+      return block.p ?? block.li;
+    };
+    const pounds = (s: string) =>
+      [...s.matchAll(/£([\d,]+)/g)].map((m) => Number(m[1]!.replaceAll(",", "")));
+    const options = data.content.find(
+      (b: { table?: string[][] }) =>
+        b.table?.[0]?.[0] === "Option" && b.table[0][1] === "Requirements",
+    ).table as string[][];
+    expect(Object.keys(data.values.salary_option_thresholds)).toEqual(
+      options.slice(1).map((r) => r[0]),
+    );
+    for (const [option, requirement] of options.slice(1)) {
+      expect(data.values.salary_option_thresholds[option!]).toBe(pounds(requirement!)[0]);
+    }
+    expect(text("SW 14.3.")).toContain(
+      `more than ${data.values.max_weekly_hours_counted} hours a week`,
+    );
+    expect(text("SW 14.4.")).toContain(
+      `based on a ${data.values.going_rate_weekly_hours}-hour week`,
+    );
+    const { partner, first_child, other_child } = data.values.dependant_funds;
+    expect(pounds(text("SW 33.3."))).toEqual([partner, first_child, other_child]);
+  });
+
+  it("ilr-worker-salary.json normalized minimums match the GOV.UK salary page", () => {
+    // https://www.gov.uk/indefinite-leave-to-remain-tier-2-t2-skilled-worker-visa/salary-requirements
+    const data = read("ilr-worker-salary.json");
+    const blocks: Array<Record<string, string>> = data.content;
+    // The nth "£x per year" list item after a heading, in page order.
+    const after = (heading: string, nth = 0): number => {
+      const start = blocks.findIndex((b) => (b.h2 ?? b.h3 ?? "").startsWith(heading));
+      expect(start, heading).toBeGreaterThanOrEqual(0);
+      const items = blocks
+        .slice(start)
+        .flatMap((b) => (b.li ? [/^£([\d,]+) per year/.exec(b.li)] : []))
+        .filter((m) => m !== null);
+      return Number(items[nth]![1]!.replaceAll(",", ""));
+    };
+    const v = data.values;
+    expect(v.standard).toBe(Number(/^£([\d,]+)/.exec(blocks[2]!.li!)![1]!.replaceAll(",", "")));
+    expect(v.health_education_pay_scale).toBe(after("If you work in healthcare or education"));
+    expect(v.health_care_different_requirements).toBe(
+      after("If your job in healthcare has different"),
+    );
+    expect(v.health_care_salary_list).toBe(after("If your job in healthcare has different", 1));
+    expect(v.salary_list).toBe(after("If your job is on the Immigration Salary List"));
+    expect(v.transitional).toBe(after("If you got a certificate of sponsorship for your first"));
+    expect(v.transitional_salary_list).toBe(
+      after("If you got a certificate of sponsorship for your first", 1),
+    );
+    expect(JSON.stringify(blocks)).toContain(
+      `You must be paid £${v.sportsperson.toLocaleString("en-GB")} or more a year`,
+    );
+    expect(JSON.stringify(blocks)).toContain(
+      `for up to ${v.max_weekly_hours_counted} hours a week`,
+    );
+  });
+
   it("preserves published bank-holiday coverage for each nation", () => {
     // https://www.gov.uk/bank-holidays.json
     const data = read("bank-holidays.json");
