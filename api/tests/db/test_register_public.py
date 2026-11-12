@@ -21,7 +21,7 @@ from app import cli
 from app.jobs.register import register_ingest_manual
 from app.modules.register import public as register
 from app.modules.register.ingest import ingest
-from app.modules.register.models import CompanyDataset, Sponsor
+from app.modules.register.models import CompanyDataset, CompanyMatch, Sponsor
 from tests.db.test_careers import anonymous
 from tests.db.test_employee_documents import rig as rig
 from tests.test_register_ingest import FIXTURES
@@ -57,7 +57,7 @@ async def _clear(rig: dict[str, Any]) -> None:
             text(
                 "truncate register_problem_reports, register_possible_matches, register_changes, "
                 "register_entries, register_sponsors, register_publications, "
-                "register_place_datasets, register_company_datasets cascade"
+                "register_place_datasets, register_company_matches, register_company_datasets cascade"
             )
         )
 
@@ -374,7 +374,9 @@ async def test_production_bulk_companies_flag_matches_facets_and_refresh(
             )
             assert care is not None
             assert (care.companies_house_number, care.sic_section) == ("01234567", "Q")
-            dataset = await db.get(CompanyDataset, care.companies_dataset_id)
+            match = await db.get(CompanyMatch, care.id)
+            assert match is not None
+            dataset = await db.get(CompanyDataset, match.dataset_id)
             assert dataset is not None
             assert (dataset.version, dataset.source) == ("2026-11-enabled", saved.name)
             assert dataset.sha256 == hashlib.sha256(saved.read_bytes()).hexdigest()
@@ -398,7 +400,7 @@ async def test_production_bulk_companies_flag_matches_facets_and_refresh(
             new = await db.scalar(select(Sponsor).where(Sponsor.normalised_name == "new ltd"))
             assert new is not None
             assert new.companies_house_number == "SC000003"
-            assert new.companies_dataset_id is not None
+            assert await db.get(CompanyMatch, new.id) is not None
 
         # A monthly refresh must remove an earlier match if the name becomes ambiguous.
         saved.write_text(
@@ -415,11 +417,8 @@ async def test_production_bulk_companies_flag_matches_facets_and_refresh(
         async with AsyncSession(rig["owner"]) as db:
             new = await db.scalar(select(Sponsor).where(Sponsor.normalised_name == "new ltd"))
             assert new is not None
-            assert (new.companies_house_number, new.sic_section, new.companies_dataset_id) == (
-                None,
-                None,
-                None,
-            )
+            assert (new.companies_house_number, new.sic_section) == (None, None)
+            assert await db.get(CompanyMatch, new.id) is None
         refreshed = (await public.get(f"{API}/explore", params={"industry": "Q"})).json()
         assert refreshed["total"] == 1
         assert refreshed["results"][0]["name"] == "Stable Ltd"

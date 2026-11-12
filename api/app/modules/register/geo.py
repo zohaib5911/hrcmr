@@ -14,7 +14,7 @@ from sqlalchemy import select
 
 from app.core.logging import get_logger
 from app.modules.register.ingest import normalise
-from app.modules.register.models import CompanyDataset, PlaceDataset, Sponsor
+from app.modules.register.models import CompanyDataset, CompanyMatch, PlaceDataset, Sponsor
 
 if TYPE_CHECKING:
     import uuid
@@ -247,19 +247,24 @@ async def apply_companies_match(
     if not enabled:
         return 0
     changed = 0
+    provenance = {m.sponsor_id: m for m in (await db.scalars(select(CompanyMatch))).all()}
     for sponsor in (await db.scalars(select(Sponsor))).all():
-        if sponsor.companies_dataset_id is not None and (
-            refresh or sponsor.companies_dataset_id != dataset_id
-        ):
+        previous = provenance.get(sponsor.id)
+        if previous is not None and (refresh or previous.dataset_id != dataset_id):
             sponsor.companies_house_number = sponsor.sic_section = None
-            sponsor.companies_dataset_id = None
         if sponsor.companies_house_number:
             continue
         hit = companies.get(sponsor.normalised_name)
         if hit:
             sponsor.companies_house_number, sponsor.sic_section = hit
-            sponsor.companies_dataset_id = dataset_id
+            if dataset_id is not None:
+                if previous is None:
+                    db.add(CompanyMatch(sponsor_id=sponsor.id, dataset_id=dataset_id))
+                else:
+                    previous.dataset_id = dataset_id
             changed += 1
+        elif previous is not None:
+            await db.delete(previous)
     await db.flush()
     return changed
 

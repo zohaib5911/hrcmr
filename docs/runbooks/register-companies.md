@@ -22,7 +22,7 @@ uv run python -m app.cli load-companies /path/to/BasicCompanyData-2026-11.csv --
 
 The command stores the file, source filename, edition, SHA-256, unambiguous-name count and load
 time in the owner-only `register_company_datasets` table. Sponsors matched by the bulk loader
-link to that dataset through `companies_dataset_id`. The newest loaded dataset is active.
+link to that dataset through the owner-only `register_company_matches` table. The newest loaded dataset is active.
 Malformed or wholly unusable files are refused atomically.
 
 Matches use the existing exact normalised-name service: no fuzzy guesses. Duplicate names

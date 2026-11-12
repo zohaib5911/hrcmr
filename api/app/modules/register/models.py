@@ -72,12 +72,19 @@ class Sponsor(Base, UUIDPrimaryKeyMixin):
     place_precision: Mapped[str] = mapped_column(String(10), default="none")
     companies_house_number: Mapped[str | None] = mapped_column(String(20))
     sic_section: Mapped[str | None] = mapped_column(String(10))
-    companies_dataset_id: Mapped[uuid.UUID | None] = mapped_column(
-        ForeignKey("register_company_datasets.id")
-    )
     first_seen_on: Mapped[date] = mapped_column(Date)
     last_seen_on: Mapped[date] = mapped_column(Date)
     current: Mapped[bool]
+
+
+class CompanyMatch(Base):
+    """Provenance for bulk-enriched fields; separate from API-managed company numbers."""
+
+    __tablename__ = "register_company_matches"
+    sponsor_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("register_sponsors.id"), primary_key=True
+    )
+    dataset_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("register_company_datasets.id"))
 
 
 class Entry(Base, UUIDPrimaryKeyMixin):
