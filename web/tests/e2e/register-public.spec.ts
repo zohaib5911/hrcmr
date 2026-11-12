@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { API } from "../support/accounts";
+import { audit } from "../support/axe";
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
@@ -15,12 +16,16 @@ test("register detail pages render saved publications with a fresh CSP nonce", a
   for (const [route, heading] of [
     ["/sponsors/regions/london", "Licensed sponsors in London"],
     ["/sponsors/changes/2026-11-11", "Register changes, 11 Nov 2026"],
+    ["/sponsors/changes", "Change bulletins"],
     [`/sponsors/profile/${sponsor!.stable_id}/${sponsor!.slug}`, "Stable Ltd"],
     ["/sponsors/regions/london", "Licensed sponsors in London"],
   ] as const) {
     const response = await page.goto(route);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: heading, exact: true })).toBeVisible();
+    const reject = page.getByRole("button", { name: "Reject all", exact: true });
+    if (await reject.isVisible()) await reject.click();
+    await audit(page, route);
     const csp = response!.headers()["content-security-policy"] ?? "";
     const nonce = csp.match(/'nonce-([^']+)'/)?.[1];
     expect(nonce).toBeTruthy();
