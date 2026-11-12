@@ -2,13 +2,26 @@
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from typing import Any
 
+import pytest
+from arq import create_pool
 from arq.jobs import Job
 from sqlalchemy import text
 
+from app.jobs.queue import redis_settings
 from tests.db.test_employee_documents import rig as rig
 from tests.db.test_platform_jobs import API, _platform_admin, _seed_failure
+
+
+@pytest.fixture(autouse=True)
+async def clean_register(rig: dict[str, Any]) -> AsyncIterator[None]:
+    async with rig["owner"].begin() as c:
+        await c.execute(text("truncate register_publications, register_sponsors cascade"))
+    yield
+    async with rig["owner"].begin() as c:
+        await c.execute(text("truncate register_publications, register_sponsors cascade"))
 
 
 async def test_register_operations_require_platform_access(rig: dict[str, Any]) -> None:
@@ -75,7 +88,11 @@ async def test_register_rerun_requires_reason_queues_allow_listed_job_and_audits
     assert response.status_code == 202, response.text
     made = response.json()
     assert made["job"] == "register_ingest"
-    info = await Job(made["job_id"], rig["app"].state.auth.redis).info()
+    pool = await create_pool(redis_settings(rig["app"].state.settings))
+    try:
+        info = await Job(made["job_id"], pool).info()
+    finally:
+        await pool.aclose()
     assert info is not None
     assert info.function == "rerun_register_ingest"
     assert info.args == ()
