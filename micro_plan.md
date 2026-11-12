@@ -426,7 +426,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Steps:** one page per sub-step: Home, Features (screenshots by a Playwright script from seeded demo data, both themes), Pricing, Security, About, Contact (+ `POST /public/contact`, R5), Accessibility, Careers (own company via careers module), Sponsor compliance + Reporting duties.
 - **Watch:** original copy only; brand from `brand.config.ts`; prices from config, not typed into copy.
 
-### [ ] T18.2 · S · Legal pages (DRAFT)
+### [x] T18.2 · S · Legal pages (DRAFT)
 - **Spec:** plan L1217, L1473. Every page shows "DRAFT — requires solicitor review". Cookie policy lists the real cookies (grep the code); subprocessors = real vendors. Cookie consent per L1218–1222. Add owner action to PROGRESS.
 
 ### [ ] T18.3 · S · SEO and Lighthouse ≥ 95
