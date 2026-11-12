@@ -52,8 +52,10 @@ from app.modules.platform_admin.schemas import (
     JobFailuresOut,
     JobQueueOut,
     JobRerunOut,
+    LiveSupportOut,
     MetricsOut,
     OptionalReasonIn,
+    PlatformContextOut,
     ReasonIn,
     RefundIn,
     RefundOut,
@@ -65,6 +67,7 @@ from app.modules.platform_admin.schemas import (
     UsersOut,
 )
 from app.modules.rbac.platform import PlatformAccess, require_platform
+from app.modules.support.models import ImpersonationSession
 
 router = APIRouter(tags=["platform-admin"])
 Reader = Annotated[PlatformAccess, Depends(require_platform("platform.companies.read"))]
@@ -83,6 +86,37 @@ async def _is_owner(access: PlatformAccess) -> bool:
         )
     ).scalar_one_or_none()
     return level == "owner"
+
+
+@router.get("/platform/context", response_model=PlatformContextOut)
+async def platform_context(
+    request: Request, access: Reader, company_id: uuid.UUID | None = None
+) -> PlatformContextOut:
+    """UI permissions and the caller's live support session, never a cookie or token."""
+    support = None
+    if company_id is not None:
+        row = await access.db.scalar(
+            select(ImpersonationSession)
+            .where(
+                ImpersonationSession.company_id == company_id,
+                ImpersonationSession.started_by == access.caller.user_id,
+                ImpersonationSession.ended_at.is_(None),
+                ImpersonationSession.expires_at > datetime.now(UTC),
+            )
+            .order_by(ImpersonationSession.created_at.desc())
+            .limit(1)
+        )
+        if row is not None:
+            support = LiveSupportOut(
+                id=row.id,
+                expires_at=row.expires_at,
+                write_enabled=row.write_enabled_at is not None,
+            )
+    return PlatformContextOut(
+        owner=await _is_owner(access),
+        web_origin=str(request.app.state.settings.web_origin),
+        support=support,
+    )
 
 
 @router.get("/platform/metrics", response_model=MetricsOut)
