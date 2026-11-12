@@ -337,6 +337,8 @@
   "tax_year": "2026-2027",
   "values": {
     "currency": "GBP",
+    "employer_ni_under_age": 21,
+    "employer_ni_apprentice_under_age": 25,
     "personal_allowance_annual": 12570,
     "ni_thresholds": {
       "Lower earnings limit": {
