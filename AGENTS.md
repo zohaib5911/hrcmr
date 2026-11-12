@@ -97,6 +97,7 @@ Before asking, check `.agent/decisions.md`: the answer may already be there.
 - Change only what the task needs. Don't refactor, rename or restyle earlier work; post suggestions as `say <agent> all INFO`.
 - Copy the structure, naming and test style of the nearest similar module, so Codex and Claude code looks the same.
 - Two agents touch the repo at once: keep diffs small and local; don't reformat files you didn't change.
+- Stop only processes you started yourself (check the PID's parent chain and its cwd are in your own worktree). Never stop the runners, the `prs` loop or the other agent's processes, and never remove a worktree you did not create.
 - Never print, log or commit secrets. Never ask the owner to paste a key in chat.
 - AI features show only when `ANTHROPIC_API_KEY` is set; otherwise they are hidden, with non-AI fallbacks. Ask Mady chat (T14.4) is deferred.
 
