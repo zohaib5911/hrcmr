@@ -496,7 +496,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [ ] T20.3 · S · Explore page
 - **Spec:** plan L1239–1242, L1487.
 
-### [ ] T20.4 · S · Region pages, change bulletins, profiles, methodology, report form, sitemaps
+### [x] T20.4 · S · Region pages, change bulletins, profiles, methodology, report form, sitemaps
 - **Spec:** plan L1243–1251, L1488. Profiles use ISR (revalidate 6 h); sitemaps split ≤45k URLs; attribution text exactly as L1247; report form R5.
 
 ### [ ] T20.5 · S · Register status and rerun (moved from T17.6)
