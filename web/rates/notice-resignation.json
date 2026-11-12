@@ -1,0 +1,41 @@
+{
+  "source_url": "https://www.gov.uk/handing-in-your-notice/giving-notice",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "Handing in your notice: Giving notice - GOV.UK",
+  "content": [
+    {
+      "p": "You must give at least a week’s notice if you’ve been in your job for more than a month."
+    },
+    {
+      "p": "Your contract will tell you whether you need to give notice in writing - otherwise you can do it verbally."
+    },
+    {
+      "p": "Give written notice if you think you’ll need to refer to it later, for example at an employment tribunal."
+    },
+    {
+      "p": "You may be in breach of your contract if you do not give enough notice, or give notice verbally when it should be given in writing. Your employer could take you to court."
+    },
+    {
+      "p": "Your notice period usually runs from the start of the day after you handed your notice in."
+    },
+    {
+      "h2": "If you change your mind"
+    },
+    {
+      "p": "If you resign in the ‘heat of the moment’ (for example, during an argument) and you change your mind, you should tell your employer immediately. They can choose to accept your resignation or not."
+    },
+    {
+      "h2": "Get free advice from Acas"
+    },
+    {
+      "p": "Call the Acas helpline to get advice about handing in your notice and pay rights."
+    }
+  ],
+  "values": {
+    "minimum_service_months": 1,
+    "minimum_statutory_weeks": 1
+  }
+}
