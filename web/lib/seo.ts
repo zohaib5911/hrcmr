@@ -56,6 +56,7 @@ export const marketingPages = [
   ["/sponsor-licence-compliance/reporting-duties", "Sponsor reporting duties"],
   ["/resources/tools/sponsorship-job-checker", "Sponsorship job checker"],
   ["/resources/tools/right-to-work-october-2026-checker", "Right-to-work October 2026 checker"],
+  ["/resources/tools/uk-minimum-wage-underpayment-checker", "UK minimum wage underpayment checker"],
   ...guides.map((guide) => [`/resources/guides/${guide.slug}`, guide.title] as const),
 ] as const;
 
