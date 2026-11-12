@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
   // A self-contained server for the Docker image.
   output: "standalone",
   outputFileTracingRoot: repoRoot,
+  // Downloads read reviewed documents from disk in the standalone server.
+  outputFileTracingIncludes: {
+    "/resources/templates/download/*": ["./content/templates/*"],
+  },
   turbopack: { root: repoRoot },
   poweredByHeader: false,
   reactStrictMode: true,

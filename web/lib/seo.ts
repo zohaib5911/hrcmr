@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { brand } from "@brand";
+import { resourceTools } from "@/lib/resources";
 import { guides } from "@/lib/guides/catalogue";
 
 /** Deployment URL only: never derive canonical links from an untrusted Host header. */
@@ -54,9 +55,11 @@ export const marketingPages = [
   ["/careers", "Careers"],
   ["/sponsor-licence-compliance", "Sponsor licence compliance"],
   ["/sponsor-licence-compliance/reporting-duties", "Sponsor reporting duties"],
-  ["/resources/tools/sponsorship-job-checker", "Sponsorship job checker"],
-  ["/resources/tools/right-to-work-october-2026-checker", "Right-to-work October 2026 checker"],
-  ["/resources/tools/uk-minimum-wage-underpayment-checker", "UK minimum wage underpayment checker"],
+  ["/resources", "Employer resources"],
+  ["/resources/guides", "Employer guides"],
+  ["/resources/tools", "Free employer tools"],
+  ["/resources/templates", "Employer templates"],
+  ...resourceTools.map((tool) => [`/resources/tools/${tool.slug}`, tool.title] as const),
   ...guides.map((guide) => [`/resources/guides/${guide.slug}`, guide.title] as const),
 ] as const;
 

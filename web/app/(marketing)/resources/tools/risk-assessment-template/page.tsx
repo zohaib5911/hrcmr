@@ -1,11 +1,12 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { RiskAssessmentTemplate } from "@/components/calculators/risk-assessment-template";
 
-export const metadata: Metadata = {
-  title: "Risk assessment template",
-  description:
-    "Fill in a workplace risk assessment and download it as PDF or Word. Your draft is kept only in your browser.",
-};
+export const metadata: Metadata = pageMetadata(
+  "/resources/tools/risk-assessment-template",
+  "Risk assessment template",
+  "Fill in a workplace risk assessment and download it as PDF or Word. Your draft is kept only in your browser.",
+);
 export default function Page() {
   return (
     <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">

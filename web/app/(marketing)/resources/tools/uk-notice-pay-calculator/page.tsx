@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
 import { CalculatorTemplate } from "@/components/calculators/calculator-template";
@@ -8,11 +9,11 @@ import {
   resignationSource,
 } from "@/lib/calculators/uk-notice-pay-calculator";
 
-export const metadata: Metadata = {
-  title: "UK notice pay calculator",
-  description:
-    "Compare statutory and contractual notice and work out gross notice pay, garden leave and payment in lieu of notice.",
-};
+export const metadata: Metadata = pageMetadata(
+  "/resources/tools/uk-notice-pay-calculator",
+  "UK notice pay calculator",
+  "Compare statutory and contractual notice and work out gross notice pay, garden leave and payment in lieu of notice.",
+);
 
 export default function Page() {
   return (

@@ -65,7 +65,7 @@ describe("public search metadata", () => {
       breadcrumbData("/resources/guides/right-to-work-checks").itemListElement.map(
         ({ name }) => name,
       ),
-    ).toEqual(["Home", "Right to Work checks"]);
+    ).toEqual(["Home", "Employer resources", "Employer guides", "Right to Work checks"]);
   });
   it("describes the real organisation, website and software without invented reviews", () => {
     const graph = websiteData()["@graph"];

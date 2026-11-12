@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
 import { CalculatorTemplate } from "@/components/calculators/calculator-template";
@@ -7,11 +8,11 @@ import {
   sponsorDutiesSource,
 } from "@/lib/calculators/sponsor-reporting-deadline-calculator";
 
-export const metadata: Metadata = {
-  title: "Sponsor reporting deadline calculator",
-  description:
-    "Work out the 10 or 20 working day deadline for reporting a change to the Home Office, using your nation’s bank holidays.",
-};
+export const metadata: Metadata = pageMetadata(
+  "/resources/tools/sponsor-reporting-deadline-calculator",
+  "Sponsor reporting deadline calculator",
+  "Work out the 10 or 20 working day deadline for reporting a change to the Home Office, using your nation’s bank holidays.",
+);
 
 export default function Page() {
   return (
