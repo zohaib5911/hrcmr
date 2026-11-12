@@ -4,7 +4,7 @@ Scope: audit-3-r2 (170a10d)..9b2e3a1, limited to C3.2.1–C3.2.6 and regressions
 
 Reviewed spec: micro_plan T17.1–T17.6 and plan L1155–1175, prior changesneeded C3.2.1–C3.2.6, and the recorded authenticated-ingress/SSR decision.
 
-- C3.2.1 injects the same deterministic embedder used to load the SOC database sample. It guards against accidental model startup and preserves endpoint/database/rate-limit assertions. Full API run pending.
+- C3.2.1 injects the same deterministic embedder used to load the SOC database sample. It guards against accidental model startup and preserves endpoint/database/rate-limit assertions. Full API run passed: 1359 tests in 594.45 seconds, including the former stalled SOC section.
 - C3.2.2 reuses baseUrl() with explicit public env reads for session start and CSV export. New tests exercise startFromBrowser with real client/CSRF middleware and mocked fetch, plus configured CSV origin and filters.
 - C3.2.3 authenticates ingress with a separate secret, validates the IP, signs a short-lived GET assertion bound to URL and cookie, and verifies it before network allowlisting and audit context creation. Direct API requests retain existing proxy trust. API coverage includes allowed/denied visitors, forged and stale signatures, cookie and URL replay, and recorded IP/UA. Browser tests simulate ingress for SSR; client-action coverage follows the existing production-CSP decision. Deployment contract and secret scanning updated.
 - C3.2.4 calls audited /platform/context on queues/contact/users/subscriptions and redirects 401/403; browser components handle UNAUTHENTICATED and FORBIDDEN. Finding: its new app/(admin)/platform/session-guard.test.tsx is outside vitest.config.mts include globs (lib, components, tests/unit only). Its sixteen page-entry cases are not collected by pnpm test.
@@ -13,4 +13,4 @@ Reviewed spec: micro_plan T17.1–T17.6 and plan L1155–1175, prior changesneed
 
 Hidden-cheating scan of scoped diff: no added skip/xfail/only/type-ignore/eslint-disable/noqa/TODO/FIXME. Two removed query assertions were strengthened to include limit/offset. New tables/endpoints/legal figures: none in the six fixes.
 
-Verification in progress: Ruff and format passed (552 files), mypy passed (489 source files). Full API suite running under coordinator serial lock. No final result asserted yet.
+Verification in progress: Ruff and format passed (552 files), mypy passed (489 source files), full API suite passed (1359/0/0, 594.45 seconds). RLS CLI passed on a freshly provisioned/migrated disposable database. Latest listed dev CI run: success 42513865285; latest merged fix PR #71 has all twelve checks green (run 43246264784). Ordered web checks running next. No final audit result asserted yet.
