@@ -298,6 +298,8 @@ Do not paste them into the Claude Code chat; just tell it "the .env is ready".
 [ ] All accounts in section 2 created and verified
 [ ] All production variables in section 4 set in Railway (staging done and tested first)
 [ ] Postgres public proxy OFF in production; backups ON
+[ ] Sponsor map places: download the ONS Index of Place Names CSV (ONS Open Geography Portal, OGL) and run once on the API service:
+    python -m app.cli load-places <file.csv> --version <label, e.g. IPN-2025>   (re-run when ONS publishes a new edition)
 [ ] Stripe LIVE products, restricted live key, live webhook set
 [ ] Resend domain verified; test emails reach Gmail and Outlook inboxes
 [ ] Turnstile, WAF, rate-limit rule active
