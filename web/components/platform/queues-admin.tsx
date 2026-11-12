@@ -9,6 +9,8 @@ import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { formatUk } from "@/lib/ui/dates";
 
+import { PAGE_SIZE, Pager } from "./pager";
+
 type DeletionRow = components["schemas"]["DeletionRequestRow"];
 type ExportRow = components["schemas"]["DataExportRow"];
 
@@ -24,13 +26,23 @@ const day = (iso: string | null) => (iso ? formatUk(iso.slice(0, 10)) : "–");
 export function QueuesAdmin() {
   const [deletionStatus, setDeletionStatus] = useState<DeletionStatus | "">("");
   const [exportStatus, setExportStatus] = useState<ExportStatus | "">("");
-  const [deletionsLoaded, setDeletions] = useState<{ key: string; items: DeletionRow[] } | null>(
-    null,
-  );
-  const [exportsLoaded, setExports] = useState<{ key: string; items: ExportRow[] } | null>(null);
-  // Rows count as loading until they match the chosen filter.
-  const deletions = deletionsLoaded?.key === deletionStatus ? deletionsLoaded.items : null;
-  const exports = exportsLoaded?.key === exportStatus ? exportsLoaded.items : null;
+  const [deletionOffset, setDeletionOffset] = useState(0);
+  const [exportOffset, setExportOffset] = useState(0);
+  const [deletionsLoaded, setDeletions] = useState<{
+    key: string;
+    items: DeletionRow[];
+    total: number;
+  } | null>(null);
+  const [exportsLoaded, setExports] = useState<{
+    key: string;
+    items: ExportRow[];
+    total: number;
+  } | null>(null);
+  // Rows count as loading until they match the chosen filter and page.
+  const deletionKey = `${deletionStatus}:${deletionOffset}`;
+  const exportKey = `${exportStatus}:${exportOffset}`;
+  const deletions = deletionsLoaded?.key === deletionKey ? deletionsLoaded.items : null;
+  const exports = exportsLoaded?.key === exportKey ? exportsLoaded.items : null;
   const [problem, setProblem] = useState<Problem | null>(null);
 
   const fail = useCallback((p: Problem) => {
@@ -46,33 +58,55 @@ export function QueuesAdmin() {
     let live = true;
     void attempt((c) =>
       c.GET("/platform/deletion-requests", {
-        params: { query: deletionStatus ? { status: deletionStatus } : {} },
+        params: {
+          query: {
+            limit: PAGE_SIZE,
+            offset: deletionOffset,
+            ...(deletionStatus ? { status: deletionStatus } : {}),
+          },
+        },
       }),
     ).then((r) => {
       if (!live) return;
-      if (r.ok) setDeletions({ key: deletionStatus, items: r.data.items });
+      if (r.ok)
+        setDeletions({
+          key: `${deletionStatus}:${deletionOffset}`,
+          items: r.data.items,
+          total: r.data.total,
+        });
       else fail(r.problem);
     });
     return () => {
       live = false;
     };
-  }, [deletionStatus, fail]);
+  }, [deletionStatus, deletionOffset, fail]);
 
   useEffect(() => {
     let live = true;
     void attempt((c) =>
       c.GET("/platform/data-exports", {
-        params: { query: exportStatus ? { status: exportStatus } : {} },
+        params: {
+          query: {
+            limit: PAGE_SIZE,
+            offset: exportOffset,
+            ...(exportStatus ? { status: exportStatus } : {}),
+          },
+        },
       }),
     ).then((r) => {
       if (!live) return;
-      if (r.ok) setExports({ key: exportStatus, items: r.data.items });
+      if (r.ok)
+        setExports({
+          key: `${exportStatus}:${exportOffset}`,
+          items: r.data.items,
+          total: r.data.total,
+        });
       else fail(r.problem);
     });
     return () => {
       live = false;
     };
-  }, [exportStatus, fail]);
+  }, [exportStatus, exportOffset, fail]);
 
   return (
     <>
@@ -93,7 +127,10 @@ export function QueuesAdmin() {
         <Select
           label="Status"
           value={deletionStatus}
-          onChange={(e) => setDeletionStatus(e.target.value as DeletionStatus | "")}
+          onChange={(e) => {
+            setDeletionOffset(0);
+            setDeletionStatus(e.target.value as DeletionStatus | "");
+          }}
           containerClassName="mb-4 max-w-xs"
         >
           <option value="">All</option>
@@ -121,6 +158,12 @@ export function QueuesAdmin() {
             ))}
           </ul>
         )}
+        <Pager
+          label="Deletion requests"
+          offset={deletionOffset}
+          total={deletionsLoaded?.total ?? 0}
+          onChange={setDeletionOffset}
+        />
       </section>
 
       <section aria-labelledby="exports-h">
@@ -130,7 +173,10 @@ export function QueuesAdmin() {
         <Select
           label="Status"
           value={exportStatus}
-          onChange={(e) => setExportStatus(e.target.value as ExportStatus | "")}
+          onChange={(e) => {
+            setExportOffset(0);
+            setExportStatus(e.target.value as ExportStatus | "");
+          }}
           containerClassName="mb-4 max-w-xs"
         >
           <option value="">All</option>
@@ -158,6 +204,12 @@ export function QueuesAdmin() {
             ))}
           </ul>
         )}
+        <Pager
+          label="Data exports"
+          offset={exportOffset}
+          total={exportsLoaded?.total ?? 0}
+          onChange={setExportOffset}
+        />
       </section>
     </>
   );

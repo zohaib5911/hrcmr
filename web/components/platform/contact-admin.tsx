@@ -11,14 +11,18 @@ import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { formatUk } from "@/lib/ui/dates";
 
+import { PAGE_SIZE, Pager } from "./pager";
+
 type Message = components["schemas"]["ContactMessageRow"];
 type Filter = "" | "false" | "true";
 
 /** Contact inbox: filter by handled, open a message, mark it handled or not handled. */
 export function ContactAdmin() {
   const [filter, setFilter] = useState<Filter>("false");
-  const [loaded, setRows] = useState<{ key: Filter; items: Message[] } | null>(null);
-  const rows = loaded?.key === filter ? loaded.items : null;
+  const [offset, setOffset] = useState(0);
+  const [loaded, setRows] = useState<{ key: string; items: Message[]; total: number } | null>(null);
+  const key = `${filter}:${offset}`;
+  const rows = loaded?.key === key ? loaded.items : null;
   const [openId, setOpenId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<Problem | null>(null);
@@ -35,17 +39,19 @@ export function ContactAdmin() {
     let live = true;
     void attempt((c) =>
       c.GET("/platform/contact-messages", {
-        params: { query: filter ? { handled: filter === "true" } : {} },
+        params: {
+          query: { limit: PAGE_SIZE, offset, ...(filter ? { handled: filter === "true" } : {}) },
+        },
       }),
     ).then((r) => {
       if (!live) return;
-      if (r.ok) setRows({ key: filter, items: r.data.items });
+      if (r.ok) setRows({ key: `${filter}:${offset}`, items: r.data.items, total: r.data.total });
       else fail(r.problem);
     });
     return () => {
       live = false;
     };
-  }, [filter, fail]);
+  }, [filter, offset, fail]);
 
   async function mark(message: Message, handled: boolean) {
     setBusy(true);
@@ -61,7 +67,8 @@ export function ContactAdmin() {
     const updated = result.data;
     // A message that no longer matches the filter leaves the list.
     setRows((current) => ({
-      key: filter,
+      key,
+      total: current?.total ?? 0,
       items: (current?.items ?? []).flatMap((m) => {
         if (m.id !== message.id) return [m];
         const stays = filter === "" || (filter === "true") === (updated.handled_at !== null);
@@ -79,7 +86,10 @@ export function ContactAdmin() {
       <Select
         label="Show"
         value={filter}
-        onChange={(e) => setFilter(e.target.value as Filter)}
+        onChange={(e) => {
+          setOffset(0);
+          setFilter(e.target.value as Filter);
+        }}
         containerClassName="mb-6 max-w-xs"
       >
         <option value="false">Not handled</option>
@@ -145,6 +155,12 @@ export function ContactAdmin() {
           })}
         </ul>
       )}
+      <Pager
+        label="Contact messages"
+        offset={offset}
+        total={loaded?.total ?? 0}
+        onChange={setOffset}
+      />
     </>
   );
 }
