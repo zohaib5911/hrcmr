@@ -41,7 +41,7 @@ describe("public resource hubs", () => {
   });
 
   it("lists reviewed templates with a version, review date and download", () => {
-    const entry = { ...manifest.loadTemplates()[0], reviewed_on: "2026-11-12" };
+    const entry = { ...manifest.loadTemplates()[0]!, reviewed_on: "2026-11-12" };
     vi.spyOn(manifest, "loadTemplates").mockReturnValue([entry]);
     const html = renderToStaticMarkup(<TemplatesPage />);
     expect(html).toContain(`href="/resources/templates/download/${entry.file}"`);
@@ -51,7 +51,7 @@ describe("public resource hubs", () => {
   });
 
   it("blocks direct downloads of unreviewed, unknown and path-like files", async () => {
-    for (const file of [manifest.loadTemplates()[0].file, "missing.docx", "../manifest.json"]) {
+    for (const file of [manifest.loadTemplates()[0]!.file, "missing.docx", "../manifest.json"]) {
       const response = await GET(new Request("http://localhost"), {
         params: Promise.resolve({ file }),
       });
@@ -60,7 +60,7 @@ describe("public resource hubs", () => {
   });
 
   it("serves reviewed files as attachments with the correct media type", async () => {
-    const entry = { ...manifest.loadTemplates()[0], reviewed_on: "2026-11-12" };
+    const entry = { ...manifest.loadTemplates()[0]!, reviewed_on: "2026-11-12" };
     vi.spyOn(manifest, "loadTemplates").mockReturnValue([entry]);
     const response = await GET(new Request("http://localhost"), {
       params: Promise.resolve({ file: entry.file }),

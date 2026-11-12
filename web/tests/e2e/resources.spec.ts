@@ -10,7 +10,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       ["/resources/guides", "Employer guides"],
       ["/resources/tools", "Free employer tools"],
       ["/resources/templates", "Employer templates"],
-    ]) {
+    ] as const) {
       test(`${route} opens signed out with working category navigation`, async ({ page }) => {
         const response = await page.goto(route);
         expect(response?.status()).toBe(200);
