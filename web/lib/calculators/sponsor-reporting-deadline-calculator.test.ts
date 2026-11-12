@@ -81,4 +81,46 @@ describe("calculateDeadline", () => {
       calculateDeadline({ ...base, eventId: "role", eventDate: "2028-12-20" }).deadline,
     ).toBeNull();
   });
+
+  it("rejects events before the first captured holiday date", () => {
+    const r = calculateDeadline({ ...base, eventId: "role", eventDate: "2018-12-24" });
+    expect(r).toMatchObject({ reportable: true, deadline: null, daysLeft: null });
+    expect(r.explanation[0]).toContain("2019-01-01");
+    // The day after the event is the first counted day, so 2018-12-31 is still covered.
+    expect(calculateDeadline({ ...base, eventId: "role", eventDate: "2018-12-31" }).deadline).toBe(
+      "2019-01-15",
+    );
+  });
+  it("rejects deadlines beyond the last captured holiday date", () => {
+    const r = calculateDeadline({ ...base, eventId: "org-change", eventDate: "2028-12-01" });
+    expect(r).toMatchObject({ deadline: null, daysLeft: null });
+    expect(r.explanation[0]).toContain("2028-12-26");
+  });
+  it.each(["2018-06-01", "2029-03-01"])(
+    "gives no days left when today %s is outside coverage",
+    (today) => {
+      const r = calculateDeadline({ ...base, today, eventId: "role", eventDate: "2026-08-28" });
+      expect(r.deadline).toBe("2026-09-14");
+      expect(r.daysLeft).toBeNull();
+      expect(r.overdue).toBe(today > "2026-09-14");
+      expect(r.explanation.at(-1)).toContain("cannot be counted from today");
+    },
+  );
+  it("counts across national holidays inside coverage", () => {
+    const ni = calculateDeadline({
+      ...base,
+      nation: "northern-ireland",
+      today: "2026-03-13",
+      eventId: "role",
+      eventDate: "2026-03-13",
+    });
+    expect(ni).toMatchObject({ deadline: "2026-03-30", daysLeft: 10 });
+    const ew = calculateDeadline({
+      ...base,
+      today: "2026-12-24",
+      eventId: "role",
+      eventDate: "2026-12-24",
+    });
+    expect(ew).toMatchObject({ deadline: "2027-01-12", daysLeft: 10 });
+  });
 });
