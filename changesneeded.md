@@ -2,7 +2,7 @@
 Scope: 349789f..c221577, limited to T18.1–P20 plus the permitted one-line browser fix; audit-pass-3 already contained phase implementations excluded from AUDIT-3. Tests at audit: api 1363/0/0, web unit 1309/0, e2e 485/1/328 before the fix; post-fix employee unit 6/0 and shell e2e 9/0. RLS/lint/types/schema/build passed. Latest listed dev CI green (43302217904).
 Open findings: 1 P0 / 19 P1 / 1 P2 — FIX NEEDED. One further P0 browser failure was corrected during this audit under the one-line exception; AUDIT-4 remains open.
 
-### [ ] C4.1.1 · P0 · Restore rate limiting on every public register read (from T20.4)
+### [x] C4.1.1 · P0 · Restore rate limiting on every public register read (from T20.4) — fixed in PR #86
 - **Problem:** `api/app/modules/register/public.py:44` lost the router dependency from c955b58. Only `/explore` calls `_limit`; region, bulletin, profile and sitemap queries are publicly unbounded. No middleware provides a replacement.
 - **Fix:** restore a shared dependency using `RateLimiter`, `client_ip` and the existing error envelope, as c955b58 did. Retain the report-specific write limit/Turnstile and explorer's own limit. Add denial/boundary tests for all read route families in `api/tests/db/test_register_public.py` so a future route merge cannot remove protection unnoticed.
 - **Done when:** anonymous reads receive 429 after the connection budget; another connection remains allowed; report protection still passes. Run the affected API register tests, Ruff and mypy.
