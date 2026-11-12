@@ -464,7 +464,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [ ] T19.11 · S! · Calculator 10: uk-redundancy-pay-calculator
 ### [ ] T19.12 · S! · Calculator 11: uk-notice-pay-calculator
 ### [ ] T19.13 · S! · Calculator 12: uk-sick-pay-calculator
-### [ ] T19.14 · S! · Calculator 13: uk-minimum-wage-underpayment-checker (compare with `api/tests/test_minimum_wage.py` data if relevant)
+### [x] T19.14 · S! · Calculator 13: uk-minimum-wage-underpayment-checker (compare with `api/tests/test_minimum_wage.py` data if relevant)
 ### [ ] T19.15 · S · Tool 14: risk-assessment-template (browser-only, PDF/DOCX download, saved in localStorage with try/catch)
 
 ### [x] T19.16 · S! · Guides, including the 26-question audit self-test
