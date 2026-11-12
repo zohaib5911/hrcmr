@@ -1,0 +1,115 @@
+{
+  "source_url": "https://www.gov.uk/indefinite-leave-to-remain-business-investor-global-talent/eligibility",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "Indefinite leave to remain if you have a business, investor or talent visa: Time in the UK and financial requirements - GOV.UK",
+  "content": [
+    {
+      "p": "You must:"
+    },
+    {
+      "li": "have lived in the UK for long enough - this can be from 2 to 5 years"
+    },
+    {
+      "li": "meet the financial requirements, if relevant"
+    },
+    {
+      "p": "The rules depend on your type of visa."
+    },
+    {
+      "h2": "Global Talent"
+    },
+    {
+      "p": "The time you must have been in the UK depends on how you were endorsed."
+    },
+    {
+      "p": "You can apply after 3 years if you were endorsed by either:"
+    },
+    {
+      "li": "the British Academy, the Royal Academy of Engineering, the Royal Society or UK Research and Innovation"
+    },
+    {
+      "li": "Arts Council England or Tech Nation - this must be as a recognised leader (‘exceptional talent’)"
+    },
+    {
+      "p": "Or if you were endorsed by Arts Council England or Tech Nation as an emerging leader (‘exceptional promise’), you can apply after 5 years."
+    },
+    {
+      "p": "If you did not need an endorsement for your visa because you had won an eligible award, you can apply after 3 years."
+    },
+    {
+      "h2": "Tier 1 (Entrepreneur) visa"
+    },
+    {
+      "p": "The time you must have been in the UK depends on how much you’ve grown your business."
+    },
+    {
+      "p": "You can apply after 3 years if you’ve either:"
+    },
+    {
+      "li": "created the equivalent of 10 new full-time jobs that existed for 12 months"
+    },
+    {
+      "li": "generated £5 million business income in 3 years"
+    },
+    {
+      "p": "You can apply after 5 years if you’ve created the equivalent of 2 new full-time jobs that existed for 12 months."
+    },
+    {
+      "h2": "Tier 1 (Investor) visa"
+    },
+    {
+      "p": "The rules depend on when you successfully applied for your first Tier 1 (Investor) visa."
+    },
+    {
+      "h3": "On or after 6 November 2014"
+    },
+    {
+      "p": "The amount of time you must have spent in the UK depends on how much cash you’ve invested."
+    },
+    {
+      "table": [
+        ["Time living in the UK", "Cash"],
+        ["2 years", "£10 million"],
+        ["3 years", "£5 million"],
+        ["5 years", "£2 million"]
+      ]
+    },
+    {
+      "p": "You must have invested those funds in share capital, loan capital or UK government bonds in active UK companies within 3 months of your ‘investor start date’."
+    },
+    {
+      "p": "You cannot include UK government bonds if you first successfully applied for your visa on or after 29 March 2019."
+    },
+    {
+      "p": "There’s more about investment criteria in the detailed Tier 1 (Investor) guidance ."
+    },
+    {
+      "h3": "Before 6 November 2014"
+    },
+    {
+      "p": "The amount of time  you must have spent in the UK depends on your level of investment."
+    },
+    {
+      "table": [
+        [
+          "Time living in the UK",
+          "Cash",
+          "Personal assets",
+          "Loans from a UK-regulated financial institution"
+        ],
+        ["2 years", "£10 million", "£20 million", "£10 million"],
+        ["3 years", "£5 million", "£10 million", "£5 million"],
+        ["5 years", "£1 million", "£2 million", "£1 million"]
+      ]
+    },
+    {
+      "p": "You must have invested at least 75% of those funds in UK government bonds, share capital or loan capital in active UK companies within 3 months of your ‘investor start date’."
+    },
+    {
+      "p": "There’s more about investment criteria in the detailed Tier 1 (Investor) guidance ."
+    }
+  ]
+}

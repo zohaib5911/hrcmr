@@ -1,0 +1,12 @@
+{
+  "source_url": "https://www.economy-ni.gov.uk/news/minister-announces-increase-limits-unfair-dismissal-and-redundancy-payments",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-04-06",
+  "valid_to": "2027-04-05",
+  "validity_basis": "statutory_period",
+  "values": {
+    "jurisdiction": "NI",
+    "weekly_pay_cap": 783
+  },
+  "scope": "NI weekly cap only. Other eligibility and calculation rules must be verified against NI legislation, not inferred from the GB record."
+}

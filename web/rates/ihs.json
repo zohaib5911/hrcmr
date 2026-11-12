@@ -1,0 +1,109 @@
+{
+  "source_url": "https://www.gov.uk/healthcare-immigration-application/how-much-pay",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "Pay for UK healthcare as part of your immigration application: How much you have to pay - GOV.UK",
+  "content": [
+    {
+      "p": "The exact amount you pay depends on the length of your visa."
+    },
+    {
+      "p": "A visa may last longer than your course of study or period of employment."
+    },
+    {
+      "h2": "Cost for a year"
+    },
+    {
+      "p": "You’ll have to pay:"
+    },
+    {
+      "li": "£776 per year for students, their dependants, and those on a Youth Mobility Scheme visa, for example £1,552 for a 2-year visa"
+    },
+    {
+      "li": "£776 per year for visa and immigration applicants who are under the age of 18 at time of application"
+    },
+    {
+      "li": "£1,035 per year for all other visa and immigration applications, for example £3,105 for a 3-year visa"
+    },
+    {
+      "h2": "Cost for part of a year"
+    },
+    {
+      "p": "The amount you have to pay depends on the length of the visa you’re given and where you apply from."
+    },
+    {
+      "h3": "6 months or less"
+    },
+    {
+      "p": "You do not need to pay the surcharge if you’re applying from outside the UK for 6 months or less."
+    },
+    {
+      "p": "If you’re applying from inside the UK, you’ll have to pay half the yearly cost. For example:"
+    },
+    {
+      "li": "£388 for students, their dependants or under-18 applications"
+    },
+    {
+      "li": "£517.50 for any other application"
+    },
+    {
+      "h3": "More than 6 months but less than one year"
+    },
+    {
+      "p": "Wherever you apply from, you’ll have to pay the cost of a full year."
+    },
+    {
+      "h2": "Cost for more than one year"
+    },
+    {
+      "p": "If your visa is for more than a year, you’ll have to pay:"
+    },
+    {
+      "li": "the yearly cost plus half the yearly cost, if it’s for 18 months or less"
+    },
+    {
+      "li": "the cost of 2 full years, if it’s for more than 18 months but less than 2 years"
+    },
+    {
+      "h2": "Paying for dependants"
+    },
+    {
+      "p": "Dependants aged 18 or over usually need to pay the same amount as you."
+    },
+    {
+      "h2": "If you do not pay"
+    },
+    {
+      "p": "You’ll get an email from UK Visas and Immigration if you do not pay the surcharge (or do not pay enough)."
+    },
+    {
+      "p": "The email will explain how to pay. It will go to the email address given in your visa application."
+    },
+    {
+      "p": "Check your junk folder if you cannot see the email in your inbox."
+    },
+    {
+      "p": "Once you get the email, you must pay the surcharge within:"
+    },
+    {
+      "li": "10 working days if you’re inside the UK"
+    },
+    {
+      "li": "7 working days if you’re outside the UK"
+    },
+    {
+      "p": "Your visa or immigration application will be turned down if you do not pay the full amount in this time."
+    }
+  ],
+  "values": {
+    "adult_annual": 1035,
+    "under_18_annual": 776,
+    "student_or_youth_mobility_annual": 776,
+    "adult_half_year": 517.5,
+    "reduced_half_year": 388,
+    "under_18_assessed_at": "application",
+    "rounding": "See content: outside applications of six months or less are exempt; other partial years round to six-month blocks."
+  }
+}
