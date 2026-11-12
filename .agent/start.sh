@@ -13,7 +13,8 @@ case ${1:-start} in
     tmux new-session -d -s agents -n claude "bash '$HERE/run.sh' claude; read -r -p 'claude runner stopped; Enter to close'"
     tmux new-window -t agents -n codex "bash '$HERE/run.sh' codex; read -r -p 'codex runner stopped; Enter to close'"
     # Merge green PRs every 5 minutes too, not only between agent sessions (gates and audits run for an hour).
-    tmux new-window -t agents -n prs "while true; do bash '$HERE/prs.sh'; sleep 300; done"
+    # bash -c: tmux runs window commands in the login shell, which may be fish (it cannot read a bash loop).
+    tmux new-window -t agents -n prs "bash -c 'while true; do bash \"$HERE/prs.sh\"; sleep 300; done'"
     echo "started. watch: bash .agent/start.sh attach" ;;
   attach) exec tmux attach -t agents ;;
   status) bash "$HERE/bus.sh" status ;;
