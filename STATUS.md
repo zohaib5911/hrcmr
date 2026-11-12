@@ -1,20 +1,24 @@
 # STATUS (snapshot — live state is `bash .agent/bus.sh status`)
-Updated: 2026-11-12 17:22 UTC    Agent: codex (gpt-6.1-sol, BIG)    Branch: task/AUDIT-3
-State: HANDED OVER — audit passed (AUDIT-3 round 4: 0 P0 / 0 P1 / 1 P2).
+Updated: 2026-11-12 21:12 UTC    Agent: codex (gpt-6.1-sol, BIG)    Branch: task/AUDIT-4
+State: HANDED OVER — audit fixes ready (AUDIT-4 round 1: 1 P0 / 19 P1 / 1 P2).
 
 ## Last completed
-- Re-audited C3.3.1/C3.3.2 at code snapshot 462a184: delayed contact updates preserve the current page/filter; all sixteen platform page-entry session cases execute under normal Vitest discovery.
-- Required ordered checks passed: API 1363; fresh migrated RLS CLI; web unit 1309; browser 485 passed / 220 expected skips; lint, formatting, types, generated client, production build and bundle scan.
-- Targeted verification: 34 passed (16 session, 9 original contact, 9 scratch contact). The scratch probe confirmed total 51→50 and Next becoming disabled after row removal; scratch removed.
+- Reviewed T18.1–P20 against the spec, implementation and tests, including phase implementations already present but expressly excluded from AUDIT-3. Checked calculator figures against live primary government sources.
+- Recorded 21 exact fix tasks and dependencies. C4.1.1 (lost public register read limits) must merge first. AUDIT-4 remains open.
+- Independently reproduced 13 calculator acceptance failures, five missing read-limit failures, stale same-day profiles/duplicate bulletins and skipped A→B→A imports. Temporary probes removed; evidence in docs/audits/audit-4-r1-review.md.
+
+## Verification
+- Required API suite: 1363 passed / 0 failed / 0 skipped; Ruff/format/mypy pass. RLS CLI passed on a fresh migrated database.
+- Web lint/typecheck, unit 1309 passed, generated API client, production build and bundle scan passed.
+- Required browser run: 485 passed / 1 failed / 328 expected screenshot-only skips. The mobile employee filter scroller failed keyboard-focus accessibility.
+- Permitted audit one-line fix c221577 adds tabIndex=0 to that wrapper. Post-fix lint/types, employee-list unit 6 passed and all shell accessibility cases plus setup 9 passed. Full suite not rerun; its initial failure is preserved above.
+- Latest listed dev CI successful: 43302217904 at fa331d0. Audit PR CI belongs to the coordinator; do not wait.
 
 ## Ready next
-- C3.4.1 (P2): persist the verified total/pager boundary assertions in the existing contact removal test. Current product behavior is correct.
-- AUDIT-3 is PASS and ticked; use the coordinator's next.sh for assignment after this PR merges.
-
-## Health and evidence
-- No required test failures; no added skips or weakened assertions in scoped fixes. Both fix PRs #74/#75 have twelve green checks; latest listed dev CI run is green (42513865285).
-- Review evidence: docs/audits/audit-3-r4-review.md. Exact P2 task: changesneeded.md.
-- Admin browser-action coverage follows the recorded production-CSP decision. SSR browser security cases pass; deployment requires the documented authenticated ingress and separate server secrets.
+- Follow the coordinator next.sh: changesneeded.md first, starting C4.1.1. Other tasks cover register import/enrichment/admin UI, calculator correctness/data/spec gaps, and malformed risk draft recovery.
+- SSP partial-week rounding follows dated HMRC payment tables; the conflicting prose example and decision C4.1.12 are documented.
 
 ## Parked work
-- leftover L1: Stripe test-mode E2E awaits test credentials before Phase 23. No owner decision is needed for this audit.
+- Existing template human review and solicitor review of legal drafts remain required before publication/launch.
+- Existing Stripe test credentials and other parked work remain in leftover.md. No new owner input is needed for this audit.
+- True ONS map geometry and interaction are already scheduled by the owner in T25.2.
