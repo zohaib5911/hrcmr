@@ -18,6 +18,7 @@ export const ADMIN_LINKS: readonly { href: string; label: string }[] = [
   { href: "/queues", label: "Deletion and export queues" },
   { href: "/contact", label: "Contact messages" },
   { href: "/jobs", label: "Jobs" },
+  { href: "/register", label: "Sponsor register" },
   { href: "/audit", label: "Audit log" },
   { href: "/rules", label: "SOC rules" },
   { href: "/courses", label: "Courses" },
