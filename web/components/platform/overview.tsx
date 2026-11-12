@@ -22,6 +22,7 @@ export const ADMIN_LINKS: readonly { href: string; label: string }[] = [
   { href: "/rules", label: "SOC rules" },
   { href: "/courses", label: "Courses" },
   { href: "/dossier-links", label: "Dossier links" },
+  { href: "/settings", label: "Settings" },
 ];
 
 /** The admin landing page: platform figures as cards, then a list of every admin screen. */
