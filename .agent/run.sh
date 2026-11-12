@@ -49,10 +49,10 @@ worktree $WT, at the same time as the other agent. Follow AGENTS.md "Parallel mo
 Do exactly ONE block: the one \`bash $COORD/.agent/next.sh --agent $AGENT --tier $TIER\` gives you (always this copy: the
 one on your branch may be old). Use $COORD/.agent/bus.sh for the bus. Never ask the owner and never wait:
 SMALL agents post an ASK on the bus and move on; BIG agents decide and record it with bus.sh decide.
-Your final message must end with exactly one of these lines:
-RUNNER: DONE <id>      (PR opened or fix pushed)
-RUNNER: BLOCKED <id>   (ASK posted, claim set to blocked)
-RUNNER: IDLE           (next.sh said IDLE or DONE)
+Your final message must end with exactly one of these lines (written at the start of the line, without the indent):
+  RUNNER: DONE <id>      (PR opened or fix pushed)
+  RUNNER: BLOCKED <id>   (ASK posted, claim set to blocked)
+  RUNNER: IDLE           (next.sh said IDLE or DONE)
 EOF
 }
 
@@ -81,13 +81,14 @@ while true; do
   log="$BUS/logs/$AGENT-$(date +%Y%m%d-%H%M%S).log"
   echo "$(date '+%F %T') session -> $log"
   run_session "$log"; rc=$?
+  # The options in the prompt are indented, so Codex echoing its prompt into the log never counts as an answer.
   last=$(grep -E '^RUNNER: (DONE|BLOCKED|IDLE)' "$log" | tail -n 1)
   echo "$(date '+%F %T') rc=$rc ${last:-no RUNNER line}"
   case $last in
     "RUNNER: IDLE"*) fails=0; bash "$COORD/.agent/bus.sh" beat "$AGENT" "runner: idle, next try in $((IDLE_SLEEP/60)) min"; sleep "$IDLE_SLEEP" ;;
     "RUNNER: "*)     fails=0; sleep 30; exec bash "$COORD/.agent/run.sh" "$AGENT" ;;   # reload the latest runner
     *) fails=$((fails+1))
-       if tail -n 40 "$log" | grep -qiE 'usage limit|limit reached|hit your limit|out of (credits|usage)|quota|resets? (at|in)|429'; then
+       if tail -n 40 "$log" | grep -qiE 'usage limit|hit your usage limit|5-hour limit|limit reached|hit your limit|out of (credits|usage)|quota|resets? (at|in)|429'; then
          why="usage limit"; else why="session ended without a RUNNER line (rc $rc)"; fi
        wait=$(( LIMIT_SLEEP * (fails > 4 ? 2 : 1) ))
        bash "$COORD/.agent/bus.sh" beat "$AGENT" "runner: $why; retry in $((wait/60)) min"
