@@ -6,7 +6,16 @@ import uuid
 from datetime import date, datetime  # noqa: TC003
 from typing import Any
 
-from sqlalchemy import JSON, Date, DateTime, ForeignKey, String, UniqueConstraint, func
+from sqlalchemy import (
+    JSON,
+    Date,
+    DateTime,
+    ForeignKey,
+    LargeBinary,
+    String,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, UUIDPrimaryKeyMixin
@@ -20,6 +29,19 @@ class Publication(Base, UUIDPrimaryKeyMixin):
     sha256: Mapped[str] = mapped_column(String(64), index=True)
     fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     status: Mapped[str] = mapped_column(String(20), default="complete")
+
+
+class PlaceDataset(Base, UUIDPrimaryKeyMixin):
+    """An operator-loaded ONS place-name file, normalised to the geocoder's five columns.
+    The newest row is the one every later register import geocodes with."""
+
+    __tablename__ = "register_place_datasets"
+    version: Mapped[str] = mapped_column(String(100))
+    source: Mapped[str] = mapped_column(String(500))
+    sha256: Mapped[str] = mapped_column(String(64))
+    row_count: Mapped[int]
+    content: Mapped[bytes] = mapped_column(LargeBinary)
+    loaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class Sponsor(Base, UUIDPrimaryKeyMixin):

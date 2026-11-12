@@ -1616,6 +1616,18 @@ Checks:
 | `route` | VARCHAR(300) | no |  |  |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 
+## `register_place_datasets`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `version` | VARCHAR(100) | no |  |  |
+| `source` | VARCHAR(500) | no |  |  |
+| `sha256` | VARCHAR(64) | no |  |  |
+| `row_count` | INTEGER | no |  |  |
+| `content` | BYTEA | no |  |  |
+| `loaded_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
 ## `register_possible_matches`
 
 | Column | Type | Null | Default | Notes |

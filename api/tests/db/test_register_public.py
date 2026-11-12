@@ -3,15 +3,21 @@ snapshot tables; the report form is the only write and needs Turnstile and a per
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncIterator
-from datetime import date
+from datetime import UTC, date, datetime
+from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import httpx
 import pytest
+from pydantic import SecretStr
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app import cli
+from app.jobs.register import register_ingest_manual
 from app.modules.register import public as register
 from app.modules.register.ingest import ingest
 from tests.db.test_careers import anonymous
@@ -48,7 +54,8 @@ async def _clear(rig: dict[str, Any]) -> None:
         await c.execute(
             text(
                 "truncate register_problem_reports, register_possible_matches, register_changes, "
-                "register_entries, register_sponsors, register_publications cascade"
+                "register_entries, register_sponsors, register_publications, "
+                "register_place_datasets cascade"
             )
         )
 
@@ -232,3 +239,76 @@ async def test_explorer_retains_its_own_connection_limit(
         assert blocked.status_code == 429
         assert blocked.json()["error"]["code"] == "RATE_LIMITED"
         assert (await public.get(f"{API}/regions")).status_code == 200
+
+
+# Shaped like the ONS Index of Place Names: Bristol is in the file before any sponsor is there.
+ONS_PLACES = (
+    "place22cd,place22nm,descnm,ctyhistnm,ctyltnm,cty22nm,rgn22cd,ctry22cd,lat,long\n"
+    "IPN1,London,LOC,Middlesex,Greater London,Greater London,E12000007,E92000001,51.5,-0.12\n"
+    "IPN2,Leeds,BUA,Yorkshire,West Yorkshire,West Yorkshire,E12000003,E92000001,53.8,-1.55\n"
+    "IPN3,Bath,BUA,Somerset,Somerset,Somerset,E12000009,E92000001,51.38,-2.36\n"
+    "IPN4,Bristol,BUA,Gloucestershire,Bristol,Bristol,E12000009,E92000001,51.45,-2.59\n"
+)
+
+
+async def test_production_import_geocodes_from_the_loaded_ons_dataset(
+    rig: dict[str, Any], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    serving = {"csv": "first.csv"}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        name = serving["csv"] if request.url.path.endswith(".csv") else "publication.html"
+        return httpx.Response(200, content=(FIXTURES / name).read_bytes())
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        ctx = {
+            "owner_engine": rig["owner"],
+            "http": client,
+            "now": datetime(2026, 11, 10, 10, tzinfo=UTC),
+        }
+        # No dataset yet: the import still succeeds and leaves everyone unplaced.
+        assert await register_ingest_manual(ctx) == "imported"
+        public = anonymous(rig)
+        explore = (await public.get(f"{API}/explore")).json()["results"]
+        assert {s["precision"] for s in explore} == {"none"}
+
+        saved = tmp_path / "IPN_GB_2022.csv"
+        saved.write_text(ONS_PLACES)
+        owner_url = rig["owner"].url.render_as_string(hide_password=False)
+        monkeypatch.setattr(
+            cli,
+            "get_settings",
+            lambda: SimpleNamespace(database_url_owner=SecretStr(owner_url)),
+        )
+        # The operator command itself, in a thread because it runs its own event loop.
+        assert (
+            await asyncio.to_thread(cli.main, ["load-places", str(saved), "--version", "IPN 2022"])
+            == 0
+        )
+        by_name = {s["name"]: s for s in (await public.get(f"{API}/explore")).json()["results"]}
+        assert (by_name["Stable Ltd"]["region"], by_name["Stable Ltd"]["precision"]) == (
+            "Yorkshire and The Humber",
+            "exact",
+        )
+        assert (by_name["Gone Ltd"]["region"], by_name["Gone Ltd"]["precision"]) == (
+            "South West",
+            "town",
+        )
+
+        # A later production import places the new Bristol sponsor from the retained dataset.
+        serving["csv"] = "second.csv"
+        ctx["now"] = datetime(2026, 11, 11, 10, tzinfo=UTC)
+        assert await register_ingest_manual(ctx) == "imported"
+        by_name = {s["name"]: s for s in (await public.get(f"{API}/explore")).json()["results"]}
+        assert (by_name["New Ltd"]["region"], by_name["New Ltd"]["precision"]) == (
+            "South West",
+            "town",
+        )
+        regions = {
+            r["region"]: r["sponsors"]
+            for r in (await public.get(f"{API}/regions")).json()["regions"]
+        }
+        assert regions["South West"] == 1  # Gone Ltd is no longer current
+        assert regions["London"] == 1
+        assert regions["Yorkshire and The Humber"] == 1
+        await public.aclose()
