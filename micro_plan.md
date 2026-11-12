@@ -490,7 +490,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Steps:** discover the latest CSV link by parsing the GOV.UK publication page (never hard-code the file URL; allowlisted host only) → download → hash (skip if unchanged) → parse → normalise → upsert → changes vs previous → possible renames (fuzzy). Saved HTML + CSV fixtures; tests never hit the network. Job at 10:00 and 16:00 working days (R3).
 - **Done when:** running twice on the same fixture creates no new publication; diff test with two fixtures.
 
-### [ ] T20.2 · S · Geocoding, ITL1 regions, SVG map, Companies House bulk match
+### [x] T20.2 · S · Geocoding, ITL1 regions, SVG map, Companies House bulk match
 - **Spec:** plan L1237–1238, L1241, L1486. Original simplified SVG from ONS boundary data; Companies House match behind a flag.
 
 ### [ ] T20.3 · S · Explore page
