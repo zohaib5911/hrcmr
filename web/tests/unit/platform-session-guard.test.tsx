@@ -18,10 +18,10 @@ vi.mock("@/components/platform/contact-admin", () => ({ ContactAdmin: () => null
 vi.mock("@/components/platform/users-admin", () => ({ UsersAdmin: () => null }));
 vi.mock("@/components/platform/subscriptions-admin", () => ({ SubscriptionsAdmin: () => null }));
 
-import ContactPage from "./contact/page";
-import QueuesPage from "./queues/page";
-import SubscriptionsPage from "./subscriptions/page";
-import UsersPage from "./users/page";
+import ContactPage from "@/app/(admin)/platform/contact/page";
+import QueuesPage from "@/app/(admin)/platform/queues/page";
+import SubscriptionsPage from "@/app/(admin)/platform/subscriptions/page";
+import UsersPage from "@/app/(admin)/platform/users/page";
 
 const pages = [
   ["/queues", QueuesPage],
