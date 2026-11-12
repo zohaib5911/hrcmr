@@ -140,7 +140,7 @@ export function EmployeesPage({
       />
       <div className="flex flex-col gap-4">
         {archived ? null : (
-          <div className="max-w-full overflow-x-auto">
+          <div tabIndex={0} className="max-w-full overflow-x-auto">
             <SegmentedControl<PillId>
               className="min-w-max"
               label="Show"
