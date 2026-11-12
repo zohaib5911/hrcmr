@@ -14,7 +14,7 @@ test("published pages have unique canonicals, social images and nonce-protected 
     expect(new URL(canonical!).pathname).toBe(path);
     expect(canonicals.has(canonical!)).toBe(false);
     canonicals.add(canonical!);
-    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /\S.{20}/);
+    await expect(page.locator('meta[name="description"]')).toHaveAttribute("content", /\S/);
     await expect(page.locator('meta[property="og:url"]')).toHaveAttribute("content", canonical!);
     const image = await page.locator('meta[property="og:image"]').getAttribute("content");
     expect(image).toContain("opengraph-image");

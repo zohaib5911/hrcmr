@@ -1,0 +1,108 @@
+{
+  "lighthouseVersion": "13.6.0",
+  "formFactor": "mobile",
+  "throttlingMethod": "simulate",
+  "minimumRequired": 95,
+  "pages": [
+    {
+      "path": "/",
+      "fetchTime": "2026-11-12T10:42:01.747Z",
+      "scores": {
+        "performance": 99,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      }
+    },
+    {
+      "path": "/about",
+      "fetchTime": "2026-11-12T10:42:26.220Z",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      }
+    },
+    {
+      "path": "/accessibility",
+      "fetchTime": "2026-11-12T10:42:37.892Z",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      }
+    },
+    {
+      "path": "/careers",
+      "fetchTime": "2026-11-12T10:42:43.649Z",
+      "scores": {
+        "performance": 96,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      }
+    },
+    {
+      "path": "/contact",
+      "fetchTime": "2026-11-12T10:42:32.005Z",
+      "scores": {
+        "performance": 97,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      }
+    },
+    {
+      "path": "/features",
+      "fetchTime": "2026-11-12T10:42:08.299Z",
+      "scores": {
+        "performance": 96,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      }
+    },
+    {
+      "path": "/pricing",
+      "fetchTime": "2026-11-12T10:42:14.277Z",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      }
+    },
+    {
+      "path": "/security",
+      "fetchTime": "2026-11-12T10:42:20.392Z",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      }
+    },
+    {
+      "path": "/sponsor-licence-compliance",
+      "fetchTime": "2026-11-12T10:42:49.372Z",
+      "scores": {
+        "performance": 100,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      }
+    },
+    {
+      "path": "/sponsor-licence-compliance/reporting-duties",
+      "fetchTime": "2026-11-12T10:42:55.346Z",
+      "scores": {
+        "performance": 97,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      }
+    }
+  ]
+}
