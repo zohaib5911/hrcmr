@@ -64,3 +64,8 @@ T23.6: T23.5
 T23.7: T23.6
 T23.8: T23.7
 T24.1: P23
+
+# Phase 25 (owner request): visual audit -> visual fixes -> security scan, after launch.
+T25.1: T24.1
+T25.2: T25.1
+T25.3: T25.2

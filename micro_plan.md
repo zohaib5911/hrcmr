@@ -554,3 +554,26 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [ ] T23.8 · B · Production go-live
 ### [ ] P23 · B · Phase 23 gate
 ### [ ] T24.1 · B · Launch checklist (plan §12) and `docs/handover.md`
+
+---
+
+## Phase 25 — Apple-quality visual pass and final security scan (big model, added by the owner 2026-11-12)
+
+### [ ] T25.1 · B · Visual audit of every screen against the Apple-quality design
+- **Spec:** plan §5 (L296–450): principles, typography, colour tokens, materials (glass), motion, layout, components, §5.12 QA checklist. Plan L25: no Apple trademarks, logos, SF Symbols, SF font files or device images.
+- **Steps:** 1. List every route (app, admin, auth, marketing, careers, free tools) from `web/app`. 2. Screenshot each at 390 and 1280 px, light and dark, into `docs/screenshots/phase-25/before/` (copy `web/tests/e2e/phase9-screenshots.spec.ts`; run through `bus.sh serial`). 3. Check each against §5 and §5.12. Look hardest at the glass: translucent sidebar, toolbar, sheets, popovers and the marketing nav (`backdrop-filter: saturate(180%) blur(20px)` over the material tokens, hairline borders, layered soft shadows); also type scale, spacing on the 4 px grid, radius, motion, alignment and empty/loading states. 4. Write `docs/design-audit.md`: one row per screen with each gap, the §5 rule it breaks and the fix (token or component, not per-page CSS), sorted by how many screens a fix touches.
+- **Done when:** `docs/design-audit.md` covers every route, and the before screenshots are saved. No app code changed.
+
+### [ ] T25.2 · B · Make every screen look Apple-quality (glass and the rest)
+- **Spec:** `docs/design-audit.md` (T25.1) and plan §5. This block may restyle earlier work (the owner's request); behaviour stays the same.
+- **Steps:** 1. Fix the tokens and materials in `web/app/globals.css` first, so most screens improve at once. 2. Then the shared components in `web/components/ui/`. 3. Then the rows of `docs/design-audit.md` left over, screen by screen; tick each row there. 4. After screenshots into `docs/screenshots/phase-25/after/` (same script, same widths and themes).
+- **Watch:** our own tokens and components only: no Apple logos, SF Symbols, SF font files or Apple device frames (plan L25, L308). Every glass surface falls back to a solid colour under `prefers-reduced-transparency` and when `backdrop-filter` is unsupported; motion respects `prefers-reduced-motion`; text contrast stays WCAG AA on glass in both themes; no layout shift. Don't change copy, routes or behaviour. Update the `/design` catalog and its expected tokens when tokens change.
+- **Done when:** every `docs/design-audit.md` row is ticked; web lint, typecheck, unit suite and full e2e pass (e2e via `bus.sh serial`); the design and accessibility e2e specs pass in both themes.
+
+### [ ] T25.3 · B · Whole-project security scan
+- **Spec:** plan security sections; `docs/security.md` (T21.2) as the threat model; `audit.md` severity scale (P0/P1/P2).
+- **Steps:** 1. Automated: gitleaks over the full history, semgrep, pip-audit, pnpm audit, Trivy images and config, actionlint and zizmor (the CI jobs, run locally), plus the CSP and security headers on the production build. 2. Manual review of every API router: auth, MFA, sessions, CSRF, RBAC matrix, RLS on every table, tenant isolation, platform admin and support mode, file uploads, exports, webhooks (Stripe signature, replay), rate limits, input validation, SSRF in fetchers, secrets handling and logging. 3. Check that T25.2 added no unsafe CSS or inline script that the CSP would need to allow. 4. Write `docs/security-scan-2026.md` with each finding, its severity and the fix.
+- **Done when:** the report covers every router and table; every P0/P1 is fixed in this block with a test that fails before the fix (or, if large, written into `changesneeded.md` for the next round); the automated scans are clean.
+
+### [ ] P25 · B · Phase 25 gate
+- Recipe R7, and redeploy staging then production with the T23.5 workflows after the PR to main merges.
