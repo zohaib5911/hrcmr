@@ -234,7 +234,7 @@ export function SponsorLicenceCostCalculator() {
         aria-label="Cost result"
         aria-live="polite"
         aria-atomic="true"
-        className="bg-bg-elevated rounded-control p-5 sm:p-6"
+        className="bg-elevated rounded-control p-5 sm:p-6"
       >
         {result && input ? (
           <>

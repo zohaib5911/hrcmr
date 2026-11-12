@@ -159,7 +159,7 @@ export function MinimumWageChecker() {
       <section
         aria-label="Minimum wage result"
         aria-live="polite"
-        className="rounded-control bg-bg-elevated p-5"
+        className="rounded-control bg-elevated p-5"
       >
         {result ? (
           <>
