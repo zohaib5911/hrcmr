@@ -17,7 +17,7 @@ class Publication(Base, UUIDPrimaryKeyMixin):
     published_on: Mapped[date] = mapped_column(Date)
     source_url: Mapped[str] = mapped_column(String(2048))
     row_count: Mapped[int]
-    sha256: Mapped[str] = mapped_column(String(64), unique=True)
+    sha256: Mapped[str] = mapped_column(String(64), index=True)
     fetched_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     status: Mapped[str] = mapped_column(String(20), default="complete")
 

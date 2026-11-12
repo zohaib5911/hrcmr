@@ -106,12 +106,12 @@ async def ingest(db: AsyncSession, client: httpx.AsyncClient, on: date) -> str:
     digest = hashlib.sha256(content).hexdigest()
     # Serialize snapshot writers, including manual reruns. Caller owns commit/rollback.
     await db.execute(select(func.pg_advisory_xact_lock(20201101)))
-    if await db.scalar(select(Publication.id).where(Publication.sha256 == digest)):
-        return "unchanged"
-    rows = parse(content)
     previous = await db.scalar(
         select(Publication).order_by(Publication.fetched_at.desc(), Publication.id.desc()).limit(1)
     )
+    if previous and previous.sha256 == digest:
+        return "unchanged"
+    rows = parse(content)
     old: dict[object, set[tuple[str, str]]] = defaultdict(set)
     if previous:
         for entry in (
