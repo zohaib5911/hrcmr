@@ -1,0 +1,34 @@
+"""Twice per UK working day, with UTC candidates covering GMT and BST."""
+
+from __future__ import annotations
+
+from datetime import UTC, datetime
+from typing import Any
+from zoneinfo import ZoneInfo
+
+import httpx
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.modules.holidays.models import BankHoliday
+from app.modules.register.ingest import ingest
+
+
+async def register_ingest(ctx: dict[str, Any]) -> str:
+    now = ctx.get("now", datetime.now(UTC)).astimezone(ZoneInfo("Europe/London"))
+    if now.weekday() >= 5 or now.hour not in (10, 16):
+        return "outside_schedule"
+    engine = ctx.get("owner_engine")
+    if engine is None:
+        return "no_owner_engine"
+    async with AsyncSession(engine) as db:
+        if await db.scalar(
+            select(BankHoliday.id).where(
+                BankHoliday.region == "england-and-wales", BankHoliday.on_date == now.date()
+            )
+        ):
+            return "bank_holiday"
+        async with httpx.AsyncClient(timeout=60) as client:
+            result = await ingest(db, ctx.get("http", client), now.date())
+        await db.commit()
+        return result

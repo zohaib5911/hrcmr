@@ -453,8 +453,8 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - If a figure you need is not in `web/rates/`: **STOP — BLOCKED needs verified figure**.
 
 ### [x] T19.2 · S! · Calculator 1: right-to-work-october-2026-checker (+ build the shared calculator template)
-### [ ] T19.3 · S! · Calculator 2: sponsor-licence-cost-calculator
-### [ ] T19.4 · S! · Calculator 3: sponsor-reporting-deadline-calculator (reuse the working-day logic semantics from `api/tests/test_working_days.py`)
+### [x] T19.3 · S! · Calculator 2: sponsor-licence-cost-calculator
+### [x] T19.4 · S! · Calculator 3: sponsor-reporting-deadline-calculator (reuse the working-day logic semantics from `api/tests/test_working_days.py`)
 ### [ ] T19.5 · S! · Calculator 4: skilled-worker-visa-checker (SOC data via public SOC API, no AI)
 ### [ ] T19.6 · S! · Calculator 5: ilr-citizenship-checker
 ### [ ] T19.7 · S! · Calculator 6: skilled-worker-ilr-salary-calculator
@@ -485,7 +485,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 20 — Public sponsor register
 
-### [ ] T20.1 · S! · Ingest pipeline
+### [x] T20.1 · S! · Ingest pipeline
 - **Spec:** plan L1232–1238, L1485; §6.12 L617–627.
 - **Steps:** discover the latest CSV link by parsing the GOV.UK publication page (never hard-code the file URL; allowlisted host only) → download → hash (skip if unchanged) → parse → normalise → upsert → changes vs previous → possible renames (fuzzy). Saved HTML + CSV fixtures; tests never hit the network. Job at 10:00 and 16:00 working days (R3).
 - **Done when:** running twice on the same fixture creates no new publication; diff test with two fixtures.

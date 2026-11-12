@@ -52,13 +52,13 @@ Each screen needs loading, empty and error states, works at 360 px and in dark m
 - **Watch:** do the refund request once per click (disable the button while busy); never type an amount.
 - **Done when:** unit test (button hidden for support level; confirm sends `confirm: true`); e2e shows the list (the e2e server has no Stripe, so the refund itself is a unit test only).
 
-### [ ] C3.1.8 · P1 · Admin screens: deletion and export queues, contact inbox (from T17.4)
+### [x] C3.1.8 · P1 · Admin screens: deletion and export queues, contact inbox (from T17.4) — fixed in PR #44
 - **Pattern:** read the "Admin screens" paragraph at the top of changesneeded.md first (files to copy, states, tests).
 - **Problem:** no screens for `GET /platform/deletion-requests`, `GET /platform/data-exports`, `GET/PATCH /platform/contact-messages`.
 - **Fix:** `/queues` with two tables (deletion requests by status; data exports by status) and `/contact` (handled / not handled filter, open a message, "Mark handled" / "Mark not handled").
 - **Done when:** unit tests; e2e opens both pages and sees the empty states.
 
-### [ ] C3.1.9 · P1 · Admin screens: settings (terms publish, feature flags, announcements) (from T17.5)
+### [x] C3.1.9 · P1 · Admin screens: settings (terms publish, feature flags, announcements) (from T17.5) — fixed in PR #45
 - **Pattern:** read the "Admin screens" paragraph at the top of changesneeded.md first (files to copy, states, tests).
 - **Problem:** no screens for `/platform/terms-versions`, `/platform/feature-flags`, `/platform/announcements`.
 - **Fix:** `/settings` page with three cards: terms versions list + "Publish new version" (owner only; second confirmation that says every user must accept again); feature flags list with a switch per flag (`PUT /platform/feature-flags/{key}`); announcements list + create (message, region, start, end) + "End now".
