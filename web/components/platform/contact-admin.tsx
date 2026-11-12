@@ -54,6 +54,8 @@ export function ContactAdmin() {
   }, [filter, offset, fail]);
 
   async function mark(message: Message, handled: boolean) {
+    const requestKey = key;
+    const requestFilter = filter;
     setBusy(true);
     setProblem(null);
     const result = await attempt((c) =>
@@ -65,16 +67,20 @@ export function ContactAdmin() {
     setBusy(false);
     if (!result.ok) return fail(result.problem);
     const updated = result.data;
-    // A message that no longer matches the filter leaves the list.
-    setRows((current) => ({
-      key,
-      total: current?.total ?? 0,
-      items: (current?.items ?? []).flatMap((m) => {
+    // Only touch the list the request was made from; a page or filter change moved on.
+    setRows((current) => {
+      if (!current || current.key !== requestKey) return current;
+      let removed = 0;
+      const items = current.items.flatMap((m) => {
         if (m.id !== message.id) return [m];
-        const stays = filter === "" || (filter === "true") === (updated.handled_at !== null);
+        // A message that no longer matches the filter leaves the list.
+        const stays =
+          requestFilter === "" || (requestFilter === "true") === (updated.handled_at !== null);
+        if (!stays) removed += 1;
         return stays ? [updated] : [];
-      }),
-    }));
+      });
+      return { key: current.key, items, total: Math.max(0, current.total - removed) };
+    });
   }
 
   return (

@@ -97,3 +97,50 @@ describe("ContactAdmin expired platform session", () => {
     vi.unstubAllGlobals();
   });
 });
+
+describe("ContactAdmin delayed update", () => {
+  const other = { ...message, id: "m2", name: "Page Two" };
+  function deferPatch() {
+    let resolve: (v: unknown) => void = () => {};
+    patch.mockReturnValue(new Promise((r) => (resolve = r)));
+    return () => resolve({ data: { ...message, handled_at: "2026-11-02T09:00:00Z" } });
+  }
+
+  it("keeps the second page visible when a delayed update resolves after paging", async () => {
+    get.mockResolvedValueOnce({ data: { items: [message], total: 120 } });
+    get.mockResolvedValueOnce({ data: { items: [other], total: 120 } });
+    const finish = deferPatch();
+    render(<ContactAdmin />);
+    await userEvent.click(await screen.findByRole("button", { name: "Open" }));
+    await userEvent.click(screen.getByRole("button", { name: "Mark handled" }));
+    await userEvent.click(screen.getByRole("button", { name: "Next" }));
+    expect(await screen.findByText("Page Two")).toBeInTheDocument();
+    finish();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(screen.getByText("Page Two")).toBeInTheDocument();
+    expect(screen.queryByText("Loading…")).not.toBeInTheDocument();
+  });
+
+  it("keeps the new filter's list when a delayed update resolves after a filter change", async () => {
+    get.mockResolvedValueOnce({ data: { items: [message], total: 1 } });
+    get.mockResolvedValueOnce({ data: { items: [other], total: 1 } });
+    const finish = deferPatch();
+    render(<ContactAdmin />);
+    await userEvent.click(await screen.findByRole("button", { name: "Open" }));
+    await userEvent.click(screen.getByRole("button", { name: "Mark handled" }));
+    await userEvent.selectOptions(screen.getByLabelText("Show"), "true");
+    expect(await screen.findByText("Page Two")).toBeInTheDocument();
+    finish();
+    await new Promise((r) => setTimeout(r, 10));
+    expect(screen.getByText("Page Two")).toBeInTheDocument();
+  });
+
+  it("removes the handled row from the active page", async () => {
+    get.mockResolvedValue({ data: { items: [message, other], total: 2 } });
+    render(<ContactAdmin />);
+    await userEvent.click((await screen.findAllByRole("button", { name: "Open" }))[0]!);
+    await userEvent.click(screen.getByRole("button", { name: "Mark handled" }));
+    await waitFor(() => expect(screen.queryByText("Sam Jones")).not.toBeInTheDocument());
+    expect(screen.getByText("Page Two")).toBeInTheDocument();
+  });
+});
