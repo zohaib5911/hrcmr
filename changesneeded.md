@@ -22,7 +22,7 @@ Counts: 1 P0 / 4 P1 / 1 P2. FIX NEEDED.
 - **Fix:** use an authenticated platform read and `dataOrSessionRedirect` on each page (coordinate with C3.2.3's trusted SSR strategy); do not swallow authentication refusal in owner lookup. Cover 401 and 403 on page entry and browser expiry while retaining normal action errors. Keep sensitive data protected by the API.
 - **Done when:** tests for each page cover absent, invalid/expired and valid platform sessions; refusals return to `/session?next=<public path>`, successful page views are audited, and component tests cover expired-session outcomes.
 
-### [ ] C3.2.5 · P1 · Expose subsequent contact and queue records (from C3.1.8)
+### [x] C3.2.5 · P1 · Expose subsequent contact and queue records (from C3.1.8) — fixed in PR #66
 - **Problem:** `web/components/platform/contact-admin.tsx` and `queues-admin.tsx` request no offset/limit, discard response totals, and expose no paging. Their APIs default to 50 rows; the 51st outstanding contact message or deletion/export request is unreachable.
 - **Fix:** add independent offset/total state and accessible Previous/Next controls for the contact list and both queue lists; preserve status filters and reset each affected offset on filter changes. Copy subscriptions paging. Avoid stale-filter response races.
 - **Done when:** unit tests cover more than 50 results, second-page requests and filter resets for all three lists, including empty/error states.
