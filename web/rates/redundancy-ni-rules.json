@@ -281,5 +281,23 @@
     {
       "li": "Managing your money if your job is at risk"
     }
-  ]
+  ],
+  "values": {
+    "minimum_service_years": 2,
+    "maximum_service_years": 20,
+    "age_bands": [
+      {
+        "under": 22,
+        "weeks_per_year": 0.5
+      },
+      {
+        "under": 41,
+        "weeks_per_year": 1
+      },
+      {
+        "under": null,
+        "weeks_per_year": 1.5
+      }
+    ]
+  }
 }
