@@ -13,9 +13,10 @@ import os
 import secrets
 from collections.abc import AsyncIterator, Sequence
 from contextlib import asynccontextmanager, suppress
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 
+import httpx
 import uvicorn
 from arq.worker import Worker
 from fastapi import Body, FastAPI, HTTPException
@@ -36,6 +37,8 @@ from app.modules.email.outbox import sender_of
 from app.modules.email.templates import render
 from app.modules.identity.models import User
 from app.modules.learning.loader import load_courses
+from app.modules.register.geo import Place, apply_geocoding
+from app.modules.register.ingest import ingest
 from app.modules.soc.importer import load_soc_source
 from app.modules.soc.source import load_source
 from app.modules.soc_rules.importer import import_rules_source, publish_rules_version
@@ -89,6 +92,38 @@ async def _courses(owner_url: str) -> None:
     try:
         async with AsyncSession(engine) as db:
             await load_courses(db, Path(__file__).parent / "fixtures" / "courses")
+            await db.commit()
+    finally:
+        await engine.dispose()
+
+
+async def _register_reference(owner_url: str) -> None:
+    """Saved publications for register browser tests, through the real ingest (no network)."""
+    fixtures = Path(__file__).parent / "fixtures" / "register"
+    current = "first.csv"
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        name = current if request.url.path.endswith(".csv") else "publication.html"
+        return httpx.Response(200, content=(fixtures / name).read_bytes())
+
+    engine = engine_for(owner_url, poolclass=NullPool)
+    try:
+        async with (
+            AsyncSession(engine) as db,
+            httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client,
+        ):
+            await ingest(db, client, date(2026, 11, 10))
+            current = "second.csv"
+            await ingest(db, client, date(2026, 11, 11))
+            await apply_geocoding(
+                db,
+                {
+                    ("london", ""): Place("London", 51.5, -0.1),
+                    ("leeds", ""): Place("Yorkshire and The Humber", 53.8, -1.5),
+                    ("bath", ""): Place("South West", 51.4, -2.4),
+                    ("bristol", ""): Place("South West", 51.5, -2.6),
+                },
+            )
             await db.commit()
     finally:
         await engine.dispose()
@@ -201,6 +236,7 @@ def main() -> None:
         asyncio.run(_calendar(database.owner_url))
         asyncio.run(_courses(database.owner_url))
         asyncio.run(_soc_reference(database.owner_url))
+        asyncio.run(_register_reference(database.owner_url))
         settings = build_settings(
             database_url=database.app_url,
             redis_url=REDIS_URL,

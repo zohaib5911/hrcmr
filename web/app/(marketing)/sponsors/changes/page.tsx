@@ -42,7 +42,10 @@ export default async function Page() {
               {data.bulletins.map((b) => (
                 <tr key={b.date}>
                   <th scope="row" className="font-normal">
-                    <Link href={`/sponsors/changes/${b.date}`} className="underline">
+                    <Link
+                      href={`/sponsors/changes/${b.date}`}
+                      className="inline-flex min-h-11 items-center underline"
+                    >
                       {formatUk(b.date)}
                     </Link>
                   </th>

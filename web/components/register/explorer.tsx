@@ -160,7 +160,7 @@ function HistoryChart({
       </figcaption>
       <details className="mt-3">
         <summary className="cursor-pointer text-accent-text">View chart data</summary>
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto" role="region" aria-label="Chart data" tabIndex={0}>
           <table className="w-full text-left text-subheadline">
             <caption className="sr-only">Publication chart values</caption>
             <thead>
@@ -411,7 +411,12 @@ export function RegisterExplorer() {
             )}
             {view === "Trend" && <HistoryChart points={data.timeline ?? []} trend />}
             {view === "Table" && (
-              <div className="overflow-x-auto">
+              <div
+                className="overflow-x-auto"
+                role="region"
+                aria-label="Sponsor table"
+                tabIndex={0}
+              >
                 <table className="w-full text-left text-subheadline">
                   <caption className="sr-only">Matching sponsors</caption>
                   <thead>

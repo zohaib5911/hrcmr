@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Keeps one agent working for ever, in its own git worktree, and restarts it after a usage limit.
-#   bash .agent/run.sh claude        (Claude Code; CLAUDE_MODEL=sonnet by default -> SMALL)
+#   bash .agent/run.sh claude        (Claude Code; CLAUDE_MODEL=opus by default -> BIG)
 #   bash .agent/run.sh codex         (Codex CLI;  model from ~/.codex/config.toml   -> BIG)
 # Normally started by .agent/start.sh inside tmux. Stop it with Ctrl-C or `bash .agent/start.sh stop`.
 #
@@ -12,17 +12,17 @@
 #   started while the limit is still on ends at once, so retrying costs nothing; work resumes by itself.
 #
 # Env overrides: CLAUDE_MODEL, CODEX_MODEL, AGENT_TIER (S|B), CLAUDE_FLAGS, CODEX_FLAGS,
-#                IDLE_SLEEP, LIMIT_SLEEP, SESSION_TIMEOUT (default 4h).
+#                IDLE_SLEEP, LIMIT_SLEEP, SESSION_TIMEOUT (default 90m).
 set -uo pipefail
 AGENT=${1:?usage: run.sh <claude|codex>}
 COMMON=$(git -C "$(dirname "$0")" rev-parse --path-format=absolute --git-common-dir)
 COORD=$(dirname "$COMMON"); BUS="$COMMON/agent-bus"
 WT="$(dirname "$COORD")/$(basename "$COORD")-wt/$AGENT"
-IDLE_SLEEP=${IDLE_SLEEP:-600} LIMIT_SLEEP=${LIMIT_SLEEP:-900} SESSION_TIMEOUT=${SESSION_TIMEOUT:-4h}
+IDLE_SLEEP=${IDLE_SLEEP:-600} LIMIT_SLEEP=${LIMIT_SLEEP:-900} SESSION_TIMEOUT=${SESSION_TIMEOUT:-90m}   # a stuck session costs at most 90 min; work is committed per step
 mkdir -p "$BUS/logs"
 
 case $AGENT in
-  claude) MODEL=${CLAUDE_MODEL:-sonnet}
+  claude) MODEL=${CLAUDE_MODEL:-opus}
           case $MODEL in *opus*|*fable*) DEF_TIER=B;; *) DEF_TIER=S;; esac ;;
   codex)  MODEL=${CODEX_MODEL:-$(sed -n 's/^model *= *"\(.*\)"/\1/p' ~/.codex/config.toml 2>/dev/null | head -1)}
           case $MODEL in *sol*|*solo*) DEF_TIER=B;; *) DEF_TIER=S;; esac ;;
