@@ -13,7 +13,7 @@ from datetime import date, timedelta
 from statistics import median
 from typing import TYPE_CHECKING, Annotated, Literal
 
-from fastapi import APIRouter, Path, Query, Request
+from fastapi import APIRouter, Depends, Path, Query, Request
 from pydantic import BaseModel, EmailStr, Field, StringConstraints
 from sqlalchemy import distinct, func, or_, select, tuple_
 from sqlalchemy.orm import aliased
@@ -41,7 +41,25 @@ if TYPE_CHECKING:
     from sqlalchemy.sql.elements import ColumnElement
     from sqlalchemy.sql.selectable import Subquery
 
-router = APIRouter(prefix="/public/register", tags=["public-register"])
+READ_PER_CONNECTION = ("public.register.read", 120, 60)  # page reads, per minute
+
+
+async def _limit_reads(request: Request) -> None:
+    name, limit, window = READ_PER_CONNECTION
+    result = await RateLimiter(request.app.state.auth.redis).hit(
+        name, client_ip(request) or "unknown", limit=limit, window_seconds=window
+    )
+    if not result.allowed:
+        raise AppError(
+            "RATE_LIMITED",
+            "Too many requests from this connection. Try again later.",
+            status_code=429,
+        )
+
+
+router = APIRouter(
+    prefix="/public/register", tags=["public-register"], dependencies=[Depends(_limit_reads)]
+)
 REPORT_PER_CONNECTION = ("public.register.report", 5, 3600)  # reports, per hour
 SITEMAP_PAGE = 45_000
 BULLETIN_LIMIT = 500
