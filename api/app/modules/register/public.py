@@ -11,11 +11,11 @@ import re
 import uuid  # noqa: TC003 (Pydantic resolves response fields at runtime)
 from datetime import date, timedelta
 from statistics import median
-from typing import TYPE_CHECKING, Annotated, Literal
+from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Path, Query, Request
 from pydantic import BaseModel, EmailStr, Field, StringConstraints
-from sqlalchemy import distinct, func, or_, select, tuple_
+from sqlalchemy import and_, case, distinct, func, or_, select, tuple_
 from sqlalchemy.orm import aliased
 
 from app.core.errors import AppError, NotFoundError
@@ -38,7 +38,7 @@ from app.modules.soc.public_router import SEARCH_PER_CONNECTION, _limit
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
     from sqlalchemy.orm import InstrumentedAttribute
-    from sqlalchemy.sql.elements import ColumnElement
+    from sqlalchemy.sql.elements import ColumnElement, UnaryExpression
     from sqlalchemy.sql.selectable import Subquery
 
 READ_PER_CONNECTION = ("public.register.read", 120, 60)  # page reads, per minute
@@ -63,6 +63,7 @@ router = APIRouter(
 REPORT_PER_CONNECTION = ("public.register.report", 5, 3600)  # reports, per hour
 SITEMAP_PAGE = 45_000
 BULLETIN_LIMIT = 500
+KINDS = ("added", "removed", "returned")
 
 
 def slugify(text: str) -> str:
@@ -193,9 +194,78 @@ class ReportOut(BaseModel):
 async def _latest(db: GlobalDb) -> Publication | None:
     return await db.scalar(
         select(Publication)
-        .order_by(Publication.published_on.desc(), Publication.id.desc())
+        .where(Publication.status == "complete")
+        .order_by(*_newest_first())
         .limit(1)
     )
+
+
+def _newest_first() -> tuple[UnaryExpression[Any], ...]:
+    return (
+        Publication.published_on.desc(),
+        Publication.fetched_at.desc(),
+        Publication.id.desc(),
+    )
+
+
+def _daily(*where: ColumnElement[bool]) -> Subquery:
+    """One bulletin per date: the last complete snapshot of the day against the last complete
+    snapshot before it. Each publication's changes are against the one before, so a sponsor's
+    first change that day says whether it was listed before the day ("removed" = it was), and
+    its last change says whether it is listed at the end of the day. Intraday flips cancel out."""
+    order = (Publication.fetched_at, Publication.id, Change.id)
+    window = (Publication.published_on, Change.sponsor_id)
+    steps = (
+        select(
+            Publication.published_on.label("day"),
+            Change.sponsor_id.label("sponsor_id"),
+            func.first_value(Change.change)
+            .over(partition_by=window, order_by=order)
+            .label("first"),
+            func.first_value(Change.change)
+            .over(partition_by=window, order_by=[c.desc() for c in order])
+            .label("last"),
+        )
+        .join(Publication, Publication.id == Change.publication_id)
+        .where(Publication.status == "complete", Change.change.in_(KINDS), *where)
+        .distinct()
+        .subquery()
+    )
+    kind = case(
+        (and_(steps.c.first == "removed", steps.c.last == "removed"), "removed"),
+        (and_(steps.c.first != "removed", steps.c.last != "removed"), steps.c.first),
+        else_=None,
+    )
+    rows = select(steps.c.day, steps.c.sponsor_id, kind.label("change")).subquery()
+    return select(rows).where(rows.c.change.is_not(None)).subquery()
+
+
+async def _dates(db: GlobalDb, *where: ColumnElement[bool], limit: int) -> list[date]:
+    return list(
+        (
+            await db.scalars(
+                select(Publication.published_on)
+                .where(Publication.status == "complete", *where)
+                .group_by(Publication.published_on)
+                .order_by(Publication.published_on.desc())
+                .limit(limit)
+            )
+        ).all()
+    )
+
+
+async def _counts(db: GlobalDb, days: list[date]) -> dict[date, dict[str, int]]:
+    out: dict[date, dict[str, int]] = {d: {} for d in days}
+    if not days:
+        return out
+    daily = _daily(Publication.published_on.between(min(days), max(days)))
+    rows = await db.execute(
+        select(daily.c.day, daily.c.change, func.count()).group_by(daily.c.day, daily.c.change)
+    )
+    for day, kind, n in rows:
+        if day in out:
+            out[day][kind] = n
+    return out
 
 
 @router.get("/regions", response_model=RegionListOut)
@@ -231,6 +301,7 @@ async def region(slug: Annotated[str, Path(max_length=60)], db: GlobalDb) -> Reg
     routes: list[RegionTown] = []
     changes: list[RegionChange] = []
     if latest:
+        latest_day = _daily(Publication.published_on == latest.published_on)
         routes = [
             RegionTown(town=r, count=n)
             for r, n in (
@@ -247,14 +318,10 @@ async def region(slug: Annotated[str, Path(max_length=60)], db: GlobalDb) -> Reg
             RegionChange(stable_id=s.stable_id, name=s.organisation_name, town=s.town, change=c)
             for s, c in (
                 await db.execute(
-                    select(Sponsor, Change.change)
-                    .join(Change, Change.sponsor_id == Sponsor.id)
-                    .where(
-                        Change.publication_id == latest.id,
-                        Sponsor.region_itl1 == name,
-                        Change.change.in_(("added", "removed", "returned")),
-                    )
-                    .order_by(Sponsor.organisation_name)
+                    select(Sponsor, latest_day.c.change)
+                    .join(latest_day, latest_day.c.sponsor_id == Sponsor.id)
+                    .where(Sponsor.region_itl1 == name)
+                    .order_by(Sponsor.organisation_name, Sponsor.id)
                     .limit(50)
                 )
             )
@@ -270,32 +337,18 @@ async def region(slug: Annotated[str, Path(max_length=60)], db: GlobalDb) -> Reg
     )
 
 
-async def _counts(db: GlobalDb) -> dict[object, dict[str, int]]:
-    out: dict[object, dict[str, int]] = {}
-    rows = await db.execute(
-        select(Change.publication_id, Change.change, func.count())
-        .where(Change.change.in_(("added", "removed", "returned")))
-        .group_by(Change.publication_id, Change.change)
-    )
-    for pub, kind, n in rows:
-        out.setdefault(pub, {})[kind] = n
-    return out
-
-
 @router.get("/changes", response_model=BulletinListOut)
 async def list_bulletins(
     db: GlobalDb, limit: Annotated[int, Query(ge=1, le=200)] = 60
 ) -> BulletinListOut:
-    pubs = (
-        await db.scalars(select(Publication).order_by(Publication.published_on.desc()).limit(limit))
-    ).all()
-    counts = await _counts(db)
+    days = await _dates(db, limit=limit)
+    counts = await _counts(db, days)
     bulletins = []
-    for p in pubs:
-        c = counts.get(p.id, {})
+    for day in days:
+        c = counts[day]
         a, r, ret = c.get("added", 0), c.get("removed", 0), c.get("returned", 0)
         bulletins.append(
-            BulletinSummary(date=p.published_on, added=a, removed=r, returned=ret, net=a + ret - r)
+            BulletinSummary(date=day, added=a, removed=r, returned=ret, net=a + ret - r)
         )
     return BulletinListOut(bulletins=bulletins)
 
@@ -312,23 +365,14 @@ def _sponsor(s: Sponsor) -> BulletinSponsor:
 
 @router.get("/changes/{on}", response_model=BulletinOut)
 async def bulletin(on: date, db: GlobalDb) -> BulletinOut:
-    pub = await db.scalar(
-        select(Publication)
-        .where(Publication.published_on == on)
-        .order_by(Publication.fetched_at.desc())
-        .limit(1)
-    )
-    if pub is None:
+    if not await _dates(db, Publication.published_on == on, limit=1):
         raise NotFoundError("No bulletin for that date.")
+    daily = _daily(Publication.published_on == on)
     rows = (
         await db.execute(
-            select(Sponsor, Change.change)
-            .join(Change, Change.sponsor_id == Sponsor.id)
-            .where(
-                Change.publication_id == pub.id,
-                Change.change.in_(("added", "removed", "returned")),
-            )
-            .order_by(Sponsor.organisation_name)
+            select(Sponsor, daily.c.change)
+            .join(daily, daily.c.sponsor_id == Sponsor.id)
+            .order_by(Sponsor.organisation_name, Sponsor.id)
         )
     ).all()
     lists: dict[str, list[BulletinSponsor]] = {"added": [], "removed": [], "returned": []}
@@ -340,23 +384,16 @@ async def bulletin(on: date, db: GlobalDb) -> BulletinOut:
             lists[kind].append(_sponsor(s))
         if kind != "removed" and s.region_itl1:
             regions[s.region_itl1] = regions.get(s.region_itl1, 0) + 1
-    earlier = (
-        await db.scalars(
-            select(Publication.id)
-            .where(Publication.published_on < on)
-            .order_by(Publication.published_on.desc())
-            .limit(28)
-        )
-    ).all()
-    counts = await _counts(db)
-    base = [counts.get(i, {}).get("added", 0) for i in earlier]
+    # The median uses the same daily bulletins, so intraday files are not extra samples.
+    earlier = await _dates(db, Publication.published_on < on, limit=28)
+    counts = await _counts(db, earlier)
+    base = [counts[d].get("added", 0) for d in earlier]
+    added_today = [s.id for s, kind in rows if kind != "removed"]
     pairs = (
         await db.execute(
-            select(PossibleMatch.added_sponsor_id, PossibleMatch.removed_sponsor_id).where(
-                PossibleMatch.added_sponsor_id.in_(
-                    select(Change.sponsor_id).where(Change.publication_id == pub.id)
-                )
-            )
+            select(PossibleMatch.added_sponsor_id, PossibleMatch.removed_sponsor_id)
+            .where(PossibleMatch.added_sponsor_id.in_(added_today))
+            .order_by(PossibleMatch.added_sponsor_id, PossibleMatch.removed_sponsor_id)
         )
     ).all()
     names = {
@@ -396,8 +433,8 @@ async def profile(
     latest = await db.scalar(
         select(Publication.id)
         .join(Entry, Entry.publication_id == Publication.id)
-        .where(Entry.sponsor_id == s.id)
-        .order_by(Publication.published_on.desc())
+        .where(Entry.sponsor_id == s.id, Publication.status == "complete")
+        .order_by(*_newest_first())
         .limit(1)
     )
     entries = (
@@ -414,8 +451,8 @@ async def profile(
     changes = await db.execute(
         select(Publication.published_on, Change.change, Change.detail)
         .join(Publication, Publication.id == Change.publication_id)
-        .where(Change.sponsor_id == s.id)
-        .order_by(Publication.published_on.desc())
+        .where(Change.sponsor_id == s.id, Publication.status == "complete")
+        .order_by(*_newest_first(), Change.id.desc())
         .limit(100)
     )
     return ProfileOut(
