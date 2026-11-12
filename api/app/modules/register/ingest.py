@@ -109,7 +109,9 @@ async def ingest(db: AsyncSession, client: httpx.AsyncClient, on: date) -> str:
     if await db.scalar(select(Publication.id).where(Publication.sha256 == digest)):
         return "unchanged"
     rows = parse(content)
-    previous = await db.scalar(select(Publication).order_by(Publication.fetched_at.desc()).limit(1))
+    previous = await db.scalar(
+        select(Publication).order_by(Publication.fetched_at.desc(), Publication.id.desc()).limit(1)
+    )
     old: dict[object, set[tuple[str, str]]] = defaultdict(set)
     if previous:
         for entry in (

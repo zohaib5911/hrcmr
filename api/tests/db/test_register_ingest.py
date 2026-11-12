@@ -14,12 +14,13 @@ from tests.test_register_ingest import FIXTURES
 async def test_snapshots_idempotency_diff_return_and_rollback(database: DatabaseUnderTest) -> None:
     engine = engine_for(database.owner_url)
     fixture = "first.csv"
+    restored = False
 
     def handler(request: httpx.Request) -> httpx.Response:
         content = (
             FIXTURES / (fixture if request.url.path.endswith(".csv") else "publication.html")
         ).read_bytes()
-        return httpx.Response(200, content=content)
+        return httpx.Response(200, content=content + (b"\n" if restored else b""))
 
     try:
         async with (
@@ -43,6 +44,11 @@ async def test_snapshots_idempotency_diff_return_and_rollback(database: Database
                 await db.scalar(select(func.count()).select_from(Sponsor).where(Sponsor.current))
                 == 3
             )
+            fixture, restored = "first.csv", True
+            assert await ingest(db, client, date(2026, 11, 12)) == "imported"
+            kinds = list((await db.scalars(select(Change.change))).all())
+            assert kinds.count("returned") == 2
+            assert kinds.count("route_removed") == 1
             # Rollback includes publication, entries, sponsor flags and diffs together.
             await db.rollback()
             assert await db.scalar(select(func.count()).select_from(Publication)) == 0
