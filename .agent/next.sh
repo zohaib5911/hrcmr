@@ -69,7 +69,12 @@ awk -v F=micro_plan.md -v openfix="$(grep -c '^### \[ \]' "$TMP/changesneeded.md
     for (i = 1; i <= n; i++) if (i in row && okv[i]) print row[i]
   }' "$TMP/micro_plan.md" >>"$TMP/cands"
 
-ticked() { grep -qE "^### \[x\] $1 " "$TMP/micro_plan.md" "$TMP/changesneeded.md"; }
+ticked() {
+  grep -qE "^### \[x\] $1 " "$TMP/micro_plan.md" "$TMP/changesneeded.md" && return 0
+  # An audit fix (C<n>...) from an earlier round is gone from changesneeded.md once a new round replaces
+  # the file; a round is replaced only when all its fixes are done, so a missing C-id counts as done.
+  [[ "$1" == C* ]] && ! grep -qE "^### \[ \] $1 " "$TMP/changesneeded.md"
+}
 deps_ok() {
   local line dep; line=$(awk -v id="$1" -F': *' '$1==id {print $2}' "$TMP/deps.txt")
   for dep in $line; do ticked "$dep" || return 1; done
