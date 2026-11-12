@@ -34,4 +34,16 @@ describe("public skilled worker ILR salary calculator", () => {
       screen.queryByRole("heading", { name: "Your settlement salary requirement" }),
     ).not.toBeInTheDocument();
   });
+
+  it("shows review guidance, not an amount, when the going rate is missing", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    await user.type(screen.getByLabelText("Job title or SOC code"), "3214");
+    await user.click(screen.getByRole("button", { name: "Calculate salary" }));
+    const result = screen.getByRole("region", { name: "Salary result" });
+    expect(result).toHaveTextContent("We can’t give a figure for this situation");
+    expect(result).toHaveTextContent("no standard going rate");
+    expect(result).not.toHaveTextContent("At least");
+    expect(result).not.toHaveTextContent("£41,700");
+  });
 });

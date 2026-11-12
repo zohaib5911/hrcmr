@@ -80,6 +80,46 @@ describe("skilled worker ILR salary calculator", () => {
     expect(r.notes.join(" ")).toContain("£25,000");
   });
 
+  // Rates file: 3214 appears only in the lower going-rate tables (lower £31,300, no standard rate).
+  it("gives no figure when the usual route has no standard going rate", () => {
+    const o = occ("3214");
+    expect(o.standard).toBeNull();
+    for (const situation of ["standard", "salary_list"] as const) {
+      const r = calculateIlrSalary({ occupation: o, situation, hours: 37.5 });
+      expect(r.status).toBe("review");
+      expect(r.required).toBeNull();
+      expect(r.floor).toBeNull();
+      expect(r.notes.join(" ")).toContain("no standard going rate");
+    }
+    // The transitional branch has a sourced lower rate: higher of £31,300 and £31,300.
+    const t = calculateIlrSalary({ occupation: o, situation: "transitional", hours: 37.5 });
+    expect(t.status).toBe("ok");
+    expect(t.required).toBe(31_300);
+  });
+
+  it("gives no figure when the transitional branch has no lower going rate", () => {
+    const o = { ...occ("1111"), lower: null };
+    const r = calculateIlrSalary({ occupation: o, situation: "transitional", hours: 37.5 });
+    expect(r.status).toBe("review");
+    expect(r.required).toBeNull();
+    expect(r.notes.join(" ")).toContain("no lower going rate");
+  });
+
+  // https://www.gov.uk/indefinite-leave-to-remain-tier-2-t2-skilled-worker-visa/salary-requirements
+  // Health and Care codes with different requirements: higher of £31,300 (£25,000 ISL) and lower rate.
+  it("routes Health and Care Worker visas to review with the sourced rule", () => {
+    expect(thresholds.healthCare).toBe(31_300);
+    const r = calculateIlrSalary({
+      occupation: occ("2136"),
+      situation: "health_care",
+      hours: 37.5,
+    });
+    expect(r.status).toBe("review");
+    expect(r.required).toBeNull();
+    expect(r.notes.join(" ")).toContain("£31,300");
+    expect(r.notes.join(" ")).toContain("£25,000");
+  });
+
   it("searches by code and by words", () => {
     expect(searchOccupations("1111")[0]?.code).toBe("1111");
     expect(searchOccupations("chief executives").map((o) => o.code)).toContain("1111");

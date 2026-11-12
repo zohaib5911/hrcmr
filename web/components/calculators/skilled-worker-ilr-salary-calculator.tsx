@@ -88,7 +88,8 @@ export function SkilledWorkerIlrSalaryCalculator() {
             reset();
           }}
         >
-          <option value="standard">Usual Skilled Worker or Health and Care Worker</option>
+          <option value="standard">Usual Skilled Worker</option>
+          <option value="health_care">Health and Care Worker visa</option>
           <option value="salary_list">Job on the Immigration Salary List</option>
           <option value="transitional">First certificate of sponsorship before 4 April 2024</option>
           <option value="sportsperson">International Sportsperson</option>
@@ -138,21 +139,28 @@ export function SkilledWorkerIlrSalaryCalculator() {
               {input.occupation.code} {input.occupation.title} · {result.basis}
             </p>
             <p className="text-headline text-label mt-4">
-              {result.required === null
-                ? "Depends on your pay scale"
-                : `At least ${gbp(result.required)} a year`}
+              {result.status === "review"
+                ? "We can’t give a figure for this situation"
+                : result.required === null
+                  ? "Depends on your pay scale"
+                  : `At least ${gbp(result.required)} a year`}
             </p>
-            <dl className="text-callout text-label mt-3 space-y-1">
-              {result.floor !== null ? (
-                <Row label="Fixed minimum" value={gbp(result.floor)} />
-              ) : null}
-              {result.fullTimeGoingRate !== null ? (
-                <Row label="Going rate (37.5 hours)" value={gbp(result.fullTimeGoingRate)} />
-              ) : null}
-              {result.goingRate !== null ? (
-                <Row label={`Going rate for ${result.hours} hours`} value={gbp(result.goingRate)} />
-              ) : null}
-            </dl>
+            {result.status === "review" ? null : (
+              <dl className="text-callout text-label mt-3 space-y-1">
+                {result.floor !== null ? (
+                  <Row label="Fixed minimum" value={gbp(result.floor)} />
+                ) : null}
+                {result.fullTimeGoingRate !== null ? (
+                  <Row label="Going rate (37.5 hours)" value={gbp(result.fullTimeGoingRate)} />
+                ) : null}
+                {result.goingRate !== null ? (
+                  <Row
+                    label={`Going rate for ${result.hours} hours`}
+                    value={gbp(result.goingRate)}
+                  />
+                ) : null}
+              </dl>
+            )}
             <ul className="text-footnote text-label-secondary mt-4 list-disc space-y-1 pl-5">
               {result.notes.map((note) => (
                 <li key={note}>{note}</li>
