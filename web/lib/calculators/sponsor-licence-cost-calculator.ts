@@ -103,7 +103,9 @@ export function skillsChargeFor(months: number, small: boolean) {
   return first + blocks * extra;
 }
 
-/** Healthcare surcharge per person for a stay of `months` (GOV.UK part-year rules). */
+/** IHS for whole calendar months and an optional SW 18.1 fourteen-day extension.
+ * The extra days cross an exact six-month boundary without changing employment months.
+ */
 export function healthSurchargeFor(
   months: number,
   insideUK: boolean,
@@ -148,6 +150,7 @@ export function calculateSponsorCosts(input: SponsorCostInput): SponsorCostResul
   const chargeable = !exempt && (input.insideUK || months >= 6);
   const skillsCharge = chargeable ? skillsChargeFor(months, small) : 0;
 
+  // Published application fee tiers use CoS duration, independently of IHS visa duration.
   const long = months > feeBasis.values.short_certificate_max_months;
   let visaFeePerPerson: number;
   if (input.route === "health_care") {
