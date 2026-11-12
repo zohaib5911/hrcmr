@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -5,10 +6,11 @@ import { brand } from "@brand";
 
 import { Section, SectionHeading } from "@/components/marketing/sections";
 
-export const metadata: Metadata = {
-  title: "Accessibility statement",
-  description: `How accessible ${brand.name} is and how to tell us about a problem.`,
-};
+export const metadata: Metadata = pageMetadata(
+  "/accessibility",
+  "Accessibility statement",
+  `How accessible ${brand.name} is and how to tell us about a problem.`,
+);
 
 export default function AccessibilityPage() {
   return (

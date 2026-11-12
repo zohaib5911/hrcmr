@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
 import { brand } from "@brand";
@@ -6,10 +7,11 @@ import { ProductShot } from "@/components/marketing/product-shot";
 import { Band, CtaBand, Hero } from "@/components/marketing/sections";
 import { SIGN_UP } from "@/lib/marketing-nav";
 
-export const metadata: Metadata = {
-  title: "Features",
-  description: `What ${brand.name} does: people records, leave, attendance, rota, documents, learning, recruitment and sponsor compliance.`,
-};
+export const metadata: Metadata = pageMetadata(
+  "/features",
+  "Features",
+  `What ${brand.name} does: people records, leave, attendance, rota, documents, learning, recruitment and sponsor compliance.`,
+);
 
 const MODULES = [
   {

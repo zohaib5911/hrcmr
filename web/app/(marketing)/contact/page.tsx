@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 
 import { brand } from "@brand";
@@ -5,10 +6,11 @@ import { brand } from "@brand";
 import { ContactForm } from "@/components/marketing/contact-form";
 import { Section, SectionHeading } from "@/components/marketing/sections";
 
-export const metadata: Metadata = {
-  title: "Contact",
-  description: `Get in touch with the ${brand.name} team. We reply within one working day.`,
-};
+export const metadata: Metadata = pageMetadata(
+  "/contact",
+  "Contact",
+  `Get in touch with the ${brand.name} team. We reply within one working day.`,
+);
 
 export default function ContactPage() {
   return (

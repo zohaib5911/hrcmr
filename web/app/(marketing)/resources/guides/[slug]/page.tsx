@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { ComponentType } from "react";
@@ -32,7 +33,7 @@ type Props = { params: Promise<{ slug: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const guide = findGuide((await params).slug);
   if (!guide) notFound();
-  return { title: guide.title, description: guide.description };
+  return pageMetadata(`/resources/guides/${guide.slug}`, guide.title, guide.description);
 }
 
 export default async function GuidePage({ params }: Props) {

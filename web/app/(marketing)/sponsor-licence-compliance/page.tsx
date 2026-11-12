@@ -1,3 +1,5 @@
+import { StructuredData } from "@/components/marketing/structured-data";
+import { pageMetadata } from "@/lib/seo";
 import {
   BellRing,
   BadgeCheck,
@@ -21,10 +23,11 @@ import {
 } from "@/components/marketing/sections";
 import { SIGN_UP } from "@/lib/marketing-nav";
 
-export const metadata: Metadata = {
-  title: "Sponsor licence compliance",
-  description: `How ${brand.name} helps a UK sponsor licence holder keep records and meet reporting duties.`,
-};
+export const metadata: Metadata = pageMetadata(
+  "/sponsor-licence-compliance",
+  "Sponsor licence compliance",
+  `How ${brand.name} helps a UK sponsor licence holder keep records and meet reporting duties.`,
+);
 
 const FEATURES = [
   {
@@ -108,6 +111,17 @@ export default function SponsorCompliancePage() {
       <Section tone="raised" id="faq">
         <SectionHeading title="Questions people ask" className="mb-10" />
         <Faq items={FAQ} />
+        <StructuredData
+          data={{
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: FAQ.map(({ question, answer }) => ({
+              "@type": "Question",
+              name: question,
+              acceptedAnswer: { "@type": "Answer", text: answer },
+            })),
+          }}
+        />
       </Section>
       <CtaBand
         title="Get ready before the next visit"

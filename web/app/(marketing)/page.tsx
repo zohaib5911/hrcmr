@@ -1,3 +1,6 @@
+import { StructuredData } from "@/components/marketing/structured-data";
+import { pageMetadata } from "@/lib/seo";
+import type { Metadata } from "next";
 import {
   BadgeCheck,
   BellRing,
@@ -21,6 +24,12 @@ import {
 } from "@/components/marketing/sections";
 import { Card, CardBody } from "@/components/ui/card";
 import { SIGN_IN, SIGN_UP } from "@/lib/marketing-nav";
+
+export const metadata: Metadata = pageMetadata(
+  "/",
+  "HR and sponsor compliance",
+  "Keep HR records, right to work checks and sponsor duties together, with reminders for UK employers.",
+);
 
 const FAQ = [
   {
@@ -127,6 +136,17 @@ export default function HomePage() {
       <Section tone="raised" id="faq">
         <SectionHeading title="Questions people ask" className="mb-10" />
         <Faq items={FAQ} />
+        <StructuredData
+          data={{
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: FAQ.map(({ question, answer }) => ({
+              "@type": "Question",
+              name: question,
+              acceptedAnswer: { "@type": "Answer", text: answer },
+            })),
+          }}
+        />
       </Section>
 
       <CtaBand

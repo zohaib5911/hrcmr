@@ -1,3 +1,4 @@
+import { pageMetadata } from "@/lib/seo";
 import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -15,7 +16,11 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const document = legalDocument((await params).document);
   return {
-    title: `${document?.title ?? "Legal document"} | ${brand.name}`,
+    ...pageMetadata(
+      `/legal/${document?.slug ?? ""}`,
+      document?.title ?? "Legal document",
+      document?.introduction ?? "Legal document draft.",
+    ),
     robots: { index: false },
   };
 }
