@@ -1,6 +1,6 @@
 # STATUS (snapshot — live state is `bash .agent/bus.sh status`)
 Updated: 2026-11-12 09:05 (Europe/London)    Agent: Claude Code (Opus 5.5, BIG)    Branch: dev
-State: PARALLEL MODE — Claude Code and Codex run at the same time. Start them with `bash .agent/start.sh` (AGENTS.md).
+State: HANDED OVER — audit fixes ready (AUDIT-3 round 2: 1 P0 / 4 P1 / 1 P2).
 
 ## Last completed
 - Parallel-mode setup: `.agent/bus.sh` (claims, messages, journal, decisions, serial test lock), `.agent/next.sh` (per-agent, deps-aware),

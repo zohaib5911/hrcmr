@@ -423,6 +423,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T17.6** Jobs dashboard, register status, rules data screens, platform audit log — 2026-11-08. Platform audit log with CSV export (migration 0055); job dashboard with queue depth and failures; retry from an allow-list (`app/jobs/rerun.py`, migration 0056); rules screens from T15.7. Register status moved to T20.5 (owner answer 4). Tests: platform audit log 3, platform jobs 7.
 - [ ] **Phase 17 gate**
 - AUDIT-3 round 1: 0/10/6 (P0/P1/P2) — FIX NEEDED. Admin screens missing (API only), 10-year platform refund leaves the plan on, session start sees the server IP. api 1319, web unit 802, e2e 437 pass.
+- AUDIT-3 round 2: 1/4/1 (P0/P1/P2) — FIX NEEDED. API suite stalled at 42% and was interrupted (no final counts); ruff/format/mypy and RLS CLI passed. Web unit 1255 passed, e2e 473 passed / 220 skipped, lint/types/gen/build passed. See changesneeded.md for six fix tasks.
 
 ### Phase 18 — Public marketing site
 - [ ] **T18.1** Home, Features, Pricing, Security, About, Contact, Accessibility, Careers, Sponsor compliance
