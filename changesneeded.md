@@ -1,10 +1,10 @@
 # changesneeded.md — audit AUDIT-3 round 3 (2026-11-12, gpt-6.1-sol)
-Scope: 170a10d..9b2e3a1 (C3.2.1–C3.2.6 fixes and regressions; Phase 18–20 additions excluded). Tests at audit: api 1359/0/0, RLS CLI passed; web unit 1286/0, e2e pending; CI latest listed dev run green, latest merged fix PR #71 all checks green.
-Counts: 0 P0 / 2 P1 / 0 P2. FIX NEEDED (browser verification pending).
+Scope: 170a10d..9b2e3a1 (C3.2.1–C3.2.6 fixes and regressions; Phase 18–20 additions excluded). Tests at audit: api 1359/0/0, RLS CLI passed; web unit 1286/0, e2e 483/0/220 skipped; CI latest listed dev run green, latest merged fix PR #71 all checks green.
+Counts: 0 P0 / 2 P1 / 0 P2. FIX NEEDED.
 
 ### [ ] C3.3.1 · P1 · Preserve the current contact page when a delayed update completes (from C3.2.5)
 - **Problem:** `web/components/platform/contact-admin.tsx:56-77` captures the old list `key` and `filter` in `mark()`, then applies the PATCH response to the current list rows. Start marking a message on page 1, click Next while PATCH is pending, let page 2 load, then resolve PATCH: `setRows` assigns page 1's key to page 2's rows. Page 2 disappears and stays on Loading until another navigation/reload. Changing the handled filter during PATCH has the same race. List GET effects already ignore stale responses, but the mutation does not. An isolated component probe reproduced the disappearing second-page sender.
-- **Fix:** make the mutation response safe against page/filter changes. Only update state matching the request's original key, or prevent page/filter changes while it is pending; preserve the active list and handle failure without redirecting from stale results unnecessarily. Reconcile items and total when a handled change removes a row from the active filtered list. Keep the existing permission/session behavior.
+- **Fix:** make the mutation response safe against page/filter changes. Only update state matching the request's original key, or prevent page/filter changes while it is pending; preserve the active list and retain the shared session-expiry handling. Reconcile items and total when a handled change removes a row from the active filtered list. Keep the existing permission/session behavior.
 - **Done when:** collected `web/components/platform/contact-admin.test.tsx` tests defer PATCH, load a distinct second page (and separately change the filter), resolve PATCH and assert the current list remains visible with the correct rows/key; cover matching-page removal and total. Targeted contact tests, lint and typecheck pass.
 
 ### [ ] C3.3.2 · P1 · Collect the platform page-entry session tests (from C3.2.4)
