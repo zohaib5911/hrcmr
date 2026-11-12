@@ -72,12 +72,56 @@ export function loadAssessment(store: Store | null = browserStore()): RiskAssess
   try {
     const raw = store?.getItem(storageKey);
     if (!raw) return null;
-    const data = JSON.parse(raw) as Partial<RiskAssessment>;
-    if (typeof data !== "object" || data === null || !Array.isArray(data.hazards)) return null;
-    return { ...emptyAssessment(), ...data };
+    return restoreAssessment(JSON.parse(raw));
   } catch {
     return null;
   }
+}
+
+const countries = ["England", "Scotland", "Wales", "Northern Ireland"];
+const statuses: readonly Hazard["status"][] = ["open", "in-progress", "done"];
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+const str = (v: unknown, fallback: string) => (typeof v === "string" ? v : fallback);
+
+/** Keeps only fields of the right type; anything else falls back to the empty default. */
+function restoreHazard(v: unknown): Hazard | null {
+  if (!isRecord(v)) return null;
+  const d = emptyHazard();
+  const status = statuses.find((s) => s === v.status) ?? d.status;
+  return {
+    hazard: str(v.hazard, d.hazard),
+    who: str(v.who, d.who),
+    controls: str(v.controls, d.controls),
+    furtherAction: str(v.furtherAction, d.furtherAction),
+    owner: str(v.owner, d.owner),
+    due: str(v.due, d.due),
+    status,
+  };
+}
+
+/** A damaged draft (not an object, or no hazards list) gives null, so the form starts empty. */
+export function restoreAssessment(data: unknown): RiskAssessment | null {
+  if (!isRecord(data) || !Array.isArray(data.hazards)) return null;
+  const d = emptyAssessment();
+  const hazards = data.hazards.map(restoreHazard).filter((h): h is Hazard => h !== null);
+  const country = str(data.country, d.country);
+  return {
+    organisation: str(data.organisation, d.organisation),
+    site: str(data.site, d.site),
+    country: countries.includes(country) ? country : d.country,
+    employees: str(data.employees, d.employees),
+    activity: str(data.activity, d.activity),
+    assessor: str(data.assessor, d.assessor),
+    assessedOn: str(data.assessedOn, d.assessedOn),
+    reviewOn: str(data.reviewOn, d.reviewOn),
+    consulted: str(data.consulted, d.consulted),
+    atRiskGroups: str(data.atRiskGroups, d.atRiskGroups),
+    reference: str(data.reference, d.reference),
+    version: str(data.version, d.version),
+    hazards: hazards.length ? hazards : d.hazards,
+    acknowledgement: data.acknowledgement === true,
+  };
 }
 export function clearAssessment(store: Store | null = browserStore()) {
   try {
