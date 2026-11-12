@@ -32,14 +32,14 @@ describe("RegisterExplorer", () => {
       "Industries",
       "Newest on the register",
     ])
-      expect(screen.getByRole("heading", { name, exact: true })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Trend", exact: true }));
+      expect(screen.getByRole("heading", { name })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Trend" }));
     expect(screen.getByRole("img", { name: "Sponsor count by publication" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Table", exact: true }));
+    await user.click(screen.getByRole("button", { name: "Table" }));
     expect(
       within(screen.getByRole("table", { name: "Matching sponsors" })).getByText("Stable Ltd"),
     ).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "List", exact: true }));
+    await user.click(screen.getByRole("button", { name: "List" }));
     expect(screen.getByRole("heading", { name: "Stable Ltd" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Previous page" })).toBeDisabled();
     await user.click(screen.getByRole("button", { name: "Next page" }));
@@ -63,7 +63,7 @@ describe("RegisterExplorer", () => {
       ["Industry", "J"],
       ["Compare window", "90"],
     ]) {
-      await user.selectOptions(screen.getByRole("combobox", { name: label, exact: true }), value!);
+      await user.selectOptions(screen.getByRole("combobox", { name: label }), value!);
       await ready();
     }
     fireEvent.change(screen.getByRole("slider", { name: "Publication timeline" }), {
@@ -112,7 +112,7 @@ describe("RegisterExplorer", () => {
     render(<RegisterExplorer />);
     await screen.findByText("0 matching sponsors in the selected publication.");
     expect(screen.getByText(/No sponsors match these filters/)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Table", exact: true }));
+    await user.click(screen.getByRole("button", { name: "Table" }));
     expect(screen.getByRole("button", { name: "Next page" })).toBeDisabled();
   });
 });
