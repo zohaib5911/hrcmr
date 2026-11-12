@@ -503,7 +503,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Spec:** plan L1171 (sponsor register: last import, row counts, errors, rerun import). Owner answer 4 (2026-11-08): this moved here from T17.6, because the register ingest is built in T20.1.
 - **Steps:** `GET /platform/register/status` (last publication, row counts, errors) and `POST /platform/register/run` (rerun through the ingest job, with a reason, audited as `platform.register_rerun`). The import sends nothing, so a rerun is safe; it goes through the same job allow-list as T17.6.
 
-### [ ] P20 · S · Phase 20 gate
+### [x] P20 · S · Phase 20 gate
 - Recipe R7.
 
 ### [ ] AUDIT-4 · AUDIT STOP · covers T18.1 → P20
