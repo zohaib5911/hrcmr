@@ -471,7 +471,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Decided 2026-11-08 (owner answer 2):** guides are MDX files in the repo under `content/guides/`, compiled at build time, reviewed in pull requests. No upload and no admin editor; the Watch rule (no raw HTML or script) applies to the MDX source, which is trusted content, and the renderer must not allow raw HTML.
 - **Spec:** plan L1213. MDX, original, sources + last-reviewed date + disclaimer on each; the self-test is client-side with a score.
 
-### [ ] T19.17 · S · Templates
+### [x] T19.17 · S · Templates
 - **Decided 2026-11-08 (owner answer 1):** templates are DOCX/PDF files in the repo under `content/templates/` with a manifest (title, file, version, reviewed on). The platform admin lists them read-only (built here, from the manifest); nothing is uploaded. Each template is original work and needs a human review before it is published (offer letters especially).
 - **Spec:** plan L1214. Original DOCX/PDF generated from MDX sources at build or by a script.
 
