@@ -43,7 +43,8 @@ export type OptionResult = {
 };
 export type VisaResult = {
   occupation: Occupation | null;
-  eligibleOccupation: boolean;
+  eligibleOccupation: boolean | null;
+  status: "assessed" | "needs-review" | "invalid-code";
   messages: string[];
   options: OptionResult[];
   eligible: boolean;
@@ -126,7 +127,7 @@ function salaryListCodes(): Set<string> {
   return codes;
 }
 
-// The first two tables in the Appendix are Table 1 and Table 1a. Everything is read locally.
+// Only salary options A–E are modelled locally. Occupation selection uses the public SOC API.
 const listed = salaryListCodes();
 const appendix = tables(occupations.content as Block[]);
 export const OCCUPATIONS: readonly Occupation[] = [
@@ -153,7 +154,10 @@ function roundUp(n: number) {
 }
 
 /** Eligibility under points options A–E (rules for new applications from 22 July 2025). */
-export function checkSkilledWorkerVisa(input: VisaInput): VisaResult {
+export function checkSkilledWorkerVisa(
+  input: VisaInput,
+  selectedOccupation?: { code: string; title: string },
+): VisaResult {
   const occupation = findOccupation(input.code) ?? null;
   const hours = Math.min(Math.max(input.weeklyHours, 0), 168);
   // SW 14.3: only the first 48 hours' salary counts towards the thresholds.
@@ -180,14 +184,18 @@ export function checkSkilledWorkerVisa(input: VisaInput): VisaResult {
     }));
 
   if (!occupation) {
+    const recognised = selectedOccupation?.code === input.code;
     messages.push(
-      "This code is not in Table 1 or Table 1a of the Skilled Occupations appendix, so it is not eligible for the Skilled Worker route.",
+      recognised
+        ? "This is a recognised SOC occupation, but its eligibility and salary options are not modelled by this calculator. Health and education roles may use option K and national pay scales (Tables 3 and 4). Review the official Skilled Occupations appendix for the role, pay band and nation before deciding eligibility."
+        : "Choose a valid SOC 2020 code using the occupation search before checking eligibility.",
     );
     return {
       occupation,
-      eligibleOccupation: false,
+      status: recognised ? "needs-review" : "invalid-code",
+      eligibleOccupation: recognised ? null : false,
       messages,
-      options: empty("Occupation not eligible"),
+      options: [],
       eligible: false,
       lowestRequired: null,
       salaryConsidered,
@@ -201,6 +209,7 @@ export function checkSkilledWorkerVisa(input: VisaInput): VisaResult {
     );
     return {
       occupation,
+      status: "assessed",
       eligibleOccupation: false,
       messages,
       options: empty("Occupation not available for new applicants"),
@@ -215,6 +224,7 @@ export function checkSkilledWorkerVisa(input: VisaInput): VisaResult {
     messages.push("Enter the weekly hours stated by the sponsor.");
     return {
       occupation,
+      status: "assessed",
       eligibleOccupation: true,
       messages,
       options: empty("Hours needed"),
@@ -291,6 +301,7 @@ export function checkSkilledWorkerVisa(input: VisaInput): VisaResult {
   );
   return {
     occupation,
+    status: "assessed",
     eligibleOccupation: true,
     messages,
     options,

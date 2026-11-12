@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { NumberField } from "@/components/ui/number-field";
@@ -8,11 +8,16 @@ import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
 import {
   checkSkilledWorkerVisa,
-  searchOccupations,
+  visaCheckerSources,
   type Situation,
   type VisaInput,
   type VisaResult,
 } from "@/lib/calculators/skilled-worker-visa-checker";
+
+import type { components } from "@/lib/api/client";
+import { attempt } from "@/lib/auth/request";
+
+type Hit = components["schemas"]["PublicHitOut"];
 
 const initial: VisaInput = {
   code: "",
@@ -55,10 +60,44 @@ function YesNo({
 export function SkilledWorkerVisaChecker() {
   const [input, setInput] = useState<VisaInput>(initial);
   const [query, setQuery] = useState("");
-  const [chosen, setChosen] = useState("");
+  const [chosen, setChosen] = useState<Hit | null>(null);
+  const [hits, setHits] = useState<Hit[]>([]);
+  const [lookupMessage, setLookupMessage] = useState("");
   const [result, setResult] = useState<VisaResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const hits = chosen ? [] : searchOccupations(query);
+  useEffect(() => {
+    const term = query.trim();
+    if (chosen || term.length < 2) return;
+    let active = true;
+    const timer = setTimeout(async () => {
+      // Only the occupation query goes to the lookup. All applicant answers stay local.
+      if (/^[1-9]\d{3}$/.test(term)) {
+        const outcome = await attempt((c) =>
+          c.GET("/public/soc/{code}", { params: { path: { code: term } } }),
+        );
+        if (!active) return;
+        setHits(outcome.ok ? [outcome.data] : []);
+        setLookupMessage(outcome.ok ? "" : outcome.problem.message);
+      } else {
+        const outcome = await attempt((c) =>
+          c.GET("/public/soc/search", { params: { query: { q: term } } }),
+        );
+        if (!active) return;
+        setHits(outcome.ok ? outcome.data.results : []);
+        setLookupMessage(
+          outcome.ok
+            ? outcome.data.results.length
+              ? ""
+              : "No matching occupations. Try another title or SOC code."
+            : outcome.problem.message,
+        );
+      }
+    }, 300);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [query, chosen]);
 
   function update<K extends keyof VisaInput>(key: K, value: VisaInput[K]) {
     setInput((previous) => ({ ...previous, [key]: value }));
@@ -74,29 +113,39 @@ export function SkilledWorkerVisaChecker() {
           if (!input.code) return setError("Choose an occupation from the list first.");
           if (!(input.salary > 0)) return setError("Enter the annual salary offered.");
           setError(null);
-          setResult(checkSkilledWorkerVisa(input));
+          setResult(checkSkilledWorkerVisa(input, chosen ?? undefined));
         }}
       >
         <h2 className="text-title-2 text-label">The job and the person</h2>
         <TextField
           label="SOC code or job title"
           autoComplete="off"
-          hint="Search the SOC 2020 list, for example 2134 or software developer. No AI is used."
+          hint="Search the public SOC 2020 list, for example 2134 or software developer. Only this search is sent; salary and personal answers stay in this page."
+          maxLength={100}
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
-            setChosen("");
+            setChosen(null);
+            setHits([]);
+            setLookupMessage("");
             update("code", "");
           }}
         />
-        {hits.length > 0 ? (
+        {lookupMessage ? (
+          <p role="status" className="text-callout text-label-secondary">
+            {lookupMessage}
+          </p>
+        ) : null}
+        {!chosen && hits.length > 0 ? (
           <ul className="grid gap-2" aria-label="Matching occupations">
             {hits.map((hit) => (
-              <li key={`${hit.table}-${hit.code}`}>
+              <li key={hit.code}>
                 <Button
                   variant="gray"
                   onClick={() => {
-                    setChosen(hit.code);
+                    setChosen(hit);
+                    setHits([]);
+                    setLookupMessage("");
                     setQuery(`${hit.code} ${hit.title}`);
                     update("code", hit.code);
                   }}
@@ -179,7 +228,9 @@ export function SkilledWorkerVisaChecker() {
             onClick={() => {
               setInput(initial);
               setQuery("");
-              setChosen("");
+              setChosen(null);
+              setHits([]);
+              setLookupMessage("");
               setResult(null);
               setError(null);
             }}
@@ -197,8 +248,19 @@ export function SkilledWorkerVisaChecker() {
         {result ? (
           <>
             <h2 className="text-title-2 text-label">
-              {result.eligible ? "Salary requirement met" : "Not eligible on these answers"}
+              {result.status === "needs-review"
+                ? "Needs review"
+                : result.status === "invalid-code"
+                  ? "Choose a valid occupation"
+                  : result.eligible
+                    ? "Salary requirement met"
+                    : "Not eligible on these answers"}
             </h2>
+            {result.status === "needs-review" ? (
+              <p className="text-callout text-label-secondary mt-2">
+                {chosen?.code} {chosen?.title}
+              </p>
+            ) : null}
             {result.occupation ? (
               <p className="text-callout text-label-secondary mt-2">
                 {result.occupation.code} {result.occupation.title}. Going rate{" "}
@@ -210,6 +272,13 @@ export function SkilledWorkerVisaChecker() {
                 <p key={text}>{text}</p>
               ))}
             </div>
+            {result.status === "needs-review" ? (
+              <p className="text-callout mt-3">
+                <a href={visaCheckerSources[1]?.url} className="text-accent-text underline">
+                  Review the official Skilled Occupations appendix
+                </a>
+              </p>
+            ) : null}
             {result.eligibleOccupation ? (
               <table className="text-footnote text-label mt-4 w-full text-left">
                 <caption className="sr-only">Minimum salary for each points option</caption>

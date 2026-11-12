@@ -17,6 +17,7 @@ export default function Page() {
       title="Skilled Worker visa checker"
       description="Find the SOC 2020 code for a job and see the minimum salary under each Skilled Worker points option."
       sources={visaCheckerSources}
+      privacyNotice="Only your SOC code or job title search is sent to the public occupation lookup. Salary and personal answers stay in this page’s memory and are not saved or sent."
     >
       <SkilledWorkerVisaChecker />
     </CalculatorTemplate>

@@ -91,6 +91,55 @@ describe("skilled worker visa checker", () => {
     expect(r.options[3]?.requiredSalary).toBeGreaterThanOrEqual(33400);
   });
 
+  it("requires review for a recognised Table 3 nurse instead of declaring ineligibility", () => {
+    // Appendix Skilled Occupations Table 3: 2231 uses option K and Table 4 pay bands.
+    const result = checkSkilledWorkerVisa(
+      { ...base, code: "2231" },
+      {
+        code: "2231",
+        title: "Midwifery nurses",
+      },
+    );
+    expect(result.status).toBe("needs-review");
+    expect(result.eligibleOccupation).toBeNull();
+    expect(result.options).toEqual([]);
+    expect(result.lowestRequired).toBeNull();
+    expect(result.messages.join(" ")).toContain("option K");
+    expect(result.messages.join(" ")).not.toContain("not eligible");
+    expect(check({ code: "9999" }).status).toBe("invalid-code");
+    expect(check({ code: "1150" }).status).toBe("assessed");
+    expect(check({ code: "1150" }).messages[0]).toContain("Table 1a");
+  });
+
+  it("does not use a stale occupation selection to recognise another code", () => {
+    expect(
+      checkSkilledWorkerVisa(
+        { ...base, code: "9999" },
+        {
+          code: "2231",
+          title: "Midwifery nurses",
+        },
+      ).status,
+    ).toBe("invalid-code");
+  });
+
+  it.each([
+    ["A", 0, {}, 88100],
+    ["B", 1, { phdRelevant: true }, 79300],
+    ["C", 2, { phdStem: true }, 70400],
+    ["E", 4, { newEntrant: true }, 61600],
+  ] as const)("keeps option %s salary boundaries", (_option, index, answers, salary) => {
+    expect(check({ ...answers, salary }).options[index]?.met).toBe(true);
+    expect(check({ ...answers, salary: salary - 1 }).options[index]?.met).toBe(false);
+  });
+
+  it("keeps the option D salary boundary", () => {
+    const occupation = OCCUPATIONS.find((o) => o.onSalaryList && o.table === "1")!;
+    const salary = Math.max(33400, occupation.goingRate);
+    expect(check({ code: occupation.code, salary }).options[3]?.met).toBe(true);
+    expect(check({ code: occupation.code, salary: salary - 1 }).options[3]?.met).toBe(false);
+  });
+
   // SW 33.3: £285 partner, £315 first child, £200 each other child.
   it("sums dependant maintenance funds", () => {
     expect(check({ dependantPartner: true, dependantChildren: 3 }).dependantFunds).toBe(
