@@ -1,5 +1,7 @@
 import path from "node:path";
 
+import createMDX from "@next/mdx";
+
 import type { NextConfig } from "next";
 
 import { baseSecurityHeaders, permissionsPolicy } from "./lib/security/csp";
@@ -41,4 +43,11 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const withMDX = createMDX({
+  options: {
+    // String path keeps the build-time guard compatible with Turbopack.
+    remarkPlugins: [path.resolve(process.cwd(), "scripts/remark-safe-guides.mjs")],
+  },
+});
+
+export default withMDX(nextConfig);

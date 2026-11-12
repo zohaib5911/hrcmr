@@ -432,7 +432,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [ ] T18.3 · S · SEO and Lighthouse ≥ 95
 - **Spec:** plan L1223–1228, L1474. Metadata, OG images, JSON-LD, sitemap, robots; analytics only after consent.
 
-### [ ] T18.4 · S · Comparison page templates (unpublished)
+### [x] T18.4 · S · Comparison page templates (unpublished)
 - **Spec:** plan L1216. Templates only, unpublished by default; no competitor prices typed in.
 
 ### [ ] P18 · S · Phase 18 gate
@@ -452,7 +452,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 4. Nothing entered is stored or sent (no fetch in the module; a test greps it).
 - If a figure you need is not in `web/rates/`: **STOP — BLOCKED needs verified figure**.
 
-### [ ] T19.2 · S! · Calculator 1: right-to-work-october-2026-checker (+ build the shared calculator template)
+### [x] T19.2 · S! · Calculator 1: right-to-work-october-2026-checker (+ build the shared calculator template)
 ### [ ] T19.3 · S! · Calculator 2: sponsor-licence-cost-calculator
 ### [ ] T19.4 · S! · Calculator 3: sponsor-reporting-deadline-calculator (reuse the working-day logic semantics from `api/tests/test_working_days.py`)
 ### [ ] T19.5 · S! · Calculator 4: skilled-worker-visa-checker (SOC data via public SOC API, no AI)
@@ -467,11 +467,11 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [ ] T19.14 · S! · Calculator 13: uk-minimum-wage-underpayment-checker (compare with `api/tests/test_minimum_wage.py` data if relevant)
 ### [ ] T19.15 · S · Tool 14: risk-assessment-template (browser-only, PDF/DOCX download, saved in localStorage with try/catch)
 
-### [ ] T19.16 · S! · Guides, including the 26-question audit self-test
+### [x] T19.16 · S! · Guides, including the 26-question audit self-test
 - **Decided 2026-11-08 (owner answer 2):** guides are MDX files in the repo under `content/guides/`, compiled at build time, reviewed in pull requests. No upload and no admin editor; the Watch rule (no raw HTML or script) applies to the MDX source, which is trusted content, and the renderer must not allow raw HTML.
 - **Spec:** plan L1213. MDX, original, sources + last-reviewed date + disclaimer on each; the self-test is client-side with a score.
 
-### [ ] T19.17 · S · Templates
+### [x] T19.17 · S · Templates
 - **Decided 2026-11-08 (owner answer 1):** templates are DOCX/PDF files in the repo under `content/templates/` with a manifest (title, file, version, reviewed on). The platform admin lists them read-only (built here, from the manifest); nothing is uploaded. Each template is original work and needs a human review before it is published (offer letters especially).
 - **Spec:** plan L1214. Original DOCX/PDF generated from MDX sources at build or by a script.
 

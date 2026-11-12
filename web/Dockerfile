@@ -39,6 +39,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 WORKDIR /repo
 COPY brand.config.ts ./brand.config.ts
 COPY scripts ./scripts
+COPY content/guides ./content/guides
 COPY web ./web
 WORKDIR /repo/web
 # check-public-env, next build, then scan the browser bundle for secrets.
