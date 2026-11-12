@@ -20,7 +20,7 @@ export type RightToWorkResult = {
   records: string[];
 };
 
-// Export metadata only: the complete captured PDF is not needed in the browser bundle.
+// Share provenance with the page's sources table.
 export const rightToWorkSource = {
   title: "Home Office: employer’s guide to right to work checks",
   url: guidance.source_url,

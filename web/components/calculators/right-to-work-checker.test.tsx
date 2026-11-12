@@ -3,10 +3,12 @@ import { readFileSync } from "node:fs";
 
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import Page from "@/app/(marketing)/resources/tools/right-to-work-october-2026-checker/page";
 import { rightToWorkSource } from "@/lib/calculators/right-to-work-october-2026-checker";
+
+afterEach(() => vi.restoreAllMocks());
 
 describe("public right-to-work calculator", () => {
   it("renders the shared source table and privacy notice", () => {
