@@ -31,7 +31,7 @@ const NETWORK: Problem = {
 
 let shared: ApiClient | undefined;
 /** One client for the browser. Built on first use, so a missing API address fails where it is used. */
-function baseUrl(): string {
+export function baseUrl(): string {
   // Next.js puts a NEXT_PUBLIC_* value into the browser bundle only where it is written out in full
   // (`process.env.NEXT_PUBLIC_API_URL`), never where `process.env` is passed around as an object.
   return browserApiBaseUrl({

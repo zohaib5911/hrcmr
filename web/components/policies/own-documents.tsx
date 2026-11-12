@@ -11,8 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusChip } from "@/components/ui/status-chip";
 import { TextField } from "@/components/ui/text-field";
-import { browserApiBaseUrl } from "@/lib/api/client";
-import { attempt, type Problem } from "@/lib/auth/request";
+import { attempt, baseUrl, type Problem } from "@/lib/auth/request";
 import { formatUk, formatUkDateTime } from "@/lib/ui/dates";
 
 import { ACCEPTANCE_STATUS, VIEWABLE_MIME, type OwnPolicy, type PolicyReceipt } from "./labels";
@@ -157,7 +156,7 @@ function PolicyCard({
       {viewable ? (
         <iframe
           title={`${item.title}, version ${item.version}`}
-          src={`${browserApiBaseUrl()}/policies/own/${item.id}/view`}
+          src={`${baseUrl()}/policies/own/${item.id}/view`}
           className="h-96 w-full rounded-lg border border-separator bg-fill-secondary"
         />
       ) : (
