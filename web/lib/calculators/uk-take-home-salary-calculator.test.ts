@@ -7,6 +7,7 @@ import {
 } from "@/lib/calculators/uk-take-home-salary-calculator";
 
 const base: TakeHomeInput = {
+  taxYear: "2026-2027",
   region: "england",
   salary: 30000,
   taxCode: "auto",
@@ -145,6 +146,34 @@ describe("take-home salary calculator", () => {
     expect(get({ ...base, region: "wales", taxCode: "C1000L" }, "Income tax")).toBe(-3998.2);
     expect(get({ ...base, region: "scotland", taxCode: " sd1 " }, "Income tax")).toBe(-12600);
     expect(get({ ...base, region: "scotland", otherJobs: true }, "Income tax")).toBe(-6000);
+  });
+
+  it.each([
+    ["plan 1", 1254.15, 1179],
+    ["plan 2", 1037.7, 955.35],
+    ["plan 4", 652.95, 558.45],
+  ] as const)("uses each year's %s threshold", (studentLoan, oldLoan, newLoan) => {
+    expect(get({ ...base, taxYear: "2025-2026", salary: 40000, studentLoan }, "Student loan")).toBe(
+      -oldLoan,
+    );
+    expect(get({ ...base, salary: 40000, studentLoan }, "Student loan")).toBe(-newLoan);
+  });
+
+  it("uses the selected year's Scottish bands and identifies the year", () => {
+    // 2025: 2,827 × 19% + (14,921 - 2,827) × 20% + (17,430 - 14,921) × 21%.
+    const input = { ...base, taxYear: "2025-2026" as const, region: "scotland" as const };
+    expect(get(input, "Income tax")).toBe(-3482.82);
+    expect(get(input, "National Insurance")).toBe(-1394.4);
+    expect(calculateTakeHome(input)?.notes[0]).toContain("2025 to 2026");
+    expect(get({ ...input, taxYear: "2026-2027" }, "Income tax")).toBe(-3451.07);
+  });
+
+  it("rejects unsupported years and Plan 5 in 2025–26", () => {
+    expect(
+      calculateTakeHome({ ...base, taxYear: "2024-2025" as TakeHomeInput["taxYear"] }),
+    ).toBeNull();
+    expect(calculateTakeHome({ ...base, taxYear: "2025-2026", studentLoan: "plan 5" })).toBeNull();
+    expect(get({ ...base, studentLoan: "plan 5" }, "Student loan")).toBe(-450);
   });
 
   it("rejects invalid input", () => {

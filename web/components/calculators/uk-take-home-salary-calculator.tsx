@@ -8,6 +8,8 @@ import { TextField } from "@/components/ui/text-field";
 import {
   calculateTakeHome,
   niCategories,
+  takeHomeYears,
+  type TakeHomeInput,
   type LoanPlan,
   type PensionMethod,
   type Region,
@@ -15,6 +17,7 @@ import {
 } from "@/lib/calculators/uk-take-home-salary-calculator";
 
 type Form = {
+  taxYear: TakeHomeInput["taxYear"];
   region: Region;
   salary: string;
   taxCode: string;
@@ -29,6 +32,7 @@ type Form = {
 };
 
 const initial: Form = {
+  taxYear: "2026-2027",
   region: "england",
   salary: "",
   taxCode: "auto",
@@ -75,6 +79,7 @@ export function UkTakeHomeSalaryCalculator() {
         onSubmit={(event) => {
           event.preventDefault();
           const calculated = calculateTakeHome({
+            taxYear: form.taxYear,
             region: form.region,
             salary: num(form.salary),
             taxCode: form.taxCode,
@@ -91,11 +96,24 @@ export function UkTakeHomeSalaryCalculator() {
           setError(
             calculated
               ? null
-              : "Check your answers: enter a salary above zero, a supported tax code for your region (such as 1257L, BR, D0, SD1 or auto) and percentages from 0 to 100.",
+              : form.taxYear === "2025-2026" && form.studentLoan === "plan 5"
+                ? "Plan 5 repayments are not supported for 2025–2026. Choose another loan plan or the 2026–2027 tax year."
+                : "Check your answers: enter a salary above zero, a supported tax code for your region (such as 1257L, BR, D0, SD1 or auto) and percentages from 0 to 100.",
           );
         }}
       >
         <h2 className="text-title-2 text-label">Your pay</h2>
+        <Select
+          label="Tax year"
+          value={form.taxYear}
+          onChange={(event) => update("taxYear", event.target.value as Form["taxYear"])}
+        >
+          {Object.keys(takeHomeYears).map((year) => (
+            <option key={year} value={year}>
+              {year.replace("-", "–")}
+            </option>
+          ))}
+        </Select>
         <Select
           label="Where do you live?"
           value={form.region}
@@ -219,6 +237,12 @@ export function UkTakeHomeSalaryCalculator() {
                 ))}
               </tbody>
             </table>
+            <p className="text-footnote text-label-secondary mt-3">
+              Payroll source for {form.taxYear.replace("-", "–")}:{" "}
+              <a className="underline" href={takeHomeYears[form.taxYear].source_url}>
+                {takeHomeYears[form.taxYear].title}
+              </a>
+            </p>
             {result.notes.map((note) => (
               <p key={note} className="text-footnote text-label-secondary mt-3">
                 {note}
