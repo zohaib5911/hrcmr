@@ -32,6 +32,16 @@ export async function signInPlatformAdmin(
   page: Page,
   level: "owner" | "support",
 ): Promise<Account> {
+  // Simulate the authenticated edge only on requests to the local admin web host.
+  await page.route(`${ADMIN_ORIGIN}/**`, async (route) => {
+    await route.continue({
+      headers: {
+        ...route.request().headers(),
+        "x-platform-ingress-key": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
+        "x-platform-visitor-ip": "203.0.113.7",
+      },
+    });
+  });
   const account = await createSignedInAdmin(page.request, newAccount(level));
   const made = await page.request.post(`${API}/e2e/platform-admin`, {
     headers: await csrfHeaders(page.request),

@@ -63,3 +63,36 @@ test("a platform owner opens the subscriptions page", async ({ page }) => {
   await page.goto(`${ADMIN_ORIGIN}/subscriptions`);
   await expect(page.getByRole("heading", { level: 1, name: "Subscriptions" })).toBeVisible();
 });
+
+test("SSR refuses a visitor outside the admin allowlist", async ({ page }) => {
+  await signInPlatformAdmin(page, "owner");
+  await page.route(`${ADMIN_ORIGIN}/**`, async (route) => {
+    await route.continue({
+      headers: {
+        ...route.request().headers(),
+        "x-platform-ingress-key": "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
+        "x-platform-visitor-ip": "198.51.100.9",
+      },
+    });
+  });
+  await page.goto(`${ADMIN_ORIGIN}/`);
+  await expect(page).toHaveURL(/\/session\?next=%2F$/);
+  await expect(page.getByText("Active companies")).toHaveCount(0);
+});
+
+test("SSR refuses forged identity headers without authenticated ingress", async ({ page }) => {
+  await signInPlatformAdmin(page, "owner");
+  await page.route(`${ADMIN_ORIGIN}/**`, async (route) => {
+    await route.continue({
+      headers: {
+        ...route.request().headers(),
+        "x-platform-ingress-key": "forged",
+        "x-platform-visitor-ip": "203.0.113.7",
+        "x-forwarded-for": "203.0.113.7",
+      },
+    });
+  });
+  await page.goto(`${ADMIN_ORIGIN}/`);
+  await expect(page).toHaveURL(/\/session\?next=%2F$/);
+  await expect(page.getByText("Active companies")).toHaveCount(0);
+});

@@ -154,6 +154,22 @@ Turn OFF the public TCP proxy in production. Use private URLs only.
 Enable Railway backups for Postgres.
 
 ======================================================================
+PLATFORM_SSR_SECRET       Separate random secret >=32 characters, identical on web and API only.
+PLATFORM_INGRESS_SECRET   Different random secret >=32 characters, on web and trusted edge only.
+
+Admin SSR ingress contract (required before enabling admin pages):
+- Restrict the web origin to your trusted edge (private networking/firewall or authenticated origin).
+- On EVERY request to the admin web host, the edge MUST overwrite X-Platform-Ingress-Key with
+  PLATFORM_INGRESS_SECRET and X-Platform-Visitor-IP with the verified visitor IP. Strip incoming
+  values even when present. With Cloudflare, use the connection visitor IP (ip.src), not a client
+  forwarding header; a further proxy must authenticate its upstream before vouching for identity.
+- Never return the ingress key in responses or expose either secret through NEXT_PUBLIC_*.
+- The web server refuses SSR data access without valid ingress identity and both configured keys.
+  The API verifies a 30-second HMAC assertion bound to GET URL and cookies, then applies the same
+  ADMIN_IP_ALLOWLIST and audits the visitor IP/user agent. Browser actions retain the existing
+  trusted-proxy identity rules. Adding the web server IP to the allowlist is not a substitute.
+- Rotate each secret at both of its holders together. Configure and verify staging first.
+
 5. PROVIDER SET-UP STEPS (exact settings)
 ======================================================================
 

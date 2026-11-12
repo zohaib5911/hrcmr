@@ -1,18 +1,29 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { createApiClient, serverApiBaseUrl, type ApiClient } from "@/lib/api/client";
 import { PLATFORM_COOKIE } from "@/lib/platform/session";
+import { signVisitor, visitorFromIngress } from "@/lib/platform/visitor";
 
 /** An API client for an admin page, speaking with the platform cookie; none (null) without it. */
 export async function platformApi(): Promise<ApiClient | null> {
   const jar = await cookies();
   if (!jar.has(PLATFORM_COOKIE)) return null;
-  return createApiClient({
+  const visitor = visitorFromIngress(await headers());
+  const secret = process.env.PLATFORM_SSR_SECRET;
+  if (!visitor || !secret || secret.length < 32) return null;
+  const client = createApiClient({
     baseUrl: serverApiBaseUrl(),
     headers: { cookie: jar.toString() },
     readCookies: () => "",
   });
+  client.use({
+    onRequest({ request }) {
+      signVisitor(request, visitor, secret);
+      return request;
+    },
+  });
+  return client;
 }
 
 /** The start page on the admin host, coming back to `path` afterwards (a PUBLIC admin path, e.g. `/companies`). */
