@@ -1,16 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
+import { PresetChips } from "@/components/calculators/preset-chips";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
+import type { CalculatorPreset } from "@/lib/calculators/frame";
 import {
   calculateIlrSalary,
   FULL_TIME_HOURS,
   searchOccupations,
   type Occupation,
-  type SalaryInput,
   type Situation,
 } from "@/lib/calculators/skilled-worker-ilr-salary-calculator";
 
@@ -21,39 +22,62 @@ const gbp = (value: number) =>
     maximumFractionDigits: 0,
   }).format(value);
 
+type Form = { query: string; situation: Situation; hours: string };
+
+/** Example scenarios: they only fill in the form; every figure comes from the rates data. */
+export const ilrSalaryPresets: readonly CalculatorPreset<Form>[] = [
+  {
+    id: "developer",
+    label: "Software developer, full time",
+    values: { query: "2134", situation: "standard", hours: String(FULL_TIME_HOURS) },
+  },
+  {
+    id: "part-time",
+    label: "Chief executive, 30 hours a week",
+    values: { query: "1111", situation: "standard", hours: "30" },
+  },
+  {
+    id: "transitional",
+    label: "Developer, first certificate before April 2024",
+    values: { query: "2134", situation: "transitional", hours: String(FULL_TIME_HOURS) },
+  },
+];
+
+const INVALID = "Incomplete: search for your job, then enter weekly hours between 1 and 168.";
+
 export function SkilledWorkerIlrSalaryCalculator() {
   const [query, setQuery] = useState("");
   const [code, setCode] = useState("");
   const [situation, setSituation] = useState<Situation>("standard");
   const [hours, setHours] = useState(String(FULL_TIME_HOURS));
-  const [input, setInput] = useState<SalaryInput | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [touched, setTouched] = useState(false);
 
-  const matches = searchOccupations(query);
+  const matches = useMemo(() => searchOccupations(query), [query]);
   const chosen: Occupation | undefined = matches.find((o) => o.code === code) ?? matches[0];
-  const reset = () => {
-    setInput(null);
-    setError(null);
-  };
+  const h = Number(hours);
+  const valid = chosen !== undefined && Number.isFinite(h) && h >= 1 && h <= 168;
+  // Live result: recalculated locally on every change once the user has answered something.
+  const input = touched && valid && chosen ? { occupation: chosen, situation, hours: h } : null;
   const result = input ? calculateIlrSalary(input) : null;
+  const error = touched && !valid ? INVALID : null;
+  const touch = () => setTouched(true);
 
   return (
     <div className="grid items-start gap-8 lg:grid-cols-2">
-      <form
-        className="space-y-5"
-        onSubmit={(event) => {
-          event.preventDefault();
-          const h = Number(hours);
-          if (!chosen || !Number.isFinite(h) || h < 1 || h > 168) {
-            setInput(null);
-            setError("Search for your job, then enter weekly hours between 1 and 168.");
-            return;
-          }
-          setError(null);
-          setInput({ occupation: chosen, situation, hours: h });
-        }}
-      >
-        <h2 className="text-title-2 text-label">Your job</h2>
+      <form className="space-y-5" onSubmit={(event) => event.preventDefault()}>
+        <PresetChips
+          presets={ilrSalaryPresets}
+          onSelect={(preset) => {
+            setQuery(preset.values.query);
+            setCode("");
+            setSituation(preset.values.situation);
+            setHours(preset.values.hours);
+            setTouched(true);
+          }}
+        />
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">1.</span> Your job
+        </h2>
         <TextField
           label="Job title or SOC code"
           clearable={false}
@@ -62,7 +86,7 @@ export function SkilledWorkerIlrSalaryCalculator() {
           onChange={(event) => {
             setQuery(event.target.value);
             setCode("");
-            reset();
+            touch();
           }}
         />
         {matches.length > 0 ? (
@@ -71,7 +95,7 @@ export function SkilledWorkerIlrSalaryCalculator() {
             value={chosen?.code ?? ""}
             onChange={(event) => {
               setCode(event.target.value);
-              reset();
+              touch();
             }}
           >
             {matches.map((o) => (
@@ -81,12 +105,15 @@ export function SkilledWorkerIlrSalaryCalculator() {
             ))}
           </Select>
         ) : null}
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">2.</span> Your situation and hours
+        </h2>
         <Select
           label="Your situation"
           value={situation}
           onChange={(event) => {
             setSituation(event.target.value as Situation);
-            reset();
+            touch();
           }}
         >
           <option value="standard">Usual Skilled Worker</option>
@@ -103,11 +130,10 @@ export function SkilledWorkerIlrSalaryCalculator() {
           value={hours}
           onChange={(event) => {
             setHours(event.target.value);
-            reset();
+            touch();
           }}
         />
         <div className="flex flex-wrap gap-3">
-          <Button type="submit">Calculate salary</Button>
           <Button
             variant="gray"
             onClick={() => {
@@ -115,7 +141,7 @@ export function SkilledWorkerIlrSalaryCalculator() {
               setCode("");
               setSituation("standard");
               setHours(String(FULL_TIME_HOURS));
-              reset();
+              setTouched(false);
             }}
           >
             Reset answers
@@ -176,7 +202,7 @@ export function SkilledWorkerIlrSalaryCalculator() {
           </>
         ) : (
           <p className="text-callout text-label-secondary">
-            Search for your job, then calculate the salary you need to settle.
+            Search for your job or pick an example; the salary you need to settle updates as you go.
           </p>
         )}
       </section>

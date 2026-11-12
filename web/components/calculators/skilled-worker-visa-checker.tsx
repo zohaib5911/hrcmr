@@ -1,20 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { PresetChips } from "@/components/calculators/preset-chips";
 import { Button } from "@/components/ui/button";
 import { NumberField } from "@/components/ui/number-field";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { attempt } from "@/lib/auth/request";
+import type { CalculatorPreset } from "@/lib/calculators/frame";
 import {
   checkSkilledWorkerVisa,
+  findOccupation,
   FULL_TIME_HOURS,
   visaCheckerSources,
   type Situation,
   type VisaInput,
-  type VisaResult,
 } from "@/lib/calculators/skilled-worker-visa-checker";
 
 type Hit = components["schemas"]["PublicHitOut"];
@@ -31,6 +33,28 @@ const initial: VisaInput = {
   dependantChildren: 0,
   previousSkilledWorkerBeforeJan2026: false,
 };
+/**
+ * Example scenarios. They fill in the form from the local occupation table, so choosing one
+ * sends nothing; they are illustrations, not a prediction for any application.
+ */
+export const visaPresets: readonly CalculatorPreset<Partial<VisaInput> & { code: string }>[] = [
+  {
+    id: "developer",
+    label: "Software developer on £60,000",
+    values: { code: "2134", salary: 60000 },
+  },
+  {
+    id: "new-entrant",
+    label: "Software developer, new entrant on £40,000",
+    values: { code: "2134", salary: 40000, newEntrant: true },
+  },
+  {
+    id: "engineer-family",
+    label: "Mechanical engineer on £40,000 with a partner and child",
+    values: { code: "2122", salary: 40000, dependantPartner: true, dependantChildren: 1 },
+  },
+];
+
 const gbp = (n: number) => `£${n.toLocaleString("en-GB")}`;
 
 function YesNo({
@@ -63,8 +87,20 @@ export function SkilledWorkerVisaChecker() {
   const [chosen, setChosen] = useState<Hit | null>(null);
   const [hits, setHits] = useState<Hit[]>([]);
   const [lookupMessage, setLookupMessage] = useState("");
-  const [result, setResult] = useState<VisaResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [touched, setTouched] = useState(false);
+  // Live result: recalculated locally on every change once the job and salary are entered.
+  const ready = input.code !== "" && input.salary > 0;
+  const result = useMemo(
+    () => (ready ? checkSkilledWorkerVisa(input, chosen ?? undefined) : null),
+    [ready, input, chosen],
+  );
+  const incomplete = !touched
+    ? null
+    : !input.code
+      ? "Incomplete: search for the job and choose an occupation from the list."
+      : !(input.salary > 0)
+        ? "Incomplete: enter the annual salary offered."
+        : null;
   useEffect(() => {
     const term = query.trim();
     if (chosen || term.length < 2) return;
@@ -101,22 +137,28 @@ export function SkilledWorkerVisaChecker() {
 
   function update<K extends keyof VisaInput>(key: K, value: VisaInput[K]) {
     setInput((previous) => ({ ...previous, [key]: value }));
-    setResult(null);
+    setTouched(true);
   }
 
   return (
     <div className="grid items-start gap-8 lg:grid-cols-2">
-      <form
-        className="space-y-5"
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (!input.code) return setError("Choose an occupation from the list first.");
-          if (!(input.salary > 0)) return setError("Enter the annual salary offered.");
-          setError(null);
-          setResult(checkSkilledWorkerVisa(input, chosen ?? undefined));
-        }}
-      >
-        <h2 className="text-title-2 text-label">The job and the person</h2>
+      <form className="space-y-5" onSubmit={(event) => event.preventDefault()}>
+        <PresetChips
+          presets={visaPresets}
+          onSelect={(preset) => {
+            const occupation = findOccupation(preset.values.code);
+            const hit = occupation ? { code: occupation.code, title: occupation.title } : null;
+            setInput({ ...initial, ...preset.values });
+            setChosen(hit);
+            setHits([]);
+            setLookupMessage("");
+            setQuery(hit ? `${hit.code} ${hit.title}` : "");
+            setTouched(true);
+          }}
+        />
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">1.</span> The job
+        </h2>
         <TextField
           label="SOC code or job title"
           autoComplete="off"
@@ -172,6 +214,9 @@ export function SkilledWorkerVisaChecker() {
           value={input.weeklyHours}
           onChange={(value) => update("weeklyHours", value ?? 0)}
         />
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">2.</span> The applicant
+        </h2>
         <Select
           label="Applicant situation"
           value={input.situation}
@@ -199,6 +244,9 @@ export function SkilledWorkerVisaChecker() {
           value={input.newEntrant}
           onChange={(value) => update("newEntrant", value)}
         />
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">3.</span> Dependants and English
+        </h2>
         <YesNo
           label="Is a partner applying as a dependant?"
           value={input.dependantPartner}
@@ -216,13 +264,7 @@ export function SkilledWorkerVisaChecker() {
           value={input.previousSkilledWorkerBeforeJan2026}
           onChange={(value) => update("previousSkilledWorkerBeforeJan2026", value)}
         />
-        {error ? (
-          <p role="alert" className="text-callout text-danger">
-            {error}
-          </p>
-        ) : null}
         <div className="flex flex-wrap gap-3">
-          <Button type="submit">Check eligibility</Button>
           <Button
             variant="gray"
             onClick={() => {
@@ -231,8 +273,7 @@ export function SkilledWorkerVisaChecker() {
               setChosen(null);
               setHits([]);
               setLookupMessage("");
-              setResult(null);
-              setError(null);
+              setTouched(false);
             }}
           >
             Reset answers
@@ -326,7 +367,8 @@ export function SkilledWorkerVisaChecker() {
           </>
         ) : (
           <p className="text-callout text-label-secondary">
-            Choose the job, enter the salary and hours, then check eligibility.
+            {incomplete ??
+              "Choose the job and enter the salary, or pick an example; the result updates as you go."}
           </p>
         )}
       </section>
