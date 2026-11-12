@@ -27,7 +27,7 @@ Open findings: 1 P0 / 19 P1 / 1 P2 — FIX NEEDED. One further P0 browser failur
 - **Fix:** replace positional band guesses with sourced explicit code mappings by jurisdiction (including supported Scottish SD codes); special-case zero-allowance codes. Reject codes the tool does not model instead of silently reinterpreting them. Put any additional mappings in dated rates evidence; preserve the ordinary automatic-code path.
 - **Done when:** unit cases assert these four exact amounts and supported-code boundaries; component tests cover choosing a custom code and error handling; existing tax calculator tests, lint and typecheck pass.
 
-### [ ] C4.1.6 · P1 · Provide the specified take-home tax-year selection (from T19.9)
+### [x] C4.1.6 · P1 · Provide the specified take-home tax-year selection (from T19.9) — fixed in PR #93
 - **Problem:** the take-home module imports only `payroll-2026-27.json`; its input and form have no tax year despite plan §10 requiring selection where relevant and both supported payroll years being present. A visitor cannot calculate 2025–26 deductions.
 - **Fix:** copy `employerCostYears`/tax-year select from the employer calculator. Select bands, NI and student-loan thresholds from the chosen year's evidence, show that year in results and sources, and reject Plan5 for 2025–26 rather than inventing a threshold. Keep calculations local.
 - **Done when:** unit/component tests switch between both years and show the correct loan/Scottish-band differences, reject unsupported year/loan combinations, and existing examples pass.
