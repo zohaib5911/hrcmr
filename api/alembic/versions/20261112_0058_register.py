@@ -12,8 +12,11 @@ depends_on = None
 def upgrade() -> None:
     for model in (Publication, Sponsor, Entry, Change, PossibleMatch):
         model.__table__.create(op.get_bind())
-        # Public read models, but only the owner job may mutate global register data.
-        op.execute(f"GRANT SELECT ON {model.__tablename__} TO app_user")
+    # Public read models, but only the owner job may mutate global register data.
+    op.execute(
+        "GRANT SELECT ON register_publications, register_sponsors, register_entries, "
+        "register_changes, register_possible_matches TO app_user"
+    )
 
 
 def downgrade() -> None:
