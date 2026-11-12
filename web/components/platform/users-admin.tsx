@@ -28,8 +28,8 @@ export function UsersAdmin() {
   const tooShort = term.length < SEARCH_MIN;
 
   function fail(p: Problem) {
-    // An expired platform session: start again and come back here. FORBIDDEN is shown as a message.
-    if (p.code === "UNAUTHENTICATED") {
+    // An expired platform session: start again and come back here.
+    if (p.code === "UNAUTHENTICATED" || p.code === "FORBIDDEN") {
       window.location.replace(`/session?next=${encodeURIComponent("/users")}`);
       return;
     }

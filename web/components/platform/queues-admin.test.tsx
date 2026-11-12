@@ -104,3 +104,14 @@ describe("QueuesAdmin", () => {
     expect(last?.[1].params.query).toEqual({ limit: 50, offset: 50 });
   });
 });
+
+describe("QueuesAdmin expired platform session", () => {
+  it.each(["UNAUTHENTICATED", "FORBIDDEN"])("returns to the start page on %s", async (code) => {
+    const replace = vi.fn();
+    vi.stubGlobal("location", { ...window.location, replace });
+    get.mockResolvedValue({ error: { code, message: "no" } });
+    render(<QueuesAdmin />);
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/session?next=%2Fqueues"));
+    vi.unstubAllGlobals();
+  });
+});

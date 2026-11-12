@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default async function Page() {
   const api = await platformApi();
   if (!api) redirect(sessionStartPath("/subscriptions"));
-  const isOwner = await isPlatformOwner(api);
+  const isOwner = await isPlatformOwner(api, "/subscriptions");
   return (
     <main className="min-h-dvh bg-grouped p-5 sm:p-8">
       <div className="mx-auto max-w-6xl">

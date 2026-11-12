@@ -28,7 +28,7 @@ export function ContactAdmin() {
   const [problem, setProblem] = useState<Problem | null>(null);
 
   const fail = useCallback((p: Problem) => {
-    if (p.code === "UNAUTHENTICATED") {
+    if (p.code === "UNAUTHENTICATED" || p.code === "FORBIDDEN") {
       window.location.replace(`/session?next=${encodeURIComponent("/contact")}`);
       return;
     }

@@ -86,3 +86,14 @@ describe("ContactAdmin", () => {
     expect(await screen.findByText("Page failed")).toBeInTheDocument();
   });
 });
+
+describe("ContactAdmin expired platform session", () => {
+  it.each(["UNAUTHENTICATED", "FORBIDDEN"])("returns to the start page on %s", async (code) => {
+    const replace = vi.fn();
+    vi.stubGlobal("location", { ...window.location, replace });
+    get.mockResolvedValue({ error: { code, message: "no" } });
+    render(<ContactAdmin />);
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/session?next=%2Fcontact"));
+    vi.unstubAllGlobals();
+  });
+});
