@@ -12,13 +12,13 @@
 #   started while the limit is still on ends at once, so retrying costs nothing; work resumes by itself.
 #
 # Env overrides: CLAUDE_MODEL, CODEX_MODEL, AGENT_TIER (S|B), CLAUDE_FLAGS, CODEX_FLAGS,
-#                IDLE_SLEEP, LIMIT_SLEEP, SESSION_TIMEOUT (default 4h).
+#                IDLE_SLEEP, LIMIT_SLEEP, SESSION_TIMEOUT (default 90m).
 set -uo pipefail
 AGENT=${1:?usage: run.sh <claude|codex>}
 COMMON=$(git -C "$(dirname "$0")" rev-parse --path-format=absolute --git-common-dir)
 COORD=$(dirname "$COMMON"); BUS="$COMMON/agent-bus"
 WT="$(dirname "$COORD")/$(basename "$COORD")-wt/$AGENT"
-IDLE_SLEEP=${IDLE_SLEEP:-600} LIMIT_SLEEP=${LIMIT_SLEEP:-900} SESSION_TIMEOUT=${SESSION_TIMEOUT:-4h}
+IDLE_SLEEP=${IDLE_SLEEP:-600} LIMIT_SLEEP=${LIMIT_SLEEP:-900} SESSION_TIMEOUT=${SESSION_TIMEOUT:-90m}   # a stuck session costs at most 90 min; work is committed per step
 mkdir -p "$BUS/logs"
 
 case $AGENT in
