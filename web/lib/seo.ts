@@ -17,8 +17,28 @@ export function pageMetadata(path: string, title: string, description: string): 
     title,
     description,
     alternates: { canonical: url },
-    openGraph: { type: "website", locale: "en_GB", siteName: brand.name, title, description, url },
-    twitter: { card: "summary_large_image", title, description },
+    openGraph: {
+      type: "website",
+      locale: "en_GB",
+      siteName: brand.name,
+      title,
+      description,
+      url,
+      images: [
+        {
+          url: publicUrl("/opengraph-image"),
+          width: 1200,
+          height: 630,
+          alt: `${brand.name} — HR and sponsor compliance`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [publicUrl("/opengraph-image")],
+    },
   };
 }
 
@@ -66,7 +86,6 @@ export function websiteData() {
         "@id": publicUrl("/#organization"),
         name: brand.legal.companyName ?? brand.name,
         url: publicUrl("/"),
-        logo: publicUrl(brand.logo.fullLockup),
       },
       {
         "@type": "WebSite",
