@@ -14,11 +14,13 @@ export function CalculatorTemplate({
   description,
   sources,
   children,
+  privacyNotice,
 }: {
   title: string;
   description: string;
   sources: readonly CalculatorSource[];
   children: ReactNode;
+  privacyNotice?: string;
 }) {
   return (
     <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
@@ -26,8 +28,9 @@ export function CalculatorTemplate({
         <h1 className="text-large-title text-label">{title}</h1>
         <p className="text-callout text-label-secondary mt-3 max-w-2xl">{description}</p>
         <p className="text-footnote text-label-secondary mt-3">
-          Your answers stay in this page’s memory. Nothing you enter is saved or sent. General
-          guidance only; this tool does not provide legal or immigration advice.
+          {privacyNotice ??
+            "Your answers stay in this page’s memory. Nothing you enter is saved or sent."}{" "}
+          General guidance only; this tool does not provide legal or immigration advice.
         </p>
       </header>
       {children}
