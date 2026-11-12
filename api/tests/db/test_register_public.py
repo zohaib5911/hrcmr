@@ -95,6 +95,67 @@ async def test_regions_bulletins_profiles_and_sitemap(rig: dict[str, Any]) -> No
     await public.aclose()
 
 
+async def _ingest(rig: dict[str, Any], files: list[tuple[str, date]]) -> None:
+    serving = {"csv": ""}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        name = serving["csv"] if request.url.path.endswith(".csv") else "publication.html"
+        return httpx.Response(200, content=(FIXTURES / name).read_bytes())
+
+    async with httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client:
+        for name, on in files:
+            serving["csv"] = name
+            async with AsyncSession(rig["owner"]) as db:
+                assert await ingest(db, client, on) != "unchanged"
+                await db.commit()
+
+
+async def test_two_files_on_one_date_make_one_daily_bulletin(rig: dict[str, Any]) -> None:
+    # 10th: Example Care Ltd, Stable, Gone. 11th morning: Ltd->Limited rename, New added, Gone
+    # removed, Stable B + GBM. 11th afternoon: New removed again, Gone back, Late added, Stable A.
+    await _ingest(
+        rig,
+        [
+            ("first.csv", date(2026, 11, 10)),
+            ("second.csv", date(2026, 11, 11)),
+            ("third.csv", date(2026, 11, 11)),
+        ],
+    )
+    public = anonymous(rig)
+    bulletins = (await public.get(f"{API}/changes")).json()["bulletins"]
+    assert [b["date"] for b in bulletins] == ["2026-11-11", "2026-11-10"]
+    listed = bulletins[0]
+    assert (listed["added"], listed["removed"], listed["returned"]) == (2, 1, 0)
+    day = (await public.get(f"{API}/changes/2026-11-11")).json()
+    for key in ("added", "removed", "returned", "net"):
+        assert day[key] == listed[key]
+    assert [s["name"] for s in day["added_list"]] == ["Example Care Limited", "Late Ltd"]
+    assert [s["name"] for s in day["removed_list"]] == ["Example Care Ltd"]
+    assert day["returned_list"] == []
+    assert day["median_added_last_28"] == 3.0
+    assert len(day["possibly_same"]) == 1
+
+    async with rig["owner"].connect() as connection:
+        stable_id = await connection.scalar(
+            text("select stable_id from register_sponsors where organisation_name = 'Stable Ltd'")
+        )
+    profile = (await public.get(f"{API}/sponsors/{stable_id}")).json()
+    assert profile["entries"] == [{"type_rating": "Worker (A rating)", "route": "Skilled Worker"}]
+    # The afternoon's changes come first, before the morning's.
+    assert {c["change"] for c in profile["changes"][:2]} == {"rating_changed", "route_removed"}
+    rating = next(c for c in profile["changes"] if c["change"] == "rating_changed")
+    assert rating["detail"]["after"] == ["Worker (A rating)"]
+
+    # A sponsor listed before the day, gone, and listed again counts as returned. The median
+    # is over daily bulletins (3 and 2), not the three files (3, 2 and 1).
+    await _ingest(rig, [("fourth.csv", date(2026, 11, 12))])
+    later = (await public.get(f"{API}/changes/2026-11-12")).json()
+    assert (later["added"], later["removed"], later["returned"]) == (0, 0, 1)
+    assert [s["name"] for s in later["returned_list"]] == ["Example Care Ltd"]
+    assert later["median_added_last_28"] == 2.5
+    await public.aclose()
+
+
 async def test_the_report_form_needs_turnstile_and_is_limited(
     rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
