@@ -45,7 +45,7 @@ Each screen needs loading, empty and error states, works at 360 px and in dark m
 - **Fix:** `/users` with an e-mail search (3 characters or more), result rows with status, and Lock / Unlock in a `ConfirmDialog` with an optional reason.
 - **Done when:** unit test; e2e: an owner locks then unlocks a seeded user.
 
-### [ ] C3.1.7 · P1 · Admin screen: subscriptions and refunds (from T17.4) · S!
+### [x] C3.1.7 · P1 · Admin screen: subscriptions and refunds (from T17.4) · S! — fixed in PR #43
 - **Pattern:** read the "Admin screens" paragraph at the top of changesneeded.md first (files to copy, states, tests).
 - **Problem:** no screen for `GET /platform/subscriptions` or `POST /platform/refunds`.
 - **Fix:** `/subscriptions` list (plan and refunded filters, paging, Stripe ids shown as text). "Refund" only for an owner and only on rows with no `refunded_at`: dialog with required reason and a second confirmation that sends `confirm: true`. Show the API's error message on refusal (`ALREADY_REFUNDED`, `NOTHING_TO_REFUND`, `PAYMENTS_NOT_SET_UP`).
