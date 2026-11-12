@@ -57,6 +57,7 @@ export function calculateEmployerCost(input: EmployerCostInput) {
         ? thresholds["Upper secondary threshold (under 21)"].year
         : thresholds["Secondary threshold"].year;
   const niRate = rates.employer_ni_rates[category][3];
+  if (niRate === undefined) throw new Error("The selected NI category has no verified rate.");
   const niEarnings = money(Math.max(0, input.salary - niThreshold));
   const employerNI = money(niEarnings * niRate);
   const pensionableEarnings = money(
