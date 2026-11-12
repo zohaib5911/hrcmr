@@ -4,6 +4,7 @@ snapshot tables; the report form is the only write and needs Turnstile and a per
 from __future__ import annotations
 
 import asyncio
+import hashlib
 from collections.abc import AsyncIterator
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -13,13 +14,14 @@ from typing import Any
 import httpx
 import pytest
 from pydantic import SecretStr
-from sqlalchemy import text
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import cli
 from app.jobs.register import register_ingest_manual
 from app.modules.register import public as register
 from app.modules.register.ingest import ingest
+from app.modules.register.models import CompanyDataset, Sponsor
 from tests.db.test_careers import anonymous
 from tests.db.test_employee_documents import rig as rig
 from tests.test_register_ingest import FIXTURES
@@ -312,3 +314,112 @@ async def test_production_import_geocodes_from_the_loaded_ons_dataset(
         assert regions["London"] == 1
         assert regions["Yorkshire and The Humber"] == 1
         await public.aclose()
+
+
+async def test_production_bulk_companies_flag_matches_facets_and_refresh(
+    rig: dict[str, Any], tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    saved = tmp_path / "BasicCompanyData-2026-11.csv"
+    saved.write_text(
+        "CompanyName, CompanyNumber,RegAddress.PostTown,SICCode.SicText_1\n"
+        "Example Care Ltd,01234567,London,87100 - Residential nursing\n"
+        "Stable Ltd,00000001,Leeds,62012 - Software\n"
+        " STABLE LTD.,00000002,Leeds,62012 - Software\n"
+        "New Ltd,SC000003,Bristol,62012 - Software\n"
+    )
+    owner_url = rig["owner"].url.render_as_string(hide_password=False)
+    settings = SimpleNamespace(
+        database_url_owner=SecretStr(owner_url), register_bulk_match_enabled=False
+    )
+    monkeypatch.setattr(cli, "get_settings", lambda: settings)
+    # Load with matching disabled: retain the edition, without enriching sponsors.
+    assert (
+        await asyncio.to_thread(cli.main, ["load-companies", str(saved), "--version", "2026-11"])
+        == 0
+    )
+    serving = {"csv": "first.csv"}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        name = serving["csv"] if request.url.path.endswith(".csv") else "publication.html"
+        return httpx.Response(200, content=(FIXTURES / name).read_bytes())
+
+    async with (
+        httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client,
+        anonymous(rig) as public,
+    ):
+        ctx = {
+            "owner_engine": rig["owner"],
+            "http": client,
+            "settings": settings,
+            "now": datetime(2026, 11, 10, 10, tzinfo=UTC),
+        }
+        assert await register_ingest_manual(ctx) == "imported"
+        async with AsyncSession(rig["owner"]) as db:
+            sponsors = (await db.scalars(select(Sponsor))).all()
+            assert all(s.companies_house_number is None for s in sponsors)
+            assert all(s.sic_section is None for s in sponsors)
+        assert (await public.get(f"{API}/explore")).json()["facets"]["industry"] == []
+
+        # Enabling the operator command applies the retained exact-name service immediately.
+        settings.register_bulk_match_enabled = True
+        assert (
+            await asyncio.to_thread(
+                cli.main, ["load-companies", str(saved), "--version", "2026-11-enabled"]
+            )
+            == 0
+        )
+        async with AsyncSession(rig["owner"]) as db:
+            care = await db.scalar(
+                select(Sponsor).where(Sponsor.normalised_name == "example care ltd")
+            )
+            assert care is not None
+            assert (care.companies_house_number, care.sic_section) == ("01234567", "Q")
+            dataset = await db.get(CompanyDataset, care.companies_dataset_id)
+            assert dataset is not None
+            assert (dataset.version, dataset.source) == ("2026-11-enabled", saved.name)
+            assert dataset.sha256 == hashlib.sha256(saved.read_bytes()).hexdigest()
+            stable = await db.scalar(select(Sponsor).where(Sponsor.normalised_name == "stable ltd"))
+            assert stable is not None
+            assert stable.companies_house_number is None
+        filtered = (await public.get(f"{API}/explore", params={"industry": "Q"})).json()
+        assert filtered["total"] == 1
+        assert filtered["results"][0]["name"] == "Example Care Ltd"
+        assert filtered["sections"]["industries"] == [{"label": "Q", "count": 1}]
+
+        # The next real import picks up a new sponsor from the active local bulk file.
+        serving["csv"] = "second.csv"
+        ctx["now"] = datetime(2026, 11, 11, 10, tzinfo=UTC)
+        assert await register_ingest_manual(ctx) == "imported"
+        filtered = (await public.get(f"{API}/explore", params={"industry": "J"})).json()
+        assert filtered["total"] == 1
+        assert filtered["results"][0]["name"] == "New Ltd"
+        assert filtered["sections"]["industries"] == [{"label": "J", "count": 1}]
+        async with AsyncSession(rig["owner"]) as db:
+            new = await db.scalar(select(Sponsor).where(Sponsor.normalised_name == "new ltd"))
+            assert new is not None
+            assert new.companies_house_number == "SC000003"
+            assert new.companies_dataset_id is not None
+
+        # A monthly refresh must remove an earlier match if the name becomes ambiguous.
+        saved.write_text(
+            "CompanyName,CompanyNumber,SICCode.SicText_1\n"
+            "New Ltd,SC000003,62012\nNew Ltd.,00000004,62012\n"
+            "Stable Ltd,00000001,87100\n"
+        )
+        assert (
+            await asyncio.to_thread(
+                cli.main, ["load-companies", str(saved), "--version", "2026-12"]
+            )
+            == 0
+        )
+        async with AsyncSession(rig["owner"]) as db:
+            new = await db.scalar(select(Sponsor).where(Sponsor.normalised_name == "new ltd"))
+            assert new is not None
+            assert (new.companies_house_number, new.sic_section, new.companies_dataset_id) == (
+                None,
+                None,
+                None,
+            )
+        refreshed = (await public.get(f"{API}/explore", params={"industry": "Q"})).json()
+        assert refreshed["total"] == 1
+        assert refreshed["results"][0]["name"] == "Stable Ltd"
