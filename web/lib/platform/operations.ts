@@ -24,8 +24,8 @@ export function auditFilters(params: Record<string, string | string[] | undefine
   }
   return query;
 }
-export function queryString(query: Record<string, string | number | undefined>): string {
+export function queryString(query: Record<string, string | number | null | undefined>): string {
   return new URLSearchParams(
-    Object.entries(query).flatMap(([k, v]) => (v === undefined ? [] : [[k, String(v)]])),
+    Object.entries(query).flatMap(([k, v]) => (v == null ? [] : [[k, String(v)]])),
   ).toString();
 }
