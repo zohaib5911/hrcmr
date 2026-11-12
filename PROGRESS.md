@@ -553,3 +553,10 @@ Do not start until the owner says so: US site, Australia, native wrapper, passke
 ## Owner action — T18.2 legal drafts
 - Have a solicitor review and approve Terms, Privacy, Cookies/preferences, DPA, Subprocessors, AI policy, Complaints, Refunds/cancellation, Resources disclaimer, Register terms and Accessibility before launch. All remain marked “DRAFT — requires solicitor review”; legal drafts are excluded from search indexing.
 - Supply the contracting entity, registered office, registration/ICO details and privacy contact. Confirm lawful bases, retention/deletion and backup schedules (routine retention purging is unfinished), vendor legal entities, production regions, transfer safeguards, subprocessor change notices and AI provider terms. Sentry is configured but not instrumented; no advertising pixels are installed. Verify actual cookies and optional integrations at deployment; update drafts before activating any new recipient or tracking.
+
+## Phase 18 summary (public marketing site) — gate closed
+- Built: marketing pages (T18.1), draft legal pages with real cookie and subprocessor lists (T18.2), SEO metadata, JSON-LD, sitemap, robots (T18.3), unpublished comparison templates (T18.4).
+- Gate: API full suite 1363 passed; web lint 0 warnings, typecheck clean, unit 1309 passed; full web e2e 485 passed, 224 skipped (screenshot-only), exit 0.
+- Lighthouse on all 10 marketing pages: accessibility, best practices and SEO 100; performance 96–100 (lowest: /contact 96). All ≥ 95.
+- Screenshots: docs/screenshots/phase-18, 12 pages × 390/1280 px × light/dark = 48 images.
+- Open: legal drafts still need solicitor review (owner action above).
