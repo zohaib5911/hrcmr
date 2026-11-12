@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { PlatformOverview } from "@/components/platform/overview";
-import { serverApi } from "@/lib/auth/server";
-import { dataOrSessionRedirect, sessionStartPath } from "@/lib/platform/guard";
+import { dataOrSessionRedirect, platformApi, sessionStartPath } from "@/lib/platform/guard";
 
 export const metadata: Metadata = {
   title: "Platform admin",
@@ -11,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PlatformAdminPage() {
-  const client = await serverApi();
+  const client = await platformApi();
   if (!client) redirect(sessionStartPath("/"));
   const [metrics, queue] = await Promise.all([
     client.GET("/platform/metrics").catch(() => null),

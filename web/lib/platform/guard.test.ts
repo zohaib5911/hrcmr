@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+vi.mock("next/headers", () => ({ cookies: async () => ({}) }));
 vi.mock("next/navigation", () => ({
   redirect: (to: string) => {
     throw new Error(`REDIRECT ${to}`);
