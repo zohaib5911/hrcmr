@@ -27,7 +27,7 @@ Counts: 1 P0 / 4 P1 / 1 P2. FIX NEEDED.
 - **Fix:** add independent offset/total state and accessible Previous/Next controls for the contact list and both queue lists; preserve status filters and reset each affected offset on filter changes. Copy subscriptions paging. Avoid stale-filter response races.
 - **Done when:** unit tests cover more than 50 results, second-page requests and filter resets for all three lists, including empty/error states.
 
-### [ ] C3.2.6 · P2 · Link Settings from the admin overview (from C3.1.4, C3.1.9)
+### [x] C3.2.6 · P2 · Link Settings from the admin overview (from C3.1.4, C3.1.9) — fixed in PR #67
 - **Problem:** `web/components/platform/overview.tsx:ADMIN_LINKS` omits `/settings`; the overview is the admin navigation hub and was required to link every added screen.
 - **Fix:** add a Settings link alongside the existing admin screens and assert its public href in `overview.test.tsx`.
 - **Done when:** overview unit tests pass and the Settings link opens `/settings`.
