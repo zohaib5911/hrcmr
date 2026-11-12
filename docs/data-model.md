@@ -1644,7 +1644,7 @@ Checks:
 | `published_on` | DATE | no |  |  |
 | `source_url` | VARCHAR(2048) | no |  |  |
 | `row_count` | INTEGER | no |  |  |
-| `sha256` | VARCHAR(64) | no |  | unique |
+| `sha256` | VARCHAR(64) | no |  |  |
 | `fetched_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `status` | VARCHAR(20) | no |  |  |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
