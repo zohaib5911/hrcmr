@@ -294,3 +294,15 @@ class JobQueueOut(BaseModel):
 class JobRerunOut(BaseModel):
     job: str
     job_id: str  # the queue's id for the re-run
+
+
+class LiveSupportOut(BaseModel):
+    id: uuid.UUID
+    expires_at: datetime
+    write_enabled: bool
+
+
+class PlatformContextOut(BaseModel):
+    owner: bool
+    web_origin: str
+    support: LiveSupportOut | None
