@@ -32,7 +32,7 @@ Open findings: 1 P0 / 19 P1 / 1 P2 — FIX NEEDED. One further P0 browser failur
 - **Fix:** copy `employerCostYears`/tax-year select from the employer calculator. Select bands, NI and student-loan thresholds from the chosen year's evidence, show that year in results and sources, and reject Plan5 for 2025–26 rather than inventing a threshold. Keep calculations local.
 - **Done when:** unit/component tests switch between both years and show the correct loan/Scottish-band differences, reject unsupported year/loan combinations, and existing examples pass.
 
-### [ ] C4.1.7 · P1 · Remove the blanket Health and Care ISC exemption (from T19.3)
+### [x] C4.1.7 · P1 · Remove the blanket Health and Care ISC exemption (from T19.3) — fixed in PR #88
 - **Problem:** `web/lib/calculators/sponsor-licence-cost-calculator.ts:125` makes every Health and Care Worker exempt from Immigration Skills Charge. GOV.UK ISC guidance does not grant that exemption; for a medium/large sponsor, nurse SOC2231 and24months require £2,640, but the tool returns0. The current unit test encodes the error.
 - **Fix:** determine ISC exemption from the verified exemption conditions, not the health-care fee/IHS route flag. Retain genuinely exempt SOCs and short outside-UK stays. Update the incorrect health-care assertion and add a non-exempt nursing case; do not change the genuine Health and Care IHS exemption.
 - **Done when:** nursing24months returns2640 for large and960 for small sponsors; exempt SOCs, dependants and inside/outside cases pass; component totals reflect the charge.
