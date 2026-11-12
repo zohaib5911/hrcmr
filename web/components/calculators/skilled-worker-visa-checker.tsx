@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { NumberField } from "@/components/ui/number-field";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
+import type { components } from "@/lib/api/client";
+import { attempt } from "@/lib/auth/request";
 import {
   checkSkilledWorkerVisa,
   visaCheckerSources,
@@ -13,9 +15,6 @@ import {
   type VisaInput,
   type VisaResult,
 } from "@/lib/calculators/skilled-worker-visa-checker";
-
-import type { components } from "@/lib/api/client";
-import { attempt } from "@/lib/auth/request";
 
 type Hit = components["schemas"]["PublicHitOut"];
 

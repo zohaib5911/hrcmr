@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -9,26 +9,26 @@ const chief = { code: "1111", title: "Chief executives and senior officials" };
 const nurse = { code: "2231", title: "Midwifery nurses" };
 const manager = { code: "1150", title: "Managers and directors in retail and wholesale" };
 let requests: Request[];
+const fetchMock = vi.fn<typeof fetch>();
 
 beforeEach(() => {
   requests = [];
   document.cookie = "csrf=test";
-  vi.stubGlobal(
-    "fetch",
-    vi.fn(async (request: Request) => {
-      requests.push(request);
-      const url = new URL(request.url);
-      if (url.pathname.endsWith("/9999")) {
-        return Response.json(
-          { error: { code: "NOT_FOUND", message: "We could not find that SOC code." } },
-          { status: 404 },
-        );
-      }
-      if (url.pathname.endsWith("/2231")) return Response.json(nurse);
-      if (url.pathname.endsWith("/1150")) return Response.json(manager);
-      return Response.json({ results: url.searchParams.get("q") === "nurse" ? [nurse] : [chief] });
-    }),
-  );
+  vi.stubGlobal("fetch", fetchMock);
+  fetchMock.mockImplementation(async (input) => {
+    const request = input as Request;
+    requests.push(request);
+    const url = new URL(request.url);
+    if (url.pathname.endsWith("/9999")) {
+      return Response.json(
+        { error: { code: "NOT_FOUND", message: "We could not find that SOC code." } },
+        { status: 404 },
+      );
+    }
+    if (url.pathname.endsWith("/2231")) return Response.json(nurse);
+    if (url.pathname.endsWith("/1150")) return Response.json(manager);
+    return Response.json({ results: url.searchParams.get("q") === "nurse" ? [nurse] : [chief] });
+  });
 });
 afterEach(() => {
   vi.restoreAllMocks();
@@ -65,7 +65,7 @@ describe("skilled worker visa checker page", () => {
     expect(requests).toHaveLength(1);
     expect(requests[0]?.method).toBe("GET");
     expect(new URL(requests[0]!.url).pathname).toBe("/api/v1/public/soc/search");
-    expect(new URL(requests[0]!.url).search).toBe("?q=chief+executives");
+    expect([...new URL(requests[0]!.url).searchParams]).toEqual([["q", "chief executives"]]);
     expect(await requests[0]!.text()).toBe("");
     await user.click(screen.getByRole("button", { name: "Reset answers" }));
     expect(screen.queryByText("Salary requirement met")).not.toBeInTheDocument();
@@ -113,6 +113,29 @@ describe("skilled worker visa checker page", () => {
     expect(result).toHaveTextContent("Not eligible on these answers");
     expect(result).toHaveTextContent("Table 1a");
     expect(result).not.toHaveTextContent("Needs review");
+  });
+
+  it("ignores an older lookup response after the occupation query changes", async () => {
+    let finish: (response: Response) => void = () => {};
+    fetchMock.mockImplementationOnce((input) => {
+      requests.push(input as Request);
+      return new Promise<Response>((resolve) => {
+        finish = resolve;
+      });
+    });
+    const user = userEvent.setup();
+    render(<Page />);
+    const query = screen.getByLabelText("SOC code or job title");
+    await user.type(query, "nurse");
+    await waitFor(() => expect(requests).toHaveLength(1));
+    await user.clear(query);
+    await user.type(query, "chief executives");
+    expect(
+      await screen.findByRole("button", { name: /1111 Chief executives/ }),
+    ).toBeInTheDocument();
+    await act(async () => finish(Response.json({ results: [nurse] })));
+    expect(screen.queryByRole("button", { name: "2231 Midwifery nurses" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /1111 Chief executives/ })).toBeInTheDocument();
   });
 
   it("shows lookup failure without an eligibility verdict", async () => {
