@@ -4604,6 +4604,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/contact": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send Message */
+        post: operations["contact_send_message"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/postings/{company_slug}/{posting_slug}": {
         parameters: {
             query?: never;
@@ -7921,6 +7938,32 @@ export interface components {
         ConfirmIn: {
             /** Code */
             code: string;
+        };
+        /** ContactFormIn */
+        ContactFormIn: {
+            /** Company */
+            company?: string | null;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Message */
+            message: string;
+            /** Name */
+            name: string;
+            /**
+             * Topic
+             * @enum {string}
+             */
+            topic: "sponsor_compliance" | "simple_hr" | "pricing_billing" | "setup_help" | "partnership" | "other" | "data_protection";
+            /** Turnstile Token */
+            turnstile_token: string;
+        };
+        /** ContactFormOut */
+        ContactFormOut: {
+            /** Received */
+            received: boolean;
         };
         /** ContactIn */
         ContactIn: {
@@ -27214,6 +27257,48 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CertificateCheckOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    contact_send_message: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ContactFormIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactFormOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

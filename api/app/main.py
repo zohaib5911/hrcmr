@@ -62,6 +62,7 @@ from app.modules.compliance.hub_router import router as compliance_hub_router
 from app.modules.compliance.reminder_router import router as reminders_router
 from app.modules.compliance.router import router as compliance_changes_router
 from app.modules.compliance.sponsor_pdf import router as sponsor_pdf_router
+from app.modules.contact.public import router as contact_public_router
 from app.modules.dashboard.router import router as dashboard_router
 from app.modules.deletion.router import router as deletion_router
 from app.modules.documents.router import router as documents_router
@@ -305,6 +306,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     app.include_router(platform_admin_router, prefix=API_PREFIX)
     app.include_router(support_router, prefix=API_PREFIX)
     app.include_router(careers_router, prefix=API_PREFIX)
+    app.include_router(contact_public_router, prefix=API_PREFIX)
     app.include_router(employee_documents_router, prefix=API_PREFIX)
     app.include_router(employee_pdf_router, prefix=API_PREFIX)
     app.include_router(employee_activity_router, prefix=API_PREFIX)

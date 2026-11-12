@@ -51,7 +51,10 @@ export function Section({ tone = "raised", id, label, className, children }: Sec
       aria-label={label}
       className={cn(tone === "raised" ? "bg-elevated" : "bg-canvas", "py-16 md:py-24", className)}
     >
-      <div className="page-marketing">{children}</div>
+      <div className="page-marketing">
+        {label ? <h2 className="sr-only">{label}</h2> : null}
+        {children}
+      </div>
     </section>
   );
 }
