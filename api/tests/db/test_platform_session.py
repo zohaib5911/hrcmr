@@ -29,7 +29,9 @@ PLATFORM_COOKIE = "brand_platform_session"
 
 
 @asynccontextmanager
-async def _rig(database: DatabaseUnderTest, allowlist: str = "") -> AsyncIterator[dict[str, Any]]:
+async def _rig(
+    database: DatabaseUnderTest, allowlist: str = "", **overrides: Any
+) -> AsyncIterator[dict[str, Any]]:
     redis = Redis.from_url(TEST_REDIS_URL, decode_responses=True)
     await redis.flushdb()
     company = uuid7()
@@ -44,7 +46,10 @@ async def _rig(database: DatabaseUnderTest, allowlist: str = "") -> AsyncIterato
             {"i": company},
         )
     settings = build_settings(
-        database_url=database.app_url, redis_url=TEST_REDIS_URL, admin_ip_allowlist=allowlist
+        database_url=database.app_url,
+        redis_url=TEST_REDIS_URL,
+        admin_ip_allowlist=allowlist,
+        **overrides,
     )
     app = create_app(settings)
     sessions = SessionStore(redis)
@@ -105,7 +110,7 @@ async def _rig(database: DatabaseUnderTest, allowlist: str = "") -> AsyncIterato
 
     async with LifespanManager(app):
         try:
-            yield {"admin": admin, "anonymous": lambda: browser({}), "owner": owner}
+            yield {"admin": admin, "anonymous": lambda: browser({}), "owner": owner, "app": app}
         finally:
             await owner.dispose()
             await redis.flushdb()

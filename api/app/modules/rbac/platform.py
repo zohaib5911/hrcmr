@@ -19,10 +19,11 @@ from app.core.errors import AppError, ForbiddenError
 from app.core.rbac_matrix import PLATFORM_PERMISSIONS
 from app.db.session import GlobalDb, GlobalSession  # noqa: TC001
 from app.modules.audit.service import AuditContext, record
-from app.modules.auth.deps import Auth, Caller, client_ip, platform_caller, state_for, user_agent
+from app.modules.auth.deps import Auth, Caller, platform_caller, state_for
 from app.modules.auth.policy import require_mfa_satisfied
 from app.modules.identity.models import PlatformAdmin, TermsAcceptance
 from app.modules.rbac.deps import PERMISSION_ATTRIBUTE
+from app.modules.rbac.visitor import platform_visitor
 
 
 @dataclass
@@ -54,7 +55,8 @@ def ip_allowed(ip: str | None, allowlist: list[str]) -> bool:
 
 def require_allowed_network(request: Request, settings: Settings) -> None:
     """Refuse a platform request from outside ADMIN_IP_ALLOWLIST (no-op when it is unset)."""
-    if not ip_allowed(client_ip(request), settings.admin_ip_allowlist):
+    ip, _ = platform_visitor(request, settings)
+    if not ip_allowed(ip, settings.admin_ip_allowlist):
         raise ForbiddenError
 
 
@@ -109,12 +111,13 @@ def require_platform(permission: str) -> Callable[..., AsyncIterator[PlatformAcc
                 "TERMS_ACCEPTANCE_REQUIRED", "Accept the new terms to continue.", status_code=403
             )
         await db.act_as(caller.user_id)
+        ip, agent = platform_visitor(request, auth.settings)
         context = AuditContext(
             company_id=None,
             actor_user_id=caller.user_id,
             actor_type="platform_admin",
-            ip=client_ip(request),
-            user_agent=user_agent(request),
+            ip=ip,
+            user_agent=agent,
             request_id=str(getattr(request.state, "request_id", "")) or None,
         )
         # Committed here, before the handler, so a page view is kept even if the handler fails.

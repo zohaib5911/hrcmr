@@ -18,6 +18,7 @@ SECRET_FIELDS = [
     "database_app_user_password",
     "redis_url",
     "session_secret",
+    "platform_ssr_secret",
     "field_encryption_keys",
     "blind_index_key",
     "r2_access_key_id",
