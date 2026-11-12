@@ -94,7 +94,7 @@ for (const colorScheme of ["light", "dark"] as const) {
           });
           expect(list.status()).toBe(200);
           const company = (await list.json()).items.find(
-            (row: { contact_email: string }) => row.contact_email === account.email,
+            (row: { name: string }) => row.name === account.company,
           );
           expect(company).toBeTruthy();
           const support = await page.request.post(

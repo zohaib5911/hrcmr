@@ -88,7 +88,7 @@ export function JobsAdmin({
           <TextField
             label="Reason for running again"
             hint="At least 5 characters; saved in the audit log."
-            maxLength={1000}
+            maxLength={500}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
           />
