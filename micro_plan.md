@@ -475,7 +475,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Decided 2026-11-08 (owner answer 1):** templates are DOCX/PDF files in the repo under `content/templates/` with a manifest (title, file, version, reviewed on). The platform admin lists them read-only (built here, from the manifest); nothing is uploaded. Each template is original work and needs a human review before it is published (offer letters especially).
 - **Spec:** plan L1214. Original DOCX/PDF generated from MDX sources at build or by a script.
 
-### [ ] T19.18 · S · Resources hub pages
+### [x] T19.18 · S · Resources hub pages
 - `/resources`, `/resources/guides`, `/resources/tools`, `/resources/templates`.
 
 ### [ ] P19 · S · Phase 19 gate
