@@ -44,3 +44,15 @@ test("a platform owner opens the users page", async ({ page }) => {
   await page.goto(`${ADMIN_ORIGIN}/users`);
   await expect(page.getByRole("heading", { level: 1, name: "Users" })).toBeVisible();
 });
+
+// C3.1.8: server-rendered headings only (no client JavaScript on the admin host in e2e); the lists and
+// the empty states are covered by queues-admin.test.tsx and contact-admin.test.tsx.
+test("a platform owner opens the queues and contact pages", async ({ page }) => {
+  await signInPlatformAdmin(page, "owner");
+  await page.goto(`${ADMIN_ORIGIN}/queues`);
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Deletion and export queues" }),
+  ).toBeVisible();
+  await page.goto(`${ADMIN_ORIGIN}/contact`);
+  await expect(page.getByRole("heading", { level: 1, name: "Contact messages" })).toBeVisible();
+});
