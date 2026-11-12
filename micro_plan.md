@@ -460,7 +460,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [ ] T19.7 · S! · Calculator 6: skilled-worker-ilr-salary-calculator
 ### [ ] T19.8 · S! · Calculator 7: holiday-entitlement-calculator
 ### [ ] T19.9 · S! · Calculator 8: uk-take-home-salary-calculator
-### [ ] T19.10 · S! · Calculator 9: uk-employer-cost-calculator
+### [x] T19.10 · S! · Calculator 9: uk-employer-cost-calculator
 ### [ ] T19.11 · S! · Calculator 10: uk-redundancy-pay-calculator
 ### [ ] T19.12 · S! · Calculator 11: uk-notice-pay-calculator
 ### [ ] T19.13 · S! · Calculator 12: uk-sick-pay-calculator
