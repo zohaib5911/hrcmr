@@ -20,7 +20,8 @@ From `api/`, with `DATABASE_URL_OWNER` and `REGISTER_BULK_MATCH_ENABLED=true` se
 uv run python -m app.cli load-companies /path/to/BasicCompanyData-2026-11.csv --version 2026-11
 ```
 
-The command stores the file, source filename, edition, SHA-256, unambiguous-name count and load
+The command stores the gzip-compressed file, source filename, edition, original SHA-256,
+unambiguous-name count and load
 time in the owner-only `register_company_datasets` table. Sponsors matched by the bulk loader
 link to that dataset through the owner-only `register_company_matches` table. The newest loaded dataset is active.
 Malformed or wholly unusable files are refused atomically.

@@ -354,6 +354,13 @@ async def test_production_bulk_companies_flag_matches_facets_and_refresh(
             "now": datetime(2026, 11, 10, 10, tzinfo=UTC),
         }
         assert await register_ingest_manual(ctx) == "imported"
+        # Disabled loading also leaves existing sponsors unchanged.
+        assert (
+            await asyncio.to_thread(
+                cli.main, ["load-companies", str(saved), "--version", "2026-11-disabled"]
+            )
+            == 0
+        )
         async with AsyncSession(rig["owner"]) as db:
             sponsors = (await db.scalars(select(Sponsor))).all()
             assert all(s.companies_house_number is None for s in sponsors)

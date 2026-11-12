@@ -5,6 +5,7 @@ caller supplies the downloaded bytes."""
 from __future__ import annotations
 
 import csv
+import gzip
 import hashlib
 import io
 import re
@@ -317,7 +318,7 @@ async def load_company_dataset(
         source=source,
         sha256=hashlib.sha256(content).hexdigest(),
         row_count=len(companies),
-        content=content,
+        content=gzip.compress(content, mtime=0),
     )
     db.add(dataset)
     await db.flush()
@@ -339,7 +340,7 @@ async def match_from_latest_dataset(db: AsyncSession, *, enabled: bool) -> int |
         logger.warning("register_companies_missing", hint="python -m app.cli load-companies")
         return None
     matched = await apply_companies_match(
-        db, parse_companies(dataset.content), enabled=True, dataset_id=dataset.id
+        db, parse_companies(gzip.decompress(dataset.content)), enabled=True, dataset_id=dataset.id
     )
     logger.info("register_companies_matched", version=dataset.version, matched=matched)
     return matched

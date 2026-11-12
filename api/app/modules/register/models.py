@@ -45,7 +45,7 @@ class PlaceDataset(Base, UUIDPrimaryKeyMixin):
 
 
 class CompanyDataset(Base, UUIDPrimaryKeyMixin):
-    """An operator-loaded Companies House monthly bulk CSV; newest row is active."""
+    """An operator-loaded Companies House monthly bulk CSV (gzip); newest row is active."""
 
     __tablename__ = "register_company_datasets"
     version: Mapped[str] = mapped_column(String(100))
