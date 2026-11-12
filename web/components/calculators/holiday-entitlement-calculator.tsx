@@ -16,6 +16,7 @@ type Form = {
   mode: HolidayMode;
   daysPerWeek: string;
   hoursPerWeek: string;
+  equalDays: "yes" | "no";
   hoursWorked: string;
   leaveYearStart: string;
   leaveYearEnd: string;
@@ -27,6 +28,7 @@ const initial: Form = {
   mode: "days",
   daysPerWeek: "",
   hoursPerWeek: "",
+  equalDays: "yes",
   hoursWorked: "",
   leaveYearStart: "",
   leaveYearEnd: "",
@@ -34,12 +36,26 @@ const initial: Form = {
   endDate: "",
 };
 
+function errorFor(form: Form): string {
+  if (form.mode === "hours") {
+    if (form.equalDays === "no")
+      return "This calculator handles regular hours spread evenly over each working day. For days of different lengths, work out the entitlement from the actual pattern (5.6 weeks of the hours worked, capped at 28 days of leave) or ask ACAS.";
+    return "Check your answers: enter hours per week and the days per week they are worked over (1–7). A working day cannot be longer than 24 hours.";
+  }
+  return "Check your answers: fill every field, days per week must be 1–7 and dates must be in order.";
+}
+
 function toInput(form: Form): HolidayInput {
   switch (form.mode) {
     case "days":
       return { mode: "days", daysPerWeek: Number(form.daysPerWeek) };
     case "hours":
-      return { mode: "hours", hoursPerWeek: Number(form.hoursPerWeek) };
+      return {
+        mode: "hours",
+        hoursPerWeek: Number(form.hoursPerWeek),
+        daysPerWeek: Number(form.daysPerWeek),
+        equalDays: form.equalDays === "yes",
+      };
     case "irregular":
       return { mode: "irregular", hoursWorked: Number(form.hoursWorked) };
     case "part_year":
@@ -82,11 +98,7 @@ export function HolidayEntitlementCalculator() {
           event.preventDefault();
           const calculated = calculateHoliday(toInput(form));
           setResult(calculated);
-          setError(
-            calculated
-              ? null
-              : "Check your answers: fill every field, days per week must be 1–7 and dates must be in order.",
-          );
+          setError(calculated ? null : errorFor(form));
         }}
       >
         <h2 className="text-title-2 text-label">Your worker</h2>
@@ -100,10 +112,28 @@ export function HolidayEntitlementCalculator() {
           <option value="part_year">Starts or leaves part way through the leave year</option>
           <option value="irregular">Irregular hours or part-year (accrual at 12.07%)</option>
         </Select>
+        {form.mode === "hours" ? field("hoursPerWeek", "Hours worked per week", "number") : null}
         {form.mode === "days" || form.mode === "part_year"
           ? field("daysPerWeek", "Days worked per week", "number")
           : null}
-        {form.mode === "hours" ? field("hoursPerWeek", "Hours worked per week", "number") : null}
+        {form.mode === "hours" ? (
+          <>
+            {field(
+              "daysPerWeek",
+              "Days those hours are worked over",
+              "number",
+              "Needed for the 28-day cap: 45 hours over 6 days is capped at 28 × 7.5 = 210 hours.",
+            )}
+            <Select
+              label="Is every working day the same length?"
+              value={form.equalDays}
+              onChange={(event) => update("equalDays", event.target.value as Form["equalDays"])}
+            >
+              <option value="yes">Yes, the same hours each day</option>
+              <option value="no">No, the days are different lengths</option>
+            </Select>
+          </>
+        ) : null}
         {form.mode === "irregular"
           ? field("hoursWorked", "Hours worked in the pay period", "number")
           : null}
