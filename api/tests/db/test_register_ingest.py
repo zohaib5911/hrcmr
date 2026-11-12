@@ -1,14 +1,17 @@
+import asyncio
 from datetime import UTC, date, datetime
 
 import httpx
-from sqlalchemy import func, select
+from sqlalchemy import func, inspect, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from alembic import command
+from app.cli import alembic_config
 from app.jobs.register import register_ingest
 from app.jobs.scheduled import functions
 from app.modules.register.ingest import ingest
 from app.modules.register.models import Change, Entry, PossibleMatch, Publication, Sponsor
-from tests.db.support import DatabaseUnderTest, engine_for
+from tests.db.support import DatabaseUnderTest, engine_for, temporary_database
 from tests.test_register_ingest import FIXTURES
 
 
@@ -91,3 +94,29 @@ async def test_snapshots_idempotency_diff_return_and_rollback(database: Database
             )
     finally:
         await engine.dispose()
+
+
+def test_hash_history_migration_from_unique_constraint(stack: None) -> None:
+    async def hash_schema(database: DatabaseUnderTest) -> tuple[bool, bool]:
+        engine = engine_for(database.owner_url)
+        try:
+            async with engine.connect() as connection:
+                constraints, indexes = await connection.run_sync(
+                    lambda conn: (
+                        inspect(conn).get_unique_constraints("register_publications"),
+                        inspect(conn).get_indexes("register_publications"),
+                    )
+                )
+                return (
+                    any(c["column_names"] == ["sha256"] for c in constraints),
+                    any(i["column_names"] == ["sha256"] and not i["unique"] for i in indexes),
+                )
+        finally:
+            await engine.dispose()
+
+    with temporary_database() as database:
+        config = alembic_config(database.owner_url)
+        command.downgrade(config, "0060_register_rerun")
+        assert asyncio.run(hash_schema(database)) == (True, False)
+        command.upgrade(config, "head")
+        assert asyncio.run(hash_schema(database)) == (False, True)
