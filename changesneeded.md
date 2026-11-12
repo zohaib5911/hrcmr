@@ -39,7 +39,7 @@ Each screen needs loading, empty and error states, works at 360 px and in dark m
 - **Watch:** never show the support cookie or token; the reason is required in the UI and the API; a support-level admin must not see the owner-only buttons.
 - **Done when:** unit tests for the dialogs (reason required); e2e: an owner suspends then reactivates a seeded company and the status chip changes; a support admin does not see "Mark for deletion".
 
-### [ ] C3.1.6 · P1 · Admin screen: users search, lock and unlock (from T17.2)
+### [x] C3.1.6 · P1 · Admin screen: users search, lock and unlock (from T17.2) — fixed in PR #41
 - **Pattern:** read the "Admin screens" paragraph at the top of changesneeded.md first (files to copy, states, tests).
 - **Problem:** no screen for `GET /platform/users` and lock/unlock.
 - **Fix:** `/users` with an e-mail search (3 characters or more), result rows with status, and Lock / Unlock in a `ConfirmDialog` with an optional reason.
