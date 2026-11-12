@@ -12,7 +12,8 @@ case ${1:-start} in
     tmux has-session -t agents 2>/dev/null && { echo "already running: bash .agent/start.sh attach"; exit 0; }
     tmux new-session -d -s agents -n claude "bash '$HERE/run.sh' claude; read -r -p 'claude runner stopped; Enter to close'"
     tmux new-window -t agents -n codex "bash '$HERE/run.sh' codex; read -r -p 'codex runner stopped; Enter to close'"
-    tmux new-window -t agents -n bus "watch -n 30 bash '$HERE/bus.sh' status"
+    # Merge green PRs every 5 minutes too, not only between agent sessions (gates and audits run for an hour).
+    tmux new-window -t agents -n prs "while true; do bash '$HERE/prs.sh'; sleep 300; done"
     echo "started. watch: bash .agent/start.sh attach" ;;
   attach) exec tmux attach -t agents ;;
   status) bash "$HERE/bus.sh" status ;;
