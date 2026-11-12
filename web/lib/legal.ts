@@ -218,13 +218,13 @@ export const LEGAL_DOCUMENTS: readonly LegalDocument[] = [
     slug: "complaints",
     title: "Complaints",
     introduction:
-      "Tell us what went wrong, which part of the service is affected and the outcome you would like. Use the form below; do not include passwords, identity documents or medical information.",
+      "Tell us what went wrong, which part of the service is affected and the outcome you would like. Use the contact form linked below; do not include passwords, identity documents or medical information.",
     sections: [
       {
         title: "How we handle your message",
         paragraphs: [
           "Your message goes to the platform support inbox for an authorised person to review. Our public contact target is a reply within one working day; this is an initial response target, not a guarantee that an investigation will finish then. If unresolved, reply with your reference and ask for further review.",
-          "For a data protection complaint, choose that topic in the form. If it concerns your employer's HR records, contact the employer as controller too. You may complain to the ICO independently; using this form does not remove your rights.",
+          "For a data protection complaint, choose that topic in the contact form. If it concerns your employer's HR records, contact the employer as controller too. You may complain to the ICO independently; using this form does not remove your rights.",
         ],
       },
     ],
