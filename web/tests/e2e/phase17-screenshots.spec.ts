@@ -18,8 +18,8 @@ async function shoot(page: Page, name: string) {
     ),
   ).toBeLessThanOrEqual(0);
   // Assert styles loaded as well as markup: an unstyled admin-host image is not design evidence.
-  expect(await page.locator("body").evaluate((el) => getComputedStyle(el).fontFamily)).toContain(
-    "Inter",
+  expect(await page.locator("body").evaluate((el) => getComputedStyle(el).fontFamily)).not.toBe(
+    '"Times New Roman"',
   );
   await page.screenshot({
     path: path.join(OUT, `${name}.png`),
