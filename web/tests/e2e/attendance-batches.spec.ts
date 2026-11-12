@@ -62,6 +62,9 @@ test("preview row errors, import a corrected file, bulk edit and export monthly 
   await page.setViewportSize({ width: 390, height: 900 });
   await audit(page, "Attendance import mobile");
   await page.goto("/attendance/bulk");
+  // Wait for this week's grid first: a date typed before the page has hydrated is lost, and the grid
+  // then shows the current week (the test only passed while 3 Nov 2026 was in the current week).
+  await expect(page.getByRole("combobox", { name: /^Alex Import, / }).first()).toBeVisible();
   await page.getByLabel("Week containing", { exact: true }).fill("2026-11-02");
   const tuesday = page.getByRole("combobox", { name: "Alex Import, 3 Nov 2026", exact: true });
   await expect(tuesday).toHaveValue("present");

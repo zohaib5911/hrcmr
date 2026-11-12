@@ -1,14 +1,17 @@
-# changesneeded.md — audit AUDIT-2 round 2 (2026-11-08, Claude Opus 5.5)
+# changesneeded.md — audit AUDIT-3 round 4 (2026-11-12, gpt-6.1-sol)
 ## Result: PASS
-Scope: audit-2-r1 (a87d511)..fcfa2b5 (fix commits 499e2f3..f169827 for C2.1.1 to C2.1.6, plus regression of touched areas)
-Tests at audit: api 1043/0/0 (ruff, format, mypy clean; check-rls via tests/db/test_cli.py 4/0), web unit 786/0, web lint/types/build/gen:api clean, e2e 430/0 (176 screenshot-only skipped), CI green on last dev PR run (#22; C2.1 pushes run CI at the Phase 15 gate PR)
-Counts: 0 P0 / 0 P1 / 0 P2. AUDIT-2 closed; Phase 15 next.
 
-No open items.
+Scope: b83da48..462a184 (C3.3.1–C3.3.2 fixes and regressions; Phase 18–20 additions excluded). Tests at audit: api 1363/0/0, RLS CLI passed; web unit 1309/0; e2e 485/0/220 expected skips; CI latest listed dev run green and both merged fix PRs green (12 checks each); lint/types/schema/build/bundle passed.
+Counts: 0 P0 / 0 P1 / 1 P2. PASS (no P0/P1).
+
+### [x] C3.4.1 · P2 · Assert contact total and pager changes after removal (from C3.3.1) — fixed in PR #77
+- **Problem:** `web/components/platform/contact-admin.test.tsx`, test `removes the handled row from the active page`, checks the remaining rows but never asserts the total. C3.3.1 required total coverage. Reverting the production total decrement would leave this test green and permit incorrect paging. Current production behavior is correct; an isolated audit probe verified it.
+- **Fix:** extend that existing test with total 51, assert `51 in total` and enabled Next before marking, then `50 in total` and disabled Next after the handled row disappears. Retain both row assertions. Copy the current test's userEvent/waitFor pattern; no product change is needed.
+- **Done when:** the collected contact test checks row removal, total 51→50 and the Next-button boundary; `cd web && pnpm exec vitest run components/platform/contact-admin.test.tsx`, lint and typecheck pass.
 
 ## Notes (no action needed)
-- Round 1 items C2.1.1 to C2.1.6 re-checked in code: the fixes match the specs, the new tests assert behaviour (wire body, outbox rows, notice counts, `/auth/me`), and there are no skips or weakened assertions in the diff.
-- C2.1.1: only full names ("First Last") are labelled. A lone first name in a key point still goes to the AI. That's acceptable: a first name alone is a weak identifier, and matching it would mangle ordinary words ("May", "Will"). Revisit if the owner wants stricter handling.
-- C2.1.2: people on "daily" get leave and rota notices in the digest. `send_digests` picks up every undigested notice, whatever its kind.
-- C2.1.5: there is no dedicated test for an own-only RTW reader, because no current role has both `employee.rtw.read_own` and `organogram.level.read`. The `Scope.ALL` comparison is right.
-- C2.1.6: after an AI draft, a second "Draft with AI" asks again before replacing it. That's harmless (the text is unsaved).
+- C3.3.1 preserves the active contact page/filter after a delayed PATCH; both regression cases pass. The active list removes the handled row and decrements total correctly.
+- C3.3.2 preserves all sixteen session assertions in normal Vitest discovery; all sixteen executed successfully in the targeted run.
+- A temporary copy of the contact tests added the total/pager assertions above. Targeted run: 34 passed (16 page-entry, 9 original contact, 9 scratch contact); scratch removed. This evidence is separate from the unmodified full suite.
+- No new endpoints, tables, permissions, legal figures, skipped tests or weakened assertions in the scoped fixes. Authenticated ingress, signed SSR identity and production-CSP deployment requirements remain as documented.
+- Detailed evidence: `docs/audits/audit-3-r4-review.md`. No product code changed during this audit. Stripe test-mode E2E remains parked in leftover L1; no owner decision is needed here.

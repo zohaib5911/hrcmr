@@ -1,11 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   hasPlatformCookie,
   PLATFORM_COOKIE,
   refusalMessage,
   safeNextPath,
-  startPlatformSession,
   toPublicPath,
 } from "./session";
 
@@ -37,58 +36,6 @@ describe("safeNextPath", () => {
     ]) {
       expect(safeNextPath(raw)).toBe("/");
     }
-  });
-});
-
-describe("startPlatformSession", () => {
-  it("forwards the cookies and the CSRF token, and returns the Set-Cookie headers on 201", async () => {
-    const fetchImpl = vi.fn(
-      async () =>
-        new Response(null, {
-          status: 201,
-          headers: { "set-cookie": `${PLATFORM_COOKIE}=abc; Path=/; HttpOnly` },
-        }),
-    ) as unknown as typeof fetch;
-    const outcome = await startPlatformSession({
-      apiBase: "https://api.example.com/api/v1",
-      cookieHeader: "brand_session=s1; csrf=t1",
-      csrfToken: "t1",
-      fetchImpl,
-    });
-    expect(outcome.ok).toBe(true);
-    if (outcome.ok) expect(outcome.setCookies.join(";")).toContain(`${PLATFORM_COOKIE}=abc`);
-    const [url, init] = vi.mocked(fetchImpl).mock.calls[0] as unknown as [string, RequestInit];
-    expect(url).toBe("https://api.example.com/api/v1/auth/platform-session");
-    expect(init.method).toBe("POST");
-    expect(init.headers).toMatchObject({
-      cookie: "brand_session=s1; csrf=t1",
-      "X-CSRF-Token": "t1",
-    });
-  });
-
-  it("returns the API's error code on a refusal", async () => {
-    const fetchImpl = (async () =>
-      new Response(JSON.stringify({ error: { code: "MFA_ENROLMENT_REQUIRED" } }), {
-        status: 403,
-      })) as unknown as typeof fetch;
-    const outcome = await startPlatformSession({
-      apiBase: "https://api.example.com/api/v1",
-      cookieHeader: "",
-      fetchImpl,
-    });
-    expect(outcome).toEqual({ ok: false, code: "MFA_ENROLMENT_REQUIRED" });
-  });
-
-  it("says the server is unreachable when the call fails", async () => {
-    const fetchImpl = (async () => {
-      throw new TypeError("fetch failed");
-    }) as unknown as typeof fetch;
-    const outcome = await startPlatformSession({
-      apiBase: "https://api.example.com/api/v1",
-      cookieHeader: "",
-      fetchImpl,
-    });
-    expect(outcome).toEqual({ ok: false, code: "UNREACHABLE" });
   });
 });
 

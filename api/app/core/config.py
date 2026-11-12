@@ -94,6 +94,8 @@ class Settings(BaseSettings):
     # Comma-separated networks whose forwarded headers are believed (see core/client_ip.py). Empty
     # means Railway's private network when deployed and nobody on a developer machine.
     trusted_proxy_cidrs: str | None = None
+    # Shared only with the web server, never with browsers or ingress.
+    platform_ssr_secret: SecretStr | None = Field(default=None, min_length=32)
 
     # --- Database and cache --------------------------------------------------------------------
     database_url: SecretStr

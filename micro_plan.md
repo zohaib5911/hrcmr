@@ -415,34 +415,34 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - Recipe R7.
 - Done (2026-11-09): R7 steps 1, 3 and 4 done (API full suite 1319 pass; web unit 802 pass; web e2e 437 pass, 200 screenshot-only skipped; lint and typecheck clean). Step 2 (screenshots) is parked in leftover.md L2: the new admin screens need a platform-admin seed in the e2e harness.
 
-### [ ] AUDIT-3 · AUDIT STOP · covers T15.1 → P17 (and the B tasks in them)
+### [x] AUDIT-3 · AUDIT STOP · covers T15.1 → P17 (and the B tasks in them)
 
 ---
 
 ## Phase 18 — Public marketing site
 
-### [ ] T18.1 · S · Marketing pages
+### [x] T18.1 · S · Marketing pages
 - **Spec:** plan L1199–1211, L1472; style §5.9 (`grep -n '### 5.9' plan.md`).
 - **Steps:** one page per sub-step: Home, Features (screenshots by a Playwright script from seeded demo data, both themes), Pricing, Security, About, Contact (+ `POST /public/contact`, R5), Accessibility, Careers (own company via careers module), Sponsor compliance + Reporting duties.
 - **Watch:** original copy only; brand from `brand.config.ts`; prices from config, not typed into copy.
 
-### [ ] T18.2 · S · Legal pages (DRAFT)
+### [x] T18.2 · S · Legal pages (DRAFT)
 - **Spec:** plan L1217, L1473. Every page shows "DRAFT — requires solicitor review". Cookie policy lists the real cookies (grep the code); subprocessors = real vendors. Cookie consent per L1218–1222. Add owner action to PROGRESS.
 
-### [ ] T18.3 · S · SEO and Lighthouse ≥ 95
+### [x] T18.3 · S · SEO and Lighthouse ≥ 95
 - **Spec:** plan L1223–1228, L1474. Metadata, OG images, JSON-LD, sitemap, robots; analytics only after consent.
 
-### [ ] T18.4 · S · Comparison page templates (unpublished)
+### [x] T18.4 · S · Comparison page templates (unpublished)
 - **Spec:** plan L1216. Templates only, unpublished by default; no competitor prices typed in.
 
-### [ ] P18 · S · Phase 18 gate
+### [x] P18 · S · Phase 18 gate
 - Recipe R7 + Lighthouse on marketing pages.
 
 ---
 
 ## Phase 19 — Free tools, guides, templates
 
-### [ ] T19.1 · B · Rates data files, verified from GOV.UK and HMRC
+### [x] T19.1 · B · Rates data files, verified from GOV.UK and HMRC
 
 **For T19.2–T19.15 (all S!):** spec plan L1555–1584 (row = calculator number). Each calculator:
 1. Pure TS module `web/lib/calculators/<slug>.ts` that reads figures **only** from `web/rates/*.json` (T19.1).
@@ -452,30 +452,30 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 4. Nothing entered is stored or sent (no fetch in the module; a test greps it).
 - If a figure you need is not in `web/rates/`: **STOP — BLOCKED needs verified figure**.
 
-### [ ] T19.2 · S! · Calculator 1: right-to-work-october-2026-checker (+ build the shared calculator template)
-### [ ] T19.3 · S! · Calculator 2: sponsor-licence-cost-calculator
-### [ ] T19.4 · S! · Calculator 3: sponsor-reporting-deadline-calculator (reuse the working-day logic semantics from `api/tests/test_working_days.py`)
-### [ ] T19.5 · S! · Calculator 4: skilled-worker-visa-checker (SOC data via public SOC API, no AI)
-### [ ] T19.6 · S! · Calculator 5: ilr-citizenship-checker
-### [ ] T19.7 · S! · Calculator 6: skilled-worker-ilr-salary-calculator
-### [ ] T19.8 · S! · Calculator 7: holiday-entitlement-calculator
-### [ ] T19.9 · S! · Calculator 8: uk-take-home-salary-calculator
-### [ ] T19.10 · S! · Calculator 9: uk-employer-cost-calculator
-### [ ] T19.11 · S! · Calculator 10: uk-redundancy-pay-calculator
-### [ ] T19.12 · S! · Calculator 11: uk-notice-pay-calculator
-### [ ] T19.13 · S! · Calculator 12: uk-sick-pay-calculator
-### [ ] T19.14 · S! · Calculator 13: uk-minimum-wage-underpayment-checker (compare with `api/tests/test_minimum_wage.py` data if relevant)
-### [ ] T19.15 · S · Tool 14: risk-assessment-template (browser-only, PDF/DOCX download, saved in localStorage with try/catch)
+### [x] T19.2 · S! · Calculator 1: right-to-work-october-2026-checker (+ build the shared calculator template)
+### [x] T19.3 · S! · Calculator 2: sponsor-licence-cost-calculator
+### [x] T19.4 · S! · Calculator 3: sponsor-reporting-deadline-calculator (reuse the working-day logic semantics from `api/tests/test_working_days.py`)
+### [x] T19.5 · S! · Calculator 4: skilled-worker-visa-checker (SOC data via public SOC API, no AI)
+### [x] T19.6 · S! · Calculator 5: ilr-citizenship-checker
+### [x] T19.7 · S! · Calculator 6: skilled-worker-ilr-salary-calculator
+### [x] T19.8 · S! · Calculator 7: holiday-entitlement-calculator
+### [x] T19.9 · S! · Calculator 8: uk-take-home-salary-calculator
+### [x] T19.10 · S! · Calculator 9: uk-employer-cost-calculator
+### [x] T19.11 · S! · Calculator 10: uk-redundancy-pay-calculator
+### [x] T19.12 · S! · Calculator 11: uk-notice-pay-calculator
+### [x] T19.13 · S! · Calculator 12: uk-sick-pay-calculator
+### [x] T19.14 · S! · Calculator 13: uk-minimum-wage-underpayment-checker (compare with `api/tests/test_minimum_wage.py` data if relevant)
+### [x] T19.15 · S · Tool 14: risk-assessment-template (browser-only, PDF/DOCX download, saved in localStorage with try/catch)
 
-### [ ] T19.16 · S! · Guides, including the 26-question audit self-test
+### [x] T19.16 · S! · Guides, including the 26-question audit self-test
 - **Decided 2026-11-08 (owner answer 2):** guides are MDX files in the repo under `content/guides/`, compiled at build time, reviewed in pull requests. No upload and no admin editor; the Watch rule (no raw HTML or script) applies to the MDX source, which is trusted content, and the renderer must not allow raw HTML.
 - **Spec:** plan L1213. MDX, original, sources + last-reviewed date + disclaimer on each; the self-test is client-side with a score.
 
-### [ ] T19.17 · S · Templates
+### [x] T19.17 · S · Templates
 - **Decided 2026-11-08 (owner answer 1):** templates are DOCX/PDF files in the repo under `content/templates/` with a manifest (title, file, version, reviewed on). The platform admin lists them read-only (built here, from the manifest); nothing is uploaded. Each template is original work and needs a human review before it is published (offer letters especially).
 - **Spec:** plan L1214. Original DOCX/PDF generated from MDX sources at build or by a script.
 
-### [ ] T19.18 · S · Resources hub pages
+### [x] T19.18 · S · Resources hub pages
 - `/resources`, `/resources/guides`, `/resources/tools`, `/resources/templates`.
 
 ### [ ] P19 · S · Phase 19 gate
@@ -485,21 +485,21 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 20 — Public sponsor register
 
-### [ ] T20.1 · S! · Ingest pipeline
+### [x] T20.1 · S! · Ingest pipeline
 - **Spec:** plan L1232–1238, L1485; §6.12 L617–627.
 - **Steps:** discover the latest CSV link by parsing the GOV.UK publication page (never hard-code the file URL; allowlisted host only) → download → hash (skip if unchanged) → parse → normalise → upsert → changes vs previous → possible renames (fuzzy). Saved HTML + CSV fixtures; tests never hit the network. Job at 10:00 and 16:00 working days (R3).
 - **Done when:** running twice on the same fixture creates no new publication; diff test with two fixtures.
 
-### [ ] T20.2 · S · Geocoding, ITL1 regions, SVG map, Companies House bulk match
+### [x] T20.2 · S · Geocoding, ITL1 regions, SVG map, Companies House bulk match
 - **Spec:** plan L1237–1238, L1241, L1486. Original simplified SVG from ONS boundary data; Companies House match behind a flag.
 
-### [ ] T20.3 · S · Explore page
+### [x] T20.3 · S · Explore page
 - **Spec:** plan L1239–1242, L1487.
 
-### [ ] T20.4 · S · Region pages, change bulletins, profiles, methodology, report form, sitemaps
+### [x] T20.4 · S · Region pages, change bulletins, profiles, methodology, report form, sitemaps
 - **Spec:** plan L1243–1251, L1488. Profiles use ISR (revalidate 6 h); sitemaps split ≤45k URLs; attribution text exactly as L1247; report form R5.
 
-### [ ] T20.5 · S · Register status and rerun (moved from T17.6)
+### [x] T20.5 · S · Register status and rerun (moved from T17.6)
 - **Spec:** plan L1171 (sponsor register: last import, row counts, errors, rerun import). Owner answer 4 (2026-11-08): this moved here from T17.6, because the register ingest is built in T20.1.
 - **Steps:** `GET /platform/register/status` (last publication, row counts, errors) and `POST /platform/register/run` (rerun through the ingest job, with a reason, audited as `platform.register_rerun`). The import sends nothing, so a rerun is safe; it goes through the same job allow-list as T17.6.
 
@@ -554,3 +554,26 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [ ] T23.8 · B · Production go-live
 ### [ ] P23 · B · Phase 23 gate
 ### [ ] T24.1 · B · Launch checklist (plan §12) and `docs/handover.md`
+
+---
+
+## Phase 25 — Apple-quality visual pass and final security scan (big model, added by the owner 2026-11-12)
+
+### [ ] T25.1 · B · Visual audit of every screen against the Apple-quality design
+- **Spec:** plan §5 (L296–450): principles, typography, colour tokens, materials (glass), motion, layout, components, §5.12 QA checklist. Plan L25: no Apple trademarks, logos, SF Symbols, SF font files or device images.
+- **Steps:** 1. List every route (app, admin, auth, marketing, careers, free tools) from `web/app`. 2. Screenshot each at 390 and 1280 px, light and dark, into `docs/screenshots/phase-25/before/` (copy `web/tests/e2e/phase9-screenshots.spec.ts`; run through `bus.sh serial`). 3. Check each against §5 and §5.12. Look hardest at the glass: translucent sidebar, toolbar, sheets, popovers and the marketing nav (`backdrop-filter: saturate(180%) blur(20px)` over the material tokens, hairline borders, layered soft shadows); also type scale, spacing on the 4 px grid, radius, motion, alignment and empty/loading states. 4. Write `docs/design-audit.md`: one row per screen with each gap, the §5 rule it breaks and the fix (token or component, not per-page CSS), sorted by how many screens a fix touches.
+- **Done when:** `docs/design-audit.md` covers every route, and the before screenshots are saved. No app code changed.
+
+### [ ] T25.2 · B · Make every screen look Apple-quality (glass and the rest)
+- **Spec:** `docs/design-audit.md` (T25.1) and plan §5. This block may restyle earlier work (the owner's request); behaviour stays the same.
+- **Steps:** 1. Fix the tokens and materials in `web/app/globals.css` first, so most screens improve at once. 2. Then the shared components in `web/components/ui/`. 3. Then the rows of `docs/design-audit.md` left over, screen by screen; tick each row there. 4. After screenshots into `docs/screenshots/phase-25/after/` (same script, same widths and themes).
+- **Watch:** our own tokens and components only: no Apple logos, SF Symbols, SF font files or Apple device frames (plan L25, L308). Every glass surface falls back to a solid colour under `prefers-reduced-transparency` and when `backdrop-filter` is unsupported; motion respects `prefers-reduced-motion`; text contrast stays WCAG AA on glass in both themes; no layout shift. Don't change copy, routes or behaviour. Update the `/design` catalog and its expected tokens when tokens change.
+- **Done when:** every `docs/design-audit.md` row is ticked; web lint, typecheck, unit suite and full e2e pass (e2e via `bus.sh serial`); the design and accessibility e2e specs pass in both themes.
+
+### [ ] T25.3 · B · Whole-project security scan
+- **Spec:** plan security sections; `docs/security.md` (T21.2) as the threat model; `audit.md` severity scale (P0/P1/P2).
+- **Steps:** 1. Automated: gitleaks over the full history, semgrep, pip-audit, pnpm audit, Trivy images and config, actionlint and zizmor (the CI jobs, run locally), plus the CSP and security headers on the production build. 2. Manual review of every API router: auth, MFA, sessions, CSRF, RBAC matrix, RLS on every table, tenant isolation, platform admin and support mode, file uploads, exports, webhooks (Stripe signature, replay), rate limits, input validation, SSRF in fetchers, secrets handling and logging. 3. Check that T25.2 added no unsafe CSS or inline script that the CSP would need to allow. 4. Write `docs/security-scan-2026.md` with each finding, its severity and the fix.
+- **Done when:** the report covers every router and table; every P0/P1 is fixed in this block with a test that fails before the fix (or, if large, written into `changesneeded.md` for the next round); the automated scans are clean.
+
+### [ ] P25 · B · Phase 25 gate
+- Recipe R7, and redeploy staging then production with the T23.5 workflows after the PR to main merges.

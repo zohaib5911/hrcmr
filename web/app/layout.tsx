@@ -1,3 +1,4 @@
+import { siteUrl } from "@/lib/seo";
 import type { Metadata, Viewport } from "next";
 import { cookies, headers } from "next/headers";
 import { connection } from "next/server";
@@ -12,6 +13,7 @@ import { inter, interExtended } from "./fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: siteUrl(),
   title: { default: brand.name, template: `%s | ${brand.name}` },
   description: brand.tagline,
 };

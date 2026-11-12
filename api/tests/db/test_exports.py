@@ -152,6 +152,10 @@ async def test_export_holds_only_the_requesters_company_and_no_secrets(
         assert not {"ip", "user_agent"} & header("tables/audit_events.csv")
         assert not any(name.startswith("tables/sessions") for name in names)
         assert "account_number" not in header("tables/employee_bank_details.csv")
+        # No table in the export carries a deletion code's hash (C3.1.16).
+        for name in names:
+            if name.startswith("tables/"):
+                assert "code_hash" not in header(name), name
 
     # The link is the API's, and it sends the requester to a 60-second link to the zip.
     redirect = await admin.get(

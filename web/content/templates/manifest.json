@@ -1,0 +1,50 @@
+[
+  {
+    "slug": "job-description",
+    "title": "Job description (with worked example)",
+    "description": "A one-page job description with a filled-in example for a Customer Support Officer.",
+    "file": "job-description.docx",
+    "version": "1.0",
+    "reviewed_on": null
+  },
+  {
+    "slug": "offer-letter-standard",
+    "title": "Offer letter: standard",
+    "description": "Offer of permanent employment on a salary.",
+    "file": "offer-letter-standard.docx",
+    "version": "1.0",
+    "reviewed_on": null
+  },
+  {
+    "slug": "offer-letter-sponsored",
+    "title": "Offer letter: sponsored worker",
+    "description": "Offer of employment that depends on a Certificate of Sponsorship.",
+    "file": "offer-letter-sponsored.docx",
+    "version": "1.0",
+    "reviewed_on": null
+  },
+  {
+    "slug": "offer-letter-hourly",
+    "title": "Offer letter: hourly or casual",
+    "description": "Offer of work paid by the hour, with or without guaranteed hours.",
+    "file": "offer-letter-hourly.docx",
+    "version": "1.0",
+    "reviewed_on": null
+  },
+  {
+    "slug": "right-to-work-checklist",
+    "title": "Right to Work check checklist",
+    "description": "Steps to record for each right to work check, with a follow-up date.",
+    "file": "right-to-work-checklist.docx",
+    "version": "1.0",
+    "reviewed_on": null
+  },
+  {
+    "slug": "new-starter-checklist",
+    "title": "New starter checklist",
+    "description": "Tasks to finish before and after a new person's first day.",
+    "file": "new-starter-checklist.docx",
+    "version": "1.0",
+    "reviewed_on": null
+  }
+]

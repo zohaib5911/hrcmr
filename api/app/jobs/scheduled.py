@@ -23,6 +23,7 @@ from app.jobs.holidays import bank_holidays_weekly
 from app.jobs.learning import learning_overdue_daily
 from app.jobs.notifications import notifications_digest_daily
 from app.jobs.policies import policies_overdue_daily
+from app.jobs.register import register_ingest, register_ingest_manual
 from app.jobs.reports import generate_report, sweep_report_jobs
 from app.jobs.rerun import RERUNNABLE, rerun_name
 from app.jobs.rules import rules_watch_daily
@@ -87,7 +88,12 @@ SCHEDULE: tuple[Schedule, ...] = (
         {"weekday": "mon", "hour": 3, "minute": 10},
         "T4.5",
     ),
-    Schedule("register_ingest", _nothing_yet("register_ingest"), {"hour": 3, "minute": 30}, "T4.2"),
+    Schedule(
+        "register_ingest",
+        register_ingest,
+        {"weekday": {0, 1, 2, 3, 4}, "hour": {9, 10, 15, 16}, "minute": 0},
+        "T20.1",
+    ),
     Schedule("rtw_status_daily", rtw_status_daily, {"hour": 5, "minute": 0}, "T7.4"),
     Schedule("reminders_daily", reminders_daily, {"hour": 6, "minute": 0}, "T7.4"),
     Schedule("policies_overdue_daily", policies_overdue_daily, {"hour": 6, "minute": 15}, "T10.3"),
@@ -127,7 +133,15 @@ def functions() -> list[Function]:
         func(tracked(worker_ping, name="worker_ping", quiet=True), name="worker_ping", max_tries=1),
         # Re-runs an admin asks for (T17.6): only the jobs listed in app/jobs/rerun.py.
         *[
-            func(tracked(s.job, name=s.name, quiet=s.quiet), name=rerun_name(s.name), max_tries=1)
+            func(
+                tracked(
+                    register_ingest_manual if s.name == "register_ingest" else s.job,
+                    name=s.name,
+                    quiet=s.quiet,
+                ),
+                name=rerun_name(s.name),
+                max_tries=1,
+            )
             for s in SCHEDULE
             if s.name in RERUNNABLE
         ],

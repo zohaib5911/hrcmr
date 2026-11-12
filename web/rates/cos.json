@@ -1,0 +1,121 @@
+{
+  "source_url": "https://www.gov.uk/uk-visa-sponsorship-employers/certificates-of-sponsorship",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "UK visa sponsorship for employers: Certificates of sponsorship - GOV.UK",
+  "content": [
+    {
+      "p": "You must assign a certificate of sponsorship to each foreign worker you employ. This is an electronic record, not a physical document. Each certificate has its own number which a worker can use to apply for a visa."
+    },
+    {
+      "p": "When you assign the certificate to a worker, they must use it to apply for their visa within 3 months. They must not apply for their visa more than 3 months before the start date of the job listed on the certificate."
+    },
+    {
+      "p": "You may need to check if your worker needs an Academic Technology Approval Scheme (ATAS) certificate before you assign a certificate of sponsorship."
+    },
+    {
+      "h2": "Defined certificates"
+    },
+    {
+      "p": "These are for people applying on a Skilled Worker visa from outside the UK."
+    },
+    {
+      "p": "You must apply for defined certificates for these workers through the sponsorship management system ( SMS ). You’ll get access to the SMS when you get your licence."
+    },
+    {
+      "h3": "When you’ll get a defined certificate"
+    },
+    {
+      "p": "Applications are usually approved within one working day. It may take longer if UKVI need to carry out further checks on the information in your application."
+    },
+    {
+      "p": "Defined certificates will appear in your SMS account once they have been approved. You can then assign them to a worker."
+    },
+    {
+      "h2": "Undefined certificates"
+    },
+    {
+      "p": "These are for Skilled Workers applying from inside the UK, and applicants on all other visas."
+    },
+    {
+      "p": "When you apply for your licence you’ll be asked to estimate how many undefined certificates you’ll need for Workers and Temporary Workers in the first year."
+    },
+    {
+      "h3": "Getting extra undefined certificates"
+    },
+    {
+      "p": "You can apply for extra undefined certificates through the sponsorship management system ."
+    },
+    {
+      "p": "You’ll usually get a decision within 12 weeks. It may take longer if UKVI need to carry out further checks on the information in your application."
+    },
+    {
+      "p": "You can also pay to get a decision within 5 working days ."
+    },
+    {
+      "h3": "If you’re sponsoring a UK Expansion Worker"
+    },
+    {
+      "p": "If your licence has a provisional rating, you’ll only be able to assign one certificate of sponsorship. This must be assigned to the authorising officer so they can enter the UK."
+    },
+    {
+      "p": "Once they’ve got their visa, you can upgrade your licence to an A-rating and request up to 9 additional certificates of sponsorship using the sponsorship management system ( SMS ) ."
+    },
+    {
+      "h2": "Certificate costs"
+    },
+    {
+      "p": "You’ll need to pay a fee when you assign a certificate to a worker. How much a certificate will cost depends on the type of sponsor licence you have."
+    },
+    {
+      "p": "You must pay the certificate of sponsorship fee yourself if you’re sponsoring a:"
+    },
+    {
+      "li": "Skilled Worker"
+    },
+    {
+      "li": "person on any of the Global Business Mobility routes"
+    },
+    {
+      "li": "Minister of Religion"
+    },
+    {
+      "li": "International Sportsperson"
+    },
+    {
+      "li": "Scale-up Worker"
+    },
+    {
+      "li": "Seasonal Worker"
+    },
+    {
+      "p": "Your licence may be revoked if you ask the sponsored worker to pay the fee or any costs linked to your application."
+    },
+    {
+      "table": [
+        ["Type of licence", "Cost per certificate"],
+        ["Worker (except workers on the International Sportsperson visa)", "£525"],
+        ["Temporary Worker", "£55"],
+        [
+          "International Sportsperson - where the certificate of sponsorship is assigned for more than 12 months",
+          "£525"
+        ],
+        [
+          "International Sportsperson - where the certificate of sponsorship is assigned for 12 months or less",
+          "£55"
+        ]
+      ]
+    },
+    {
+      "p": "If you assign a certificate of sponsorship to a worker on a Skilled Worker or Senior or Specialist Worker visa, you might also need to pay the immigration skills charge ."
+    }
+  ],
+  "values": {
+    "worker": 525,
+    "temporary_worker": 55,
+    "sportsperson_over_12_months": 525,
+    "sportsperson_up_to_12_months": 55
+  }
+}

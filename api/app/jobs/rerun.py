@@ -9,7 +9,8 @@ arguments are never listed either, because their arguments are never stored (job
 Checked by reading each job (2026-11-08): ``rtw_status_daily`` only counts rows;
 ``bank_holidays_weekly`` upserts (``on_conflict_do_update``); ``cloudflare_ranges_weekly`` replaces
 the stored ranges; ``files_orphans_daily`` deletes only files no row points to;
-``report_jobs_sweep`` claims queued report jobs.
+``report_jobs_sweep`` claims queued report jobs; ``register_ingest`` atomically imports
+hash-idempotent snapshots under an advisory lock, with no messages sent.
 """
 
 from __future__ import annotations
@@ -21,6 +22,7 @@ RERUNNABLE: frozenset[str] = frozenset(
         "cloudflare_ranges_weekly",
         "files_orphans_daily",
         "report_jobs_sweep",
+        "register_ingest",
     }
 )
 RERUN_PREFIX = "rerun_"

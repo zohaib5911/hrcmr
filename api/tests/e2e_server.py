@@ -13,13 +13,14 @@ import os
 import secrets
 from collections.abc import AsyncIterator, Sequence
 from contextlib import asynccontextmanager, suppress
+from datetime import UTC, datetime
 from pathlib import Path
 
 import uvicorn
 from arq.worker import Worker
-from fastapi import Body, FastAPI
+from fastapi import Body, FastAPI, HTTPException
 from redis import Redis
-from sqlalchemy import text
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.pool import NullPool
 
@@ -33,6 +34,7 @@ from app.jobs.scheduled import functions
 from app.main import create_app
 from app.modules.email.outbox import sender_of
 from app.modules.email.templates import render
+from app.modules.identity.models import User
 from app.modules.learning.loader import load_courses
 from app.modules.soc.importer import load_soc_source
 from app.modules.soc.source import load_source
@@ -148,6 +150,51 @@ def _plan_route(app: FastAPI, owner_url: str) -> None:
     app.add_api_route("/api/v1/e2e/paid-plan", paid_plan, methods=["POST"], include_in_schema=False)
 
 
+# The two-step verification secret of the browser test platform admins (web/tests/support/platform.ts
+# signs in with the same value).
+E2E_TOTP_SECRET = "JBSWY3DPEHPK3PXP"
+PLATFORM_LEVELS = ("owner", "support")
+
+
+def _platform_admin_route(app: FastAPI, owner_url: str) -> None:
+    """Test-only (C3.1.3): make the account with this e-mail a platform admin at ``level``, with its
+    e-mail verified and two-step verification on, using the secret above. The secret goes through the
+    app's own encryption, as an enrolment stores it, so signing in reads it back like any account's."""
+
+    async def platform_admin(
+        email: str = Body(embed=True), level: str = Body(embed=True)
+    ) -> dict[str, str]:
+        if level not in PLATFORM_LEVELS:
+            raise HTTPException(status_code=422, detail="level must be owner or support")
+        engine = engine_for(owner_url, poolclass=NullPool)
+        try:
+            async with AsyncSession(engine) as db:
+                user = (
+                    await db.execute(select(User).where(User.email == email))
+                ).scalar_one_or_none()
+                if user is None:
+                    raise HTTPException(status_code=404, detail="no such account")
+                user_id = user.id
+                user.email_verified_at = user.email_verified_at or datetime.now(UTC)
+                user.mfa_secret = E2E_TOTP_SECRET
+                user.mfa_enabled = True
+                await db.execute(
+                    text(
+                        "insert into platform_admins (user_id, level) values (:u, :l) "
+                        "on conflict (user_id) do update set level = excluded.level"
+                    ),
+                    {"u": user_id, "l": level},
+                )
+                await db.commit()
+        finally:
+            await engine.dispose()
+        return {"user_id": str(user_id)}
+
+    app.add_api_route(
+        "/api/v1/e2e/platform-admin", platform_admin, methods=["POST"], include_in_schema=False
+    )
+
+
 def main() -> None:
     configure_logging()
     with temporary_database() as database:
@@ -183,6 +230,7 @@ def main() -> None:
         )
         app.state.soc_embedder = _fake_embed
         _plan_route(app, database.owner_url)
+        _platform_admin_route(app, database.owner_url)
         original_lifespan = app.router.lifespan_context
 
         @asynccontextmanager

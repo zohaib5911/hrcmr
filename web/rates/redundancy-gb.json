@@ -1,0 +1,116 @@
+{
+  "source_url": "https://www.gov.uk/redundancy-your-rights/redundancy-pay",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-04-06",
+  "valid_to": "2027-04-05",
+  "validity_basis": "statutory_period",
+  "title": "Redundancy: your rights: Statutory redundancy pay - GOV.UK",
+  "content": [
+    {
+      "p": "You’ll normally be entitled to statutory redundancy pay if you’re an employee and you’ve been working for your current employer for 2 years or more."
+    },
+    {
+      "p": "You’ll get:"
+    },
+    {
+      "li": "half a week’s pay for each full year you were under 22"
+    },
+    {
+      "li": "one week’s pay for each full year you were 22 or older, but under 41"
+    },
+    {
+      "li": "one and half week’s pay for each full year you were 41 or older"
+    },
+    {
+      "p": "Length of service is capped at 20 years."
+    },
+    {
+      "p": "Your weekly pay is the average you earned per week over the 12 weeks before the day you got your redundancy notice."
+    },
+    {
+      "p": "If you were paid less than usual because you were ‘on furlough’ because of coronavirus, your statutory redundancy pay is based on what you would have earned normally."
+    },
+    {
+      "p": "If you were made redundant on or after 6 April 2026, your weekly pay is capped at £751 and the maximum statutory redundancy pay you can get is £22,530. If you were made redundant before 6 April 2026, these amounts will be lower."
+    },
+    {
+      "p": "Calculate your redundancy pay ."
+    },
+    {
+      "p": "You have 6 months from the date your job ends to apply for statutory redundancy pay."
+    },
+    {
+      "h2": "Exceptions"
+    },
+    {
+      "p": "You’re not entitled to statutory redundancy pay if:"
+    },
+    {
+      "li": "your employer offers to keep you on"
+    },
+    {
+      "li": "your employer offers you suitable alternative work which you refuse without good reason"
+    },
+    {
+      "p": "Being dismissed for misconduct does not count as redundancy, so you would not get statutory redundancy pay if this happened."
+    },
+    {
+      "p": "You’re not entitled to statutory redundancy pay if you fall into one or more of the following categories:"
+    },
+    {
+      "li": "former registered dock workers (covered by other arrangements) and share fishermen"
+    },
+    {
+      "li": "crown servants, members of the armed forces or police services"
+    },
+    {
+      "li": "apprentices who are not employees at the end of their training"
+    },
+    {
+      "li": "a domestic servant who is a member of the employer’s immediate family"
+    },
+    {
+      "h2": "Short-term and temporary lay-offs"
+    },
+    {
+      "p": "You can claim statutory redundancy pay if you’re eligible and you’ve been temporarily laid off (without pay or less than half a week’s pay) for either:"
+    },
+    {
+      "li": "more than 4 weeks in a row"
+    },
+    {
+      "li": "more than 6 non-consecutive weeks in a 13 week period"
+    },
+    {
+      "p": "Write to your employer telling them you intend to claim statutory redundancy pay. This must be done within 4 weeks of your last non-working day in the 4 or 6 week period."
+    },
+    {
+      "p": "If your employer does not reject your claim within 7 days of receiving it, write to your employer again giving them your notice."
+    },
+    {
+      "p": "Your claim could be rejected if your normal work is likely to start within 4 weeks and continue for at least 13 weeks."
+    }
+  ],
+  "values": {
+    "jurisdiction": "GB",
+    "weekly_pay_cap": 751,
+    "maximum_payment": 22530,
+    "minimum_service_years": 2,
+    "maximum_service_years": 20,
+    "weekly_pay_average_weeks": 12,
+    "age_bands": [
+      {
+        "under": 22,
+        "weeks_per_year": 0.5
+      },
+      {
+        "under": 41,
+        "weeks_per_year": 1
+      },
+      {
+        "under": null,
+        "weeks_per_year": 1.5
+      }
+    ]
+  }
+}

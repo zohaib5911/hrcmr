@@ -82,6 +82,12 @@ export const COLOUR_TOKENS: readonly ColourToken[] = [
     group: "accent",
     use: "Text on the fixed red of the admin bar and the support banner (white in both themes)",
   },
+  {
+    name: "--fixed-admin",
+    swatch: "bg-fixed-admin",
+    group: "accent",
+    use: "The fixed red of the admin bar and the support banner (the same in both themes)",
+  },
   { name: "--success", swatch: "bg-success", group: "status", use: "Verified, present (text)" },
   { name: "--success-fill", swatch: "bg-success-fill", group: "status", use: "Success fills" },
   { name: "--success-tint", swatch: "bg-success-tint", group: "status", use: "Success chip" },

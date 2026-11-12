@@ -1596,6 +1596,79 @@ Checks:
 - `visa_sponsorship in ('not_stated','available','considered','not_available')`
 - `visibility in ('internal','external')`
 
+## `register_changes`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `publication_id` | UUID | no |  | references `register_publications` |
+| `sponsor_id` | UUID | no |  | references `register_sponsors` |
+| `change` | VARCHAR(30) | no |  |  |
+| `detail` | JSON | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+## `register_entries`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `publication_id` | UUID | no |  | references `register_publications` |
+| `sponsor_id` | UUID | no |  | references `register_sponsors` |
+| `type_rating` | VARCHAR(300) | no |  |  |
+| `route` | VARCHAR(300) | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+## `register_possible_matches`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `added_sponsor_id` | UUID | no |  | references `register_sponsors` |
+| `removed_sponsor_id` | UUID | no |  | references `register_sponsors` |
+| `similarity` | DOUBLE PRECISION | no |  |  |
+| `reason` | VARCHAR(300) | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+## `register_problem_reports`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `sponsor_stable_id` | VARCHAR(32) | yes |  |  |
+| `email` | VARCHAR(254) | yes |  |  |
+| `message` | VARCHAR(2000) | no |  |  |
+| `ip_hash` | VARCHAR(64) | yes |  |  |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+## `register_publications`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `published_on` | DATE | no |  |  |
+| `source_url` | VARCHAR(2048) | no |  |  |
+| `row_count` | INTEGER | no |  |  |
+| `sha256` | VARCHAR(64) | no |  | unique |
+| `fetched_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `status` | VARCHAR(20) | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+## `register_sponsors`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `stable_id` | VARCHAR(32) | no |  | unique |
+| `organisation_name` | VARCHAR(1000) | no |  |  |
+| `normalised_name` | VARCHAR(1000) | no |  |  |
+| `town` | VARCHAR(500) | no |  |  |
+| `county` | VARCHAR(500) | no |  |  |
+| `region_itl1` | VARCHAR(100) | yes |  |  |
+| `lat` | DOUBLE PRECISION | yes |  |  |
+| `lon` | DOUBLE PRECISION | yes |  |  |
+| `place_precision` | VARCHAR(10) | no |  |  |
+| `companies_house_number` | VARCHAR(20) | yes |  |  |
+| `sic_section` | VARCHAR(10) | yes |  |  |
+| `first_seen_on` | DATE | no |  |  |
+| `last_seen_on` | DATE | no |  |  |
+| `current` | BOOLEAN | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
 ## `reminders`
 
 | Column | Type | Null | Default | Notes |

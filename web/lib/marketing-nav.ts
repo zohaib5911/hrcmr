@@ -28,7 +28,7 @@ export const HEADER_LINKS: readonly MarketingLink[] = [
 ];
 
 export const SIGN_IN: MarketingLink = { label: "Sign in", href: "/login" };
-export const SIGN_UP: MarketingLink = { label: "Start free", href: to("/signup") };
+export const SIGN_UP: MarketingLink = { label: "Start free", href: "/setup" };
 
 export const FOOTER_COLUMNS: readonly FooterColumn[] = [
   {
@@ -65,6 +65,12 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
       { label: "Privacy", href: to("/legal/privacy") },
       { label: "Cookies", href: to("/legal/cookies") },
       { label: "Data processing agreement", href: to("/legal/dpa") },
+      { label: "Subprocessors", href: to("/legal/subprocessors") },
+      { label: "AI policy", href: to("/legal/ai-policy") },
+      { label: "Complaints", href: to("/legal/complaints") },
+      { label: "Refunds and cancellation", href: to("/legal/refunds") },
+      { label: "Resources disclaimer", href: to("/legal/resources-disclaimer") },
+      { label: "Register terms", href: to("/legal/register-terms") },
     ],
   },
 ];

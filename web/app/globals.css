@@ -59,6 +59,8 @@
   --on-accent: #ffffff;
   /* White on the fixed red of the admin bar and the support banner: the same in both themes. */
   --on-fixed: #ffffff;
+  /* The admin red bar and the support banner (C3.1.15): the same in both themes. */
+  --fixed-admin: #b00010;
 
   /* Status: the plain token is for text, -fill for dots and bars, -tint for chips (12%). */
   --success: #1f7835;
@@ -108,6 +110,7 @@
     --accent-tint: color-mix(in srgb, var(--accent) 12%, transparent);
     --on-accent: #000000;
     --on-fixed: #ffffff;
+    --fixed-admin: #b00010;
 
     --success: #30d158;
     --success-fill: #30d158;
@@ -155,6 +158,7 @@
   --accent-tint: color-mix(in srgb, var(--accent) 12%, transparent);
   --on-accent: #000000;
   --on-fixed: #ffffff;
+  --fixed-admin: #b00010;
 
   --success: #30d158;
   --success-fill: #30d158;
@@ -294,6 +298,7 @@
   --color-accent-tint: var(--accent-tint);
   --color-on-accent: var(--on-accent);
   --color-on-fixed: var(--on-fixed);
+  --color-fixed-admin: var(--fixed-admin);
   --color-success: var(--success);
   --color-success-fill: var(--success-fill);
   --color-success-tint: var(--success-tint);

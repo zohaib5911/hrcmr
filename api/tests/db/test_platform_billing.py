@@ -8,6 +8,8 @@ database, as the webhook would have written them."""
 
 from __future__ import annotations
 
+import json
+import time
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -17,7 +19,8 @@ import pytest
 from pydantic import SecretStr
 from sqlalchemy import text
 
-from app.integrations.stripe import Stripe
+from app.integrations.stripe import Stripe, sign
+from tests.db.test_careers import anonymous
 from tests.db.test_employee_documents import rig as rig
 
 API = "/api/v1"
@@ -207,6 +210,64 @@ async def test_an_owner_refunds_a_ten_year_payment_once_and_it_is_audited(
     assert again.status_code == 409, again.text
     assert again.json()["error"]["code"] == "ALREADY_REFUNDED"
     assert len(fake.refunds()) == 1
+
+
+async def _company_plan(rig: dict[str, Any]) -> tuple[str, str | None]:
+    async with rig["owner"].connect() as c:
+        row = (
+            await c.execute(
+                text("select plan, subscription_status from companies where id = :c"),
+                {"c": rig["a"]},
+            )
+        ).one()
+    return (row.plan, row.subscription_status)
+
+
+async def test_a_ten_year_refund_ends_the_plan_and_the_later_webhook_changes_nothing(
+    rig: dict[str, Any], fake: FakeStripe
+) -> None:
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text(
+                "update companies set plan = 'ten_year', subscription_status = 'active' where id = :c"
+            ),
+            {"c": rig["a"]},
+        )
+    row = await _seed_ten_year(rig, rig["a"], "pi_ten")
+    owner = await _platform_admin(rig, "owner")
+    made = await owner.post(f"{API}/platform/refunds", json=_refund_body(row))
+    assert made.status_code == 200, made.text
+    assert await _company_plan(rig) == ("free", "refunded")
+    # Stripe then sends charge.refunded for the same payment: it must change nothing and not fail.
+    event = {
+        "id": "evt_after_platform_refund",
+        "type": "charge.refunded",
+        "created": int(time.time()),
+        "data": {
+            "object": {
+                "object": "charge",
+                "refunded": True,
+                "payment_intent": "pi_ten",
+                "metadata": {"company_id": str(rig["a"])},
+            }
+        },
+    }
+    body = json.dumps(event).encode()
+    stripe = anonymous(rig)
+    stripe.cookies.clear()  # Stripe has no browser: no cookie and no CSRF header
+    del stripe.headers["X-CSRF-Token"]
+    async with stripe:
+        sent = await stripe.post(
+            f"{API}/webhooks/stripe",
+            content=body,
+            headers={
+                "Stripe-Signature": sign(body, "whsec_test", int(time.time())),
+                "Content-Type": "application/json",
+            },
+        )
+    assert sent.status_code == 200, sent.text
+    assert await _company_plan(rig) == ("free", "refunded")
+    assert await _refunded_at(rig, row) is not None
 
 
 async def test_an_annual_refund_uses_the_latest_payment_behind_the_subscription(

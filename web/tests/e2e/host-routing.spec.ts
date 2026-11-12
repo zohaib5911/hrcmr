@@ -53,21 +53,25 @@ test.describe("admin host", () => {
     expect(response.headers()["location"]).toBe("/session?next=%2F");
   });
 
-  test("a visitor without a platform session sees the refusal page on the admin host", async ({
+  test("a visitor without a platform session is sent to a start page, and the refusal page is on the admin host", async ({
     request,
   }) => {
     // Each hop is requested by hand, with the admin Host header, as the browser would send it.
     const first = await request.get("/", { headers: admin, maxRedirects: 0 });
     expect(first.status()).toBe(307);
+    // The start page is served (C3.1.2): the browser calls the API itself, then moves on, or to the
+    // refusal page. So the page is a 200 here, not another redirect.
     const session = await request.get(first.headers()["location"] ?? "", {
       headers: admin,
       maxRedirects: 0,
     });
-    expect(session.status()).toBe(307);
-    // A RELATIVE location: an absolute one would carry the server's bind address, not this host.
-    const location = session.headers()["location"] ?? "";
-    expect(location.startsWith("/session-required?code=")).toBe(true);
-    const refusal = await request.get(location, { headers: admin, maxRedirects: 0 });
+    expect(session.status()).toBe(200);
+    expect(session.headers()["x-robots-tag"]).toBe("noindex, nofollow");
+    expect(await session.text()).toContain("Starting a platform session");
+    const refusal = await request.get("/session-required?code=UNAUTHENTICATED", {
+      headers: admin,
+      maxRedirects: 0,
+    });
     expect(refusal.status()).toBe(200);
     expect(refusal.headers()["x-robots-tag"]).toBe("noindex, nofollow");
     expect(await headingOf(refusal)).toBe("Platform session not started");

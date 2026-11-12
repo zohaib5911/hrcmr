@@ -36,7 +36,13 @@ export default defineConfig({
       name: "production",
       testIgnore: DESIGN_SPECS,
       dependencies: ["setup"],
-      use: { baseURL: `http://127.0.0.1:${WEB_PORT}`, storageState: SESSION_FILE },
+      use: {
+        baseURL: `http://127.0.0.1:${WEB_PORT}`,
+        storageState: SESSION_FILE,
+        // The admin host (T17.1) is a name the browser resolves to the local web server, so a page can
+        // open http://admin.example.test:3100/ (C3.1.3). Only that name is mapped.
+        launchOptions: { args: ["--host-resolver-rules=MAP admin.example.test 127.0.0.1"] },
+      },
     },
     {
       name: "design",
@@ -53,7 +59,12 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
       // The pages that call the API (sign-in) are built to call the test API below.
-      env: { PORT: String(WEB_PORT), NEXT_PUBLIC_API_URL: `http://127.0.0.1:${API_PORT}/api/v1` },
+      env: {
+        PORT: String(WEB_PORT),
+        NEXT_PUBLIC_API_URL: `http://127.0.0.1:${API_PORT}/api/v1`,
+        PLATFORM_INGRESS_SECRET: "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
+        PLATFORM_SSR_SECRET: "ssssssssssssssssssssssssssssssss",
+      },
     },
     // The development server, for tests/e2e/design.spec.ts only. It writes to .next/dev, so it does
     // not disturb the production build above.
@@ -75,6 +86,8 @@ export default defineConfig({
       timeout: 90_000,
       env: {
         E2E_API_PORT: String(API_PORT),
+        ADMIN_IP_ALLOWLIST: "127.0.0.1,203.0.113.7",
+        PLATFORM_SSR_SECRET: "ssssssssssssssssssssssssssssssss",
         E2E_WEB_ORIGIN: `http://127.0.0.1:${WEB_PORT}`,
         E2E_REDIS_URL: `redis://127.0.0.1:${redisPort}/12`,
         POSTGRES_PASSWORD: postgresPassword,

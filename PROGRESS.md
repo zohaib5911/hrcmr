@@ -422,6 +422,10 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - [x] **T17.5** Content tools and feature flags — 2026-11-08. Terms version publish (owner only, forces re-acceptance); feature flags; announcement banners per region (API and app banner); dossier links and courses reused. Templates and guides are repo content: listing in T19.17, guides in T19.16 (owner answers 1–2). Migrations 0052–0054.
 - [x] **T17.6** Jobs dashboard, register status, rules data screens, platform audit log — 2026-11-08. Platform audit log with CSV export (migration 0055); job dashboard with queue depth and failures; retry from an allow-list (`app/jobs/rerun.py`, migration 0056); rules screens from T15.7. Register status moved to T20.5 (owner answer 4). Tests: platform audit log 3, platform jobs 7.
 - [ ] **Phase 17 gate**
+- AUDIT-3 round 1: 0/10/6 (P0/P1/P2) — FIX NEEDED. Admin screens missing (API only), 10-year platform refund leaves the plan on, session start sees the server IP. api 1319, web unit 802, e2e 437 pass.
+- AUDIT-3 round 2: 1/4/1 (P0/P1/P2) — FIX NEEDED. API suite stalled at 42% and was interrupted (no final counts); ruff/format/mypy and RLS CLI passed. Web unit 1255 passed, e2e 473 passed / 220 skipped, lint/types/gen/build passed. See changesneeded.md for six fix tasks.
+- AUDIT-3 round 3: 0/2/0 (P0/P1/P2) — FIX NEEDED. API 1359 passed; RLS CLI passed; web unit 1286 passed; e2e 483 passed / 220 expected skips; lint/types/schema/build passed. Confirmed delayed contact PATCH corrupts the active page and sixteen page-entry cases are outside Vitest discovery. L2 screenshots are already complete; see changesneeded.md and docs/audits/audit-3-r3-review.md.
+- AUDIT-3 round 4: 0/0/1 (P0/P1/P2) — PASS. C3.3.1/C3.3.2 verified; API 1363, web unit 1309, e2e 485 passed / 220 expected skips; RLS/lint/types/schema/build passed. Remaining P2: persist the verified contact total/pager boundary assertions.
 
 ### Phase 18 — Public marketing site
 - [ ] **T18.1** Home, Features, Pricing, Security, About, Contact, Accessibility, Careers, Sponsor compliance
@@ -545,3 +549,14 @@ Do not start until the owner says so: US site, Australia, native wrapper, passke
 - Found and fixed at the gate: the session route built its redirects from the server bind address (0.0.0.0), which would break the admin host in every deployment; the session commit had not run e2e, so three host-routing tests failed; mypy errors in two test helpers; one entitlement fixture missing `comp_until`. Fixed on dev in 2dd49b5, 8dd0222, a9d6c4b and 6c31a38.
 - Decisions: the owner answers 3–5, as recorded in STATUS.md (templates and guides as repo content, the retry allow-list, comp access, the session start in the admin frame).
 - Open: screenshots for docs/screenshots/phase-17 not captured (leftover L2); one manual browser check of the admin session start with an MFA-enabled platform admin (owner). AUDIT-3 is next, a big-model stop.
+
+## Owner action — T18.2 legal drafts
+- Have a solicitor review and approve Terms, Privacy, Cookies/preferences, DPA, Subprocessors, AI policy, Complaints, Refunds/cancellation, Resources disclaimer, Register terms and Accessibility before launch. All remain marked “DRAFT — requires solicitor review”; legal drafts are excluded from search indexing.
+- Supply the contracting entity, registered office, registration/ICO details and privacy contact. Confirm lawful bases, retention/deletion and backup schedules (routine retention purging is unfinished), vendor legal entities, production regions, transfer safeguards, subprocessor change notices and AI provider terms. Sentry is configured but not instrumented; no advertising pixels are installed. Verify actual cookies and optional integrations at deployment; update drafts before activating any new recipient or tracking.
+
+## Phase 18 summary (public marketing site) — gate closed
+- Built: marketing pages (T18.1), draft legal pages with real cookie and subprocessor lists (T18.2), SEO metadata, JSON-LD, sitemap, robots (T18.3), unpublished comparison templates (T18.4).
+- Gate: API full suite 1363 passed; web lint 0 warnings, typecheck clean, unit 1309 passed; full web e2e 485 passed, 224 skipped (screenshot-only), exit 0.
+- Lighthouse on all 10 marketing pages: accessibility, best practices and SEO 100; performance 96–100 (lowest: /contact 96). All ≥ 95.
+- Screenshots: docs/screenshots/phase-18, 12 pages × 390/1280 px × light/dark = 48 images.
+- Open: legal drafts still need solicitor review (owner action above).

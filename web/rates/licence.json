@@ -1,0 +1,171 @@
+{
+  "source_url": "https://www.gov.uk/uk-visa-sponsorship-employers/apply-for-your-licence",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "UK visa sponsorship for employers: Apply for your licence - GOV.UK",
+  "content": [
+    {
+      "p": "You need to apply online for your licence."
+    },
+    {
+      "p": "Once you’ve finished the online application, you need to send in:"
+    },
+    {
+      "li": "the submission sheet at the end of the application"
+    },
+    {
+      "li": "your supporting documents , if you’re asked to"
+    },
+    {
+      "p": "Any affidavits or statutory declarations you send must be witnessed by a qualified, independent person - for example, a solicitor, Notary Public, Justice of the Peace, Commissioner for Oaths, or (in Scotland only) a Councillor."
+    },
+    {
+      "p": "Apply now"
+    },
+    {
+      "h2": "How to send the documents"
+    },
+    {
+      "p": "You can scan or take pictures of your submission sheet and supporting documents. Send them to the email address given on the submission sheet. Make sure your files:"
+    },
+    {
+      "li": "are in PDF, JPEG or PNG format"
+    },
+    {
+      "li": "have descriptive titles, with 25 or fewer characters"
+    },
+    {
+      "li": "are high enough quality to be read"
+    },
+    {
+      "p": "If your documents are not in English or Welsh, you must include a certified translation ."
+    },
+    {
+      "p": "If you cannot scan and send the documents by email, contact UK Visas and Immigration ( UKVI ) using the contact details on the submission sheet."
+    },
+    {
+      "h2": "Licence fees"
+    },
+    {
+      "p": "You need to pay a fee when you apply. The fee depends on the type of licence you’re applying for and what type of organisation you are."
+    },
+    {
+      "p": "You must pay the licence fee yourself. Your licence may be revoked if you ask the sponsored worker to pay the fee or any costs linked to your application."
+    },
+    {
+      "table": [
+        [
+          "Type of licence",
+          "Fee for small or charitable sponsors",
+          "Fee for medium or large sponsors"
+        ],
+        ["Worker", "£611", "£1,682"],
+        ["Temporary Worker", "£611", "£611"],
+        ["Worker and Temporary Worker", "£611", "£ 1,682"],
+        ["Add a Worker licence to an existing Temporary Worker licence", "No fee", "£1,071"],
+        ["Add a Temporary Worker licence to an existing Worker licence", "No fee", "No fee"]
+      ]
+    },
+    {
+      "h3": "How to tell if you’re a small or charitable sponsor"
+    },
+    {
+      "p": "You’re usually a small sponsor if at least 2 of the following apply:"
+    },
+    {
+      "li": "your annual turnover is £15 million or less"
+    },
+    {
+      "li": "your total assets are worth £7.5 million or less"
+    },
+    {
+      "li": "you have 50 employees or fewer"
+    },
+    {
+      "p": "You’re a charitable sponsor if you’re:"
+    },
+    {
+      "li": "a registered charity in England or Wales"
+    },
+    {
+      "li": "a registered charity in Scotland"
+    },
+    {
+      "li": "a registered charity in Northern Ireland - if you’re not on the register, you must provide proof of your charitable status for tax purposes from HM Revenue and Customs (HMRC)"
+    },
+    {
+      "li": "an excepted charity"
+    },
+    {
+      "li": "an exempt charity"
+    },
+    {
+      "li": "an ecclesiastical corporation established for charitable purposes"
+    },
+    {
+      "p": "If you’re not sure which category your business fits into, contact the Business Helpdesk:"
+    },
+    {
+      "p": "Business Helpdesk businesshelpdesk@homeoffice.gov.uk"
+    },
+    {
+      "h2": "How long it takes to get a decision"
+    },
+    {
+      "p": "Most applications are dealt with in less than 8 weeks. UKVI may need to visit your business."
+    },
+    {
+      "p": "You may be able to pay an extra £750 to get a decision within 10 working days. This service is limited to a small number of applications every working day. Faster decisions are allocated in the order that requests arrive (first come, first served)."
+    },
+    {
+      "p": "You’ll be told how to ask for a faster decision after you apply."
+    },
+    {
+      "h2": "Applications refused because of a mistake"
+    },
+    {
+      "p": "You can apply to request a review of your application if you think it was refused because:"
+    },
+    {
+      "li": "the caseworker processing your application made a mistake"
+    },
+    {
+      "li": "your supporting documents were not considered"
+    },
+    {
+      "p": "You cannot apply just because you disagree with the decision."
+    },
+    {
+      "h2": "Help and advice"
+    },
+    {
+      "p": "Sponsors can get advice from the sponsorship, employer and education helpline:"
+    },
+    {
+      "p": "Sponsorship, employer and education helpline Telephone: 0300 123 4699 Monday to Friday, 9am to 4pm Find out about call charges"
+    },
+    {
+      "p": "UK businesses and Tier 1 (Investors) can get help from the Business Helpdesk:"
+    },
+    {
+      "p": "Business Helpdesk businesshelpdesk@homeoffice.gov.uk"
+    }
+  ],
+  "values": {
+    "currency": "GBP",
+    "worker_small_charity": 611,
+    "worker_medium_large": 1682,
+    "temporary_worker_any_size": 611,
+    "add_worker_small_charity": 0,
+    "add_worker_medium_large": 1071,
+    "add_temporary_worker": 0,
+    "small_sponsor_criteria_required": 2,
+    "small_sponsor_max_turnover": 15000000,
+    "small_sponsor_max_assets": 7500000,
+    "small_sponsor_max_employees": 50,
+    "priority_fee": 750,
+    "priority_working_days": 10
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 
 import { PageHeader } from "@/components/app/page-header";
 import { Alert } from "@/components/ui/alert";
@@ -9,9 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { StatusChip } from "@/components/ui/status-chip";
+import { TextField } from "@/components/ui/text-field";
 import { useToast } from "@/components/ui/toast";
-import { attempt } from "@/lib/auth/request";
+import { attempt, type Problem } from "@/lib/auth/request";
 import type { components } from "@/lib/api/client";
+
+import { FormSheet } from "./form-sheet";
 
 type Billing = components["schemas"]["BillingOut"];
 type Plan = "annual" | "ten_year";
@@ -87,6 +90,15 @@ export function BillingPage({
   const router = useRouter();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
+  const [exportBusy, setExportBusy] = useState(false);
+  const [exportNote, setExportNote] = useState<{
+    tone: "success" | "warning" | "danger";
+    title: string;
+    text: string;
+  } | null>(null);
+  const [exportStepUp, setExportStepUp] = useState(false);
+  const [exportPassword, setExportPassword] = useState("");
+  const [exportStepUpProblem, setExportStepUpProblem] = useState<Problem | null>(null);
   const moment = new Date(now);
 
   if (!billing) {
@@ -132,6 +144,48 @@ export function BillingPage({
     }
     setBusy(false);
     toast.show({ title: outcome.problem.message, tone: "danger" });
+  }
+
+  /** Asks for the export (C3.1.11). A recent sign-in is needed: the step-up sheet asks for it. */
+  async function requestExport(): Promise<void> {
+    setExportBusy(true);
+    const outcome = await attempt((api) => api.POST("/companies/me/export"));
+    setExportBusy(false);
+    if (outcome.ok) {
+      setExportNote({
+        tone: "success",
+        title: "Export requested",
+        text: "We are preparing your export. We will e-mail you a link.",
+      });
+      return;
+    }
+    if (outcome.problem.code === "STEP_UP_REQUIRED") {
+      setExportStepUp(true);
+      return;
+    }
+    const inProgress = outcome.problem.code === "EXPORT_IN_PROGRESS";
+    setExportNote({
+      tone: inProgress ? "warning" : "danger",
+      title: inProgress ? "An export is already being prepared" : "The export was not started",
+      text: outcome.problem.message,
+    });
+  }
+
+  async function confirmExportPassword(event: FormEvent): Promise<void> {
+    event.preventDefault();
+    setExportBusy(true);
+    const confirmed = await attempt((api) =>
+      api.POST("/auth/step-up", { body: { password: exportPassword } }),
+    );
+    setExportBusy(false);
+    setExportPassword("");
+    if (!confirmed.ok) {
+      setExportStepUpProblem(confirmed.problem);
+      return;
+    }
+    setExportStepUp(false);
+    setExportStepUpProblem(null);
+    await requestExport();
   }
 
   async function cancel() {
@@ -189,6 +243,11 @@ export function BillingPage({
       {refundable ? (
         <Alert tone="info" title="14-day money-back guarantee">
           You can cancel until {onDay(billing.cooling_off_ends_at)} for a full refund.
+        </Alert>
+      ) : null}
+      {before(billing.comp_until, moment) ? (
+        <Alert tone="info" title="Complimentary access">
+          Complimentary access until {onDay(billing.comp_until)}.
         </Alert>
       ) : null}
 
@@ -325,6 +384,53 @@ export function BillingPage({
             }
           />
         </Card>
+      ) : null}
+
+      <Card>
+        <CardHeader
+          title="Export all your data"
+          headingLevel={2}
+          description="A zip of every record and document the company holds. We e-mail you a link, which works for 7 days."
+          actions={
+            <Button variant="gray" disabled={exportBusy} onClick={() => void requestExport()}>
+              Request an export
+            </Button>
+          }
+        />
+        {exportNote ? (
+          <CardBody>
+            <Alert tone={exportNote.tone} title={exportNote.title}>
+              {exportNote.text}
+            </Alert>
+          </CardBody>
+        ) : null}
+      </Card>
+
+      {exportStepUp ? (
+        <FormSheet
+          open
+          onOpenChange={(open) => {
+            if (!open) {
+              setExportStepUp(false);
+              setExportPassword("");
+            }
+          }}
+          title="Confirm it is you"
+          description="Confirm your password to export the company's data."
+          onSubmit={(event) => void confirmExportPassword(event)}
+          busy={exportBusy}
+          problem={exportStepUpProblem}
+          saveLabel="Continue"
+        >
+          <TextField
+            label="Your password"
+            type="password"
+            autoComplete="current-password"
+            value={exportPassword}
+            onChange={(event) => setExportPassword(event.target.value)}
+            required
+          />
+        </FormSheet>
       ) : null}
     </div>
   );

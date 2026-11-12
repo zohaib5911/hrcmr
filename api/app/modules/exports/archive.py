@@ -55,6 +55,8 @@ NEVER_EXPORTED = frozenset(
         "account_number",
         "sort_code",
         "ni_number_index",
+        # A deletion request's code is kept only as a hash; even the hash is not exported (C3.1.16).
+        "code_hash",
     }
 )
 _UNSAFE = re.compile(r"[^A-Za-z0-9._ -]")

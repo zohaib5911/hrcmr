@@ -1,0 +1,72 @@
+# What each block needs ticked on dev before it may start (read by .agent/next.sh).
+# Format:  <id>: <id> <id> ...      Blocks not listed need nothing and can run in parallel.
+# Automatic (not listed here): a gate P<n> needs every other block of Phase n;
+# an AUDIT-n needs every block above it and no open changesneeded.md item.
+# Edit this file through a normal task PR (or bus.sh devcommit) when the plan changes.
+
+# AUDIT-3 fixes: C3.1.4 builds the admin redirect helper and the landing nav the others use.
+C3.1.5: C3.1.4
+C3.1.6: C3.1.4
+C3.1.7: C3.1.4
+C3.1.8: C3.1.4
+C3.1.9: C3.1.4
+C3.1.10: C3.1.4 C3.1.5 C3.1.6 C3.1.7 C3.1.8 C3.1.9
+
+# Phase 18
+T18.2: T18.1
+T18.3: T18.1 T18.2 T18.4
+P18: AUDIT-3
+
+# Phase 19: the rates data, then the shared calculator template, then every calculator in parallel.
+T19.2: T19.1
+T19.3: T19.2
+T19.4: T19.2
+T19.5: T19.2
+T19.6: T19.2
+T19.7: T19.2
+T19.8: T19.2
+T19.9: T19.2
+T19.10: T19.2
+T19.11: T19.2
+T19.12: T19.2
+T19.13: T19.2
+T19.14: T19.2
+T19.15: T19.2
+T19.18: T19.2 T19.3 T19.4 T19.5 T19.6 T19.7 T19.8 T19.9 T19.10 T19.11 T19.12 T19.13 T19.14 T19.15 T19.16 T19.17
+P19: AUDIT-3
+
+# Phase 20
+T20.2: T20.1
+T20.3: T20.2
+T20.4: T20.2
+T20.5: T20.1 C3.1.10
+P20: AUDIT-3
+
+# Phase 21 starts after AUDIT-4 passes; its five checks run in parallel.
+T21.1: AUDIT-4
+T21.2: AUDIT-4
+T21.3: AUDIT-4
+T21.4: AUDIT-4
+T21.5: AUDIT-4
+
+# Phase 22 after the security phase; the design sweep last.
+T22.1: P21
+T22.2: P21
+T22.3: P21
+T22.4: T22.1 T22.2 T22.3
+
+# Phase 23 is one step after another (owner accounts involved).
+T23.1: AUDIT-5
+T23.2: T23.1
+T23.3: T23.2
+T23.4: T23.3
+T23.5: T23.4
+T23.6: T23.5
+T23.7: T23.6
+T23.8: T23.7
+T24.1: P23
+
+# Phase 25 (owner request): visual audit -> visual fixes -> security scan, after launch.
+T25.1: T24.1
+T25.2: T25.1
+T25.3: T25.2

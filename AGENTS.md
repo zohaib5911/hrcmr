@@ -1,151 +1,129 @@
 # AGENTS.md — rules for every AI agent on this repo (Claude Code, Codex, any other)
 
-Two agents (Claude Code and Codex) work on this repo **one at a time, in relay**. The owner starts one, it works until its usage limit or a stop point, and then the owner starts the other.
-**You can be cut off at any second without warning.** Work so that a different agent can continue from whatever you left behind, even if you never got to write a handover.
+Claude Code and Codex now work **at the same time (parallel mode)**, each in its own git worktree. They share work
+through the **agent bus** (`.agent/bus.sh`). Each task gets its own branch and PR, and **`.agent/prs.sh` merges a PR
+by itself once CI is green**. Nobody waits for CI: open the PR and start the next task.
+**You can be cut off at any second** (usage limit). `.agent/run.sh` restarts you when the limit resets, and your
+worktree, your claims and your pushed branch let you pick up exactly where you stopped.
 
-## Quick start — the owner ALWAYS types only "Read AGENTS.md and continue" (any model, Claude Code or Codex)
-The owner never tells you what to do or which tier you are. You decide, from this section, and you tell the owner which model to start next.
+## Owner: how to run it
+- Start both agents: `bash .agent/start.sh`. Watch: `bash .agent/start.sh attach`. State: `bash .agent/start.sh status`. Stop: `bash .agent/start.sh stop`.
+- Models: Claude runs `sonnet` (SMALL) and Codex runs its configured model (`gpt-6.1-sol`, BIG). To change: `CLAUDE_MODEL=opus bash .agent/start.sh`.
+- Codex runs inside `.agent/jail.sh`: it can write only to this project (and its caches), and it cannot use Docker, so keep the stack up yourself (`docker compose up -d --wait`).
+- The main folder (`cmr_hr/`) is the **coordinator checkout**: it always stays on `dev` and nobody does task work in it.
+  The agents work in `cmr_hr-wt/claude/` and `cmr_hr-wt/codex/`.
+- Typing "Read AGENTS.md and continue" in an interactive session still works: the agent follows the same loop below.
 
-**0. Know your tier.** **BIG** = Claude Opus (any version), Claude Fable, Solo 6.1 (the owner may add names to this line).
-Every other model is **SMALL** (Haiku, Sonnet, Luna, any mini model…). If you can't tell which model you are, you are SMALL.
+## Quick start (every session, headless or interactive)
+**0. Know who you are.** Agent name = `claude` (Claude Code) or `codex` (Codex CLI). Tier: **BIG** = Claude Opus (any
+version), Claude Fable, Solo 6.1 / gpt-6.1-sol. Every other model is **SMALL**. If the runner's prompt tells you your
+name and tier, use those. If you can't tell, you are SMALL.
+**1. Go to your worktree.** If you are not in `cmr_hr-wt/<agent>` (interactive start in the main folder), `cd` there
+(create it with `git worktree add --detach ../cmr_hr-wt/<agent> origin/dev` if it is missing). Never do task work in the main folder.
+**2. Recover (§1), then run** `bash .agent/next.sh --agent <agent> --tier <S|B>` and do what it says:
 
-1. Do §1 below (save any cut-off work, sync).
-2. Run `bash .agent/next.sh`. It prints a `NEXT:` line with a kind (`FIX`, `TASK`, `AUDIT`) and the tier tag, then the block.
-3. Act by this table. Repeat steps 2–3 after every finished block until you hit a stop.
+| `next.sh` says | What you do |
+|---|---|
+| `FIX-PR` | Your PR is red or has a conflict. `git switch task/<id>`, read `gh pr checks <n>`, fix it (or rebase on `origin/dev`), push. Done. |
+| `RESUME` | You claimed this task earlier and were cut off. `git switch task/<id>` (create it from `origin/dev` if it isn't there), continue from your last journal line. |
+| `ANSWER` (BIG only) | Answer every open ASK yourself, never ask the owner: `bash .agent/bus.sh decide <agent> <task-id> "<decision and why>"`, then `bash .agent/bus.sh say <agent> <asker> ANSWER "#<ask id> <short answer>"`. Then run next.sh again. |
+| `AUDIT` (BIG only) | Claim it, then run `audit.md` fully on branch `task/AUDIT-n`, open the PR. |
+| `FIX` / `TASK` | Claim it (`bash .agent/bus.sh claim <id> <agent>`; if REFUSED, run next.sh again), then do it (§2). |
+| `IDLE` / `DONE` | Nothing you may start now. End the session (headless: last line `RUNNER: IDLE`). |
 
-| `next.sh` shows | If you are SMALL | If you are BIG |
-|---|---|---|
-| `FIX` tagged S/S!/P* (not `· B`) | do it | stop → **START SMALL MODEL** |
-| `FIX` tagged `· B` | stop → **BIG MODEL TASK** | do it |
-| `TASK` tagged S or S! | do it | stop → **START SMALL MODEL** |
-| `TASK` tagged B | stop → **BIG MODEL TASK** | do it, then keep going while the next block is B |
-| `AUDIT` (an `AUDIT-n` block, or a re-audit after fixes) | stop → **AUDIT NEEDED** | run `audit.md` fully, then go back to step 2 |
+**3. One block per session.** When your PR is open (or your fix is pushed), end the session. Headless sessions end
+with exactly one line: `RUNNER: DONE <id>`, `RUNNER: BLOCKED <id>` or `RUNNER: IDLE`. The runner starts a fresh
+session for the next block (fresh context = fewer tokens). In an interactive session just run next.sh again.
 
-**How to stop:** set `STATUS.md` State (`BLOCKED — needs big model (Txx)`, `BLOCKED — audit requested (AUDIT-n)` or
-`HANDED OVER — small model next`), commit `chore(status): <state>` with a `Next:` line, push. Then make your **final message
-exactly one** of these (first line, word for word; one more line with the task id is fine):
-- `⚠ BIG MODEL TASK — start Opus / Solo 6.1 and type: Read AGENTS.md and continue`
-- `⚠ AUDIT NEEDED FIRST — start Opus / Solo 6.1 and type: Read AGENTS.md and continue`
-- `✓ BIG-MODEL WORK DONE — start a small model and type: Read AGENTS.md and continue`
+**Tiers in parallel mode:** SMALL does only S / S! blocks. BIG takes B blocks, audits and ANSWERs first, and does S
+blocks only when nothing B is ready (next.sh handles this). SMALL never does B work.
 
-If you are cut off by a usage limit before you can stop, that's fine: the owner starts another model of the same size with the same sentence.
+## The agent bus (`.agent/bus.sh`) — how the two agents talk
+Live state lives in `<repo>/.git/agent-bus/`, which every worktree shares. It is never committed and never conflicts.
+| Command | Use |
+|---|---|
+| `claim <id> <agent>` / `set <id> <state> [pr]` | Own a task. States: `working`, `pr`, `red`, `conflict`, `blocked`, `merged`. |
+| `say <from> <to\|all> <TYPE> <text>` | Message the other agent. TYPE: `INFO`, `ASK`, `ANSWER`, `WARN`, `HANDOFF`. |
+| `inbox <agent>` | Read messages to you (new ones have `*`). **Read it at the start of every session.** |
+| `asks` | Open questions (an ASK is closed by an ANSWER starting `#<its id>`). |
+| `log <agent> <id> <text>` | Journal line (replaces `.agent/journal.md`). |
+| `beat <agent> <text>` | Heartbeat. A claim is taken over only if its owner has been silent for 24 h. |
+| `decide <agent> <id> <text>` | Writes the decision into `.agent/decisions.md` on `dev`, and tells everyone. |
+| `serial -- <cmd>` | Runs `<cmd>` only while no other agent runs one. **Use it for every Playwright run, full suite and `pnpm build`** (the e2e ports 3100/3101/8100 are shared). |
+| `status` | Heartbeats, claims, open asks, last journal lines. |
+
+Message format (`messages.log`): `YYYY-MM-DD HH:MM | from -> to | TYPE | text`. Keep each message to one line.
+**Questions:** SMALL agents never stop to wait. Post `say <agent> all ASK "<id>: <question, options, your recommendation>"`,
+`set <id> blocked`, end the session with `RUNNER: BLOCKED <id>`. When an ANSWER arrives in your inbox, `set <id> working` and continue.
+Before asking, check `.agent/decisions.md`: the answer may already be there.
 
 ## Source of truth
-- `micro_plan.md`: **the task list and steps** for all remaining work (T10.3 onward). Work through it top to bottom.
-- `changesneeded.md`: fixes from the last audit. **Always done before** new `micro_plan.md` tasks. Tick each item (`### [x]`) with its fix commit.
-- `leftover.md`: work parked until the owner supplies something (e.g. keys). Don't block on it; must be done before Phase 23.
-- `audit.md`: instructions for the auditor (big model) only. Small models don't read it.
-- `plan.md`: the full **spec** (behaviour, rules, data). Read only the lines a `micro_plan.md` block cites. If it conflicts with `micro_plan.md` on behaviour, `plan.md` wins: note it in STATUS.
-- `deployment-requirements.txt`: accounts, keys and env var names.
-- `PROGRESS.md`: permanent log; finished tasks ticked, one line each.
-- `STATUS.md`: live state (current only, overwritten). It may be stale; see Recovery.
-- `.agent/journal.md`: append-only work journal, one line per step. It is the cut-off safety net.
-- **Git history:** every commit message carries a `Next:` line. Even if nothing else was updated, the last commit tells the next agent what to do.
+- `micro_plan.md`: the task list and steps. `changesneeded.md`: fixes from the last audit (next.sh offers them first).
+- `.agent/deps.txt`: which blocks must be merged before another may start. Blocks not listed run in parallel.
+- `.agent/decisions.md`: every decision the agents took themselves (append-only, written by `bus.sh decide`).
+- `plan.md`: the full spec. Read only the lines a block cites. If it conflicts with `micro_plan.md` on behaviour, `plan.md` wins.
+- `leftover.md`: work parked until the owner supplies something (e.g. Stripe keys). Must be done before Phase 23.
+- `audit.md`: auditor instructions (BIG only). `deployment-requirements.txt`: accounts, keys, env var names.
+- `PROGRESS.md`: permanent log, written at phase gates. `STATUS.md`: a snapshot written at phase gates only; live state is `bus.sh status`.
+- Git: every commit message carries a `Next:` line.
 
-## Where to work
-- Both agents use the **same local folder** (Codex CLI and Claude Code on the owner's machine), so even uncommitted work survives a cut-off.
-- Work on branch **`dev`**. `main` is protected. At each phase gate, open a PR `dev → main` and merge only when CI is green.
+## 1. Start of every session (protect unsaved work BEFORE any pull)
+1. In your worktree: `git status --short`, `git branch --show-current`, `git log -3 --format='%h %s%n%b'`,
+   `bash .agent/bus.sh inbox <agent>`, and `bash .agent/bus.sh status` (your last journal lines and claims).
+2. **Uncommitted changes = you were cut off.** Commit them at once on the current branch:
+   `git add -A && git commit -m "wip(<id>): recovered from cut-off" -m "Next: review and finish"`, push. Then review and continue.
+   **Forbidden at all times:** `git checkout .`, `git checkout -- <file>`, `git restore`, `git reset --hard`, `git clean`,
+   `git stash` (any form), `git pull` with a dirty tree, force-push to `dev` or `main`. (Force-push with lease is allowed
+   only on your own `task/<id>` branch after a rebase.)
+3. `git fetch origin`. `bash .agent/bus.sh beat <agent> "<id>: starting"`.
+4. If the stack is down: `docker compose up -d --wait` (repo root). If `dev` itself is red (CI on `dev` or a merged PR
+   broke it), fixing it is your task: claim `FIX-dev`, branch `task/FIX-dev`.
 
-## 1. Start of every session (order matters — protect unsaved work BEFORE any pull)
-1. **Look first, change nothing:**
-   - `git branch --show-current`: must be `dev`. If it isn't, and step 2 finds unsaved changes, do NOT switch branches yet.
-   - `git status --short`: uncommitted changes mean the last agent was cut off mid-work.
-   - `git log -5 --format='%h %s%n%b'`: read the latest `Next:` lines.
-   - `tail -n 30 .agent/journal.md`, then compare with `STATUS.md`. **If they disagree, git and the journal win over STATUS.**
-2. **If there are uncommitted changes, save them first:**
-   - **Forbidden at all times:** `git checkout .`, `git checkout -- <file>`, `git restore`, `git reset --hard`, `git clean`, `git stash` (any form), and `git pull` while the tree is dirty.
-   - Run `git add -A && git commit -m "wip(Txx): recovered from cut-off" -m "Next: review and finish"` **immediately**, before doing anything else. Save first, judge later.
-   - Then review that commit's diff and run the related tests. If the work is good, continue it; if it's broken, fix it in the next commit. Never throw it away.
-3. **Only now sync** (the working tree must be clean): `git switch dev` if needed, then `git pull --rebase origin dev`.
-   - If the rebase hits a conflict, stop: run `git rebase --abort` and set `State: BLOCKED — merge conflict` in STATUS with the file names. Don't guess.
-   - Then `git push origin dev`.
-4. Write the corrected state into `STATUS.md` (yourself as the agent, State IN PROGRESS, the task, the sub-steps). Commit and push: `chore(status): start Txx (Codex|Claude)`.
-5. Run `bash .agent/next.sh`; read only the `plan.md` lines that block cites.
-6. Run lint, type-check and the tests for the area you'll touch. If `dev` is red, fixing it is your first task.
-
-## 2. While working: checkpoint constantly
-- **Sub-steps are the numbered Steps of the `micro_plan.md` block.** At task start, copy them as a checklist under "Current task" in `STATUS.md`.
-- **After every sub-step (slim checkpoint), do both together:**
-  1. append one line to `.agent/journal.md`: `YYYY-MM-DD HH:MM | agent | Txx | step N done: X (tests: real counts) | next Y`;
-  2. commit **and push** in one go, with the journal included:
-     ```
-     wip(Txx): <what was done>
-
-     Next: <exact next action, file(s)>
-     ```
-  `STATUS.md` is rewritten only at task start, task end, BLOCKED and handover. Between those, the journal and the
-  `Next:` lines are the live state (Recovery in §1 already trusts them over STATUS).
-- **Commit and push before** any long-running command (full test suite, Playwright, builds, big refactors).
-- Don't sit on more than ~20 minutes of unpushed work.
-- When a task is fully done: tick it in `micro_plan.md` (`### [x]`) and in `PROGRESS.md` (one line), rewrite `STATUS.md`,
-  then a final commit `feat(area): <title> (Txx)` with a `Next:` line.
+## 2. Doing a block
+1. Branch from the latest dev: `git switch -c task/<id> origin/dev` (the claim's branch name). One block per branch.
+2. Read only the `plan.md` lines the block cites. Run lint, type-check and the tests for the area you touch.
+3. **After every Step of the block:** `bash .agent/bus.sh log <agent> <id> "step N done: X (tests: real counts) | next Y"`,
+   then commit and push the branch (`wip(<id>): <what>` + a `Next:` line). Push before any long command.
+4. When the block's "Done when" passes: final commit `feat(area): <title> (<id>)` (or `fix(<id>): ...`), push, then
+   `gh pr create --base dev --head task/<id> --title "[<id>] <title>" --body "<what, tests run with real counts>"`, and
+   `bash .agent/bus.sh set <id> pr <n>`. **Don't wait for CI.** End the session.
+5. **Do NOT tick** the block in `micro_plan.md`/`changesneeded.md`, and do not edit `STATUS.md`, `.agent/journal.md` or
+   `PROGRESS.md` on a task branch (gates excepted). `prs.sh` ticks the block on `dev` when the PR merges. (Parallel PRs
+   ticking neighbouring lines would conflict.)
+6. If the block needs a decision that isn't in the plan or `decisions.md`: BIG decides the simplest safe option and records
+   it with `bus.sh decide`; SMALL asks (see the bus section). Never ask the owner, except for keys, accounts or money.
 
 ## 3. Quality and style
-- One task at a time, in plan order.
-- Change only what the task needs. Don't refactor, rename or restyle earlier work; write suggestions under "Issues / suggestions" in STATUS.
+- Change only what the task needs. Don't refactor, rename or restyle earlier work; post suggestions as `say <agent> all INFO`.
 - Copy the structure, naming and test style of the nearest similar module, so Codex and Claude code looks the same.
-- If a decision isn't in the plan, make the simplest safe choice and record it under "Strategy / decisions".
+- Two agents touch the repo at once: keep diffs small and local; don't reformat files you didn't change.
+- Stop only processes you started yourself (check the PID's parent chain and its cwd are in your own worktree). Never stop the runners, the `prs` loop or the other agent's processes, and never remove a worktree you did not create.
 - Never print, log or commit secrets. Never ask the owner to paste a key in chat.
 - AI features show only when `ANTHROPIC_API_KEY` is set; otherwise they are hidden, with non-AI fallbacks. Ask Mady chat (T14.4) is deferred.
 
 ## 4. Speed rules (tokens and time)
 - Read only the plan sections you need. Don't re-read whole files you've already seen this session.
-- Run only the tests affected by your change. The full suite runs once, at phase gates, never in parallel.
-- Design QA screenshots only at phase gates (390 + 1280 px; all widths in T22.4).
-- No tests beyond each task's "Done when".
-- Keep messages and notes short. Final message to the owner: at most 3 lines.
+- Run only the tests affected by your change. CI runs the rest on your PR. The full suite runs once, at phase gates.
+- Wrap every Playwright run, full suite and production build in `bash .agent/bus.sh serial -- <cmd>`.
+- Design QA screenshots only at phase gates (390 + 1280 px; all widths in T22.4). No tests beyond each task's "Done when".
+- Keep messages and notes short.
 
-## 5. Before you stop (if you get the chance)
-1. Nothing uncommitted (done commit, or a `wip` commit with a `Next:` line).
-2. `STATUS.md` fully filled in (template below), State = HANDED OVER or BLOCKED.
-3. Commit and push: `chore(status): handover after Txx (agent)`.
-If you are cut off before this, that's fine: the journal, the `Next:` lines and Recovery (step 1.2) cover it.
+## 5. PRs, CI and merging (`.agent/prs.sh`, run by the runner before every session; you may run it too)
+- CI runs on every PR to `dev` and to `main`. `prs.sh` merges a task PR (`task/<id>` → `dev`) as soon as **every** check
+  is green, deletes the branch, ticks `<id>` on `dev` and tells everyone. A red PR becomes `FIX-PR` for its owner; a
+  conflict becomes `FIX-PR` too (rebase on `origin/dev`, `git push --force-with-lease`).
+- Never merge red, never `--admin`, never `--auto` (it merges instantly on this repo), never force-push `dev` or `main`.
+- A block whose dependencies (`deps.txt`) are not merged yet is not offered; take another one.
 
 ## 6. Phase gates and audits
-- At the end of each phase: run the full suite once, save the screenshots, and write a 5-line phase summary in `PROGRESS.md`. Then open a PR `dev → main`.
-- **You have standing permission to merge that PR yourself, without asking:**
-  - merge only when **all** CI checks are green, using `gh pr merge <n> --merge --auto` (it waits for green);
-  - never use `--admin`, bypass branch protection, or force-push `main`;
-  - if CI fails, fix it on `dev` and push; never merge red;
-  - after merging, `git pull` on `dev` and continue with the next task. Don't wait for the merge to finish before starting it.
-- Gate PRs: `--auto` merges instantly on this repo, so wait for checks yourself (`gh pr checks <n> --watch`) and merge only when all are green (`micro_plan.md` Recipe R7).
-- **Audit stops** are the `AUDIT-n` blocks in `micro_plan.md` (after Phases 11, 14, 17, 20 and 22). Stop there with
-  `State: BLOCKED — audit requested (AUDIT-n)`. A big model runs `audit.md` and writes the fixes into `changesneeded.md`;
-  small models fix them first, then the loop repeats until an audit round has no P0/P1 items.
+- **Gate `P<n>`** (offered when every block of Phase n is merged): on `task/P<n>`, Recipe R7 steps 1–3 (full suite via
+  `bus.sh serial`, screenshots, 5-line summary in `PROGRESS.md`; don't tick). PR to `dev`. When it merges, `prs.sh`
+  ticks the gate; then open `gh pr create --base main --head dev --title "Phase <n>"`; `prs.sh` merges it when green.
+- **Audits** (`AUDIT-n`, BIG only, offered when every block above it is merged and no fix is open): run `audit.md` on
+  `task/AUDIT-n`; it writes `changesneeded.md` (and ticks `AUDIT-n` itself only on PASS). The fixes are then offered to
+  every agent, and the re-audit is offered again once they are all merged. Phases 18–20 do not wait for AUDIT-3; only
+  their gates do (`deps.txt`).
 
 ## 7. Model tiers
-- Each `micro_plan.md` block is tagged **S** (small model OK), **S!** (small model OK, high-risk: follow every "Watch" line), or **B** (big model only).
-- Who is BIG and what each tier does on each kind of block: the table in "Quick start". A big model never does S/S! blocks (that wastes the expensive model); it hands back.
-- Small models: never invent figures, never skip/weaken tests, never claim a pass you didn't see. When unsure, set BLOCKED with the question; don't guess.
-
-## STATUS.md template (overwrite fully each time)
-```
-# STATUS
-Updated: <date time, Europe/London>    Agent: <Claude Code | Codex>    Branch: dev    Commit: <short sha>
-State: IN PROGRESS | HANDED OVER | BLOCKED (<reason>)
-
-## Last completed
-- Txx — <one line>
-
-## Current task
-- Txx — <title>
-  - [x] sub-step 1
-  - [ ] sub-step 2   <- here
-- Resume note: <exact next action, files, what is half-done, how to verify>
-
-## Next tasks
-- Txx, Txx, Txx
-
-## Health
-- CI on dev: green | red (<why>)    CI on main: green | red
-- Local checks run: <areas> — pass/fail
-
-## Issues / suggestions
-- <bugs, tech debt, things for the other agent or the auditor>
-
-## Strategy / decisions taken
-- <choices not in the plan, and why>
-
-## Owner actions needed
-- <real blockers or decisions only>
-```
+- Each block is tagged **S** (small model OK), **S!** (small model OK, high-risk: follow every "Watch" line), or **B** (big model only).
+- Small models: never invent figures, never skip or weaken tests, never claim a pass you didn't see. When unsure, ASK on the bus; don't guess.
