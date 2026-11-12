@@ -77,7 +77,7 @@ for (const colorScheme of ["light", "dark"] as const) {
           ],
           ["/sponsors/methodology", "Methodology", "methodology"],
           ["/sponsors/terms", "Register terms", "terms"],
-        ]) {
+        ] as const) {
           await page.goto(route);
           await expect(
             page.getByRole("heading", { level: 1, name: heading, exact: true }),
