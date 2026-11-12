@@ -122,7 +122,7 @@ export function calculateSponsorCosts(input: SponsorCostInput): SponsorCostResul
   const licencePriorityFee = input.licencePriority ? L.priority_fee : 0;
   const cosFee = cos.values.worker;
 
-  const exempt = input.route === "health_care" || S.exempt_soc_codes.includes(input.soc.trim());
+  const exempt = S.exempt_soc_codes.includes(input.soc.trim());
   // Charged for outside-UK stays of 6 months or more, and for any inside-UK stay.
   const chargeable = !exempt && (input.insideUK || months >= 6);
   const skillsCharge = chargeable ? skillsChargeFor(months, small) : 0;
