@@ -7,3 +7,7 @@ Reviewed micro_plan T17.1/T17.4 (S!) and plan L1155–1175, together with the ex
 Scoped hidden-cheating scan found no added skip/xfail/only/type-ignore/eslint-disable/noqa/TODO/FIXME. The moved session tests retain their assertions. Verification pending.
 
 Ordered API verification passed: Ruff, formatting (556 files), mypy (492 source files), full pytest 1363 passed / 0 failed / 0 skipped in 628.14 seconds. The RLS CLI passed against a freshly provisioned database migrated through head and then removed. The running stack was reachable; no Docker access was needed.
+
+Ordered web verification passed: lint, typecheck, 112 files / 1309 unit tests, generated API client check, production build and bundle scan. Normal Vitest discovery includes tests/unit/platform-session-guard.test.tsx; a targeted run explicitly executed its sixteen parameterized cases together with the nine contact cases.
+
+A temporary copy of the contact cases added total/pager assertions to the active-page removal scenario: start with total 51 and enabled Next, mark one row handled, assert total 50 and disabled Next. All 34 targeted cases passed (16 page-entry + 9 original contact + 9 scratch contact); scratch file removed. Product behavior is correct. P2 coverage gap: C3.3.1 explicitly required total coverage, but the committed removal test only checks rows. Preserve the boundary assertions in the normal contact test so a regression in total calculation is caught.
