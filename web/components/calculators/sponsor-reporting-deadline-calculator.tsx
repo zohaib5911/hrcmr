@@ -1,42 +1,77 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
+import { PresetChips } from "@/components/calculators/preset-chips";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
+import type { CalculatorPreset } from "@/lib/calculators/frame";
 import {
   calculateDeadline,
   eventKinds,
-  type DeadlineResult,
   type Nation,
 } from "@/lib/calculators/sponsor-reporting-deadline-calculator";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
+type Form = { eventId: string; eventDate: string; nation: Nation };
+
+const initial: Form = {
+  eventId: eventKinds[0]?.id ?? "",
+  eventDate: "",
+  nation: "england-and-wales",
+};
+
+/** Example events: they only fill in the form; the deadline comes from the same rules. */
+export const deadlinePresets: readonly CalculatorPreset<Form>[] = [
+  {
+    id: "no-start",
+    label: "Worker did not start, Scotland",
+    values: { eventId: "no-start", eventDate: "2026-11-27", nation: "scotland" },
+  },
+  {
+    id: "org-change",
+    label: "Change to your organisation over the August bank holiday",
+    values: { eventId: "org-change", eventDate: "2026-08-28", nation: "england-and-wales" },
+  },
+  {
+    id: "pay-rise",
+    label: "Salary increase",
+    values: { eventId: "pay-rise", eventDate: "", nation: "england-and-wales" },
+  },
+];
+
 export function SponsorReportingDeadlineCalculator() {
-  const [eventId, setEventId] = useState(eventKinds[0]?.id ?? "");
-  const [eventDate, setEventDate] = useState("");
-  const [nation, setNation] = useState<Nation>("england-and-wales");
-  const [result, setResult] = useState<DeadlineResult | null>(null);
+  const [form, setForm] = useState<Form>(initial);
+  const [touched, setTouched] = useState(false);
+  // Live result: recalculated locally on every change once the user has answered something.
+  const result = useMemo(
+    () => (touched ? calculateDeadline({ ...form, today: today() }) : null),
+    [form, touched],
+  );
+  function update<K extends keyof Form>(key: K, value: Form[K]) {
+    setForm((previous) => ({ ...previous, [key]: value }));
+    setTouched(true);
+  }
 
   return (
     <div className="grid items-start gap-8 lg:grid-cols-2">
-      <form
-        className="space-y-5"
-        onSubmit={(event) => {
-          event.preventDefault();
-          setResult(calculateDeadline({ eventId, eventDate, nation, today: today() }));
-        }}
-      >
-        <h2 className="text-title-2 text-label">The event</h2>
+      <form className="space-y-5" onSubmit={(event) => event.preventDefault()}>
+        <PresetChips
+          presets={deadlinePresets}
+          onSelect={(preset) => {
+            setForm(preset.values);
+            setTouched(true);
+          }}
+        />
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">1.</span> The event
+        </h2>
         <Select
           label="Event type"
-          value={eventId}
-          onChange={(event) => {
-            setEventId(event.target.value);
-            setResult(null);
-          }}
+          value={form.eventId}
+          onChange={(event) => update("eventId", event.target.value)}
         >
           {eventKinds.map((kind) => (
             <option key={kind.id} value={kind.id}>
@@ -49,25 +84,30 @@ export function SponsorReportingDeadlineCalculator() {
           type="date"
           clearable={false}
           hint="The date the event happened, or the date you became aware of it for organisation changes."
-          value={eventDate}
-          onChange={(event) => {
-            setEventDate(event.target.value);
-            setResult(null);
-          }}
+          value={form.eventDate}
+          onChange={(event) => update("eventDate", event.target.value)}
         />
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">2.</span> Where you are
+        </h2>
         <Select
           label="Nation (bank holidays)"
-          value={nation}
-          onChange={(event) => {
-            setNation(event.target.value as Nation);
-            setResult(null);
-          }}
+          value={form.nation}
+          onChange={(event) => update("nation", event.target.value as Nation)}
         >
           <option value="england-and-wales">England and Wales</option>
           <option value="scotland">Scotland</option>
           <option value="northern-ireland">Northern Ireland</option>
         </Select>
-        <Button type="submit">Work out the deadline</Button>
+        <Button
+          variant="gray"
+          onClick={() => {
+            setForm(initial);
+            setTouched(false);
+          }}
+        >
+          Reset answers
+        </Button>
       </form>
       <section
         aria-label="Deadline result"
@@ -78,6 +118,11 @@ export function SponsorReportingDeadlineCalculator() {
         {result ? (
           <>
             <h2 className="text-title-2 text-label">Your deadline</h2>
+            {result.reportable && !result.deadline ? (
+              <p role="status" className="text-callout text-label mt-2">
+                Incomplete: a deadline can’t be shown yet. See the note below.
+              </p>
+            ) : null}
             <dl className="text-callout text-label mt-4 space-y-3">
               <div>
                 <dt className="font-semibold">Reportable?</dt>
@@ -108,7 +153,7 @@ export function SponsorReportingDeadlineCalculator() {
           </>
         ) : (
           <p className="text-callout text-label-secondary">
-            Choose the event and date, then work out the deadline.
+            Choose the event and its date, or pick an example; the deadline updates as you go.
           </p>
         )}
       </section>
