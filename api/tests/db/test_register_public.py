@@ -55,7 +55,7 @@ async def _clear(rig: dict[str, Any]) -> None:
             text(
                 "truncate register_problem_reports, register_possible_matches, register_changes, "
                 "register_entries, register_sponsors, register_publications, "
-                "register_place_datasets cascade"
+                "register_place_datasets, register_company_datasets cascade"
             )
         )
 

@@ -14,9 +14,11 @@ from sqlalchemy import select
 
 from app.core.logging import get_logger
 from app.modules.register.ingest import normalise
-from app.modules.register.models import PlaceDataset, Sponsor
+from app.modules.register.models import CompanyDataset, PlaceDataset, Sponsor
 
 if TYPE_CHECKING:
+    import uuid
+
     from sqlalchemy.ext.asyncio import AsyncSession
 
 ITL1_REGIONS = (
@@ -234,18 +236,29 @@ async def apply_geocoding(
 
 
 async def apply_companies_match(
-    db: AsyncSession, companies: dict[str, tuple[str, str | None]], *, enabled: bool
+    db: AsyncSession,
+    companies: dict[str, tuple[str, str | None]],
+    *,
+    enabled: bool,
+    dataset_id: uuid.UUID | None = None,
+    refresh: bool = False,
 ) -> int:
     """Behind a flag: does nothing unless enabled. Exact normalised-name matches only."""
     if not enabled:
         return 0
     changed = 0
     for sponsor in (await db.scalars(select(Sponsor))).all():
+        if sponsor.companies_dataset_id is not None and (
+            refresh or sponsor.companies_dataset_id != dataset_id
+        ):
+            sponsor.companies_house_number = sponsor.sic_section = None
+            sponsor.companies_dataset_id = None
         if sponsor.companies_house_number:
             continue
         hit = companies.get(sponsor.normalised_name)
         if hit:
             sponsor.companies_house_number, sponsor.sic_section = hit
+            sponsor.companies_dataset_id = dataset_id
             changed += 1
     await db.flush()
     return changed
@@ -284,3 +297,44 @@ async def geocode_from_latest_dataset(db: AsyncSession) -> int | None:
     changed = await apply_geocoding(db, parse_places(dataset.content))
     logger.info("register_geocoded", version=dataset.version, placed=changed)
     return changed
+
+
+async def load_company_dataset(
+    db: AsyncSession, content: bytes, *, version: str, source: str, enabled: bool
+) -> tuple[CompanyDataset, int]:
+    """Retain a monthly bulk file; apply it only with the explicit register flag enabled.
+    Caller owns commit/rollback. Duplicate names are rejected across the entire file."""
+    companies = parse_companies(content)
+    if not companies:
+        raise ValueError("Empty or wholly ambiguous Companies House file refused")
+    dataset = CompanyDataset(
+        version=version,
+        source=source,
+        sha256=hashlib.sha256(content).hexdigest(),
+        row_count=len(companies),
+        content=content,
+    )
+    db.add(dataset)
+    await db.flush()
+    matched = await apply_companies_match(
+        db, companies, enabled=enabled, dataset_id=dataset.id, refresh=True
+    )
+    return dataset, matched
+
+
+async def match_from_latest_dataset(db: AsyncSession, *, enabled: bool) -> int | None:
+    if not enabled:
+        return 0
+    dataset = await db.scalar(
+        select(CompanyDataset)
+        .order_by(CompanyDataset.loaded_at.desc(), CompanyDataset.id.desc())
+        .limit(1)
+    )
+    if dataset is None:
+        logger.warning("register_companies_missing", hint="python -m app.cli load-companies")
+        return None
+    matched = await apply_companies_match(
+        db, parse_companies(dataset.content), enabled=True, dataset_id=dataset.id
+    )
+    logger.info("register_companies_matched", version=dataset.version, matched=matched)
+    return matched
