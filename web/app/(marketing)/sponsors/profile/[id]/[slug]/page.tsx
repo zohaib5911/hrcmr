@@ -9,9 +9,8 @@ import { CHANGE_LABELS, type Profile, registerGet } from "@/lib/register";
 import { pageMetadata } from "@/lib/seo";
 import { formatUk } from "@/lib/ui/dates";
 
-// About 128k pages: built on first visit, then cached for six hours.
+// Render with a fresh CSP nonce; registerGet caches public profile data for six hours.
 export const revalidate = 21600;
-export const generateStaticParams = () => [];
 
 type Props = { params: Promise<{ id: string; slug: string }> };
 

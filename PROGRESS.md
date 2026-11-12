@@ -560,3 +560,10 @@ Do not start until the owner says so: US site, Australia, native wrapper, passke
 - Lighthouse on all 10 marketing pages: accessibility, best practices and SEO 100; performance 96–100 (lowest: /contact 96). All ≥ 95.
 - Screenshots: docs/screenshots/phase-18, 12 pages × 390/1280 px × light/dark = 48 images.
 - Open: legal drafts still need solicitor review (owner action above).
+
+## Phase 20 summary (public sponsor register)
+- Built: GOV.UK publication discovery and hash-idempotent snapshots, change detection and possible renames; ITL1 geocoding and optional Companies House bulk matching; scheduled working-day imports at 10:00 and 16:00 UK time.
+- Public pages: explorer search/filters/timeline and map/trend/table/list, regions, bulletins, current/removed profiles, methodology/terms, Turnstile-protected reports and split sitemaps; platform status and audited allow-listed manual reruns.
+- Gate fixes: remove static fallback declarations that broke detail pages under nonce CSP (retain 6-hour profile data caching); enable keyboard scrolling of wide tables and enlarge bulletin date targets. Real SSR nonce, accessibility and keyboard regressions run in CI.
+- Checks: full API 1363, web unit 1309 and browser 485 passed (224 expected screenshot-only skips); lint/typecheck/build passed; after gate fixes, targeted unit 7 and browser 8 passed, including all screenshot states and fresh matching CSP nonces.
+- Screenshots: docs/screenshots/phase-20 has 48 captures of 12 states at 390/1280 px in light/dark, all axe and overflow checks passed. Isolated browser API ingests saved fictional publications without network calls; this is not evidence of a live production import. Gate tick remains with the coordinator.

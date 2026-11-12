@@ -4,6 +4,7 @@ import { registerFixture } from "../fixtures/register";
 
 for (const theme of ["light", "dark"] as const) {
   test(`register exploration works in ${theme} theme`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 900 });
     await page.emulateMedia({ colorScheme: theme });
     await page.route("**/public/register/explore*", async (route) => {
       const query = new URL(route.request().url()).searchParams;
@@ -30,6 +31,11 @@ for (const theme of ["light", "dark"] as const) {
     await expect(page.getByRole("table", { name: "Matching sponsors" })).toContainText(
       "Stable Ltd",
     );
+    const table = page.getByRole("region", { name: "Sponsor table", exact: true });
+    await table.focus();
+    await expect(table).toBeFocused();
+    await page.keyboard.press("ArrowRight");
+    await expect.poll(() => table.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
     await page.getByRole("button", { name: "Next page" }).click();
     await expect(page.getByText("Page 2 of 2")).toBeVisible();
     await page.getByRole("button", { name: "List", exact: true }).click();
