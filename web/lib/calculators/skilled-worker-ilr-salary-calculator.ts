@@ -1,7 +1,8 @@
 import salary from "@/rates/ilr-worker-salary.json";
 import occupations from "@/rates/skilled-occupations.json";
 
-export type Situation = "standard" | "salary_list" | "transitional" | "sportsperson";
+export type Situation =
+  "standard" | "health_care" | "salary_list" | "transitional" | "sportsperson";
 
 export type Occupation = {
   code: string;
@@ -22,7 +23,14 @@ export type SalaryInput = {
   hours: number; // weekly hours stated by the sponsor
 };
 
+/**
+ * ok: `required` is the figure to meet. pay_scale: the going rate comes from national pay
+ * scales. review: the rates file has no going rate for the selected branch, so no figure is given.
+ */
+export type SalaryStatus = "ok" | "pay_scale" | "review";
+
 export type SalaryResult = {
+  status: SalaryStatus;
   required: number | null;
   floor: number | null;
   goingRate: number | null; // pro-rated
@@ -41,6 +49,8 @@ export const ilrSalarySources = [salary, occupations].map((file) => ({
 }));
 
 const FULL_TIME_HOURS = 37.5;
+
+const gbp = (value: number) => `£${value.toLocaleString("en-GB")}`;
 
 type Block = Record<string, unknown>;
 const blocks = salary.content as Block[];
@@ -72,6 +82,15 @@ export const thresholds = {
     perYearRe,
   ),
   transitionalSalaryList: 25_000,
+  healthCare: (() => {
+    const start = blocks.findIndex(
+      (b) => typeof b.h3 === "string" && b.h3.startsWith("If your job in healthcare has different"),
+    );
+    const m = start < 0 ? null : blocks.slice(start).find((b) => typeof b.li === "string");
+    const n = typeof m?.li === "string" ? perYearRe.exec(m.li)?.[1] : undefined;
+    if (!n) throw new Error("Health and Care figure not found in rates file");
+    return Number(n.replace(/,/g, ""));
+  })(),
   sportsperson: (() => {
     const text = JSON.stringify(blocks);
     const m = /You must be paid £([\d,]+) or more a year/.exec(text);
@@ -172,10 +191,11 @@ export function calculateIlrSalary(input: SalaryInput): SalaryResult {
     "Going rates are for a 37.5-hour week and are pro-rated by the hours your sponsor states; the fixed minimum is not pro-rated.",
     "Only the going rate column applies to settlement; the 70%, 80% and 90% columns do not.",
   ];
-  const result = (basis: string, floor: number | null, fullTime: number | null): SalaryResult => {
+  const result = (basis: string, floor: number, fullTime: number | null): SalaryResult => {
     const going = fullTime === null ? null : prorate(fullTime, hours);
     return {
-      required: floor === null ? null : Math.max(floor, going ?? 0),
+      status: "ok",
+      required: Math.max(floor, going ?? 0),
       floor,
       goingRate: going,
       fullTimeGoingRate: fullTime,
@@ -184,6 +204,26 @@ export function calculateIlrSalary(input: SalaryInput): SalaryResult {
       notes,
     };
   };
+  /** The branch needs a going rate the rates file does not hold: never substitute 0. */
+  const review = (basis: string, guidance: string[]): SalaryResult => ({
+    status: "review",
+    required: null,
+    floor: null,
+    goingRate: null,
+    fullTimeGoingRate: null,
+    hours,
+    basis,
+    notes: guidance,
+  });
+  const goingRateFor = (fullTime: number | null, basis: string, floor: number, kind: string) =>
+    fullTime === null
+      ? review(basis, [
+          `SOC ${occ.code} has no ${kind} going rate in the going rates tables, so we cannot give a salary figure for this situation.`,
+          kind === "standard" && occ.lower !== null
+            ? "It is listed only with a lower going rate. You may qualify under another rule (for example a first certificate of sponsorship before 4 April 2024, or a Health and Care Worker role): check the going rates table or ask your sponsor."
+            : "Check the going rates table or ask your sponsor which going rate applies to your job.",
+        ])
+      : result(basis, floor, fullTime);
 
   if (input.situation === "sportsperson") {
     return {
@@ -194,6 +234,7 @@ export function calculateIlrSalary(input: SalaryInput): SalaryResult {
   if (occ.payScale) {
     return {
       ...result("National pay scale", thresholds.transitionalSalaryList, null),
+      status: "pay_scale",
       required: null,
       notes: [
         "Your job’s going rate comes from national pay scales: you must be paid the higher of £25,000 and your pay-scale rate.",
@@ -201,15 +242,29 @@ export function calculateIlrSalary(input: SalaryInput): SalaryResult {
       ],
     };
   }
+  if (input.situation === "health_care") {
+    // GOV.UK lists separate Health and Care Worker rules for some occupation codes; the
+    // list of those codes is not in our rates files, so this branch is routed to review.
+    return review("Health and Care Worker visa", [
+      `If your occupation code has different salary requirements for Health and Care Workers, you must be paid the higher of ${gbp(thresholds.healthCare)} (${gbp(thresholds.transitionalSalaryList)} if your job is on the Immigration Salary List) and the lower going rate for your job.`,
+      "Otherwise the usual salary requirement applies. Ask your sponsor which rule covers your occupation code, then check it against the going rates table.",
+    ]);
+  }
   if (input.situation === "transitional") {
-    return result(
+    return goingRateFor(
+      occ.lower,
       "Certificate of sponsorship before 4 April 2024 (lower going rate)",
       thresholds.transitional,
-      occ.lower,
+      "lower",
     );
   }
   if (input.situation === "salary_list") {
-    return result("Immigration Salary List job", thresholds.salaryList, occ.standard);
+    return goingRateFor(
+      occ.standard,
+      "Immigration Salary List job",
+      thresholds.salaryList,
+      "standard",
+    );
   }
-  return result("Usual salary requirement", thresholds.standard, occ.standard);
+  return goingRateFor(occ.standard, "Usual salary requirement", thresholds.standard, "standard");
 }
