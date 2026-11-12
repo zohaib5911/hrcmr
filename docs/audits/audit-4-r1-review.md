@@ -40,3 +40,41 @@ Cross-mode holiday review found an additional concrete defect: regular-days mode
 ## Required browser failure and permitted one-line correction
 
 The full browser run found one P0 failure: `shell.spec.ts:66`, light390px, axe `scrollable-region-focusable` incomplete on the employee-view filter wrapper (`web/components/employees/employees-page.tsx:143`, `max-w-full overflow-x-auto`). The scrollable wrapper lacked a keyboard focus stop; all child radios can carry roving negative tab indices during this state. Under audit.md's explicit one-line CI correction exception, added only `tabIndex={0}` to that wrapper; no assertion, rule or skip was changed. Read web/AGENTS.md and the installed Next accessibility guide before the edit. Targeted lint/types/unit and all shell accessibility browser cases will verify it after diagnostics. The initial full-run failure remains reported separately from those post-fix checks.
+
+## Independent diagnostic results
+
+These scratch acceptance probes are separate from the required suites. They intentionally asserted the missing correct behavior and reproduced defects; their failures are evidence for the listed fix tasks, not a claim that the existing suites caught them. Temporary test files were removed after execution; assertions/rules in the committed tests were unchanged.
+
+Five public-read probes forced `RateLimiter.hit` to deny and requested regions, London detail, changes, sitemap count and sitemap page. All five returned200 instead of429 (5 failed in9.09s), confirming C4.1.1. The same shared module also serves profiles; inspect every read family when restoring the dependency.
+
+A fresh migrated-database fixture probe imported exact first.csv then second.csv on2026-11-10, committing each import. The Stable Ltd profile still returned only its morning A-rated Skilled Worker entry, although its changes contained the later B-rating and added Global Business Mobility route. The bulletin list contained two rows for2026-11-10, with3/0/net3 and2/2/net0 respectively. Restoring exact first.csv on2026-11-11 returned `unchanged`; only2publications remained and current sponsors stayed Stable Ltd, Example Care Limited and New Ltd (state B). This confirms both C4.1.2 and C4.1.4 without altering fixture bytes. The probe exited0 after reporting observations; its database was removed.
+
+Thirteen calculator acceptance probes failed on the exact observed differences below (one scratch file,13 failed,569ms). Cases call the real pure modules, not mocks.
+
+| Case | Observed | Required / source basis |
+| --- | --- | --- |
+| England D0, annual30000 | tax6000 |12000; D0 higher rate |
+| Scotland SBR, annual30000 | tax5700 |6000; BR basic rate |
+| Scotland SD1, annual30000 | tax14400 |12600; SD1 higher rate |
+| 0T, annual30000 | tax5998.20 |6000; no allowance |
+| Health/Care nurse2231, large sponsor,24months | ISC0 |2640; no blanket health-care exemption |
+| ILR3214, usual branch | numeric41700 | review; standard going rate absent |
+| SSP7qualifying days,2sick days |35.21 |35.22 in HMRC payment table |
+| Notice Jan31→Feb28 | less than1month | calendar-month completion |
+| Risk draft with null organisation/null hazard | accepted object | reject/recover safely |
+| Reporting event2018-12-24 | deadline2019-01-08 | refuse: holidays start2019 |
+| CoS12months, ordinary Skilled Worker | IHS1035 | estimated visa includes14days;1552.50 at next half-year block |
+| Table3 midwifery nurse2231 | explicitly ineligible | supported calculation or needs-review state |
+|45weekly hours over6equal days |252hours leave |210hours under28day cap; current API lacks the working-days input |
+
+The6-day SSP examples conflict across two GOV.UK pages: the manual guide rounds a daily amount in its prose example, whereas the employer rates page provides the exact partial-week payment table. C4.1.12 specifies the dated payment table (e.g.4days82.17) as the calculator evidence and requires documenting that rounding basis; do not claim the two publications agree.
+
+Latest dev CI queried after the required browser run:43302217904 atfa331d0 passed; the earlierb660e57 run was cancelled and43298198217 atfea9f9d passed. No CI waiting was performed.
+
+## Final verification and result
+
+The required full browser run ended485passed /1failed /328expected screenshot-only skips in17.1minutes. The one failure was the employee filter scroller described above. One-line fix commit:c221577. After that fix, lint/typecheck pass; employee-list unit6passed; rebuilding through the production browser runner and running all shell accessibility cases gave9passed (8theme/width cases plus setup) in37.5seconds. The complete suite was not rerun, per the audit's once-only rule; the original failure is not rewritten as a full-suite pass.
+
+SSP conflict decision is recorded through the agent bus (C4.1.12, dev decision commit5f0473f). Final read-only CI query still lists43302217904 atfa331d0 as successful, with the priorb660e57 cancelled andfea9f9d successful. Did not wait for CI. Generated data-model freshness is covered by the passing full API test; generated API types passed the explicit web check.
+
+Result: FIX NEEDED. Open findings1P0 /19P1 /1P2,21total, each with independent fix/verification steps in changesneeded.md. A further P0 required-browser finding was resolved by the documented one-line exception. AUDIT-4 stays unticked. The fix dependency graph contains21unique reachable tasks with no missing dependencies or cycles; every task follows C4.1.1 directly or transitively. No new owner decision/credential is needed for this audit. Existing human template/legal review and parked Stripe credentials remain unchanged.

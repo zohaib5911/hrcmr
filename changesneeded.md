@@ -1,5 +1,6 @@
 # changesneeded.md — audit AUDIT-4 round 1 (2026-11-13, gpt-6.1-sol)
-Scope: audit-pass-3..b660e57 plus T18.1–T20.5 implementations previously excluded from AUDIT-3. Tests at audit: ordered verification in progress (not a completed audit).
+Scope: 349789f..c221577, limited to T18.1–P20 plus the permitted one-line browser fix; audit-pass-3 already contained phase implementations excluded from AUDIT-3. Tests at audit: api 1363/0/0, web unit 1309/0, e2e 485/1/328 before the fix; post-fix employee unit 6/0 and shell e2e 9/0. RLS/lint/types/schema/build passed. Latest listed dev CI green (43302217904).
+Open findings: 1 P0 / 19 P1 / 1 P2 — FIX NEEDED. One further P0 browser failure was corrected during this audit under the one-line exception; AUDIT-4 remains open.
 
 ### [ ] C4.1.1 · P0 · Restore rate limiting on every public register read (from T20.4)
 - **Problem:** `api/app/modules/register/public.py:44` lost the router dependency from c955b58. Only `/explore` calls `_limit`; region, bulletin, profile and sitemap queries are publicly unbounded. No middleware provides a replacement.
@@ -107,6 +108,9 @@ Scope: audit-pass-3..b660e57 plus T18.1–T20.5 implementations previously exclu
 - **Done when:** unit tests cover null/wrong-type fields and invalid hazard entries/status, plus a component restoration test; valid drafts and blocked/full storage cases still pass.
 
 ## Notes (no action needed)
-- Audit verification and scratch reproductions are still running; this checkpoint is not a completed result.
+- The full browser failure was `shell.spec.ts:66`, light390px, employee-view scroller focusability. Audit.md permits a one-line correction: `tabIndex={0}` at `web/components/employees/employees-page.tsx:143` (c221577). All8shell accessibility cases plus setup passed after rebuilding; the initial full-run failure is retained in the counts above. No test assertion, axe rule or skip was weakened.
+- Independent scratch diagnostics reproduced13calculator failures and5missing-limiter failures, plus real same-day-profile/bulletin and exact A→B→A import defects. These probes were removed after execution. Full evidence and source links: `docs/audits/audit-4-r1-review.md`.
+- Task dependencies make C4.1.1 the first repair and order overlapping files. The new fix tasks are not claimed by this audit.
+- SSP source discrepancy/rounding choice is recorded on the bus as decision C4.1.12; use the dated HMRC payment tables, not rounded prose arithmetic.
 - The owner already scheduled true ONS map geometry/keyboard interaction in T25.2; do not duplicate that work here.
 - Templates remain unpublished pending human review, legal documents remain drafts, and parked Stripe credentials remain in leftover.md.
