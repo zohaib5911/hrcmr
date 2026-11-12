@@ -50,4 +50,18 @@ describe("public holiday entitlement calculator", () => {
     await user.click(screen.getByRole("button", { name: "Calculate holiday" }));
     expect(screen.getByRole("alert")).toHaveTextContent("different lengths");
   });
+
+  it("shows the complete frame and fills the form from a preset", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Quick answer" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "How it works" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Are bank holidays included?" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "More tools" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Part time, 3 days a week" }));
+    expect(screen.getByLabelText("Days worked per week")).toHaveValue(3);
+    await user.click(screen.getByRole("button", { name: "Calculate holiday" }));
+    expect(screen.getByRole("region", { name: "Holiday result" })).toHaveTextContent("16.8 days");
+  });
 });

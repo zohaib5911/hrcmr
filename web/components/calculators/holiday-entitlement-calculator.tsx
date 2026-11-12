@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { PresetChips } from "@/components/calculators/preset-chips";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
@@ -11,6 +12,7 @@ import {
   type HolidayMode,
   type HolidayResult,
 } from "@/lib/calculators/holiday-entitlement-calculator";
+import type { CalculatorPreset } from "@/lib/calculators/frame";
 
 type Form = {
   mode: HolidayMode;
@@ -44,6 +46,30 @@ function errorFor(form: Form): string {
   }
   return "Check your answers: fill every field, days per week must be 1–7 and dates must be in order.";
 }
+
+/** Example scenarios: they only fill in the form; the user still calculates. */
+export const holidayPresets: readonly CalculatorPreset<Partial<Form>>[] = [
+  {
+    id: "full-time",
+    label: "Full time, 5 days a week",
+    values: { mode: "days", daysPerWeek: "5" },
+  },
+  {
+    id: "part-time",
+    label: "Part time, 3 days a week",
+    values: { mode: "days", daysPerWeek: "3" },
+  },
+  {
+    id: "hours",
+    label: "22.5 hours a week",
+    values: { mode: "hours", hoursPerWeek: "22.5", daysPerWeek: "3" },
+  },
+  {
+    id: "irregular",
+    label: "Irregular hours, 120 hours worked",
+    values: { mode: "irregular", hoursWorked: "120" },
+  },
+];
 
 function toInput(form: Form): HolidayInput {
   switch (form.mode) {
@@ -101,7 +127,17 @@ export function HolidayEntitlementCalculator() {
           setError(calculated ? null : errorFor(form));
         }}
       >
-        <h2 className="text-title-2 text-label">Your worker</h2>
+        <PresetChips
+          presets={holidayPresets}
+          onSelect={(preset) => {
+            setForm({ ...initial, ...preset.values });
+            setResult(null);
+            setError(null);
+          }}
+        />
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">1.</span> Your worker
+        </h2>
         <Select
           label="How do they work?"
           value={form.mode}
