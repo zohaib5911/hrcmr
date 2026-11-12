@@ -85,6 +85,7 @@ IDENTITY_TABLES = [
     "register_changes",
     "register_entries",
     "register_possible_matches",
+    "register_problem_reports",
     "register_publications",
     "register_sponsors",
     "reminders",

@@ -4660,6 +4660,142 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/register/changes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Bulletins */
+        get: operations["public_register_list_bulletins"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/register/changes/{on}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bulletin */
+        get: operations["public_register_bulletin"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/register/regions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Regions */
+        get: operations["public_register_list_regions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/register/regions/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Region */
+        get: operations["public_register_region"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/register/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Report Problem */
+        post: operations["public_register_report_problem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/register/sitemap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sitemap Count */
+        get: operations["public_register_sitemap_count"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/register/sitemap/{page}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Sitemap Page */
+        get: operations["public_register_sitemap_page"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/public/register/sponsors/{stable_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Profile */
+        get: operations["public_register_profile"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/soc/salary-check": {
         parameters: {
             query?: never;
@@ -6799,6 +6935,70 @@ export interface components {
             job_description: string;
             /** Soc Code */
             soc_code: string;
+        };
+        /** BulletinListOut */
+        BulletinListOut: {
+            /** Bulletins */
+            bulletins: components["schemas"]["BulletinSummary"][];
+        };
+        /** BulletinOut */
+        BulletinOut: {
+            /** Added */
+            added: number;
+            /** Added List */
+            added_list: components["schemas"]["BulletinSponsor"][];
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Median Added Last 28 */
+            median_added_last_28: number | null;
+            /** Net */
+            net: number;
+            /** Possibly Same */
+            possibly_same: string[];
+            /** Regions */
+            regions: components["schemas"]["RegionTown"][];
+            /** Removed */
+            removed: number;
+            /** Removed List */
+            removed_list: components["schemas"]["BulletinSponsor"][];
+            /** Returned */
+            returned: number;
+            /** Returned List */
+            returned_list: components["schemas"]["BulletinSponsor"][];
+            /** Truncated */
+            truncated: boolean;
+        };
+        /** BulletinSponsor */
+        BulletinSponsor: {
+            /** Name */
+            name: string;
+            /** Region */
+            region: string | null;
+            /** Slug */
+            slug: string;
+            /** Stable Id */
+            stable_id: string;
+            /** Town */
+            town: string;
+        };
+        /** BulletinSummary */
+        BulletinSummary: {
+            /** Added */
+            added: number;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Net */
+            net: number;
+            /** Removed */
+            removed: number;
+            /** Returned */
+            returned: number;
         };
         /** CalendarEntry */
         CalendarEntry: {
@@ -11323,6 +11523,60 @@ export interface components {
             /** Total Experience Years */
             total_experience_years?: string | null;
         };
+        /** ProfileChange */
+        ProfileChange: {
+            /** Change */
+            change: string;
+            /**
+             * Date
+             * Format: date
+             */
+            date: string;
+            /** Detail */
+            detail: {
+                [key: string]: unknown;
+            };
+        };
+        /** ProfileEntry */
+        ProfileEntry: {
+            /** Route */
+            route: string;
+            /** Type Rating */
+            type_rating: string;
+        };
+        /** ProfileOut */
+        ProfileOut: {
+            /** Changes */
+            changes: components["schemas"]["ProfileChange"][];
+            /** County */
+            county: string;
+            /** Current */
+            current: boolean;
+            /** Entries */
+            entries: components["schemas"]["ProfileEntry"][];
+            /**
+             * First Seen On
+             * Format: date
+             */
+            first_seen_on: string;
+            /**
+             * Last Seen On
+             * Format: date
+             */
+            last_seen_on: string;
+            /** Name */
+            name: string;
+            /** Region */
+            region: string | null;
+            /** Region Slug */
+            region_slug: string | null;
+            /** Slug */
+            slug: string;
+            /** Stable Id */
+            stable_id: string;
+            /** Town */
+            town: string;
+        };
         /** ProgressIn */
         ProgressIn: {
             /** Section */
@@ -11599,6 +11853,55 @@ export interface components {
             stripe_refund_id: string;
             subscription: components["schemas"]["SubscriptionRow"];
         };
+        /** RegionChange */
+        RegionChange: {
+            /** Change */
+            change: string;
+            /** Name */
+            name: string;
+            /** Stable Id */
+            stable_id: string;
+            /** Town */
+            town: string;
+        };
+        /** RegionListOut */
+        RegionListOut: {
+            /** Regions */
+            regions: components["schemas"]["RegionSummary"][];
+        };
+        /** RegionOut */
+        RegionOut: {
+            /** Last Published */
+            last_published: string | null;
+            /** Latest Changes */
+            latest_changes: components["schemas"]["RegionChange"][];
+            /** Region */
+            region: string;
+            /** Routes */
+            routes: components["schemas"]["RegionTown"][];
+            /** Slug */
+            slug: string;
+            /** Sponsors */
+            sponsors: number;
+            /** Towns */
+            towns: components["schemas"]["RegionTown"][];
+        };
+        /** RegionSummary */
+        RegionSummary: {
+            /** Region */
+            region: string;
+            /** Slug */
+            slug: string;
+            /** Sponsors */
+            sponsors: number;
+        };
+        /** RegionTown */
+        RegionTown: {
+            /** Count */
+            count: number;
+            /** Town */
+            town: string;
+        };
         /** ReminderMessageIn */
         ReminderMessageIn: {
             /** Message */
@@ -11729,6 +12032,17 @@ export interface components {
              */
             renewal_date: string;
         };
+        /** ReportIn */
+        ReportIn: {
+            /** Email */
+            email?: string | null;
+            /** Message */
+            message: string;
+            /** Sponsor Id */
+            sponsor_id?: string | null;
+            /** Turnstile Token */
+            turnstile_token: string;
+        };
         /** ReportJobOut */
         ReportJobOut: {
             /**
@@ -11759,6 +12073,11 @@ export interface components {
             status: "queued" | "ready" | "failed";
             /** Url */
             url?: string | null;
+        };
+        /** ReportOut */
+        ReportOut: {
+            /** Received */
+            received: boolean;
         };
         /** ReportPageOut */
         ReportPageOut: {
@@ -12265,6 +12584,28 @@ export interface components {
             password: string;
             /** Turnstile Token */
             turnstile_token?: string | null;
+        };
+        /** SitemapCountOut */
+        SitemapCountOut: {
+            /** Pages */
+            pages: number;
+        };
+        /** SitemapItem */
+        SitemapItem: {
+            /**
+             * Last Seen On
+             * Format: date
+             */
+            last_seen_on: string;
+            /** Slug */
+            slug: string;
+            /** Stable Id */
+            stable_id: string;
+        };
+        /** SitemapOut */
+        SitemapOut: {
+            /** Items */
+            items: components["schemas"]["SitemapItem"][];
         };
         /**
          * SocApplicantIn
@@ -27385,6 +27726,324 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApplyOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_register_list_bulletins: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulletinListOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_register_bulletin: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                on: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulletinOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_register_list_regions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegionListOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_register_region: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegionOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_register_report_problem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReportIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ReportOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_register_sitemap_count: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SitemapCountOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_register_sitemap_page: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                page: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SitemapOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_register_profile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                stable_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

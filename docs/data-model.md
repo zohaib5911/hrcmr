@@ -1626,6 +1626,17 @@ Checks:
 | `reason` | VARCHAR(300) | no |  |  |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 
+## `register_problem_reports`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `sponsor_stable_id` | VARCHAR(32) | yes |  |  |
+| `email` | VARCHAR(254) | yes |  |  |
+| `message` | VARCHAR(2000) | no |  |  |
+| `ip_hash` | VARCHAR(64) | yes |  |  |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
 ## `register_publications`
 
 | Column | Type | Null | Default | Notes |

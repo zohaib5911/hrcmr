@@ -71,3 +71,14 @@ class PossibleMatch(Base, UUIDPrimaryKeyMixin):
     removed_sponsor_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("register_sponsors.id"))
     similarity: Mapped[float]
     reason: Mapped[str] = mapped_column(String(300))
+
+
+class ProblemReport(Base, UUIDPrimaryKeyMixin):
+    """A visitor's "report a problem with an entry" (T20.4). Written by the public form only."""
+
+    __tablename__ = "register_problem_reports"
+    sponsor_stable_id: Mapped[str | None] = mapped_column(String(32), index=True)
+    email: Mapped[str | None] = mapped_column(String(254))
+    message: Mapped[str] = mapped_column(String(2000))
+    ip_hash: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

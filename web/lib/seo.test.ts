@@ -49,9 +49,18 @@ describe("public search metadata", () => {
           "/marketing/",
           "/opengraph-image",
           "/sitemap.xml$",
+          "/sponsors/regions/",
+          "/sponsors/changes",
+          "/sponsors/profile/",
+          "/sponsors/methodology$",
+          "/sponsors/terms$",
+          "/sponsors/sitemap",
         ],
       },
-      sitemap: "https://www.example.test/sitemap.xml",
+      sitemap: [
+        "https://www.example.test/sitemap.xml",
+        "https://www.example.test/sponsors/sitemap.xml",
+      ],
     });
   });
   it("builds ordered breadcrumbs without linking unpublished folder routes", () => {
