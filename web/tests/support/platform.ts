@@ -40,8 +40,11 @@ export async function signInPlatformAdmin(
   expect(made.status(), await made.text()).toBe(200);
 
   // Sign in again: the session from sign-up has not passed two-step verification.
+  // Each test represents a separate visitor. As with sign-up, use the test API's trusted proxy
+  // header so parallel admin tests do not share the five-logins-per-minute IP allowance.
+  const visitor = `10.${Math.floor(Math.random() * 256)}.${Math.floor(Math.random() * 256)}.${1 + Math.floor(Math.random() * 254)}`;
   const login = await page.request.post(`${API}/auth/login`, {
-    headers: await csrfHeaders(page.request),
+    headers: { ...(await csrfHeaders(page.request)), "X-Real-IP": visitor },
     data: { email: account.email, password: account.password },
   });
   expect(login.status(), await login.text()).toBe(200);
