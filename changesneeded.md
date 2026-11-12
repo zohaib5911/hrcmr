@@ -7,7 +7,7 @@ Open findings: 1 P0 / 19 P1 / 1 P2 — FIX NEEDED. One further P0 browser failur
 - **Fix:** restore a shared dependency using `RateLimiter`, `client_ip` and the existing error envelope, as c955b58 did. Retain the report-specific write limit/Turnstile and explorer's own limit. Add denial/boundary tests for all read route families in `api/tests/db/test_register_public.py` so a future route merge cannot remove protection unnoticed.
 - **Done when:** anonymous reads receive 429 after the connection budget; another connection remains allowed; report protection still passes. Run the affected API register tests, Ruff and mypy.
 
-### [ ] C4.1.2 · P1 · Import an exact earlier register file when it becomes current again (from T20.1)
+### [x] C4.1.2 · P1 · Import an exact earlier register file when it becomes current again (from T20.1) — fixed in PR #92
 - **Problem:** `api/app/modules/register/ingest.py:109` treats a hash found anywhere in history as unchanged, and `Publication.sha256` is unique. Exact fixtures A→B→A leave the register at B. The existing return test adds a newline to A, hiding this case.
 - **Fix:** skip only when the downloaded hash matches the latest committed snapshot. Allow an earlier hash in a new publication, with a migration removing the global hash uniqueness (retain an ordinary lookup index). Preserve the writer lock and atomic rollback. Extend `api/tests/db/test_register_ingest.py` with byte-identical A→B→A and then A again, without modifying fixture bytes.
 - **Done when:** first three imports create three snapshots with A current and expected returned/removed changes; the fourth creates none. Existing idempotency and rollback tests pass.
