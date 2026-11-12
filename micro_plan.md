@@ -435,7 +435,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T18.4 · S · Comparison page templates (unpublished)
 - **Spec:** plan L1216. Templates only, unpublished by default; no competitor prices typed in.
 
-### [ ] P18 · S · Phase 18 gate
+### [x] P18 · S · Phase 18 gate
 - Recipe R7 + Lighthouse on marketing pages.
 
 ---
