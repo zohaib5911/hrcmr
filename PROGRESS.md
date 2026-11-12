@@ -425,6 +425,7 @@ Written at each phase gate, with screenshots in `docs/screenshots/<phase>/`.
 - AUDIT-3 round 1: 0/10/6 (P0/P1/P2) — FIX NEEDED. Admin screens missing (API only), 10-year platform refund leaves the plan on, session start sees the server IP. api 1319, web unit 802, e2e 437 pass.
 - AUDIT-3 round 2: 1/4/1 (P0/P1/P2) — FIX NEEDED. API suite stalled at 42% and was interrupted (no final counts); ruff/format/mypy and RLS CLI passed. Web unit 1255 passed, e2e 473 passed / 220 skipped, lint/types/gen/build passed. See changesneeded.md for six fix tasks.
 - AUDIT-3 round 3: 0/2/0 (P0/P1/P2) — FIX NEEDED. API 1359 passed; RLS CLI passed; web unit 1286 passed; e2e 483 passed / 220 expected skips; lint/types/schema/build passed. Confirmed delayed contact PATCH corrupts the active page and sixteen page-entry cases are outside Vitest discovery. L2 screenshots are already complete; see changesneeded.md and docs/audits/audit-3-r3-review.md.
+- AUDIT-3 round 4: 0/0/1 (P0/P1/P2) — PASS. C3.3.1/C3.3.2 verified; API 1363, web unit 1309, e2e 485 passed / 220 expected skips; RLS/lint/types/schema/build passed. Remaining P2: persist the verified contact total/pager boundary assertions.
 
 ### Phase 18 — Public marketing site
 - [ ] **T18.1** Home, Features, Pricing, Security, About, Contact, Accessibility, Careers, Sponsor compliance
