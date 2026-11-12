@@ -307,7 +307,10 @@ def test_no_real_endpoint_skips_authorisation() -> None:
     unprotected = [
         f"{sorted(methods)} {path}"
         for path, methods, dep in routes
-        if not path.startswith(allowed_prefixes) and not permissions(dep)
+        if not path.startswith(allowed_prefixes)
+        # Public, aggregate register data only (see test_register_explore).
+        and not (path == "/api/v1/public/register/explore" and methods == {"GET"})
+        and not permissions(dep)
     ]
     assert unprotected == []
 
