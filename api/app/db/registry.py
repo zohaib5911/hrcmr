@@ -35,6 +35,7 @@ import app.modules.organogram.models
 import app.modules.pay.models
 import app.modules.policies.models
 import app.modules.recruitment.models
+import app.modules.register.models
 import app.modules.reports.models
 import app.modules.rota.models
 import app.modules.rota.week_models
