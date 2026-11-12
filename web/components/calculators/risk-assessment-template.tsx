@@ -79,8 +79,38 @@ export function RiskAssessmentTemplate() {
 
   return (
     <form noValidate className="space-y-8" onSubmit={(e) => e.preventDefault()}>
+      <section aria-label="Example scenario" className="space-y-3">
+        <p className="text-callout text-label-secondary">
+          Example only: adapt every control to your workplace. Loading this replaces and saves the
+          current browser draft.
+        </p>
+        <Button
+          type="button"
+          variant="gray"
+          onClick={() =>
+            change({
+              ...emptyAssessment(),
+              organisation: "Example organisation",
+              site: "Office",
+              activity: "Office walkways",
+              hazards: [
+                {
+                  ...emptyHazard(),
+                  hazard: "Trailing cables",
+                  who: "Staff and visitors",
+                  controls: "Route cables away from walkways",
+                  furtherAction: "Inspect cable routes and secure loose cables",
+                  owner: "Site lead",
+                },
+              ],
+            })
+          }
+        >
+          Office walkway example
+        </Button>
+      </section>
       <section className="grid gap-5 sm:grid-cols-2">
-        <h2 className="text-title-2 text-label sm:col-span-2">Assessment details</h2>
+        <h2 className="text-title-2 text-label sm:col-span-2">1. Assessment details</h2>
         {text("Organisation", "organisation")}
         {text("Site", "site")}
         <Select
@@ -117,7 +147,7 @@ export function RiskAssessmentTemplate() {
         />
       </section>
       <section className="space-y-6">
-        <h2 className="text-title-2 text-label">Hazards</h2>
+        <h2 className="text-title-2 text-label">2. Hazards</h2>
         {form.hazards.map((h, i) => (
           <fieldset
             key={i}
@@ -190,6 +220,39 @@ export function RiskAssessmentTemplate() {
         >
           Add hazard
         </Button>
+      </section>
+      <section
+        aria-label="Assessment preview"
+        aria-live="polite"
+        className="bg-elevated rounded-control space-y-3 p-5"
+      >
+        <h2 className="text-title-2 text-label">3. Preview and export</h2>
+        <p className="text-callout text-label">
+          {form.organisation || "Organisation not entered"} · {form.site || "Site not entered"}
+        </p>
+        <p className="text-callout text-label">
+          {form.activity || "Describe the activity to begin your draft."}
+        </p>
+        <ul className="text-callout text-label space-y-3">
+          {form.hazards.map((hazard, index) => (
+            <li key={index}>
+              <strong>{hazard.hazard || `Hazard ${index + 1} not entered`}</strong>
+              <p>
+                Who: {hazard.who || "Not entered"}. Controls: {hazard.controls || "Not entered"}.
+              </p>
+              <p>
+                Action: {hazard.furtherAction || "Not entered"}. Owner:{" "}
+                {hazard.owner || "Not entered"}. Due: {hazard.due || "Not entered"}. Status:{" "}
+                {hazard.status}.
+              </p>
+            </li>
+          ))}
+        </ul>
+        <p className="text-footnote text-label-secondary">
+          {validateAssessment(form).length
+            ? "Draft incomplete: finish the required details and acknowledgement before export."
+            : "Ready to export. Review the assessment against your workplace before using it."}
+        </p>
       </section>
       <Checkbox
         label="I confirm this assessment reflects the work as done and will be reviewed."

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { PresetChips } from "@/components/calculators/preset-chips";
+import type { CalculatorPreset } from "@/lib/calculators/frame";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
@@ -21,15 +23,44 @@ const initial = {
 };
 const gbp = (amount: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(amount);
+const presets: readonly CalculatorPreset<Partial<typeof initial>>[] = [
+  {
+    id: "standard",
+    label: "\u00a335,000 employee aged 30",
+    values: { salary: "35000", age: "30" },
+  },
+  { id: "young", label: "\u00a325,000 employee aged 20", values: { salary: "25000", age: "20" } },
+];
+
 export function EmployerCostCalculator() {
   const [form, setForm] = useState(initial);
-  const [result, setResult] = useState<ReturnType<typeof calculateEmployerCost> | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [attempted, setAttempted] = useState(false);
   function update(key: keyof typeof initial, value: string) {
     setForm((previous) => ({ ...previous, [key]: value }));
-    setResult(null);
-    setError(null);
+    setAttempted(false);
   }
+  const { result, error: liveError } = (() => {
+    let result: ReturnType<typeof calculateEmployerCost> | null = null;
+    let error: string | null = null;
+
+    result = null;
+    try {
+      if ([form.salary, form.age, form.pensionRate].some((value) => value.trim() === ""))
+        throw new Error("Enter salary, age and pension percentage.");
+      result = calculateEmployerCost({
+        ...form,
+        salary: Number(form.salary),
+        age: Number(form.age),
+        pensionRate: Number(form.pensionRate),
+      } as EmployerCostInput);
+      error = null;
+    } catch (cause) {
+      error = cause instanceof Error ? cause.message : "Check your answers.";
+    }
+    return { result, error };
+  })();
+  const error = attempted || JSON.stringify(form) !== JSON.stringify(initial) ? liveError : null;
+
   return (
     <div className="grid items-start gap-8 lg:grid-cols-2">
       <form
@@ -37,25 +68,17 @@ export function EmployerCostCalculator() {
         className="space-y-5"
         onSubmit={(event) => {
           event.preventDefault();
-          setResult(null);
-          try {
-            if ([form.salary, form.age, form.pensionRate].some((value) => value.trim() === ""))
-              throw new Error("Enter salary, age and pension percentage.");
-            setResult(
-              calculateEmployerCost({
-                ...form,
-                salary: Number(form.salary),
-                age: Number(form.age),
-                pensionRate: Number(form.pensionRate),
-              } as EmployerCostInput),
-            );
-            setError(null);
-          } catch (cause) {
-            setError(cause instanceof Error ? cause.message : "Check your answers.");
-          }
+          setAttempted(true);
         }}
       >
-        <h2 className="text-title-2 text-label">Employee details</h2>
+        <PresetChips
+          presets={presets}
+          onSelect={(preset) => {
+            setForm({ ...initial, ...preset.values });
+            setAttempted(false);
+          }}
+        />
+        <h2 className="text-title-2 text-label">1. Employee details</h2>
         <Select
           label="Tax year"
           value={form.taxYear}
@@ -120,8 +143,7 @@ export function EmployerCostCalculator() {
             variant="gray"
             onClick={() => {
               setForm(initial);
-              setResult(null);
-              setError(null);
+              setAttempted(false);
             }}
           >
             Reset answers
@@ -139,6 +161,7 @@ export function EmployerCostCalculator() {
         aria-atomic="true"
         className="bg-elevated rounded-control p-5 sm:p-6"
       >
+        <h2 className="text-headline text-label mb-3">2. Live result</h2>
         {result ? (
           <>
             <h2 className="text-title-2 text-label">Estimated annual employer cost</h2>

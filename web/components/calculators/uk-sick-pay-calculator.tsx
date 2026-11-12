@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { PresetChips } from "@/components/calculators/preset-chips";
+import type { CalculatorPreset } from "@/lib/calculators/frame";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
@@ -17,15 +19,50 @@ const initial = {
 };
 const gbp = (amount: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(amount);
+const presets: readonly CalculatorPreset<Partial<typeof initial>>[] = [
+  {
+    id: "week",
+    label: "One week, \u00a3500 weekly earnings",
+    values: { startDate: "2026-11-09", endDate: "2026-11-15", weeklyEarnings: "500" },
+  },
+  {
+    id: "low-pay",
+    label: "One week, \u00a3100 weekly earnings",
+    values: { startDate: "2026-11-09", endDate: "2026-11-15", weeklyEarnings: "100" },
+  },
+];
+
 export function SickPayCalculator() {
   const [form, setForm] = useState(initial);
-  const [result, setResult] = useState<ReturnType<typeof calculateSickPay> | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [attempted, setAttempted] = useState(false);
   function update<K extends keyof typeof initial>(key: K, value: (typeof initial)[K]) {
     setForm((previous) => ({ ...previous, [key]: value }));
-    setResult(null);
-    setError(null);
+    setAttempted(false);
   }
+  const { result, error: liveError } = (() => {
+    let result: ReturnType<typeof calculateSickPay> | null = null;
+    let error: string | null = null;
+
+    result = null;
+    try {
+      if ([form.startDate, form.endDate, form.weeklyEarnings].some((v) => v.trim() === ""))
+        throw new Error("Enter the start date, end date and average weekly earnings.");
+      result = calculateSickPay({
+        employeeStatus: form.employeeStatus,
+        startDate: form.startDate,
+        endDate: form.endDate,
+        qualifyingDays: form.days,
+        weeklyEarnings: Number(form.weeklyEarnings),
+        workedPartOfFirstDay: form.workedPartOfFirstDay,
+      } as SickPayInput);
+      error = null;
+    } catch (cause) {
+      error = cause instanceof Error ? cause.message : "Check your answers.";
+    }
+    return { result, error };
+  })();
+  const error = attempted || JSON.stringify(form) !== JSON.stringify(initial) ? liveError : null;
+
   return (
     <div className="grid items-start gap-8 lg:grid-cols-2">
       <form
@@ -33,27 +70,17 @@ export function SickPayCalculator() {
         className="space-y-5"
         onSubmit={(event) => {
           event.preventDefault();
-          setResult(null);
-          try {
-            if ([form.startDate, form.endDate, form.weeklyEarnings].some((v) => v.trim() === ""))
-              throw new Error("Enter the start date, end date and average weekly earnings.");
-            setResult(
-              calculateSickPay({
-                employeeStatus: form.employeeStatus,
-                startDate: form.startDate,
-                endDate: form.endDate,
-                qualifyingDays: form.days,
-                weeklyEarnings: Number(form.weeklyEarnings),
-                workedPartOfFirstDay: form.workedPartOfFirstDay,
-              } as SickPayInput),
-            );
-            setError(null);
-          } catch (cause) {
-            setError(cause instanceof Error ? cause.message : "Check your answers.");
-          }
+          setAttempted(true);
         }}
       >
-        <h2 className="text-title-2 text-label">Absence details</h2>
+        <PresetChips
+          presets={presets}
+          onSelect={(preset) => {
+            setForm({ ...initial, ...preset.values });
+            setAttempted(false);
+          }}
+        />
+        <h2 className="text-title-2 text-label">1. Absence details</h2>
         <Select
           label="Worker status"
           value={form.employeeStatus}
@@ -125,8 +152,7 @@ export function SickPayCalculator() {
             variant="gray"
             onClick={() => {
               setForm(initial);
-              setResult(null);
-              setError(null);
+              setAttempted(false);
             }}
           >
             Reset answers
@@ -144,6 +170,7 @@ export function SickPayCalculator() {
         aria-atomic="true"
         className="bg-elevated rounded-control p-5 sm:p-6"
       >
+        <h2 className="text-headline text-label mb-3">2. Live result</h2>
         {result ? (
           result.eligible ? (
             <>

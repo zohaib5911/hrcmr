@@ -27,9 +27,24 @@ export function UkNoticePayCalculator() {
   const [payMode, setPayMode] = useState<PayMode>("weekly");
   const [amount, setAmount] = useState("");
   const [arrangement, setArrangement] = useState<Arrangement>("work");
-  const [result, setResult] = useState<ReturnType<typeof calculateNotice> | null>(null);
+  const [attempted, setAttempted] = useState(false);
 
-  const reset = () => setResult(null);
+  const reset = () => setAttempted(false);
+
+  const result =
+    (startDate && noticeDate && amount.trim()) || attempted
+      ? calculateNotice({
+          jurisdiction,
+          giver,
+          status,
+          startDate,
+          noticeDate,
+          contractWeeks: contractWeeks.trim() === "" ? null : Number(contractWeeks),
+          payMode,
+          amount: Number(amount),
+          arrangement,
+        })
+      : null;
 
   return (
     <div className="grid items-start gap-8 lg:grid-cols-2">
@@ -37,22 +52,48 @@ export function UkNoticePayCalculator() {
         className="space-y-5"
         onSubmit={(event) => {
           event.preventDefault();
-          setResult(
-            calculateNotice({
-              jurisdiction,
-              giver,
-              status,
-              startDate,
-              noticeDate,
-              contractWeeks: contractWeeks.trim() === "" ? null : Number(contractWeeks),
-              payMode,
-              amount: Number(amount),
-              arrangement,
-            }),
-          );
+          setAttempted(true);
         }}
       >
-        <h2 className="text-title-2 text-label">Your situation</h2>
+        <div className="flex flex-wrap gap-3" aria-label="Example scenarios">
+          <Button
+            type="button"
+            variant="gray"
+            onClick={() => {
+              setJurisdiction("gb");
+              setGiver("employer");
+              setStatus("employee");
+              setStartDate("2020-06-01");
+              setNoticeDate("2026-11-12");
+              setContractWeeks("");
+              setPayMode("weekly");
+              setAmount("500");
+              setArrangement("work");
+              reset();
+            }}
+          >
+            Employer notice, 6 years of service
+          </Button>
+          <Button
+            type="button"
+            variant="gray"
+            onClick={() => {
+              setJurisdiction("gb");
+              setGiver("employee");
+              setStatus("employee");
+              setStartDate("2020-06-01");
+              setNoticeDate("2026-11-12");
+              setContractWeeks("4");
+              setPayMode("weekly");
+              setAmount("500");
+              setArrangement("work");
+              reset();
+            }}
+          >
+            Resignation, 4-week contract notice
+          </Button>
+        </div>
+        <h2 className="text-title-2 text-label">1. Your situation</h2>
         <Select
           label="Where do you work?"
           value={jurisdiction}
@@ -153,7 +194,27 @@ export function UkNoticePayCalculator() {
           <option value="garden-leave">Garden leave</option>
           <option value="pilon">Payment in lieu of notice (PILON)</option>
         </Select>
-        <Button type="submit">Work out notice pay</Button>
+        <div className="flex flex-wrap gap-3">
+          <Button type="submit">Work out notice pay</Button>
+          <Button
+            type="button"
+            variant="gray"
+            onClick={() => {
+              setJurisdiction("gb");
+              setGiver("employer");
+              setStatus("employee");
+              setStartDate("");
+              setNoticeDate("");
+              setContractWeeks("");
+              setPayMode("weekly");
+              setAmount("");
+              setArrangement("work");
+              reset();
+            }}
+          >
+            Reset answers
+          </Button>
+        </div>
       </form>
       <section
         aria-label="Notice result"
@@ -161,6 +222,7 @@ export function UkNoticePayCalculator() {
         aria-atomic="true"
         className="bg-elevated rounded-control p-5 sm:p-6"
       >
+        <h2 className="text-headline text-label mb-3">2. Live result</h2>
         <NoticeOutput result={result} />
       </section>
     </div>
@@ -174,7 +236,12 @@ function NoticeOutput({ result }: { result: ReturnType<typeof calculateNotice> |
         Fill in the form, then work out notice pay.
       </p>
     );
-  if (!result.ok) return <p className="text-callout text-label">{result.error}</p>;
+  if (!result.ok)
+    return (
+      <p role="alert" className="text-callout text-label">
+        {result.error}
+      </p>
+    );
   const r: NoticeResult = result;
   return (
     <>

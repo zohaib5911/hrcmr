@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { PresetChips } from "@/components/calculators/preset-chips";
+import type { CalculatorPreset } from "@/lib/calculators/frame";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
@@ -49,14 +51,21 @@ const initial: Form = {
 const money = (value: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(value);
 
+const presets: readonly CalculatorPreset<Partial<Form>>[] = [
+  { id: "standard", label: "\u00a335,000 standard salary", values: { salary: "35000" } },
+  {
+    id: "scottish",
+    label: "\u00a345,000 in Scotland",
+    values: { salary: "45000", region: "scotland" },
+  },
+];
+
 export function UkTakeHomeSalaryCalculator() {
   const [form, setForm] = useState<Form>(initial);
-  const [result, setResult] = useState<TakeHomeResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [attempted, setAttempted] = useState(false);
   function update<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((previous) => ({ ...previous, [key]: value }));
-    setResult(null);
-    setError(null);
+    setAttempted(false);
   }
   const num = (value: string) => (value.trim() === "" ? 0 : Number(value));
   const field = (
@@ -72,37 +81,51 @@ export function UkTakeHomeSalaryCalculator() {
     />
   );
 
+  const { result, error: liveError } = (() => {
+    let result: TakeHomeResult | null = null;
+    let error: string | null = null;
+
+    const calculated = calculateTakeHome({
+      taxYear: form.taxYear,
+      region: form.region,
+      salary: num(form.salary),
+      taxCode: form.taxCode,
+      pensionMethod: form.pensionMethod,
+      pensionPercent: num(form.pensionPercent),
+      studentLoan: form.studentLoan,
+      postgradLoan: form.postgradLoan,
+      niCategory: form.niCategory,
+      otherJobs: form.otherJobs,
+      benefits: num(form.benefits),
+      otherDeductions: num(form.otherDeductions),
+    });
+    result = calculated;
+    error = calculated
+      ? null
+      : form.taxYear === "2025-2026" && form.studentLoan === "plan 5"
+        ? "Plan 5 repayments are not supported for 2025–2026. Choose another loan plan or the 2026–2027 tax year."
+        : "Check your answers: enter a salary above zero, a supported tax code for your region (such as 1257L, BR, D0, SD1 or auto) and percentages from 0 to 100.";
+    return { result, error };
+  })();
+  const error = attempted || JSON.stringify(form) !== JSON.stringify(initial) ? liveError : null;
+
   return (
     <div className="grid items-start gap-8 lg:grid-cols-2">
       <form
         className="space-y-5"
         onSubmit={(event) => {
           event.preventDefault();
-          const calculated = calculateTakeHome({
-            taxYear: form.taxYear,
-            region: form.region,
-            salary: num(form.salary),
-            taxCode: form.taxCode,
-            pensionMethod: form.pensionMethod,
-            pensionPercent: num(form.pensionPercent),
-            studentLoan: form.studentLoan,
-            postgradLoan: form.postgradLoan,
-            niCategory: form.niCategory,
-            otherJobs: form.otherJobs,
-            benefits: num(form.benefits),
-            otherDeductions: num(form.otherDeductions),
-          });
-          setResult(calculated);
-          setError(
-            calculated
-              ? null
-              : form.taxYear === "2025-2026" && form.studentLoan === "plan 5"
-                ? "Plan 5 repayments are not supported for 2025–2026. Choose another loan plan or the 2026–2027 tax year."
-                : "Check your answers: enter a salary above zero, a supported tax code for your region (such as 1257L, BR, D0, SD1 or auto) and percentages from 0 to 100.",
-          );
+          setAttempted(true);
         }}
       >
-        <h2 className="text-title-2 text-label">Your pay</h2>
+        <PresetChips
+          presets={presets}
+          onSelect={(preset) => {
+            setForm({ ...initial, ...preset.values });
+            setAttempted(false);
+          }}
+        />
+        <h2 className="text-title-2 text-label">1. Your pay</h2>
         <Select
           label="Tax year"
           value={form.taxYear}
@@ -188,8 +211,7 @@ export function UkTakeHomeSalaryCalculator() {
             variant="gray"
             onClick={() => {
               setForm(initial);
-              setResult(null);
-              setError(null);
+              setAttempted(false);
             }}
           >
             Reset answers
@@ -207,6 +229,7 @@ export function UkTakeHomeSalaryCalculator() {
         aria-atomic="true"
         className="bg-elevated rounded-control p-5 sm:p-6"
       >
+        <h2 className="text-headline text-label mb-3">2. Live result</h2>
         {result ? (
           <>
             <h2 className="text-title-2 text-label">Your take-home pay</h2>

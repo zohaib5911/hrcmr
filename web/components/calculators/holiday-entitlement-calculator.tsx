@@ -98,12 +98,10 @@ function toInput(form: Form): HolidayInput {
 
 export function HolidayEntitlementCalculator() {
   const [form, setForm] = useState<Form>(initial);
-  const [result, setResult] = useState<HolidayResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [attempted, setAttempted] = useState(false);
   function update<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((previous) => ({ ...previous, [key]: value }));
-    setResult(null);
-    setError(null);
+    setAttempted(false);
   }
   const field = (key: keyof Form, label: string, type: "number" | "date", hint?: string) => (
     <TextField
@@ -116,23 +114,31 @@ export function HolidayEntitlementCalculator() {
     />
   );
 
+  const { result, error: liveError } = (() => {
+    let result: HolidayResult | null = null;
+    let error: string | null = null;
+
+    const calculated = calculateHoliday(toInput(form));
+    result = calculated;
+    error = calculated ? null : errorFor(form);
+    return { result, error };
+  })();
+  const error = attempted || JSON.stringify(form) !== JSON.stringify(initial) ? liveError : null;
+
   return (
     <div className="grid items-start gap-8 lg:grid-cols-2">
       <form
         className="space-y-5"
         onSubmit={(event) => {
           event.preventDefault();
-          const calculated = calculateHoliday(toInput(form));
-          setResult(calculated);
-          setError(calculated ? null : errorFor(form));
+          setAttempted(true);
         }}
       >
         <PresetChips
           presets={holidayPresets}
           onSelect={(preset) => {
             setForm({ ...initial, ...preset.values });
-            setResult(null);
-            setError(null);
+            setAttempted(false);
           }}
         />
         <h2 className="text-title-2 text-label">
@@ -187,8 +193,7 @@ export function HolidayEntitlementCalculator() {
             variant="gray"
             onClick={() => {
               setForm(initial);
-              setResult(null);
-              setError(null);
+              setAttempted(false);
             }}
           >
             Reset answers
@@ -206,6 +211,7 @@ export function HolidayEntitlementCalculator() {
         aria-atomic="true"
         className="bg-elevated rounded-control p-5 sm:p-6"
       >
+        <h2 className="text-headline text-label mb-3">2. Live result</h2>
         {result ? (
           <>
             <h2 className="text-title-2 text-label">Your holiday entitlement</h2>
