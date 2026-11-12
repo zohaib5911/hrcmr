@@ -62,7 +62,7 @@ Open findings: 1 P0 / 19 P1 / 1 P2 — FIX NEEDED. One further P0 browser failur
 - **Fix:** capture the relevant HMRC employer rate/payment tables in dated rates evidence, use Sunday–Saturday SSP weeks and the published partial-week rounding rule, retain the28week cap, and reject uncovered dates instead of extrapolating current rates. Add a first-part-day input or require the first full day explicitly so a worked part-day is not paid. Copy existing validation/error patterns.
 - **Done when:** published7day/2day and6day/4day examples match35.22 and82.17, a midweek cross-Sunday absence has correct weekly rows/totals, full weeks remain capped, unsupported tax years and worked first part-days are handled explicitly. Existing SSP unit/component tests pass.
 
-### [ ] C4.1.13 · P1 · Clamp notice-service month anniversaries at month end (from T19.12)
+### [x] C4.1.13 · P1 · Clamp notice-service month anniversaries at month end (from T19.12) — fixed in PR #95
 - **Problem:** `hasOneMonth` in `web/lib/calculators/uk-notice-pay-calculator.ts:93` lets JavaScript overflow January31+1month into March. An employee starting2026-01-31 and given notice2026-02-28 is incorrectly assigned zero statutory notice. Date parsing also silently normalizes impossible dates.
 - **Fix:** use explicit validated ISO-date parsing and UTC calendar-month addition clamped to month end, following the existing settlement calculator helper pattern. Retain separate employee/employer scales and GB/NI source notes.
 - **Done when:** tests cover January29–31 to February in normal/leap years, a date immediately before completion, ordinary anniversaries and impossible dates; the end-of-month employee receives the statutory minimum, and existing notice tests pass.
