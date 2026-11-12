@@ -86,6 +86,21 @@ async def rerun(
     if failed is None:
         raise NotFoundError("We could not find that failed run.")
     job = failed.summary or ""
+    made = await enqueue_rerun(job, queue)
+    await record(
+        db,
+        context,
+        "platform.job_rerun",
+        entity_type="job",
+        after={"job": job, "failure": str(failure_id), "job_id": made.job_id},
+        reason=reason,
+        summary=f"Re-run {job} after a failure",
+    )
+    return made
+
+
+async def enqueue_rerun(job: str, queue: ArqQueue) -> JobRerunOut:
+    """All admin-triggered runs pass the same no-arguments, no-messages allow-list."""
     if job not in RERUNNABLE:
         raise AppError(
             "NOT_RERUNNABLE",
@@ -95,13 +110,4 @@ async def rerun(
         )
     job_id = f"rerun-{uuid.uuid4().hex}"
     await queue.enqueue(rerun_name(job), job_id=job_id)
-    await record(
-        db,
-        context,
-        "platform.job_rerun",
-        entity_type="job",
-        after={"job": job, "failure": str(failure_id), "job_id": job_id},
-        reason=reason,
-        summary=f"Re-run {job} after a failure",
-    )
     return JobRerunOut(job=job, job_id=job_id)

@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.jobs.register import register_ingest
+from app.jobs.scheduled import functions
 from app.modules.register.ingest import ingest
 from app.modules.register.models import Change, Entry, PossibleMatch, Publication, Sponsor
 from tests.db.support import DatabaseUnderTest, engine_for
@@ -61,6 +62,18 @@ async def test_snapshots_idempotency_diff_return_and_rollback(database: Database
                     }
                 )
                 == "imported"
+            )
+            # Manual worker registration actually imports on a weekend, outside cron hours.
+            manual = next(f for f in functions() if f.name == "rerun_register_ingest")
+            assert (
+                await manual.coroutine(
+                    {
+                        "now": datetime(2026, 11, 14, 2, tzinfo=UTC),
+                        "owner_engine": engine,
+                        "http": client,
+                    }
+                )
+                == "unchanged"
             )
     finally:
         await engine.dispose()

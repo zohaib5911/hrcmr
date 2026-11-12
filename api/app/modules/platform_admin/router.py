@@ -30,6 +30,7 @@ from app.modules.platform_admin import (
     jobs,
     metrics,
     queues,
+    register,
     terms,
     users,
 )
@@ -59,6 +60,7 @@ from app.modules.platform_admin.schemas import (
     ReasonIn,
     RefundIn,
     RefundOut,
+    RegisterStatusOut,
     SubscriptionsOut,
     TermsIn,
     TermsVersionRow,
@@ -494,3 +496,19 @@ async def unlock_user(
     await users.unlock(access.db, access.audit_context, user, body.reason if body else None)
     await access.db.commit()
     return await users.row(access.db, user)
+
+
+@router.get("/platform/register/status", response_model=RegisterStatusOut)
+async def register_status(access: Reader) -> RegisterStatusOut:
+    return await register.status(access.db)
+
+
+@router.post("/platform/register/run", status_code=202, response_model=JobRerunOut)
+async def run_register(body: ReasonIn, request: Request, access: Rerunner) -> JobRerunOut:
+    queue = await open_queue(request.app.state.settings)
+    try:
+        made = await register.run(access.db, access.audit_context, reason=body.reason, queue=queue)
+    finally:
+        await queue.close()
+    await access.db.commit()
+    return made
