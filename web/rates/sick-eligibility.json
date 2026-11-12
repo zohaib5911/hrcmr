@@ -1,0 +1,118 @@
+{
+  "source_url": "https://www.gov.uk/statutory-sick-pay/eligibility",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "Statutory Sick Pay (SSP) : Eligibility - GOV.UK",
+  "content": [
+    {
+      "p": "To qualify for Statutory Sick Pay ( SSP ) you must:"
+    },
+    {
+      "li": "be classed as an employee"
+    },
+    {
+      "li": "have done some work for your employer"
+    },
+    {
+      "li": "have been ill for at least one full working day"
+    },
+    {
+      "p": "Agency workers may be entitled to Statutory Sick Pay ."
+    },
+    {
+      "h2": "Telling your employer"
+    },
+    {
+      "p": "You must usually tell your employer you’re unable to work before the deadline they set (or within 7 days if they have not set one)."
+    },
+    {
+      "p": "You could lose some of your SSP if you do not tell your employer in time."
+    },
+    {
+      "h2": "Exceptions"
+    },
+    {
+      "p": "You will not qualify if you:"
+    },
+    {
+      "li": "have received the maximum amount of SSP (28 weeks)"
+    },
+    {
+      "li": "are getting Statutory Maternity Pay"
+    },
+    {
+      "h3": "Linked periods of sickness"
+    },
+    {
+      "p": "If you have regular periods of sickness, they may count as ‘linked’. To be linked, the periods must:"
+    },
+    {
+      "li": "last more than one full working day"
+    },
+    {
+      "li": "be 8 weeks or less apart"
+    },
+    {
+      "p": "You’re no longer eligible for SSP if you have a continuous series of linked periods that lasts more than 3 years."
+    },
+    {
+      "h2": "Fit notes and asking for proof"
+    },
+    {
+      "p": "You must give your employer a fit note if you’re off work for more than 7 days in a row (including non-working days)."
+    },
+    {
+      "p": "You can get a fit note (sometimes called a sick note) from the following healthcare professionals:"
+    },
+    {
+      "li": "GP or hospital doctor"
+    },
+    {
+      "li": "registered nurse"
+    },
+    {
+      "li": "occupational therapist"
+    },
+    {
+      "li": "pharmacist"
+    },
+    {
+      "li": "physiotherapist"
+    },
+    {
+      "p": "The note can be printed or digital."
+    },
+    {
+      "h3": "Other proof of sickness"
+    },
+    {
+      "p": "If your employer agrees, you can give them another appropriate form of evidence instead of a fit note, such as:"
+    },
+    {
+      "li": "an Allied Health Professional ( AHP ) Health and Work Report from a physiotherapist or occupational therapist, for example"
+    },
+    {
+      "li": "a plan to support a return to work"
+    },
+    {
+      "h2": "If you’re not eligible or your SSP ends"
+    },
+    {
+      "p": "You may be able to apply for Universal Credit or Employment and Support Allowance ( ESA ) . You can use form SSP1 to support your application."
+    },
+    {
+      "p": "If your SSP is ending, your employer must send you form SSP1 either:"
+    },
+    {
+      "li": "within 7 days of your SSP ending, if it ends unexpectedly while you’re still sick"
+    },
+    {
+      "li": "on or before the beginning of the 23rd week, if your SSP is expected to end before your sickness does"
+    },
+    {
+      "p": "If you do not qualify for SSP , your employer must send you form SSP1 within 7 days of your first day off sick."
+    }
+  ]
+}

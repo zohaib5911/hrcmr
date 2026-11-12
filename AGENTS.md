@@ -9,6 +9,7 @@ worktree, your claims and your pushed branch let you pick up exactly where you s
 ## Owner: how to run it
 - Start both agents: `bash .agent/start.sh`. Watch: `bash .agent/start.sh attach`. State: `bash .agent/start.sh status`. Stop: `bash .agent/start.sh stop`.
 - Models: Claude runs `sonnet` (SMALL) and Codex runs its configured model (`gpt-6.1-sol`, BIG). To change: `CLAUDE_MODEL=opus bash .agent/start.sh`.
+- Codex runs inside `.agent/jail.sh`: it can write only to this project (and its caches), and it cannot use Docker, so keep the stack up yourself (`docker compose up -d --wait`).
 - The main folder (`cmr_hr/`) is the **coordinator checkout**: it always stays on `dev` and nobody does task work in it.
   The agents work in `cmr_hr-wt/claude/` and `cmr_hr-wt/codex/`.
 - Typing "Read AGENTS.md and continue" in an interactive session still works: the agent follows the same loop below.

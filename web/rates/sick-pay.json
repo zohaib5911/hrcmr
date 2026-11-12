@@ -1,0 +1,41 @@
+{
+  "source_url": "https://www.gov.uk/statutory-sick-pay/what-youll-get",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "Statutory Sick Pay (SSP) : What you'll get - GOV.UK",
+  "content": [
+    {
+      "p": "If you’re eligible, you can get £123.25 a week Statutory Sick Pay ( SSP ) or 80% of your normal weekly earnings - whichever is lower. It’s paid for up to 28 weeks."
+    },
+    {
+      "p": "You’ll be paid SSP for all the full days you’re off sick that you normally would have worked."
+    },
+    {
+      "p": "Your employer will use your average weekly earnings over an 8-week period to work out much you get. You still qualify if you started your job recently and have not yet received 8 weeks’ pay. Ask your employer to find out more."
+    },
+    {
+      "h2": "How you’re paid"
+    },
+    {
+      "p": "SSP is paid by your employer in the same way as your normal wages, for example weekly or monthly."
+    },
+    {
+      "p": "If you have more than one job, you may get SSP from each employer."
+    },
+    {
+      "p": "Tax and National Insurance will be deducted."
+    },
+    {
+      "p": "If you think you’re not getting the right amount of SSP , talk to your employer. If you’re still not happy, contact the HM Revenue and Customs ( HMRC ) enquiry line ."
+    }
+  ],
+  "values": {
+    "weekly_cap": 123.25,
+    "average_weekly_earnings_rate": 0.8,
+    "maximum_weeks": 28,
+    "earnings_reference_weeks": 8,
+    "part_days_payable": false
+  }
+}

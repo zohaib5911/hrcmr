@@ -1,0 +1,142 @@
+{
+  "source_url": "https://www.gov.uk/holiday-entitlement-rights/calculate-leave-entitlement",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "Holiday entitlement: Calculate leave entitlement - GOV.UK",
+  "content": [
+    {
+      "p": "For regular-hours workers, employers can use a ‘leave year’ or an ‘accrual’ system to work out how much leave their staff should get."
+    },
+    {
+      "p": "For irregular-hours and part-year workers, employers must use a specific accrual system."
+    },
+    {
+      "p": "For leave years beginning on or before 31 March 2024, employers can use either a leave year or an accrual system to work out leave for irregular-hours or part-year workers. You can use the holiday entitlement calculator to estimate their entitlement based on the average days or hours they work each week."
+    },
+    {
+      "h2": "Leave year"
+    },
+    {
+      "p": "An employer should tell their staff the dates of their statutory leave year as soon as they start working, for example, it might run from 1 January to 31 December."
+    },
+    {
+      "p": "Workers must take their statutory leave during this time. If a leave year is not set out in a contract then it will start:"
+    },
+    {
+      "li": "on the first day of a new job (if started after 1 October 1998)"
+    },
+    {
+      "li": "on 1 October (if started on or before 1 October 1998)"
+    },
+    {
+      "p": "The leave year and holiday entitlement is not affected by maternity, paternity or adoption leave. The employee still builds up (‘accrues’) holiday over these periods."
+    },
+    {
+      "h3": "Starting a job part way through a leave year"
+    },
+    {
+      "p": "If a worker starts their job part way through a leave year, they’re only entitled to part of their total annual leave for the current leave year. What they get depends on how much of the year is left."
+    },
+    {
+      "p": "If a worker starts part way through the month, they can accrue one-twelfth of their leave from their first day."
+    },
+    {
+      "p": "Example"
+    },
+    {
+      "p": "Someone works a 5-day week and is entitled to 28 days’ annual leave a year. The leave year starts on 1 January but they start their job on 13 January. They’re entitled to 2.5 days’ leave for January (28 days ÷ 12 = 2.33), rounding up to the nearest half day."
+    },
+    {
+      "p": "Alternatively, their employer can choose to calculate the first month’s leave ‘pro-rata’ (in proportion to the number of days worked) instead. This means the worker does not accrue one-twelfth of their leave from their first day."
+    },
+    {
+      "p": "Use the holiday entitlement calculator to work out how much leave someone has when they start part way through the leave year."
+    },
+    {
+      "h2": "Accrual system"
+    },
+    {
+      "p": "For regular hours workers, annual leave begins to build up (‘accrue’) as soon as they start their job. An employer can use an accrual system to work out a worker’s leave during the first year of the job. Under this system, a worker gets one-twelfth of their leave in each month."
+    },
+    {
+      "p": "Example"
+    },
+    {
+      "p": "Someone works a 5-day week and is entitled to 28 days’ annual leave a year. After their third month in the job, they’d be entitled to 7 days’ leave (a quarter of their total leave, or 28 ÷ 12 × 3)."
+    },
+    {
+      "h3": "Irregular-hours or part-year workers"
+    },
+    {
+      "p": "Employers need to use a specific accrual system to calculate leave for irregular-hours or part-year workers."
+    },
+    {
+      "p": "If their leave year began on or before 31 March 2024, employers do not need to use this system until their leave year renews."
+    },
+    {
+      "p": "The amount of leave depends on:"
+    },
+    {
+      "li": "how often they get paid (their ‘pay period’)"
+    },
+    {
+      "li": "how many hours they worked in a pay period"
+    },
+    {
+      "p": "Their entitlement will be 12.07% of the hours they worked in a pay period. It must be rounded up to the nearest hour if the entitlement is 0.5 of an hour or more."
+    },
+    {
+      "p": "For example, if they worked 30 hours and are paid weekly, they’ll have earned 4 hours leave (30 × 12.07 ÷ 100 = 3.621). They can take this leave from their next pay period."
+    },
+    {
+      "h2": "Carrying over leave"
+    },
+    {
+      "p": "The worker’s contract says how many days’ leave they can carry over into the next year."
+    },
+    {
+      "p": "If a worker gets 28 days’ leave, they can carry over a maximum of 8 days."
+    },
+    {
+      "p": "If a worker gets more than 28 days’ leave, their employer may allow them to carry over any additional untaken leave. Check the employment contract, company handbook or intranet to see what the rules say."
+    },
+    {
+      "h3": "Workers on parental or sick leave"
+    },
+    {
+      "p": "If a worker cannot take some or all of their leave entitlement because they’re on family-related leave, for example parental leave, they can carry over their untaken leave into next year."
+    },
+    {
+      "p": "If a worker could not take their leave entitlement because they were sick, they can carry over:"
+    },
+    {
+      "li": "up to 20 of their 28 days’ leave entitlement if they work regular hours for the whole year"
+    },
+    {
+      "li": "up to 28 days of their leave entitlement if they work irregular hours or for part of the year"
+    },
+    {
+      "h3": "If a worker was unable to take leave"
+    },
+    {
+      "p": "Workers can carry over their whole leave entitlement if any of the following apply:"
+    },
+    {
+      "li": "they did not receive ‘rolled-up holiday pay’ that they were entitled to"
+    },
+    {
+      "li": "they were not given reasonable opportunity to take leave"
+    },
+    {
+      "li": "they were not told that they would lose their leave if they did not take it by the end of the leave year"
+    }
+  ],
+  "values": {
+    "irregular_part_year_accrual_rate": 0.1207,
+    "applicable_leave_year_start_from": "2024-04-01",
+    "round_accrued_hours": "nearest_whole_hour_half_up",
+    "jurisdiction": "Great Britain; verify Northern Ireland separately"
+  }
+}

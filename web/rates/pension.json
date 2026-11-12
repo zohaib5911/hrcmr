@@ -1,0 +1,161 @@
+{
+  "source_url": "https://www.gov.uk/workplace-pensions/what-you-your-employer-and-the-government-pay",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "Workplace pensions: What you, your employer and the government pay - GOV.UK",
+  "content": [
+    {
+      "p": "The amount you and your employer pay towards the pension depends on:"
+    },
+    {
+      "li": "what type of workplace pension scheme you’re in"
+    },
+    {
+      "li": "whether you’ve been automatically enrolled in a workplace pension or you’ve joined one voluntarily (‘opted in’)"
+    },
+    {
+      "p": "Example"
+    },
+    {
+      "p": "You’re in a defined contribution pension scheme. Each payday:"
+    },
+    {
+      "li": "you put in £40"
+    },
+    {
+      "li": "your employer puts in £30"
+    },
+    {
+      "li": "you get £10 tax relief"
+    },
+    {
+      "p": "A total of £80 goes into your pension."
+    },
+    {
+      "p": "Use MoneyHelper’s contributions calculator to work out how much you and your employer will put in."
+    },
+    {
+      "h2": "Tax relief"
+    },
+    {
+      "p": "The government will usually add money to your workplace pension in the form of tax relief if both of the following apply:"
+    },
+    {
+      "li": "you pay Income Tax"
+    },
+    {
+      "li": "you pay into a personal pension or workplace pension"
+    },
+    {
+      "p": "Even if you do not pay Income Tax, you’ll still get an additional payment if your pension scheme uses ‘relief at source’ to add money to your pension pot."
+    },
+    {
+      "h2": "If you’ve been automatically enrolled"
+    },
+    {
+      "p": "You and your employer must pay a percentage of your earnings into your workplace pension scheme."
+    },
+    {
+      "p": "How much you pay and what counts as earnings depend on the pension scheme your employer has chosen. Ask your employer about your pension scheme rules."
+    },
+    {
+      "p": "In most automatic enrolment schemes, you’ll make contributions based on your total earnings between £6,240 and £50,270 a year before tax. Your total earnings include:"
+    },
+    {
+      "li": "salary or wages"
+    },
+    {
+      "li": "bonuses and commission"
+    },
+    {
+      "li": "overtime"
+    },
+    {
+      "li": "statutory sick pay"
+    },
+    {
+      "li": "statutory maternity pay"
+    },
+    {
+      "li": "statutory paternity pay"
+    },
+    {
+      "li": "statutory adoption pay"
+    },
+    {
+      "li": "shared parental pay"
+    },
+    {
+      "li": "statutory parental bereavement pay"
+    },
+    {
+      "li": "neonatal care pay"
+    },
+    {
+      "h3": "Workplace pension contributions"
+    },
+    {
+      "table": [
+        ["", "The minimum your employer pays", "You pay", "Total minimum contribution"],
+        ["From April 2019", "3%", "5%", "8%"]
+      ]
+    },
+    {
+      "p": "These amounts could be higher for you or your employer because of your pension scheme rules. They’re higher for most defined benefit pension schemes."
+    },
+    {
+      "p": "In some schemes, your employer has the option to pay in more than the legal minimum. In these schemes, you can pay in less as long as your employer puts in enough to meet the total minimum contribution."
+    },
+    {
+      "h2": "If you’ve voluntarily enrolled in a workplace pension"
+    },
+    {
+      "p": "Your employer must contribute the minimum amount if you earn more than:"
+    },
+    {
+      "li": "£520 a month"
+    },
+    {
+      "li": "£120 a week"
+    },
+    {
+      "li": "£480 over 4 weeks"
+    },
+    {
+      "p": "They do not have to contribute anything if you earn these amounts or less."
+    },
+    {
+      "h2": "How your take-home pay changes"
+    },
+    {
+      "p": "Joining a workplace pension scheme means that your take-home income will be reduced. But this may:"
+    },
+    {
+      "li": "mean you’re entitled to an income-related benefit or an increase in the amount of benefit you get"
+    },
+    {
+      "li": "reduce the amount of student loan repayments you need to make"
+    },
+    {
+      "h2": "Payments using salary sacrifice"
+    },
+    {
+      "p": "You and your employer may agree to use ‘salary sacrifice’ (sometimes known as a ‘SMART’ scheme)."
+    },
+    {
+      "p": "If you do this, you give up part of your salary and your employer pays this straight into your pension. In some cases, this will mean you and your employer pay less tax and National Insurance."
+    },
+    {
+      "p": "Ask your employer if they use salary sacrifice."
+    }
+  ],
+  "values": {
+    "qualifying_earnings_lower_annual": 6240,
+    "qualifying_earnings_upper_annual": 50270,
+    "minimum_employer_rate": 0.03,
+    "minimum_employee_including_tax_relief_rate": 0.05,
+    "minimum_total_rate": 0.08
+  }
+}

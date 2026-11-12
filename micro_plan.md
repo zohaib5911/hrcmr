@@ -442,7 +442,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 19 — Free tools, guides, templates
 
-### [ ] T19.1 · B · Rates data files, verified from GOV.UK and HMRC
+### [x] T19.1 · B · Rates data files, verified from GOV.UK and HMRC
 
 **For T19.2–T19.15 (all S!):** spec plan L1555–1584 (row = calculator number). Each calculator:
 1. Pure TS module `web/lib/calculators/<slug>.ts` that reads figures **only** from `web/rates/*.json` (T19.1).

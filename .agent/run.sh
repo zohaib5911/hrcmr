@@ -46,7 +46,8 @@ prompt() { cat <<EOF
 Read AGENTS.md and continue.
 You are agent=$AGENT, tier=$( [ "$TIER" = B ] && echo BIG || echo SMALL ), model=$MODEL. You run headless under .agent/run.sh in the
 worktree $WT, at the same time as the other agent. Follow AGENTS.md "Parallel mode" (it replaces the relay rules).
-Do exactly ONE block: the one \`bash .agent/next.sh --agent $AGENT --tier $TIER\` gives you. Never ask the owner and never wait:
+Do exactly ONE block: the one \`bash $COORD/.agent/next.sh --agent $AGENT --tier $TIER\` gives you (always this copy: the
+one on your branch may be old). Use $COORD/.agent/bus.sh for the bus. Never ask the owner and never wait:
 SMALL agents post an ASK on the bus and move on; BIG agents decide and record it with bus.sh decide.
 Your final message must end with exactly one of these lines:
 RUNNER: DONE <id>      (PR opened or fix pushed)
@@ -63,8 +64,10 @@ run_session() {   # $1 = log file
     timeout "$SESSION_TIMEOUT" claude -p "$p" --model "$MODEL" ${CLAUDE_FLAGS:---permission-mode auto} >"$1" 2>&1
   else
     # shellcheck disable=SC2086
-    timeout "$SESSION_TIMEOUT" codex exec -C "$WT" -m "$MODEL" \
-      ${CODEX_FLAGS:--s workspace-write -c sandbox_workspace_write.network_access=true --add-dir $COORD --add-dir $HOME/.cache --add-dir $HOME/.local/share} \
+    # Codex's own sandbox keeps .git read-only (it could not commit or use the bus), so it runs without it,
+    # inside .agent/jail.sh instead: write access to this project, its caches and ~/.codex only, no Docker.
+    timeout "$SESSION_TIMEOUT" bash "$COORD/.agent/jail.sh" codex exec -C "$WT" -m "$MODEL" \
+      ${CODEX_FLAGS:---dangerously-bypass-approvals-and-sandbox} \
       "$p" >"$1" 2>&1 </dev/null
   fi
 }
@@ -82,7 +85,7 @@ while true; do
   echo "$(date '+%F %T') rc=$rc ${last:-no RUNNER line}"
   case $last in
     "RUNNER: IDLE"*) fails=0; bash "$COORD/.agent/bus.sh" beat "$AGENT" "runner: idle, next try in $((IDLE_SLEEP/60)) min"; sleep "$IDLE_SLEEP" ;;
-    "RUNNER: "*)     fails=0; sleep 30 ;;
+    "RUNNER: "*)     fails=0; sleep 30; exec bash "$COORD/.agent/run.sh" "$AGENT" ;;   # reload the latest runner
     *) fails=$((fails+1))
        if tail -n 40 "$log" | grep -qiE 'usage limit|limit reached|hit your limit|out of (credits|usage)|quota|resets? (at|in)|429'; then
          why="usage limit"; else why="session ended without a RUNNER line (rc $rc)"; fi

@@ -1,0 +1,280 @@
+{
+  "source_url": "https://www.gov.uk/national-minimum-wage-rates",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "National Minimum Wage and National Living Wage rates - GOV.UK",
+  "content": [
+    {
+      "p": "The hourly rate for the minimum wage depends on your age and whether you’re an apprentice ."
+    },
+    {
+      "p": "This page is also available in Welsh (Cymraeg) ."
+    },
+    {
+      "p": "You must be at least:"
+    },
+    {
+      "li": "school leaving age to get the National Minimum Wage"
+    },
+    {
+      "li": "aged 21 to get the National Living Wage - the minimum wage will still apply for workers aged 20 and under"
+    },
+    {
+      "h2": "Current rates"
+    },
+    {
+      "p": "The rates change on 1 April every year."
+    },
+    {
+      "table": [
+        ["", "21 and over", "18 to 20", "Under 18", "Apprentice"],
+        ["April 2026", "£12.71", "£10.85", "£8", "£8"],
+        ["April 2027", "£13.21", "£11.27", "£8.31", "£8.31"]
+      ]
+    },
+    {
+      "h3": "Apprentices"
+    },
+    {
+      "p": "Apprentices are entitled to the apprentice rate if they’re either:"
+    },
+    {
+      "li": "aged under 19"
+    },
+    {
+      "li": "aged 19 or over and in the first year of their apprenticeship"
+    },
+    {
+      "p": "Example"
+    },
+    {
+      "p": "An apprentice aged 21 in the first year of their apprenticeship is entitled to a minimum hourly rate of £8."
+    },
+    {
+      "p": "Apprentices are entitled to the minimum wage for their age if they both:"
+    },
+    {
+      "li": "are aged 19 or over"
+    },
+    {
+      "li": "have completed the first year of their apprenticeship"
+    },
+    {
+      "p": "Example"
+    },
+    {
+      "p": "An apprentice aged 21 who has completed the first year of their apprenticeship is entitled to a minimum hourly rate of £12.71."
+    },
+    {
+      "h2": "Previous rates"
+    },
+    {
+      "p": "The following rates were for the National Living Wage and the National Minimum Wage from April 2019."
+    },
+    {
+      "h3": "Rates between 1 April 2024 and 31 March 2026"
+    },
+    {
+      "p": "Since 1 April 2024 the National Living Wage has been for those aged 21 and over."
+    },
+    {
+      "table": [
+        ["", "21 and over", "18 to 20", "Under 18", "Apprentice"],
+        ["April 2025 to March 2026", "£12.21", "£10", "£7.55", "£7.55"],
+        ["April 2024 to March 2025", "£11.44", "£8.60", "£6.40", "£6.40"]
+      ]
+    },
+    {
+      "h3": "Rates between 1 April 2021 and 31 March 2024"
+    },
+    {
+      "p": "Between 1 April 2021 and 31 March 2024 the National Living Wage was for those aged 23 and over."
+    },
+    {
+      "table": [
+        ["", "23 and over", "21 to 22", "18 to 20", "Under 18", "Apprentice"],
+        ["April 2023 to March 2024", "£10.42", "£10.18", "£7.49", "£5.28", "£5.28"],
+        ["April 2022 to March 2023", "£9.50", "£9.18", "£6.83", "£4.81", "£4.81"],
+        ["April 2021 to March 2022", "£8.91", "£8.36", "£6.56", "£4.62", "£4.30"]
+      ]
+    },
+    {
+      "h3": "Rates before 1 April 2021"
+    },
+    {
+      "p": "Before 1 April 2021 the National Living Wage was for those aged 25 and over."
+    },
+    {
+      "table": [
+        ["", "25 and over", "21 to 24", "18 to 20", "Under 18", "Apprentice"],
+        ["April 2020 to March 2021", "£8.72", "£8.20", "£6.45", "£4.55", "£4.15"],
+        ["April 2019 to March 2020", "£8.21", "£7.70", "£6.15", "£4.35", "£3.90"]
+      ]
+    },
+    {
+      "h2": "Who gets the minimum wage"
+    },
+    {
+      "p": "Read the information on who is entitled to the minimum wage ."
+    },
+    {
+      "p": "You can use the minimum wage calculator to check whether the National Minimum Wage or National Living Wage is being paid."
+    },
+    {
+      "p": "Contact Acas if you’re not getting the National Minimum Wage and think you should be."
+    }
+  ],
+  "periods": [
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-rates",
+      "checked_on": "2026-11-12",
+      "valid_from": "2026-04-01",
+      "valid_to": "2027-03-31",
+      "validity_basis": "statutory_period",
+      "status": "effective_or_historical",
+      "age_band_rates": {
+        "21 and over": 12.71,
+        "18 to 20": 10.85,
+        "Under 18": 8.0,
+        "Apprentice": 8.0
+      },
+      "apprentice_under_age": 19,
+      "apprentice_first_year": true
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-rates",
+      "checked_on": "2026-11-12",
+      "valid_from": "2027-04-01",
+      "valid_to": "2028-03-31",
+      "validity_basis": "statutory_period",
+      "status": "announced",
+      "age_band_rates": {
+        "21 and over": 13.21,
+        "18 to 20": 11.27,
+        "Under 18": 8.31,
+        "Apprentice": 8.31
+      },
+      "apprentice_under_age": 19,
+      "apprentice_first_year": true
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-rates",
+      "checked_on": "2026-11-12",
+      "valid_from": "2025-04-01",
+      "valid_to": "2026-03-31",
+      "validity_basis": "statutory_period",
+      "status": "effective_or_historical",
+      "age_band_rates": {
+        "21 and over": 12.21,
+        "18 to 20": 10.0,
+        "Under 18": 7.55,
+        "Apprentice": 7.55
+      },
+      "apprentice_under_age": 19,
+      "apprentice_first_year": true
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-rates",
+      "checked_on": "2026-11-12",
+      "valid_from": "2024-04-01",
+      "valid_to": "2025-03-31",
+      "validity_basis": "statutory_period",
+      "status": "effective_or_historical",
+      "age_band_rates": {
+        "21 and over": 11.44,
+        "18 to 20": 8.6,
+        "Under 18": 6.4,
+        "Apprentice": 6.4
+      },
+      "apprentice_under_age": 19,
+      "apprentice_first_year": true
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-rates",
+      "checked_on": "2026-11-12",
+      "valid_from": "2023-04-01",
+      "valid_to": "2024-03-31",
+      "validity_basis": "statutory_period",
+      "status": "effective_or_historical",
+      "age_band_rates": {
+        "23 and over": 10.42,
+        "21 to 22": 10.18,
+        "18 to 20": 7.49,
+        "Under 18": 5.28,
+        "Apprentice": 5.28
+      },
+      "apprentice_under_age": 19,
+      "apprentice_first_year": true
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-rates",
+      "checked_on": "2026-11-12",
+      "valid_from": "2022-04-01",
+      "valid_to": "2023-03-31",
+      "validity_basis": "statutory_period",
+      "status": "effective_or_historical",
+      "age_band_rates": {
+        "23 and over": 9.5,
+        "21 to 22": 9.18,
+        "18 to 20": 6.83,
+        "Under 18": 4.81,
+        "Apprentice": 4.81
+      },
+      "apprentice_under_age": 19,
+      "apprentice_first_year": true
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-rates",
+      "checked_on": "2026-11-12",
+      "valid_from": "2021-04-01",
+      "valid_to": "2022-03-31",
+      "validity_basis": "statutory_period",
+      "status": "effective_or_historical",
+      "age_band_rates": {
+        "23 and over": 8.91,
+        "21 to 22": 8.36,
+        "18 to 20": 6.56,
+        "Under 18": 4.62,
+        "Apprentice": 4.3
+      },
+      "apprentice_under_age": 19,
+      "apprentice_first_year": true
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-rates",
+      "checked_on": "2026-11-12",
+      "valid_from": "2020-04-01",
+      "valid_to": "2021-03-31",
+      "validity_basis": "statutory_period",
+      "status": "effective_or_historical",
+      "age_band_rates": {
+        "25 and over": 8.72,
+        "21 to 24": 8.2,
+        "18 to 20": 6.45,
+        "Under 18": 4.55,
+        "Apprentice": 4.15
+      },
+      "apprentice_under_age": 19,
+      "apprentice_first_year": true
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-rates",
+      "checked_on": "2026-11-12",
+      "valid_from": "2019-04-01",
+      "valid_to": "2020-03-31",
+      "validity_basis": "statutory_period",
+      "status": "effective_or_historical",
+      "age_band_rates": {
+        "25 and over": 8.21,
+        "21 to 24": 7.7,
+        "18 to 20": 6.15,
+        "Under 18": 4.35,
+        "Apprentice": 3.9
+      },
+      "apprentice_under_age": 19,
+      "apprentice_first_year": true
+    }
+  ]
+}
