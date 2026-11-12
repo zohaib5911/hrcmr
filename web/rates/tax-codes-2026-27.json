@@ -1,0 +1,47 @@
+{
+  "source_url": "https://www.gov.uk/tax-codes/what-your-tax-code-means",
+  "checked_on": "2026-11-13",
+  "valid_from": "2026-04-06",
+  "valid_to": "2027-04-05",
+  "validity_basis": "statutory_period",
+  "title": "PAYE tax code meanings and 2026 to 2027 flat rates - GOV.UK",
+  "content": [
+    {
+      "p": "Code meanings checked against HMRC tax-code guidance; percentages checked against the employer rates for 2026 to 2027."
+    }
+  ],
+  "rate_source_url": "https://www.gov.uk/guidance/rates-and-thresholds-for-employers-2026-to-2027",
+  "values": {
+    "flat_rates": {
+      "england": {
+        "BR": 0.2,
+        "D0": 0.4,
+        "D1": 0.45,
+        "NT": 0
+      },
+      "wales": {
+        "BR": 0.2,
+        "CBR": 0.2,
+        "D0": 0.4,
+        "CD0": 0.4,
+        "D1": 0.45,
+        "CD1": 0.45,
+        "NT": 0
+      },
+      "scotland": {
+        "BR": 0.2,
+        "SBR": 0.2,
+        "SD0": 0.21,
+        "SD1": 0.42,
+        "SD2": 0.45,
+        "SD3": 0.48,
+        "NT": 0
+      }
+    }
+  },
+  "model_notes": [
+    "Unprefixed BR is accepted as basic-rate shorthand in each selected region.",
+    "Other unprefixed non-basic flat codes use England/Wales meanings; Scotland requires SD0 to SD3.",
+    "Jurisdiction prefixes on allowance codes must match the selected region. Emergency-code suffixes and obsolete Y codes are not modeled."
+  ]
+}

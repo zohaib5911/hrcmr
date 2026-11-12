@@ -33,4 +33,25 @@ describe("public take-home salary calculator", () => {
     await user.click(screen.getByRole("button", { name: "Calculate take-home" }));
     expect(screen.getByRole("alert")).toBeInTheDocument();
   });
+  it("uses a custom Scottish code and explains unsupported codes", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    await user.selectOptions(screen.getByLabelText("Where do you live?"), "scotland");
+    await user.type(screen.getByLabelText("Annual salary (£)"), "30000");
+    const code = screen.getByLabelText("Tax code");
+    await user.clear(code);
+    await user.type(code, "SD1");
+    await user.click(screen.getByRole("button", { name: "Calculate take-home" }));
+    expect(screen.getByRole("row", { name: /Income tax/ })).toHaveTextContent("-£12,600.00");
+    await user.clear(code);
+    await user.type(code, "SD4");
+    await user.click(screen.getByRole("button", { name: "Calculate take-home" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("supported tax code for your region");
+    expect(screen.queryByRole("heading", { name: "Your take-home pay" })).not.toBeInTheDocument();
+    await user.clear(code);
+    await user.type(code, "BR");
+    await user.click(screen.getByRole("button", { name: "Calculate take-home" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("row", { name: /Income tax/ })).toHaveTextContent("-£6,000.00");
+  });
 });
