@@ -296,3 +296,32 @@ async def test_a_support_admin_cannot_lock_a_platform_admin_but_an_owner_can_loc
     allowed = await owner.post(f"{API}/platform/users/{support_id}/lock", json={})
     assert allowed.status_code == 200, allowed.text
     assert allowed.json()["locked"] is True
+
+
+async def test_platform_context_exposes_permissions_and_only_own_live_support(
+    rig: dict[str, Any],
+) -> None:
+    admin, _ = await _platform_admin(rig, "owner")
+    support_admin, _ = await _platform_admin(rig, "support")
+    company = str(rig["b"])
+    path = f"{API}/platform/context?company_id={company}"
+    body = (await admin.get(path)).json()
+    assert body["owner"] is True
+    assert body["web_origin"].startswith("http")
+    assert body["support"] is None
+    started = await admin.post(
+        f"{API}/platform/companies/{company}/impersonate",
+        json={"reason": "Investigate access", "ticket_ref": "HELP-123"},
+    )
+    assert started.status_code == 201, started.text
+    session_id = started.json()["id"]
+    body = (await admin.get(path)).json()
+    assert body["support"]["id"] == session_id
+    assert body["support"]["write_enabled"] is False
+    assert set(body["support"]) == {"id", "expires_at", "write_enabled"}
+    other = (await support_admin.get(path)).json()
+    assert other["owner"] is False
+    assert other["support"] is None
+    ended = await admin.post(f"{API}/platform/impersonation/{session_id}/end")
+    assert ended.status_code == 200, ended.text
+    assert (await admin.get(path)).json()["support"] is None

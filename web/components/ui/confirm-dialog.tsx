@@ -20,6 +20,8 @@ interface ConfirmDialogProps {
   destructive?: boolean;
   /** For deletions: the name of the record. The person must type it before the button works. */
   requireText?: string;
+  children?: ReactNode;
+  confirmDisabled?: boolean;
   onConfirm: () => void | Promise<void>;
 }
 
@@ -36,11 +38,13 @@ export function ConfirmDialog({
   destructive = false,
   requireText,
   onConfirm,
+  children,
+  confirmDisabled = false,
 }: ConfirmDialogProps) {
   const [open, setOpen] = useState(false);
   const [typed, setTyped] = useState("");
   const [busy, setBusy] = useState(false);
-  const allowed = requireText === undefined || typed.trim() === requireText;
+  const allowed = !confirmDisabled && (requireText === undefined || typed.trim() === requireText);
 
   async function confirm() {
     if (!allowed || busy) return;
@@ -77,6 +81,7 @@ export function ConfirmDialog({
           <AlertDialog.Description className="text-callout text-label-secondary mt-1">
             {description}
           </AlertDialog.Description>
+          {children ? <div className="mt-4 grid gap-4">{children}</div> : null}
           {requireText !== undefined ? (
             <div className="mt-4">
               <TextField

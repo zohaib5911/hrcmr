@@ -3859,6 +3859,26 @@ export interface paths {
         patch: operations["platform_admin_mark_contact_message"];
         trace?: never;
     };
+    "/platform/context": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Platform Context
+         * @description UI permissions and the caller's live support session, never a cookie or token.
+         */
+        get: operations["platform_admin_platform_context"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/platform/data-exports": {
         parameters: {
             query?: never;
@@ -10030,6 +10050,21 @@ export interface components {
             /** Rank */
             rank?: number | null;
         };
+        /** LiveSupportOut */
+        LiveSupportOut: {
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Write Enabled */
+            write_enabled: boolean;
+        };
         /** LocationIn */
         LocationIn: {
             /** Address Line1 */
@@ -10828,6 +10863,14 @@ export interface components {
              * @enum {string}
              */
             stage: "applied" | "shortlisted" | "interview" | "offer_letter" | "offer_accepted" | "hired" | "rejected" | "withdrawn";
+        };
+        /** PlatformContextOut */
+        PlatformContextOut: {
+            /** Owner */
+            owner: boolean;
+            support: components["schemas"]["LiveSupportOut"] | null;
+            /** Web Origin */
+            web_origin: string;
         };
         /** PlatformEventOut */
         PlatformEventOut: {
@@ -25200,6 +25243,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ContactMessageRow"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_admin_platform_context: {
+        parameters: {
+            query?: {
+                company_id?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PlatformContextOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
