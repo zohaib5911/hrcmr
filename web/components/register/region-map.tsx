@@ -18,7 +18,13 @@ export const REGIONS = [
 
 export type RegionCount = { count: number; delta?: number };
 
-export function RegionMap({ counts }: { counts: Record<string, RegionCount> }) {
+export function RegionMap({
+  counts,
+  deltaLabel = "today",
+}: {
+  counts: Record<string, RegionCount>;
+  deltaLabel?: string;
+}) {
   return (
     <figure>
       <svg
@@ -42,7 +48,7 @@ export function RegionMap({ counts }: { counts: Record<string, RegionCount> }) {
             >
               <title>
                 {r.name}: {c ? c.count.toLocaleString("en-GB") : "no data"}
-                {delta ? ` (${delta > 0 ? "+" : ""}${delta} today)` : ""}
+                {delta ? ` (${delta > 0 ? "+" : ""}${delta} ${deltaLabel})` : ""}
               </title>
             </path>
           );

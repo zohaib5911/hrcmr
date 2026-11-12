@@ -8,13 +8,15 @@ hash of the connection, never the address."""
 from __future__ import annotations
 
 import re
-from datetime import date  # noqa: TC003  (pydantic reads the field types at runtime)
+import uuid  # noqa: TC003 (Pydantic resolves response fields at runtime)
+from datetime import date, timedelta
 from statistics import median
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated, Literal
 
 from fastapi import APIRouter, Path, Query, Request
-from pydantic import BaseModel, EmailStr, StringConstraints
-from sqlalchemy import func, select
+from pydantic import BaseModel, EmailStr, Field, StringConstraints
+from sqlalchemy import distinct, func, or_, select, tuple_
+from sqlalchemy.orm import aliased
 
 from app.core.errors import AppError, NotFoundError
 from app.core.rate_limit import RateLimiter, hashed
@@ -31,6 +33,13 @@ from app.modules.register.models import (
     Publication,
     Sponsor,
 )
+from app.modules.soc.public_router import SEARCH_PER_CONNECTION, _limit
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+    from sqlalchemy.orm import InstrumentedAttribute
+    from sqlalchemy.sql.elements import ColumnElement
+    from sqlalchemy.sql.selectable import Subquery
 
 router = APIRouter(prefix="/public/register", tags=["public-register"])
 REPORT_PER_CONNECTION = ("public.register.report", 5, 3600)  # reports, per hour
@@ -458,3 +467,311 @@ async def report_problem(body: ReportIn, db: GlobalDb, request: Request) -> Repo
     )
     await db.commit()
     return ReportOut(received=True)
+
+
+class ExploreQuery(RequestModel):
+    q: str = Field(default="", max_length=100)
+    region: str = Field(default="", max_length=100)
+    route: str = Field(default="", max_length=300)
+    rating: str = Field(default="", max_length=300)
+    industry: str = Field(default="", max_length=10)
+    published_on: date | None = None
+    publication_id: uuid.UUID | None = None
+    window: Literal["7", "30", "90", "180", "365", "start"] = "30"
+    page: int = Field(default=1, ge=1, le=10000)
+
+
+class PublicationOut(BaseModel):
+    id: uuid.UUID
+    published_on: date
+    source_url: str
+
+
+class Bucket(BaseModel):
+    label: str
+    count: int
+
+
+class SponsorOut(BaseModel):
+    id: str
+    name: str
+    town: str
+    region: str | None
+    industry: str | None
+    precision: str
+    first_seen: date
+    routes: list[str]
+    ratings: list[str]
+
+
+class PulsePoint(BaseModel):
+    published_on: date
+    count: int
+    added: int
+    removed: int
+
+
+class ExploreOut(BaseModel):
+    publications: list[PublicationOut] = Field(default_factory=list)
+    selected: PublicationOut | None = None
+    baseline: PublicationOut | None = None
+    total: int = 0
+    previous_total: int = 0
+    page: int = 1
+    page_size: int = 50
+    results: list[SponsorOut] = Field(default_factory=list)
+    newest: list[SponsorOut] = Field(default_factory=list)
+    facets: dict[str, list[str]] = Field(default_factory=dict)
+    sections: dict[str, list[Bucket]] = Field(default_factory=dict)
+    previous_regions: list[Bucket] = Field(default_factory=list)
+    daily_previous_regions: list[Bucket] = Field(default_factory=list)
+    timeline: list[PulsePoint] = Field(default_factory=list)
+
+
+def conditions(query: ExploreQuery) -> list[ColumnElement[bool]]:
+    clauses: list[ColumnElement[bool]] = []
+    if query.q.strip():
+        q = query.q.strip()
+        clauses.append(
+            or_(
+                Sponsor.organisation_name.icontains(q, autoescape=True),
+                Sponsor.town.icontains(q, autoescape=True),
+                Entry.route.icontains(q, autoescape=True),
+            )
+        )
+    for value, column in (
+        (query.region, Sponsor.region_itl1),
+        (query.route, Entry.route),
+        (query.rating, Entry.type_rating),
+        (query.industry, Sponsor.sic_section),
+    ):
+        if value:
+            clauses.append(column == value)
+    return clauses
+
+
+def snapshot(publication_id: uuid.UUID, query: ExploreQuery) -> Subquery:
+    # Match sponsors first, then show all their entries in the selected publication. Multiple
+    # routes never inflate the sponsor count. Never use the mutable Sponsor.current flag here.
+    return (
+        select(Entry.sponsor_id)
+        .join(Sponsor, Sponsor.id == Entry.sponsor_id)
+        .where(Entry.publication_id == publication_id, *conditions(query))
+        .distinct()
+        .subquery()
+    )
+
+
+async def buckets(
+    db: AsyncSession,
+    ids: Subquery,
+    column: InstrumentedAttribute[str] | InstrumentedAttribute[str | None],
+) -> list[Bucket]:
+    label = func.coalesce(func.nullif(column, ""), "Unknown")
+    rows = await db.execute(
+        select(label, func.count(distinct(Sponsor.id)))
+        .select_from(Sponsor)
+        .join(ids, ids.c.sponsor_id == Sponsor.id)
+        .group_by(label)
+        .order_by(func.count(distinct(Sponsor.id)).desc(), label)
+        .limit(50)
+    )
+    return [Bucket(label=name, count=count) for name, count in rows]
+
+
+async def sponsors(
+    db: AsyncSession,
+    ids: Subquery,
+    publication_id: uuid.UUID,
+    *,
+    offset: int = 0,
+    newest: bool = False,
+) -> list[SponsorOut]:
+    order = [Sponsor.first_seen_on.desc()] if newest else []
+    rows = (
+        await db.scalars(
+            select(Sponsor)
+            .join(ids, ids.c.sponsor_id == Sponsor.id)
+            .order_by(*order, Sponsor.organisation_name, Sponsor.id)
+            .offset(offset)
+            .limit(10 if newest else 50)
+        )
+    ).all()
+    if not rows:
+        return []
+    entries = (
+        await db.scalars(
+            select(Entry).where(
+                Entry.publication_id == publication_id, Entry.sponsor_id.in_([s.id for s in rows])
+            )
+        )
+    ).all()
+    return [
+        SponsorOut(
+            id=s.stable_id,
+            name=s.organisation_name,
+            town=s.town,
+            region=s.region_itl1,
+            industry=s.sic_section,
+            precision=s.place_precision,
+            first_seen=s.first_seen_on,
+            routes=sorted({e.route for e in entries if e.sponsor_id == s.id}),
+            ratings=sorted({e.type_rating for e in entries if e.sponsor_id == s.id}),
+        )
+        for s in rows
+    ]
+
+
+async def explore_data(db: AsyncSession, query: ExploreQuery) -> ExploreOut:
+    pubs = list(
+        (
+            await db.scalars(
+                select(Publication)
+                .where(Publication.status == "complete")
+                .order_by(Publication.published_on, Publication.fetched_at, Publication.id)
+            )
+        ).all()
+    )
+    out = ExploreOut(
+        publications=[
+            PublicationOut(id=p.id, published_on=p.published_on, source_url=p.source_url)
+            for p in pubs
+        ],
+        page=query.page,
+    )
+    eligible = [
+        i
+        for i, p in enumerate(pubs)
+        if query.published_on is None or p.published_on <= query.published_on
+    ]
+    if query.publication_id is not None:
+        eligible = [i for i, p in enumerate(pubs) if p.id == query.publication_id]
+    if not eligible:
+        return out
+    index = eligible[-1]
+    selected = pubs[index]
+    target = (
+        pubs[0].published_on
+        if query.window == "start"
+        else selected.published_on - timedelta(days=int(query.window))
+    )
+    prior = [i for i in range(index + 1) if pubs[i].published_on <= target]
+    baseline_index = prior[-1] if prior else 0
+    baseline = pubs[baseline_index]
+    out.selected, out.baseline = out.publications[index], out.publications[baseline_index]
+    ids, before = snapshot(selected.id, query), snapshot(baseline.id, query)
+    out.total = int(await db.scalar(select(func.count()).select_from(ids)) or 0)
+    out.previous_total = int(await db.scalar(select(func.count()).select_from(before)) or 0)
+    out.results = await sponsors(db, ids, selected.id, offset=(query.page - 1) * 50)
+    out.newest = await sponsors(db, ids, selected.id, newest=True)
+    for name, column in (
+        ("towns", Sponsor.town),
+        ("regions", Sponsor.region_itl1),
+        ("precision", Sponsor.place_precision),
+        ("industries", Sponsor.sic_section),
+    ):
+        out.sections[name] = await buckets(db, ids, column)
+    out.previous_regions = await buckets(db, before, Sponsor.region_itl1)
+    daily_prior = [p for p in pubs[:index] if p.published_on < selected.published_on]
+    daily_id = daily_prior[-1].id if daily_prior else selected.id
+    out.daily_previous_regions = await buckets(db, snapshot(daily_id, query), Sponsor.region_itl1)
+    # Reference facets ignore filters, so a user can always change to another available value.
+    for name, column in (
+        ("region", Sponsor.region_itl1),
+        ("route", Entry.route),
+        ("rating", Entry.type_rating),
+        ("industry", Sponsor.sic_section),
+    ):
+        values = await db.scalars(
+            select(column)
+            .select_from(Entry)
+            .join(Sponsor, Sponsor.id == Entry.sponsor_id)
+            .where(Entry.publication_id == selected.id, column.is_not(None), column != "")
+            .distinct()
+            .order_by(column)
+        )
+        out.facets[name] = [value for value in values if value is not None]
+    for name, entry_column in (
+        ("routes", Entry.route),
+        ("ratings", Entry.type_rating),
+        ("types", func.split_part(Entry.type_rating, " (", 1)),
+    ):
+        rows = await db.execute(
+            select(entry_column, func.count(distinct(Entry.sponsor_id)))
+            .join(ids, ids.c.sponsor_id == Entry.sponsor_id)
+            .where(Entry.publication_id == selected.id)
+            .group_by(entry_column)
+            .order_by(func.count(distinct(Entry.sponsor_id)).desc(), entry_column)
+        )
+        out.sections[name] = [
+            Bucket(label=label or "Unknown", count=count) for label, count in rows
+        ]
+    # One grouped query over the window, rather than one snapshot read for each chart point.
+    history_ids = [p.id for p in pubs[baseline_index : index + 1]]
+    counts = dict(
+        (
+            await db.execute(
+                select(Entry.publication_id, func.count(distinct(Entry.sponsor_id)))
+                .join(Sponsor, Sponsor.id == Entry.sponsor_id)
+                .where(Entry.publication_id.in_(history_ids), *conditions(query))
+                .group_by(Entry.publication_id)
+            )
+        ).all()
+    )
+    # Removed entries belong to the preceding snapshot, not the new one. An EXISTS matches the
+    # filters against either side of a change without discarding removed sponsors.
+    previous, current = aliased(Publication), aliased(Publication)
+    previous_id = (
+        select(previous.id)
+        .join(current, current.id == Change.publication_id)
+        .where(
+            previous.status == "complete",
+            tuple_(previous.published_on, previous.fetched_at, previous.id)
+            < tuple_(current.published_on, current.fetched_at, current.id),
+        )
+        .order_by(previous.published_on.desc(), previous.fetched_at.desc(), previous.id.desc())
+        .limit(1)
+        .correlate(Change)
+        .scalar_subquery()
+    )
+    match = (
+        select(Entry.id)
+        .join(Sponsor, Sponsor.id == Entry.sponsor_id)
+        .where(
+            Entry.sponsor_id == Change.sponsor_id,
+            or_(Entry.publication_id == Change.publication_id, Entry.publication_id == previous_id),
+            *conditions(query),
+        )
+        .correlate(Change)
+        .exists()
+    )
+    changes = (
+        await db.execute(
+            select(Change.publication_id, Change.change, func.count())
+            .where(
+                Change.publication_id.in_(history_ids),
+                match,
+                Change.change.in_(["added", "returned", "removed"]),
+            )
+            .group_by(Change.publication_id, Change.change)
+        )
+    ).all()
+    change_counts = {(pid, kind): n for pid, kind, n in changes}
+    out.timeline = [
+        PulsePoint(
+            published_on=p.published_on,
+            count=counts.get(p.id, 0),
+            added=change_counts.get((p.id, "added"), 0) + change_counts.get((p.id, "returned"), 0),
+            removed=change_counts.get((p.id, "removed"), 0),
+        )
+        for p in pubs[baseline_index : index + 1]
+    ]
+    return out
+
+
+@router.get("/explore", response_model=ExploreOut)
+async def explore(
+    request: Request, db: GlobalDb, query: Annotated[ExploreQuery, Query()]
+) -> ExploreOut:
+    await _limit(request, ("public.register.explore", *SEARCH_PER_CONNECTION[1:]))
+    return await explore_data(db, query)

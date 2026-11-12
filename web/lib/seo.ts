@@ -53,6 +53,7 @@ export const marketingPages = [
   ["/contact", "Contact"],
   ["/accessibility", "Accessibility statement"],
   ["/careers", "Careers"],
+  ["/sponsors", "Explore the UK sponsor register"],
   ["/sponsor-licence-compliance", "Sponsor licence compliance"],
   ["/sponsor-licence-compliance/reporting-duties", "Sponsor reporting duties"],
   ["/resources", "Employer resources"],
