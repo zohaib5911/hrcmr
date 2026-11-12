@@ -33,6 +33,7 @@ type Form = Record<
   speed: Speed;
   licencePriority: "yes" | "no";
   basis: Basis;
+  gpTraining: "" | "yes" | "no";
 };
 
 const initial: Form = {
@@ -51,6 +52,7 @@ const initial: Form = {
   speed: "standard",
   licencePriority: "no",
   basis: "standard",
+  gpTraining: "",
 };
 
 const gbp = (value: number) =>
@@ -61,8 +63,9 @@ function toInput(form: Form): SponsorCostInput | null {
   const fields = [form.turnover, form.assets, form.employees, form.months, form.workers];
   const all = [...fields, form.adultDependants, form.childDependants].map(num);
   if (all.some((value) => !Number.isFinite(value) || value < 0)) return null;
+  if (form.soc.trim() === "2211" && form.gpTraining === "") return null;
   const months = num(form.months);
-  if (months < 1 || months > 60 || num(form.workers) < 1) return null;
+  if (!Number.isInteger(months) || months < 1 || months > 60 || num(form.workers) < 1) return null;
   return {
     licenceType: form.licenceType,
     charity: form.charity === "yes",
@@ -73,6 +76,7 @@ function toInput(form: Form): SponsorCostInput | null {
     insideUK: form.location === "inside",
     months,
     soc: form.soc,
+    gpTraining: form.soc.trim() === "2211" && form.gpTraining === "yes",
     workers: num(form.workers),
     adultDependants: num(form.adultDependants),
     childDependants: num(form.childDependants),
@@ -114,7 +118,7 @@ export function SponsorLicenceCostCalculator() {
           setError(
             parsed
               ? null
-              : "Check your answers: numbers cannot be negative, workers must be at least 1 and the certificate length 1–60 months.",
+              : "Check your answers: numbers cannot be negative, workers must be at least 1 and the certificate length 1–60 whole months. For SOC 2211, confirm GP specialty training.",
           );
         }}
       >
@@ -179,10 +183,26 @@ export function SponsorLicenceCostCalculator() {
         <TextField
           label="Occupation (SOC) code"
           clearable={false}
-          hint="Four digits, used only to check the skills-charge exemptions."
+          hint="Four digits, used for skills-charge exemptions and the GP training visa extension."
           value={form.soc}
           onChange={(event) => update("soc", event.target.value)}
         />
+        {form.soc.trim() === "2211" ? (
+          <Select
+            label="Is this GP specialty training?"
+            value={form.gpTraining}
+            onChange={(event) => update("gpTraining", event.target.value as Form["gpTraining"])}
+          >
+            <option value="">Select an answer</option>
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </Select>
+        ) : null}
+        <p className="text-footnote text-label-secondary">
+          The visa normally ends 14 days after the CoS employment end date (SW 18.1). Confirmed GP
+          specialty training under SOC 2211 adds 4 months instead (SW 18.1A). IHS uses this longer
+          visa period; ISC and visa fee tiers use the CoS employment length.
+        </p>
         {num_("workers", "Number of workers")}
         {num_("adultDependants", "Adult dependants (18+) per worker")}
         {num_("childDependants", "Child dependants (under 18) per worker")}
@@ -242,6 +262,15 @@ export function SponsorLicenceCostCalculator() {
             <p className="text-callout text-label-secondary mt-2">
               Treated as a {result.small ? "small or charitable" : "medium or large"} sponsor.
             </p>
+            <p className="text-callout text-label-secondary mt-2">
+              CoS employment: {input.months} months. Estimated visa period: {result.visaPeriod}.
+            </p>
+            <p className="text-footnote text-label-secondary mt-2">
+              Assumes permission starts on the employment start date, with the same dates for
+              dependants and children under 18 at application. Earlier visa grants or different
+              dependant dates need review using actual visa dates and may change IHS. Health and
+              Care applicants and their dependants pay no IHS.
+            </p>
             <h3 className="text-headline text-label mt-4">Employer must pay</h3>
             <dl className="text-callout text-label mt-2 space-y-1">
               <Row label="Licence fee" value={result.licenceFee} />
@@ -276,10 +305,15 @@ export function SponsorLicenceCostCalculator() {
             </p>
             <h3 className="text-headline text-label mt-5">Compare certificate lengths</h3>
             <table className="text-footnote text-label mt-2 w-full text-left">
-              <caption className="sr-only">Total cost by certificate length</caption>
+              <caption className="text-label-secondary text-left">
+                Total cost by certificate length, using the same visa start and dependant
+                assumptions. IHS includes{" "}
+                {input.gpTraining ? "4 months for GP specialty training" : "14 days after CoS end"}.
+              </caption>
               <thead className="text-label-secondary">
                 <tr>
                   <th scope="col">Months</th>
+                  <th scope="col">Estimated visa period</th>
                   <th scope="col">Employer</th>
                   <th scope="col">Worker side</th>
                   <th scope="col">Total</th>
@@ -291,6 +325,7 @@ export function SponsorLicenceCostCalculator() {
                     <th scope="row" className="font-normal">
                       {months}
                     </th>
+                    <td>{row.visaPeriod}</td>
                     <td>{gbp(row.employerTotal)}</td>
                     <td>{gbp(row.workerSideTotal)}</td>
                     <td>{gbp(row.grandTotal)}</td>

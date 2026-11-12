@@ -27,7 +27,7 @@ describe("public sponsor licence cost calculator", () => {
     await user.type(screen.getByLabelText("Certificate length (months, 1–60)"), "24");
     await user.click(screen.getByRole("button", { name: "Calculate costs" }));
     const result = screen.getByRole("region", { name: "Cost result" });
-    // £819 visa + 2 × £1,035 healthcare surcharge = £2,889 (GOV.UK worked example)
+    // 24-month CoS + 14 days gives 2.5 years IHS.
     expect(result).toHaveTextContent("medium or large");
     expect(result).toHaveTextContent("£1,682.00");
     expect(fetchSpy).not.toHaveBeenCalled();
@@ -59,5 +59,53 @@ describe("public sponsor licence cost calculator", () => {
       "£324.00",
     );
     expect(result).toHaveTextContent("Grand total: £5,171.00");
+  });
+  it("shows matching visa assumptions and boundary IHS in the result and comparison", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    expect(screen.getByText(/visa normally ends 14 days/)).toBeInTheDocument();
+    await user.clear(screen.getByLabelText("Certificate length (months, 1–60)"));
+    await user.type(screen.getByLabelText("Certificate length (months, 1–60)"), "36");
+    await user.clear(screen.getByLabelText("Child dependants (under 18) per worker"));
+    await user.type(screen.getByLabelText("Child dependants (under 18) per worker"), "1");
+    await user.click(screen.getByRole("button", { name: "Calculate costs" }));
+    const result = screen.getByRole("region", { name: "Cost result" });
+    expect(result).toHaveTextContent(
+      "CoS employment: 36 months. Estimated visa period: 36 months + 14 days.",
+    );
+    expect(result).toHaveTextContent(
+      "Earlier visa grants or different dependant dates need review",
+    );
+    expect(within(result).getByText("Healthcare surcharge, adult").parentElement).toHaveTextContent(
+      "£3,622.50",
+    );
+    expect(within(result).getByText("Healthcare surcharge, child").parentElement).toHaveTextContent(
+      "£2,716.00",
+    );
+    const table = within(result).getByRole("table");
+    expect(table).toHaveTextContent("IHS includes 14 days after CoS end");
+    const row = within(table).getByRole("rowheader", { name: "36" }).parentElement!;
+    expect(row).toHaveTextContent("36 months + 14 days");
+    expect(row).toHaveTextContent("£7,976.50"); // 2 × £819 + adult £3622.50 + child £2716
+    expect(within(result).getByText("Worker-side total").parentElement).toHaveTextContent(
+      "£7,976.50",
+    );
+  });
+
+  it("asks for GP specialty training confirmation and applies the four-month exception", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    await user.type(screen.getByLabelText("Occupation (SOC) code"), "2211");
+    await user.click(screen.getByRole("button", { name: "Calculate costs" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("confirm GP specialty training");
+    await user.selectOptions(screen.getByLabelText("Is this GP specialty training?"), "yes");
+    await user.click(screen.getByRole("button", { name: "Calculate costs" }));
+    const result = screen.getByRole("region", { name: "Cost result" });
+    expect(result).toHaveTextContent(
+      "Estimated visa period: 40 months (includes 4 months for GP specialty training)",
+    );
+    expect(within(result).getByRole("table")).toHaveTextContent(
+      "IHS includes 4 months for GP specialty training",
+    );
   });
 });
