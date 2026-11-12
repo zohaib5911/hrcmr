@@ -1606,6 +1606,25 @@ Checks:
 | `detail` | JSON | no |  |  |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 
+## `register_company_datasets`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `version` | VARCHAR(100) | no |  |  |
+| `source` | VARCHAR(500) | no |  |  |
+| `sha256` | VARCHAR(64) | no |  |  |
+| `row_count` | INTEGER | no |  |  |
+| `content` | BYTEA | no |  |  |
+| `loaded_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+## `register_company_matches`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `sponsor_id` | UUID | no |  | primary key, references `register_sponsors` |
+| `dataset_id` | UUID | no |  | references `register_company_datasets` |
+
 ## `register_entries`
 
 | Column | Type | Null | Default | Notes |

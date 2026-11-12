@@ -44,6 +44,18 @@ class PlaceDataset(Base, UUIDPrimaryKeyMixin):
     loaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class CompanyDataset(Base, UUIDPrimaryKeyMixin):
+    """An operator-loaded Companies House monthly bulk CSV (gzip); newest row is active."""
+
+    __tablename__ = "register_company_datasets"
+    version: Mapped[str] = mapped_column(String(100))
+    source: Mapped[str] = mapped_column(String(500))
+    sha256: Mapped[str] = mapped_column(String(64))
+    row_count: Mapped[int]
+    content: Mapped[bytes] = mapped_column(LargeBinary)
+    loaded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class Sponsor(Base, UUIDPrimaryKeyMixin):
     __tablename__ = "register_sponsors"
     __table_args__ = (UniqueConstraint("normalised_name", "town", "county"),)
@@ -63,6 +75,16 @@ class Sponsor(Base, UUIDPrimaryKeyMixin):
     first_seen_on: Mapped[date] = mapped_column(Date)
     last_seen_on: Mapped[date] = mapped_column(Date)
     current: Mapped[bool]
+
+
+class CompanyMatch(Base):
+    """Provenance for bulk-enriched fields; separate from API-managed company numbers."""
+
+    __tablename__ = "register_company_matches"
+    sponsor_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("register_sponsors.id"), primary_key=True
+    )
+    dataset_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("register_company_datasets.id"))
 
 
 class Entry(Base, UUIDPrimaryKeyMixin):

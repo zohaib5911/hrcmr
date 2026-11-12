@@ -83,6 +83,8 @@ IDENTITY_TABLES = [
     "policy_documents",
     "postings",
     "register_changes",
+    "register_company_datasets",
+    "register_company_matches",
     "register_entries",
     "register_place_datasets",
     "register_possible_matches",
