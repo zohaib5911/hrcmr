@@ -493,7 +493,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T20.2 · S · Geocoding, ITL1 regions, SVG map, Companies House bulk match
 - **Spec:** plan L1237–1238, L1241, L1486. Original simplified SVG from ONS boundary data; Companies House match behind a flag.
 
-### [ ] T20.3 · S · Explore page
+### [x] T20.3 · S · Explore page
 - **Spec:** plan L1239–1242, L1487.
 
 ### [x] T20.4 · S · Region pages, change bulletins, profiles, methodology, report form, sitemaps
