@@ -45,7 +45,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         for (const [route, name] of PAGES) {
           const res = await page.goto(route);
           expect(res?.status(), route).toBeLessThan(400);
-          await page.locator("html[data-hydrated]").waitFor({ state: "attached" });
+          await page.waitForLoadState("networkidle");
           await shoot(page, `${name}-${colorScheme}-${width}`);
         }
       });
