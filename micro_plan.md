@@ -478,7 +478,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T19.18 · S · Resources hub pages
 - `/resources`, `/resources/guides`, `/resources/tools`, `/resources/templates`.
 
-### [ ] P19 · S · Phase 19 gate
+### [x] P19 · S · Phase 19 gate
 - Recipe R7.
 
 ---
@@ -566,7 +566,8 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ### [ ] T25.2 · B · Make every screen look Apple-quality (glass and the rest)
 - **Spec:** `docs/design-audit.md` (T25.1) and plan §5. This block may restyle earlier work (the owner's request); behaviour stays the same.
-- **Steps:** 1. Fix the tokens and materials in `web/app/globals.css` first, so most screens improve at once. 2. Then the shared components in `web/components/ui/`. 3. Then the rows of `docs/design-audit.md` left over, screen by screen; tick each row there. 4. After screenshots into `docs/screenshots/phase-25/after/` (same script, same widths and themes).
+- **Steps:** 1. Fix the tokens and materials in `web/app/globals.css` first, so most screens improve at once. 2. Then the shared components in `web/components/ui/`. 3. Then the rows of `docs/design-audit.md` left over, screen by screen; tick each row there. 4. **Sponsor register map (owner request, 2026-11-13):** the map on the Explore page (`/register/explore`, from T20.2/T20.3) is a boxy hand-drawn schematic. Replace it with the real shape of the UK: the 12 ITL1 regions from the ONS Open Geography Portal boundaries (Open Government Licence; add the attribution line), simplified to a light inline SVG (no map tiles, no third-party map scripts). Make it look Apple-designed: regions on a glass panel with soft depth, a calm colour scale from our tokens, smooth hover/focus highlight and a gentle animated zoom into the chosen region, a glass tooltip with the region figures, and the same in dark mode. Keep it accessible: every region is keyboard-focusable with a label, a table of the same figures sits under the map, and motion and blur fall back under `prefers-reduced-motion` / `prefers-reduced-transparency`. It must work at 360 px.
+5. After screenshots into `docs/screenshots/phase-25/after/` (same script, same widths and themes), including the Explore map before and after.
 - **Watch:** our own tokens and components only: no Apple logos, SF Symbols, SF font files or Apple device frames (plan L25, L308). Every glass surface falls back to a solid colour under `prefers-reduced-transparency` and when `backdrop-filter` is unsupported; motion respects `prefers-reduced-motion`; text contrast stays WCAG AA on glass in both themes; no layout shift. Don't change copy, routes or behaviour. Update the `/design` catalog and its expected tokens when tokens change.
 - **Done when:** every `docs/design-audit.md` row is ticked; web lint, typecheck, unit suite and full e2e pass (e2e via `bus.sh serial`); the design and accessibility e2e specs pass in both themes.
 

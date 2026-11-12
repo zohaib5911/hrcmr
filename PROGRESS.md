@@ -561,6 +561,13 @@ Do not start until the owner says so: US site, Australia, native wrapper, passke
 - Screenshots: docs/screenshots/phase-18, 12 pages × 390/1280 px × light/dark = 48 images.
 - Open: legal drafts still need solicitor review (owner action above).
 
+## Phase 19 summary (free tools, guides and templates)
+- Built: fourteen browser-only calculators/templates plus the public Sponsorship Job Checker; calculator figures come from the versioned rates files with sources and dates, and inputs stay local (risk assessments may be saved in browser storage).
+- Resources: four public hub pages, six original MDX guides with sources/review dates/disclaimers and the 26-question audit self-test, plus original DOCX/PDF templates controlled by the reviewed manifest.
+- Gate: full API 1363 passed; web lint/typecheck and unit 1309 passed; full production/design browser suite 485 passed, 320 expected screenshot-only skips; production build passed. The first API run was interrupted after shared test-role password collisions; the isolated retry passed.
+- Visual checks: 100 captures of all 25 public resource screens at 390/1280 px in light/dark, with axe and page-overflow checks, in docs/screenshots/phase-19; fixed low-contrast guide/calculator panels and cookie choice text. Existing consent/resource browser regression run: 24 passed.
+- Open: template publication still requires human review (unreviewed entries remain unavailable); keep calculator rates and guide sources reviewed before release. Gate tick and dev-to-main promotion belong to the coordinator after this gate PR merges.
+
 ## Phase 20 summary (public sponsor register)
 - Built: GOV.UK publication discovery and hash-idempotent snapshots, change detection and possible renames; ITL1 geocoding and optional Companies House bulk matching; scheduled working-day imports at 10:00 and 16:00 UK time.
 - Public pages: explorer search/filters/timeline and map/trend/table/list, regions, bulletins, current/removed profiles, methodology/terms, Turnstile-protected reports and split sitemaps; platform status and audited allow-listed manual reruns.
