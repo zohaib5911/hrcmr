@@ -52,8 +52,6 @@ describe("public take-home salary calculator", () => {
       expect.stringContaining("2026-to-2027"),
     );
     await user.selectOptions(year, "2025-2026");
-    expect(screen.queryByRole("heading", { name: "Your take-home pay" })).not.toBeInTheDocument();
-    await user.click(submit);
     expect(screen.getByRole("row", { name: /Income tax/ })).toHaveTextContent("-£5,582.82");
     expect(screen.getByRole("row", { name: /Student loan/ })).toHaveTextContent("-£1,037.70");
     expect(result).toHaveTextContent("2025 to 2026 tax year");

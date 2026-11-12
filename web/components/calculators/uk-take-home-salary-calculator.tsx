@@ -274,7 +274,7 @@ export function UkTakeHomeSalaryCalculator() {
           </>
         ) : (
           <p className="text-callout text-label-secondary">
-            Answer the questions, then calculate your take-home pay.
+            Enter your pay details to see your take-home estimate update as you edit.
           </p>
         )}
       </section>

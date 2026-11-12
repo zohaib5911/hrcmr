@@ -233,7 +233,7 @@ function NoticeOutput({ result }: { result: ReturnType<typeof calculateNotice> |
   if (!result)
     return (
       <p className="text-callout text-label-secondary">
-        Fill in the form, then work out notice pay.
+        Enter dates and pay to see your notice estimate update as you edit.
       </p>
     );
   if (!result.ok)

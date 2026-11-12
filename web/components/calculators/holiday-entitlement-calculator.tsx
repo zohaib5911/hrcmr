@@ -231,7 +231,7 @@ export function HolidayEntitlementCalculator() {
           </>
         ) : (
           <p className="text-callout text-label-secondary">
-            Answer the questions, then calculate the holiday entitlement.
+            Enter a working pattern to see your holiday entitlement update as you edit.
           </p>
         )}
       </section>
