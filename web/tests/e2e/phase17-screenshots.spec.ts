@@ -33,6 +33,16 @@ for (const colorScheme of ["light", "dark"] as const) {
     for (const width of [390, 1280]) {
       test(`admin screens and tenant banners at ${width}px`, async ({ page }) => {
         test.setTimeout(180_000);
+        // Production CSP upgrades admin-host assets to HTTPS, absent on the local test server.
+        // Relay only static CSS/fonts; scripts remain blocked and admin actions remain unit tests.
+        await page.route("https://admin.example.test:3100/_next/static/**", async (route) => {
+          if (!["stylesheet", "font"].includes(route.request().resourceType()))
+            return route.abort();
+          const asset = await page.request.get(
+            route.request().url().replace("https://admin.example.test", "http://127.0.0.1"),
+          );
+          await route.fulfill({ response: asset });
+        });
         const account = await signInPlatformAdmin(page, "owner");
         await page.setViewportSize({ width, height: 900 });
         const suffix = `${colorScheme}-${width}`;
