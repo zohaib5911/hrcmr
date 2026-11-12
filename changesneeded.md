@@ -4,7 +4,7 @@
 Scope: b83da48..462a184 (C3.3.1–C3.3.2 fixes and regressions; Phase 18–20 additions excluded). Tests at audit: api 1363/0/0, RLS CLI passed; web unit 1309/0; e2e 485/0/220 expected skips; CI latest listed dev run green and both merged fix PRs green (12 checks each); lint/types/schema/build/bundle passed.
 Counts: 0 P0 / 0 P1 / 1 P2. PASS (no P0/P1).
 
-### [ ] C3.4.1 · P2 · Assert contact total and pager changes after removal (from C3.3.1)
+### [x] C3.4.1 · P2 · Assert contact total and pager changes after removal (from C3.3.1) — fixed in PR #77
 - **Problem:** `web/components/platform/contact-admin.test.tsx`, test `removes the handled row from the active page`, checks the remaining rows but never asserts the total. C3.3.1 required total coverage. Reverting the production total decrement would leave this test green and permit incorrect paging. Current production behavior is correct; an isolated audit probe verified it.
 - **Fix:** extend that existing test with total 51, assert `51 in total` and enabled Next before marking, then `50 in total` and disabled Next after the handled row disappears. Retain both row assertions. Copy the current test's userEvent/waitFor pattern; no product change is needed.
 - **Done when:** the collected contact test checks row removal, total 51→50 and the Next-button boundary; `cd web && pnpm exec vitest run components/platform/contact-admin.test.tsx`, lint and typecheck pass.
