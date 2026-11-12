@@ -63,8 +63,10 @@ run_session() {   # $1 = log file
     timeout "$SESSION_TIMEOUT" claude -p "$p" --model "$MODEL" ${CLAUDE_FLAGS:---permission-mode auto} >"$1" 2>&1
   else
     # shellcheck disable=SC2086
-    timeout "$SESSION_TIMEOUT" codex exec -C "$WT" -m "$MODEL" \
-      ${CODEX_FLAGS:--s workspace-write -c sandbox_workspace_write.network_access=true --add-dir $COORD --add-dir $HOME/.cache --add-dir $HOME/.local/share} \
+    # Codex's own sandbox keeps .git read-only (it could not commit or use the bus), so it runs without it,
+    # inside .agent/jail.sh instead: write access to this project, its caches and ~/.codex only, no Docker.
+    timeout "$SESSION_TIMEOUT" bash "$COORD/.agent/jail.sh" codex exec -C "$WT" -m "$MODEL" \
+      ${CODEX_FLAGS:---dangerously-bypass-approvals-and-sandbox} \
       "$p" >"$1" 2>&1 </dev/null
   fi
 }
