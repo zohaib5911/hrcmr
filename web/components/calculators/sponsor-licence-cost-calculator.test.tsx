@@ -25,7 +25,6 @@ describe("public sponsor licence cost calculator", () => {
     await user.type(screen.getByLabelText("Employees"), "100");
     await user.clear(screen.getByLabelText("Certificate length (months, 1–60)"));
     await user.type(screen.getByLabelText("Certificate length (months, 1–60)"), "24");
-    await user.click(screen.getByRole("button", { name: "Calculate costs" }));
     const result = screen.getByRole("region", { name: "Cost result" });
     // 24-month CoS + 14 days gives 2.5 years IHS.
     expect(result).toHaveTextContent("medium or large");
@@ -36,7 +35,6 @@ describe("public sponsor licence cost calculator", () => {
     expect(screen.queryByRole("heading", { name: "Your estimated costs" })).not.toBeInTheDocument();
     await user.clear(screen.getByLabelText("Number of workers"));
     await user.type(screen.getByLabelText("Number of workers"), "0");
-    await user.click(screen.getByRole("button", { name: "Calculate costs" }));
     expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
@@ -50,7 +48,6 @@ describe("public sponsor licence cost calculator", () => {
     await user.type(screen.getByLabelText("Occupation (SOC) code"), "2231");
     await user.clear(screen.getByLabelText("Certificate length (months, 1–60)"));
     await user.type(screen.getByLabelText("Certificate length (months, 1–60)"), "24");
-    await user.click(screen.getByRole("button", { name: "Calculate costs" }));
     const result = screen.getByRole("region", { name: "Cost result" });
     const charge = within(result).getByText("Immigration Skills Charge × 1");
     expect(charge.parentElement).toHaveTextContent("£2,640.00");
@@ -68,7 +65,6 @@ describe("public sponsor licence cost calculator", () => {
     await user.type(screen.getByLabelText("Certificate length (months, 1–60)"), "36");
     await user.clear(screen.getByLabelText("Child dependants (under 18) per worker"));
     await user.type(screen.getByLabelText("Child dependants (under 18) per worker"), "1");
-    await user.click(screen.getByRole("button", { name: "Calculate costs" }));
     const result = screen.getByRole("region", { name: "Cost result" });
     expect(result).toHaveTextContent(
       "CoS employment: 36 months. Estimated visa period: 36 months + 14 days.",
@@ -92,14 +88,35 @@ describe("public sponsor licence cost calculator", () => {
     );
   });
 
+  it("shows the frame and fills a preset with live totals", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    expect(screen.getByRole("heading", { name: "Quick answer" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "How it works" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Questions" })).toBeInTheDocument();
+    const result = screen.getByRole("region", { name: "Cost result" });
+    await user.click(
+      screen.getByRole("button", { name: "Large company, 2 workers with families for 5 years" }),
+    );
+    expect(screen.getByLabelText("Number of workers")).toHaveValue(2);
+    expect(result).toHaveTextContent("medium or large");
+    expect(result).toHaveTextContent("Certificate of sponsorship × 2");
+    const before = result.textContent;
+    await user.clear(screen.getByLabelText("Number of workers"));
+    await user.type(screen.getByLabelText("Number of workers"), "3");
+    expect(result).toHaveTextContent("Certificate of sponsorship × 3");
+    expect(result.textContent).not.toBe(before);
+    await user.click(screen.getByRole("button", { name: "Small company, 1 worker for 3 years" }));
+    expect(result).toHaveTextContent("small or charitable");
+  });
+
   it("asks for GP specialty training confirmation and applies the four-month exception", async () => {
     const user = userEvent.setup();
     render(<Page />);
     await user.type(screen.getByLabelText("Occupation (SOC) code"), "2211");
-    await user.click(screen.getByRole("button", { name: "Calculate costs" }));
+    expect(screen.getByRole("region", { name: "Cost result" })).toHaveTextContent("Incomplete");
     expect(screen.getByRole("alert")).toHaveTextContent("confirm GP specialty training");
     await user.selectOptions(screen.getByLabelText("Is this GP specialty training?"), "yes");
-    await user.click(screen.getByRole("button", { name: "Calculate costs" }));
     const result = screen.getByRole("region", { name: "Cost result" });
     expect(result).toHaveTextContent(
       "Estimated visa period: 40 months (includes 4 months for GP specialty training)",
