@@ -22,3 +22,12 @@ optional cookies through the banner before capture.
 
 T20.5 adds register status and rerun API endpoints, without a new screen;
 their authorisation, audit and queue behavior is covered by the API suite.
+
+All 48 captures passed the axe and overflow checks. The final browser run passed
+8 tests (setup, four screenshot variants, two explorer keyboard-scroll checks,
+and one real SSR/accessibility/CSP-nonce regression).
+
+Detail pages render per request to preserve nonce CSP. Public fetch data retains
+its timed cache (six hours for profiles); full HTML ISR is incompatible with
+this request-specific frame, as described in the
+[Next.js CSP documentation](https://nextjs.org/docs/app/guides/content-security-policy#static-vs-dynamic-rendering-with-csp).
