@@ -39,4 +39,25 @@ describe("public sponsor licence cost calculator", () => {
     await user.click(screen.getByRole("button", { name: "Calculate costs" }));
     expect(screen.getByRole("alert")).toBeInTheDocument();
   });
+
+  it("includes nursing ISC in the displayed Health and Care totals", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    await user.type(screen.getByLabelText("Annual turnover (£)"), "20000000");
+    await user.type(screen.getByLabelText("Total assets (£)"), "10000000");
+    await user.type(screen.getByLabelText("Employees"), "100");
+    await user.selectOptions(screen.getByLabelText("Route"), "health_care");
+    await user.type(screen.getByLabelText("Occupation (SOC) code"), "2231");
+    await user.clear(screen.getByLabelText("Certificate length (months, 1–60)"));
+    await user.type(screen.getByLabelText("Certificate length (months, 1–60)"), "24");
+    await user.click(screen.getByRole("button", { name: "Calculate costs" }));
+    const result = screen.getByRole("region", { name: "Cost result" });
+    const charge = within(result).getByText("Immigration Skills Charge × 1");
+    expect(charge.parentElement).toHaveTextContent("£2,640.00");
+    expect(within(result).getByText("Employer total").parentElement).toHaveTextContent("£4,847.00");
+    expect(within(result).getByText("Worker-side total").parentElement).toHaveTextContent(
+      "£324.00",
+    );
+    expect(result).toHaveTextContent("Grand total: £5,171.00");
+  });
 });

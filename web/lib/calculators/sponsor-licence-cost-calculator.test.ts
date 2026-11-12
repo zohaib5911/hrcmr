@@ -67,14 +67,62 @@ describe("sponsor licence cost calculator", () => {
     expect(skillsChargeFor(13, true)).toBe(480 + 240);
   });
 
-  it("skills charge: exempt SOC, health care, short stays outside the UK, dependants", () => {
+  it("skills charge: exempt SOC, short stays outside the UK, dependants", () => {
     expect(calc({ soc: "2111" }).skillsCharge).toBe(0);
-    expect(calc({ route: "health_care" }).skillsCharge).toBe(0);
     expect(calc({ months: 5 }).skillsCharge).toBe(0);
     expect(calc({ months: 5, insideUK: true }).skillsCharge).toBe(1320);
     expect(calc({ adultDependants: 2, childDependants: 1 }).employerTotal).toBe(
       1682 + 525 + 1320 + 660 * 2,
     ); // dependants add no charge
+  });
+
+  // GOV.UK ISC rates above: hand-worked 24 months = £1,320 + 2 × £660,
+  // or £480 + 2 × £240. Health and Care visa fees/IHS do not exempt nurses from ISC.
+  it.each([
+    [false, false, 2640],
+    [false, true, 2640],
+    [true, false, 960],
+    [true, true, 960],
+  ])("charges nursing ISC (small=%s, insideUK=%s)", (charity, insideUK, charge) => {
+    const result = calc({ route: "health_care", soc: "2231", charity, insideUK });
+    expect(result.skillsCharge).toBe(charge);
+    expect(result.skillsChargeExempt).toBe(false);
+  });
+
+  it.each(["2111", "2112", "2113", "2114", "2115", "2119", "2161", "2162", "2311"])(
+    "retains the occupation exemption for SOC %s",
+    (soc) => {
+      for (const insideUK of [false, true]) {
+        const result = calc({ soc: ` ${soc} `, insideUK });
+        expect(result.skillsCharge).toBe(0);
+        expect(result.skillsChargeExempt).toBe(true);
+      }
+    },
+  );
+
+  it.each([
+    [false, 5, 0],
+    [false, 6, 1320],
+    [true, 5, 1320],
+    [true, 6, 1320],
+  ])("applies nursing stay rules (insideUK=%s, months=%i)", (insideUK, months, charge) => {
+    expect(calc({ route: "health_care", soc: "2231", insideUK, months }).skillsCharge).toBe(charge);
+  });
+
+  it("charges ISC per nurse, excludes dependants and retains Health and Care IHS exemption", () => {
+    const result = calc({
+      route: "health_care",
+      soc: "2231",
+      workers: 2,
+      adultDependants: 1,
+      childDependants: 1,
+    });
+    expect(result.employerTotal).toBe(1682 + 2 * (525 + 2640));
+    expect(result.healthSurchargeWorker).toBe(0);
+    expect(result.healthSurchargeAdult).toBe(0);
+    expect(result.healthSurchargeChild).toBe(0);
+    expect(result.workerSideTotal).toBe(4 * 324);
+    expect(result.grandTotal).toBe(9308);
   });
 
   // https://www.gov.uk/uk-visa-sponsorship-employers/certificates-of-sponsorship: £525 per Worker certificate.
