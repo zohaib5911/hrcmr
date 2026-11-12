@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+import salaryRates from "@/rates/ilr-worker-salary.json";
 
 import {
   allOccupations,
@@ -134,5 +136,34 @@ describe("skilled worker ILR salary calculator", () => {
     expect(source).not.toMatch(
       /fetch\s*\(|XMLHttpRequest|sendBeacon|WebSocket|localStorage|sessionStorage|indexedDB|document\.cookie/,
     );
+  });
+});
+
+// Settlement minimums live only in rates/ilr-worker-salary.json: editing the data changes results.
+describe("ILR salary figures come from the rates data", () => {
+  it("uses the pay-scale minimum and sportsperson figure from the rates file", async () => {
+    const values = {
+      ...salaryRates.values,
+      health_education_pay_scale: 26_000,
+      sportsperson: 40_000,
+    };
+    vi.resetModules();
+    vi.doMock("@/rates/ilr-worker-salary.json", () => ({ default: { ...salaryRates, values } }));
+    try {
+      const mod = await import("./skilled-worker-ilr-salary-calculator");
+      const scale = mod.allOccupations.find((o) => o.payScale)!;
+      const pay = mod.calculateIlrSalary({ occupation: scale, situation: "standard", hours: 37.5 });
+      expect(pay.floor).toBe(26_000);
+      expect(pay.notes.join(" ")).toContain("£26,000");
+      const sport = mod.calculateIlrSalary({
+        occupation: scale,
+        situation: "sportsperson",
+        hours: 37.5,
+      });
+      expect(sport.required).toBe(40_000);
+    } finally {
+      vi.doUnmock("@/rates/ilr-worker-salary.json");
+      vi.resetModules();
+    }
   });
 });

@@ -77,13 +77,23 @@ export const visaCheckerSources = sources.map(({ title, json }) => ({
   validTo: json.valid_to,
 }));
 
+const rules = skilledWorker.values;
 /** General salary thresholds per year, from the options table in Appendix Skilled Worker (SW 4.4). */
-export const THRESHOLDS = { A: 41700, B: 37500, C: 33400, D: 33400, E: 33400 } as const;
-export const PARTNER_FUNDS = 285;
-export const FIRST_CHILD_FUNDS = 315;
-export const OTHER_CHILD_FUNDS = 200;
-const FULL_TIME_HOURS = 37.5;
-const MAX_HOURS = 48;
+export const THRESHOLDS: Readonly<Record<OptionResult["option"], number>> = {
+  A: rules.salary_option_thresholds.A,
+  B: rules.salary_option_thresholds.B,
+  C: rules.salary_option_thresholds.C,
+  D: rules.salary_option_thresholds.D,
+  E: rules.salary_option_thresholds.E,
+};
+/** SW 33.3 maintenance funds for dependants. */
+export const PARTNER_FUNDS = rules.dependant_funds.partner;
+export const FIRST_CHILD_FUNDS = rules.dependant_funds.first_child;
+export const OTHER_CHILD_FUNDS = rules.dependant_funds.other_child;
+/** SW 14.4(a): Tables 1 to 2a going rates are for this many weekly hours. */
+export const FULL_TIME_HOURS = rules.going_rate_weekly_hours;
+/** SW 14.3: salary above this many weekly hours does not count. */
+export const MAX_HOURS = rules.max_weekly_hours_counted;
 
 function money(cell: string | undefined): number | null {
   const match = /£([\d,]+)/.exec(cell ?? "");
@@ -160,9 +170,9 @@ export function checkSkilledWorkerVisa(
 ): VisaResult {
   const occupation = findOccupation(input.code) ?? null;
   const hours = Math.min(Math.max(input.weeklyHours, 0), 168);
-  // SW 14.3: only the first 48 hours' salary counts towards the thresholds.
+  // SW 14.3: only the salary for the first MAX_HOURS a week counts towards the thresholds.
   const salaryConsidered = hours > MAX_HOURS ? (input.salary * MAX_HOURS) / hours : input.salary;
-  // SW 14.4: going rates are pro-rated by all stated hours ÷ 37.5.
+  // SW 14.4: going rates are pro-rated by all stated hours ÷ FULL_TIME_HOURS.
   const factor = hours / FULL_TIME_HOURS;
   const messages: string[] = [];
   const children = Math.max(0, Math.floor(input.dependantChildren));
@@ -289,7 +299,7 @@ export function checkSkilledWorkerVisa(
   }
   if (hours > MAX_HOURS) {
     messages.push(
-      "Only salary for the first 48 hours a week counts towards the thresholds, so the salary has been scaled down for this check.",
+      `Only salary for the first ${MAX_HOURS} hours a week counts towards the thresholds, so the salary has been scaled down for this check.`,
     );
   }
   const required = options.flatMap((o) => (o.requiredSalary === null ? [] : [o.requiredSalary]));

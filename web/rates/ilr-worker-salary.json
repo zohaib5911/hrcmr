@@ -177,5 +177,16 @@
     {
       "p": "You must be paid at least the same as UK workers in the same role, and meet national minimum wage requirements."
     }
-  ]
+  ],
+  "values": {
+    "standard": 41700,
+    "health_education_pay_scale": 25000,
+    "health_care_different_requirements": 31300,
+    "health_care_salary_list": 25000,
+    "salary_list": 33400,
+    "transitional": 31300,
+    "transitional_salary_list": 25000,
+    "sportsperson": 35800,
+    "max_weekly_hours_counted": 48
+  }
 }

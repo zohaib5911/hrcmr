@@ -7,6 +7,7 @@ import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
 import {
   calculateIlrSalary,
+  FULL_TIME_HOURS,
   searchOccupations,
   type Occupation,
   type SalaryInput,
@@ -24,7 +25,7 @@ export function SkilledWorkerIlrSalaryCalculator() {
   const [query, setQuery] = useState("");
   const [code, setCode] = useState("");
   const [situation, setSituation] = useState<Situation>("standard");
-  const [hours, setHours] = useState("37.5");
+  const [hours, setHours] = useState(String(FULL_TIME_HOURS));
   const [input, setInput] = useState<SalaryInput | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -98,7 +99,7 @@ export function SkilledWorkerIlrSalaryCalculator() {
           label="Weekly working hours"
           type="number"
           clearable={false}
-          hint="The hours your sponsor states; a full week is 37.5."
+          hint={`The hours your sponsor states; a full week is ${FULL_TIME_HOURS}.`}
           value={hours}
           onChange={(event) => {
             setHours(event.target.value);
@@ -113,7 +114,7 @@ export function SkilledWorkerIlrSalaryCalculator() {
               setQuery("");
               setCode("");
               setSituation("standard");
-              setHours("37.5");
+              setHours(String(FULL_TIME_HOURS));
               reset();
             }}
           >
@@ -151,7 +152,10 @@ export function SkilledWorkerIlrSalaryCalculator() {
                   <Row label="Fixed minimum" value={gbp(result.floor)} />
                 ) : null}
                 {result.fullTimeGoingRate !== null ? (
-                  <Row label="Going rate (37.5 hours)" value={gbp(result.fullTimeGoingRate)} />
+                  <Row
+                    label={`Going rate (${FULL_TIME_HOURS} hours)`}
+                    value={gbp(result.fullTimeGoingRate)}
+                  />
                 ) : null}
                 {result.goingRate !== null ? (
                   <Row
