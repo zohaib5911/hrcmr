@@ -41,6 +41,7 @@ describe("PlatformOverview", () => {
       "href",
       "/dossier-links",
     );
+    expect(screen.getByRole("link", { name: "Settings" })).toHaveAttribute("href", "/settings");
   });
   it("shows an error when the figures are missing, and still links the screens", () => {
     render(<PlatformOverview metrics={null} queueWaiting={null} />);
