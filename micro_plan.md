@@ -421,7 +421,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 18 — Public marketing site
 
-### [ ] T18.1 · S · Marketing pages
+### [x] T18.1 · S · Marketing pages
 - **Spec:** plan L1199–1211, L1472; style §5.9 (`grep -n '### 5.9' plan.md`).
 - **Steps:** one page per sub-step: Home, Features (screenshots by a Playwright script from seeded demo data, both themes), Pricing, Security, About, Contact (+ `POST /public/contact`, R5), Accessibility, Careers (own company via careers module), Sponsor compliance + Reporting duties.
 - **Watch:** original copy only; brand from `brand.config.ts`; prices from config, not typed into copy.
