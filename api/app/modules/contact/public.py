@@ -35,7 +35,7 @@ Topic = Literal[
 ]
 
 
-class ContactIn(RequestModel):
+class ContactFormIn(RequestModel):
     name: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=120)]
     company: (
         Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=160)]
@@ -47,12 +47,12 @@ class ContactIn(RequestModel):
     turnstile_token: Annotated[str, StringConstraints(min_length=1, max_length=2048)]
 
 
-class ContactOut(BaseModel):
+class ContactFormOut(BaseModel):
     received: bool
 
 
-@router.post("/contact", response_model=ContactOut, status_code=201)
-async def send_message(body: ContactIn, db: GlobalDb, request: Request) -> ContactOut:
+@router.post("/contact", response_model=ContactFormOut, status_code=201)
+async def send_message(body: ContactFormIn, db: GlobalDb, request: Request) -> ContactFormOut:
     ip = client_ip(request)
     auth = request.app.state.auth
     name, limit, window = CONTACT_PER_CONNECTION
@@ -84,4 +84,4 @@ async def send_message(body: ContactIn, db: GlobalDb, request: Request) -> Conta
         )
     )
     await db.commit()
-    return ContactOut(received=True)
+    return ContactFormOut(received=True)

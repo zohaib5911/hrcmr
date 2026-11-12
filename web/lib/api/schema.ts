@@ -7919,6 +7919,50 @@ export interface components {
             /** Code */
             code: string;
         };
+        /** ContactFormIn */
+        ContactFormIn: {
+            /** Company */
+            company?: string | null;
+            /**
+             * Email
+             * Format: email
+             */
+            email: string;
+            /** Message */
+            message: string;
+            /** Name */
+            name: string;
+            /**
+             * Topic
+             * @enum {string}
+             */
+            topic: "sponsor_compliance" | "simple_hr" | "pricing_billing" | "setup_help" | "partnership" | "other" | "data_protection";
+            /** Turnstile Token */
+            turnstile_token: string;
+        };
+        /** ContactFormOut */
+        ContactFormOut: {
+            /** Received */
+            received: boolean;
+        };
+        /** ContactIn */
+        ContactIn: {
+            /** Address */
+            address?: string | null;
+            /** Details */
+            details?: string | null;
+            /** Email */
+            email?: string | null;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /**
+             * Relationship
+             * @enum {string}
+             */
+            relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
+        };
         /** ContactMessageRow */
         ContactMessageRow: {
             /** Company */
@@ -7950,6 +7994,29 @@ export interface components {
             items: components["schemas"]["ContactMessageRow"][];
             /** Total */
             total: number;
+        };
+        /** ContactOut */
+        ContactOut: {
+            /** Address */
+            address: string | null;
+            /** Details */
+            details: string | null;
+            /** Email */
+            email: string | null;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Name */
+            name: string;
+            /** Phone */
+            phone: string;
+            /**
+             * Relationship
+             * @enum {string}
+             */
+            relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
         };
         /** ContactUpdateIn */
         ContactUpdateIn: {
@@ -10777,7 +10844,7 @@ export interface components {
             address: components["schemas"]["app__modules__employees__personal_schemas__AddressOut"] | null;
             bank: components["schemas"]["BankMasked"] | null;
             /** Contacts */
-            contacts: components["schemas"]["app__modules__employees__personal_schemas__ContactOut"][];
+            contacts: components["schemas"]["ContactOut"][];
             details: components["schemas"]["PersonalDetails"];
             identity: components["schemas"]["IdentityMasked"] | null;
             /**
@@ -13239,32 +13306,6 @@ export interface components {
             /** Postcode */
             postcode: string | null;
         };
-        /** ContactIn */
-        app__modules__contact__public__ContactIn: {
-            /** Company */
-            company?: string | null;
-            /**
-             * Email
-             * Format: email
-             */
-            email: string;
-            /** Message */
-            message: string;
-            /** Name */
-            name: string;
-            /**
-             * Topic
-             * @enum {string}
-             */
-            topic: "sponsor_compliance" | "simple_hr" | "pricing_billing" | "setup_help" | "partnership" | "other" | "data_protection";
-            /** Turnstile Token */
-            turnstile_token: string;
-        };
-        /** ContactOut */
-        app__modules__contact__public__ContactOut: {
-            /** Received */
-            received: boolean;
-        };
         /** AddressOut */
         app__modules__employees__personal_schemas__AddressOut: {
             /** City County */
@@ -13279,47 +13320,6 @@ export interface components {
             line3: string | null;
             /** Postcode */
             postcode: string | null;
-        };
-        /** ContactIn */
-        app__modules__employees__personal_schemas__ContactIn: {
-            /** Address */
-            address?: string | null;
-            /** Details */
-            details?: string | null;
-            /** Email */
-            email?: string | null;
-            /** Name */
-            name: string;
-            /** Phone */
-            phone: string;
-            /**
-             * Relationship
-             * @enum {string}
-             */
-            relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
-        };
-        /** ContactOut */
-        app__modules__employees__personal_schemas__ContactOut: {
-            /** Address */
-            address: string | null;
-            /** Details */
-            details: string | null;
-            /** Email */
-            email: string | null;
-            /**
-             * Id
-             * Format: uuid
-             */
-            id: string;
-            /** Name */
-            name: string;
-            /** Phone */
-            phone: string;
-            /**
-             * Relationship
-             * @enum {string}
-             */
-            relationship: "spouse" | "civil_partner" | "partner" | "parent" | "child" | "sibling" | "guardian" | "other_relative" | "friend" | "other";
         };
     };
     responses: never;
@@ -19518,7 +19518,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["app__modules__employees__personal_schemas__ContactIn"];
+                "application/json": components["schemas"]["ContactIn"];
             };
         };
         responses: {
@@ -19528,7 +19528,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__modules__employees__personal_schemas__ContactOut"];
+                    "application/json": components["schemas"]["ContactOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -19563,7 +19563,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["app__modules__employees__personal_schemas__ContactIn"];
+                "application/json": components["schemas"]["ContactIn"];
             };
         };
         responses: {
@@ -19573,7 +19573,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__modules__employees__personal_schemas__ContactOut"];
+                    "application/json": components["schemas"]["ContactOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
@@ -27205,7 +27205,7 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["app__modules__contact__public__ContactIn"];
+                "application/json": components["schemas"]["ContactFormIn"];
             };
         };
         responses: {
@@ -27215,7 +27215,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__modules__contact__public__ContactOut"];
+                    "application/json": components["schemas"]["ContactFormOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

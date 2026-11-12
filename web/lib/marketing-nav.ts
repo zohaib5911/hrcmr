@@ -28,7 +28,7 @@ export const HEADER_LINKS: readonly MarketingLink[] = [
 ];
 
 export const SIGN_IN: MarketingLink = { label: "Sign in", href: "/login" };
-export const SIGN_UP: MarketingLink = { label: "Start free", href: to("/signup") };
+export const SIGN_UP: MarketingLink = { label: "Start free", href: "/setup" };
 
 export const FOOTER_COLUMNS: readonly FooterColumn[] = [
   {
