@@ -30,7 +30,7 @@ async def test_geocoding_and_flagged_company_match(database: DatabaseUnderTest) 
             )
             assert await apply_geocoding(db, places) == 1
             assert await apply_geocoding(db, places) == 0  # only missing
-            companies = {"example care ltd": ("01234567", "Q")}
+            companies: dict[str, tuple[str, str | None]] = {"example care ltd": ("01234567", "Q")}
             assert await apply_companies_match(db, companies, enabled=False) == 0
             assert await apply_companies_match(db, companies, enabled=True) == 1
             care = await db.scalar(select(Sponsor).where(Sponsor.town == "leeds"))
