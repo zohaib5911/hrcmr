@@ -58,7 +58,7 @@ Each screen needs loading, empty and error states, works at 360 px and in dark m
 - **Fix:** `/queues` with two tables (deletion requests by status; data exports by status) and `/contact` (handled / not handled filter, open a message, "Mark handled" / "Mark not handled").
 - **Done when:** unit tests; e2e opens both pages and sees the empty states.
 
-### [ ] C3.1.9 · P1 · Admin screens: settings (terms publish, feature flags, announcements) (from T17.5)
+### [x] C3.1.9 · P1 · Admin screens: settings (terms publish, feature flags, announcements) (from T17.5) — fixed in PR #45
 - **Pattern:** read the "Admin screens" paragraph at the top of changesneeded.md first (files to copy, states, tests).
 - **Problem:** no screens for `/platform/terms-versions`, `/platform/feature-flags`, `/platform/announcements`.
 - **Fix:** `/settings` page with three cards: terms versions list + "Publish new version" (owner only; second confirmation that says every user must accept again); feature flags list with a switch per flag (`PUT /platform/feature-flags/{key}`); announcements list + create (message, region, start, end) + "End now".
