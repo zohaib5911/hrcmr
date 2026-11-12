@@ -10,8 +10,8 @@
 # Automatic rules: a gate P<n> needs every other block of Phase n; an AUDIT-n needs every block above it
 # and no open changesneeded.md item.
 set -euo pipefail
+HERE=$(cd "$(dirname "$0")" && pwd)   # the coordinator copy when called by absolute path
 cd "$(git rev-parse --show-toplevel)"
-HERE=.agent
 AGENT=${AGENT_NAME:-} TIER=${AGENT_TIER:-}
 while [ $# -gt 0 ]; do case $1 in --agent) AGENT=$2; shift 2;; --tier) TIER=$2; shift 2;; *) shift;; esac; done
 [ -n "$AGENT" ] && [ -n "$TIER" ] || { echo "usage: bash .agent/next.sh --agent <claude|codex> --tier <S|B>"; exit 2; }
@@ -78,7 +78,8 @@ pick() {   # first ready candidate of the wanted tier
   while IFS=$'\t' read -r file id tier kind; do
     [[ "$tier" == $1 ]] || continue
     owner=$(claim_field "$id" 2); st=$(claim_field "$id" 4)
-    if [ -n "$owner" ] && [ "$st" != merged ] && [ "$owner" != "$AGENT" ]; then continue; fi
+    # Claimed and not merged: skip (your own working claim was offered as RESUME above; an open PR is done for now).
+    if [ -n "$owner" ] && [ "$st" != merged ]; then continue; fi
     deps_ok "$id" || continue
     echo "$file	$id	$tier	$kind"; return 0
   done <"$TMP/cands"
