@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid  # noqa: TC003  (pydantic reads the field types at runtime)
-from datetime import datetime  # noqa: TC003  (pydantic reads the field types at runtime)
+from datetime import date, datetime  # noqa: TC003  (pydantic reads the field types at runtime)
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -306,3 +306,19 @@ class PlatformContextOut(BaseModel):
     owner: bool
     web_origin: str
     support: LiveSupportOut | None
+
+
+class RegisterPublicationOut(BaseModel):
+    id: uuid.UUID
+    published_on: date
+    fetched_at: datetime
+    source_url: str
+    row_count: int
+    status: str
+
+
+class RegisterStatusOut(BaseModel):
+    last_publication: RegisterPublicationOut | None
+    current_sponsors: int
+    total_sponsors: int
+    errors: list[JobFailureRow]  # latest 20 failed ingest runs, newest first

@@ -18,11 +18,21 @@ async def register_ingest(ctx: dict[str, Any]) -> str:
     now = ctx.get("now", datetime.now(UTC)).astimezone(ZoneInfo("Europe/London"))
     if now.weekday() >= 5 or now.hour not in (10, 16):
         return "outside_schedule"
+    return await _import(ctx, now, scheduled=True)
+
+
+async def register_ingest_manual(ctx: dict[str, Any]) -> str:
+    """Admin reruns use the same atomic ingest, without the cron calendar gate."""
+    now = ctx.get("now", datetime.now(UTC)).astimezone(ZoneInfo("Europe/London"))
+    return await _import(ctx, now, scheduled=False)
+
+
+async def _import(ctx: dict[str, Any], now: datetime, *, scheduled: bool) -> str:
     engine = ctx.get("owner_engine")
     if engine is None:
         return "no_owner_engine"
     async with AsyncSession(engine) as db:
-        if await db.scalar(
+        if scheduled and await db.scalar(
             select(BankHoliday.id).where(
                 BankHoliday.region == "england-and-wales", BankHoliday.on_date == now.date()
             )
