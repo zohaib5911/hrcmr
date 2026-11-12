@@ -452,7 +452,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 4. Nothing entered is stored or sent (no fetch in the module; a test greps it).
 - If a figure you need is not in `web/rates/`: **STOP — BLOCKED needs verified figure**.
 
-### [ ] T19.2 · S! · Calculator 1: right-to-work-october-2026-checker (+ build the shared calculator template)
+### [x] T19.2 · S! · Calculator 1: right-to-work-october-2026-checker (+ build the shared calculator template)
 ### [ ] T19.3 · S! · Calculator 2: sponsor-licence-cost-calculator
 ### [ ] T19.4 · S! · Calculator 3: sponsor-reporting-deadline-calculator (reuse the working-day logic semantics from `api/tests/test_working_days.py`)
 ### [ ] T19.5 · S! · Calculator 4: skilled-worker-visa-checker (SOC data via public SOC API, no AI)
