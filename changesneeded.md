@@ -3,7 +3,7 @@ Scope: audit-pass-2..55153b7 (128 commits, T15.1 → P17)   Tests at audit: api 
 Counts: 0 P0 / 10 P1 / 6 P2. FIX NEEDED.
 
 Order: do the items top to bottom. C3.1.3 (the e2e seed) comes before the admin screens, because their e2e tests need it.
-**BLOCKED (2026-11-09, Haiku): C3.1.4 to C3.1.10 wait for a decision on the e2e admin host.** The admin host cannot run client JavaScript in e2e (CSP upgrade-insecure-requests on plain http) and its browser calls to the API are cross-site (SameSite cookies not sent). Both are in STATUS Issues. Every item here needs a client screen and an e2e test, so none is ticked. C3.1.11 to C3.1.16 are done.
+**Unblocked (2026-11-12, Opus): the e2e admin-host question is decided in `.agent/decisions.md` (C3.1.4–C3.1.10).** Client actions are unit-tested with the API mocked; each e2e spec checks only the server-rendered page on the admin host. No CSP change. C3.1.11 to C3.1.16 are done.
 
 Admin screens (C3.1.4 to C3.1.10): copy `web/components/platform/rules-editor.tsx` (components/ui only, `attempt()` from
 `lib/auth/request`, `PageHeader`, `ConfirmDialog`, `formatUk`) and its page `web/app/(admin)/platform/rules/page.tsx`.

@@ -1,4 +1,4 @@
-# Continuous integration (plan.md T0.8). Runs on every pull request to main and on every push to main.
+# Continuous integration (plan.md T0.8). Runs on every pull request to main or dev (the agents' task PRs) and on every push to main.
 #
 # What it checks, and where each check also runs locally:
 #   gitleaks    secrets anywhere in the git history        (pre-commit: gitleaks on staged changes)
@@ -26,7 +26,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, dev]
   workflow_dispatch:
 
 permissions:
