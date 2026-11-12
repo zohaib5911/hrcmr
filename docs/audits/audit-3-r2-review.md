@@ -12,3 +12,5 @@ Findings to carry into changesneeded.md after verification:
 - Overview navigation omits /settings, although C3.1.4 requires all new screens.
 
 Hidden-cheating scan: only two added conditional screenshot skips; accepted phase-gate policy. Removed assertions belong to removed server-side session-start implementation, replaced by component tests; replacement tests do not cover the actual request URL.
+
+Verification: API ruff/format/mypy passed; pytest stalled after 584 dots at 42%, interrupted with no final counts (exit 143 after SIGTERM). RLS CLI passed on a newly provisioned disposable database. Web lint/typecheck/gen/build passed; 1255 unit tests passed; 473 browser tests passed, 220 conditionally skipped (13.9 minutes). All 48 Phase 17 screenshots exist. Latest listed dev CI run: success 42513865285. Production chunk inspection confirms startFromBrowser calls the dynamic-env URL helper without arguments.

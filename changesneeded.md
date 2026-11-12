@@ -1,5 +1,5 @@
 # changesneeded.md — audit AUDIT-3 round 2 (2026-11-12, gpt-6.1-sol)
-Scope: f986a6c..0d1addd (C3.1.1–C3.1.16 fixes and regressions; Phase 18–20 additions excluded). Tests at audit: api incomplete (stalled at 42%, interrupted; no final p/f/s summary), RLS CLI passed; web unit 1255/0, e2e pending; CI latest dev run green.
+Scope: f986a6c..0d1addd (C3.1.1–C3.1.16 fixes and regressions; Phase 18–20 additions excluded). Tests at audit: api incomplete (stalled at 42%, interrupted; no final p/f/s summary), RLS CLI passed; web unit 1255/0, e2e 473/0/220 skipped; CI latest dev run green.
 Counts: 1 P0 / 4 P1 / 1 P2. FIX NEEDED.
 
 ### [ ] C3.2.1 · P0 · Make the required full API suite finish (from AUDIT-3) · B
