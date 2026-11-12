@@ -64,7 +64,7 @@ Each screen needs loading, empty and error states, works at 360 px and in dark m
 - **Fix:** `/settings` page with three cards: terms versions list + "Publish new version" (owner only; second confirmation that says every user must accept again); feature flags list with a switch per flag (`PUT /platform/feature-flags/{key}`); announcements list + create (message, region, start, end) + "End now".
 - **Done when:** unit tests; e2e: an owner creates an announcement and the tenant app shows the `AnnouncementBanner`, then ends it.
 
-### [ ] C3.1.10 · P1 · Admin screens: jobs and platform audit log, then phase screenshots (from T17.6, P17)
+### [x] C3.1.10 · P1 · Admin screens: jobs and platform audit log, then phase screenshots (from T17.6, P17) — fixed in PR #61
 - **Pattern:** read the "Admin screens" paragraph at the top of changesneeded.md first (files to copy, states, tests).
 - **Problem:** no screens for `/platform/jobs/*` and `/platform/audit*`. P17's screenshots were never taken (leftover.md L2).
 - **Fix:** `/jobs` (queue depth, failures table, "Run again" for allow-listed jobs with a required reason) and `/audit` (filters: action family, actor, date range; paged table; "Export CSV" link to `/platform/audit/export` with the same filters). Then add the admin pages to a `web/tests/e2e/phase17-screenshots.spec.ts` (copy `phase16-screenshots.spec.ts`; 390 and 1280 px, both themes) and run it once. Tick leftover.md L2.
