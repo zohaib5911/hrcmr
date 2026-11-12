@@ -5,7 +5,10 @@ import { createApiClient, serverApiBaseUrl, type ApiClient } from "@/lib/api/cli
 import { PLATFORM_COOKIE } from "@/lib/platform/session";
 import { signVisitor, visitorFromIngress } from "@/lib/platform/visitor";
 
-/** An API client for an admin page, speaking with the platform cookie; none (null) without it. */
+/**
+ * An admin SSR client with the platform cookie and verified ingress identity.
+ * Fail closed when the cookie, authenticated ingress or internal signing key is missing.
+ */
 export async function platformApi(): Promise<ApiClient | null> {
   const jar = await cookies();
   if (!jar.has(PLATFORM_COOKIE)) return null;
