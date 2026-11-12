@@ -429,7 +429,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T18.2 · S · Legal pages (DRAFT)
 - **Spec:** plan L1217, L1473. Every page shows "DRAFT — requires solicitor review". Cookie policy lists the real cookies (grep the code); subprocessors = real vendors. Cookie consent per L1218–1222. Add owner action to PROGRESS.
 
-### [ ] T18.3 · S · SEO and Lighthouse ≥ 95
+### [x] T18.3 · S · SEO and Lighthouse ≥ 95
 - **Spec:** plan L1223–1228, L1474. Metadata, OG images, JSON-LD, sitemap, robots; analytics only after consent.
 
 ### [x] T18.4 · S · Comparison page templates (unpublished)
