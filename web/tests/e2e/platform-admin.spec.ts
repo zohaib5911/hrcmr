@@ -56,3 +56,10 @@ test("a platform owner opens the queues and contact pages", async ({ page }) => 
   await page.goto(`${ADMIN_ORIGIN}/contact`);
   await expect(page.getByRole("heading", { level: 1, name: "Contact messages" })).toBeVisible();
 });
+
+// C3.1.7: the refund itself is a unit test (no Stripe in the e2e server); only the page is checked here.
+test("a platform owner opens the subscriptions page", async ({ page }) => {
+  await signInPlatformAdmin(page, "owner");
+  await page.goto(`${ADMIN_ORIGIN}/subscriptions`);
+  await expect(page.getByRole("heading", { level: 1, name: "Subscriptions" })).toBeVisible();
+});
