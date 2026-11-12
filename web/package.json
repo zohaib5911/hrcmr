@@ -57,7 +57,7 @@
     "lint": "eslint --max-warnings 0 .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "bash ../.agent/e2e.sh",
     "gen:api": "node scripts/gen-api.mjs",
     "gen:api:check": "node scripts/gen-api.mjs --check"
   }
