@@ -159,7 +159,7 @@ export function UkNoticePayCalculator() {
         aria-label="Notice result"
         aria-live="polite"
         aria-atomic="true"
-        className="bg-fill-secondary rounded-control p-5 sm:p-6"
+        className="bg-bg-elevated rounded-control p-5 sm:p-6"
       >
         <NoticeOutput result={result} />
       </section>

@@ -51,7 +51,7 @@ export default async function GuidePage({ params }: Props) {
       </header>
       <aside
         aria-label="Resources disclaimer"
-        className="bg-fill-secondary text-callout text-label-secondary rounded-card my-6 p-4"
+        className="bg-bg-elevated text-callout text-label-secondary rounded-card my-6 p-4"
       >
         {guideDisclaimer}
       </aside>
