@@ -50,16 +50,16 @@ describe("skilled worker visa checker page", () => {
   it("uses the public occupation lookup while keeping salary and personal answers local, then resets", async () => {
     const user = userEvent.setup();
     render(<Page />);
-    await user.click(screen.getByRole("button", { name: "Check eligibility" }));
-    expect(screen.getByRole("alert")).toHaveTextContent("Choose an occupation");
+    const result = screen.getByRole("region", { name: "Checker result" });
+    await user.type(screen.getByLabelText("Annual salary offered"), "1");
+    expect(result).toHaveTextContent("Incomplete: search for the job");
+    await user.clear(screen.getByLabelText("Annual salary offered"));
     await user.type(screen.getByLabelText("SOC code or job title"), "chief executives");
     await user.click(await screen.findByRole("button", { name: /1111 Chief executives/ }));
     await user.type(screen.getByLabelText("Annual salary offered"), "90000");
     await user.selectOptions(screen.getByLabelText("Relevant PhD?"), "yes");
     await user.selectOptions(screen.getByLabelText("Is a partner applying as a dependant?"), "yes");
     await user.type(screen.getByLabelText("Dependent children applying"), "2");
-    await user.click(screen.getByRole("button", { name: "Check eligibility" }));
-    const result = screen.getByRole("region", { name: "Checker result" });
     expect(result).toHaveTextContent("Salary requirement met");
     expect(result).toHaveTextContent("B2");
     expect(requests).toHaveLength(1);
@@ -79,7 +79,6 @@ describe("skilled worker visa checker page", () => {
       await user.type(screen.getByLabelText("SOC code or job title"), query);
       await user.click(await screen.findByRole("button", { name: "2231 Midwifery nurses" }));
       await user.type(screen.getByLabelText("Annual salary offered"), "40000");
-      await user.click(screen.getByRole("button", { name: "Check eligibility" }));
       const result = screen.getByRole("region", { name: "Checker result" });
       expect(within(result).getByRole("heading", { name: "Needs review" })).toBeInTheDocument();
       expect(result).toHaveTextContent("2231 Midwifery nurses");
@@ -108,11 +107,34 @@ describe("skilled worker visa checker page", () => {
     await user.type(query, "1150");
     await user.click(await screen.findByRole("button", { name: /1150 Managers/ }));
     await user.type(screen.getByLabelText("Annual salary offered"), "50000");
-    await user.click(screen.getByRole("button", { name: "Check eligibility" }));
     const result = screen.getByRole("region", { name: "Checker result" });
     expect(result).toHaveTextContent("Not eligible on these answers");
     expect(result).toHaveTextContent("Table 1a");
     expect(result).not.toHaveTextContent("Needs review");
+  });
+
+  it("shows the frame and fills a preset from local data without a lookup request", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    expect(screen.getByRole("heading", { name: "Quick answer" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "How it works" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Questions" })).toBeInTheDocument();
+    const result = screen.getByRole("region", { name: "Checker result" });
+    await user.click(screen.getByRole("button", { name: "Software developer on £60,000" }));
+    expect(screen.getByLabelText("SOC code or job title")).toHaveValue(
+      "2134 Programmers and software development professionals",
+    );
+    expect(screen.getByLabelText("Annual salary offered")).toHaveValue("60,000.00");
+    expect(result).toHaveTextContent("Salary requirement met");
+    await user.clear(screen.getByLabelText("Annual salary offered"));
+    expect(result).toHaveTextContent("Incomplete: enter the annual salary");
+    await user.type(screen.getByLabelText("Annual salary offered"), "20000");
+    expect(result).toHaveTextContent("Not eligible on these answers");
+    await new Promise((resolve) => setTimeout(resolve, 350));
+    expect(requests).toHaveLength(0);
+    await user.click(screen.getByRole("button", { name: "Reset answers" }));
+    expect(screen.getByLabelText("SOC code or job title")).toHaveValue("");
+    expect(result).not.toHaveTextContent("Not eligible");
   });
 
   it("ignores an older lookup response after the occupation query changes", async () => {
