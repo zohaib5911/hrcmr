@@ -478,7 +478,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T19.18 · S · Resources hub pages
 - `/resources`, `/resources/guides`, `/resources/tools`, `/resources/templates`.
 
-### [ ] P19 · S · Phase 19 gate
+### [x] P19 · S · Phase 19 gate
 - Recipe R7.
 
 ---
