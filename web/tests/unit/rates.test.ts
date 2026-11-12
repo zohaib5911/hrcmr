@@ -14,9 +14,12 @@ describe("verified calculator sources", () => {
     const data = read(file);
     const url = new URL(data.source_url);
     expect(url.protocol).toBe("https:");
-    expect(["www.gov.uk", "assets.publishing.service.gov.uk", "www.economy-ni.gov.uk"]).toContain(
-      url.hostname,
-    );
+    expect([
+      "www.gov.uk",
+      "assets.publishing.service.gov.uk",
+      "www.economy-ni.gov.uk",
+      "www.nidirect.gov.uk",
+    ]).toContain(url.hostname);
     expect(data.checked_on).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(data.valid_from).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(data.valid_to === null || data.valid_to >= data.valid_from).toBe(true);
@@ -41,12 +44,12 @@ describe("verified calculator sources", () => {
         .filter((block: object) => "table" in block)
         .map((block: { table: string[][] }) => block.table);
       const thresholds = tables.find(
-        (rows) => rows[0][0] === "Class 1 National Insurance thresholds",
+        (rows) => rows[0]?.[0] === "Class 1 National Insurance thresholds",
       )!;
       for (const [label, text] of thresholds.slice(1)) {
-        for (const match of text.matchAll(/£([\d,]+) per (week|month|year)/g)) {
-          expect(data.values.ni_thresholds[label][match[2]]).toBe(
-            Number(match[1].replaceAll(",", "")),
+        for (const match of text!.matchAll(/£([\d,]+) per (week|month|year)/g)) {
+          expect(data.values.ni_thresholds[label!][match[2]!]).toBe(
+            Number(match[1]!.replaceAll(",", "")),
           );
         }
       }
@@ -56,11 +59,11 @@ describe("verified calculator sources", () => {
       ] as const) {
         const table = tables.find(
           (rows) =>
-            rows[0][0] === "National Insurance category letter" && rows[0].length === columns,
+            rows[0]?.[0] === "National Insurance category letter" && rows[0].length === columns,
         )!;
         expect(Object.keys(data.values[field])).toHaveLength(table.length - 1);
         for (const row of table.slice(1)) {
-          expect(data.values[field][row[0].split(" ")[0]]).toEqual(
+          expect(data.values[field][row[0]!.split(" ")[0]!]).toEqual(
             row.slice(1).map((cell) => (cell === "nil" ? 0 : parseFloat(cell) / 100)),
           );
         }
