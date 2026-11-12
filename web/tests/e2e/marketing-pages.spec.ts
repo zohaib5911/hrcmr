@@ -48,10 +48,12 @@ test("the pricing page shows the prices from config", async ({ page }) => {
 test("the contact form sends a message", async ({ page }) => {
   await page.goto("/contact");
   await ready(page);
-  await page.getByLabel("Name").fill("Sam Jones");
-  await page.getByLabel("Email").fill("sam@example.com");
-  await page.getByLabel("Topic").selectOption("pricing_billing");
-  await page.getByLabel("Message").fill("Do you offer a discount for a team of five?");
+  await page.getByLabel("Name", { exact: true }).fill("Sam Jones");
+  await page.getByLabel("Email", { exact: true }).fill("sam@example.com");
+  await page.getByLabel("Topic", { exact: true }).selectOption("pricing_billing");
+  await page
+    .getByLabel("Message", { exact: true })
+    .fill("Do you offer a discount for a team of five?");
   await page.getByRole("button", { name: "Send message" }).click();
   await expect(page.getByRole("heading", { name: "Message sent" })).toBeVisible();
 });
