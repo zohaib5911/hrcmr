@@ -4694,6 +4694,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/public/register/explore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Explore */
+        get: operations["public_register_explore"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/register/regions": {
         parameters: {
             query?: never;
@@ -6935,6 +6952,13 @@ export interface components {
             job_description: string;
             /** Soc Code */
             soc_code: string;
+        };
+        /** Bucket */
+        Bucket: {
+            /** Count */
+            count: number;
+            /** Label */
+            label: string;
         };
         /** BulletinListOut */
         BulletinListOut: {
@@ -9317,6 +9341,51 @@ export interface components {
             /** Id */
             id: string;
         };
+        /** ExploreOut */
+        ExploreOut: {
+            baseline?: components["schemas"]["PublicationOut"] | null;
+            /** Daily Previous Regions */
+            daily_previous_regions?: components["schemas"]["Bucket"][];
+            /** Facets */
+            facets?: {
+                [key: string]: string[];
+            };
+            /** Newest */
+            newest?: components["schemas"]["SponsorOut"][];
+            /**
+             * Page
+             * @default 1
+             */
+            page: number;
+            /**
+             * Page Size
+             * @default 50
+             */
+            page_size: number;
+            /** Previous Regions */
+            previous_regions?: components["schemas"]["Bucket"][];
+            /**
+             * Previous Total
+             * @default 0
+             */
+            previous_total: number;
+            /** Publications */
+            publications?: components["schemas"]["PublicationOut"][];
+            /** Results */
+            results?: components["schemas"]["SponsorOut"][];
+            /** Sections */
+            sections?: {
+                [key: string]: components["schemas"]["Bucket"][];
+            };
+            selected?: components["schemas"]["PublicationOut"] | null;
+            /** Timeline */
+            timeline?: components["schemas"]["PulsePoint"][];
+            /**
+             * Total
+             * @default 0
+             */
+            total: number;
+        };
         /** ExportOut */
         ExportOut: {
             /**
@@ -11665,6 +11734,35 @@ export interface components {
             /** Results */
             results: components["schemas"]["PublicHitOut"][];
         };
+        /** PublicationOut */
+        PublicationOut: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /**
+             * Published On
+             * Format: date
+             */
+            published_on: string;
+            /** Source Url */
+            source_url: string;
+        };
+        /** PulsePoint */
+        PulsePoint: {
+            /** Added */
+            added: number;
+            /** Count */
+            count: number;
+            /**
+             * Published On
+             * Format: date
+             */
+            published_on: string;
+            /** Removed */
+            removed: number;
+        };
         /** QuestionAdminOut */
         QuestionAdminOut: {
             /** Answer */
@@ -12955,6 +13053,30 @@ export interface components {
             withdraw_reason: string | null;
             /** Withdrawn At */
             withdrawn_at: string | null;
+        };
+        /** SponsorOut */
+        SponsorOut: {
+            /**
+             * First Seen
+             * Format: date
+             */
+            first_seen: string;
+            /** Id */
+            id: string;
+            /** Industry */
+            industry: string | null;
+            /** Name */
+            name: string;
+            /** Precision */
+            precision: string;
+            /** Ratings */
+            ratings: string[];
+            /** Region */
+            region: string | null;
+            /** Routes */
+            routes: string[];
+            /** Town */
+            town: string;
         };
         /** SponsoredEmployee */
         SponsoredEmployee: {
@@ -27806,6 +27928,54 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["BulletinOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    public_register_explore: {
+        parameters: {
+            query?: {
+                q?: string;
+                region?: string;
+                route?: string;
+                rating?: string;
+                industry?: string;
+                published_on?: string | null;
+                publication_id?: string | null;
+                window?: "7" | "30" | "90" | "180" | "365" | "start";
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExploreOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */
