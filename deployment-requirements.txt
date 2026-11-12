@@ -94,6 +94,7 @@ DATABASE_APP_USER_PASSWORD      generated in section 3                          
 REDIS_URL                       Railway Redis private URL                          [SECRET]
 SESSION_SECRET                  generated in section 3                             [SECRET]
 SESSION_COOKIE_NAME             brand_session                                      [PUBLIC]
+OWN_COMPANY_SLUG               slug of our own company; /careers lists its open roles     [PUBLIC]
 FIELD_ENCRYPTION_KEYS           generated in section 3                             [SECRET]
 FIELD_ENCRYPTION_ACTIVE_KID     k1                                                 [PUBLIC]
 BLIND_INDEX_KEY                 generated in section 3                             [SECRET]
@@ -142,6 +143,7 @@ NEXT_PUBLIC_GOOGLE_ADS_ID       optional, consent-gated                         
 Server-only (never sent to the browser):
 API_INTERNAL_URL                http://api.railway.internal:8000/api/v1 (private network) [PUBLIC]
 SESSION_COOKIE_NAME             same value as the api                              [PUBLIC]
+OWN_COMPANY_SLUG               slug of our own company; /careers lists its open roles     [PUBLIC]
 NOTE: the web service holds NO third-party secret keys. All Stripe / Resend / Claude / R2 calls go through the api.
 
 ---- 4.3 clamav service ----------------------------------------------------------------------
