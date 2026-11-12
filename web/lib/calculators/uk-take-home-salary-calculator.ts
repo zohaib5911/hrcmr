@@ -1,12 +1,18 @@
 import income from "@/rates/income-tax.json";
-import payroll from "@/rates/payroll-2026-27.json";
+import payroll2025 from "@/rates/payroll-2025-26.json";
+import payroll2026 from "@/rates/payroll-2026-27.json";
 import taxCodes from "@/rates/tax-codes-2026-27.json";
 
 export type Region = "england" | "scotland" | "wales";
 export type PensionMethod = "none" | "net_pay" | "salary_sacrifice" | "relief_at_source";
 export type LoanPlan = "none" | "plan 1" | "plan 2" | "plan 4" | "plan 5";
 
+export const takeHomeYears = {
+  "2026-2027": payroll2026,
+  "2025-2026": payroll2025,
+} as const;
 export type TakeHomeInput = {
+  taxYear: keyof typeof takeHomeYears;
   region: Region;
   salary: number; // annual gross
   taxCode: string; // "auto" or a code such as 1257L, BR, D0, 0T, K100, NT
@@ -29,9 +35,7 @@ export type TakeHomeResult = {
   notes: string[];
 };
 
-const V = payroll.values;
-
-export const takeHomeSources = [payroll, income, taxCodes].map((file) => ({
+export const takeHomeSources = [payroll2026, payroll2025, income, taxCodes].map((file) => ({
   title: file.title,
   url: file.source_url,
   checkedOn: file.checked_on,
@@ -39,13 +43,16 @@ export const takeHomeSources = [payroll, income, taxCodes].map((file) => ({
   validTo: file.valid_to,
 }));
 
-export const niCategories = Object.keys(V.employee_ni_rates);
+export const niCategories = Object.keys(payroll2026.values.employee_ni_rates);
 
 type Band = { upTo: number; rate: number };
 type Block = { h3?: string; table?: string[][] };
 
 /** Reads the PAYE band table that follows the given heading in the payroll file. */
-function bandsFor(heading: string): Band[] {
+function bandsFor(
+  payroll: (typeof takeHomeYears)[TakeHomeInput["taxYear"]],
+  heading: string,
+): Band[] {
   const content = payroll.content as Block[];
   const start = content.findIndex((block) => block.h3 === heading);
   const table = content.slice(start + 1).find((block) => block.table)?.table ?? [];
@@ -57,12 +64,6 @@ function bandsFor(heading: string): Band[] {
     return { rate, upTo: isTop ? Infinity : (amounts[amounts.length - 1] ?? Infinity) };
   });
 }
-
-const BANDS: Record<Region, Band[]> = {
-  england: bandsFor("England and Northern Ireland"),
-  wales: bandsFor("Wales"),
-  scotland: bandsFor("Scotland"),
-};
 
 const round2 = (value: number) => Math.round(value * 100) / 100;
 
@@ -84,13 +85,14 @@ function parseCode(
   code: string,
   income: number,
   region: Region,
+  personalAllowance: number,
 ): { allowance: number } | { rate: number } | null {
   let clean = code.trim().toUpperCase();
   if (clean === "AUTO" || clean === "") {
     const reduction =
       Math.max(0, income - income_values.allowance_taper_start_adjusted_net_income) *
       income_values.allowance_reduction_per_pound_over_threshold;
-    return { allowance: Math.max(0, V.personal_allowance_annual - reduction) };
+    return { allowance: Math.max(0, personalAllowance - reduction) };
   }
   const rates: Record<string, number> = taxCodes.values.flat_rates[region];
   if (Object.hasOwn(rates, clean)) return { rate: rates[clean]! };
@@ -110,6 +112,12 @@ function parseCode(
 const income_values = income.values;
 
 export function calculateTakeHome(input: TakeHomeInput): TakeHomeResult | null {
+  if (!Object.hasOwn(takeHomeYears, input.taxYear)) return null;
+  const payroll = takeHomeYears[input.taxYear];
+  const V = payroll.values;
+  const plan = input.studentLoan === "none" ? null : `student loan ${input.studentLoan}`;
+  const loans: Record<string, { year: number }> = V.student_loans;
+  if (plan && !Object.hasOwn(loans, plan)) return null;
   const { salary, pensionPercent, benefits, otherDeductions } = input;
   if (![salary, pensionPercent, benefits, otherDeductions].every(Number.isFinite)) return null;
   if (salary <= 0 || pensionPercent < 0 || pensionPercent > 100 || benefits < 0) return null;
@@ -124,9 +132,19 @@ export function calculateTakeHome(input: TakeHomeInput): TakeHomeResult | null {
   const grossPay = salary - sacrifice; // pay subject to NI and loans
   const taxablePay = Math.max(0, grossPay - netPay + benefits);
 
-  const parsed = parseCode(input.otherJobs ? "BR" : input.taxCode, taxablePay, input.region);
+  const parsed = parseCode(
+    input.otherJobs ? "BR" : input.taxCode,
+    taxablePay,
+    input.region,
+    V.personal_allowance_annual,
+  );
   if (!parsed) return null;
-  const bands = BANDS[input.region];
+  const headings: Record<Region, string> = {
+    england: "England and Northern Ireland",
+    wales: "Wales",
+    scotland: "Scotland",
+  };
+  const bands = bandsFor(payroll, headings[input.region]);
   let tax = 0;
   if ("rate" in parsed) {
     tax = taxablePay * parsed.rate;
@@ -141,10 +159,7 @@ export function calculateTakeHome(input: TakeHomeInput): TakeHomeResult | null {
   const niDue =
     Math.max(0, Math.min(grossPay, uel) - pt) * midRate + Math.max(0, grossPay - uel) * topRate;
 
-  const plan = input.studentLoan === "none" ? null : `student loan ${input.studentLoan}`;
-  const planThreshold = plan
-    ? V.student_loans[plan as keyof typeof V.student_loans].year
-    : Infinity;
+  const planThreshold = plan ? loans[plan]!.year : Infinity;
   const loan = plan ? Math.max(0, grossPay - planThreshold) * V.student_loan_rate : 0;
   const pgl = input.postgradLoan
     ? Math.max(0, grossPay - V.student_loans["postgraduate loan"].year) * V.postgraduate_loan_rate
@@ -168,7 +183,7 @@ export function calculateTakeHome(input: TakeHomeInput): TakeHomeResult | null {
   ].map((row) => ({ ...row, annual: round2(row.annual) }));
 
   const notes = [
-    "Rates are for the 2026 to 2027 tax year (6 April 2026 to 5 April 2027).",
+    `Rates are for the ${input.taxYear.replace("-", " to ")} tax year (${payroll.valid_from} to ${payroll.valid_to}).`,
     "Estimate only: it does not model higher-rate relief on relief-at-source pensions, the Scottish starter band for non-standard codes, or cumulative tax code adjustments.",
   ];
   if (input.otherJobs) notes.push("Other jobs: this job is taxed at the basic rate (code BR).");

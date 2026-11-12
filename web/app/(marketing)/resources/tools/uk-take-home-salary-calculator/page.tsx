@@ -15,7 +15,7 @@ export default function Page() {
   return (
     <CalculatorTemplate
       title="UK take-home salary calculator"
-      description="Estimate take-home pay for 2026 to 2027 after income tax, National Insurance, pension and student loans, with a breakdown."
+      description="Estimate take-home pay for 2025 to 2026 or 2026 to 2027 after income tax, National Insurance, pension and student loans, with a breakdown."
       sources={takeHomeSources}
     >
       <UkTakeHomeSalaryCalculator />
