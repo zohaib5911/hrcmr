@@ -14,8 +14,14 @@ export default function robots(): MetadataRoute.Robots {
         "/marketing/",
         "/opengraph-image",
         "/sitemap.xml$",
+        "/sponsors/regions/",
+        "/sponsors/changes",
+        "/sponsors/profile/",
+        "/sponsors/methodology$",
+        "/sponsors/terms$",
+        "/sponsors/sitemap",
       ],
     },
-    sitemap: publicUrl("/sitemap.xml"),
+    sitemap: [publicUrl("/sitemap.xml"), publicUrl("/sponsors/sitemap.xml")],
   };
 }
