@@ -2,6 +2,8 @@ import noticeGb from "@/rates/notice-gb.json";
 import noticeNi from "@/rates/notice-ni.json";
 import resignation from "@/rates/notice-resignation.json";
 
+import { addMonths, parseIso } from "@/lib/ui/dates";
+
 export type Jurisdiction = "gb" | "ni";
 export type Giver = "employer" | "employee";
 export type Status = "employee" | "worker";
@@ -62,9 +64,10 @@ export type NoticeResult = {
 export type NoticeError = { ok: false; error: string };
 
 const DAY = 86_400_000;
-const parse = (iso: string) => {
-  const t = Date.parse(`${iso}T00:00:00Z`);
-  return Number.isNaN(t) ? null : t;
+/** Strict `YYYY-MM-DD` to UTC ms; null for impossible dates such as 2026-02-30. */
+const parse = (value: string) => {
+  const ymd = parseIso(value);
+  return ymd ? Date.UTC(ymd.y, ymd.m - 1, ymd.d) : null;
 };
 const iso = (t: number) => new Date(t).toISOString().slice(0, 10);
 const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
@@ -89,13 +92,9 @@ export function hasOneMonth(from: string, to: string): boolean {
   const a = parse(from);
   const b = parse(to);
   if (a === null || b === null || b < a) return false;
-  const f = new Date(a);
-  const next = Date.UTC(
-    f.getUTCFullYear(),
-    f.getUTCMonth() + v.minimum_service_months,
-    f.getUTCDate(),
-  );
-  return b >= next;
+  // Calendar-month addition clamped to month end: 31 Jan + 1 month is 28 (or 29) Feb, not 3 Mar.
+  const next = parse(addMonths(from, v.minimum_service_months));
+  return next !== null && b >= next;
 }
 
 export function statutoryNoticeWeeks(
