@@ -102,7 +102,7 @@ Open findings: 1 P0 / 19 P1 / 1 P2 — FIX NEEDED. One further P0 browser failur
 - **Fix:** collect enough regular working-pattern information to apply the same28day cap in hours mode (for equal-length days, weekly hours plus days/week). Use `holiday.values` and the existing `statutoryDays` helper for the cap; explain the conversion and reject unsupported uneven patterns rather than assuming a five-day week. Keep ordinary five-day/part-time examples and the separate irregular-hours accrual method unchanged.
 - **Done when:** unit/component cases cover45hours/6days→210hours,37.5hours/5days→210hours and a part-time pattern, with visible cap workings; days/hours modes agree for the same pattern and invalid/missing pattern input is explained. Existing holiday tests, lint and typecheck pass.
 
-### [ ] C4.1.21 · P2 · Validate persisted risk-assessment structure before restoring it (from T19.15)
+### [x] C4.1.21 · P2 · Validate persisted risk-assessment structure before restoring it (from T19.15) — fixed in PR #101
 - **Problem:** `loadAssessment` in `web/lib/calculators/risk-assessment-template.ts:70` checks only that `hazards` is an array. Valid JSON such as `{ "organisation": null, "hazards": [null] }` is returned as a typed assessment and can crash form rendering/export rather than recovering from a damaged draft.
 - **Fix:** validate scalar fields and each hazard's fields/status before merging saved data. Reject malformed records or safely restore known valid fields using the existing defaults; keep all storage calls guarded. Show a usable empty form on invalid storage.
 - **Done when:** unit tests cover null/wrong-type fields and invalid hazard entries/status, plus a component restoration test; valid drafts and blocked/full storage cases still pass.
