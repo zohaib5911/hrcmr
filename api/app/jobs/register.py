@@ -11,6 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.holidays.models import BankHoliday
+from app.modules.register.geo import geocode_from_latest_dataset
 from app.modules.register.ingest import ingest
 
 
@@ -40,5 +41,7 @@ async def _import(ctx: dict[str, Any], now: datetime, *, scheduled: bool) -> str
             return "bank_holiday"
         async with httpx.AsyncClient(timeout=60) as client:
             result = await ingest(db, ctx.get("http", client), now.date())
+        if result == "imported":
+            await geocode_from_latest_dataset(db)
         await db.commit()
         return result

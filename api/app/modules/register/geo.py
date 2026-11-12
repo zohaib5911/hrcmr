@@ -5,13 +5,16 @@ caller supplies the downloaded bytes."""
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
+import re
 from typing import TYPE_CHECKING, NamedTuple
 
 from sqlalchemy import select
 
+from app.core.logging import get_logger
 from app.modules.register.ingest import normalise
-from app.modules.register.models import Sponsor
+from app.modules.register.models import PlaceDataset, Sponsor
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,6 +38,21 @@ _BY_KEY["yorkshire and the humber"] = "Yorkshire and The Humber"
 _BY_KEY["yorkshire humber"] = "Yorkshire and The Humber"
 _BY_KEY["east"] = "East of England"
 PLACE_HEADERS = ("place_name", "county", "region", "lat", "lon")
+# ONS region/country codes (GSS). The Index of Place Names gives Welsh and Scottish places a
+# W99999999/S99999999 region, so country codes fill in for the devolved nations.
+_REGION_CODES = {
+    "E12000001": "North East",
+    "E12000002": "North West",
+    "E12000003": "Yorkshire and The Humber",
+    "E12000004": "East Midlands",
+    "E12000005": "West Midlands",
+    "E12000006": "East of England",
+    "E12000007": "London",
+    "E12000008": "South East",
+    "E12000009": "South West",
+}
+_NATION_PREFIX = {"W": "Wales", "S": "Scotland", "N": "Northern Ireland"}
+logger = get_logger("app.register.geo")
 
 # SIC 2007 division (first two digits) -> section letter.
 _SECTIONS = (
@@ -99,6 +117,63 @@ def parse_places(content: bytes) -> dict[tuple[str, str], Place]:
         if len(regions) == 1:
             exact[(name, "")] = first[name]
     return exact
+
+
+def _ons_region(row: dict[str, str], code_cols: list[str], name_cols: list[str]) -> str | None:
+    for col in code_cols:
+        code = row.get(col, "").strip().upper()
+        if code in _REGION_CODES:
+            return _REGION_CODES[code]
+        if code[:1] in _NATION_PREFIX:
+            return _NATION_PREFIX[code[:1]]
+    for col in name_cols:
+        if found := region_name(row.get(col, "")):
+            return found
+    return None
+
+
+def normalise_places(content: bytes) -> bytes:
+    """Accept the ONS Index of Place Names CSV (columns such as place22nm, cty22nm, ctyhistnm,
+    ctyltnm, rgn22cd, ctry22cd, lat, long; the year digits vary by edition) or a file already
+    in PLACE_HEADERS form, and return the five-column CSV ``parse_places`` reads. One row per
+    county spelling, so a sponsor's county can match the current, historic or ceremonial name."""
+    text = content.decode("utf-8-sig")
+    reader = csv.DictReader(io.StringIO(text))
+    raw = [h or "" for h in reader.fieldnames or ()]
+    if tuple(raw) == PLACE_HEADERS:
+        parse_places(content)
+        return content
+    headers = {h.strip().lower(): h for h in raw}
+
+    def cols(pattern: str) -> list[str]:
+        return [headers[h] for h in sorted(headers) if re.fullmatch(pattern, h)]
+
+    names = cols(r"place\d{2}nm")
+    counties = cols(r"cty\d{2}nm|ctyhistnm|ctyltnm")
+    region_codes = cols(r"rgn\d{2}cd") + cols(r"ctry\d{2}cd")
+    region_names = cols(r"rgn\d{2}nm") + cols(r"ctry\d{2}nm")
+    lat, lon = headers.get("lat"), headers.get("long")
+    if not names or not (region_codes or region_names) or lat is None or lon is None:
+        raise ValueError("Unexpected place-name CSV columns")
+    out = io.StringIO()
+    writer = csv.writer(out, lineterminator="\n")
+    writer.writerow(PLACE_HEADERS)
+    seen: set[tuple[str, str, str]] = set()
+    for row in reader:
+        values = {k: v or "" for k, v in row.items() if k is not None}
+        name = values[names[0]].strip()
+        region = _ons_region(values, region_codes, region_names)
+        if not name or region is None:
+            continue
+        for county in {values[c].strip() for c in counties} or {""}:
+            key = (normalise(name), normalise(county), region)
+            if key in seen:
+                continue
+            seen.add(key)
+            writer.writerow((name, county, region, values[lat].strip(), values[lon].strip()))
+    result = out.getvalue().encode("utf-8")
+    parse_places(result)  # refuses an empty or unusable file
+    return result
 
 
 def geocode(
@@ -173,4 +248,39 @@ async def apply_companies_match(
             sponsor.companies_house_number, sponsor.sic_section = hit
             changed += 1
     await db.flush()
+    return changed
+
+
+async def load_place_dataset(
+    db: AsyncSession, content: bytes, *, version: str, source: str
+) -> tuple[PlaceDataset, int]:
+    """Store a new place-name dataset as the active one and place every sponsor it can.
+    Caller owns commit/rollback."""
+    normalised = normalise_places(content)
+    places = parse_places(normalised)
+    dataset = PlaceDataset(
+        version=version,
+        source=source,
+        sha256=hashlib.sha256(content).hexdigest(),
+        row_count=normalised.count(b"\n") - 1,
+        content=normalised,
+    )
+    db.add(dataset)
+    await db.flush()
+    return dataset, await apply_geocoding(db, places, only_missing=False)
+
+
+async def geocode_from_latest_dataset(db: AsyncSession) -> int | None:
+    """Called after every register import: place sponsors still unplaced. Returns None (and
+    logs) when no dataset was ever loaded, so the import still succeeds but stays unplaced."""
+    dataset = await db.scalar(
+        select(PlaceDataset)
+        .order_by(PlaceDataset.loaded_at.desc(), PlaceDataset.id.desc())
+        .limit(1)
+    )
+    if dataset is None:
+        logger.warning("register_places_missing", hint="python -m app.cli load-places")
+        return None
+    changed = await apply_geocoding(db, parse_places(dataset.content))
+    logger.info("register_geocoded", version=dataset.version, placed=changed)
     return changed

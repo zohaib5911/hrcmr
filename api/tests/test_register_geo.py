@@ -3,6 +3,7 @@ import pytest
 from app.modules.register.geo import (
     ITL1_REGIONS,
     geocode,
+    normalise_places,
     parse_companies,
     parse_places,
     sic_section,
@@ -62,3 +63,21 @@ def test_companies_ambiguous_names_dropped() -> None:
     assert parse_companies(data) == {"example care ltd": ("01234567", "Q")}
     with pytest.raises(ValueError, match="columns"):
         parse_companies(b"x\n1\n")
+
+
+def test_ons_index_of_place_names_is_normalised() -> None:
+    ons = (
+        b"\xef\xbb\xbfplace23cd,PLACE23NM,ctyhistnm,ctyltnm,rgn23cd,ctry23cd,lat,long\n"
+        b"1,Leeds,Yorkshire,West Yorkshire,E12000003,E92000001,53.8,-1.55\n"
+        b"2,Cardiff,Glamorgan,South Glamorgan,W99999999,W92000004,51.48,-3.18\n"
+        b"3,Nowhere,,,X1,X2,1,1\n"
+    )
+    places = parse_places(normalise_places(ons))
+    assert geocode(places, "Leeds", "Yorkshire")[1] == "exact"
+    assert geocode(places, "Leeds", "West Yorkshire")[1] == "exact"
+    assert geocode(places, "Cardiff", "")[0].region == "Wales"  # type: ignore[union-attr]
+    assert geocode(places, "Nowhere", "") == (None, "none")
+    own = b"place_name,county,region,lat,lon\nLondon,,London,51.5,-0.12\n"
+    assert normalise_places(own) == own
+    with pytest.raises(ValueError, match="columns"):
+        normalise_places(b"place23nm,lat,long\nLeeds,1,1\n")
