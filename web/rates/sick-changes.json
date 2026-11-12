@@ -1,0 +1,65 @@
+{
+  "source_url": "https://www.gov.uk/government/publications/employer-bulletin-february-2026/february-2026-issue-of-the-employer-bulletin",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-04-06",
+  "valid_to": null,
+  "validity_basis": "commencement",
+  "title": "February 2026 issue of the Employer Bulletin - GOV.UK",
+  "content": [
+    {
+      "h3": "Statutory Sick Pay changes — what employers need to know"
+    },
+    {
+      "p": "From 6 April 2026 the Employment Rights Act 2025 introduces two major changes to Statutory Sick Pay ( SSP )."
+    },
+    {
+      "h4": "Removal of the Lower Earnings Limit"
+    },
+    {
+      "p": "All eligible employees will be entitled to SSP regardless of income. SSP will be paid at 80% of normal weekly earnings or the uprated weekly flat rate of £123.25, whichever is lower."
+    },
+    {
+      "h4": "Removal of the Waiting Period"
+    },
+    {
+      "p": "SSP will be paid from the first full day of sickness absence, not from day four."
+    },
+    {
+      "p": "These changes make SSP more accessible and remove barriers for lower-paid employees, and will apply across the United Kingdom, including Northern Ireland. The relevant legislation will apply as to when the sickness absence took place. Absences starting before 6 April 2026 will follow the current system to determine eligibility and payment. Absences starting on or after 6 April 2026 will use the new rules, unless otherwise outlined in legislation."
+    },
+    {
+      "h4": "Get ready for SSP changes"
+    },
+    {
+      "p": "HMRC has shared technical guidance, including on transitional protections with software developers and payroll providers to help them prepare for these changes. You may wish to discuss these changes with your payroll provider."
+    },
+    {
+      "p": "Make sure your payroll systems are ready and staff understand the new rules."
+    },
+    {
+      "p": "Guidance on SSP for employers and employees will be updated in due course. Wider guidance on the Employment Rights Act is available on Business.gov.uk ."
+    },
+    {
+      "h4": "Next steps"
+    },
+    {
+      "li": "confirm your payroll provider is prepared"
+    },
+    {
+      "li": "watch for GOV.UK updates ahead of April 2026"
+    },
+    {
+      "li": "share this bulletin with HR and line managers"
+    },
+    {
+      "p": "For queries about SSP changes, email SSP .Team@DWP.gov.uk ."
+    }
+  ],
+  "scope": "Statutory Sick Pay reform section only",
+  "values": {
+    "waiting_days": 0,
+    "lower_earnings_limit": null,
+    "jurisdictions": ["England", "Wales", "Scotland", "Northern Ireland"],
+    "ongoing_absences_started_before_valid_from": "Check transitional legislation; do not apply new rules retrospectively."
+  }
+}

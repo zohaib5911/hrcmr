@@ -1,0 +1,142 @@
+{
+  "source_url": "https://www.gov.uk/income-tax-rates",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "Income Tax rates and Personal Allowances : Current rates and allowances - GOV.UK",
+  "content": [
+    {
+      "p": "How much Income Tax you pay in each tax year depends on:"
+    },
+    {
+      "li": "how much of your income is above your Personal Allowance"
+    },
+    {
+      "li": "how much of your income falls within each tax band"
+    },
+    {
+      "p": "Some income is tax-free ."
+    },
+    {
+      "p": "The current tax year is from 6 April 2026 to 5 April 2027."
+    },
+    {
+      "p": "This guide is also available in Welsh (Cymraeg) ."
+    },
+    {
+      "h2": "Your tax-free Personal Allowance"
+    },
+    {
+      "p": "The standard Personal Allowance is £12,570, which is the amount of income you do not have to pay tax on."
+    },
+    {
+      "h3": "If you earn more than £100,000"
+    },
+    {
+      "p": "Your personal allowance goes down by £1 for every £2 that your adjusted net income is above £100,000. This means your allowance is zero if your income is £125,140 or above."
+    },
+    {
+      "h3": "Blind Person’s Allowance"
+    },
+    {
+      "p": "You may be able to earn more before you start paying Income Tax if you claim Blind Person’s Allowance . This tax-free allowance is added to your Personal Allowance."
+    },
+    {
+      "h2": "Income Tax rates and bands"
+    },
+    {
+      "p": "The table shows the tax rates you pay in each band if you have a standard Personal Allowance of £12,570."
+    },
+    {
+      "p": "Income tax bands are different if you live in Scotland ."
+    },
+    {
+      "table": [
+        ["Band", "Taxable income", "Tax rate"],
+        ["Personal Allowance", "Up to £12,570", "0%"],
+        ["Basic rate", "£12,571 to £50,270", "20%"],
+        ["Higher rate", "£50,271 to £125,140", "40%"],
+        ["Additional rate", "over £125,140", "45%"]
+      ]
+    },
+    {
+      "p": "You can also see the rates and bands without the Personal Allowance . You do not get a Personal Allowance on taxable income over £125,140."
+    },
+    {
+      "h3": "If you’re employed or get a pension"
+    },
+    {
+      "p": "Check your Income Tax to see:"
+    },
+    {
+      "li": "your Personal Allowance and tax code"
+    },
+    {
+      "li": "how much tax you’ve paid in the current tax year"
+    },
+    {
+      "li": "how much you’re likely to pay for the rest of the year"
+    },
+    {
+      "h2": "Other allowances"
+    },
+    {
+      "p": "You have tax-free allowances for:"
+    },
+    {
+      "li": "savings interest"
+    },
+    {
+      "li": "dividend income , if you own shares in a company"
+    },
+    {
+      "p": "You may also have tax-free allowances for:"
+    },
+    {
+      "li": "your first £1,000 of income from self-employment - this is your ‘trading allowance’"
+    },
+    {
+      "li": "your first £1,000 of income from property you rent (unless you’re using the Rent a Room Scheme )"
+    },
+    {
+      "p": "Find out whether you’re eligible for the trading and property allowances ."
+    },
+    {
+      "p": "You pay tax on any interest, dividends or income over your allowances."
+    },
+    {
+      "h2": "Paying less Income Tax"
+    },
+    {
+      "p": "The amount of tax you pay can also be reduced by tax reliefs if you qualify for them, for example:"
+    },
+    {
+      "li": "charity donations"
+    },
+    {
+      "li": "job expenses"
+    },
+    {
+      "li": "private pension contributions"
+    },
+    {
+      "li": "maintenance payments"
+    },
+    {
+      "h3": "If you’re married or in a civil partnership"
+    },
+    {
+      "p": "You may be able to claim Marriage Allowance to reduce your partner’s tax if your income is less than the standard Personal Allowance."
+    },
+    {
+      "p": "If you do not claim Marriage Allowance and you or your partner were born before 6 April 1935, you may be able to claim Married Couple’s Allowance ."
+    }
+  ],
+  "values": {
+    "personal_allowance_annual": 12570,
+    "allowance_taper_start_adjusted_net_income": 100000,
+    "allowance_reduction_per_pound_over_threshold": 0.5,
+    "allowance_zero_adjusted_net_income": 125140
+  }
+}

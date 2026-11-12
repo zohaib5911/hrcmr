@@ -1,0 +1,161 @@
+{
+  "source_url": "https://www.gov.uk/national-minimum-wage-accommodation",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "National Minimum Wage and Living Wage: accommodation: Accommodation rates - GOV.UK",
+  "content": [
+    {
+      "p": "Accommodation provided by an employer can be taken into account when calculating the National Minimum Wage or National Living Wage ."
+    },
+    {
+      "p": "No other kind of company benefit (such as food, a car, childcare vouchers) counts towards the minimum wage."
+    },
+    {
+      "h2": "Accommodation offset rates"
+    },
+    {
+      "p": "The accommodation rates are set in April each year."
+    },
+    {
+      "p": "From April 2026, the rates are:"
+    },
+    {
+      "li": "£11.10 (daily rate)"
+    },
+    {
+      "li": "£77.70 (weekly rate)"
+    },
+    {
+      "h2": "Previous rates"
+    },
+    {
+      "table": [
+        ["Year", "Daily accommodation offset rate", "Weekly accommodation offset rate"],
+        ["2025", "£10.66", "£74.62"],
+        ["2024", "£9.99", "£69.93"],
+        ["2023", "£9.10", "£63.70"],
+        ["2022", "£8.70", "£60.90"],
+        ["2021", "£8.36", "£58.52"],
+        ["2020", "£8.20", "£57.40"],
+        ["2019", "£7.55", "£52.85"],
+        ["2018", "£7", "£49"],
+        ["2017", "£6.40", "£44.80"]
+      ]
+    },
+    {
+      "p": "Use the minimum wage calculator to check if it’s been paid."
+    },
+    {
+      "h2": "Using the offset rate to work out the minimum wage"
+    },
+    {
+      "p": "If an employer charges more than the offset rate, the difference is taken off the worker’s pay which counts for the National Minimum Wage or National Living Wage."
+    },
+    {
+      "p": "This means the higher the accommodation charge, the lower a worker’s pay when calculating the minimum wage."
+    },
+    {
+      "p": "If the accommodation charge is at or below the offset rate, it does not have an effect on the worker’s pay."
+    },
+    {
+      "p": "If the accommodation is free, the offset rate is added to the worker’s pay."
+    },
+    {
+      "p": "See examples of accommodation rates for minimum wage calculations ."
+    }
+  ],
+  "periods": [
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-accommodation",
+      "checked_on": "2026-11-12",
+      "valid_from": "2026-04-01",
+      "valid_to": "2027-03-31",
+      "validity_basis": "statutory_period",
+      "daily": 11.1,
+      "weekly": 77.7
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-accommodation",
+      "checked_on": "2026-11-12",
+      "valid_from": "2025-04-01",
+      "valid_to": "2026-03-31",
+      "validity_basis": "statutory_period",
+      "daily": 10.66,
+      "weekly": 74.62
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-accommodation",
+      "checked_on": "2026-11-12",
+      "valid_from": "2024-04-01",
+      "valid_to": "2025-03-31",
+      "validity_basis": "statutory_period",
+      "daily": 9.99,
+      "weekly": 69.93
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-accommodation",
+      "checked_on": "2026-11-12",
+      "valid_from": "2023-04-01",
+      "valid_to": "2024-03-31",
+      "validity_basis": "statutory_period",
+      "daily": 9.1,
+      "weekly": 63.7
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-accommodation",
+      "checked_on": "2026-11-12",
+      "valid_from": "2022-04-01",
+      "valid_to": "2023-03-31",
+      "validity_basis": "statutory_period",
+      "daily": 8.7,
+      "weekly": 60.9
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-accommodation",
+      "checked_on": "2026-11-12",
+      "valid_from": "2021-04-01",
+      "valid_to": "2022-03-31",
+      "validity_basis": "statutory_period",
+      "daily": 8.36,
+      "weekly": 58.52
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-accommodation",
+      "checked_on": "2026-11-12",
+      "valid_from": "2020-04-01",
+      "valid_to": "2021-03-31",
+      "validity_basis": "statutory_period",
+      "daily": 8.2,
+      "weekly": 57.4
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-accommodation",
+      "checked_on": "2026-11-12",
+      "valid_from": "2019-04-01",
+      "valid_to": "2020-03-31",
+      "validity_basis": "statutory_period",
+      "daily": 7.55,
+      "weekly": 52.85
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-accommodation",
+      "checked_on": "2026-11-12",
+      "valid_from": "2018-04-01",
+      "valid_to": "2019-03-31",
+      "validity_basis": "statutory_period",
+      "daily": 7.0,
+      "weekly": 49.0
+    },
+    {
+      "source_url": "https://www.gov.uk/national-minimum-wage-accommodation",
+      "checked_on": "2026-11-12",
+      "valid_from": "2017-04-01",
+      "valid_to": "2018-03-31",
+      "validity_basis": "statutory_period",
+      "daily": 6.4,
+      "weekly": 44.8
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "source_url": "https://www.gov.uk/redundancy-your-rights/notice-periods",
+  "checked_on": "2026-11-12",
+  "valid_from": "2026-11-12",
+  "valid_to": null,
+  "validity_basis": "verification_snapshot_not_legal_commencement",
+  "title": "Redundancy: your rights: Notice periods - GOV.UK",
+  "content": [
+    {
+      "p": "You must be given a notice period before your employment ends."
+    },
+    {
+      "p": "The statutory redundancy notice periods are:"
+    },
+    {
+      "li": "at least one week’s notice if employed between one month and 2 years"
+    },
+    {
+      "li": "one week’s notice for each year if employed between 2 and 12 years"
+    },
+    {
+      "li": "12 weeks’ notice if employed for 12 years or more"
+    },
+    {
+      "p": "Check your contract. Your employer may give you more than the statutory minimum, but they cannot give you less."
+    },
+    {
+      "h2": "Notice pay"
+    },
+    {
+      "p": "As well as statutory redundancy pay, your employer should either:"
+    },
+    {
+      "li": "pay you through your notice period"
+    },
+    {
+      "li": "pay you in lieu of notice depending on your circumstances"
+    },
+    {
+      "p": "Your notice pay is based on the average you earned per week over the 12 weeks before your notice period starts."
+    },
+    {
+      "p": "If you were paid less than usual because you were ‘on furlough’ because of coronavirus, your notice pay is based on what you would have earned normally."
+    },
+    {
+      "h2": "Payment in lieu of notice"
+    },
+    {
+      "p": "Your employment can be ended without notice if ‘payment in lieu of notice’ is included in your contract. Your employer will pay you instead of giving you a notice period."
+    },
+    {
+      "p": "You get all of the basic pay you would have received during the notice period. You may get extras such as pension contributions or private health care insurance if they’re in your contract."
+    },
+    {
+      "p": "Your employer may still offer you payment in lieu of notice, even if your contract does not mention it. If you accept, you should receive full pay and any extras that are in your contract."
+    }
+  ],
+  "values": {
+    "minimum_service_months": 1,
+    "minimum_weeks": 1,
+    "one_week_per_completed_year_from_years": 2,
+    "maximum_statutory_weeks": 12,
+    "average_weekly_pay_reference_weeks": 12
+  }
+}
