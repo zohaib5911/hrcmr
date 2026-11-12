@@ -11,10 +11,11 @@ from typing import Any
 
 import pytest
 
+from app.modules.soc import router as soc_router
 from tests.db.support import DatabaseUnderTest, temporary_database
 from tests.db.test_careers import anonymous
 from tests.db.test_employee_documents import rig as rig
-from tests.db.test_soc_match import _load_sample, _publish_rules
+from tests.db.test_soc_match import _fake_embed, _load_sample, _publish_rules
 
 API = "/api/v1"
 CHECK = {
@@ -48,7 +49,16 @@ def database(stack: None) -> Iterator[DatabaseUnderTest]:
 
 
 @pytest.fixture(autouse=True)
-async def ready(rig: dict[str, Any], database: DatabaseUnderTest) -> None:
+async def ready(
+    rig: dict[str, Any], database: DatabaseUnderTest, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Match the sample's vectors without downloading weights or starting ONNX worker threads.
+    # Guard the factory too: losing this injection must fail instead of hanging on model setup.
+    def unexpected_model_load() -> None:
+        pytest.fail("SOC database tests must use the deterministic sample embedder")
+
+    monkeypatch.setattr(soc_router, "fastembed_embedder", unexpected_model_load)
+    rig["app"].state.soc_embedder = _fake_embed
     await _publish_rules(database.owner_url)
 
 
