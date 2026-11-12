@@ -79,7 +79,7 @@ function taxOnBands(taxable: number, bands: Band[], bandShift: number) {
   return tax + bandShift;
 }
 
-/** Returns the allowance for a code, or a flat-rate marker. */
+/** Returns the modeled allowance or explicit flat rate for the selected jurisdiction. */
 function parseCode(
   code: string,
   income: number,

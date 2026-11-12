@@ -106,6 +106,14 @@ describe("take-home salary calculator", () => {
     expect(get({ ...base, region, taxCode }, "Income tax")).toBe(-tax);
   });
 
+  it("keeps zero-allowance codes progressive across the higher-rate boundary", () => {
+    // £37,700 × 20% + £22,300 × 40% = £16,460, with no allowance.
+    expect(get({ ...base, salary: 60000, taxCode: "0T" }, "Income tax")).toBe(-16460);
+    expect(get({ ...base, region: "wales", salary: 60000, taxCode: "C0T" }, "Income tax")).toBe(
+      -16460,
+    );
+  });
+
   it.each([
     ["england", "SBR"],
     ["england", "CD0"],
