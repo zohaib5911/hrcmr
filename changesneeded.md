@@ -67,7 +67,7 @@ Open findings: 1 P0 / 19 P1 / 1 P2 — FIX NEEDED. One further P0 browser failur
 - **Fix:** use explicit validated ISO-date parsing and UTC calendar-month addition clamped to month end, following the existing settlement calculator helper pattern. Retain separate employee/employer scales and GB/NI source notes.
 - **Done when:** tests cover January29–31 to February in normal/leap years, a date immediately before completion, ordinary anniversaries and impossible dates; the end-of-month employee receives the statutory minimum, and existing notice tests pass.
 
-### [ ] C4.1.14 · P1 · Reject reporting deadlines outside captured holiday coverage (from T19.4)
+### [x] C4.1.14 · P1 · Reject reporting deadlines outside captured holiday coverage (from T19.4) — fixed in PR #97
 - **Problem:** `calculateDeadline` checks only whether the result exceeds `bankHolidays.valid_to`. Event2018-12-24 is accepted even though data starts2019; Christmas2018 is treated as a working day and a false deadline is returned. Long days-left ranges can likewise extend beyond captured data.
 - **Fix:** validate the event→deadline and today→deadline ranges against the selected nation's stored coverage, including its lower bound. Return an explanation without a numeric deadline/days-left where the required range is unsupported. Keep trigger dates and event-day exclusion unchanged.
 - **Done when:** tests cover before-first-date, beyond-last-date and a today value outside coverage, plus valid national holiday crossings; no unsupported range yields a reliable-looking number. Existing deadline tests pass.
