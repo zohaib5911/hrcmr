@@ -129,7 +129,7 @@ export function MinimumWageChecker() {
           <Button type="submit">Check minimum wage</Button>
           <Button
             type="button"
-            variant="secondary"
+            variant="gray"
             onClick={() => {
               setForm(initial);
               setResult(null);

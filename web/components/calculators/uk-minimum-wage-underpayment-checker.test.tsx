@@ -10,7 +10,7 @@ it("calculates a period and clears stale results and answers", () => {
     ["Age at pay-period start", "21"],
     ["Minimum-wage hours for this period", "40"],
     ["Gross period pay before the reductions below (£)", "500"],
-  ])
+  ] as const)
     fireEvent.change(screen.getByLabelText(label), { target: { value } });
   fireEvent.click(screen.getByRole("button", { name: "Check minimum wage" }));
   expect(screen.getByText("Potential underpayment")).toBeInTheDocument();
