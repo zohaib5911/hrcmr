@@ -101,6 +101,6 @@ case "$cmd" in
     [ "${1:-}" = "--" ] && shift
     exec 6>"$BUS/.seriallock"
     flock -n 6 || { echo "serial: waiting for the other agent's test run..." >&2; flock -w 5400 6; }
-    "$@" ;;
+    AGENT_SERIAL_HELD=1 "$@" ;;   # .agent/e2e.sh (pnpm test:e2e) sees this and does not lock again
   *) sed -n '2,24p' "$0"; exit 1 ;;
 esac
