@@ -1,9 +1,13 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, expect, it } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { AuditAdmin } from "./audit-admin";
 import { auditFilters, pageOffset } from "@/lib/platform/operations";
-afterEach(cleanup);
+beforeEach(() => vi.stubEnv("NEXT_PUBLIC_API_URL", "https://api.configured.test/api/v1"));
+afterEach(() => {
+  cleanup();
+  vi.unstubAllEnvs();
+});
 it("shares normalized action, actor and inclusive UTC dates between results, paging and CSV", () => {
   const filters = auditFilters({
     action: " platform. ",
@@ -48,6 +52,9 @@ it("shares normalized action, actor and inclusive UTC dates between results, pag
     );
     for (const [k, v] of Object.entries(filters)) expect(url.searchParams.get(k)).toBe(v);
     if (name === "Export CSV") {
+      expect(screen.getByRole("link", { name }).getAttribute("href")).toMatch(
+        /^https:\/\/api\.configured\.test\/api\/v1\/platform\/audit\/export\?/,
+      );
       expect(url.pathname).toBe("/api/v1/platform/audit/export");
       expect(url.searchParams.has("offset")).toBe(false);
     }

@@ -15,8 +15,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ProgressBar } from "@/components/ui/progress";
 import { StatusChip } from "@/components/ui/status-chip";
 import { useToast } from "@/components/ui/toast";
-import { browserApiBaseUrl } from "@/lib/api/client";
-import { attempt, type Problem } from "@/lib/auth/request";
+import { attempt, baseUrl, type Problem } from "@/lib/auth/request";
 import { formatUk } from "@/lib/ui/dates";
 
 import { NewDocumentSheet } from "./new-document-sheet";
@@ -190,7 +189,7 @@ export function PolicyDetail({ policyId }: { policyId: string }) {
         </span>
         {policy.file_id && (
           <a
-            href={`${browserApiBaseUrl()}/policies/${policy.id}/view`}
+            href={`${baseUrl()}/policies/${policy.id}/view`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-callout text-accent-text underline"

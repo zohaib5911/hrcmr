@@ -2,8 +2,8 @@
 
 import { useEffect, useRef } from "react";
 
-import { browserApiBaseUrl, createApiClient } from "@/lib/api/client";
-import { ensureCsrfCookie } from "@/lib/auth/request";
+import { createApiClient } from "@/lib/api/client";
+import { baseUrl, ensureCsrfCookie } from "@/lib/auth/request";
 import { safeNextPath } from "@/lib/platform/session";
 
 export type StartResult = { ok: true } | { ok: false; code: string };
@@ -17,7 +17,7 @@ export type StartResult = { ok: true } | { ok: false; code: string };
 export async function startFromBrowser(): Promise<StartResult> {
   try {
     await ensureCsrfCookie();
-    const client = createApiClient({ baseUrl: browserApiBaseUrl() });
+    const client = createApiClient({ baseUrl: baseUrl() });
     const { response, error } = await client.POST("/auth/platform-session");
     if (response.ok) return { ok: true };
     return { ok: false, code: errorCode(error) };

@@ -5,7 +5,8 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { TextField } from "@/components/ui/text-field";
 import { Select } from "@/components/ui/select";
-import { browserApiBaseUrl, type components } from "@/lib/api/client";
+import { type components } from "@/lib/api/client";
+import { baseUrl } from "@/lib/auth/request";
 import { PAGE_SIZE, queryString, type AuditFilters } from "@/lib/platform/operations";
 import { formatUk } from "@/lib/ui/dates";
 
@@ -55,7 +56,7 @@ export function AuditAdmin({
       </form>
       <a
         className="text-accent underline"
-        href={`${browserApiBaseUrl()}/platform/audit/export?${queryString(filters)}`}
+        href={`${baseUrl()}/platform/audit/export?${queryString(filters)}`}
       >
         Export CSV
       </a>
