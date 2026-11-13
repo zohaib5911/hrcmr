@@ -1,0 +1,848 @@
+[
+  {
+    "source": "web/app/(admin)/platform/audit/page.tsx",
+    "route": "/platform/audit",
+    "group": "admin",
+    "key": "admin-platform-audit"
+  },
+  {
+    "source": "web/app/(admin)/platform/companies/[id]/page.tsx",
+    "route": "/platform/companies/[id]",
+    "group": "admin",
+    "key": "admin-platform-companies-id"
+  },
+  {
+    "source": "web/app/(admin)/platform/companies/page.tsx",
+    "route": "/platform/companies",
+    "group": "admin",
+    "key": "admin-platform-companies"
+  },
+  {
+    "source": "web/app/(admin)/platform/contact/page.tsx",
+    "route": "/platform/contact",
+    "group": "admin",
+    "key": "admin-platform-contact"
+  },
+  {
+    "source": "web/app/(admin)/platform/courses/page.tsx",
+    "route": "/platform/courses",
+    "group": "admin",
+    "key": "admin-platform-courses"
+  },
+  {
+    "source": "web/app/(admin)/platform/dossier-links/page.tsx",
+    "route": "/platform/dossier-links",
+    "group": "admin",
+    "key": "admin-platform-dossier-links"
+  },
+  {
+    "source": "web/app/(admin)/platform/jobs/page.tsx",
+    "route": "/platform/jobs",
+    "group": "admin",
+    "key": "admin-platform-jobs"
+  },
+  {
+    "source": "web/app/(admin)/platform/page.tsx",
+    "route": "/platform",
+    "group": "admin",
+    "key": "admin-platform"
+  },
+  {
+    "source": "web/app/(admin)/platform/queues/page.tsx",
+    "route": "/platform/queues",
+    "group": "admin",
+    "key": "admin-platform-queues"
+  },
+  {
+    "source": "web/app/(admin)/platform/register/page.tsx",
+    "route": "/platform/register",
+    "group": "admin",
+    "key": "admin-platform-register"
+  },
+  {
+    "source": "web/app/(admin)/platform/rules/page.tsx",
+    "route": "/platform/rules",
+    "group": "admin",
+    "key": "admin-platform-rules"
+  },
+  {
+    "source": "web/app/(admin)/platform/session/page.tsx",
+    "route": "/platform/session",
+    "group": "admin",
+    "key": "admin-platform-session"
+  },
+  {
+    "source": "web/app/(admin)/platform/session-required/page.tsx",
+    "route": "/platform/session-required",
+    "group": "admin",
+    "key": "admin-platform-session-required"
+  },
+  {
+    "source": "web/app/(admin)/platform/settings/page.tsx",
+    "route": "/platform/settings",
+    "group": "admin",
+    "key": "admin-platform-settings"
+  },
+  {
+    "source": "web/app/(admin)/platform/subscriptions/page.tsx",
+    "route": "/platform/subscriptions",
+    "group": "admin",
+    "key": "admin-platform-subscriptions"
+  },
+  {
+    "source": "web/app/(admin)/platform/templates/page.tsx",
+    "route": "/platform/templates",
+    "group": "admin",
+    "key": "admin-platform-templates"
+  },
+  {
+    "source": "web/app/(admin)/platform/users/page.tsx",
+    "route": "/platform/users",
+    "group": "admin",
+    "key": "admin-platform-users"
+  },
+  {
+    "source": "web/app/(app)/attendance/absences/page.tsx",
+    "route": "/attendance/absences",
+    "group": "app",
+    "key": "app-attendance-absences"
+  },
+  {
+    "source": "web/app/(app)/attendance/bulk/page.tsx",
+    "route": "/attendance/bulk",
+    "group": "app",
+    "key": "app-attendance-bulk"
+  },
+  {
+    "source": "web/app/(app)/attendance/import/page.tsx",
+    "route": "/attendance/import",
+    "group": "app",
+    "key": "app-attendance-import"
+  },
+  {
+    "source": "web/app/(app)/attendance/page.tsx",
+    "route": "/attendance",
+    "group": "app",
+    "key": "app-attendance"
+  },
+  {
+    "source": "web/app/(app)/attendance/timesheets/page.tsx",
+    "route": "/attendance/timesheets",
+    "group": "app",
+    "key": "app-attendance-timesheets"
+  },
+  {
+    "source": "web/app/(app)/clock/page.tsx",
+    "route": "/clock",
+    "group": "app",
+    "key": "app-clock"
+  },
+  {
+    "source": "web/app/(app)/company/bank-accounts/page.tsx",
+    "route": "/company/bank-accounts",
+    "group": "app",
+    "key": "app-company-bank-accounts"
+  },
+  {
+    "source": "web/app/(app)/company/billing/page.tsx",
+    "route": "/company/billing",
+    "group": "app",
+    "key": "app-company-billing"
+  },
+  {
+    "source": "web/app/(app)/company/compliance-documents/page.tsx",
+    "route": "/company/compliance-documents",
+    "group": "app",
+    "key": "app-company-compliance-documents"
+  },
+  {
+    "source": "web/app/(app)/company/delete-account/page.tsx",
+    "route": "/company/delete-account",
+    "group": "app",
+    "key": "app-company-delete-account"
+  },
+  {
+    "source": "web/app/(app)/company/departments/page.tsx",
+    "route": "/company/departments",
+    "group": "app",
+    "key": "app-company-departments"
+  },
+  {
+    "source": "web/app/(app)/company/designations/page.tsx",
+    "route": "/company/designations",
+    "group": "app",
+    "key": "app-company-designations"
+  },
+  {
+    "source": "web/app/(app)/company/key-personnel/page.tsx",
+    "route": "/company/key-personnel",
+    "group": "app",
+    "key": "app-company-key-personnel"
+  },
+  {
+    "source": "web/app/(app)/company/locations/page.tsx",
+    "route": "/company/locations",
+    "group": "app",
+    "key": "app-company-locations"
+  },
+  {
+    "source": "web/app/(app)/company/page.tsx",
+    "route": "/company",
+    "group": "app",
+    "key": "app-company"
+  },
+  {
+    "source": "web/app/(app)/company/pay-bands/page.tsx",
+    "route": "/company/pay-bands",
+    "group": "app",
+    "key": "app-company-pay-bands"
+  },
+  {
+    "source": "web/app/(app)/company/pay-schedules/page.tsx",
+    "route": "/company/pay-schedules",
+    "group": "app",
+    "key": "app-company-pay-schedules"
+  },
+  {
+    "source": "web/app/(app)/company/payment-types/page.tsx",
+    "route": "/company/payment-types",
+    "group": "app",
+    "key": "app-company-payment-types"
+  },
+  {
+    "source": "web/app/(app)/company/tax-codes/page.tsx",
+    "route": "/company/tax-codes",
+    "group": "app",
+    "key": "app-company-tax-codes"
+  },
+  {
+    "source": "web/app/(app)/company/trading-hours/page.tsx",
+    "route": "/company/trading-hours",
+    "group": "app",
+    "key": "app-company-trading-hours"
+  },
+  {
+    "source": "web/app/(app)/company/users/page.tsx",
+    "route": "/company/users",
+    "group": "app",
+    "key": "app-company-users"
+  },
+  {
+    "source": "web/app/(app)/company/working-pattern/page.tsx",
+    "route": "/company/working-pattern",
+    "group": "app",
+    "key": "app-company-working-pattern"
+  },
+  {
+    "source": "web/app/(app)/dashboard/page.tsx",
+    "route": "/dashboard",
+    "group": "app",
+    "key": "app-dashboard"
+  },
+  {
+    "source": "web/app/(app)/documents/page.tsx",
+    "route": "/documents",
+    "group": "app",
+    "key": "app-documents"
+  },
+  {
+    "source": "web/app/(app)/employees/[id]/page.tsx",
+    "route": "/employees/[id]",
+    "group": "app",
+    "key": "app-employees-id"
+  },
+  {
+    "source": "web/app/(app)/employees/archived/page.tsx",
+    "route": "/employees/archived",
+    "group": "app",
+    "key": "app-employees-archived"
+  },
+  {
+    "source": "web/app/(app)/employees/new/page.tsx",
+    "route": "/employees/new",
+    "group": "app",
+    "key": "app-employees-new"
+  },
+  {
+    "source": "web/app/(app)/employees/page.tsx",
+    "route": "/employees",
+    "group": "app",
+    "key": "app-employees"
+  },
+  {
+    "source": "web/app/(app)/holiday-management/page.tsx",
+    "route": "/holiday-management",
+    "group": "app",
+    "key": "app-holiday-management"
+  },
+  {
+    "source": "web/app/(app)/learning/assignments/[id]/page.tsx",
+    "route": "/learning/assignments/[id]",
+    "group": "app",
+    "key": "app-learning-assignments-id"
+  },
+  {
+    "source": "web/app/(app)/learning/my/page.tsx",
+    "route": "/learning/my",
+    "group": "app",
+    "key": "app-learning-my"
+  },
+  {
+    "source": "web/app/(app)/learning/page.tsx",
+    "route": "/learning",
+    "group": "app",
+    "key": "app-learning"
+  },
+  {
+    "source": "web/app/(app)/leave/page.tsx",
+    "route": "/leave",
+    "group": "app",
+    "key": "app-leave"
+  },
+  {
+    "source": "web/app/(app)/leave/settings/page.tsx",
+    "route": "/leave/settings",
+    "group": "app",
+    "key": "app-leave-settings"
+  },
+  {
+    "source": "web/app/(app)/leave/year-end/page.tsx",
+    "route": "/leave/year-end",
+    "group": "app",
+    "key": "app-leave-year-end"
+  },
+  {
+    "source": "web/app/(app)/my-approvals/page.tsx",
+    "route": "/my-approvals",
+    "group": "app",
+    "key": "app-my-approvals"
+  },
+  {
+    "source": "web/app/(app)/my-documents/page.tsx",
+    "route": "/my-documents",
+    "group": "app",
+    "key": "app-my-documents"
+  },
+  {
+    "source": "web/app/(app)/my-leave/page.tsx",
+    "route": "/my-leave",
+    "group": "app",
+    "key": "app-my-leave"
+  },
+  {
+    "source": "web/app/(app)/my-shifts/page.tsx",
+    "route": "/my-shifts",
+    "group": "app",
+    "key": "app-my-shifts"
+  },
+  {
+    "source": "web/app/(app)/my-work-log/page.tsx",
+    "route": "/my-work-log",
+    "group": "app",
+    "key": "app-my-work-log"
+  },
+  {
+    "source": "web/app/(app)/organogram/page.tsx",
+    "route": "/organogram",
+    "group": "app",
+    "key": "app-organogram"
+  },
+  {
+    "source": "web/app/(app)/policies/[id]/page.tsx",
+    "route": "/policies/[id]",
+    "group": "app",
+    "key": "app-policies-id"
+  },
+  {
+    "source": "web/app/(app)/policies/page.tsx",
+    "route": "/policies",
+    "group": "app",
+    "key": "app-policies"
+  },
+  {
+    "source": "web/app/(app)/profile/page.tsx",
+    "route": "/profile",
+    "group": "app",
+    "key": "app-profile"
+  },
+  {
+    "source": "web/app/(app)/recruitment/applications/[id]/page.tsx",
+    "route": "/recruitment/applications/[id]",
+    "group": "app",
+    "key": "app-recruitment-applications-id"
+  },
+  {
+    "source": "web/app/(app)/recruitment/candidates/[id]/page.tsx",
+    "route": "/recruitment/candidates/[id]",
+    "group": "app",
+    "key": "app-recruitment-candidates-id"
+  },
+  {
+    "source": "web/app/(app)/recruitment/page.tsx",
+    "route": "/recruitment",
+    "group": "app",
+    "key": "app-recruitment"
+  },
+  {
+    "source": "web/app/(app)/reports/page.tsx",
+    "route": "/reports",
+    "group": "app",
+    "key": "app-reports"
+  },
+  {
+    "source": "web/app/(app)/rota/page.tsx",
+    "route": "/rota",
+    "group": "app",
+    "key": "app-rota"
+  },
+  {
+    "source": "web/app/(app)/rota/settings/page.tsx",
+    "route": "/rota/settings",
+    "group": "app",
+    "key": "app-rota-settings"
+  },
+  {
+    "source": "web/app/(app)/sponsor-compliance/change-of-circumstances/page.tsx",
+    "route": "/sponsor-compliance/change-of-circumstances",
+    "group": "app",
+    "key": "app-sponsor-compliance-change-of-circumstances"
+  },
+  {
+    "source": "web/app/(app)/sponsor-compliance/dossier/page.tsx",
+    "route": "/sponsor-compliance/dossier",
+    "group": "app",
+    "key": "app-sponsor-compliance-dossier"
+  },
+  {
+    "source": "web/app/(app)/sponsor-compliance/migrant-employees/page.tsx",
+    "route": "/sponsor-compliance/migrant-employees",
+    "group": "app",
+    "key": "app-sponsor-compliance-migrant-employees"
+  },
+  {
+    "source": "web/app/(app)/sponsor-compliance/page.tsx",
+    "route": "/sponsor-compliance",
+    "group": "app",
+    "key": "app-sponsor-compliance"
+  },
+  {
+    "source": "web/app/(app)/sponsor-compliance/reminders/page.tsx",
+    "route": "/sponsor-compliance/reminders",
+    "group": "app",
+    "key": "app-sponsor-compliance-reminders"
+  },
+  {
+    "source": "web/app/(app)/sponsorship-checker/page.tsx",
+    "route": "/sponsorship-checker",
+    "group": "app",
+    "key": "app-sponsorship-checker"
+  },
+  {
+    "source": "web/app/(app)/work-log/page.tsx",
+    "route": "/work-log",
+    "group": "app",
+    "key": "app-work-log"
+  },
+  {
+    "source": "web/app/(auth)/accept-invite/page.tsx",
+    "route": "/accept-invite",
+    "group": "auth",
+    "key": "auth-accept-invite"
+  },
+  {
+    "source": "web/app/(auth)/forgot-password/page.tsx",
+    "route": "/forgot-password",
+    "group": "auth",
+    "key": "auth-forgot-password"
+  },
+  {
+    "source": "web/app/(auth)/login/mfa/page.tsx",
+    "route": "/login/mfa",
+    "group": "auth",
+    "key": "auth-login-mfa"
+  },
+  {
+    "source": "web/app/(auth)/login/page.tsx",
+    "route": "/login",
+    "group": "auth",
+    "key": "auth-login"
+  },
+  {
+    "source": "web/app/(auth)/mfa/enrol/page.tsx",
+    "route": "/mfa/enrol",
+    "group": "auth",
+    "key": "auth-mfa-enrol"
+  },
+  {
+    "source": "web/app/(auth)/reset-password/page.tsx",
+    "route": "/reset-password",
+    "group": "auth",
+    "key": "auth-reset-password"
+  },
+  {
+    "source": "web/app/(auth)/setup/page.tsx",
+    "route": "/setup",
+    "group": "auth",
+    "key": "auth-setup"
+  },
+  {
+    "source": "web/app/(auth)/verify-email/page.tsx",
+    "route": "/verify-email",
+    "group": "auth",
+    "key": "auth-verify-email"
+  },
+  {
+    "source": "web/app/(marketing)/about/page.tsx",
+    "route": "/about",
+    "group": "public",
+    "key": "public-about"
+  },
+  {
+    "source": "web/app/(marketing)/accessibility/page.tsx",
+    "route": "/accessibility",
+    "group": "public",
+    "key": "public-accessibility"
+  },
+  {
+    "source": "web/app/(marketing)/careers/page.tsx",
+    "route": "/careers",
+    "group": "public",
+    "key": "public-careers"
+  },
+  {
+    "source": "web/app/(marketing)/compare/[category]/page.tsx",
+    "route": "/compare/[category]",
+    "group": "public",
+    "key": "public-compare-category"
+  },
+  {
+    "source": "web/app/(marketing)/contact/page.tsx",
+    "route": "/contact",
+    "group": "public",
+    "key": "public-contact"
+  },
+  {
+    "source": "web/app/(marketing)/features/page.tsx",
+    "route": "/features",
+    "group": "public",
+    "key": "public-features"
+  },
+  {
+    "source": "web/app/(marketing)/legal/[document]/page.tsx",
+    "route": "/legal/terms",
+    "group": "public",
+    "key": "public-legal-terms"
+  },
+  {
+    "source": "web/app/(marketing)/legal/[document]/page.tsx",
+    "route": "/legal/privacy",
+    "group": "public",
+    "key": "public-legal-privacy"
+  },
+  {
+    "source": "web/app/(marketing)/legal/[document]/page.tsx",
+    "route": "/legal/cookies",
+    "group": "public",
+    "key": "public-legal-cookies"
+  },
+  {
+    "source": "web/app/(marketing)/legal/[document]/page.tsx",
+    "route": "/legal/dpa",
+    "group": "public",
+    "key": "public-legal-dpa"
+  },
+  {
+    "source": "web/app/(marketing)/legal/[document]/page.tsx",
+    "route": "/legal/subprocessors",
+    "group": "public",
+    "key": "public-legal-subprocessors"
+  },
+  {
+    "source": "web/app/(marketing)/legal/[document]/page.tsx",
+    "route": "/legal/ai-policy",
+    "group": "public",
+    "key": "public-legal-ai-policy"
+  },
+  {
+    "source": "web/app/(marketing)/legal/[document]/page.tsx",
+    "route": "/legal/complaints",
+    "group": "public",
+    "key": "public-legal-complaints"
+  },
+  {
+    "source": "web/app/(marketing)/legal/[document]/page.tsx",
+    "route": "/legal/refunds",
+    "group": "public",
+    "key": "public-legal-refunds"
+  },
+  {
+    "source": "web/app/(marketing)/legal/[document]/page.tsx",
+    "route": "/legal/resources-disclaimer",
+    "group": "public",
+    "key": "public-legal-resources-disclaimer"
+  },
+  {
+    "source": "web/app/(marketing)/legal/[document]/page.tsx",
+    "route": "/legal/register-terms",
+    "group": "public",
+    "key": "public-legal-register-terms"
+  },
+  {
+    "source": "web/app/(marketing)/page.tsx",
+    "route": "/",
+    "group": "public",
+    "key": "public"
+  },
+  {
+    "source": "web/app/(marketing)/pricing/page.tsx",
+    "route": "/pricing",
+    "group": "public",
+    "key": "public-pricing"
+  },
+  {
+    "source": "web/app/(marketing)/resources/guides/[slug]/page.tsx",
+    "route": "/resources/guides/right-to-work-checks",
+    "group": "public",
+    "key": "public-resources-guides-right-to-work-checks"
+  },
+  {
+    "source": "web/app/(marketing)/resources/guides/[slug]/page.tsx",
+    "route": "/resources/guides/follow-up-right-to-work-checks",
+    "group": "public",
+    "key": "public-resources-guides-follow-up-right-to-work-checks"
+  },
+  {
+    "source": "web/app/(marketing)/resources/guides/[slug]/page.tsx",
+    "route": "/resources/guides/right-to-work-changes-october-2026",
+    "group": "public",
+    "key": "public-resources-guides-right-to-work-changes-october-2026"
+  },
+  {
+    "source": "web/app/(marketing)/resources/guides/[slug]/page.tsx",
+    "route": "/resources/guides/sponsor-licence-audit-preparation",
+    "group": "public",
+    "key": "public-resources-guides-sponsor-licence-audit-preparation"
+  },
+  {
+    "source": "web/app/(marketing)/resources/guides/[slug]/page.tsx",
+    "route": "/resources/guides/statutory-holiday-entitlement",
+    "group": "public",
+    "key": "public-resources-guides-statutory-holiday-entitlement"
+  },
+  {
+    "source": "web/app/(marketing)/resources/guides/[slug]/page.tsx",
+    "route": "/resources/guides/sponsor-reporting-duties",
+    "group": "public",
+    "key": "public-resources-guides-sponsor-reporting-duties"
+  },
+  {
+    "source": "web/app/(marketing)/resources/guides/page.tsx",
+    "route": "/resources/guides",
+    "group": "public",
+    "key": "public-resources-guides"
+  },
+  {
+    "source": "web/app/(marketing)/resources/page.tsx",
+    "route": "/resources",
+    "group": "public",
+    "key": "public-resources"
+  },
+  {
+    "source": "web/app/(marketing)/resources/templates/page.tsx",
+    "route": "/resources/templates",
+    "group": "public",
+    "key": "public-resources-templates"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/holiday-entitlement-calculator/page.tsx",
+    "route": "/resources/tools/holiday-entitlement-calculator",
+    "group": "public",
+    "key": "public-resources-tools-holiday-entitlement-calculator"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/ilr-citizenship-checker/page.tsx",
+    "route": "/resources/tools/ilr-citizenship-checker",
+    "group": "public",
+    "key": "public-resources-tools-ilr-citizenship-checker"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/page.tsx",
+    "route": "/resources/tools",
+    "group": "public",
+    "key": "public-resources-tools"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/right-to-work-october-2026-checker/page.tsx",
+    "route": "/resources/tools/right-to-work-october-2026-checker",
+    "group": "public",
+    "key": "public-resources-tools-right-to-work-october-2026-checker"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/risk-assessment-template/page.tsx",
+    "route": "/resources/tools/risk-assessment-template",
+    "group": "public",
+    "key": "public-resources-tools-risk-assessment-template"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/skilled-worker-ilr-salary-calculator/page.tsx",
+    "route": "/resources/tools/skilled-worker-ilr-salary-calculator",
+    "group": "public",
+    "key": "public-resources-tools-skilled-worker-ilr-salary-calculator"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/skilled-worker-visa-checker/page.tsx",
+    "route": "/resources/tools/skilled-worker-visa-checker",
+    "group": "public",
+    "key": "public-resources-tools-skilled-worker-visa-checker"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/sponsor-licence-cost-calculator/page.tsx",
+    "route": "/resources/tools/sponsor-licence-cost-calculator",
+    "group": "public",
+    "key": "public-resources-tools-sponsor-licence-cost-calculator"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/sponsor-reporting-deadline-calculator/page.tsx",
+    "route": "/resources/tools/sponsor-reporting-deadline-calculator",
+    "group": "public",
+    "key": "public-resources-tools-sponsor-reporting-deadline-calculator"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/sponsorship-job-checker/page.tsx",
+    "route": "/resources/tools/sponsorship-job-checker",
+    "group": "public",
+    "key": "public-resources-tools-sponsorship-job-checker"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/uk-employer-cost-calculator/page.tsx",
+    "route": "/resources/tools/uk-employer-cost-calculator",
+    "group": "public",
+    "key": "public-resources-tools-uk-employer-cost-calculator"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/uk-minimum-wage-underpayment-checker/page.tsx",
+    "route": "/resources/tools/uk-minimum-wage-underpayment-checker",
+    "group": "public",
+    "key": "public-resources-tools-uk-minimum-wage-underpayment-checker"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/uk-notice-pay-calculator/page.tsx",
+    "route": "/resources/tools/uk-notice-pay-calculator",
+    "group": "public",
+    "key": "public-resources-tools-uk-notice-pay-calculator"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/uk-redundancy-pay-calculator/page.tsx",
+    "route": "/resources/tools/uk-redundancy-pay-calculator",
+    "group": "public",
+    "key": "public-resources-tools-uk-redundancy-pay-calculator"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/uk-sick-pay-calculator/page.tsx",
+    "route": "/resources/tools/uk-sick-pay-calculator",
+    "group": "public",
+    "key": "public-resources-tools-uk-sick-pay-calculator"
+  },
+  {
+    "source": "web/app/(marketing)/resources/tools/uk-take-home-salary-calculator/page.tsx",
+    "route": "/resources/tools/uk-take-home-salary-calculator",
+    "group": "public",
+    "key": "public-resources-tools-uk-take-home-salary-calculator"
+  },
+  {
+    "source": "web/app/(marketing)/security/page.tsx",
+    "route": "/security",
+    "group": "public",
+    "key": "public-security"
+  },
+  {
+    "source": "web/app/(marketing)/sponsor-licence-compliance/page.tsx",
+    "route": "/sponsor-licence-compliance",
+    "group": "public",
+    "key": "public-sponsor-licence-compliance"
+  },
+  {
+    "source": "web/app/(marketing)/sponsor-licence-compliance/reporting-duties/page.tsx",
+    "route": "/sponsor-licence-compliance/reporting-duties",
+    "group": "public",
+    "key": "public-sponsor-licence-compliance-reporting-duties"
+  },
+  {
+    "source": "web/app/(marketing)/sponsors/changes/[date]/page.tsx",
+    "route": "/sponsors/changes/[date]",
+    "group": "public",
+    "key": "public-sponsors-changes-date"
+  },
+  {
+    "source": "web/app/(marketing)/sponsors/changes/page.tsx",
+    "route": "/sponsors/changes",
+    "group": "public",
+    "key": "public-sponsors-changes"
+  },
+  {
+    "source": "web/app/(marketing)/sponsors/methodology/page.tsx",
+    "route": "/sponsors/methodology",
+    "group": "public",
+    "key": "public-sponsors-methodology"
+  },
+  {
+    "source": "web/app/(marketing)/sponsors/page.tsx",
+    "route": "/sponsors",
+    "group": "public",
+    "key": "public-sponsors"
+  },
+  {
+    "source": "web/app/(marketing)/sponsors/profile/[id]/[slug]/page.tsx",
+    "route": "/sponsors/profile/[id]/[slug]",
+    "group": "public",
+    "key": "public-sponsors-profile-id-slug"
+  },
+  {
+    "source": "web/app/(marketing)/sponsors/regions/[region]/page.tsx",
+    "route": "/sponsors/regions/[region]",
+    "group": "public",
+    "key": "public-sponsors-regions-region"
+  },
+  {
+    "source": "web/app/(marketing)/sponsors/terms/page.tsx",
+    "route": "/sponsors/terms",
+    "group": "public",
+    "key": "public-sponsors-terms"
+  },
+  {
+    "source": "web/app/(marketing)/vs/[competitor]/page.tsx",
+    "route": "/vs/[competitor]",
+    "group": "public",
+    "key": "public-vs-competitor"
+  },
+  {
+    "source": "web/app/careers/[company]/[posting]/page.tsx",
+    "route": "/careers/[company]/[posting]",
+    "group": "public",
+    "key": "public-careers-company-posting"
+  },
+  {
+    "source": "web/app/careers/[company]/page.tsx",
+    "route": "/careers/[company]",
+    "group": "public",
+    "key": "public-careers-company"
+  },
+  {
+    "source": "web/app/design/marketing/page.dev.tsx",
+    "route": "/design/marketing",
+    "group": "dev",
+    "key": "dev-design-marketing"
+  },
+  {
+    "source": "web/app/design/page.dev.tsx",
+    "route": "/design",
+    "group": "dev",
+    "key": "dev-design"
+  },
+  {
+    "source": "web/app/verify/page.tsx",
+    "route": "/verify",
+    "group": "public",
+    "key": "public-verify"
+  }
+]
