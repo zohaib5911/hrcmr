@@ -9,6 +9,8 @@ import type { Page } from "@playwright/test";
 import { expect, test } from "../support/fixtures";
 
 import { NAV_GROUPS, NAV_ITEMS } from "../../lib/navigation";
+import { expectBrandLogo } from "../support/brand";
+
 import { audit } from "../support/axe";
 
 const WIDTHS = [390, 768, 1280, 1920] as const;
@@ -61,7 +63,10 @@ for (const colorScheme of THEMES) {
           await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible({
             visible: !wide,
           });
-          if (wide) expect(await widthOf(page, "#app-sidebar")).toBe(260);
+          if (wide) {
+            expect(await widthOf(page, "#app-sidebar")).toBe(260);
+            await expectBrandLogo(sidebar(page), colorScheme);
+          }
         });
 
         test("has no accessibility violations", async ({ page }) => {
@@ -340,5 +345,36 @@ test.describe("every page in the sidebar", () => {
           .getByRole("link", { name: item.label, exact: true }),
       ).toHaveAttribute("aria-current", "page");
     });
+  }
+});
+
+test("the brand icons and social image are served by the production build", async ({
+  page,
+  request,
+}) => {
+  await page.goto("/clock");
+  const manifest = await request.get("/clock/manifest.webmanifest");
+  expect(manifest.status()).toBe(200);
+  const data = await manifest.json();
+  expect(data.theme_color).toBe(brand.colours.accent);
+  expect(data.icons).toHaveLength(4);
+  for (const icon of data.icons) {
+    const response = await request.get(icon.src);
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toContain("image/png");
+  }
+  for (const file of [
+    "/icon.png",
+    "/icon1.png",
+    "/apple-icon.png",
+    "/opengraph-image",
+    "/brand/logo-email.png",
+    "/clock/icon?size=192",
+    "/clock/icon?size=512",
+  ]) {
+    const response = await request.get(file);
+    expect(response.status(), file).toBe(200);
+    expect(response.headers()["content-type"], file).toContain("image/png");
+    expect((await response.body()).subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
   }
 });
