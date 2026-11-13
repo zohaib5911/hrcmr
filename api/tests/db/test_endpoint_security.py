@@ -8,6 +8,7 @@ the frozen inventory lists each exception by method/path rather than exempting w
 from __future__ import annotations
 
 import json
+import uuid
 from contextlib import AsyncExitStack
 from pathlib import Path
 from typing import Any
@@ -124,7 +125,7 @@ async def test_every_platform_guard_admits_both_platform_levels(setup: Setup, le
             async with GlobalSession(engine) as db:
                 token, _ = await setup.sessions.create(
                     db,
-                    user_id=data.user_id,
+                    user_id=uuid.UUID(data.user_id),
                     company_id=None,
                     ip=None,
                     user_agent=None,
