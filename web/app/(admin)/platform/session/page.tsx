@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/app/page-header";
 import { AdminPage } from "@/components/platform/admin-page";
 import { SessionStart } from "@/components/platform/session-start";
 import { safeNextPath } from "@/lib/platform/session";
@@ -14,6 +15,7 @@ export default async function SessionPage({
   const { next } = await searchParams;
   return (
     <AdminPage width="narrow" className="pt-10">
+      <PageHeader title="Platform session" />
       <SessionStart next={safeNextPath(next ?? null)} />
     </AdminPage>
   );
