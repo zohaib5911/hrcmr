@@ -7,11 +7,11 @@
  */
 export function PlatformBar() {
   return (
-    <div
+    <header
       data-testid="platform-bar"
       className="bg-fixed-admin px-4 py-3 text-center text-sm font-semibold tracking-wide text-on-fixed"
     >
       Platform admin
-    </div>
+    </header>
   );
 }

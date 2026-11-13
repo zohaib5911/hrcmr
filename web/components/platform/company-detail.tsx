@@ -194,7 +194,7 @@ export function CompanyDetail({
   }
   return (
     <div className="mx-auto grid max-w-6xl gap-6">
-      <a href="/companies" className="text-accent">
+      <a href="/companies" className="text-accent-text">
         All companies
       </a>
       <PageHeader title={company.name} description={company.contact_email ?? company.slug} />
@@ -205,6 +205,7 @@ export function CompanyDetail({
       ) : null}
       <Card>
         <CardHeader
+          headingLevel={2}
           title="Company profile"
           actions={
             <StatusChip tone={company.status === "active" ? "success" : "warning"}>
@@ -255,7 +256,7 @@ export function CompanyDetail({
       </Card>
       {live ? (
         <Card>
-          <CardHeader title="Live support session" />
+          <CardHeader headingLevel={2} title="Live support session" />
           <CardBody className="grid gap-3 pb-5">
             <p>
               {support.write_enabled ? "Changes are on." : "Read-only."} Expires{" "}
@@ -290,7 +291,7 @@ export function CompanyDetail({
         </Card>
       ) : null}
       <Card>
-        <CardHeader title="People" />
+        <CardHeader headingLevel={2} title="People" />
         <CardBody className="grid gap-3 pb-5">
           {company.people.length ? (
             company.people.map((p) => (
@@ -305,7 +306,7 @@ export function CompanyDetail({
         </CardBody>
       </Card>
       <Card>
-        <CardHeader title="Recent platform actions" />
+        <CardHeader headingLevel={2} title="Recent platform actions" />
         <CardBody className="grid gap-3 pb-5">
           {company.events.length ? (
             company.events.map((e, i) => (

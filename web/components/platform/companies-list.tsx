@@ -82,7 +82,7 @@ export function CompaniesList({
                   <Card>
                     <CardBody className="flex flex-wrap items-center justify-between gap-3 py-4">
                       <div className="min-w-0 break-words">
-                        <a className="text-accent font-medium" href={`/companies/${c.id}`}>
+                        <a className="text-accent-text font-medium" href={`/companies/${c.id}`}>
                           {c.name}
                         </a>
                         <p>{c.contact_email ?? c.slug}</p>
@@ -104,12 +104,12 @@ export function CompaniesList({
           )}
           <nav aria-label="Company pages" className="flex flex-wrap gap-4">
             {filters.offset > 0 ? (
-              <a href={link(Math.max(0, filters.offset - 25))} className="text-accent">
+              <a href={link(Math.max(0, filters.offset - 25))} className="text-accent-text">
                 Previous
               </a>
             ) : null}
             {filters.offset + 25 < data.total ? (
-              <a href={link(filters.offset + 25)} className="text-accent">
+              <a href={link(filters.offset + 25)} className="text-accent-text">
                 Next
               </a>
             ) : null}
