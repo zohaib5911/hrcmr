@@ -9,6 +9,7 @@ import { request as playwrightRequest, type Page } from "@playwright/test";
 import { API, createSignedInAdmin, csrfHeaders } from "../support/accounts";
 import { audit } from "../support/axe";
 import { expect, test } from "../support/fixtures";
+import { ADMIN_ORIGIN, signInPlatformAdmin } from "../support/platform";
 
 /** Every signed-in page that takes no id. */
 const APP_PAGES = [
@@ -151,6 +152,54 @@ for (const colorScheme of ["light", "dark"] as const) {
     });
   });
 }
+
+/** Admin-host paths are rewritten to /platform internally by the proxy. */
+const ADMIN_PAGES = [
+  "/",
+  "/audit",
+  "/companies",
+  "/contact",
+  "/courses",
+  "/dossier-links",
+  "/jobs",
+  "/queues",
+  "/register",
+  "/rules",
+  "/settings",
+  "/subscriptions",
+  "/templates",
+  "/users",
+] as const;
+
+test.describe("platform admin", () => {
+  // The production CSP on the local HTTP admin host otherwise blocks axe injection.
+  test.use({ bypassCSP: true, storageState: { cookies: [], origins: [] } });
+
+  for (const colorScheme of ["light", "dark"] as const) {
+    test.describe(`${colorScheme} theme`, () => {
+      test.use({ colorScheme });
+
+      test("every admin page and a company detail pass axe", async ({ page }) => {
+        test.setTimeout((ADMIN_PAGES.length + 1) * 15_000);
+        const account = await signInPlatformAdmin(page, "owner");
+        const list = await page.request.get(`${API}/platform/companies`, {
+          params: { q: account.company },
+        });
+        expect(list.status(), await list.text()).toBe(200);
+        const companies = (await list.json()).items as { id: string; contact_email: string }[];
+        const company = companies.find((item) => item.contact_email === account.email);
+        expect(company, "the signed-in admin's company is in the API list").toBeDefined();
+
+        for (const path of [...ADMIN_PAGES, `/companies/${company!.id}`]) {
+          await test.step(path, async () => {
+            await open(page, `${ADMIN_ORIGIN}${path}`);
+            await audit(page, `${colorScheme} platform ${path}`);
+          });
+        }
+      });
+    });
+  }
+});
 
 /** What a screen reader meets first on the main flows: a skip link, the landmarks, one h1, named controls. */
 const MAIN_FLOWS = ["/dashboard", "/employees", "/my-leave", "/rota", "/sponsor-compliance"];
