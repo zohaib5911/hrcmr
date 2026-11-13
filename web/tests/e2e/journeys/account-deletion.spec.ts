@@ -35,6 +35,8 @@ test("a Company Admin asks, confirms with the e-mailed code, then withdraws the 
       .getByLabel(`Type ${account.company} to confirm`, { exact: true })
       .fill(account.company);
     await dialog.getByRole("button", { name: "Send the code" }).click();
+    await page.getByLabel("Your password", { exact: true }).fill(account.password);
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
     await expect(page.getByLabel("Code", { exact: true })).toBeVisible();
   });
 

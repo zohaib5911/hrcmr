@@ -8,6 +8,7 @@ import uuid
 import zipfile
 from typing import Any
 
+import pytest
 from arq.worker import Worker
 from sqlalchemy import text
 
@@ -231,3 +232,41 @@ async def test_an_expired_export_is_marked_and_cannot_be_downloaded(rig: dict[st
         f"{API}/companies/me/exports/{export_id}/download", follow_redirects=False
     )
     assert (gone.status_code, gone.json()["error"]["code"]) == (410, "EXPORT_EXPIRED")
+
+
+@pytest.mark.parametrize("role", ["company_admin", "hr_admin"])
+@pytest.mark.parametrize("expired", [False, True])
+async def test_generic_file_routes_never_expose_company_export_artifacts(
+    rig: dict[str, Any], role: str, expired: bool
+) -> None:
+    """Export permission, requester binding and expiry must not be bypassed via /files."""
+    requester = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, requester)
+    requested = await requester.post(f"{API}/companies/me/export")
+    assert requested.status_code == 202, requested.text
+    export_id = uuid.UUID(requested.json()["id"])
+    await run(rig)
+    file_id = await _scalar(rig, "select file_id from data_exports where id = :e", e=export_id)
+    assert file_id is not None
+    if expired:
+        async with rig["owner"].begin() as connection:
+            await connection.execute(
+                text(
+                    "update data_exports set expires_at = now() - interval '1 minute' where id = :e"
+                ),
+                {"e": export_id},
+            )
+    other = await rig["person"](role, rig["a"])
+    for browser in (requester, other):
+        for suffix in ("", "/download"):
+            response = await browser.get(f"{API}/files/{file_id}{suffix}")
+            assert response.status_code == 404, response.text
+            assert "url" not in response.json()
+    assert (
+        await _scalar(
+            rig,
+            "select count(*) from audit_events where entity_id = :f and action = 'file.downloaded'",
+            f=file_id,
+        )
+        == 0
+    )

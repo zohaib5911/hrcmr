@@ -162,6 +162,7 @@ async def deletion_request(access: Deleter) -> DeletionOut | None:
 @router.post("/deletion-request", status_code=202, response_model=DeletionOut)
 async def request_deletion(body: DeletionIn, request: Request, access: Deleter) -> DeletionOut:
     """Starts a request and e-mails its code, or sends a new code for the person's own request."""
+    require_step_up(access.caller.session)
     db, me, now = access.db, access.caller.user_id, datetime.now(UTC)
     row = await _open(db, lock=True)
     if row is not None and row.confirmed_at is not None:
@@ -186,8 +187,6 @@ async def request_deletion(body: DeletionIn, request: Request, access: Deleter) 
             )
     export: DataExport | None = None
     if body.export_requested and (row is None or row.export_id is None):
-        # The export is the same as the data export page's, so it needs the same step-up.
-        require_step_up(access.caller.session)
         queued = (
             await db.execute(
                 select(func.count()).select_from(DataExport).where(DataExport.status == "queued")

@@ -95,3 +95,63 @@ describe("BillingPage data export (C3.1.11)", () => {
     expect(screen.queryByRole("dialog", { name: "Confirm it is you" })).toBeNull();
   });
 });
+
+describe("BillingPage plan step-up (T25.3)", () => {
+  it("reauthenticates and retries the same checkout plan", async () => {
+    const post = vi.fn().mockResolvedValue({});
+    const requests: unknown[] = [];
+    attempt.mockImplementation(async (call: (api: { POST: typeof post }) => unknown) => {
+      await call({ POST: post });
+      requests.push(post.mock.calls.at(-1));
+      if (requests.length === 1) {
+        return { ok: false, problem: { code: "STEP_UP_REQUIRED", message: "Confirm it is you." } };
+      }
+      if (requests.length === 2) return { ok: true, data: undefined };
+      return { ok: false, problem: { code: "PAYMENTS_UNAVAILABLE", message: "Try again later." } };
+    });
+    const user = userEvent.setup();
+    renderPage(billing({}));
+    await user.click(screen.getByRole("button", { name: "Choose 10 years" }));
+    await user.type(await screen.findByLabelText("Your password"), "a long passphrase here");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(await screen.findByText("Try again later.")).toBeInTheDocument();
+    expect(requests).toEqual([
+      ["/billing/checkout-session", { body: { plan: "ten_year" } }],
+      ["/auth/step-up", { body: { password: "a long passphrase here" } }],
+      ["/billing/checkout-session", { body: { plan: "ten_year" } }],
+    ]);
+  });
+
+  it("reauthenticates and retries cancellation without requesting an export", async () => {
+    const post = vi.fn().mockResolvedValue({});
+    const requests: unknown[] = [];
+    attempt.mockImplementation(async (call: (api: { POST: typeof post }) => unknown) => {
+      await call({ POST: post });
+      requests.push(post.mock.calls.at(-1));
+      if (requests.length === 1) {
+        return { ok: false, problem: { code: "STEP_UP_REQUIRED", message: "Confirm it is you." } };
+      }
+      if (requests.length === 2) return { ok: true, data: undefined };
+      return { ok: true, data: { refunded: false, ends_at: "2027-11-09T10:00:00Z" } };
+    });
+    const user = userEvent.setup();
+    renderPage(
+      billing({
+        plan: "annual",
+        subscription_status: "active",
+        started_at: "2026-10-01T10:00:00Z",
+        ends_at: "2027-11-09T10:00:00Z",
+      }),
+    );
+    await user.click(screen.getByRole("button", { name: "Cancel subscription" }));
+    await user.click(screen.getByRole("button", { name: /^Cancel subscription$/ }));
+    await user.type(await screen.findByLabelText("Your password"), "a long passphrase here");
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+    expect(await screen.findByText(/Your plan ends on/)).toBeInTheDocument();
+    expect(requests).toEqual([
+      ["/billing/cancel"],
+      ["/auth/step-up", { body: { password: "a long passphrase here" } }],
+      ["/billing/cancel"],
+    ]);
+  });
+});

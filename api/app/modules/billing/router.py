@@ -20,6 +20,7 @@ from app.core.logging import get_logger
 from app.core.schemas import RequestModel
 from app.db.session import GlobalDb  # noqa: TC001  (FastAPI reads the dependency at runtime)
 from app.integrations.stripe import StripeError, StripeSignatureError
+from app.modules.auth.sessions import require_step_up
 from app.modules.billing import service
 from app.modules.billing.models import Subscription
 from app.modules.companies.models import Company
@@ -136,6 +137,7 @@ async def create_checkout_session(
 ) -> RedirectOut:
     """A Stripe Checkout page for the plan. The plan starts when Stripe's webhook says it is paid,
     not when the browser comes back."""
+    require_step_up(access.caller.session)
     stripe = _stripe(request)
     if not stripe.enabled:
         raise _not_set_up()
@@ -205,6 +207,7 @@ async def create_portal_session(request: Request, access: Manager) -> RedirectOu
 async def cancel_plan(request: Request, access: Manager) -> CancelOut:
     """Cancels the plan. Within 14 days of the start: a full refund through Stripe, and the plan
     ends now. After that: an annual plan ends at the end of its period, with no refund."""
+    require_step_up(access.caller.session)
     stripe = _stripe(request)
     if not stripe.enabled:
         raise _not_set_up()

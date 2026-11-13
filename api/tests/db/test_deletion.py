@@ -20,6 +20,7 @@ from app.jobs.deletion import deletion_executor_hourly
 from app.modules.email.outbox import PAYLOAD_CONTEXT
 from tests.db.test_employee_documents import _keys as _keys
 from tests.db.test_employee_documents import rig as rig
+from tests.db.test_exports import step_up
 
 API = "/api/v1"
 URL = f"{API}/companies/me/deletion-request"
@@ -95,6 +96,7 @@ async def _admin_email(rig: dict[str, Any], company: uuid.UUID) -> list[str]:
 
 
 async def _schedule(rig: dict[str, Any], admin: Any) -> dict[str, Any]:
+    await step_up(rig, admin)
     started = await admin.post(URL, json={})
     assert started.status_code == 202, started.text
     (email,) = await _admin_email(rig, rig["a"])
@@ -110,6 +112,7 @@ async def test_a_code_schedules_the_deletion_and_any_admin_can_withdraw_it(
     hr = await rig["person"]("hr_admin", rig["a"])
     assert (await hr.post(URL, json={})).status_code == 403
     assert (await admin.get(URL)).json() is None
+    await step_up(rig, admin)
 
     started = await admin.post(URL, json={})
     assert started.status_code == 202, started.text
@@ -181,6 +184,7 @@ async def test_a_code_schedules_the_deletion_and_any_admin_can_withdraw_it(
 
 async def test_five_wrong_codes_end_the_code(rig: dict[str, Any]) -> None:
     admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
     assert (await admin.post(URL, json={})).status_code == 202
     (address,) = await _admin_email(rig, rig["a"])
     code = (await _code_for(rig, address)).replace(" ", "")
@@ -408,3 +412,21 @@ async def test_only_the_owner_role_in_a_purge_may_delete_history_rows(rig: dict[
     async with rig["app"].state.engine.connect() as c:
         with pytest.raises(DBAPIError, match="permission denied"):
             await c.execute(text(ledger), {"c": rig["a"]})
+
+
+async def test_starting_deletion_without_export_requires_recent_step_up(
+    rig: dict[str, Any],
+) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    refused = await admin.post(URL, json={"export_requested": False})
+    assert refused.status_code == 403, refused.text
+    assert refused.json()["error"]["code"] == "STEP_UP_REQUIRED"
+    assert (
+        await _rows(rig, "select id from deletion_requests where company_id = :c", c=rig["a"]) == []
+    )
+    assert rig["sent"] == []
+    await step_up(rig, admin)
+    started = await admin.post(URL, json={"export_requested": False})
+    assert started.status_code == 202, started.text
+    assert started.json()["status"] == "awaiting_code"
+    assert len(rig["sent"]) == 1

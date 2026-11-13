@@ -22,6 +22,7 @@ from app.integrations.stripe import Stripe, sign
 from tests.db.test_careers import anonymous
 from tests.db.test_employee_documents import _keys as _keys
 from tests.db.test_employee_documents import rig as rig
+from tests.db.test_exports import step_up
 
 API = "/api/v1"
 WEBHOOK_SECRET = "whsec_test"
@@ -153,6 +154,7 @@ async def test_checkout_makes_one_customer_and_a_session_for_the_plan(
     assert refused.status_code == 403
 
     admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
     made = await admin.post(f"{API}/billing/checkout-session", json={"plan": "annual"})
     assert made.status_code == 200, made.text
     assert made.json() == {"url": "https://checkout.stripe.com/c"}
@@ -185,6 +187,7 @@ async def test_checkout_makes_one_customer_and_a_session_for_the_plan(
 async def test_payments_not_set_up_say_so(rig: dict[str, Any]) -> None:
     rig["app"].state.stripe = Stripe(None, None, {"annual": None, "ten_year": None})
     admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
     response = await admin.post(f"{API}/billing/checkout-session", json={"plan": "annual"})
     assert response.status_code == 503
     assert (await admin.get(f"{API}/billing/subscription")).json()["payments_enabled"] is False
@@ -300,6 +303,7 @@ async def test_the_ten_year_plan_starts_from_the_payment_and_ends_on_a_full_refu
     assert company["cooling_off_ends_at"] == started + timedelta(days=14)
 
     admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
     shown = (await admin.get(f"{API}/billing/subscription")).json()
     assert (shown["plan"], shown["payments_enabled"], shown["has_billing_account"]) == (
         "ten_year",
@@ -379,6 +383,7 @@ async def test_a_free_or_lapsed_company_is_read_only_but_can_pay_and_keep_its_pr
     rig: dict[str, Any], fake: FakeStripe
 ) -> None:
     admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
     assert (await admin.get(f"{API}/company")).status_code == 200
     refused = await admin.post(f"{API}/departments", json={"name": "Sales"})
     assert refused.status_code == 402
@@ -419,6 +424,7 @@ async def test_a_failed_renewal_starts_seven_days_of_grace_once_and_tells_the_ad
 ) -> None:
     await _clear_events(rig)
     admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
     await rig["person"]("hr_admin", rig["a"])  # not told: billing is the company admin's
     await rig["person"]("company_admin", rig["b"])  # another company's admin: not told
     await _set_plan(rig, stripe_customer_id="cus_1")
@@ -535,6 +541,7 @@ async def test_cancel_inside_14_days_refunds_the_first_payment_then_ends_the_pla
     rig: dict[str, Any], fake: FakeStripe
 ) -> None:
     admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
     hr = await rig["person"]("hr_admin", rig["a"])
     nothing = await admin.post(f"{API}/billing/cancel")  # on the free plan: no plan to end
     assert (nothing.status_code, nothing.json()["error"]["code"]) == (409, "NO_PLAN_TO_CANCEL")
@@ -606,6 +613,7 @@ async def test_cancel_after_14_days_ends_the_annual_plan_at_the_period_end_with_
 ) -> None:
     begin = await _start_annual(rig, fake, days_ago=15)
     admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
 
     cancelled = await admin.post(f"{API}/billing/cancel")
     assert cancelled.status_code == 200, cancelled.text
@@ -637,6 +645,7 @@ async def test_a_cancel_that_fails_after_the_refund_ends_the_plan_on_retry_witho
 ) -> None:
     await _start_annual(rig, fake, days_ago=13)
     admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
     fake.fail_cancel = True
     failed = await admin.post(f"{API}/billing/cancel")
     assert (failed.status_code, failed.json()["error"]["code"]) == (502, "PAYMENTS_UNAVAILABLE")
@@ -673,6 +682,7 @@ async def test_the_ten_year_plan_is_refunded_inside_14_days_and_has_nothing_to_c
 ) -> None:
     await _start_ten_year(rig, fake, days_ago=13)
     admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
     cancelled = await admin.post(f"{API}/billing/cancel")
     assert cancelled.status_code == 200, cancelled.text
     assert cancelled.json()["refunded"] is True
@@ -706,7 +716,29 @@ async def test_a_ten_year_plan_after_14_days_has_nothing_to_cancel(
 ) -> None:
     await _start_ten_year(rig, fake, days_ago=15)
     admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
     late = await admin.post(f"{API}/billing/cancel")
     assert (late.status_code, late.json()["error"]["code"]) == (409, "NOTHING_TO_CANCEL")
     assert (await _company(rig))["plan"] == "ten_year"
     assert fake.requests == []  # the 14-day check is made before any Stripe call
+
+
+@pytest.mark.parametrize("action", ["checkout-session", "cancel"])
+async def test_plan_changes_require_recent_step_up_before_provider_calls(
+    rig: dict[str, Any], fake: FakeStripe, action: str
+) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    if action == "cancel":
+        await _start_annual(rig, fake, days_ago=20)
+    audit_sql = (
+        "select count(*) from audit_events where company_id = :c and action like 'billing.%'"
+    )
+    before = await _count(rig, audit_sql)
+    response = await admin.post(
+        f"{API}/billing/{action}",
+        **({"json": {"plan": "annual"}} if action == "checkout-session" else {}),
+    )
+    assert response.status_code == 403, response.text
+    assert response.json()["error"]["code"] == "STEP_UP_REQUIRED"
+    assert fake.requests == []
+    assert await _count(rig, audit_sql) == before

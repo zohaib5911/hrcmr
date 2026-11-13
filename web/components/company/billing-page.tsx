@@ -97,6 +97,7 @@ export function BillingPage({
     text: string;
   } | null>(null);
   const [exportStepUp, setExportStepUp] = useState(false);
+  const [pendingPlanAction, setPendingPlanAction] = useState<Plan | "cancel" | null>(null);
   const [exportPassword, setExportPassword] = useState("");
   const [exportStepUpProblem, setExportStepUpProblem] = useState<Problem | null>(null);
   const moment = new Date(now);
@@ -143,6 +144,12 @@ export function BillingPage({
       return;
     }
     setBusy(false);
+    if (outcome.problem.code === "STEP_UP_REQUIRED") {
+      setPendingPlanAction(next);
+      setExportStepUpProblem(null);
+      setExportStepUp(true);
+      return;
+    }
     toast.show({ title: outcome.problem.message, tone: "danger" });
   }
 
@@ -185,12 +192,22 @@ export function BillingPage({
     }
     setExportStepUp(false);
     setExportStepUpProblem(null);
-    await requestExport();
+    const action = pendingPlanAction;
+    setPendingPlanAction(null);
+    if (action === "cancel") await cancel();
+    else if (action !== null) await choose(action);
+    else await requestExport();
   }
 
   async function cancel() {
     const outcome = await attempt((api) => api.POST("/billing/cancel"));
     if (!outcome.ok) {
+      if (outcome.problem.code === "STEP_UP_REQUIRED") {
+        setPendingPlanAction("cancel");
+        setExportStepUpProblem(null);
+        setExportStepUp(true);
+        return;
+      }
       toast.show({ title: outcome.problem.message, tone: "danger" });
       return;
     }
@@ -412,11 +429,17 @@ export function BillingPage({
           onOpenChange={(open) => {
             if (!open) {
               setExportStepUp(false);
+              setPendingPlanAction(null);
+              setExportStepUpProblem(null);
               setExportPassword("");
             }
           }}
           title="Confirm it is you"
-          description="Confirm your password to export the company's data."
+          description={
+            pendingPlanAction === null
+              ? "Confirm your password to export the company's data."
+              : "Confirm your password to change the company's plan."
+          }
           onSubmit={(event) => void confirmExportPassword(event)}
           busy={exportBusy}
           problem={exportStepUpProblem}
