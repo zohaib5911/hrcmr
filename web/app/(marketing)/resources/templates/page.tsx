@@ -1,3 +1,4 @@
+import { PublicDate } from "@/components/marketing/public-content";
 import { ResourceHub } from "@/components/resources/hub";
 import { isPublishable, loadTemplates } from "@/lib/templates/manifest";
 import { pageMetadata } from "@/lib/seo";
@@ -15,7 +16,7 @@ export default function TemplatesPage() {
       description="Original employment documents and checklists to adapt to your organisation. Every template needs human review before publication."
     >
       {templates.length === 0 ? (
-        <p className="text-body text-label-secondary mx-auto max-w-3xl text-center">
+        <p className="text-lead text-label-secondary mx-auto max-w-3xl text-center">
           Our templates are awaiting human review. Downloads will appear here once reviewed. In the
           meantime, explore our guides and free tools.
         </p>
@@ -27,9 +28,9 @@ export default function TemplatesPage() {
               className="rounded-card border-separator bg-elevated border p-6"
             >
               <h3 className="text-title-3 text-label">{template.title}</h3>
-              <p className="text-body text-label-secondary mt-3">{template.description}</p>
+              <p className="text-lead text-label-secondary mt-3">{template.description}</p>
               <p className="text-footnote text-label-secondary mt-3">
-                Version {template.version} · Reviewed: {template.reviewed_on}
+                Version {template.version} · Reviewed: <PublicDate value={template.reviewed_on} />
               </p>
               <a
                 className="text-accent-text mt-4 inline-block underline underline-offset-4"

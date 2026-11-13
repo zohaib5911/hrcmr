@@ -1,5 +1,7 @@
 "use client";
 
+import { DatePicker } from "@/components/ui/date-picker";
+
 import { type FormEvent, useEffect, useState } from "react";
 
 import { Turnstile, TURNSTILE_SITE_KEY } from "@/components/auth/turnstile";
@@ -12,7 +14,7 @@ import { StatusChip } from "@/components/ui/status-chip";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
-import { todayIso } from "@/lib/ui/dates";
+import { formatUk, todayIso } from "@/lib/ui/dates";
 
 import { DISCLAIMER, verdictText } from "./results";
 
@@ -188,11 +190,10 @@ export function PublicSalaryChecker() {
                 </option>
               ))}
             </Select>
-            <TextField
+            <DatePicker
               label="Certificate of Sponsorship date"
-              type="date"
-              value={cosDate}
-              onChange={(event) => setCosDate(event.target.value)}
+              value={cosDate || null}
+              onChange={(value) => setCosDate(value ?? "")}
             />
           </div>
           {TURNSTILE_SITE_KEY ? <Turnstile onToken={setToken} /> : null}
@@ -218,7 +219,7 @@ export function PublicSalaryChecker() {
           <Card>
             <CardHeader
               title={`${result.soc_code} ${result.title}`}
-              description={`Rules: ${result.rules_version_name}, effective ${result.rules_effective_from}`}
+              description={`Rules: ${result.rules_version_name}, effective ${formatUk(result.rules_effective_from)}`}
               headingLevel={3}
               actions={<StatusChip tone="neutral">{result.eligibility}</StatusChip>}
             />

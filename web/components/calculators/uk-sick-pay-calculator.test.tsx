@@ -3,9 +3,15 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Page from "@/app/(marketing)/resources/tools/uk-sick-pay-calculator/page";
 
+// DatePicker commits typed dates on blur, as a person leaves the field.
+function changeAndBlur(...args: Parameters<typeof fireEvent.change>) {
+  fireEvent.change(...args);
+  fireEvent.blur(args[0]);
+}
+
 afterEach(() => vi.restoreAllMocks());
 const fill = (label: string, value: string) =>
-  fireEvent.change(screen.getByLabelText(label), { target: { value } });
+  changeAndBlur(screen.getByLabelText(label), { target: { value } });
 const submit = () => fireEvent.click(screen.getByRole("button", { name: "Calculate sick pay" }));
 const result = () => within(screen.getByRole("region", { name: "Sick pay result" }));
 

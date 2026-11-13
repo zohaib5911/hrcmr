@@ -12,7 +12,7 @@ export default function Page() {
   return (
     <Section tone="page">
       <SectionHeading level={1} eyebrow="Sponsor register" title="Register terms" />
-      <div className="text-body text-label mx-auto mt-8 flex max-w-3xl flex-col gap-4">
+      <div className="text-lead text-label mx-auto mt-8 flex max-w-3xl flex-col gap-4">
         <p>
           These pages are for information only and are not legal advice. The register on GOV.UK is
           the official record; check it before you rely on an entry.

@@ -1,5 +1,9 @@
 "use client";
 
+import { PublicDate } from "@/components/marketing/public-content";
+
+import { DatePicker } from "@/components/ui/date-picker";
+
 import { useMemo, useState } from "react";
 
 import { PresetChips } from "@/components/calculators/preset-chips";
@@ -113,27 +117,24 @@ export function IlrCitizenshipChecker() {
             </option>
           ))}
         </Select>
-        <TextField
+        <DatePicker
           label="Qualifying route residence start"
-          type="date"
           required
-          value={input.startDate}
-          onChange={(event) => update("startDate", event.target.value)}
+          value={input.startDate || null}
+          onChange={(value) => update("startDate", value ?? "")}
           hint="First qualifying day in the UK, not automatically the visa issue date. Confirm which previous visas count."
         />
-        <TextField
+        <DatePicker
           label="UK residence start for citizenship"
-          type="date"
           required
-          value={input.residenceStart}
-          onChange={(event) => update("residenceStart", event.target.value)}
+          value={input.residenceStart || null}
+          onChange={(value) => update("residenceStart", value ?? "")}
           hint="May predate your current visa pathway. Excluded periods and gaps need review."
         />
-        <TextField
+        <DatePicker
           label="Actual ILR grant date (optional)"
-          type="date"
-          value={input.settledDate}
-          onChange={(event) => update("settledDate", event.target.value)}
+          value={input.settledDate || null}
+          onChange={(value) => update("settledDate", value ?? "")}
           hint="Leave blank for an indicative citizenship timeline. An application date is not a grant date."
         />
         <Select
@@ -224,11 +225,10 @@ export function IlrCitizenshipChecker() {
           <h2 className="text-title-2 text-label">Your conditional timeline</h2>
           <ol className="text-callout text-label space-y-4">
             <li>
-              Qualifying residence begins: <time dateTime={input.startDate}>{input.startDate}</time>
+              Qualifying residence begins: <PublicDate value={input.startDate} />
             </li>
             <li>
-              ILR qualifying-residence milestone:{" "}
-              <time dateTime={result.qualifyingDate}>{result.qualifyingDate}</time>.{" "}
+              ILR qualifying-residence milestone: <PublicDate value={result.qualifyingDate} />.{" "}
               {result.settlementReview
                 ? "Individual residence review required."
                 : "Subject to all settlement conditions."}
@@ -237,7 +237,7 @@ export function IlrCitizenshipChecker() {
               {result.indicative
                 ? "Indicative citizenship milestone"
                 : "Earliest citizenship residence milestone"}
-              : <time dateTime={result.citizenshipDate}>{result.citizenshipDate}</time>.{" "}
+              : <PublicDate value={result.citizenshipDate} />.{" "}
               {result.citizenshipReview
                 ? "Absences need individual review before applying."
                 : "Subject to all citizenship conditions."}

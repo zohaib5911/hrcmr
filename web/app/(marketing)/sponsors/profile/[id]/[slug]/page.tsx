@@ -56,7 +56,7 @@ export default async function Page({ params }: Props) {
             Current entry
           </h2>
           {data.entries.length === 0 ? (
-            <p className="text-body text-label-secondary mt-3">
+            <p className="text-lead text-label-secondary mt-3">
               No entry in the latest publication.
             </p>
           ) : (
@@ -82,7 +82,7 @@ export default async function Page({ params }: Props) {
           <h2 id="lifeline" className="text-title-3 text-label font-semibold">
             Licence lifeline
           </h2>
-          <p className="text-body mt-3">
+          <p className="text-lead mt-3">
             First seen {formatUk(data.first_seen_on)}. Last seen {formatUk(data.last_seen_on)}.
           </p>
           {data.changes.length > 0 && (

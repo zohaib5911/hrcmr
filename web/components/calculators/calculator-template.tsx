@@ -1,3 +1,9 @@
+import {
+  PublicBody,
+  PublicContentFrame,
+  PublicDate,
+  PublicLead,
+} from "@/components/marketing/public-content";
 import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -50,7 +56,7 @@ export function CalculatorTemplate({
   const more = relatedTools(slug);
   return (
     <>
-      <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
+      <PublicContentFrame>
         <header className="pb-8">
           <Breadcrumbs
             crumbs={[
@@ -63,7 +69,7 @@ export function CalculatorTemplate({
             Free tool
           </StatusChip>
           <h1 className="text-large-title text-label mt-3">{title}</h1>
-          <p className="text-callout text-label-secondary mt-3 max-w-2xl">{description}</p>
+          <PublicLead className="mt-3">{description}</PublicLead>
           <p className="text-footnote text-label-secondary mt-3">
             {privacyNotices[privacy]} General guidance only; this tool does not provide legal or
             immigration advice.
@@ -77,7 +83,7 @@ export function CalculatorTemplate({
             <h2 id="calculator-quick-answer" className="text-headline text-label">
               Quick answer
             </h2>
-            <p className="text-callout text-label mt-2 max-w-3xl">{quickAnswer}</p>
+            <PublicBody className="text-label mt-2">{quickAnswer}</PublicBody>
           </section>
         ) : null}
         {children}
@@ -97,7 +103,7 @@ export function CalculatorTemplate({
                   </span>
                   <div>
                     <h3 className="text-headline text-label">{step.title}</h3>
-                    <p className="text-callout text-label-secondary mt-1">{step.body}</p>
+                    <PublicBody className="mt-1">{step.body}</PublicBody>
                   </div>
                 </li>
               ))}
@@ -135,9 +141,19 @@ export function CalculatorTemplate({
                         {source.title}
                       </a>
                     </th>
-                    <td className="p-3 whitespace-nowrap">{source.checkedOn}</td>
-                    <td className="p-3 whitespace-nowrap">{source.validFrom}</td>
-                    <td className="p-3">{source.validTo ?? "No end date specified"}</td>
+                    <td className="p-3 whitespace-nowrap">
+                      <PublicDate value={source.checkedOn} />
+                    </td>
+                    <td className="p-3 whitespace-nowrap">
+                      <PublicDate value={source.validFrom} />
+                    </td>
+                    <td className="p-3">
+                      {source.validTo ? (
+                        <PublicDate value={source.validTo} />
+                      ) : (
+                        "No end date specified"
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -178,7 +194,7 @@ export function CalculatorTemplate({
             </ul>
           </nav>
         ) : null}
-      </div>
+      </PublicContentFrame>
       <CtaBand
         title="Keep sponsor and HR records in one place"
         lead="Start on the free plan. No card needed."

@@ -8,13 +8,19 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import Page from "@/app/(marketing)/resources/tools/ilr-citizenship-checker/page";
 import { settlementSources } from "@/lib/calculators/ilr-citizenship-checker";
 
+// DatePicker commits typed dates on blur, as a person leaves the field.
+function changeAndBlur(...args: Parameters<typeof fireEvent.change>) {
+  fireEvent.change(...args);
+  fireEvent.blur(args[0]);
+}
+
 afterEach(() => vi.restoreAllMocks());
 
 function dates() {
-  fireEvent.change(screen.getByLabelText("Qualifying route residence start"), {
+  changeAndBlur(screen.getByLabelText("Qualifying route residence start"), {
     target: { value: "2021-06-20" },
   });
-  fireEvent.change(screen.getByLabelText("UK residence start for citizenship"), {
+  changeAndBlur(screen.getByLabelText("UK residence start for citizenship"), {
     target: { value: "2021-06-20" },
   });
 }
@@ -43,7 +49,7 @@ describe("public ILR and citizenship checker", () => {
     const storageSpy = vi.spyOn(Storage.prototype, "setItem");
     dates();
     expect(screen.getByRole("region", { name: "Settlement timeline result" })).toHaveTextContent(
-      "2027-06-20",
+      "20 Jun 2027",
     );
     expect(screen.getByRole("region", { name: "Settlement timeline result" })).toHaveTextContent(
       "Indicative citizenship",
@@ -55,11 +61,11 @@ describe("public ILR and citizenship checker", () => {
     expect(
       screen.getByLabelText("Days abroad in the citizenship 3-year period"),
     ).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("Actual ILR grant date (optional)"), {
+    changeAndBlur(screen.getByLabelText("Actual ILR grant date (optional)"), {
       target: { value: "2026-11-15" },
     });
     expect(screen.getByRole("region", { name: "Settlement timeline result" })).toHaveTextContent(
-      "Earliest citizenship residence milestone: 2026-11-15",
+      "Earliest citizenship residence milestone: 15 Nov 2026",
     );
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(storageSpy).not.toHaveBeenCalled();
@@ -76,7 +82,7 @@ describe("public ILR and citizenship checker", () => {
     render(<Page />);
     dates();
     await user.selectOptions(screen.getByLabelText("Visa pathway"), "long_residence");
-    fireEvent.change(screen.getByLabelText("Days abroad in the citizenship 5-year period"), {
+    changeAndBlur(screen.getByLabelText("Days abroad in the citizenship 5-year period"), {
       target: { value: "451" },
     });
     expect(screen.getByRole("region", { name: "Settlement timeline result" })).toHaveTextContent(
@@ -93,16 +99,15 @@ describe("public ILR and citizenship checker", () => {
   it("reports inconsistent dates and absence totals accessibly", () => {
     render(<Page />);
     dates();
-    fireEvent.change(screen.getByLabelText("UK residence start for citizenship"), {
+    changeAndBlur(screen.getByLabelText("UK residence start for citizenship"), {
       target: { value: "2022-01-01" },
     });
     expect(screen.getByRole("alert")).toHaveTextContent("UK residence cannot start after");
     dates();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    fireEvent.change(
-      screen.getByLabelText("Days abroad in the final 12 months before citizenship"),
-      { target: { value: "1" } },
-    );
+    changeAndBlur(screen.getByLabelText("Days abroad in the final 12 months before citizenship"), {
+      target: { value: "1" },
+    });
     expect(screen.getByRole("alert")).toHaveTextContent("Last-year absences cannot exceed");
   });
 
@@ -113,14 +118,14 @@ describe("public ILR and citizenship checker", () => {
     expect(screen.getByRole("heading", { name: "How it works" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Questions" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Skilled Worker since June 2021" }));
-    expect(screen.getByLabelText("Qualifying route residence start")).toHaveValue("2021-06-20");
+    expect(screen.getByLabelText("Qualifying route residence start")).toHaveValue("20 Jun 2021");
     const result = screen.getByRole("region", { name: "Settlement timeline result" });
-    expect(result).toHaveTextContent("ILR qualifying-residence milestone: 2026-06-20");
+    expect(result).toHaveTextContent("ILR qualifying-residence milestone: 20 Jun 2026");
     await user.click(screen.getByRole("button", { name: "Long residence with long absences" }));
     expect(screen.getByRole("region", { name: "Settlement timeline result" })).toHaveTextContent(
       "Absences need individual review",
     );
-    fireEvent.change(screen.getByLabelText("UK residence start for citizenship"), {
+    changeAndBlur(screen.getByLabelText("UK residence start for citizenship"), {
       target: { value: "" },
     });
     expect(

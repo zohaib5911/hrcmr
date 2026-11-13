@@ -68,7 +68,7 @@ export default async function Page({ params }: Props) {
           Latest changes here
         </h2>
         {data.latest_changes.length === 0 ? (
-          <p className="text-body text-label-secondary mt-3">
+          <p className="text-lead text-label-secondary mt-3">
             No changes in the latest publication.
           </p>
         ) : (
