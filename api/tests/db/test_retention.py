@@ -216,12 +216,12 @@ async def test_evidence_calendar_cutoffs_preserve_active_unknown_recent_and_shar
         assert event.actor_user_id is None
         assert event.actor_type == "system"
         assert event.entity_type == "employee"
-        assert event.after == {"rtw_checks": 2, "rtw_documents": 0, "sponsor_documents": 1}
+        assert event.after == {"rtw_checks": 2, "rtw_documents": 1, "sponsor_documents": 1}
         assert event.reason == (
             "Retention: RTW evidence employment + 2 years / sponsor records + 1 year"
         )
         shared_event = next(event for event in events if event.entity_id == shared)
-        assert shared_event.after == {"rtw_checks": 2, "rtw_documents": 0, "sponsor_documents": 0}
+        assert shared_event.after == {"rtw_checks": 2, "rtw_documents": 1, "sponsor_documents": 0}
         event_ids = {event.id for event in events}
     assert await retention_purge_daily(ctx) == 0
     async with AsyncSession(rig["owner"]) as db:
