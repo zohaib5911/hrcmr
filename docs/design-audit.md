@@ -58,6 +58,18 @@ Counts mean inventoried source consumers/page families, including published cont
 The route captures contain 692 visible chrome/sheet observations; every computed backdrop filter is `saturate(1.8) blur(20px)` (the browser-normalised form of 180%). No captured route falls back to Times New Roman.
 
 
+## Focused material overlays
+
+Four overlay tests passed (plus their setup), saving 18 additional screenshots. Command palette, notifications popover, company inspector sheet, mobile marketing menu and scrolled marketing navigation were inspected in both themes/widths where applicable. Escape dismissed all 14 opened layers; these are sampled keyboard checks, not an exhaustive keyboard audit. The 44 visible material observations in these states also all compute to `saturate(1.8) blur(20px)`, with no page-level horizontal overflow. These focused captures do not add axe scans to the route baseline above.
+
+| Surface | Before evidence |
+| --- | --- |
+| command-palette | [light 390](screenshots/phase-25/before/overlay-command-palette-light-390.png) · [light 1280](screenshots/phase-25/before/overlay-command-palette-light-1280.png) · [dark 390](screenshots/phase-25/before/overlay-command-palette-dark-390.png) · [dark 1280](screenshots/phase-25/before/overlay-command-palette-dark-1280.png) |
+| notifications | [light 390](screenshots/phase-25/before/overlay-notifications-light-390.png) · [light 1280](screenshots/phase-25/before/overlay-notifications-light-1280.png) · [dark 390](screenshots/phase-25/before/overlay-notifications-dark-390.png) · [dark 1280](screenshots/phase-25/before/overlay-notifications-dark-1280.png) |
+| company-sheet | [light 390](screenshots/phase-25/before/overlay-company-sheet-light-390.png) · [light 1280](screenshots/phase-25/before/overlay-company-sheet-light-1280.png) · [dark 390](screenshots/phase-25/before/overlay-company-sheet-dark-390.png) · [dark 1280](screenshots/phase-25/before/overlay-company-sheet-dark-1280.png) |
+| marketing-menu | [light 390](screenshots/phase-25/before/overlay-marketing-menu-light-390.png) · [dark 390](screenshots/phase-25/before/overlay-marketing-menu-dark-390.png) |
+| scrolled-marketing-nav | [light 390](screenshots/phase-25/before/overlay-scrolled-marketing-nav-light-390.png) · [light 1280](screenshots/phase-25/before/overlay-scrolled-marketing-nav-light-1280.png) · [dark 390](screenshots/phase-25/before/overlay-scrolled-marketing-nav-dark-390.png) · [dark 1280](screenshots/phase-25/before/overlay-scrolled-marketing-nav-dark-1280.png) |
+
 ## Every screen, sorted by shared-fix footprint
 
 Each row is one screen case, with all four before images. Finding letters resolve to the rule and concrete reusable fix above. “Baseline pass” means no additional gap in this captured presentation; it does not waive the stated interaction/width limitations. Admin internal `/platform` routes are shown here as source identifiers; the public admin host removes that prefix.
