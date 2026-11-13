@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/app/page-header";
 import { useCan } from "@/components/app/session-context";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { STATUS, type Status } from "@/lib/attendance";
@@ -122,6 +124,13 @@ export function AttendanceBulk() {
           {saved !== null && <Alert tone="success" title={`${saved} attendance records saved`} />}
           {loadedKey !== key ? (
             <p role="status">Loading attendance…</p>
+          ) : grid && grid.people.length === 0 ? (
+            // A table with headers and no rows reads as broken to a screen reader.
+            <EmptyState
+              icon={Clock}
+              title="No employees this week"
+              description="Add employees, or choose a week when they were employed."
+            />
           ) : (
             grid && (
               <>

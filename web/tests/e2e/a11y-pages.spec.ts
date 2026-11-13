@@ -103,6 +103,8 @@ async function open(page: Page, path: string) {
   const response = await page.goto(path);
   expect(response?.status(), path).toBeLessThan(400);
   await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
+  // Axe reads what is on screen: wait for the data, not a loading skeleton or a half-enabled control.
+  await expect(page.locator(".skeleton"), path).toHaveCount(0);
 }
 
 for (const colorScheme of ["light", "dark"] as const) {
@@ -168,34 +170,27 @@ test("the main flows read well with a screen reader", async ({ page }) => {
       path,
     ).toBe(true);
 
-    // Every button and link the page shows has a name a screen reader can announce.
-    const unnamed = await page.evaluate(() =>
-      [...document.querySelectorAll<HTMLElement>("button, a[href], [role=button]")]
-        .filter((el) => el.offsetParent !== null)
-        .filter((el) => {
-          const label =
-            el.getAttribute("aria-label") ??
-            (el.getAttribute("aria-labelledby")
-              ? document.getElementById(el.getAttribute("aria-labelledby")!)?.textContent
-              : null) ??
-            el.textContent ??
-            el.getAttribute("title");
-          return !label?.trim();
-        })
-        .map((el) => el.outerHTML.slice(0, 80)),
-    );
+    // In the accessibility tree a screen reader reads, every control has a name to announce.
+    const tree = await page.locator("body").ariaSnapshot();
+    const unnamed = tree
+      .split("\n")
+      .filter((line) =>
+        /^\s*- (button|link|switch|checkbox|radio|textbox|combobox|tab|menuitem)\s*(\[|:|$)/.test(
+          line,
+        ),
+      );
     expect(unnamed, path).toEqual([]);
   }
 });
 
 test("a new employee can be added with only a keyboard", async ({ page }) => {
   await open(page, "/employees/new");
-  const first = page.getByLabel("First name", { exact: true });
+  const first = page.getByRole("textbox", { name: "First name", exact: true });
   await first.focus();
   await expect(first).toBeFocused();
   await first.fill("Kofi");
   await page.keyboard.press("Tab");
-  await expect(page.getByLabel("Last name", { exact: true })).toBeFocused();
+  await expect(page.getByRole("textbox", { name: "Last name", exact: true })).toBeFocused();
 });
 
 test("with reduced motion nothing slides or zooms", async ({ browser }) => {
@@ -209,27 +204,32 @@ test("with reduced motion nothing slides or zooms", async ({ browser }) => {
   await api.dispose();
   const page = await context.newPage();
 
+  // Every finite animation on the page, shown at its first and last frame: does anything move?
   const moving = () =>
-    page.evaluate(() =>
-      document
+    page.evaluate(() => {
+      const pose = (el: Element) => {
+        const style = getComputedStyle(el);
+        return [style.transform, style.translate, style.scale, style.rotate].join(" ");
+      };
+      return document
         .getAnimations()
+        .filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity)
         .filter((animation) => {
-          const effect = animation.effect as KeyframeEffect | null;
-          const frames = effect?.getKeyframes() ?? [];
-          const moves = ["transform", "translate", "scale", "rotate"].some((property) => {
-            const values = new Set(
-              frames
-                .map((frame) => String(frame[property] ?? "none"))
-                .map((v) =>
-                  v.replace(/\b0px\b/g, "0").replace(/translate[XY]?\(0(, 0)?\)/g, "none"),
-                ),
-            );
-            return values.size > 1;
-          });
-          return moves;
+          const target = (animation.effect as KeyframeEffect | null)?.target;
+          const end = Number(animation.effect?.getComputedTiming().endTime ?? 0);
+          if (!target || end <= 0) return false;
+          const now = animation.currentTime;
+          animation.pause();
+          animation.currentTime = 0;
+          const first = pose(target);
+          animation.currentTime = end - 1;
+          const last = pose(target);
+          animation.currentTime = now;
+          animation.play();
+          return first !== last;
         })
-        .map((animation) => (animation as CSSAnimation).animationName ?? "animation"),
-    );
+        .map((animation) => (animation as CSSAnimation).animationName ?? "animation");
+    });
 
   await open(page, "/dashboard");
   expect(await moving()).toEqual([]);
