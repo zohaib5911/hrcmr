@@ -192,7 +192,7 @@ export function RulesEditor({ versions: initial }: Props) {
                 {earlier.map((version) => (
                   <li
                     key={version.id}
-                    className="border-separator flex flex-wrap items-center justify-between gap-3 rounded-xl border p-3"
+                    className="bg-elevated rounded-card shadow-e1 flex flex-wrap items-center justify-between gap-3 p-3"
                   >
                     <span className="text-callout">
                       {version.name}

@@ -147,7 +147,7 @@ export function QueuesAdmin() {
         ) : (
           <ul className="grid gap-3" aria-label="Deletion requests">
             {deletions.map((d) => (
-              <li key={d.id} className="border-separator rounded-xl border p-4">
+              <li key={d.id} className="bg-elevated rounded-card shadow-e1 p-4">
                 <p className="text-callout break-words font-medium">{d.company_name}</p>
                 <p className="text-footnote text-label-secondary">
                   {label(d.status)} · requested {day(d.requested_at)}
@@ -193,7 +193,7 @@ export function QueuesAdmin() {
         ) : (
           <ul className="grid gap-3" aria-label="Data exports">
             {exports.map((x) => (
-              <li key={x.id} className="border-separator rounded-xl border p-4">
+              <li key={x.id} className="bg-elevated rounded-card shadow-e1 p-4">
                 <p className="text-callout break-words font-medium">{x.company_name}</p>
                 <p className="text-footnote text-label-secondary">
                   {label(x.status)} · requested {day(x.requested_at)}

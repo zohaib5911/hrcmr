@@ -1,16 +1,29 @@
 "use client";
 
 import { useState } from "react";
+
 import { PageHeader } from "@/components/app/page-header";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { DataTable, type Column } from "@/components/ui/data-table";
+import { GroupedList, GroupedRow } from "@/components/ui/grouped-list";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { attempt } from "@/lib/auth/request";
 import { formatUk } from "@/lib/ui/dates";
 
 type Status = components["schemas"]["RegisterStatusOut"];
+type ImportError = Status["errors"][number];
+
+const ERROR_COLUMNS: readonly Column<ImportError>[] = [
+  { id: "date", header: "Date (UTC)", primary: true, cell: (row) => row.created_at },
+  {
+    id: "detail",
+    header: "Failure details",
+    cell: (row) => <span className="break-all">{JSON.stringify(row.detail)}</span>,
+  },
+];
 export function RegisterAdmin({ status }: { status: Status | null }) {
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
@@ -52,71 +65,41 @@ export function RegisterAdmin({ status }: { status: Status | null }) {
         </Alert>
       ) : (
         <>
-          <dl className="mb-6 grid gap-3 sm:grid-cols-2">
-            <div>
-              <dt>Current sponsors</dt>
-              <dd>{status.current_sponsors}</dd>
-            </div>
-            <div>
-              <dt>Total sponsors</dt>
-              <dd>{status.total_sponsors}</dd>
-            </div>
-          </dl>
-          <h2 className="text-title-3 my-4">Latest publication</h2>
+          <GroupedList heading="Sponsors" className="mb-6">
+            <GroupedRow title="Current sponsors" detail={String(status.current_sponsors)} />
+            <GroupedRow title="Total sponsors" detail={String(status.total_sponsors)} />
+          </GroupedList>
           {publication ? (
-            <dl className="mb-6 grid gap-3 sm:grid-cols-2">
-              <div>
-                <dt>Published on</dt>
-                <dd>{formatUk(publication.published_on)}</dd>
-              </div>
-              <div>
-                <dt>Last import fetched at (UTC)</dt>
-                <dd>{publication.fetched_at}</dd>
-              </div>
-              <div>
-                <dt>Rows in publication</dt>
-                <dd>{publication.row_count}</dd>
-              </div>
-              <div>
-                <dt>Import status</dt>
-                <dd>{publication.status}</dd>
-              </div>
-            </dl>
+            <GroupedList heading="Latest publication" className="mb-6">
+              <GroupedRow title="Published on" detail={formatUk(publication.published_on)} />
+              <GroupedRow title="Last import fetched at (UTC)" detail={publication.fetched_at} />
+              <GroupedRow title="Rows in publication" detail={String(publication.row_count)} />
+              <GroupedRow title="Import status" detail={publication.status} />
+            </GroupedList>
           ) : (
-            <p>No register publications imported yet.</p>
+            <>
+              <h2 className="text-title-3 text-label my-4">Latest publication</h2>
+              <p className="text-callout text-label-secondary">
+                No register publications imported yet.
+              </p>
+            </>
           )}
-          <h2 className="text-title-3 my-4">Recent import errors</h2>
+          <h2 className="text-title-3 text-label my-4">Recent import errors</h2>
           {status.errors.length === 0 ? (
-            <p>No recent import errors.</p>
+            <p className="text-callout text-label-secondary">No recent import errors.</p>
           ) : (
-            <div
-              className="overflow-x-auto"
-              tabIndex={0}
-              role="region"
-              aria-label="Recent import errors"
-            >
-              <table className="w-full text-left text-callout">
-                <caption className="sr-only">Register import failures (latest 20)</caption>
-                <thead>
-                  <tr>
-                    <th className="p-2">Date (UTC)</th>
-                    <th className="p-2">Failure details</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {status.errors.map((row) => (
-                    <tr key={row.id} className="border-t border-separator">
-                      <td className="p-2">{row.created_at}</td>
-                      <td className="p-2 break-all">{JSON.stringify(row.detail)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <DataTable
+              caption="Register import failures (latest 20)"
+              columns={ERROR_COLUMNS}
+              rows={status.errors}
+              getRowId={(row) => row.id}
+              pageSize={20}
+              pager={false}
+            />
           )}
         </>
       )}
-      <h2 className="text-title-3 my-4">Rerun import</h2>
+      <h2 className="text-title-3 text-label my-4">Rerun import</h2>
       {error && (
         <Alert tone="danger" title="Could not queue import">
           {error}

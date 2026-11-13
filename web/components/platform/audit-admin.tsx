@@ -1,14 +1,43 @@
 "use client";
 
+import { ScrollText } from "lucide-react";
+
 import { PageHeader } from "@/components/app/page-header";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { DataTable, type Column } from "@/components/ui/data-table";
+import { EmptyState } from "@/components/ui/empty-state";
 import { TextField } from "@/components/ui/text-field";
 import { Select } from "@/components/ui/select";
 import { type components } from "@/lib/api/client";
 import { baseUrl } from "@/lib/auth/request";
 import { PAGE_SIZE, queryString, type AuditFilters } from "@/lib/platform/operations";
 import { formatUk } from "@/lib/ui/dates";
+
+type AuditRow = components["schemas"]["AuditLogOut"]["items"][number];
+
+const COLUMNS: readonly Column<AuditRow>[] = [
+  { id: "date", header: "Date", cell: (row) => formatUk(row.created_at.slice(0, 10)) },
+  { id: "actor", header: "Actor", cell: (row) => row.actor },
+  {
+    id: "action",
+    header: "Action",
+    primary: true,
+    cell: (row) => <span className="break-words">{row.action}</span>,
+  },
+  {
+    id: "summary",
+    header: "Summary",
+    cell: (row) => <span className="break-words">{row.summary ?? "–"}</span>,
+  },
+  {
+    id: "reason",
+    header: "Reason",
+    cell: (row) => <span className="break-words">{row.reason ?? "–"}</span>,
+  },
+];
+
+const pageLink = buttonVariants({ variant: "gray", size: "sm" });
 
 export function AuditAdmin({
   data,
@@ -24,8 +53,16 @@ export function AuditAdmin({
       <PageHeader
         title="Platform audit log"
         description="Platform actions and system jobs. A trailing dot in the action matches a family, for example platform."
+        actions={
+          <a
+            className={buttonVariants({ variant: "gray" })}
+            href={`${baseUrl()}/platform/audit/export?${queryString(filters)}`}
+          >
+            Export CSV
+          </a>
+        }
       />
-      <form action="/audit" method="get" className="mb-6 grid gap-4 sm:grid-cols-2">
+      <form action="/audit" method="get" className="mb-6 grid items-end gap-4 sm:grid-cols-2">
         <TextField
           label="Action family"
           name="action"
@@ -52,63 +89,47 @@ export function AuditAdmin({
           defaultValue={filters.until?.slice(0, 10) ?? ""}
           clearable={false}
         />
-        <Button type="submit">Apply filters</Button>
+        <Button type="submit" className="self-end justify-self-start">
+          Apply filters
+        </Button>
       </form>
-      <a
-        className="text-accent-text underline"
-        href={`${baseUrl()}/platform/audit/export?${queryString(filters)}`}
-      >
-        Export CSV
-      </a>
       {!data ? (
         <Alert tone="danger" title="Could not load audit log">
           Reload to try again.
         </Alert>
-      ) : data.items.length === 0 ? (
-        <p className="mt-6">No audit events match these filters.</p>
       ) : (
-        <div className="mt-6 overflow-x-auto">
-          <table className="w-full text-left text-callout">
-            <caption className="sr-only">Platform audit events</caption>
-            <thead>
-              <tr>
-                {["Date", "Actor", "Action", "Summary", "Reason"].map((h) => (
-                  <th key={h} className="p-2">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {data.items.map((row) => (
-                <tr key={row.id} className="border-t border-separator">
-                  {[
-                    formatUk(row.created_at.slice(0, 10)),
-                    row.actor,
-                    row.action,
-                    row.summary ?? "–",
-                    row.reason ?? "–",
-                  ].map((value, i) => (
-                    <td key={i} className="p-2 break-words">
-                      {value}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <DataTable
+          caption="Platform audit events"
+          columns={COLUMNS}
+          rows={data.items}
+          getRowId={(row) => row.id}
+          pageSize={PAGE_SIZE}
+          pager={false}
+          empty={
+            <EmptyState
+              icon={ScrollText}
+              title="No audit events"
+              description="No audit events match these filters."
+            />
+          }
+        />
       )}
-      <nav aria-label="Audit pages" className="mt-6 flex gap-4">
+      <nav aria-label="Audit pages" className="mt-4 flex gap-3">
         {offset > 0 && (
           <a
+            className={pageLink}
             href={`/audit?${queryString({ ...filters, offset: Math.max(0, offset - PAGE_SIZE) })}`}
           >
             Previous
           </a>
         )}
         {data && offset + PAGE_SIZE < data.total && (
-          <a href={`/audit?${queryString({ ...filters, offset: offset + PAGE_SIZE })}`}>Next</a>
+          <a
+            className={pageLink}
+            href={`/audit?${queryString({ ...filters, offset: offset + PAGE_SIZE })}`}
+          >
+            Next
+          </a>
         )}
       </nav>
     </>

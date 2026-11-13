@@ -61,7 +61,7 @@ it("renders publication, sponsor counts and recent failure details", () => {
   ])
     expect(screen.getByText(text)).toBeInTheDocument();
   expect(
-    screen.getByRole("table", { name: "Register import failures (latest 20)" }),
+    screen.getByRole("grid", { name: "Register import failures (latest 20)" }),
   ).toHaveTextContent("TimeoutError");
 });
 it("shows empty status and still allows the first import", () => {

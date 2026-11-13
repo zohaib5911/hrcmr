@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+
 import { PageHeader } from "@/components/app/page-header";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { DataTable, type Column } from "@/components/ui/data-table";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { attempt } from "@/lib/auth/request";
@@ -20,6 +22,8 @@ const RERUNNABLE = new Set([
   "report_jobs_sweep",
 ]);
 type Schemas = components["schemas"];
+type Failure = Schemas["JobFailuresOut"]["items"][number];
+const pageLink = buttonVariants({ variant: "gray", size: "sm" });
 export function JobsAdmin({
   queue,
   failures,
@@ -53,6 +57,41 @@ export function JobsAdmin({
       setBusy(false);
     }
   }
+  const columns: readonly Column<Failure>[] = [
+    { id: "date", header: "Date", cell: (row) => formatUk(row.created_at.slice(0, 10)) },
+    {
+      id: "job",
+      header: "Job",
+      primary: true,
+      cell: (row) => <span className="break-all">{row.job}</span>,
+    },
+    {
+      id: "detail",
+      header: "Failure details",
+      cell: (row) => <span className="break-all">{JSON.stringify(row.detail)}</span>,
+    },
+    {
+      id: "action",
+      header: "Action",
+      cell: (row) =>
+        RERUNNABLE.has(row.job) ? (
+          <ConfirmDialog
+            trigger={
+              <Button variant="gray" disabled={busy || reason.trim().length < 5}>
+                Run again
+              </Button>
+            }
+            title={`Run ${row.job} again?`}
+            description="This queues a new run. The failed run stays in the audit log."
+            confirmLabel="Queue run"
+            confirmDisabled={busy || reason.trim().length < 5}
+            onConfirm={() => rerun(row.id)}
+          />
+        ) : (
+          "Re-run the original action instead."
+        ),
+    },
+  ];
   return (
     <>
       <PageHeader
@@ -60,7 +99,7 @@ export function JobsAdmin({
         description="Queue depth and failed scheduled runs. Only safe, allow-listed jobs can be run again."
       />
       {queue ? (
-        <p className="mb-6 text-title-3">Waiting in queue: {queue.waiting}</p>
+        <p className="text-title-3 text-label mb-6">Waiting in queue: {queue.waiting}</p>
       ) : (
         <Alert tone="danger" title="Could not load queue">
           Reload to try again.
@@ -82,7 +121,7 @@ export function JobsAdmin({
           Reload to try again.
         </Alert>
       ) : failures.items.length === 0 ? (
-        <p>No failed jobs.</p>
+        <p className="text-callout text-label-secondary">No failed jobs.</p>
       ) : (
         <>
           <TextField
@@ -92,52 +131,27 @@ export function JobsAdmin({
             value={reason}
             onChange={(e) => setReason(e.target.value)}
           />
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full text-left text-callout">
-              <caption className="sr-only">Failed jobs</caption>
-              <thead>
-                <tr>
-                  <th className="p-2">Date</th>
-                  <th className="p-2">Job</th>
-                  <th className="p-2">Failure details</th>
-                  <th className="p-2">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {failures.items.map((row) => (
-                  <tr key={row.id} className="border-t border-separator">
-                    <td className="p-2">{formatUk(row.created_at.slice(0, 10))}</td>
-                    <td className="p-2 break-all">{row.job}</td>
-                    <td className="p-2 break-all">{JSON.stringify(row.detail)}</td>
-                    <td className="p-2">
-                      {RERUNNABLE.has(row.job) ? (
-                        <ConfirmDialog
-                          trigger={
-                            <Button variant="gray" disabled={busy || reason.trim().length < 5}>
-                              Run again
-                            </Button>
-                          }
-                          title={`Run ${row.job} again?`}
-                          description="This queues a new run. The failed run stays in the audit log."
-                          confirmLabel="Queue run"
-                          confirmDisabled={busy || reason.trim().length < 5}
-                          onConfirm={() => rerun(row.id)}
-                        />
-                      ) : (
-                        "Re-run the original action instead."
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            className="mt-4"
+            caption="Failed jobs"
+            columns={columns}
+            rows={failures.items}
+            getRowId={(row) => row.id}
+            pageSize={PAGE_SIZE}
+            pager={false}
+          />
         </>
       )}
-      <nav aria-label="Job pages" className="mt-6 flex gap-4">
-        {offset > 0 && <a href={`/jobs?offset=${Math.max(0, offset - PAGE_SIZE)}`}>Previous</a>}
+      <nav aria-label="Job pages" className="mt-4 flex gap-3">
+        {offset > 0 && (
+          <a className={pageLink} href={`/jobs?offset=${Math.max(0, offset - PAGE_SIZE)}`}>
+            Previous
+          </a>
+        )}
         {failures && offset + PAGE_SIZE < failures.total && (
-          <a href={`/jobs?offset=${offset + PAGE_SIZE}`}>Next</a>
+          <a className={pageLink} href={`/jobs?offset=${offset + PAGE_SIZE}`}>
+            Next
+          </a>
         )}
       </nav>
     </>

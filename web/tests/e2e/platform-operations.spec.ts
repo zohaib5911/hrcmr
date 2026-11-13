@@ -11,7 +11,7 @@ test("an owner opens jobs and filters the platform audit log", async ({ page }) 
   await expect(
     page.getByRole("heading", { name: "Platform audit log", exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole("table", { name: "Platform audit events" })).toBeVisible();
+  await expect(page.getByRole("grid", { name: "Platform audit events" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Export CSV" })).toHaveAttribute(
     "href",
     /\/platform\/audit\/export\?action=platform\.&actor_type=platform_admin/,

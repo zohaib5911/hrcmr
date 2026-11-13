@@ -112,7 +112,7 @@ export function UsersAdmin() {
           {rows.map((user) => (
             <li
               key={user.id}
-              className="border-separator flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4"
+              className="bg-elevated rounded-card shadow-e1 flex flex-wrap items-center justify-between gap-3 p-4"
             >
               <span className="text-callout min-w-0 break-words">
                 {user.first_name} {user.last_name}

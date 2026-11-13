@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { PageHeader } from "@/components/app/page-header";
+
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -177,147 +179,151 @@ export function CourseEditor({ courses: initial }: { courses: Course[] }) {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[18rem_1fr]">
-      <aside className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <h1 className="text-title-2 text-label">Courses</h1>
-        </div>
-        <Button variant="filled" onClick={() => choose("new")}>
-          New course
-        </Button>
-        <ul className="flex flex-col gap-1">
-          {courses.map((course) => (
-            <li key={course.id}>
-              <button
-                type="button"
-                aria-current={selected === course.id ? "true" : undefined}
-                onClick={() => choose(course.id)}
-                className={
-                  selected === course.id
-                    ? "bg-accent-tint text-label rounded-control w-full px-3 py-2 text-left"
-                    : "text-label-secondary hover:bg-fill-secondary rounded-control w-full px-3 py-2 text-left"
-                }
-              >
-                <span className="text-callout block truncate">{course.title}</span>
-                <span className="text-caption block">
-                  {course.published ? "Published" : "Draft"} · version {course.version}
-                </span>
-              </button>
-            </li>
-          ))}
-        </ul>
-      </aside>
-
-      <form
-        className="bg-elevated border-separator rounded-card flex flex-col gap-5 border p-5"
-        onSubmit={(event) => {
-          event.preventDefault();
-          void save();
-        }}
-      >
-        <h2 className="text-title-3 text-label">{current ? current.title : "New course"}</h2>
-        {problem ? <Alert tone="danger" title={problem.message} /> : null}
-        {notice ? <Alert tone="success" title={notice} /> : null}
-        <div className="grid gap-4 sm:grid-cols-2">
-          <TextField
-            label="Address (slug)"
-            hint="Lower-case words joined by hyphens. It cannot change later."
-            value={draft.slug}
-            disabled={current !== null}
-            onChange={(e) => set("slug", e.target.value)}
-          />
-          <TextField
-            label="Title"
-            value={draft.title}
-            onChange={(e) => set("title", e.target.value)}
-          />
-          <TextField
-            label="Duration (minutes)"
-            type="number"
-            min={5}
-            max={120}
-            value={draft.duration}
-            onChange={(e) => set("duration", e.target.value)}
-          />
-          <Select
-            label="Audience"
-            value={draft.audience}
-            onChange={(e) => set("audience", e.target.value as Draft["audience"])}
-          >
-            <option value="all_staff">All staff</option>
-            <option value="managers">Managers</option>
-          </Select>
-          <TextField
-            label="Pass mark (%)"
-            type="number"
-            min={1}
-            max={100}
-            value={draft.passMark}
-            onChange={(e) => set("passMark", e.target.value)}
-          />
-        </div>
-        <TextArea
-          label="Summary"
-          value={draft.summary}
-          onChange={(e) => set("summary", e.target.value)}
-        />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <TextField
-            label="Source title"
-            value={draft.sourceTitle}
-            onChange={(e) => set("sourceTitle", e.target.value)}
-          />
-          <TextField
-            label="Source publisher"
-            value={draft.sourcePublisher}
-            onChange={(e) => set("sourcePublisher", e.target.value)}
-          />
-          <TextField
-            label="Source address (https)"
-            value={draft.sourceUrl}
-            onChange={(e) => set("sourceUrl", e.target.value)}
-          />
-          <TextField
-            label="Source last updated"
-            type="date"
-            value={draft.sourceUpdated}
-            onChange={(e) => set("sourceUpdated", e.target.value)}
-          />
-          <TextField
-            label="Content reviewed"
-            type="date"
-            value={draft.reviewed}
-            onChange={(e) => set("reviewed", e.target.value)}
-          />
-          <TextField
-            label="Licence note (optional)"
-            value={draft.licenceNote}
-            onChange={(e) => set("licenceNote", e.target.value)}
-          />
-        </div>
-        <TextArea
-          label="Sections (JSON: title, body, key_points)"
-          className="font-mono"
-          value={draft.sections}
-          onChange={(e) => set("sections", e.target.value)}
-        />
-        <TextArea
-          label="Check questions (JSON: questions with prompt, options, answer, explanation)"
-          className="font-mono"
-          value={draft.questions}
-          onChange={(e) => set("questions", e.target.value)}
-        />
-        <Checkbox
-          label="Published (learners can see and be assigned it)"
-          checked={draft.published}
-          onCheckedChange={(value) => set("published", value === true)}
-        />
-        <div className="flex justify-end">
-          <Button type="submit" variant="filled" disabled={busy}>
-            {current ? "Save as a new version" : "Create course"}
+    <>
+      <PageHeader
+        title="Courses"
+        actions={
+          <Button variant="filled" onClick={() => choose("new")}>
+            New course
           </Button>
-        </div>
-      </form>
-    </div>
+        }
+      />
+      <div className="grid gap-6 lg:grid-cols-[18rem_1fr]">
+        <aside className="flex flex-col gap-2">
+          <ul className="flex flex-col gap-1">
+            {courses.map((course) => (
+              <li key={course.id}>
+                <button
+                  type="button"
+                  aria-current={selected === course.id ? "true" : undefined}
+                  onClick={() => choose(course.id)}
+                  className={
+                    selected === course.id
+                      ? "bg-accent-tint text-label rounded-control w-full px-3 py-2 text-left"
+                      : "text-label-secondary hover:bg-fill-secondary rounded-control w-full px-3 py-2 text-left"
+                  }
+                >
+                  <span className="text-callout block truncate">{course.title}</span>
+                  <span className="text-caption block">
+                    {course.published ? "Published" : "Draft"} · version {course.version}
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </aside>
+
+        <form
+          className="bg-elevated rounded-card shadow-e1 flex flex-col gap-5 p-5"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void save();
+          }}
+        >
+          <h2 className="text-title-3 text-label">{current ? current.title : "New course"}</h2>
+          {problem ? <Alert tone="danger" title={problem.message} /> : null}
+          {notice ? <Alert tone="success" title={notice} /> : null}
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextField
+              label="Address (slug)"
+              hint="Lower-case words joined by hyphens. It cannot change later."
+              value={draft.slug}
+              disabled={current !== null}
+              onChange={(e) => set("slug", e.target.value)}
+            />
+            <TextField
+              label="Title"
+              value={draft.title}
+              onChange={(e) => set("title", e.target.value)}
+            />
+            <TextField
+              label="Duration (minutes)"
+              type="number"
+              min={5}
+              max={120}
+              value={draft.duration}
+              onChange={(e) => set("duration", e.target.value)}
+            />
+            <Select
+              label="Audience"
+              value={draft.audience}
+              onChange={(e) => set("audience", e.target.value as Draft["audience"])}
+            >
+              <option value="all_staff">All staff</option>
+              <option value="managers">Managers</option>
+            </Select>
+            <TextField
+              label="Pass mark (%)"
+              type="number"
+              min={1}
+              max={100}
+              value={draft.passMark}
+              onChange={(e) => set("passMark", e.target.value)}
+            />
+          </div>
+          <TextArea
+            label="Summary"
+            value={draft.summary}
+            onChange={(e) => set("summary", e.target.value)}
+          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <TextField
+              label="Source title"
+              value={draft.sourceTitle}
+              onChange={(e) => set("sourceTitle", e.target.value)}
+            />
+            <TextField
+              label="Source publisher"
+              value={draft.sourcePublisher}
+              onChange={(e) => set("sourcePublisher", e.target.value)}
+            />
+            <TextField
+              label="Source address (https)"
+              value={draft.sourceUrl}
+              onChange={(e) => set("sourceUrl", e.target.value)}
+            />
+            <TextField
+              label="Source last updated"
+              type="date"
+              value={draft.sourceUpdated}
+              onChange={(e) => set("sourceUpdated", e.target.value)}
+            />
+            <TextField
+              label="Content reviewed"
+              type="date"
+              value={draft.reviewed}
+              onChange={(e) => set("reviewed", e.target.value)}
+            />
+            <TextField
+              label="Licence note (optional)"
+              value={draft.licenceNote}
+              onChange={(e) => set("licenceNote", e.target.value)}
+            />
+          </div>
+          <TextArea
+            label="Sections (JSON: title, body, key_points)"
+            className="font-mono"
+            value={draft.sections}
+            onChange={(e) => set("sections", e.target.value)}
+          />
+          <TextArea
+            label="Check questions (JSON: questions with prompt, options, answer, explanation)"
+            className="font-mono"
+            value={draft.questions}
+            onChange={(e) => set("questions", e.target.value)}
+          />
+          <Checkbox
+            label="Published (learners can see and be assigned it)"
+            checked={draft.published}
+            onCheckedChange={(value) => set("published", value === true)}
+          />
+          <div className="flex justify-end">
+            <Button type="submit" variant="filled" disabled={busy}>
+              {current ? "Save as a new version" : "Create course"}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </>
   );
 }
