@@ -577,3 +577,9 @@ Do not start until the owner says so: US site, Australia, native wrapper, passke
 - AUDIT-4 round 1: 1 P0 / 19 P1 / 1 P2 — FIX NEEDED. API1363/web1309 passed; full browser485 passed/1 failed/328 expected skips. One-line employee-scroller focus fix verified with6unit/9browser passes;21 fix tasks and diagnostic evidence recorded; AUDIT-4 remains open.
 - AUDIT-4 round 2: 0 P0 / 1 P1 / 3 P2 — FIX NEEDED. All 21 round-1 fixes verified; API 1377/0/0, web unit 1466/0, e2e 488/0 (328 skipped). New P1: SSR register reads share one rate-limit bucket.
 - AUDIT-4 round 3: 0 P0 / 0 P1 / 0 P2 — PASS. Fixes C4.2.1–C4.2.4 verified; API 1381/0/0, web unit 1466/0, e2e 488/0 (328 skipped), build and gen:api check pass.
+
+## Phase 21 summary (security hardening)
+- Built: endpoint RBAC matrix and security test suite (T21.1); threat model `docs/security.md` (T21.2); clean dependency/container/secret scans and enforced nonce CSP (T21.3, runbook `docs/runbooks/security-scans-csp.md`); pen-test checks with IDOR sweep, anti-framing headers and rules-watch redirect allowlist (T21.4); daily retention, structural Sentry scrubbing and data map `docs/privacy.md` (T21.5).
+- Gate: full API 1417 passed; web lint 0 warnings, typecheck clean, unit 1471 passed. Local full e2e reached 284 passed, then the host Docker bridge stopped forwarding (no container reachable from host; environment, not code); full Playwright evidence is the gate PR's CI e2e job.
+- Screenshots: none; Phase 21 added no new screens (security headers, API and docs only).
+- Open: HTTPS staging CSP report-only/enforced check parked (L3, T23.1/T23.3); live Sentry receipt, retention cron and backups verified at T23.4/T23.6; owner must restart Docker/fix the host bridge (needs root) before local DB/e2e runs work again.
