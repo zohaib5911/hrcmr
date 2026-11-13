@@ -88,7 +88,8 @@ export async function audit(page: Page, where: string, mode: Mode = {}) {
         return page
           .locator(target)
           .evaluateAll(
-            (elements, selector) => elements.length === 1 && elements[0].matches(selector),
+            (elements, selector) =>
+              elements.length === 1 && elements[0]?.matches(selector) === true,
             INACTIVE,
           );
       }),
