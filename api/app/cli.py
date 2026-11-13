@@ -182,7 +182,7 @@ async def _load_places(content: bytes, source: str, version: str) -> int:
     return 0
 
 
-async def _load_companies(content: bytes, source: str, version: str) -> int:
+async def _load_companies(path: Path, version: str) -> int:
     from sqlalchemy.ext.asyncio import AsyncSession
 
     from app.modules.register.geo import load_company_dataset
@@ -194,20 +194,21 @@ async def _load_companies(content: bytes, source: str, version: str) -> int:
     try:
         async with AsyncSession(engine) as db:
             try:
-                dataset, matched = await load_company_dataset(
-                    db,
-                    content,
-                    version=version,
-                    source=source,
-                    enabled=settings.register_bulk_match_enabled,
-                )
+                with path.open("rb") as content:  # streamed: never read whole into memory
+                    dataset, matched = await load_company_dataset(
+                        db,
+                        content,
+                        version=version,
+                        source=path.name,
+                        enabled=settings.register_bulk_match_enabled,
+                    )
             except ValueError as error:
                 raise SystemExit(f"Refused: {error}") from None
             rows = dataset.row_count
             await db.commit()
     finally:
         await engine.dispose()
-    print(f"Loaded {rows} unambiguous companies ({version}); {matched} sponsors matched.")  # noqa: T201
+    print(f"Loaded {rows} company rows ({version}); {matched} sponsors matched.")  # noqa: T201
     return 0
 
 
@@ -284,7 +285,7 @@ def main(argv: list[str] | None = None) -> int:
             parser.error("load-companies needs FILE and --version (1-100 characters)")
         if not args.file.is_file():
             raise SystemExit(f"{args.file} is not a file. Download the bulk CSV first.")
-        return asyncio.run(_load_companies(args.file.read_bytes(), args.file.name, args.version))
+        return asyncio.run(_load_companies(args.file, args.version))
     if args.command == "load-places":
         if args.file is None or not args.version:
             parser.error("load-places needs FILE and --version")
