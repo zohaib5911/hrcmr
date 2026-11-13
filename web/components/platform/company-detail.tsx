@@ -194,7 +194,7 @@ export function CompanyDetail({
   }
   return (
     <div className="mx-auto grid max-w-6xl gap-6">
-      <a href="/companies" className="text-accent">
+      <a href="/companies" className="text-accent-text">
         All companies
       </a>
       <PageHeader title={company.name} description={company.contact_email ?? company.slug} />

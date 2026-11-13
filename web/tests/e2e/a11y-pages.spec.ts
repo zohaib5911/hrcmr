@@ -9,7 +9,7 @@ import { request as playwrightRequest, type Page } from "@playwright/test";
 import { API, createSignedInAdmin, csrfHeaders } from "../support/accounts";
 import { audit } from "../support/axe";
 import { expect, test } from "../support/fixtures";
-import { ADMIN_ORIGIN, signInPlatformAdmin } from "../support/platform";
+import { ADMIN_HOST, ADMIN_ORIGIN, signInPlatformAdmin } from "../support/platform";
 
 /** Every signed-in page that takes no id. */
 const APP_PAGES = [
@@ -182,6 +182,12 @@ test.describe("platform admin", () => {
       test("every admin page and a company detail pass axe", async ({ page }) => {
         test.setTimeout((ADMIN_PAGES.length + 1) * 15_000);
         const account = await signInPlatformAdmin(page, "owner");
+        // Legacy course/rule/dossier SSR also needs the tenant session on the admin host.
+        const tenantCookie = (await page.context().cookies(API)).find(
+          (cookie) => cookie.name === "brand_session",
+        );
+        expect(tenantCookie).toBeDefined();
+        await page.context().addCookies([{ ...tenantCookie!, domain: ADMIN_HOST, path: "/" }]);
         const list = await page.request.get(`${API}/platform/companies`, {
           params: { q: account.company },
         });

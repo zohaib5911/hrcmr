@@ -55,7 +55,7 @@ export function AuditAdmin({
         <Button type="submit">Apply filters</Button>
       </form>
       <a
-        className="text-accent underline"
+        className="text-accent-text underline"
         href={`${baseUrl()}/platform/audit/export?${queryString(filters)}`}
       >
         Export CSV
