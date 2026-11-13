@@ -160,10 +160,8 @@ async def _email_samples() -> int:
 
 
 async def _seed_perf() -> int:
-    from sqlalchemy import text
-
     try:
-        from seed.perf import seed_company
+        from seed.perf import seed_perf_test_company
     except ModuleNotFoundError:
         raise SystemExit("seed-perf is for development: seed/ is not in this image.") from None
 
@@ -175,18 +173,9 @@ async def _seed_perf() -> int:
     engine = create_async_engine(settings.database_url_owner.get_secret_value())
     try:
         async with engine.begin() as connection:
-            exists = await connection.scalar(
-                text("select id from companies where slug = 'perf-test'")
-            )
-            if exists is not None:
+            count = await seed_perf_test_company(connection)
+            if count is None:
                 raise SystemExit("Company perf-test already exists; nothing added.")
-            company = await connection.scalar(
-                text(
-                    "insert into companies (name, slug, plan, subscription_status) "
-                    "values ('Perf test', 'perf-test', 'annual', 'active') returning id"
-                )
-            )
-            count = await seed_company(connection, company)
     finally:
         await engine.dispose()
     print(f"Company perf-test seeded with {count} employees.")  # noqa: T201

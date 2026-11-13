@@ -95,3 +95,17 @@ async def seed_company(connection: AsyncConnection, company: uuid.UUID, count: i
     for statement in _STATEMENTS:
         await connection.execute(text(statement), params)
     return count
+
+
+async def seed_perf_test_company(connection: AsyncConnection) -> int | None:
+    """Creates company ``perf-test`` and seeds it. Returns None if it already exists."""
+    exists = await connection.scalar(text("select id from companies where slug = 'perf-test'"))
+    if exists is not None:
+        return None
+    company = await connection.scalar(
+        text(
+            "insert into companies (name, slug, plan, subscription_status) "
+            "values ('Perf test', 'perf-test', 'annual', 'active') returning id"
+        )
+    )
+    return await seed_company(connection, company)
