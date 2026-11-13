@@ -177,7 +177,7 @@ export function UserAccessPage({
                 <Button
                   variant="plain"
                   size="sm"
-                  aria-label={"Link employee for " + fullName(user)}
+                  aria-label={`${user.employee_id ? "Change link" : "Link employee"} for ${fullName(user)}`}
                   onClick={() => setOpen({ kind: "employee", user })}
                 >
                   {user.employee_id ? "Change link" : "Link employee"}
