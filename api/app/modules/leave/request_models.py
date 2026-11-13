@@ -54,6 +54,7 @@ class LeaveRequest(Base, RecordMixin, TenantMixin):
             "start_date",
             "end_date",
         ),
+        Index("ix_leave_requests_company_id_start_date", "company_id", "start_date", "id"),
     )
     company_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True

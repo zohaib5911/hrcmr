@@ -43,6 +43,7 @@ class AttendanceRecord(Base, RecordMixin, TenantMixin):
         UniqueConstraint(
             "company_id", "employee_id", "date", name="uq_attendance_records_company_employee_date"
         ),
+        Index("ix_attendance_records_company_id_date", "company_id", "date"),
         ForeignKeyConstraint(
             ["company_id", "employee_id"],
             ["employees.company_id", "employees.id"],
