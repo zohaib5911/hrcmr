@@ -532,7 +532,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T22.3 · S · Accessibility audit
 - **Spec:** plan L1500. axe 0 serious on every page (extend `web/tests/e2e/design-a11y.spec.ts`), reduced-motion check.
 
-### [ ] T22.4 · S · Design QA sweep with final screenshots
+### [x] T22.4 · S · Design QA sweep with final screenshots
 - **Spec:** plan L1501, §5.12 L439–451. All widths, light/dark → `docs/screenshots/final/`.
 
 ### [ ] P22 · S · Phase 22 gate
