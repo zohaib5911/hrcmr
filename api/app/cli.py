@@ -8,6 +8,10 @@ rotate-keys    Re-encrypt every encrypted column with the active key (after addi
 export-openapi Print (or --output) the OpenAPI document.
 export-data-model Print (or --output) docs/data-model.md, generated from the models.
 email-samples  Send one of every e-mail to the configured mail service (Mailpit on a dev machine).
+load-places    Load a saved ONS Index of Place Names CSV (FILE --version LABEL) for register
+               geocoding; later register imports reuse it. See docs/runbooks/register-places.md.
+load-companies Load a Companies House monthly bulk CSV (FILE --version LABEL). Matching needs
+               REGISTER_BULK_MATCH_ENABLED=true. See docs/runbooks/register-companies.md.
 """
 
 from __future__ import annotations
@@ -153,6 +157,61 @@ async def _email_samples() -> int:
     return 0
 
 
+async def _load_places(content: bytes, source: str, version: str) -> int:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from app.modules.register.geo import load_place_dataset
+
+    settings = get_settings()
+    if settings.database_url_owner is None:
+        raise SystemExit("DATABASE_URL_OWNER is not set. Only the owner writes register data.")
+    engine = create_async_engine(settings.database_url_owner.get_secret_value())
+    try:
+        async with AsyncSession(engine) as db:
+            try:
+                dataset, placed = await load_place_dataset(
+                    db, content, version=version, source=source
+                )
+            except ValueError as error:
+                raise SystemExit(f"Refused: {error}") from None
+            rows = dataset.row_count
+            await db.commit()
+    finally:
+        await engine.dispose()
+    print(f"Loaded {rows} places ({version}); {placed} sponsors placed.")  # noqa: T201
+    return 0
+
+
+async def _load_companies(path: Path, version: str) -> int:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+    from app.modules.register.geo import load_company_dataset
+
+    settings = get_settings()
+    if settings.database_url_owner is None:
+        raise SystemExit("DATABASE_URL_OWNER is not set. Only the owner writes register data.")
+    engine = create_async_engine(settings.database_url_owner.get_secret_value())
+    try:
+        async with AsyncSession(engine) as db:
+            try:
+                with path.open("rb") as content:  # streamed: never read whole into memory
+                    dataset, matched = await load_company_dataset(
+                        db,
+                        content,
+                        version=version,
+                        source=path.name,
+                        enabled=settings.register_bulk_match_enabled,
+                    )
+            except ValueError as error:
+                raise SystemExit(f"Refused: {error}") from None
+            rows = dataset.row_count
+            await db.commit()
+    finally:
+        await engine.dispose()
+    print(f"Loaded {rows} company rows ({version}); {matched} sponsors matched.")  # noqa: T201
+    return 0
+
+
 def openapi_document() -> str:
     """The API's OpenAPI document as stable, sorted JSON.
 
@@ -193,8 +252,14 @@ def main(argv: list[str] | None = None) -> int:
             "export-data-model",
             "rotate-keys",
             "email-samples",
+            "load-places",
+            "load-companies",
         ],
     )
+    parser.add_argument(
+        "file", nargs="?", type=Path, help="load-places/load-companies: saved bulk CSV"
+    )
+    parser.add_argument("--version", help="load-places/load-companies: dataset edition")
     parser.add_argument(
         "--output", type=Path, help="export-openapi, export-data-model: write to this file"
     )
@@ -215,6 +280,18 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "rotate-keys":
         return asyncio.run(_rotate_keys())
+    if args.command == "load-companies":
+        if args.file is None or not args.version or len(args.version) > 100:
+            parser.error("load-companies needs FILE and --version (1-100 characters)")
+        if not args.file.is_file():
+            raise SystemExit(f"{args.file} is not a file. Download the bulk CSV first.")
+        return asyncio.run(_load_companies(args.file, args.version))
+    if args.command == "load-places":
+        if args.file is None or not args.version:
+            parser.error("load-places needs FILE and --version")
+        if not args.file.is_file():
+            raise SystemExit(f"{args.file} is not a file. Download the ONS file first.")
+        return asyncio.run(_load_places(args.file.read_bytes(), args.file.name, args.version))
     if args.command == "email-samples":
         return asyncio.run(_email_samples())
     if args.command == "export-data-model":

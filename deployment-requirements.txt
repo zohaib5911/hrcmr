@@ -120,6 +120,7 @@ STRIPE_PRICE_ANNUAL             price_... (GBP 50 / year, recurring)            
 STRIPE_PRICE_TEN_YEAR           price_... (GBP 240, one-time)                      [PUBLIC]
 TURNSTILE_SECRET_KEY            from Cloudflare Turnstile                          [SECRET]
 COMPANIES_HOUSE_API_KEY         from Companies House developer hub (optional)      [SECRET]
+REGISTER_BULK_MATCH_ENABLED    false by default; optional register bulk CSV match (no key)
 SENTRY_DSN_API                  from Sentry (api project)                          [PUBLIC-ish, keep out of repo]
 CLAMAV_HOST                     clamav.railway.internal                            [PUBLIC]
 CLAMAV_PORT                     3310                                               [PUBLIC]
@@ -298,6 +299,10 @@ Do not paste them into the Claude Code chat; just tell it "the .env is ready".
 [ ] All accounts in section 2 created and verified
 [ ] All production variables in section 4 set in Railway (staging done and tested first)
 [ ] Postgres public proxy OFF in production; backups ON
+[ ] Sponsor map places: download the ONS Index of Place Names CSV (ONS Open Geography Portal, OGL) and run once on the API service:
+    python -m app.cli load-places <file.csv> --version <label, e.g. IPN-2025>   (re-run when ONS publishes a new edition)
+[ ] Optional register industries: set REGISTER_BULK_MATCH_ENABLED=true on worker/operator, then load the complete monthly Companies House Free Company Data Product CSV:
+    python -m app.cli load-companies <file.csv> --version <YYYY-MM>   (refresh monthly; docs/runbooks/register-companies.md)
 [ ] Stripe LIVE products, restricted live key, live webhook set
 [ ] Resend domain verified; test emails reach Gmail and Outlook inboxes
 [ ] Turnstile, WAF, rate-limit rule active

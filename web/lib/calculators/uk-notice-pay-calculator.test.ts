@@ -38,6 +38,33 @@ describe("statutory notice", () => {
     expect(hasOneMonth("2026-10-12", "2026-11-12")).toBe(true);
     expect(hasOneMonth("2026-10-13", "2026-11-12")).toBe(false);
   });
+
+  // One calendar month from a late-January start ends on the last day of February (clamped, no overflow into March).
+  it.each([
+    ["2026-01-29", "2026-02-28", true], // normal year: 29 Jan -> 28 Feb
+    ["2026-01-30", "2026-02-28", true],
+    ["2026-01-31", "2026-02-28", true],
+    ["2026-01-31", "2026-02-27", false], // the day before completion
+    ["2028-01-29", "2028-02-29", true], // leap year: 29 Jan -> 29 Feb
+    ["2028-01-29", "2028-02-28", false],
+    ["2028-01-30", "2028-02-29", true],
+    ["2028-01-31", "2028-02-29", true],
+    ["2028-01-31", "2028-02-28", false],
+    ["2026-03-15", "2026-04-15", true], // ordinary anniversary
+    ["2026-03-15", "2026-04-14", false],
+  ])("one month from %s reached on %s: %s", (start, notice, reached) => {
+    expect(hasOneMonth(start, notice)).toBe(reached);
+  });
+
+  it("an end-of-January starter given notice on 28 February gets the statutory minimum", () => {
+    expect(statutoryNoticeWeeks("employer", "employee", "2026-01-31", "2026-02-28")).toBe(1);
+    expect(statutoryNoticeWeeks("employee", "employee", "2026-01-31", "2026-02-28")).toBe(1);
+  });
+
+  it("impossible dates are not normalised", () => {
+    expect(hasOneMonth("2026-01-31", "2026-02-31")).toBe(false);
+    expect(completedYears("2025-02-30", "2026-11-12")).toBe(0);
+  });
 });
 
 const base: NoticeInput = {
@@ -91,6 +118,8 @@ describe("calculateNotice", () => {
     expect(calculateNotice({ ...base, amount: 0 })).toMatchObject({ ok: false });
     expect(calculateNotice({ ...base, startDate: "" })).toMatchObject({ ok: false });
     expect(calculateNotice({ ...base, contractWeeks: 1.5 })).toMatchObject({ ok: false });
+    expect(calculateNotice({ ...base, startDate: "2026-02-30" })).toMatchObject({ ok: false });
+    expect(calculateNotice({ ...base, noticeDate: "2026-13-01" })).toMatchObject({ ok: false });
   });
 });
 

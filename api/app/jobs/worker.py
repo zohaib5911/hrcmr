@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from app.core.config import Settings, get_settings
 from app.core.crypto import KeyRing, set_keyring
 from app.core.logging import configure_logging, get_logger
+from app.core.telemetry import configure_telemetry
 from app.db.engine import create_engine
 from app.integrations.email import NoTransport, transport_from_settings
 from app.integrations.storage import Storage
@@ -55,6 +56,7 @@ def build_context(settings: Settings) -> dict[str, Any]:
 
 async def startup(ctx: dict[str, Any]) -> None:
     settings = get_settings()
+    configure_telemetry(settings)
     set_keyring(KeyRing.from_settings(settings))
     ctx.update(build_context(settings))
     logger.info("worker_started", app_env=settings.app_env.value)

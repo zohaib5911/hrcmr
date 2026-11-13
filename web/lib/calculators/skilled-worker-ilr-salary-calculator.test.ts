@@ -1,6 +1,8 @@
 import { readFileSync } from "node:fs";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+import salaryRates from "@/rates/ilr-worker-salary.json";
 
 import {
   allOccupations,
@@ -80,6 +82,46 @@ describe("skilled worker ILR salary calculator", () => {
     expect(r.notes.join(" ")).toContain("£25,000");
   });
 
+  // Rates file: 3214 appears only in the lower going-rate tables (lower £31,300, no standard rate).
+  it("gives no figure when the usual route has no standard going rate", () => {
+    const o = occ("3214");
+    expect(o.standard).toBeNull();
+    for (const situation of ["standard", "salary_list"] as const) {
+      const r = calculateIlrSalary({ occupation: o, situation, hours: 37.5 });
+      expect(r.status).toBe("review");
+      expect(r.required).toBeNull();
+      expect(r.floor).toBeNull();
+      expect(r.notes.join(" ")).toContain("no standard going rate");
+    }
+    // The transitional branch has a sourced lower rate: higher of £31,300 and £31,300.
+    const t = calculateIlrSalary({ occupation: o, situation: "transitional", hours: 37.5 });
+    expect(t.status).toBe("ok");
+    expect(t.required).toBe(31_300);
+  });
+
+  it("gives no figure when the transitional branch has no lower going rate", () => {
+    const o = { ...occ("1111"), lower: null };
+    const r = calculateIlrSalary({ occupation: o, situation: "transitional", hours: 37.5 });
+    expect(r.status).toBe("review");
+    expect(r.required).toBeNull();
+    expect(r.notes.join(" ")).toContain("no lower going rate");
+  });
+
+  // https://www.gov.uk/indefinite-leave-to-remain-tier-2-t2-skilled-worker-visa/salary-requirements
+  // Health and Care codes with different requirements: higher of £31,300 (£25,000 ISL) and lower rate.
+  it("routes Health and Care Worker visas to review with the sourced rule", () => {
+    expect(thresholds.healthCare).toBe(31_300);
+    const r = calculateIlrSalary({
+      occupation: occ("2136"),
+      situation: "health_care",
+      hours: 37.5,
+    });
+    expect(r.status).toBe("review");
+    expect(r.required).toBeNull();
+    expect(r.notes.join(" ")).toContain("£31,300");
+    expect(r.notes.join(" ")).toContain("£25,000");
+  });
+
   it("searches by code and by words", () => {
     expect(searchOccupations("1111")[0]?.code).toBe("1111");
     expect(searchOccupations("chief executives").map((o) => o.code)).toContain("1111");
@@ -94,5 +136,34 @@ describe("skilled worker ILR salary calculator", () => {
     expect(source).not.toMatch(
       /fetch\s*\(|XMLHttpRequest|sendBeacon|WebSocket|localStorage|sessionStorage|indexedDB|document\.cookie/,
     );
+  });
+});
+
+// Settlement minimums live only in rates/ilr-worker-salary.json: editing the data changes results.
+describe("ILR salary figures come from the rates data", () => {
+  it("uses the pay-scale minimum and sportsperson figure from the rates file", async () => {
+    const values = {
+      ...salaryRates.values,
+      health_education_pay_scale: 26_000,
+      sportsperson: 40_000,
+    };
+    vi.resetModules();
+    vi.doMock("@/rates/ilr-worker-salary.json", () => ({ default: { ...salaryRates, values } }));
+    try {
+      const mod = await import("./skilled-worker-ilr-salary-calculator");
+      const scale = mod.allOccupations.find((o) => o.payScale)!;
+      const pay = mod.calculateIlrSalary({ occupation: scale, situation: "standard", hours: 37.5 });
+      expect(pay.floor).toBe(26_000);
+      expect(pay.notes.join(" ")).toContain("£26,000");
+      const sport = mod.calculateIlrSalary({
+        occupation: scale,
+        situation: "sportsperson",
+        hours: 37.5,
+      });
+      expect(sport.required).toBe(40_000);
+    } finally {
+      vi.doUnmock("@/rates/ilr-worker-salary.json");
+      vi.resetModules();
+    }
   });
 });

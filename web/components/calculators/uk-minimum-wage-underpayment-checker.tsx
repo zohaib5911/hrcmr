@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { PresetChips } from "@/components/calculators/preset-chips";
+import type { CalculatorPreset } from "@/lib/calculators/frame";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
@@ -36,15 +38,51 @@ const fields = {
 };
 const gbp = (n: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(n);
+const presets: readonly CalculatorPreset<Partial<typeof initial>>[] = [
+  {
+    id: "weekly",
+    label: "40 hours, \u00a3520 weekly pay",
+    values: { periodStart: "2026-11-09", age: "27", hours: "40", pay: "520" },
+  },
+  {
+    id: "uniform",
+    label: "Weekly pay with \u00a315 uniform cost",
+    values: { periodStart: "2026-11-09", age: "27", hours: "40", pay: "520", workCosts: "15" },
+  },
+];
+
 export function MinimumWageChecker() {
   const [form, setForm] = useState(initial);
-  const [result, setResult] = useState<ReturnType<typeof checkMinimumWage> | null>(null);
-  const [error, setError] = useState("");
+  const [attempted, setAttempted] = useState(false);
   function update(key: keyof typeof initial, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
-    setResult(null);
-    setError("");
+    setAttempted(false);
   }
+  const { result, error: liveError } = (() => {
+    let result: ReturnType<typeof checkMinimumWage> | null = null;
+    let error: string | null = null;
+
+    result = null;
+    try {
+      if (Object.values(form).some((v) => v.trim() === ""))
+        throw new Error("Complete all fields; enter 0 where no amount applies.");
+      const numeric = Object.fromEntries(
+        Object.keys(fields).map((k) => [k, Number(form[k as keyof typeof fields])]),
+      );
+      result = checkMinimumWage({
+        ...form,
+        ...numeric,
+        apprentice: form.apprentice !== "no",
+        firstYear: form.apprentice === "first",
+      } as unknown as WageInput);
+      error = "";
+    } catch (cause) {
+      error = cause instanceof Error ? cause.message : "Check your answers.";
+    }
+    return { result, error };
+  })();
+  const error = attempted || JSON.stringify(form) !== JSON.stringify(initial) ? liveError : null;
+
   return (
     <div className="space-y-6">
       <p className="text-callout text-label-secondary">
@@ -55,29 +93,19 @@ export function MinimumWageChecker() {
       <form
         noValidate
         className="grid gap-5 sm:grid-cols-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          setResult(null);
-          try {
-            if (Object.values(form).some((v) => v.trim() === ""))
-              throw new Error("Complete all fields; enter 0 where no amount applies.");
-            const numeric = Object.fromEntries(
-              Object.keys(fields).map((k) => [k, Number(form[k as keyof typeof fields])]),
-            );
-            setResult(
-              checkMinimumWage({
-                ...form,
-                ...numeric,
-                apprentice: form.apprentice !== "no",
-                firstYear: form.apprentice === "first",
-              } as unknown as WageInput),
-            );
-            setError("");
-          } catch (cause) {
-            setError(cause instanceof Error ? cause.message : "Check your answers.");
-          }
+        onSubmit={(event) => {
+          event.preventDefault();
+          setAttempted(true);
         }}
       >
+        <PresetChips
+          presets={presets}
+          onSelect={(preset) => {
+            setForm({ ...initial, ...preset.values });
+            setAttempted(false);
+          }}
+        />
+        <h2 className="text-title-2 sm:col-span-2">1. Pay reference period</h2>
         <Select
           label="Pay type"
           value={form.payType}
@@ -132,8 +160,7 @@ export function MinimumWageChecker() {
             variant="gray"
             onClick={() => {
               setForm(initial);
-              setResult(null);
-              setError("");
+              setAttempted(false);
             }}
           >
             Reset answers
@@ -161,6 +188,7 @@ export function MinimumWageChecker() {
         aria-live="polite"
         className="rounded-control bg-elevated p-5"
       >
+        <h2 className="text-headline text-label mb-3">2. Live result</h2>
         {result ? (
           <>
             <h2 className="text-title-2">

@@ -11,6 +11,7 @@ import functools
 import time
 from typing import TYPE_CHECKING, Any
 
+import sentry_sdk
 from arq import Retry
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -68,6 +69,7 @@ def tracked(
             logger.info("job_will_retry", job=name, **details)
             raise
         except Exception as exc:
+            sentry_sdk.capture_exception(exc)
             seconds = round(time.monotonic() - started, 3)
             logger.error(
                 "job_failed", job=name, kind=type(exc).__name__, seconds=seconds, **details

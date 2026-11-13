@@ -154,6 +154,7 @@ class Settings(BaseSettings):
     # --- Other third parties ---------------------------------------------------------------------
     turnstile_secret_key: SecretStr | None = None
     companies_house_api_key: SecretStr | None = None
+    register_bulk_match_enabled: bool = False
     # A Sentry DSN is "public-ish" but belongs to the api project and is kept out of the repo.
     sentry_dsn_api: SecretStr | None = None
 

@@ -28,7 +28,9 @@ test.describe("security headers on every page", () => {
 
 test.describe("Content-Security-Policy", () => {
   test("is strict", async ({ request }) => {
-    const csp = parseCsp((await request.get("/")).headers()["content-security-policy"]);
+    const response = await request.get("/");
+    expect(response.headers()["content-security-policy-report-only"]).toBeUndefined();
+    const csp = parseCsp(response.headers()["content-security-policy"]);
 
     expect(csp.get("default-src")).toEqual(["'self'"]);
     expect(csp.get("frame-ancestors")).toEqual(["'none'"]);
@@ -74,6 +76,49 @@ test.describe("Content-Security-Policy", () => {
     expect(nonceOf(csp)).not.toBe("ATTACKER");
     expect(await response.text()).not.toContain("ATTACKER");
   });
+
+  for (const invalidNonce of ["missing", "incorrect", "previous-response"] as const) {
+    test(`the browser blocks an inline script with a ${invalidNonce} nonce`, async ({
+      page,
+      request,
+    }) => {
+      const previous = await request.get("/");
+      const oldNonce = nonceOf(parseCsp(previous.headers()["content-security-policy"]));
+      // Inject parser-created scripts into the real response. Scripts appended synchronously
+      // through DevTools page.evaluate inherit the inspector's CSP bypass in Chromium.
+      await page.route("**/*", async (route) => {
+        if (!route.request().isNavigationRequest()) return route.continue();
+        const response = await route.fetch();
+        const nonce = nonceOf(parseCsp(response.headers()["content-security-policy"]));
+        expect(nonce).not.toBe(oldNonce);
+        const invalid =
+          invalidNonce === "missing"
+            ? ""
+            : ` nonce="${invalidNonce === "previous-response" ? oldNonce : "INCORRECT"}"`;
+        // The matching-nonce script is both a positive control and the violation listener.
+        const probes = `<script nonce="${nonce}">
+          document.addEventListener("securitypolicyviolation", (event) => {
+            if (event.blockedURI === "inline" && event.effectiveDirective === "script-src-elem") {
+              document.documentElement.dataset.cspViolation = event.disposition;
+            }
+          });
+          document.documentElement.dataset.cspAllowed = "executed";
+        </script><script${invalid}>
+          document.documentElement.dataset.cspBlocked = "executed";
+        </script>`;
+        await route.fulfill({
+          response,
+          body: (await response.text()).replace("</head>", `${probes}</head>`),
+        });
+      });
+      const response = await page.goto("/");
+      expect(response).not.toBeNull();
+
+      await expect(page.locator("html")).toHaveAttribute("data-csp-allowed", "executed");
+      await expect(page.locator("html")).toHaveAttribute("data-csp-violation", "enforce");
+      await expect(page.locator("html")).not.toHaveAttribute("data-csp-blocked", "executed");
+    });
+  }
 });
 
 test.describe("other responses", () => {

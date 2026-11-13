@@ -36,13 +36,12 @@ describe("public ILR and citizenship checker", () => {
     }
   });
 
-  it("calculates locally, updates the citizenship basis and clears stale results and answers", async () => {
+  it("calculates locally, updates the citizenship basis live and resets answers", async () => {
     const user = userEvent.setup();
     render(<Page />);
     const fetchSpy = vi.spyOn(globalThis, "fetch");
     const storageSpy = vi.spyOn(Storage.prototype, "setItem");
     dates();
-    await user.click(screen.getByRole("button", { name: "Check timeline" }));
     expect(screen.getByRole("region", { name: "Settlement timeline result" })).toHaveTextContent(
       "2027-06-20",
     );
@@ -54,15 +53,11 @@ describe("public ILR and citizenship checker", () => {
       "yes",
     );
     expect(
-      screen.queryByRole("region", { name: "Settlement timeline result" }),
-    ).not.toBeInTheDocument();
-    expect(
       screen.getByLabelText("Days abroad in the citizenship 3-year period"),
     ).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("Actual ILR grant date (optional)"), {
       target: { value: "2026-11-15" },
     });
-    await user.click(screen.getByRole("button", { name: "Check timeline" }));
     expect(screen.getByRole("region", { name: "Settlement timeline result" })).toHaveTextContent(
       "Earliest citizenship residence milestone: 2026-11-15",
     );
@@ -84,7 +79,6 @@ describe("public ILR and citizenship checker", () => {
     fireEvent.change(screen.getByLabelText("Days abroad in the citizenship 5-year period"), {
       target: { value: "451" },
     });
-    await user.click(screen.getByRole("button", { name: "Check timeline" }));
     expect(screen.getByRole("region", { name: "Settlement timeline result" })).toHaveTextContent(
       "Individual residence review required",
     );
@@ -96,14 +90,12 @@ describe("public ILR and citizenship checker", () => {
     );
   });
 
-  it("reports inconsistent dates and absence totals accessibly", async () => {
-    const user = userEvent.setup();
+  it("reports inconsistent dates and absence totals accessibly", () => {
     render(<Page />);
     dates();
     fireEvent.change(screen.getByLabelText("UK residence start for citizenship"), {
       target: { value: "2022-01-01" },
     });
-    await user.click(screen.getByRole("button", { name: "Check timeline" }));
     expect(screen.getByRole("alert")).toHaveTextContent("UK residence cannot start after");
     dates();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -111,8 +103,30 @@ describe("public ILR and citizenship checker", () => {
       screen.getByLabelText("Days abroad in the final 12 months before citizenship"),
       { target: { value: "1" } },
     );
-    await user.click(screen.getByRole("button", { name: "Check timeline" }));
     expect(screen.getByRole("alert")).toHaveTextContent("Last-year absences cannot exceed");
+  });
+
+  it("shows the frame, fills presets and flags incomplete answers", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    expect(screen.getByRole("heading", { name: "Quick answer" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "How it works" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Questions" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Skilled Worker since June 2021" }));
+    expect(screen.getByLabelText("Qualifying route residence start")).toHaveValue("2021-06-20");
+    const result = screen.getByRole("region", { name: "Settlement timeline result" });
+    expect(result).toHaveTextContent("ILR qualifying-residence milestone: 2026-06-20");
+    await user.click(screen.getByRole("button", { name: "Long residence with long absences" }));
+    expect(screen.getByRole("region", { name: "Settlement timeline result" })).toHaveTextContent(
+      "Absences need individual review",
+    );
+    fireEvent.change(screen.getByLabelText("UK residence start for citizenship"), {
+      target: { value: "" },
+    });
+    expect(
+      screen.queryByRole("region", { name: "Settlement timeline result" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/Incomplete: enter both residence start dates/)).toBeInTheDocument();
   });
 
   it("keeps the page and form free of transport and persistence", () => {

@@ -1606,6 +1606,25 @@ Checks:
 | `detail` | JSON | no |  |  |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 
+## `register_company_datasets`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `version` | VARCHAR(100) | no |  |  |
+| `source` | VARCHAR(500) | no |  |  |
+| `sha256` | VARCHAR(64) | no |  |  |
+| `row_count` | INTEGER | no |  |  |
+| `content` | BYTEA | no |  |  |
+| `loaded_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+## `register_company_matches`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `sponsor_id` | UUID | no |  | primary key, references `register_sponsors` |
+| `dataset_id` | UUID | no |  | references `register_company_datasets` |
+
 ## `register_entries`
 
 | Column | Type | Null | Default | Notes |
@@ -1614,6 +1633,18 @@ Checks:
 | `sponsor_id` | UUID | no |  | references `register_sponsors` |
 | `type_rating` | VARCHAR(300) | no |  |  |
 | `route` | VARCHAR(300) | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+
+## `register_place_datasets`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `version` | VARCHAR(100) | no |  |  |
+| `source` | VARCHAR(500) | no |  |  |
+| `sha256` | VARCHAR(64) | no |  |  |
+| `row_count` | INTEGER | no |  |  |
+| `content` | BYTEA | no |  |  |
+| `loaded_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 
 ## `register_possible_matches`
@@ -1644,7 +1675,7 @@ Checks:
 | `published_on` | DATE | no |  |  |
 | `source_url` | VARCHAR(2048) | no |  |  |
 | `row_count` | INTEGER | no |  |  |
-| `sha256` | VARCHAR(64) | no |  | unique |
+| `sha256` | VARCHAR(64) | no |  |  |
 | `fetched_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `status` | VARCHAR(20) | no |  |  |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |

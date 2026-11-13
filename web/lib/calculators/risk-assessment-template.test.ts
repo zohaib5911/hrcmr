@@ -6,6 +6,7 @@ import {
   buildPdf,
   crc32,
   emptyAssessment,
+  emptyHazard,
   loadAssessment,
   saveAssessment,
   validateAssessment,
@@ -54,6 +55,47 @@ describe("risk assessment template", () => {
     expect(loadAssessment(broken)).toBeNull();
     s.setItem("risk-assessment-template:v1", "{bad json");
     expect(loadAssessment(s)).toBeNull();
+  });
+  it("restores only valid fields from a damaged draft", () => {
+    const s = memory();
+    const put = (v: unknown) => s.setItem("risk-assessment-template:v1", JSON.stringify(v));
+    for (const bad of [null, [], "text", 3, {}, { hazards: "x" }, { hazards: null }]) {
+      put(bad);
+      expect(loadAssessment(s)).toBeNull();
+    }
+    put({ organisation: null, hazards: [null] });
+    expect(loadAssessment(s)).toEqual(emptyAssessment());
+    put({
+      organisation: "Acme",
+      site: 7,
+      country: "Narnia",
+      version: ["2"],
+      acknowledgement: "yes",
+      hazards: [
+        null,
+        "slip",
+        [],
+        { hazard: "Slips", who: 1, owner: "Sam", due: null, status: "closed" },
+        { hazard: "Fire", status: "in-progress" },
+      ],
+    });
+    const got = loadAssessment(s)!;
+    expect(got).toMatchObject({
+      organisation: "Acme",
+      site: "",
+      country: "England",
+      version: "1.0",
+      acknowledgement: false,
+    });
+    expect(got.hazards).toEqual([
+      { ...emptyHazard(), hazard: "Slips", owner: "Sam" },
+      { ...emptyHazard(), hazard: "Fire", status: "in-progress" },
+    ]);
+    // the restored draft renders and exports without crashing
+    expect(validateAssessment(got)).toHaveLength(3);
+    expect(text(buildPdf(got))).toContain("Slips");
+    put(sample());
+    expect(loadAssessment(s)).toEqual(sample());
   });
   it("builds a PDF with escaped text", () => {
     const pdf = text(buildPdf(sample()));

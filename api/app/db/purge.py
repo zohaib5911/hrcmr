@@ -15,6 +15,7 @@ from typing import TYPE_CHECKING
 
 from sqlalchemy import text
 
+import app.db.registry  # noqa: F401 (worker must know every tenant table and file reference)
 from app.db.base import Base
 
 if TYPE_CHECKING:

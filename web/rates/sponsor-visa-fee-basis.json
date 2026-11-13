@@ -1,0 +1,16 @@
+{
+  "source_url": "https://www.gov.uk/government/publications/visa-regulations-revised-table/home-office-immigration-and-nationality-fees-8-october-2026",
+  "checked_on": "2026-11-13",
+  "valid_from": "2026-10-08",
+  "valid_to": null,
+  "validity_basis": "published_fee_table_effective_2026-10-08",
+  "title": "Home Office fees: Skilled Worker certificate duration basis",
+  "content": [
+    {
+      "p": "The Skilled Worker application fee tiers for main applicants and dependants use whether the certificate of sponsorship is for three years or less, or over three years. This also applies to Immigration Salary List and Health and Care fees, for applications inside and outside the UK."
+    }
+  ],
+  "values": {
+    "short_certificate_max_months": 36
+  }
+}

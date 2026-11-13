@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { PresetChips } from "@/components/calculators/preset-chips";
+import type { CalculatorPreset } from "@/lib/calculators/frame";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
@@ -17,6 +19,19 @@ import {
 
 const gbp = (n: number) => `£${n.toLocaleString("en-GB", { minimumFractionDigits: 2 })}`;
 
+const presets: readonly CalculatorPreset<{ giver: Giver; contractWeeks: string }>[] = [
+  {
+    id: "employer-six-years",
+    label: "Employer notice, 6 years of service",
+    values: { giver: "employer", contractWeeks: "" },
+  },
+  {
+    id: "resignation-four-weeks",
+    label: "Resignation, 4-week contract notice",
+    values: { giver: "employee", contractWeeks: "4" },
+  },
+];
+
 export function UkNoticePayCalculator() {
   const [jurisdiction, setJurisdiction] = useState<Jurisdiction>("gb");
   const [giver, setGiver] = useState<Giver>("employer");
@@ -27,9 +42,24 @@ export function UkNoticePayCalculator() {
   const [payMode, setPayMode] = useState<PayMode>("weekly");
   const [amount, setAmount] = useState("");
   const [arrangement, setArrangement] = useState<Arrangement>("work");
-  const [result, setResult] = useState<ReturnType<typeof calculateNotice> | null>(null);
+  const [attempted, setAttempted] = useState(false);
 
-  const reset = () => setResult(null);
+  const reset = () => setAttempted(false);
+
+  const result =
+    (startDate && noticeDate && amount.trim()) || attempted
+      ? calculateNotice({
+          jurisdiction,
+          giver,
+          status,
+          startDate,
+          noticeDate,
+          contractWeeks: contractWeeks.trim() === "" ? null : Number(contractWeeks),
+          payMode,
+          amount: Number(amount),
+          arrangement,
+        })
+      : null;
 
   return (
     <div className="grid items-start gap-8 lg:grid-cols-2">
@@ -37,22 +67,25 @@ export function UkNoticePayCalculator() {
         className="space-y-5"
         onSubmit={(event) => {
           event.preventDefault();
-          setResult(
-            calculateNotice({
-              jurisdiction,
-              giver,
-              status,
-              startDate,
-              noticeDate,
-              contractWeeks: contractWeeks.trim() === "" ? null : Number(contractWeeks),
-              payMode,
-              amount: Number(amount),
-              arrangement,
-            }),
-          );
+          setAttempted(true);
         }}
       >
-        <h2 className="text-title-2 text-label">Your situation</h2>
+        <PresetChips
+          presets={presets}
+          onSelect={(preset) => {
+            setJurisdiction("gb");
+            setGiver(preset.values.giver);
+            setStatus("employee");
+            setStartDate("2020-06-01");
+            setNoticeDate("2026-11-12");
+            setContractWeeks(preset.values.contractWeeks);
+            setPayMode("weekly");
+            setAmount("500");
+            setArrangement("work");
+            reset();
+          }}
+        />
+        <h2 className="text-title-2 text-label">1. Your situation</h2>
         <Select
           label="Where do you work?"
           value={jurisdiction}
@@ -153,7 +186,27 @@ export function UkNoticePayCalculator() {
           <option value="garden-leave">Garden leave</option>
           <option value="pilon">Payment in lieu of notice (PILON)</option>
         </Select>
-        <Button type="submit">Work out notice pay</Button>
+        <div className="flex flex-wrap gap-3">
+          <Button type="submit">Work out notice pay</Button>
+          <Button
+            type="button"
+            variant="gray"
+            onClick={() => {
+              setJurisdiction("gb");
+              setGiver("employer");
+              setStatus("employee");
+              setStartDate("");
+              setNoticeDate("");
+              setContractWeeks("");
+              setPayMode("weekly");
+              setAmount("");
+              setArrangement("work");
+              reset();
+            }}
+          >
+            Reset answers
+          </Button>
+        </div>
       </form>
       <section
         aria-label="Notice result"
@@ -161,6 +214,7 @@ export function UkNoticePayCalculator() {
         aria-atomic="true"
         className="bg-elevated rounded-control p-5 sm:p-6"
       >
+        <h2 className="text-headline text-label mb-3">2. Live result</h2>
         <NoticeOutput result={result} />
       </section>
     </div>
@@ -171,10 +225,15 @@ function NoticeOutput({ result }: { result: ReturnType<typeof calculateNotice> |
   if (!result)
     return (
       <p className="text-callout text-label-secondary">
-        Fill in the form, then work out notice pay.
+        Enter dates and pay to see your notice estimate update as you edit.
       </p>
     );
-  if (!result.ok) return <p className="text-callout text-label">{result.error}</p>;
+  if (!result.ok)
+    return (
+      <p role="alert" className="text-callout text-label">
+        {result.error}
+      </p>
+    );
   const r: NoticeResult = result;
   return (
     <>

@@ -25,9 +25,8 @@ describe("public sponsor licence cost calculator", () => {
     await user.type(screen.getByLabelText("Employees"), "100");
     await user.clear(screen.getByLabelText("Certificate length (months, 1–60)"));
     await user.type(screen.getByLabelText("Certificate length (months, 1–60)"), "24");
-    await user.click(screen.getByRole("button", { name: "Calculate costs" }));
     const result = screen.getByRole("region", { name: "Cost result" });
-    // £819 visa + 2 × £1,035 healthcare surcharge = £2,889 (GOV.UK worked example)
+    // 24-month CoS + 14 days gives 2.5 years IHS.
     expect(result).toHaveTextContent("medium or large");
     expect(result).toHaveTextContent("£1,682.00");
     expect(fetchSpy).not.toHaveBeenCalled();
@@ -36,7 +35,94 @@ describe("public sponsor licence cost calculator", () => {
     expect(screen.queryByRole("heading", { name: "Your estimated costs" })).not.toBeInTheDocument();
     await user.clear(screen.getByLabelText("Number of workers"));
     await user.type(screen.getByLabelText("Number of workers"), "0");
-    await user.click(screen.getByRole("button", { name: "Calculate costs" }));
     expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("includes nursing ISC in the displayed Health and Care totals", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    await user.type(screen.getByLabelText("Annual turnover (£)"), "20000000");
+    await user.type(screen.getByLabelText("Total assets (£)"), "10000000");
+    await user.type(screen.getByLabelText("Employees"), "100");
+    await user.selectOptions(screen.getByLabelText("Route"), "health_care");
+    await user.type(screen.getByLabelText("Occupation (SOC) code"), "2231");
+    await user.clear(screen.getByLabelText("Certificate length (months, 1–60)"));
+    await user.type(screen.getByLabelText("Certificate length (months, 1–60)"), "24");
+    const result = screen.getByRole("region", { name: "Cost result" });
+    const charge = within(result).getByText("Immigration Skills Charge × 1");
+    expect(charge.parentElement).toHaveTextContent("£2,640.00");
+    expect(within(result).getByText("Employer total").parentElement).toHaveTextContent("£4,847.00");
+    expect(within(result).getByText("Worker-side total").parentElement).toHaveTextContent(
+      "£324.00",
+    );
+    expect(result).toHaveTextContent("Grand total: £5,171.00");
+  });
+  it("shows matching visa assumptions and boundary IHS in the result and comparison", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    expect(screen.getByText(/visa normally ends 14 days/)).toBeInTheDocument();
+    await user.clear(screen.getByLabelText("Certificate length (months, 1–60)"));
+    await user.type(screen.getByLabelText("Certificate length (months, 1–60)"), "36");
+    await user.clear(screen.getByLabelText("Child dependants (under 18) per worker"));
+    await user.type(screen.getByLabelText("Child dependants (under 18) per worker"), "1");
+    const result = screen.getByRole("region", { name: "Cost result" });
+    expect(result).toHaveTextContent(
+      "CoS employment: 36 months. Estimated visa period: 36 months + 14 days.",
+    );
+    expect(result).toHaveTextContent(
+      "Earlier visa grants or different dependant dates need review",
+    );
+    expect(within(result).getByText("Healthcare surcharge, adult").parentElement).toHaveTextContent(
+      "£3,622.50",
+    );
+    expect(within(result).getByText("Healthcare surcharge, child").parentElement).toHaveTextContent(
+      "£2,716.00",
+    );
+    const table = within(result).getByRole("table");
+    expect(table).toHaveTextContent("IHS includes 14 days after CoS end");
+    const row = within(table).getByRole("rowheader", { name: "36" }).parentElement!;
+    expect(row).toHaveTextContent("36 months + 14 days");
+    expect(row).toHaveTextContent("£7,976.50"); // 2 × £819 + adult £3622.50 + child £2716
+    expect(within(result).getByText("Worker-side total").parentElement).toHaveTextContent(
+      "£7,976.50",
+    );
+  });
+
+  it("shows the frame and fills a preset with live totals", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    expect(screen.getByRole("heading", { name: "Quick answer" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "How it works" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Questions" })).toBeInTheDocument();
+    const result = screen.getByRole("region", { name: "Cost result" });
+    await user.click(
+      screen.getByRole("button", { name: "Large company, 2 workers with families for 5 years" }),
+    );
+    expect(screen.getByLabelText("Number of workers")).toHaveValue(2);
+    expect(result).toHaveTextContent("medium or large");
+    expect(result).toHaveTextContent("Certificate of sponsorship × 2");
+    const before = result.textContent;
+    await user.clear(screen.getByLabelText("Number of workers"));
+    await user.type(screen.getByLabelText("Number of workers"), "3");
+    expect(result).toHaveTextContent("Certificate of sponsorship × 3");
+    expect(result.textContent).not.toBe(before);
+    await user.click(screen.getByRole("button", { name: "Small company, 1 worker for 3 years" }));
+    expect(result).toHaveTextContent("small or charitable");
+  });
+
+  it("asks for GP specialty training confirmation and applies the four-month exception", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    await user.type(screen.getByLabelText("Occupation (SOC) code"), "2211");
+    expect(screen.getByRole("region", { name: "Cost result" })).toHaveTextContent("Incomplete");
+    expect(screen.getByRole("alert")).toHaveTextContent("confirm GP specialty training");
+    await user.selectOptions(screen.getByLabelText("Is this GP specialty training?"), "yes");
+    const result = screen.getByRole("region", { name: "Cost result" });
+    expect(result).toHaveTextContent(
+      "Estimated visa period: 40 months (includes 4 months for GP specialty training)",
+    );
+    expect(within(result).getByRole("table")).toHaveTextContent(
+      "IHS includes 4 months for GP specialty training",
+    );
   });
 });

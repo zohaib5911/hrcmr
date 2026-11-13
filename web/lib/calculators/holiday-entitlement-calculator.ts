@@ -6,7 +6,13 @@ export type Unit = "days" | "hours";
 
 export type HolidayInput =
   | { mode: "days"; daysPerWeek: number }
-  | { mode: "hours"; hoursPerWeek: number }
+  | {
+      mode: "hours";
+      hoursPerWeek: number;
+      /** Days those hours are spread over; each day must be the same length. */
+      daysPerWeek: number;
+      equalDays: boolean;
+    }
   | {
       mode: "part_year";
       daysPerWeek: number;
@@ -74,17 +80,30 @@ export function calculateHoliday(input: HolidayInput): HolidayResult | null {
     }
     case "hours": {
       if (
+        !input.equalDays ||
+        !validDays(input.daysPerWeek) ||
         !Number.isFinite(input.hoursPerWeek) ||
         input.hoursPerWeek <= 0 ||
         input.hoursPerWeek > 168
       )
         return null;
-      const hours = clean(input.hoursPerWeek * H.statutory_weeks);
+      const hoursPerDay = clean(input.hoursPerWeek / input.daysPerWeek);
+      if (hoursPerDay > 24) return null;
+      // Same cap as days mode: convert the capped days back to hours at the daily length.
+      const { days, capped } = statutoryDays(input.daysPerWeek);
+      const hours = clean((days * input.hoursPerWeek) / input.daysPerWeek);
       return {
         unit: "hours",
         entitlement: hours,
-        capped: false,
-        workings: [`${input.hoursPerWeek} hours × ${H.statutory_weeks} weeks = ${hours} hours`],
+        capped,
+        workings: [
+          `${input.hoursPerWeek} hours ÷ ${input.daysPerWeek} days = ${hoursPerDay} hours a day.`,
+          `${input.daysPerWeek} days × ${H.statutory_weeks} weeks = ${clean(input.daysPerWeek * H.statutory_weeks)} days`,
+          ...(capped
+            ? [`Capped at the statutory maximum of ${H.maximum_statutory_days} days.`]
+            : []),
+          `${days} days × ${hoursPerDay} hours = ${hours} hours`,
+        ],
       };
     }
     case "part_year": {

@@ -17,6 +17,8 @@ from typing import TYPE_CHECKING, Any
 
 import structlog
 
+from app.ai.redaction import PATTERNS, is_restricted_key
+
 if TYPE_CHECKING:
     from structlog.typing import EventDict, Processor, WrappedLogger
 
@@ -33,9 +35,25 @@ _URL_CREDENTIALS = re.compile(
 MASK = "***"
 
 
+def _sensitive(key: str) -> bool:
+    return (
+        bool(SENSITIVE_KEY.search(key))
+        or is_restricted_key(key)
+        or key.lower()
+        in {
+            "body",
+            "request_body",
+            "payload",
+            "prompt",
+            "answer",
+            "cv",
+        }
+    )
+
+
 def _drop_sensitive(value: Any) -> Any:
     if isinstance(value, dict):
-        return {k: _drop_sensitive(v) for k, v in value.items() if not SENSITIVE_KEY.search(str(k))}
+        return {k: _drop_sensitive(v) for k, v in value.items() if not _sensitive(str(k))}
     if isinstance(value, list | tuple):
         return [_drop_sensitive(item) for item in value]
     return value
@@ -43,11 +61,19 @@ def _drop_sensitive(value: Any) -> Any:
 
 def redact_sensitive_keys(_: WrappedLogger, __: str, event_dict: EventDict) -> EventDict:
     """Remove sensitive keys at any depth."""
-    return {k: _drop_sensitive(v) for k, v in event_dict.items() if not SENSITIVE_KEY.search(k)}
+    return {k: _drop_sensitive(v) for k, v in event_dict.items() if not _sensitive(k)}
 
 
 def scrub_text(text: str) -> str:
-    return _URL_CREDENTIALS.sub(rf"\g<scheme>\g<user>:{MASK}@", text)
+    text = _URL_CREDENTIALS.sub(rf"\g<scheme>\g<user>:{MASK}@", text)
+    text = re.sub(
+        r"(?i)((?:password|token|secret|authorization|cookie)[\w-]*[=:\s]+)[^\s&;,]+",
+        rf"\1{MASK}",
+        text,
+    )
+    for kind in ("ni_number", "salary", "passport", "share_code"):
+        text = PATTERNS[kind].sub(MASK, text)
+    return text
 
 
 def _scrub(value: Any) -> Any:

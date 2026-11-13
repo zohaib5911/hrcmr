@@ -60,7 +60,7 @@ export function JobsAdmin({
         description="Queue depth and failed scheduled runs. Only safe, allow-listed jobs can be run again."
       />
       {queue ? (
-        <p className="mb-6 text-title3">Waiting in queue: {queue.waiting}</p>
+        <p className="mb-6 text-title-3">Waiting in queue: {queue.waiting}</p>
       ) : (
         <Alert tone="danger" title="Could not load queue">
           Reload to try again.
@@ -76,7 +76,7 @@ export function JobsAdmin({
           {notice}
         </Alert>
       )}
-      <h2 className="text-title3 my-4">Failures</h2>
+      <h2 className="text-title-3 my-4">Failures</h2>
       {!failures ? (
         <Alert tone="danger" title="Could not load failures">
           Reload to try again.

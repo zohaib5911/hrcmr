@@ -41,7 +41,6 @@ describe("public right-to-work calculator", () => {
       "no",
     );
     await user.selectOptions(screen.getByLabelText("Does the contract permit substitution?"), "no");
-    await user.click(screen.getByRole("button", { name: "Check the arrangement" }));
     const result = screen.getByRole("region", { name: "Checker result" });
     expect(result).toHaveTextContent("In scope");
     expect(result).toHaveTextContent("2 years after");
@@ -52,24 +51,19 @@ describe("public right-to-work calculator", () => {
     expect(screen.getByLabelText("Employment / engagement start date")).toHaveValue("");
   });
 
-  it("asks for the contractual date and removes stale results when answers change", async () => {
+  it("asks for the contractual date and updates the result live as answers change", async () => {
     const user = userEvent.setup();
     render(<Page />);
     await user.selectOptions(screen.getByLabelText("Engagement type"), "matching");
     await user.selectOptions(screen.getByLabelText("Is the work carried out in the UK?"), "yes");
     expect(screen.getByLabelText("Relevant contractual arrangement date")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Check the arrangement" }));
-    expect(screen.getByRole("region", { name: "Checker result" })).toHaveTextContent(
-      "Needs review",
-    );
+    const result = screen.getByRole("region", { name: "Checker result" });
+    expect(result).toHaveTextContent("Needs review");
+    expect(result).toHaveTextContent("Incomplete or needs review");
     fireEvent.change(screen.getByLabelText("Relevant contractual arrangement date"), {
       target: { value: "2026-10-01" },
     });
-    expect(screen.queryByRole("heading", { name: "Your scope check" })).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Check the arrangement" }));
-    expect(screen.getByRole("region", { name: "Checker result" })).toHaveTextContent(
-      "written terms",
-    );
+    expect(result).toHaveTextContent("written terms");
   });
 
   it("hides irrelevant questions for overseas work", async () => {
@@ -77,10 +71,31 @@ describe("public right-to-work calculator", () => {
     render(<Page />);
     await user.selectOptions(screen.getByLabelText("Is the work carried out in the UK?"), "no");
     expect(screen.queryByLabelText("Employment / engagement start date")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Check the arrangement" }));
     expect(screen.getByRole("region", { name: "Checker result" })).toHaveTextContent(
       "outside the UK",
     );
+  });
+
+  it("shows the frame sections and fills the form from a preset", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    expect(screen.getByRole("heading", { name: "Quick answer" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "How it works" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Questions" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /1\. The working arrangement/ }),
+    ).toBeInTheDocument();
+    const result = screen.getByRole("region", { name: "Checker result" });
+    expect(result).not.toHaveTextContent("Your scope check");
+    await user.click(screen.getByRole("button", { name: "Online matching service" }));
+    expect(screen.getByLabelText("Engagement type")).toHaveValue("matching");
+    expect(screen.getByLabelText("Relevant contractual arrangement date")).toHaveValue(
+      "2026-11-02",
+    );
+    expect(result).toHaveTextContent("Extended liability");
+    expect(result).toHaveTextContent("written terms");
+    await user.click(screen.getByRole("button", { name: "Work done outside the UK" }));
+    expect(result).toHaveTextContent("outside the UK");
   });
 
   it("has no transport or persistence in the template, page or client form", () => {

@@ -1,4 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+import skilledWorker from "@/rates/skilled-worker.json";
 
 import {
   checkSkilledWorkerVisa,
@@ -91,6 +93,55 @@ describe("skilled worker visa checker", () => {
     expect(r.options[3]?.requiredSalary).toBeGreaterThanOrEqual(33400);
   });
 
+  it("requires review for a recognised Table 3 nurse instead of declaring ineligibility", () => {
+    // Appendix Skilled Occupations Table 3: 2231 uses option K and Table 4 pay bands.
+    const result = checkSkilledWorkerVisa(
+      { ...base, code: "2231" },
+      {
+        code: "2231",
+        title: "Midwifery nurses",
+      },
+    );
+    expect(result.status).toBe("needs-review");
+    expect(result.eligibleOccupation).toBeNull();
+    expect(result.options).toEqual([]);
+    expect(result.lowestRequired).toBeNull();
+    expect(result.messages.join(" ")).toContain("option K");
+    expect(result.messages.join(" ")).not.toContain("not eligible");
+    expect(check({ code: "9999" }).status).toBe("invalid-code");
+    expect(check({ code: "1150" }).status).toBe("assessed");
+    expect(check({ code: "1150" }).messages[0]).toContain("Table 1a");
+  });
+
+  it("does not use a stale occupation selection to recognise another code", () => {
+    expect(
+      checkSkilledWorkerVisa(
+        { ...base, code: "9999" },
+        {
+          code: "2231",
+          title: "Midwifery nurses",
+        },
+      ).status,
+    ).toBe("invalid-code");
+  });
+
+  it.each([
+    ["A", 0, {}, 88100],
+    ["B", 1, { phdRelevant: true }, 79300],
+    ["C", 2, { phdStem: true }, 70400],
+    ["E", 4, { newEntrant: true }, 61600],
+  ] as const)("keeps option %s salary boundaries", (_option, index, answers, salary) => {
+    expect(check({ ...answers, salary }).options[index]?.met).toBe(true);
+    expect(check({ ...answers, salary: salary - 1 }).options[index]?.met).toBe(false);
+  });
+
+  it("keeps the option D salary boundary", () => {
+    const occupation = OCCUPATIONS.find((o) => o.onSalaryList && o.table === "1")!;
+    const salary = Math.max(33400, occupation.goingRate);
+    expect(check({ code: occupation.code, salary }).options[3]?.met).toBe(true);
+    expect(check({ code: occupation.code, salary: salary - 1 }).options[3]?.met).toBe(false);
+  });
+
   // SW 33.3: £285 partner, £315 first child, £200 each other child.
   it("sums dependant maintenance funds", () => {
     expect(check({ dependantPartner: true, dependantChildren: 3 }).dependantFunds).toBe(
@@ -102,5 +153,37 @@ describe("skilled worker visa checker", () => {
   it("states B2 English, or B1 for a pre-8 January 2026 extension", () => {
     expect(check().english).toContain("B2");
     expect(check({ previousSkilledWorkerBeforeJan2026: true }).english).toContain("B1");
+  });
+});
+
+// The rule figures live only in rates/skilled-worker.json: editing the data changes results.
+describe("visa checker rule figures come from the rates data", () => {
+  it("uses thresholds, hours bases and dependant funds from the rates file", async () => {
+    const values = structuredClone(skilledWorker.values);
+    values.salary_option_thresholds.A = 100_000;
+    values.going_rate_weekly_hours = 40;
+    values.max_weekly_hours_counted = 45;
+    values.dependant_funds = { partner: 1, first_child: 10, other_child: 100 };
+    vi.resetModules();
+    vi.doMock("@/rates/skilled-worker.json", () => ({ default: { ...skilledWorker, values } }));
+    try {
+      const mod = await import("./skilled-worker-visa-checker");
+      expect(mod.FULL_TIME_HOURS).toBe(40);
+      const r = mod.checkSkilledWorkerVisa({
+        ...base,
+        salary: 90_000,
+        weeklyHours: 50,
+        dependantPartner: true,
+        dependantChildren: 3,
+      });
+      // 1111 going rate £88,100 x 50 / 40 = £110,125, above the edited £100,000 floor.
+      expect(r.options[0]!.requiredSalary).toBe(110_125);
+      expect(r.salaryConsidered).toBe((90_000 * 45) / 50);
+      expect(r.dependantFunds).toBe(1 + 10 + 2 * 100);
+      expect(r.messages.join(" ")).toContain("first 45 hours");
+    } finally {
+      vi.doUnmock("@/rates/skilled-worker.json");
+      vi.resetModules();
+    }
   });
 });

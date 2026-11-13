@@ -20,10 +20,11 @@ describe("public skilled worker ILR salary calculator", () => {
     render(<Page />);
     const fetchSpy = vi.spyOn(globalThis, "fetch");
     const storageSpy = vi.spyOn(Storage.prototype, "setItem");
-    await user.click(screen.getByRole("button", { name: "Calculate salary" }));
-    expect(screen.getByRole("alert")).toBeInTheDocument();
+    await user.type(screen.getByLabelText("Job title or SOC code"), "zzzz");
+    expect(screen.getByRole("alert")).toHaveTextContent("Incomplete");
+    await user.clear(screen.getByLabelText("Job title or SOC code"));
     await user.type(screen.getByLabelText("Job title or SOC code"), "1111");
-    await user.click(screen.getByRole("button", { name: "Calculate salary" }));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     const result = screen.getByRole("region", { name: "Salary result" });
     // Hand-worked from the rates file: 1111 going rate £88,100 > £41,700.
     expect(result).toHaveTextContent("At least £88,100 a year");
@@ -33,5 +34,36 @@ describe("public skilled worker ILR salary calculator", () => {
     expect(
       screen.queryByRole("heading", { name: "Your settlement salary requirement" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("shows review guidance, not an amount, when the going rate is missing", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    await user.type(screen.getByLabelText("Job title or SOC code"), "3214");
+    const result = screen.getByRole("region", { name: "Salary result" });
+    expect(result).toHaveTextContent("We can’t give a figure for this situation");
+    expect(result).toHaveTextContent("no standard going rate");
+    expect(result).not.toHaveTextContent("At least");
+    expect(result).not.toHaveTextContent("£41,700");
+  });
+
+  it("shows the frame, fills presets and pro-rates live as the hours change", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    expect(screen.getByRole("heading", { name: "Quick answer" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "How it works" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Questions" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Chief executive, 30 hours a week" }));
+    expect(screen.getByLabelText("Job title or SOC code")).toHaveValue("1111");
+    expect(screen.getByLabelText("Weekly working hours")).toHaveValue(30);
+    const result = screen.getByRole("region", { name: "Salary result" });
+    // Hand-worked: £88,100 × 30 / 37.5 = £70,480.
+    expect(result).toHaveTextContent("At least £70,480 a year");
+    await user.clear(screen.getByLabelText("Weekly working hours"));
+    await user.type(screen.getByLabelText("Weekly working hours"), "37.5");
+    expect(result).toHaveTextContent("At least £88,100 a year");
+    await user.clear(screen.getByLabelText("Weekly working hours"));
+    expect(screen.getByRole("alert")).toHaveTextContent("Incomplete");
+    expect(result).not.toHaveTextContent("At least");
   });
 });

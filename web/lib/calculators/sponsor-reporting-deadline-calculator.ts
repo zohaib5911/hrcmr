@@ -154,22 +154,30 @@ export function calculateDeadline(input: {
   }
   if (!validDate(input.eventDate))
     return { ...none, reportable: true, explanation: ["Enter the event date."] };
-  const last = bankHolidays.valid_to;
+  const { valid_from: first, valid_to: last } = bankHolidays.nations[input.nation];
   const holidays = holidaysFor(input.nation);
+  // Counted days are (start, end]; both ends must sit inside the nation's captured holidays.
+  const covered = (start: string, end: string) =>
+    toIso(toTime(start) + DAY) >= first && end <= last;
+  const coverage = `Bank holiday dates for ${input.nation.replaceAll("-", " ")} are only held from ${first} to ${last}`;
   const deadline = addWorkingDays(input.eventDate, kind.days, holidays);
-  if (deadline > last) {
+  if (!covered(input.eventDate, deadline)) {
     return {
       ...none,
       reportable: true,
-      explanation: [
-        `Bank holiday dates are only held up to ${last}, so a reliable deadline cannot be shown for this date.`,
-      ],
+      explanation: [`${coverage}, so a reliable deadline cannot be shown for this date.`],
     };
   }
-  const daysLeft = validDate(input.today)
-    ? workingDaysBetween(input.today, deadline, holidays)
-    : null;
-  const overdue = validDate(input.today) && input.today > deadline;
+  const todayValid = validDate(input.today);
+  const todayCovered =
+    todayValid &&
+    (input.today <= deadline ? covered(input.today, deadline) : covered(deadline, input.today));
+  const daysLeft = todayCovered ? workingDaysBetween(input.today, deadline, holidays) : null;
+  const overdue = todayValid && input.today > deadline;
+  const extra =
+    todayValid && !todayCovered
+      ? [`${coverage}, so working days left cannot be counted from today.`]
+      : [];
   return {
     reportable: true,
     deadline,
@@ -178,6 +186,7 @@ export function calculateDeadline(input: {
     explanation: [
       `Paragraph ${kind.clause}: report within ${kind.days} working days of the event. The event day is not counted; weekends and ${input.nation.replaceAll("-", " ")} bank holidays are excluded.`,
       "Report as soon as you can: the deadline is the latest date. Confirm the trigger date against the guidance for your case.",
+      ...extra,
     ],
   };
 }

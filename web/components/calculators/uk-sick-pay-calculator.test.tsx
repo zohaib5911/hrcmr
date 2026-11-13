@@ -23,6 +23,9 @@ describe("sick pay calculator page", () => {
     submit();
     expect(result().getByText("Total SSP").nextSibling).toHaveTextContent("£123.25");
     expect(result().getByRole("table")).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText("I worked part of the first day (it is not paid)"));
+    submit();
+    expect(result().getByText("Total SSP").nextSibling).toHaveTextContent("£98.60");
     expect(request).not.toHaveBeenCalled();
     expect(local).not.toHaveBeenCalled();
   });

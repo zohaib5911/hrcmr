@@ -33,4 +33,35 @@ describe("public holiday entitlement calculator", () => {
     await user.click(screen.getByRole("button", { name: "Calculate holiday" }));
     expect(screen.getByRole("alert")).toBeInTheDocument();
   });
+
+  it("caps hours mode at 28 days and explains missing or uneven patterns", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    await user.selectOptions(screen.getByLabelText("How do they work?"), "hours");
+    await user.type(screen.getByLabelText("Hours worked per week"), "45");
+    await user.click(screen.getByRole("button", { name: "Calculate holiday" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("days per week");
+    await user.type(screen.getByLabelText("Days those hours are worked over"), "6");
+    await user.click(screen.getByRole("button", { name: "Calculate holiday" }));
+    const result = screen.getByRole("region", { name: "Holiday result" });
+    expect(result).toHaveTextContent("210 hours");
+    expect(result).toHaveTextContent("Capped at the statutory maximum of 28 days.");
+    await user.selectOptions(screen.getByLabelText("Is every working day the same length?"), "no");
+    await user.click(screen.getByRole("button", { name: "Calculate holiday" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("different lengths");
+  });
+
+  it("shows the complete frame and fills the form from a preset", async () => {
+    const user = userEvent.setup();
+    render(<Page />);
+    expect(screen.getByRole("navigation", { name: "Breadcrumb" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Quick answer" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "How it works" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Are bank holidays included?" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "More tools" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Part time, 3 days a week" }));
+    expect(screen.getByLabelText("Days worked per week")).toHaveValue(3);
+    await user.click(screen.getByRole("button", { name: "Calculate holiday" }));
+    expect(screen.getByRole("region", { name: "Holiday result" })).toHaveTextContent("16.8 days");
+  });
 });

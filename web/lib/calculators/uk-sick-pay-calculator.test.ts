@@ -3,7 +3,9 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { calculateSickPay, type SickPayInput } from "./uk-sick-pay-calculator";
 
-// No official worked example exists for the 2026 rules. Hand-worked arithmetic from
+// Partial-week amounts match HMRC's 2026–27 SSP payment table (rates/payroll-2026-27.json,
+// https://www.gov.uk/guidance/rates-and-thresholds-for-employers-2026-to-2027). Other figures
+// are hand-worked from
 // https://www.gov.uk/statutory-sick-pay/what-youll-get (£123.25 cap, 80% of earnings, 28 weeks)
 // https://www.gov.uk/government/publications/employer-bulletin-february-2026/february-2026-issue-of-the-employer-bulletin
 const base: SickPayInput = {
@@ -12,6 +14,7 @@ const base: SickPayInput = {
   endDate: "2026-06-07", // Sunday
   qualifyingDays: [1, 2, 3, 4, 5],
   weeklyEarnings: 400,
+  workedPartOfFirstDay: false,
 };
 describe("sick pay calculator", () => {
   it("pays from day one at the weekly cap when 80% of earnings exceeds it", () => {
@@ -31,9 +34,46 @@ describe("sick pay calculator", () => {
   it("builds a week-by-week table and ignores non-qualifying days", () => {
     const result = calculateSickPay({ ...base, endDate: "2026-06-10" });
     expect(result.weeks).toEqual([
-      { week: 1, from: "2026-06-01", to: "2026-06-07", payableDays: 5, amount: 123.25 },
-      { week: 2, from: "2026-06-08", to: "2026-06-10", payableDays: 3, amount: 73.95 },
+      { week: 1, from: "2026-06-01", to: "2026-06-06", payableDays: 5, amount: 123.25 },
+      { week: 2, from: "2026-06-07", to: "2026-06-10", payableDays: 3, amount: 73.95 },
     ]);
+  });
+  it("matches HMRC's published partial-week payment table", () => {
+    const all = [0, 1, 2, 3, 4, 5, 6];
+    // 7 qualifying days, 2 days (Mon–Tue) = £35.22; 6 qualifying days, 4 days (Mon–Thu) = £82.17.
+    expect(calculateSickPay({ ...base, qualifyingDays: all, endDate: "2026-06-02" }).total).toBe(
+      35.22,
+    );
+    expect(
+      calculateSickPay({ ...base, qualifyingDays: [1, 2, 3, 4, 5, 6], endDate: "2026-06-04" })
+        .total,
+    ).toBe(82.17);
+  });
+  it("splits a midweek absence at Sunday and rounds each SSP week", () => {
+    // Thu 4 – Mon 8 June, 7 qualifying days: Thu–Sat 3 days £52.83, Sun–Mon 2 days £35.22.
+    const result = calculateSickPay({
+      ...base,
+      qualifyingDays: [0, 1, 2, 3, 4, 5, 6],
+      startDate: "2026-06-04",
+      endDate: "2026-06-08",
+    });
+    expect(result.weeks).toEqual([
+      { week: 1, from: "2026-06-04", to: "2026-06-06", payableDays: 3, amount: 52.83 },
+      { week: 2, from: "2026-06-07", to: "2026-06-08", payableDays: 2, amount: 35.22 },
+    ]);
+    expect(result.total).toBe(88.05);
+  });
+  it("does not pay a first day partly worked", () => {
+    const result = calculateSickPay({ ...base, workedPartOfFirstDay: true });
+    expect(result).toMatchObject({ payableDays: 4, total: 98.6 });
+    expect(result.weeks[0]?.from).toBe("2026-06-02");
+    expect(
+      calculateSickPay({ ...base, workedPartOfFirstDay: true, endDate: "2026-06-01" }),
+    ).toMatchObject({ payableDays: 0, total: 0, weeks: [] });
+  });
+  it("rejects absences beyond the verified 2026–27 rate year", () => {
+    expect(() => calculateSickPay({ ...base, endDate: "2027-04-06" })).toThrow(/5 April 2027/);
+    expect(calculateSickPay({ ...base, endDate: "2027-04-05" }).maxReached).toBe(true);
   });
   it("stops at 28 weeks", () => {
     const result = calculateSickPay({ ...base, endDate: "2027-03-01" });

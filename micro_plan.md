@@ -506,18 +506,18 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] P20 · S · Phase 20 gate
 - Recipe R7.
 
-### [ ] AUDIT-4 · AUDIT STOP · covers T18.1 → P20
+### [x] AUDIT-4 · AUDIT STOP · covers T18.1 → P20
 
 ---
 
 ## Phase 21 — Security hardening (all big model)
 
-### [ ] T21.1 · B · Full security test suite and RBAC matrix coverage of every endpoint
-### [ ] T21.2 · B · Threat model (`docs/security.md`)
-### [ ] T21.3 · B · Dependency, container and secret scans clean; CSP enforced
-### [ ] T21.4 · B · Pen-test style checks
-### [ ] T21.5 · B · Privacy review
-### [ ] P21 · B · Phase 21 gate
+### [x] T21.1 · B · Full security test suite and RBAC matrix coverage of every endpoint
+### [x] T21.2 · B · Threat model (`docs/security.md`)
+### [x] T21.3 · B · Dependency, container and secret scans clean; CSP enforced
+### [x] T21.4 · B · Pen-test style checks
+### [x] T21.5 · B · Privacy review
+### [x] P21 · B · Phase 21 gate
 
 ---
 
@@ -544,6 +544,8 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 23–24 — Deployment and launch (big model + owner)
 
+> **Parked by the owner (2026-11-13):** do not start Phases 23–24 until the owner says go. `.agent/deps.txt` holds T23.1 on `OWNER-GO`. Phase 25 runs first.
+
 ### [ ] T23.1 · B · Railway project, environments and services
 ### [ ] T23.2 · B · Database roles, reference data seeding, first Platform Admin
 ### [ ] T23.3 · B · Cloudflare DNS, TLS, WAF, rate limit, Turnstile, R2 buckets
@@ -564,17 +566,35 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Steps:** 1. List every route (app, admin, auth, marketing, careers, free tools) from `web/app`. 2. Screenshot each at 390 and 1280 px, light and dark, into `docs/screenshots/phase-25/before/` (copy `web/tests/e2e/phase9-screenshots.spec.ts`; run through `bus.sh serial`). 3. Check each against §5 and §5.12. Look hardest at the glass: translucent sidebar, toolbar, sheets, popovers and the marketing nav (`backdrop-filter: saturate(180%) blur(20px)` over the material tokens, hairline borders, layered soft shadows); also type scale, spacing on the 4 px grid, radius, motion, alignment and empty/loading states. 4. Write `docs/design-audit.md`: one row per screen with each gap, the §5 rule it breaks and the fix (token or component, not per-page CSS), sorted by how many screens a fix touches.
 - **Done when:** `docs/design-audit.md` covers every route, and the before screenshots are saved. No app code changed.
 
-### [ ] T25.2 · B · Make every screen look Apple-quality (glass and the rest)
+### [ ] T25.2 · B · Apple-quality tokens, materials and shared components (glass)
 - **Spec:** `docs/design-audit.md` (T25.1) and plan §5. This block may restyle earlier work (the owner's request); behaviour stays the same.
-- **Steps:** 1. Fix the tokens and materials in `web/app/globals.css` first, so most screens improve at once. 2. Then the shared components in `web/components/ui/`. 3. Then the rows of `docs/design-audit.md` left over, screen by screen; tick each row there. 4. **Sponsor register map (owner request, 2026-11-13):** the map on the Explore page (`/register/explore`, from T20.2/T20.3) is a boxy hand-drawn schematic. Replace it with the real shape of the UK: the 12 ITL1 regions from the ONS Open Geography Portal boundaries (Open Government Licence; add the attribution line), simplified to a light inline SVG (no map tiles, no third-party map scripts). Make it look Apple-designed: regions on a glass panel with soft depth, a calm colour scale from our tokens, smooth hover/focus highlight and a gentle animated zoom into the chosen region, a glass tooltip with the region figures, and the same in dark mode. Keep it accessible: every region is keyboard-focusable with a label, a table of the same figures sits under the map, and motion and blur fall back under `prefers-reduced-motion` / `prefers-reduced-transparency`. It must work at 360 px.
-5. After screenshots into `docs/screenshots/phase-25/after/` (same script, same widths and themes), including the Explore map before and after.
+- **Steps:** 1. Fix the tokens and materials in `web/app/globals.css` first, so most screens improve at once (glass: `backdrop-filter: saturate(180%) blur(20px)` over the material tokens, hairline borders, layered soft shadows). 2. Then the shared components in `web/components/ui/` and the app shell (sidebar, toolbar, sheets, popovers, marketing nav). Tick the `docs/design-audit.md` rows these fix. Leave screen-specific rows to T25.5/T25.6 and the register map to T25.4.
 - **Watch:** our own tokens and components only: no Apple logos, SF Symbols, SF font files or Apple device frames (plan L25, L308). Every glass surface falls back to a solid colour under `prefers-reduced-transparency` and when `backdrop-filter` is unsupported; motion respects `prefers-reduced-motion`; text contrast stays WCAG AA on glass in both themes; no layout shift. Don't change copy, routes or behaviour. Update the `/design` catalog and its expected tokens when tokens change.
-- **Done when:** every `docs/design-audit.md` row is ticked; web lint, typecheck, unit suite and full e2e pass (e2e via `bus.sh serial`); the design and accessibility e2e specs pass in both themes.
+- **Done when:** the token/material/component rows of `docs/design-audit.md` are ticked; web lint, typecheck and unit suite pass; the design and accessibility e2e specs pass in both themes (via `bus.sh serial`).
+
+### [ ] T25.4 · B · Sponsor register map: real UK shape, Apple-style (owner request 2026-11-13)
+- **Spec:** plan §5; the Explore page `/register/explore` (T20.2/T20.3). Runs in parallel with T25.2: touch only the map component, its data file and its tests (no edits to `globals.css`; use the existing tokens).
+- **Steps:** 1. Replace the boxy hand-drawn schematic with the real shape of the UK: the 12 ITL1 regions from the ONS Open Geography Portal boundaries (Open Government Licence; add the attribution line), simplified to a light inline SVG (no map tiles, no third-party map scripts). 2. Make it look Apple-designed: regions on a glass panel with soft depth, a calm colour scale from our tokens, smooth hover/focus highlight and a gentle animated zoom into the chosen region, a glass tooltip with the region figures, and the same in dark mode. 3. Keep it accessible: every region is keyboard-focusable with a label, a table of the same figures sits under the map, and motion and blur fall back under `prefers-reduced-motion` / `prefers-reduced-transparency`. It must work at 360 px. 4. Before/after screenshots of the Explore map into `docs/screenshots/phase-25/`.
+- **Watch:** same as T25.2. Region figures stay exactly what the API returns.
+- **Done when:** the map rows of `docs/design-audit.md` are ticked; map unit tests and the register e2e specs pass (via `bus.sh serial`), lint and typecheck clean.
+
+### [ ] T25.5 · B · Apple-quality pass: signed-in app and platform admin screens
+- **Spec:** `docs/design-audit.md` rows for app (`web/app/(app)` and similar), admin and platform-admin routes; plan §5. Runs in parallel with T25.6.
+- **Steps:** fix the leftover rows for these screens one by one, using tokens and shared components (no per-page CSS unless a row says so); tick each row.
+- **Watch:** same as T25.2. Touch only files of these routes; if a shared component must change, post `say <you> all INFO` first so T25.6 knows.
+- **Done when:** every app/admin row is ticked; affected unit tests and e2e specs pass (via `bus.sh serial`), lint and typecheck clean.
+
+### [ ] T25.6 · B · Apple-quality pass: marketing, auth, careers, free tools and public register screens
+- **Spec:** `docs/design-audit.md` rows for marketing, auth, careers, free calculators and the public register (except the map, T25.4); plan §5. Runs in parallel with T25.5.
+- **Steps:** fix the leftover rows for these screens one by one, using tokens and shared components; tick each row.
+- **Watch:** same as T25.2. Touch only files of these routes; if a shared component must change, post `say <you> all INFO` first so T25.5 knows.
+- **Done when:** every public-screen row is ticked; affected unit tests and e2e specs pass (via `bus.sh serial`), lint and typecheck clean.
 
 ### [ ] T25.3 · B · Whole-project security scan
+- **Runs in parallel** with the visual work (starts once P22 is merged); the visual blocks change styling only.
 - **Spec:** plan security sections; `docs/security.md` (T21.2) as the threat model; `audit.md` severity scale (P0/P1/P2).
-- **Steps:** 1. Automated: gitleaks over the full history, semgrep, pip-audit, pnpm audit, Trivy images and config, actionlint and zizmor (the CI jobs, run locally), plus the CSP and security headers on the production build. 2. Manual review of every API router: auth, MFA, sessions, CSRF, RBAC matrix, RLS on every table, tenant isolation, platform admin and support mode, file uploads, exports, webhooks (Stripe signature, replay), rate limits, input validation, SSRF in fetchers, secrets handling and logging. 3. Check that T25.2 added no unsafe CSS or inline script that the CSP would need to allow. 4. Write `docs/security-scan-2026.md` with each finding, its severity and the fix.
+- **Steps:** 1. Automated: gitleaks over the full history, semgrep, pip-audit, pnpm audit, Trivy images and config, actionlint and zizmor (the CI jobs, run locally), plus the CSP and security headers on the production build. 2. Manual review of every API router: auth, MFA, sessions, CSRF, RBAC matrix, RLS on every table, tenant isolation, platform admin and support mode, file uploads, exports, webhooks (Stripe signature, replay), rate limits, input validation, SSRF in fetchers, secrets handling and logging. 3. (Moved to the P25 gate: check that T25.2/T25.4–T25.6 added no unsafe CSS or inline script.) 4. Write `docs/security-scan-2026.md` with each finding, its severity and the fix.
 - **Done when:** the report covers every router and table; every P0/P1 is fixed in this block with a test that fails before the fix (or, if large, written into `changesneeded.md` for the next round); the automated scans are clean.
 
 ### [ ] P25 · B · Phase 25 gate
-- Recipe R7, and redeploy staging then production with the T23.5 workflows after the PR to main merges.
+- Recipe R7 (full suite via `bus.sh serial`). Plus: after screenshots of every route into `docs/screenshots/phase-25/after/` (same script as T25.1, 390 and 1280 px, light and dark); check that no `docs/design-audit.md` row is left open; check the CSP still needs no unsafe CSS or inline script after the visual blocks (T25.3 step 3). Redeploying staging/production waits until Phases 23–24 are done (parked by the owner).

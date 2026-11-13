@@ -1,10 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
+import { PresetChips } from "@/components/calculators/preset-chips";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
+import type { CalculatorPreset } from "@/lib/calculators/frame";
 import {
   calculateSponsorCosts,
   compareCertificateLengths,
@@ -33,6 +35,7 @@ type Form = Record<
   speed: Speed;
   licencePriority: "yes" | "no";
   basis: Basis;
+  gpTraining: "" | "yes" | "no";
 };
 
 const initial: Form = {
@@ -51,7 +54,38 @@ const initial: Form = {
   speed: "standard",
   licencePriority: "no",
   basis: "standard",
+  gpTraining: "",
 };
+
+/** Example scenarios: they only fill in the form; every amount comes from the rates data. */
+export const sponsorCostPresets: readonly CalculatorPreset<Partial<Form>>[] = [
+  {
+    id: "small",
+    label: "Small company, 1 worker for 3 years",
+    values: { turnover: "2000000", assets: "1000000", employees: "20", months: "36" },
+  },
+  {
+    id: "large-family",
+    label: "Large company, 2 workers with families for 5 years",
+    values: {
+      turnover: "50000000",
+      assets: "20000000",
+      employees: "400",
+      months: "60",
+      workers: "2",
+      adultDependants: "1",
+      childDependants: "2",
+    },
+  },
+  {
+    id: "charity-care",
+    label: "Charity, Health and Care worker already in the UK",
+    values: { charity: "yes", route: "health_care", location: "inside", months: "36" },
+  },
+];
+
+const INVALID =
+  "Check your answers: numbers cannot be negative, workers must be at least 1 and the certificate length 1–60 whole months. For SOC 2211, confirm GP specialty training.";
 
 const gbp = (value: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(value);
@@ -61,8 +95,9 @@ function toInput(form: Form): SponsorCostInput | null {
   const fields = [form.turnover, form.assets, form.employees, form.months, form.workers];
   const all = [...fields, form.adultDependants, form.childDependants].map(num);
   if (all.some((value) => !Number.isFinite(value) || value < 0)) return null;
+  if (form.soc.trim() === "2211" && form.gpTraining === "") return null;
   const months = num(form.months);
-  if (months < 1 || months > 60 || num(form.workers) < 1) return null;
+  if (!Number.isInteger(months) || months < 1 || months > 60 || num(form.workers) < 1) return null;
   return {
     licenceType: form.licenceType,
     charity: form.charity === "yes",
@@ -73,6 +108,7 @@ function toInput(form: Form): SponsorCostInput | null {
     insideUK: form.location === "inside",
     months,
     soc: form.soc,
+    gpTraining: form.soc.trim() === "2211" && form.gpTraining === "yes",
     workers: num(form.workers),
     adultDependants: num(form.adultDependants),
     childDependants: num(form.childDependants),
@@ -84,14 +120,15 @@ function toInput(form: Form): SponsorCostInput | null {
 
 export function SponsorLicenceCostCalculator() {
   const [form, setForm] = useState<Form>(initial);
-  const [input, setInput] = useState<SponsorCostInput | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [touched, setTouched] = useState(false);
+  // Live result: recalculated locally on every change once the user has answered something.
+  const input = useMemo(() => (touched ? toInput(form) : null), [form, touched]);
+  const result = useMemo(() => (input ? calculateSponsorCosts(input) : null), [input]);
+  const error = touched && !input ? INVALID : null;
   function update<K extends keyof Form>(key: K, value: Form[K]) {
     setForm((previous) => ({ ...previous, [key]: value }));
-    setInput(null);
-    setError(null);
+    setTouched(true);
   }
-  const result = input ? calculateSponsorCosts(input) : null;
   const num_ = (key: keyof Form, label: string, hint?: string) => (
     <TextField
       label={label}
@@ -105,20 +142,17 @@ export function SponsorLicenceCostCalculator() {
 
   return (
     <div className="grid items-start gap-8 lg:grid-cols-2">
-      <form
-        className="space-y-5"
-        onSubmit={(event) => {
-          event.preventDefault();
-          const parsed = toInput(form);
-          setInput(parsed);
-          setError(
-            parsed
-              ? null
-              : "Check your answers: numbers cannot be negative, workers must be at least 1 and the certificate length 1–60 months.",
-          );
-        }}
-      >
-        <h2 className="text-title-2 text-label">Your sponsorship</h2>
+      <form className="space-y-5" onSubmit={(event) => event.preventDefault()}>
+        <PresetChips
+          presets={sponsorCostPresets}
+          onSelect={(preset) => {
+            setForm({ ...initial, ...preset.values });
+            setTouched(true);
+          }}
+        />
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">1.</span> Your organisation
+        </h2>
         <Select
           label="Licence application"
           value={form.licenceType}
@@ -148,6 +182,9 @@ export function SponsorLicenceCostCalculator() {
             {num_("employees", "Employees")}
           </>
         ) : null}
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">2.</span> The role and certificate
+        </h2>
         <Select
           label="Route"
           value={form.route}
@@ -179,10 +216,29 @@ export function SponsorLicenceCostCalculator() {
         <TextField
           label="Occupation (SOC) code"
           clearable={false}
-          hint="Four digits, used only to check the skills-charge exemptions."
+          hint="Four digits, used for skills-charge exemptions and the GP training visa extension."
           value={form.soc}
           onChange={(event) => update("soc", event.target.value)}
         />
+        {form.soc.trim() === "2211" ? (
+          <Select
+            label="Is this GP specialty training?"
+            value={form.gpTraining}
+            onChange={(event) => update("gpTraining", event.target.value as Form["gpTraining"])}
+          >
+            <option value="">Select an answer</option>
+            <option value="no">No</option>
+            <option value="yes">Yes</option>
+          </Select>
+        ) : null}
+        <p className="text-footnote text-label-secondary">
+          The visa normally ends 14 days after the CoS employment end date (SW 18.1). Confirmed GP
+          specialty training under SOC 2211 adds 4 months instead (SW 18.1A). IHS uses this longer
+          visa period; ISC and visa fee tiers use the CoS employment length.
+        </p>
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">3.</span> Workers, dependants and fees
+        </h2>
         {num_("workers", "Number of workers")}
         {num_("adultDependants", "Adult dependants (18+) per worker")}
         {num_("childDependants", "Child dependants (under 18) per worker")}
@@ -212,13 +268,11 @@ export function SponsorLicenceCostCalculator() {
           <option value="yes">Yes</option>
         </Select>
         <div className="flex flex-wrap gap-3">
-          <Button type="submit">Calculate costs</Button>
           <Button
             variant="gray"
             onClick={() => {
               setForm(initial);
-              setInput(null);
-              setError(null);
+              setTouched(false);
             }}
           >
             Reset answers
@@ -241,6 +295,15 @@ export function SponsorLicenceCostCalculator() {
             <h2 className="text-title-2 text-label">Your estimated costs</h2>
             <p className="text-callout text-label-secondary mt-2">
               Treated as a {result.small ? "small or charitable" : "medium or large"} sponsor.
+            </p>
+            <p className="text-callout text-label-secondary mt-2">
+              CoS employment: {input.months} months. Estimated visa period: {result.visaPeriod}.
+            </p>
+            <p className="text-footnote text-label-secondary mt-2">
+              Assumes permission starts on the employment start date, with the same dates for
+              dependants and children under 18 at application. Earlier visa grants or different
+              dependant dates need review using actual visa dates and may change IHS. Health and
+              Care applicants and their dependants pay no IHS.
             </p>
             <h3 className="text-headline text-label mt-4">Employer must pay</h3>
             <dl className="text-callout text-label mt-2 space-y-1">
@@ -276,10 +339,15 @@ export function SponsorLicenceCostCalculator() {
             </p>
             <h3 className="text-headline text-label mt-5">Compare certificate lengths</h3>
             <table className="text-footnote text-label mt-2 w-full text-left">
-              <caption className="sr-only">Total cost by certificate length</caption>
+              <caption className="text-label-secondary text-left">
+                Total cost by certificate length, using the same visa start and dependant
+                assumptions. IHS includes{" "}
+                {input.gpTraining ? "4 months for GP specialty training" : "14 days after CoS end"}.
+              </caption>
               <thead className="text-label-secondary">
                 <tr>
                   <th scope="col">Months</th>
+                  <th scope="col">Estimated visa period</th>
                   <th scope="col">Employer</th>
                   <th scope="col">Worker side</th>
                   <th scope="col">Total</th>
@@ -291,6 +359,7 @@ export function SponsorLicenceCostCalculator() {
                     <th scope="row" className="font-normal">
                       {months}
                     </th>
+                    <td>{row.visaPeriod}</td>
                     <td>{gbp(row.employerTotal)}</td>
                     <td>{gbp(row.workerSideTotal)}</td>
                     <td>{gbp(row.grandTotal)}</td>
@@ -301,7 +370,9 @@ export function SponsorLicenceCostCalculator() {
           </>
         ) : (
           <p className="text-callout text-label-secondary">
-            Answer the questions, then calculate your sponsorship costs.
+            {error
+              ? "Incomplete: fix the highlighted answer to see the costs."
+              : "Answer the questions or choose an example; the costs update as you go."}
           </p>
         )}
       </section>

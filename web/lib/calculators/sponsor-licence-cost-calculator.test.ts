@@ -67,14 +67,62 @@ describe("sponsor licence cost calculator", () => {
     expect(skillsChargeFor(13, true)).toBe(480 + 240);
   });
 
-  it("skills charge: exempt SOC, health care, short stays outside the UK, dependants", () => {
+  it("skills charge: exempt SOC, short stays outside the UK, dependants", () => {
     expect(calc({ soc: "2111" }).skillsCharge).toBe(0);
-    expect(calc({ route: "health_care" }).skillsCharge).toBe(0);
     expect(calc({ months: 5 }).skillsCharge).toBe(0);
     expect(calc({ months: 5, insideUK: true }).skillsCharge).toBe(1320);
     expect(calc({ adultDependants: 2, childDependants: 1 }).employerTotal).toBe(
       1682 + 525 + 1320 + 660 * 2,
     ); // dependants add no charge
+  });
+
+  // GOV.UK ISC rates above: hand-worked 24 months = £1,320 + 2 × £660,
+  // or £480 + 2 × £240. Health and Care visa fees/IHS do not exempt nurses from ISC.
+  it.each([
+    [false, false, 2640],
+    [false, true, 2640],
+    [true, false, 960],
+    [true, true, 960],
+  ])("charges nursing ISC (small=%s, insideUK=%s)", (charity, insideUK, charge) => {
+    const result = calc({ route: "health_care", soc: "2231", charity, insideUK });
+    expect(result.skillsCharge).toBe(charge);
+    expect(result.skillsChargeExempt).toBe(false);
+  });
+
+  it.each(["2111", "2112", "2113", "2114", "2115", "2119", "2161", "2162", "2311"])(
+    "retains the occupation exemption for SOC %s",
+    (soc) => {
+      for (const insideUK of [false, true]) {
+        const result = calc({ soc: ` ${soc} `, insideUK });
+        expect(result.skillsCharge).toBe(0);
+        expect(result.skillsChargeExempt).toBe(true);
+      }
+    },
+  );
+
+  it.each([
+    [false, 5, 0],
+    [false, 6, 1320],
+    [true, 5, 1320],
+    [true, 6, 1320],
+  ])("applies nursing stay rules (insideUK=%s, months=%i)", (insideUK, months, charge) => {
+    expect(calc({ route: "health_care", soc: "2231", insideUK, months }).skillsCharge).toBe(charge);
+  });
+
+  it("charges ISC per nurse, excludes dependants and retains Health and Care IHS exemption", () => {
+    const result = calc({
+      route: "health_care",
+      soc: "2231",
+      workers: 2,
+      adultDependants: 1,
+      childDependants: 1,
+    });
+    expect(result.employerTotal).toBe(1682 + 2 * (525 + 2640));
+    expect(result.healthSurchargeWorker).toBe(0);
+    expect(result.healthSurchargeAdult).toBe(0);
+    expect(result.healthSurchargeChild).toBe(0);
+    expect(result.workerSideTotal).toBe(4 * 324);
+    expect(result.grandTotal).toBe(9308);
   });
 
   // https://www.gov.uk/uk-visa-sponsorship-employers/certificates-of-sponsorship: £525 per Worker certificate.
@@ -87,8 +135,9 @@ describe("sponsor licence cost calculator", () => {
   // https://www.gov.uk/skilled-worker-visa/how-much-it-costs — example: 2 years from outside the UK
   // costs £819 plus £1,035 a year IHS = £2,889.
   it("matches the official 2-year outside-UK example", () => {
-    const r = calc({});
-    expect(r.visaFeePerPerson + r.healthSurchargeWorker).toBe(2889);
+    // This example describes a two-year VISA, not a two-year CoS plus SW 18.1 days.
+    expect(calc({}).visaFeePerPerson + healthSurchargeFor(24, false, false)).toBe(2889);
+    expect(calc({}).healthSurchargeWorker).toBe(2587.5);
   });
 
   // Same page: fee tiers, and salary-list fees £628 / £1,235 regardless of location.
@@ -140,13 +189,59 @@ describe("sponsor licence cost calculator", () => {
     const r = calc({ workers: 2, adultDependants: 1, childDependants: 1 });
     expect(r.employerTotal).toBe(1682 + 2 * (525 + 1320 + 660 * 2));
     expect(r.grandTotal).toBe(r.employerTotal + r.workerSideTotal);
-    // 4 applicants × £819 + 3 adults × £2,070 + 1 child × £1,552
-    expect(r.workerSideTotal).toBe(4 * 819 + 3 * 2070 + 1552);
+    // CoS 24 months + 14 days: 2.5 years IHS, including under-18 at application.
+    expect(r.workerSideTotal).toBe(4 * 819 + 3 * 2587.5 + 1940);
+  });
+
+  // Hand-worked from SW 18.1 + GOV.UK IHS part-year rules (not official worked examples):
+  // 6m14d => 1 year; 12m14d => 1.5 years; 36m14d => 3.5 years.
+  // Fee table tiers and ISC continue to use CoS employment, not the visa extension.
+  it.each([
+    [6, 1035, 776, 1320],
+    [12, 1552.5, 1164, 1320],
+    [36, 3622.5, 2716, 3960],
+  ])("uses visa duration at the %i-month CoS boundary", (months, adult, child, isc) => {
+    for (const insideUK of [false, true]) {
+      const result = calc({ months, insideUK, childDependants: 1 });
+      expect(result.visaPeriod).toBe(`${months} months + 14 days`);
+      expect(result.healthSurchargeWorker).toBe(adult);
+      expect(result.healthSurchargeChild).toBe(child);
+      expect(result.skillsCharge).toBe(isc);
+      expect(result.visaFeePerPerson).toBe(insideUK ? 943 : 819);
+      expect(result.workerSideTotal).toBe(2 * result.visaFeePerPerson + adult + child);
+      const exempt = calc({ months, insideUK, route: "health_care", childDependants: 1 });
+      expect(exempt.healthSurchargeWorker).toBe(0);
+      expect(exempt.healthSurchargeChild).toBe(0);
+      expect(exempt.skillsCharge).toBe(isc);
+    }
+  });
+
+  it("requires GP confirmation only for SOC 2211 and uses the verified four-month exception", () => {
+    expect(() => calc({ soc: "2211" })).toThrow(/Confirm/);
+    expect(() => calc({ soc: "2231", gpTraining: true })).toThrow(/SOC 2211/);
+    expect(calc({ soc: "2211", gpTraining: false }).visaPeriod).toBe("24 months + 14 days");
+    // 9m CoS + 4m GP exception = 13m visa => 1.5 years IHS (ordinary 9m14d => 1 year).
+    const gp = calc({ soc: "2211", gpTraining: true, months: 9, childDependants: 1 });
+    expect(gp.visaPeriod).toBe("13 months (includes 4 months for GP specialty training)");
+    expect(gp.healthSurchargeWorker).toBe(1552.5);
+    expect(gp.healthSurchargeChild).toBe(1164);
+    expect(gp.skillsCharge).toBe(1320);
+    expect(
+      calc({ soc: "2211", gpTraining: true, route: "health_care" }).healthSurchargeWorker,
+    ).toBe(0);
+    const rows = compareCertificateLengths({ ...base, soc: "2211", gpTraining: true });
+    expect(rows[0]?.result.visaPeriod).toBe(
+      "16 months (includes 4 months for GP specialty training)",
+    );
   });
 
   it("compares certificate lengths", () => {
     const rows = compareCertificateLengths(base);
     expect(rows.map((row) => row.months)).toEqual([12, 18, 24, 36, 48, 60]);
+    for (const { months, result } of rows) {
+      expect(result).toEqual(calc({ months }));
+    }
+    expect(rows[5]?.result.healthSurchargeWorker).toBe(5692.5);
     expect(rows[5]?.result.skillsCharge).toBe(6600);
     expect(rows[0]!.result.grandTotal).toBeLessThan(rows[5]!.result.grandTotal);
   });

@@ -998,5 +998,33 @@
     {
       "p": "SW 46.2. If the application is refused the person can apply for an Administrative Review under Appendix AR: Administrative Review."
     }
-  ]
+  ],
+  "values": {
+    "rule_refs": {
+      "salary_option_thresholds": "SW 4.4 options table",
+      "max_weekly_hours_counted": "SW 14.3",
+      "going_rate_weekly_hours": "SW 14.4(a)",
+      "dependant_funds": "SW 33.3"
+    },
+    "salary_option_thresholds": {
+      "A": 41700,
+      "B": 37500,
+      "C": 33400,
+      "D": 33400,
+      "E": 33400,
+      "F": 31300,
+      "G": 28200,
+      "H": 25000,
+      "I": 25000,
+      "J": 25000,
+      "K": 25000
+    },
+    "max_weekly_hours_counted": 48,
+    "going_rate_weekly_hours": 37.5,
+    "dependant_funds": {
+      "partner": 285,
+      "first_child": 315,
+      "other_child": 200
+    }
+  }
 }

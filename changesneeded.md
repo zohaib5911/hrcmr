@@ -1,17 +1,12 @@
-# changesneeded.md — audit AUDIT-3 round 4 (2026-11-12, gpt-6.1-sol)
+# changesneeded.md — audit AUDIT-4 round 3 (2026-11-13, claude-opus-5-5)
 ## Result: PASS
 
-Scope: b83da48..462a184 (C3.3.1–C3.3.2 fixes and regressions; Phase 18–20 additions excluded). Tests at audit: api 1363/0/0, RLS CLI passed; web unit 1309/0; e2e 485/0/220 expected skips; CI latest listed dev run green and both merged fix PRs green (12 checks each); lint/types/schema/build/bundle passed.
-Counts: 0 P0 / 0 P1 / 1 P2. PASS (no P0/P1).
-
-### [x] C3.4.1 · P2 · Assert contact total and pager changes after removal (from C3.3.1) — fixed in PR #77
-- **Problem:** `web/components/platform/contact-admin.test.tsx`, test `removes the handled row from the active page`, checks the remaining rows but never asserts the total. C3.3.1 required total coverage. Reverting the production total decrement would leave this test green and permit incorrect paging. Current production behavior is correct; an isolated audit probe verified it.
-- **Fix:** extend that existing test with total 51, assert `51 in total` and enabled Next before marking, then `50 in total` and disabled Next after the handled row disappears. Retain both row assertions. Copy the current test's userEvent/waitFor pattern; no product change is needed.
-- **Done when:** the collected contact test checks row removal, total 51→50 and the Next-button boundary; `cd web && pnpm exec vitest run components/platform/contact-admin.test.tsx`, lint and typecheck pass.
+Scope: audit-4-r2..fa0ea55 (fix PRs #108–#111 for C4.2.1–C4.2.4) plus a regression check of the code they touched. Tests at audit: api 1381/0/0, web unit 1466/0, e2e 488/0 (328 skipped, project-split as before), CI green (PRs #108–#111 all 12 checks pass). Ruff/format/mypy, web lint/typecheck, gen:api:check and build passed. check-rls ran through `tests/db/test_cli.py` in the API suite.
+Counts: 0 P0 / 0 P1 / 0 P2. PASS (no P0/P1).
 
 ## Notes (no action needed)
-- C3.3.1 preserves the active contact page/filter after a delayed PATCH; both regression cases pass. The active list removes the handled row and decrements total correctly.
-- C3.3.2 preserves all sixteen session assertions in normal Vitest discovery; all sixteen executed successfully in the targeted run.
-- A temporary copy of the contact tests added the total/pager assertions above. Targeted run: 34 passed (16 page-entry, 9 original contact, 9 scratch contact); scratch removed. This evidence is separate from the unmodified full suite.
-- No new endpoints, tables, permissions, legal figures, skipped tests or weakened assertions in the scoped fixes. Authenticated ingress, signed SSR identity and production-CSP deployment requirements remain as documented.
-- Detailed evidence: `docs/audits/audit-3-r4-review.md`. No product code changed during this audit. Stripe test-mode E2E remains parked in leftover L1; no owner decision is needed here.
+- C4.2.1: `_limit_reads` gives a trusted peer that sends no `X-Real-IP` its own 6000/min bucket, keyed by the peer. Requests through the Railway edge always carry `X-Real-IP`, so visitors keep the 120/min bucket. Without a configured or deployed trust list nothing is trusted, so local and untrusted callers are unchanged. All three required tests are present and pass. It repeats `client_ip._within`/`_parse` inline; reusing them would be tidier, but this is not a defect.
+- C4.2.2: the whole bulk CSV is streamed (hashing wrapper, plain or gzip input), and only the normalised name, number and SIC section are stored. Duplicates are still rejected across the whole file, because every occurrence of a wanted name is counted. Legacy raw-CSV datasets still read. It keeps every row rather than only sponsor names, as recorded in decisions.md (2026-11-13 00:55): a later-appearing sponsor must still match. The existing C4.1.15 tests pass unchanged. The one `type: ignore[override]` is on `_Hashing.readinto`'s buffer type.
+- C4.2.3: `grep -rn text-title3 web/components web/app` returns nothing.
+- C4.2.4: notice-pay now uses the shared `PresetChips` with the same two scenarios and values.
+- The diff adds no new skips, xfails or eslint-disables, and no assertions were removed.

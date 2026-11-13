@@ -37,7 +37,7 @@ describe("employer cost calculator page", () => {
     expect(request).not.toHaveBeenCalled();
     expect(local).not.toHaveBeenCalled();
   });
-  it("clears stale results and recalculates age, type, pension basis and year", () => {
+  it("updates live results for age, type, pension basis and year", () => {
     render(<Page />);
     fill("Annual gross salary (£)", "60000");
     fill("Age in whole years", "24");
@@ -45,9 +45,7 @@ describe("employer cost calculator page", () => {
     submit();
     expect(result().getByText("£1,459.50")).toBeInTheDocument();
     fill("Age in whole years", "25");
-    expect(
-      result().queryByRole("heading", { name: "Estimated annual employer cost" }),
-    ).not.toBeInTheDocument();
+    expect(result().getByText("£8,250.00")).toBeInTheDocument();
     fill("Tax year", "2025-2026");
     fill("Pension earnings basis", "full");
     fill("Employer pension contribution (%)", "5");

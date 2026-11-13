@@ -1,23 +1,30 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { PresetChips } from "@/components/calculators/preset-chips";
 import { Button } from "@/components/ui/button";
 import { NumberField } from "@/components/ui/number-field";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
+import type { components } from "@/lib/api/client";
+import { attempt } from "@/lib/auth/request";
+import type { CalculatorPreset } from "@/lib/calculators/frame";
 import {
   checkSkilledWorkerVisa,
-  searchOccupations,
+  findOccupation,
+  FULL_TIME_HOURS,
+  visaCheckerSources,
   type Situation,
   type VisaInput,
-  type VisaResult,
 } from "@/lib/calculators/skilled-worker-visa-checker";
+
+type Hit = components["schemas"]["PublicHitOut"];
 
 const initial: VisaInput = {
   code: "",
   salary: 0,
-  weeklyHours: 37.5,
+  weeklyHours: FULL_TIME_HOURS,
   situation: "new",
   phdRelevant: false,
   phdStem: false,
@@ -26,6 +33,28 @@ const initial: VisaInput = {
   dependantChildren: 0,
   previousSkilledWorkerBeforeJan2026: false,
 };
+/**
+ * Example scenarios. They fill in the form from the local occupation table, so choosing one
+ * sends nothing; they are illustrations, not a prediction for any application.
+ */
+export const visaPresets: readonly CalculatorPreset<Partial<VisaInput> & { code: string }>[] = [
+  {
+    id: "developer",
+    label: "Software developer on £60,000",
+    values: { code: "2134", salary: 60000 },
+  },
+  {
+    id: "new-entrant",
+    label: "Software developer, new entrant on £40,000",
+    values: { code: "2134", salary: 40000, newEntrant: true },
+  },
+  {
+    id: "engineer-family",
+    label: "Mechanical engineer on £40,000 with a partner and child",
+    values: { code: "2122", salary: 40000, dependantPartner: true, dependantChildren: 1 },
+  },
+];
+
 const gbp = (n: number) => `£${n.toLocaleString("en-GB")}`;
 
 function YesNo({
@@ -55,48 +84,110 @@ function YesNo({
 export function SkilledWorkerVisaChecker() {
   const [input, setInput] = useState<VisaInput>(initial);
   const [query, setQuery] = useState("");
-  const [chosen, setChosen] = useState("");
-  const [result, setResult] = useState<VisaResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const hits = chosen ? [] : searchOccupations(query);
+  const [chosen, setChosen] = useState<Hit | null>(null);
+  const [hits, setHits] = useState<Hit[]>([]);
+  const [lookupMessage, setLookupMessage] = useState("");
+  const [touched, setTouched] = useState(false);
+  // Live result: recalculated locally on every change once the job and salary are entered.
+  const ready = input.code !== "" && input.salary > 0;
+  const result = useMemo(
+    () => (ready ? checkSkilledWorkerVisa(input, chosen ?? undefined) : null),
+    [ready, input, chosen],
+  );
+  const incomplete = !touched
+    ? null
+    : !input.code
+      ? "Incomplete: search for the job and choose an occupation from the list."
+      : !(input.salary > 0)
+        ? "Incomplete: enter the annual salary offered."
+        : null;
+  useEffect(() => {
+    const term = query.trim();
+    if (chosen || term.length < 2) return;
+    let active = true;
+    const timer = setTimeout(async () => {
+      // Only the occupation query goes to the lookup. All applicant answers stay local.
+      if (/^[1-9]\d{3}$/.test(term)) {
+        const outcome = await attempt((c) =>
+          c.GET("/public/soc/{code}", { params: { path: { code: term } } }),
+        );
+        if (!active) return;
+        setHits(outcome.ok ? [outcome.data] : []);
+        setLookupMessage(outcome.ok ? "" : outcome.problem.message);
+      } else {
+        const outcome = await attempt((c) =>
+          c.GET("/public/soc/search", { params: { query: { q: term } } }),
+        );
+        if (!active) return;
+        setHits(outcome.ok ? outcome.data.results : []);
+        setLookupMessage(
+          outcome.ok
+            ? outcome.data.results.length
+              ? ""
+              : "No matching occupations. Try another title or SOC code."
+            : outcome.problem.message,
+        );
+      }
+    }, 300);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [query, chosen]);
 
   function update<K extends keyof VisaInput>(key: K, value: VisaInput[K]) {
     setInput((previous) => ({ ...previous, [key]: value }));
-    setResult(null);
+    setTouched(true);
   }
 
   return (
     <div className="grid items-start gap-8 lg:grid-cols-2">
-      <form
-        className="space-y-5"
-        onSubmit={(event) => {
-          event.preventDefault();
-          if (!input.code) return setError("Choose an occupation from the list first.");
-          if (!(input.salary > 0)) return setError("Enter the annual salary offered.");
-          setError(null);
-          setResult(checkSkilledWorkerVisa(input));
-        }}
-      >
-        <h2 className="text-title-2 text-label">The job and the person</h2>
+      <form className="space-y-5" onSubmit={(event) => event.preventDefault()}>
+        <PresetChips
+          presets={visaPresets}
+          onSelect={(preset) => {
+            const occupation = findOccupation(preset.values.code);
+            const hit = occupation ? { code: occupation.code, title: occupation.title } : null;
+            setInput({ ...initial, ...preset.values });
+            setChosen(hit);
+            setHits([]);
+            setLookupMessage("");
+            setQuery(hit ? `${hit.code} ${hit.title}` : "");
+            setTouched(true);
+          }}
+        />
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">1.</span> The job
+        </h2>
         <TextField
           label="SOC code or job title"
           autoComplete="off"
-          hint="Search the SOC 2020 list, for example 2134 or software developer. No AI is used."
+          hint="Search the public SOC 2020 list, for example 2134 or software developer. Only this search is sent; salary and personal answers stay in this page."
+          maxLength={100}
           value={query}
           onChange={(event) => {
             setQuery(event.target.value);
-            setChosen("");
+            setChosen(null);
+            setHits([]);
+            setLookupMessage("");
             update("code", "");
           }}
         />
-        {hits.length > 0 ? (
+        {lookupMessage ? (
+          <p role="status" className="text-callout text-label-secondary">
+            {lookupMessage}
+          </p>
+        ) : null}
+        {!chosen && hits.length > 0 ? (
           <ul className="grid gap-2" aria-label="Matching occupations">
             {hits.map((hit) => (
-              <li key={`${hit.table}-${hit.code}`}>
+              <li key={hit.code}>
                 <Button
                   variant="gray"
                   onClick={() => {
-                    setChosen(hit.code);
+                    setChosen(hit);
+                    setHits([]);
+                    setLookupMessage("");
                     setQuery(`${hit.code} ${hit.title}`);
                     update("code", hit.code);
                   }}
@@ -123,6 +214,9 @@ export function SkilledWorkerVisaChecker() {
           value={input.weeklyHours}
           onChange={(value) => update("weeklyHours", value ?? 0)}
         />
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">2.</span> The applicant
+        </h2>
         <Select
           label="Applicant situation"
           value={input.situation}
@@ -150,6 +244,9 @@ export function SkilledWorkerVisaChecker() {
           value={input.newEntrant}
           onChange={(value) => update("newEntrant", value)}
         />
+        <h2 className="text-title-2 text-label">
+          <span className="text-accent-text">3.</span> Dependants and English
+        </h2>
         <YesNo
           label="Is a partner applying as a dependant?"
           value={input.dependantPartner}
@@ -167,21 +264,16 @@ export function SkilledWorkerVisaChecker() {
           value={input.previousSkilledWorkerBeforeJan2026}
           onChange={(value) => update("previousSkilledWorkerBeforeJan2026", value)}
         />
-        {error ? (
-          <p role="alert" className="text-callout text-danger">
-            {error}
-          </p>
-        ) : null}
         <div className="flex flex-wrap gap-3">
-          <Button type="submit">Check eligibility</Button>
           <Button
             variant="gray"
             onClick={() => {
               setInput(initial);
               setQuery("");
-              setChosen("");
-              setResult(null);
-              setError(null);
+              setChosen(null);
+              setHits([]);
+              setLookupMessage("");
+              setTouched(false);
             }}
           >
             Reset answers
@@ -197,12 +289,23 @@ export function SkilledWorkerVisaChecker() {
         {result ? (
           <>
             <h2 className="text-title-2 text-label">
-              {result.eligible ? "Salary requirement met" : "Not eligible on these answers"}
+              {result.status === "needs-review"
+                ? "Needs review"
+                : result.status === "invalid-code"
+                  ? "Choose a valid occupation"
+                  : result.eligible
+                    ? "Salary requirement met"
+                    : "Not eligible on these answers"}
             </h2>
+            {result.status === "needs-review" ? (
+              <p className="text-callout text-label-secondary mt-2">
+                {chosen?.code} {chosen?.title}
+              </p>
+            ) : null}
             {result.occupation ? (
               <p className="text-callout text-label-secondary mt-2">
                 {result.occupation.code} {result.occupation.title}. Going rate{" "}
-                {gbp(result.occupation.goingRate)} for 37.5 hours a week.
+                {gbp(result.occupation.goingRate)} for {FULL_TIME_HOURS} hours a week.
               </p>
             ) : null}
             <div className="text-callout text-label-secondary mt-3 space-y-3">
@@ -210,6 +313,13 @@ export function SkilledWorkerVisaChecker() {
                 <p key={text}>{text}</p>
               ))}
             </div>
+            {result.status === "needs-review" ? (
+              <p className="text-callout mt-3">
+                <a href={visaCheckerSources[1]?.url} className="text-accent-text underline">
+                  Review the official Skilled Occupations appendix
+                </a>
+              </p>
+            ) : null}
             {result.eligibleOccupation ? (
               <table className="text-footnote text-label mt-4 w-full text-left">
                 <caption className="sr-only">Minimum salary for each points option</caption>
@@ -257,7 +367,8 @@ export function SkilledWorkerVisaChecker() {
           </>
         ) : (
           <p className="text-callout text-label-secondary">
-            Choose the job, enter the salary and hours, then check eligibility.
+            {incomplete ??
+              "Choose the job and enter the salary, or pick an example; the result updates as you go."}
           </p>
         )}
       </section>
