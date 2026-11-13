@@ -58,11 +58,8 @@ export function SessionStart({
     });
   }, [next, run, navigate]);
   return (
-    <>
-      <h1 className="text-headline">Platform session</h1>
-      <p role="status" className="mt-4 text-body">
-        Starting a platform session…
-      </p>
-    </>
+    <p role="status" className="mt-4 text-body">
+      Starting a platform session…
+    </p>
   );
 }
