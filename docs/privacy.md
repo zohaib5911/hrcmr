@@ -95,7 +95,8 @@ and exception class with symbol/line-only frames. Everything else is discarded, 
 messages, request bodies, cookies/headers, URL/query, source context/locals, user, extra, tags and
 breadcrumbs. Before-send never inspects the raw SDK hint. Automatic integrations, tracing and
 breadcrumbs are disabled; browser global error handlers, Next request errors, API unhandled errors
-and failed worker jobs use this same boundary. No DSN means no reporting. No replay, console capture
+and failed worker jobs use this same boundary. No DSN means no reporting. Browser CSP permits the legacy, US and EU ingestion hosts
+listed in the [Sentry ingestion notice](https://sentry.io/changelog/ingestion-ip-addresses-are-changing/). No replay, console capture
 or AI instrumentation is enabled.
 
 Python SDK 2.73 replaces deprecated `send_default_pii=False` with explicit `data_collection` category

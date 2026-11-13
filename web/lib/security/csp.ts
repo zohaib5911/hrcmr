@@ -20,7 +20,11 @@ const STRIPE = ["https://js.stripe.com"];
 const STRIPE_FRAMES = ["https://js.stripe.com", "https://hooks.stripe.com"];
 const TURNSTILE = ["https://challenges.cloudflare.com"];
 // Sentry browser SDK reports (EU and US ingest hosts).
-const SENTRY = ["https://*.ingest.sentry.io", "https://*.ingest.de.sentry.io"];
+const SENTRY = [
+  "https://*.ingest.sentry.io",
+  "https://*.ingest.us.sentry.io",
+  "https://*.ingest.de.sentry.io",
+];
 
 export function originOf(url: string | undefined): string | undefined {
   if (!url) return undefined;

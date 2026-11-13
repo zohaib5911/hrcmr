@@ -60,6 +60,7 @@ describe("buildCsp (production)", () => {
       "'self'",
       "https://api.example.com",
       "https://*.ingest.sentry.io",
+      "https://*.ingest.us.sentry.io",
       "https://*.ingest.de.sentry.io",
     ]);
     expect(csp.get("img-src")).toEqual(["'self'", "data:", "blob:", "https://api.example.com"]);
