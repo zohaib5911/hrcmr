@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { brand } from "@brand";
 
 export const metadata: Metadata = {
@@ -26,7 +27,7 @@ export default function AuthLayout({ children }: Readonly<{ children: ReactNode 
           prefetch={false}
           className="text-headline text-label rounded-control focus-visible:outline-accent inline-block outline-none focus-visible:outline-2 focus-visible:outline-offset-2"
         >
-          {brand.name}
+          <BrandLogo />
         </Link>
       </header>
       <main id="content" className="flex flex-1 items-center justify-center px-4 py-10 sm:px-8">

@@ -10,12 +10,14 @@ export function GET() {
       display: "standalone",
       background_color: "#f5f5f7",
       theme_color: brand.colours.accent,
-      icons: [192, 512].map((size) => ({
-        src: `/clock/icon?size=${size}`,
-        sizes: `${size}x${size}`,
-        type: "image/png",
-        purpose: "any",
-      })),
+      icons: [192, 512].flatMap((size) =>
+        ["any", "maskable"].map((purpose) => ({
+          src: `/brand/clock-${purpose === "maskable" ? "maskable-" : ""}${size}.png`,
+          sizes: `${size}x${size}`,
+          type: "image/png",
+          purpose,
+        })),
+      ),
     },
     { headers: { "Content-Type": "application/manifest+json" } },
   );

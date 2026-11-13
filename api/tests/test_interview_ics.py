@@ -30,6 +30,7 @@ def test_the_invite_has_the_fields_a_calendar_needs() -> None:
         stamp=datetime(2026, 11, 7, 9, 0, tzinfo=UTC),
     )
     assert text.endswith("\r\n")
+    assert "PRODID:-//StuffHub//Recruitment//EN" in text
     lines = _unfold(text)
     assert lines[0] == "BEGIN:VCALENDAR"
     assert lines[-1] == "END:VCALENDAR"

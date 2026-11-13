@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 LAYOUTS = Path(__file__).parent / "layouts"
 MAX_VALUE_LENGTH = 300
-ACCENT = "#0062c4"
+ACCENT = "#6D28D9"
 
 
 class TemplateError(ValueError):

@@ -21,7 +21,7 @@ Companion file to plan.md. Version 1.0, 1 Nov 2026.
 ======================================================================
 [x] Brand name: stuffhub (owner, 2026-11-13; set in brand.config.ts)
 [ ] Domain name (example: yourbrand.co.uk)
-[ ] Logo files: SVG (full lockup + square mark), favicon 512x512 PNG
+[x] Logo files: SVG (full lockup + square mark), favicon 512x512 PNG
 [ ] Accent colour (default #0071E3)
 [ ] Legal company name, company number, registered office address, country of registration
 [ ] ICO registration number (UK data protection fee - register at ico.org.uk)

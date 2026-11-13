@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 
 import { brand } from "@brand";
 
@@ -14,6 +15,9 @@ export function SiteFooter({ year }: { year: number }) {
   return (
     <footer className="border-separator bg-elevated border-t">
       <div className="page-marketing py-12 md:py-16">
+        <Link href="/" className="mb-8 inline-block rounded-control">
+          <BrandLogo />
+        </Link>
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4">
           {FOOTER_COLUMNS.map((column) => (
             <nav key={column.title} aria-labelledby={`footer-${column.title}`}>

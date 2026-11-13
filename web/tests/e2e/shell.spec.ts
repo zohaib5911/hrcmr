@@ -1,3 +1,4 @@
+import { brand } from "@brand";
 /**
  * The signed-in app's frame (plan T1.3), in a real browser against the PRODUCTION build: layout at
  * the four design widths in both themes, accessibility, the collapsing sidebar (including that the
@@ -177,7 +178,7 @@ test.describe("navigation", () => {
     const crumbs = page.getByRole("navigation", { name: "Breadcrumb" });
     await expect(crumbs).toContainText("Compliance");
     await expect(crumbs.getByRole("link", { name: "Sponsor compliance" })).toBeVisible();
-    await expect(page).toHaveTitle("Compliance reminders | stuffhub");
+    await expect(page).toHaveTitle(`Compliance reminders | ${brand.name}`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Compliance reminders");
   });
 
@@ -332,7 +333,7 @@ test.describe("every page in the sidebar", () => {
       if (!BUILT.has(item.id)) {
         await expect(page.getByRole("heading", { level: 2, name: item.emptyTitle })).toBeVisible();
       }
-      await expect(page).toHaveTitle(`${title} | stuffhub`);
+      await expect(page).toHaveTitle(`${title} | ${brand.name}`);
       await expect(
         page
           .getByRole("navigation", { name: "Main" })

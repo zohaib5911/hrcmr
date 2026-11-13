@@ -3,6 +3,8 @@
 import { Check, ChevronsUpDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+import { BrandLogo } from "@/components/brand-logo";
+
 import { Avatar } from "@/components/ui/avatar";
 import { Icon } from "@/components/ui/icon";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuTrigger } from "@/components/ui/menu";
@@ -26,6 +28,12 @@ export function CompanySwitcher({ session }: { session: ShellSession | null }) {
   const { company, companies } = session;
   return (
     <div className="px-3 py-3">
+      <div className="mb-2 flex justify-center group-data-[collapsed=true]/shell:hidden">
+        <BrandLogo />
+      </div>
+      <div className="mb-2 hidden justify-center group-data-[collapsed=true]/shell:flex">
+        <BrandLogo variant="mark" />
+      </div>
       <Menu>
         <MenuTrigger asChild>
           <button

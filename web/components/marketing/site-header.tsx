@@ -4,7 +4,7 @@ import { Menu } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { brand } from "@brand";
+import { BrandLogo } from "@/components/brand-logo";
 
 import { Button, IconButton } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
@@ -24,7 +24,7 @@ export function SiteHeader() {
     <header className="material-chrome border-separator sticky top-0 z-40 border-b pt-[env(safe-area-inset-top,0px)]">
       <div className="page-marketing flex h-14 items-center gap-4 md:h-16">
         <Link href="/" className="text-title-3 text-label rounded-control mr-2 font-bold">
-          {brand.name}
+          <BrandLogo />
         </Link>
 
         <nav aria-label="Main" className="hidden flex-1 items-center gap-1 md:flex">
