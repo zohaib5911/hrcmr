@@ -70,3 +70,32 @@ class RequestContextMiddleware:
                 duration_ms=round((time.perf_counter() - started) * 1000, 1),
             )
             structlog.contextvars.clear_contextvars()
+
+
+class SecurityHeadersMiddleware:
+    """Refuse framing and MIME sniffing on every API response (T21.4, clickjacking).
+
+    A response that sets its own Content-Security-Policy (the policy viewer, which the web app
+    frames) keeps it; every other response gets ``frame-ancestors 'none'`` and the legacy
+    ``X-Frame-Options: DENY``. Headers a handler already set are never replaced.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        async def send_with_headers(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                headers = MutableHeaders(scope=message)
+                headers.setdefault("X-Content-Type-Options", "nosniff")
+                headers.setdefault("Referrer-Policy", "no-referrer")
+                if "content-security-policy" not in headers:
+                    headers["Content-Security-Policy"] = "frame-ancestors 'none'"
+                    headers.setdefault("X-Frame-Options", "DENY")
+            await send(message)
+
+        await self.app(scope, receive, send_with_headers)

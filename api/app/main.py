@@ -27,7 +27,7 @@ from app.core.config import Settings, get_settings
 from app.core.csrf import CsrfMiddleware
 from app.core.errors import ErrorEnvelope, register_exception_handlers
 from app.core.logging import configure_logging, get_logger
-from app.core.middleware import RequestContextMiddleware
+from app.core.middleware import RequestContextMiddleware, SecurityHeadersMiddleware
 from app.core.redis import create_redis, ping_redis
 from app.db.engine import create_engine, ping_database
 from app.integrations.anthropic import Anthropic
@@ -243,6 +243,7 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
         secure=settings.app_env.is_deployed,
         cookie_domain=f".{settings.domain}" if settings.app_env.is_deployed else None,
     )
+    app.add_middleware(SecurityHeadersMiddleware)
     app.add_middleware(RequestContextMiddleware)
     # Outermost, so even a refusal (CSRF, rate limit) carries the headers the browser needs to show
     # it. Only our own two origins, with credentials: never a wildcard (plan 4.2).
