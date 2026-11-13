@@ -17,7 +17,7 @@ Open findings: 0 P0 / 1 P1 / 3 P2 — FIX NEEDED.
 - **Fix:** replace `text-title3` with `text-title-3` in those three files. Change nothing else.
 - **Done when:** `grep -rn "text-title3" web/components web/app` returns nothing; the platform admin unit tests, lint and typecheck pass.
 
-### [ ] C4.2.4 · P2 · Notice-pay scenarios should use the shared PresetChips (from C4.1.18)
+### [x] C4.2.4 · P2 · Notice-pay scenarios should use the shared PresetChips (from C4.1.18) — fixed in PR #111
 - **Problem:** `web/components/calculators/uk-notice-pay-calculator.tsx:58` builds its own "Example scenarios" button row. The other eleven calculators use `components/calculators/preset-chips.tsx`.
 - **Fix:** swap it for `PresetChips` with the same scenarios and labels, following `uk-redundancy-pay-calculator.tsx`.
 - **Done when:** the notice-pay component tests and `employment-tools-frame.test.tsx` pass, with the same preset → inputs/result assertions.
