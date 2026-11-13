@@ -1,11 +1,12 @@
 "use client";
 
+import { DatePicker } from "@/components/ui/date-picker";
+
 import { useMemo, useState } from "react";
 
 import { PresetChips } from "@/components/calculators/preset-chips";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import { TextField } from "@/components/ui/text-field";
 import type { CalculatorPreset } from "@/lib/calculators/frame";
 import {
   checkRightToWork,
@@ -152,13 +153,11 @@ export function RightToWorkChecker() {
               value={input.independentBusiness}
               onChange={(value) => update("independentBusiness", value)}
             />
-            <TextField
+            <DatePicker
               label="Employment / engagement start date"
-              type="date"
-              clearable={false}
               hint="The worker’s start date, not today’s date."
-              value={input.employmentStart}
-              onChange={(event) => update("employmentStart", event.target.value)}
+              value={input.employmentStart || null}
+              onChange={(value) => update("employmentStart", value ?? "")}
             />
             <h2 className="text-title-2 text-label">
               <span className="text-accent-text">3.</span> Contracts and substitution
@@ -175,13 +174,11 @@ export function RightToWorkChecker() {
               onChange={(value) => update("substitution", value)}
             />
             {hasExtended ? (
-              <TextField
+              <DatePicker
                 label="Relevant contractual arrangement date"
-                type="date"
-                clearable={false}
                 hint="When the contract chain, matching or substitution arrangement was entered into. Assess renewed or changed arrangements separately."
-                value={input.arrangementStart}
-                onChange={(event) => update("arrangementStart", event.target.value)}
+                value={input.arrangementStart || null}
+                onChange={(value) => update("arrangementStart", value ?? "")}
               />
             ) : null}
           </>

@@ -1,5 +1,7 @@
 "use client";
 
+import { DatePicker } from "@/components/ui/date-picker";
+
 import { useState } from "react";
 
 import { PresetChips } from "@/components/calculators/preset-chips";
@@ -103,16 +105,24 @@ export function HolidayEntitlementCalculator() {
     setForm((previous) => ({ ...previous, [key]: value }));
     setAttempted(false);
   }
-  const field = (key: keyof Form, label: string, type: "number" | "date", hint?: string) => (
-    <TextField
-      label={label}
-      type={type}
-      clearable={false}
-      {...(hint ? { hint } : {})}
-      value={form[key]}
-      onChange={(event) => update(key, event.target.value as never)}
-    />
-  );
+  const field = (key: keyof Form, label: string, type: "number" | "date", hint?: string) =>
+    type === "date" ? (
+      <DatePicker
+        label={label}
+        value={form[key] || null}
+        onChange={(value) => update(key, value ?? "")}
+        {...(hint ? { hint } : {})}
+      />
+    ) : (
+      <TextField
+        label={label}
+        type={type}
+        clearable={false}
+        {...(hint ? { hint } : {})}
+        value={form[key]}
+        onChange={(event) => update(key, event.target.value as never)}
+      />
+    );
 
   const { result, error: liveError } = (() => {
     let result: HolidayResult | null = null;

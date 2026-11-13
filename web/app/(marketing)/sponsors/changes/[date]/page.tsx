@@ -70,7 +70,7 @@ export default async function Page({ params }: Props) {
       </dl>
       <div className="mx-auto max-w-3xl">
         {data.median_added_last_28 !== null && (
-          <p className="text-body text-label-secondary mt-4">
+          <p className="text-lead text-label-secondary mt-4">
             The median number added in the previous 28 publications was {data.median_added_last_28}.
           </p>
         )}

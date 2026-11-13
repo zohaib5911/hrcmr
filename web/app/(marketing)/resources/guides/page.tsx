@@ -1,3 +1,4 @@
+import { formatUk } from "@/lib/ui/dates";
 import { ResourceCards, ResourceHub } from "@/components/resources/hub";
 import { guides } from "@/lib/guides/catalogue";
 import { pageMetadata } from "@/lib/seo";
@@ -17,7 +18,7 @@ export default function GuidesPage() {
         items={guides.map((guide) => ({
           ...guide,
           href: `/resources/guides/${guide.slug}`,
-          detail: `Last reviewed: ${guide.reviewedOn}`,
+          detail: `Last reviewed: ${formatUk(guide.reviewedOn)}`,
         }))}
       />
     </ResourceHub>

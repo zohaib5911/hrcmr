@@ -4,6 +4,12 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import Page from "@/app/(marketing)/resources/tools/uk-redundancy-pay-calculator/page";
 
+// DatePicker commits typed dates on blur, as a person leaves the field.
+function changeAndBlur(...args: Parameters<typeof fireEvent.change>) {
+  fireEvent.change(...args);
+  fireEvent.blur(args[0]);
+}
+
 afterEach(() => vi.restoreAllMocks());
 function fill() {
   for (const [label, value] of [
@@ -12,7 +18,7 @@ function fill() {
     ["Redundancy relevant date", "2026-11-12"],
     ["Average gross weekly pay (£)", "600"],
   ])
-    fireEvent.change(screen.getByLabelText(label!), { target: { value } });
+    changeAndBlur(screen.getByLabelText(label!), { target: { value } });
 }
 
 describe("redundancy pay calculator page", () => {
@@ -41,7 +47,7 @@ describe("redundancy pay calculator page", () => {
     const user = userEvent.setup();
     render(<Page />);
     fill();
-    fireEvent.change(screen.getByLabelText("Average gross weekly pay (£)"), {
+    changeAndBlur(screen.getByLabelText("Average gross weekly pay (£)"), {
       target: { value: "1000" },
     });
     await user.click(screen.getByRole("button", { name: "Calculate redundancy pay" }));
@@ -64,7 +70,7 @@ describe("redundancy pay calculator page", () => {
     const user = userEvent.setup();
     render(<Page />);
     fill();
-    fireEvent.change(screen.getByLabelText("Redundancy relevant date"), {
+    changeAndBlur(screen.getByLabelText("Redundancy relevant date"), {
       target: { value: "2027-04-06" },
     });
     await user.click(screen.getByRole("button", { name: "Calculate redundancy pay" }));

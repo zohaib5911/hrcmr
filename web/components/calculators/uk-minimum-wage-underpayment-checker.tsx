@@ -1,4 +1,6 @@
 "use client";
+
+import { DatePicker } from "@/components/ui/date-picker";
 import { useState } from "react";
 import { PresetChips } from "@/components/calculators/preset-chips";
 import type { CalculatorPreset } from "@/lib/calculators/frame";
@@ -125,12 +127,10 @@ export function MinimumWageChecker() {
             <option key={v}>{v}</option>
           ))}
         </Select>
-        <TextField
+        <DatePicker
           label="Pay-period start"
-          type="date"
-          clearable={false}
-          value={form.periodStart}
-          onChange={(e) => update("periodStart", e.target.value)}
+          value={form.periodStart || null}
+          onChange={(value) => update("periodStart", value ?? "")}
         />
         <Select
           label="Apprenticeship status at period start"

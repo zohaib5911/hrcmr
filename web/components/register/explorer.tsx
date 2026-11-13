@@ -1,5 +1,8 @@
 "use client";
 
+import { PublicDate } from "@/components/marketing/public-content";
+import { formatUk } from "@/lib/ui/dates";
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -93,7 +96,8 @@ function SponsorList({ rows }: { rows: Sponsor[] }) {
             {s.routes.join(" · ")} — {s.ratings.join(" · ")}
           </p>
           <p className="text-footnote">
-            First seen {s.first_seen} · {industryName(s.industry ?? "Industry unknown")}
+            First seen <PublicDate value={s.first_seen} /> ·{" "}
+            {industryName(s.industry ?? "Industry unknown")}
           </p>
         </li>
       ))}
@@ -128,7 +132,7 @@ function HistoryChart({
           return (
             <g key={`${p.published_on}-${i}`}>
               <title>
-                {p.published_on}: {number(p.count)} sponsors; {p.added} added or returned;{" "}
+                {formatUk(p.published_on)}: {number(p.count)} sponsors; {p.added} added or returned;{" "}
                 {p.removed} no longer listed
               </title>
               <rect
@@ -153,7 +157,8 @@ function HistoryChart({
         })}
       </svg>
       <figcaption className="text-label-secondary text-footnote">
-        {points[0]?.published_on} to {points.at(-1)?.published_on}.{" "}
+        <PublicDate value={points[0]?.published_on} /> to{" "}
+        <PublicDate value={points.at(-1)?.published_on} />.{" "}
         {trend
           ? "One bar per publication."
           : "Added (including returned) above; no longer listed below. All values follow your filters."}
@@ -178,7 +183,7 @@ function HistoryChart({
               {points.map((p, i) => (
                 <tr key={`${p.published_on}-${i}`}>
                   <th scope="row" className="p-2">
-                    {p.published_on}
+                    <PublicDate value={p.published_on} />
                   </th>
                   <td>{number(p.count)}</td>
                   <td>{number(p.added)}</td>
@@ -308,7 +313,11 @@ export function RegisterExplorer() {
         >
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p>
-              Publication: <strong>{data.selected.published_on}</strong> ·{" "}
+              Publication:{" "}
+              <strong>
+                <PublicDate value={data.selected.published_on} />
+              </strong>{" "}
+              ·{" "}
               <a className="text-accent-text underline" href={data.selected.source_url}>
                 GOV.UK source CSV
               </a>
@@ -331,7 +340,7 @@ export function RegisterExplorer() {
           <label className="block">
             Publication timeline
             <input
-              aria-valuetext={data.selected.published_on}
+              aria-valuetext={formatUk(data.selected.published_on)}
               type="range"
               className="mt-2 w-full"
               min={0}
@@ -345,9 +354,10 @@ export function RegisterExplorer() {
             />
           </label>
           <p className="text-footnote text-label-secondary">
-            Comparison starts at {data.baseline?.published_on}. If the requested date predates our
-            archive, we use the first available publication. Daily deltas compare with the last
-            publication on a previous day; with no earlier day, the delta is zero.
+            Comparison starts at <PublicDate value={data.baseline?.published_on} />. If the
+            requested date predates our archive, we use the first available publication. Daily
+            deltas compare with the last publication on a previous day; with no earlier day, the
+            delta is zero.
           </p>
         </section>
       )}
@@ -363,8 +373,9 @@ export function RegisterExplorer() {
                 </span>
               </p>
               <p className="text-footnote mt-2">
-                {data.baseline?.published_on} compared with {data.selected.published_on}. Route,
-                rating and type groups may overlap.
+                <PublicDate value={data.baseline?.published_on} /> compared with{" "}
+                <PublicDate value={data.selected.published_on} />. Route, rating and type groups may
+                overlap.
               </p>
             </CardBody>
           </Card>

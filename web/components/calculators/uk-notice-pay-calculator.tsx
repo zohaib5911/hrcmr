@@ -1,5 +1,9 @@
 "use client";
 
+import { PublicDate } from "@/components/marketing/public-content";
+
+import { DatePicker } from "@/components/ui/date-picker";
+
 import { useState } from "react";
 
 import { PresetChips } from "@/components/calculators/preset-chips";
@@ -119,23 +123,19 @@ export function UkNoticePayCalculator() {
           <option value="employee">Employee</option>
           <option value="worker">Worker (not an employee)</option>
         </Select>
-        <TextField
+        <DatePicker
           label="Start date"
-          type="date"
-          clearable={false}
-          value={startDate}
-          onChange={(e) => {
-            setStartDate(e.target.value);
+          value={startDate || null}
+          onChange={(value) => {
+            setStartDate(value ?? "");
             reset();
           }}
         />
-        <TextField
+        <DatePicker
           label="Date notice is given"
-          type="date"
-          clearable={false}
-          value={noticeDate}
-          onChange={(e) => {
-            setNoticeDate(e.target.value);
+          value={noticeDate || null}
+          onChange={(value) => {
+            setNoticeDate(value ?? "");
             reset();
           }}
         />
@@ -253,7 +253,7 @@ function NoticeOutput({ result }: { result: ReturnType<typeof calculateNotice> |
         </div>
         <div>
           <dt className="font-semibold">Last day of notice</dt>
-          <dd>{r.lastDay ?? "No notice period"}</dd>
+          <dd>{r.lastDay ? <PublicDate value={r.lastDay} /> : "No notice period"}</dd>
         </div>
         <div>
           <dt className="font-semibold">Gross notice pay</dt>

@@ -1,5 +1,7 @@
 "use client";
 
+import { DatePicker } from "@/components/ui/date-picker";
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -67,15 +69,22 @@ export function RiskAssessmentTemplate() {
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
       );
   }
-  const text = (label: string, key: keyof RiskAssessment, type = "text") => (
-    <TextField
-      label={label}
-      type={type}
-      clearable={false}
-      value={String(form[key])}
-      onChange={(e) => set(key, e.target.value)}
-    />
-  );
+  const text = (label: string, key: keyof RiskAssessment, type = "text") =>
+    type === "date" ? (
+      <DatePicker
+        label={label}
+        value={String(form[key]) || null}
+        onChange={(value) => set(key, value ?? "")}
+      />
+    ) : (
+      <TextField
+        label={label}
+        type={type}
+        clearable={false}
+        value={String(form[key])}
+        onChange={(e) => set(key, e.target.value)}
+      />
+    );
 
   return (
     <form noValidate className="space-y-8" onSubmit={(e) => e.preventDefault()}>
@@ -182,12 +191,10 @@ export function RiskAssessmentTemplate() {
               value={h.owner}
               onChange={(e) => setHazard(i, { owner: e.target.value })}
             />
-            <TextField
+            <DatePicker
               label="Due date"
-              type="date"
-              clearable={false}
-              value={h.due}
-              onChange={(e) => setHazard(i, { due: e.target.value })}
+              value={h.due || null}
+              onChange={(value) => setHazard(i, { due: value ?? "" })}
             />
             <Select
               label="Status"

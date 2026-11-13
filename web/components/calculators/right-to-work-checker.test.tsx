@@ -5,8 +5,15 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { formatUk } from "@/lib/ui/dates";
 import Page from "@/app/(marketing)/resources/tools/right-to-work-october-2026-checker/page";
 import { rightToWorkSource } from "@/lib/calculators/right-to-work-october-2026-checker";
+
+// DatePicker commits typed dates on blur, as a person leaves the field.
+function changeAndBlur(...args: Parameters<typeof fireEvent.change>) {
+  fireEvent.change(...args);
+  fireEvent.blur(args[0]);
+}
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -19,8 +26,8 @@ describe("public right-to-work calculator", () => {
     expect(screen.getByText(/Nothing you enter is saved or sent/)).toBeInTheDocument();
     const table = screen.getByRole("table");
     expect(within(table).getByRole("link")).toHaveAttribute("href", rightToWorkSource.url);
-    expect(within(table).getByText(rightToWorkSource.checkedOn)).toBeInTheDocument();
-    expect(within(table).getByText(rightToWorkSource.validFrom)).toBeInTheDocument();
+    expect(within(table).getByText(formatUk(rightToWorkSource.checkedOn))).toBeInTheDocument();
+    expect(within(table).getByText(formatUk(rightToWorkSource.validFrom))).toBeInTheDocument();
   });
 
   it("checks local answers without network or storage writes and resets", async () => {
@@ -33,7 +40,7 @@ describe("public right-to-work calculator", () => {
       screen.getByLabelText("Buying directly from an independent business?"),
       "no",
     );
-    fireEvent.change(screen.getByLabelText("Employment / engagement start date"), {
+    changeAndBlur(screen.getByLabelText("Employment / engagement start date"), {
       target: { value: "2026-10-01" },
     });
     await user.selectOptions(
@@ -60,7 +67,7 @@ describe("public right-to-work calculator", () => {
     const result = screen.getByRole("region", { name: "Checker result" });
     expect(result).toHaveTextContent("Needs review");
     expect(result).toHaveTextContent("Incomplete or needs review");
-    fireEvent.change(screen.getByLabelText("Relevant contractual arrangement date"), {
+    changeAndBlur(screen.getByLabelText("Relevant contractual arrangement date"), {
       target: { value: "2026-10-01" },
     });
     expect(result).toHaveTextContent("written terms");
@@ -90,7 +97,7 @@ describe("public right-to-work calculator", () => {
     await user.click(screen.getByRole("button", { name: "Online matching service" }));
     expect(screen.getByLabelText("Engagement type")).toHaveValue("matching");
     expect(screen.getByLabelText("Relevant contractual arrangement date")).toHaveValue(
-      "2026-11-02",
+      "2 Nov 2026",
     );
     expect(result).toHaveTextContent("Extended liability");
     expect(result).toHaveTextContent("written terms");

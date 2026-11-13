@@ -1,5 +1,9 @@
 "use client";
 
+import { PublicDate } from "@/components/marketing/public-content";
+
+import { DatePicker } from "@/components/ui/date-picker";
+
 import { useState } from "react";
 import { PresetChips } from "@/components/calculators/preset-chips";
 import type { CalculatorPreset } from "@/lib/calculators/frame";
@@ -90,12 +94,10 @@ export function SickPayCalculator() {
           <option value="agency">Agency worker</option>
           <option value="other">Self-employed or other</option>
         </Select>
-        <TextField
+        <DatePicker
           label="First day of sickness"
-          type="date"
-          clearable={false}
-          value={form.startDate}
-          onChange={(event) => update("startDate", event.target.value)}
+          value={form.startDate || null}
+          onChange={(value) => update("startDate", value ?? "")}
         />
         <label className="text-callout text-label flex items-center gap-2">
           <input
@@ -105,12 +107,10 @@ export function SickPayCalculator() {
           />
           I worked part of the first day (it is not paid)
         </label>
-        <TextField
+        <DatePicker
           label="Last day of sickness"
-          type="date"
-          clearable={false}
-          value={form.endDate}
-          onChange={(event) => update("endDate", event.target.value)}
+          value={form.endDate || null}
+          onChange={(value) => update("endDate", value ?? "")}
           hint="For an ongoing absence, enter the date you want to calculate to."
         />
         <TextField
@@ -209,7 +209,7 @@ export function SickPayCalculator() {
                     <tr key={week.week}>
                       <td>{week.week}</td>
                       <td>
-                        {week.from} to {week.to}
+                        <PublicDate value={week.from} /> to <PublicDate value={week.to} />
                       </td>
                       <td className="text-right">{week.payableDays}</td>
                       <td className="text-right">{gbp(week.amount)}</td>

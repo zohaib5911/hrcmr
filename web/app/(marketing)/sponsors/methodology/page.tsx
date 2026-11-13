@@ -13,7 +13,7 @@ export default function Page() {
   return (
     <Section tone="page">
       <SectionHeading level={1} eyebrow="Sponsor register" title="Methodology" />
-      <div className="text-body text-label mx-auto mt-8 flex max-w-3xl flex-col gap-4">
+      <div className="text-lead text-label mx-auto mt-8 flex max-w-3xl flex-col gap-4">
         <p>
           The data is the register of licensed sponsors that the Home Office publishes on GOV.UK. We
           check for a new publication on working days, and keep every version we see.
