@@ -123,3 +123,45 @@ def test_ons_index_of_place_names_is_normalised() -> None:
     assert normalise_places(own) == own
     with pytest.raises(ValueError, match="columns"):
         normalise_places(b"place23nm,lat,long\nLeeds,1,1\n")
+
+
+def test_ons_index_in_windows_1252_is_read() -> None:
+    # IPN_GB_2024.csv as published by the ONS is Windows-1252, not UTF-8.
+    ons = (
+        "place24cd,place24nm,ctyhistnm,ctyltnm,rgn24cd,ctry24cd,lat,long\n"
+        "1,A' Chrìon Làraich,Perthshire,Stirling,S99999999,S92000003,56.39,-4.62\n"
+        "2,Ynys Môn,Anglesey,Isle of Anglesey,W99999999,W92000004,53.28,-4.42\n"
+    ).encode("cp1252")
+    places = parse_places(normalise_places(ons))
+    assert geocode(places, "A' Chrìon Làraich", "")[0].region == "Scotland"  # type: ignore[union-attr]
+    assert geocode(places, "Ynys Môn", "Anglesey")[1] == "exact"
+
+
+def test_ons_electoral_region_wins_over_a_wrong_region_code() -> None:
+    # IPN_GB_2024.csv: Bristol's split rows have no rgn23cd and its locality row says North
+    # East (E12000001); eer23cd says South West (E15000009) on all of them.
+    ons = (
+        b"place23nm,ctyhistnm,rgn23cd,eer23cd,lat,long\n"
+        b"Bristol,Gloucestershire,,E15000009,51.44,-2.56\n"
+        b"Bristol,Gloucestershire,E12000001,E15000009,51.45,-2.60\n"
+        b"Sunderland,Durham,,E15000001,54.89,-1.40\n"
+        b"Sunderland,Lancashire,E12000002,E15000002,53.99,-2.87\n"
+    )
+    places = parse_places(normalise_places(ons))
+    assert geocode(places, "Bristol", "")[0].region == "South West"  # type: ignore[union-attr]
+    assert geocode(places, "Sunderland", "Durham")[0].region == "North East"  # type: ignore[union-attr]
+    assert geocode(places, "Sunderland", "") == (None, "none")  # two regions: not guessed
+
+
+def test_empty_county_row_does_not_decide_an_ambiguous_town() -> None:
+    # IPN_GB_2024.csv has Sheffield in Yorkshire and a Sheffield locality in Cornwall whose
+    # ceremonial county column is empty.
+    own = (
+        b"place_name,county,region,lat,lon\n"
+        b"Sheffield,South Yorkshire,Yorkshire and The Humber,53.37,-1.35\n"
+        b"Sheffield,,South West,50.09,-5.55\n"
+        b"Sheffield,Cornwall,South West,50.09,-5.55\n"
+    )
+    places = parse_places(own)
+    assert geocode(places, "Sheffield", "") == (None, "none")
+    assert geocode(places, "Sheffield", "South Yorkshire")[1] == "exact"
