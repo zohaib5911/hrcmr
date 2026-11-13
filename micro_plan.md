@@ -515,7 +515,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T21.1 · B · Full security test suite and RBAC matrix coverage of every endpoint
 ### [x] T21.2 · B · Threat model (`docs/security.md`)
 ### [x] T21.3 · B · Dependency, container and secret scans clean; CSP enforced
-### [ ] T21.4 · B · Pen-test style checks
+### [x] T21.4 · B · Pen-test style checks
 ### [ ] T21.5 · B · Privacy review
 ### [ ] P21 · B · Phase 21 gate
 
