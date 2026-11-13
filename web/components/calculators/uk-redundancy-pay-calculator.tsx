@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { PresetChips } from "@/components/calculators/preset-chips";
+import type { CalculatorPreset } from "@/lib/calculators/frame";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
@@ -21,37 +23,72 @@ const initial = {
 const money = (value: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(value);
 
+const presets: readonly CalculatorPreset<Partial<typeof initial>>[] = [
+  {
+    id: "ten-years",
+    label: "10 years, \u00a3600 weekly pay",
+    values: {
+      dateOfBirth: "1980-01-01",
+      startDate: "2016-11-12",
+      redundancyDate: "2026-11-12",
+      weeklyPay: "600",
+    },
+  },
+  {
+    id: "short-service",
+    label: "One year of service",
+    values: {
+      dateOfBirth: "1995-01-01",
+      startDate: "2025-11-12",
+      redundancyDate: "2026-11-12",
+      weeklyPay: "500",
+    },
+  },
+];
+
 export function RedundancyPayCalculator() {
   const [form, setForm] = useState(initial);
-  const [result, setResult] = useState<ReturnType<typeof calculateRedundancy> | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [attempted, setAttempted] = useState(false);
   function update(key: keyof typeof initial, value: string) {
     setForm((previous) => ({ ...previous, [key]: value }));
-    setResult(null);
-    setError(null);
+    setAttempted(false);
   }
+  const { result, error: liveError } = (() => {
+    let result: ReturnType<typeof calculateRedundancy> | null = null;
+    let error: string | null = null;
+
+    result = null;
+    try {
+      if (!form.weeklyPay.trim()) throw new Error("Enter your average gross weekly pay.");
+      result = calculateRedundancy({
+        ...form,
+        weeklyPay: Number(form.weeklyPay),
+      } as RedundancyInput);
+      error = null;
+    } catch (cause) {
+      error = cause instanceof Error ? cause.message : "Check your answers.";
+    }
+    return { result, error };
+  })();
+  const error = attempted || JSON.stringify(form) !== JSON.stringify(initial) ? liveError : null;
+
   return (
     <div className="grid items-start gap-8 lg:grid-cols-2">
       <form
         className="space-y-5"
         onSubmit={(event) => {
           event.preventDefault();
-          setResult(null);
-          try {
-            if (!form.weeklyPay.trim()) throw new Error("Enter your average gross weekly pay.");
-            setResult(
-              calculateRedundancy({
-                ...form,
-                weeklyPay: Number(form.weeklyPay),
-              } as RedundancyInput),
-            );
-            setError(null);
-          } catch (cause) {
-            setError(cause instanceof Error ? cause.message : "Check your answers.");
-          }
+          setAttempted(true);
         }}
       >
-        <h2 className="text-title-2 text-label">Your employment</h2>
+        <PresetChips
+          presets={presets}
+          onSelect={(preset) => {
+            setForm({ ...initial, ...preset.values });
+            setAttempted(false);
+          }}
+        />
+        <h2 className="text-title-2 text-label">1. Your employment</h2>
         <Select
           label="Jurisdiction"
           value={form.jurisdiction}
@@ -127,8 +164,7 @@ export function RedundancyPayCalculator() {
             variant="gray"
             onClick={() => {
               setForm(initial);
-              setResult(null);
-              setError(null);
+              setAttempted(false);
             }}
           >
             Reset answers
@@ -146,6 +182,7 @@ export function RedundancyPayCalculator() {
         aria-atomic="true"
         className="bg-elevated rounded-control p-5 sm:p-6"
       >
+        <h2 className="text-headline text-label mb-3">2. Live result</h2>
         {result ? (
           <>
             <h2 className="text-title-2 text-label">

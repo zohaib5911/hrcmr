@@ -1,3 +1,5 @@
+import { CalculatorTemplate } from "@/components/calculators/calculator-template";
+import type { CalculatorFrameContent } from "@/lib/calculators/frame";
 import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import { RiskAssessmentTemplate } from "@/components/calculators/risk-assessment-template";
@@ -7,28 +9,56 @@ export const metadata: Metadata = pageMetadata(
   "Risk assessment template",
   "Fill in a workplace risk assessment and download it as PDF or Word. Your draft is kept only in your browser.",
 );
+const content: CalculatorFrameContent = {
+  quickAnswer:
+    "A useful risk assessment records workplace hazards, who could be harmed, controls and further actions. Start with the work as it is actually done, then assign owners and review the controls.",
+  howItWorks: [
+    {
+      title: "Describe the assessment",
+      body: "Identify the organisation, site, activity, assessor and review date. Consult the people doing the work.",
+    },
+    {
+      title: "Record hazards and actions",
+      body: "Describe who could be harmed, existing controls, further actions and who will complete them.",
+    },
+    {
+      title: "Preview and export",
+      body: "Review your draft, complete the required fields and acknowledgement, then download PDF or Word. Clear the browser draft when finished.",
+    },
+  ],
+  faq: [
+    {
+      question: "Is an example a completed assessment?",
+      answer:
+        "No. Examples are prompts only. Assess your own workplace and obtain competent advice for specialist or high-risk work.",
+    },
+    {
+      question: "Where is my draft saved?",
+      answer:
+        "Only in this browser\u2019s local storage. It is never sent anywhere. Clear saved draft removes it from this browser; downloaded copies remain with you.",
+    },
+  ],
+};
+
 export default function Page() {
   return (
-    <div className="mx-auto max-w-5xl px-5 py-10 sm:px-8 sm:py-14">
-      <header className="pb-8">
-        <h1 className="text-large-title text-label">Risk assessment template</h1>
-        <p className="text-callout text-label-secondary mt-3 max-w-2xl">
-          Record hazards, controls and actions, then download a PDF or Word copy.
-        </p>
-        <p className="text-footnote text-label-secondary mt-3">
-          Your draft is saved only in this browser (local storage) and is never sent anywhere. Clear
-          it at any time. General guidance only; it does not replace professional health and safety
-          advice. See the HSE’s guidance at{" "}
-          <a
-            href="https://www.hse.gov.uk/simple-health-safety/risk/"
-            className="text-accent-text underline"
-          >
-            hse.gov.uk
-          </a>
-          .
-        </p>
-      </header>
+    <CalculatorTemplate
+      title="Risk assessment template"
+      description="Record workplace hazards, controls and actions, then download a PDF or Word copy. General guidance only; this does not replace professional health and safety advice."
+      slug="risk-assessment-template"
+      privacy="local_draft"
+      content={content}
+      sources={[
+        {
+          title: "HSE: Managing risks and risk assessment at work",
+          url: "https://www.hse.gov.uk/simple-health-safety/risk/",
+          checkedOn: "2026-11-13",
+          validFrom: "2026-11-13",
+          validTo: null,
+        },
+      ]}
+    >
       <RiskAssessmentTemplate />
-    </div>
+    </CalculatorTemplate>
   );
 }
