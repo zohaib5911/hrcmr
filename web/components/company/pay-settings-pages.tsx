@@ -53,7 +53,7 @@ function ManagedList<T extends { id: string }>(props: ManagedListProps<T>) {
       <PageHeader
         title={props.title}
         description={props.description}
-        actions={mayEdit ? add : null}
+        actions={mayEdit && items.length > 0 ? add : null}
       />
       {items.length === 0 ? (
         <div className="bg-elevated rounded-card shadow-e1">

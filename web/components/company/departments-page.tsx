@@ -30,7 +30,11 @@ export function DepartmentsPage({ departments }: { departments: Department[] }) 
       <PageHeader
         title="Departments"
         description="The parts of your company. Job titles are grouped under them."
-        actions={mayEdit ? <Button onClick={() => setEditing("new")}>Add department</Button> : null}
+        actions={
+          mayEdit && departments.length > 0 ? (
+            <Button onClick={() => setEditing("new")}>Add department</Button>
+          ) : null
+        }
       />
       {departments.length === 0 ? (
         <div className="bg-elevated rounded-card shadow-e1">
