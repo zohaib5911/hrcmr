@@ -4,7 +4,7 @@
  * flows hold up for a screen reader (landmarks, one heading, a skip link, named controls); and with
  * reduced motion nothing slides or zooms. The /design components are covered by design-a11y.spec.ts.
  */
-import { request as playwrightRequest, type Page } from "@playwright/test";
+import { request as playwrightRequest, type APIRequestContext, type Page } from "@playwright/test";
 
 import { API, createSignedInAdmin, csrfHeaders } from "../support/accounts";
 import { audit } from "../support/axe";
@@ -72,6 +72,18 @@ const PUBLIC_PAGES = [
   "/login",
   "/forgot-password",
   "/verify",
+  // Missing-token states are permanent CI coverage too.
+  "/setup",
+  "/accept-invite",
+  "/verify-email",
+  "/reset-password",
+  "/login/mfa",
+  "/mfa/enrol",
+  // Slugs from the T22.4 sweep; comparisons intentionally render the unpublished 404.
+  "/vs/example",
+  "/compare/hr",
+  "/resources/guides/right-to-work-checks",
+  "/sponsors/changes/2026-11-11",
   "/legal/privacy",
   "/legal/terms",
   "/resources",
@@ -100,14 +112,61 @@ const PUBLIC_PAGES = [
 ] as const;
 
 /** Opens a page and waits until its main heading is on screen. */
-async function open(page: Page, path: string) {
+async function open(page: Page, path: string, expectedStatus?: number) {
   const response = await page.goto(path);
-  expect(response?.status(), path).toBeLessThan(400);
+  if (expectedStatus) expect(response?.status(), path).toBe(expectedStatus);
+  else expect(response?.status(), path).toBeLessThan(400);
   await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
   // Axe reads what is on screen: wait for the data, not a loading skeleton or a half-enabled control.
   await expect(page.locator(".skeleton"), path).toHaveCount(0);
   // ...and for the page's own requests, which disable its controls while they run (busy).
   await page.waitForLoadState("networkidle");
+}
+
+/** Fresh records, using the same real API setup as the T22.4 route sweep. */
+async function createRecruitment(request: APIRequestContext, colorScheme: string) {
+  const headers = await csrfHeaders(request);
+  const post = async (path: string, data: unknown) => {
+    const response = await request.post(`${API}${path}`, { headers, data });
+    expect(response.ok(), await response.text()).toBeTruthy();
+    return response.json();
+  };
+  const requisition = await post("/requisitions", {
+    job_title: "Care coordinator",
+    headcount: 2,
+    budget_from: "28000",
+    budget_to: "32000",
+    budget_per: "year",
+  });
+  const approved = await request.patch(`${API}/requisitions/${requisition.id}/status`, {
+    headers,
+    data: { status: "open" },
+  });
+  expect(approved.ok(), await approved.text()).toBeTruthy();
+  const posting = await post("/postings", {
+    requisition_id: requisition.id,
+    title: "Care coordinator",
+    visibility: "external",
+    vacancies: 2,
+    description: "Help our care team plan reliable support for local families.",
+  });
+  const opened = await request.patch(`${API}/postings/${posting.id}/status`, {
+    headers,
+    data: { status: "open" },
+  });
+  expect(opened.ok(), await opened.text()).toBeTruthy();
+  const careers = new URL((await opened.json()).public_link).pathname;
+  const candidate = await post("/candidates", {
+    first_name: "Priya",
+    last_name: "Shah",
+    email: `priya.${colorScheme}@example.com`,
+    source: "Referral",
+  });
+  const application = await post("/applications", {
+    candidate_id: candidate.id,
+    posting_id: posting.id,
+  });
+  return { careers, candidate, application };
 }
 
 for (const colorScheme of ["light", "dark"] as const) {
@@ -139,13 +198,67 @@ for (const colorScheme of ["light", "dark"] as const) {
       await audit(page, `${colorScheme} employee profile`);
     });
 
+    test("policy and recruitment details pass axe", async ({ page, browser }) => {
+      test.setTimeout(90_000);
+      const policy = await page.request.post(`${API}/policies`, {
+        headers: await csrfHeaders(page.request),
+        data: {
+          title: "Staff handbook 2026",
+          category: "employee_handbook",
+          confirmation_mode: "accept",
+          audience_type: "everyone",
+          accept_within_days: 14,
+        },
+      });
+      expect(policy.status(), await policy.text()).toBe(201);
+      const { id } = await policy.json();
+      const { careers, candidate, application } = await createRecruitment(
+        page.request,
+        colorScheme,
+      );
+      for (const path of [
+        `/policies/${id}`,
+        `/recruitment/candidates/${candidate.id}`,
+        `/recruitment/applications/${application.id}`,
+      ]) {
+        await open(page, path);
+        await audit(page, `${colorScheme} ${path}`);
+      }
+      // /careers/[company] and /careers/[company]/[posting] must work for an applicant
+      // without the company administrator's cookies.
+      const context = await browser.newContext({
+        baseURL: new URL(page.url()).origin,
+        storageState: { cookies: [], origins: [] },
+        colorScheme,
+      });
+      try {
+        const publicPage = await context.newPage();
+        for (const path of [careers.split("/").slice(0, 3).join("/"), careers]) {
+          await open(publicPage, path);
+          await audit(publicPage, `${colorScheme} ${path}`);
+        }
+      } finally {
+        await context.close();
+      }
+    });
+
     test.describe("signed out", () => {
       test.use({ storageState: { cookies: [], origins: [] } });
 
       test("every public page passes axe", async ({ page }) => {
         test.setTimeout(PUBLIC_PAGES.length * 15_000);
-        for (const path of PUBLIC_PAGES) {
-          await open(page, path);
+        // The sweep's stable-ltd slug is fixed, but its id belongs to each fresh test database.
+        const response = await page.request.get(`${API}/public/register/sitemap/0`);
+        expect(response.ok(), await response.text()).toBeTruthy();
+        const { items } = (await response.json()) as {
+          items: { stable_id: string; slug: string }[];
+        };
+        const sponsor = items.find((item) => item.slug === "stable-ltd");
+        expect(sponsor, "the reference register includes Stable Ltd").toBeDefined();
+        const profile = `/sponsors/profile/${sponsor!.stable_id}/${sponsor!.slug}`;
+        for (const path of [...PUBLIC_PAGES, profile]) {
+          const unpublished = path === "/vs/example" || path === "/compare/hr";
+          await open(page, path, unpublished ? 404 : undefined);
           await audit(page, `${colorScheme} ${path}`);
         }
       });
