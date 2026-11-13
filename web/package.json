@@ -61,6 +61,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "bash ../.agent/e2e.sh",
+    "test:journeys": "bash ../.agent/e2e.sh tests/e2e/journeys --project=production",
     "gen:api": "node scripts/gen-api.mjs",
     "gen:api:check": "node scripts/gen-api.mjs --check",
     "audit:marketing": "node scripts/audit-marketing.mjs"

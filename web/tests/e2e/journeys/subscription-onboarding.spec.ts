@@ -92,8 +92,20 @@ test("a new free company subscribes, adds its first employee and reviews their R
       .getByRole("button", { name: "Review & send", exact: true })
       .click();
     const review = page.getByRole("dialog", { name: "Review reminder", exact: true });
-    await expect(review.getByText("Ravi Onboarding", { exact: true })).toBeVisible();
+    await expect(review.getByText(/Ravi Onboarding/)).toBeVisible();
     await expect(review.getByRole("button", { name: "Send reminder", exact: true })).toBeEnabled();
+    const sent = page.waitForResponse(
+      (response) => response.url().endsWith("/send") && response.request().method() === "POST",
+    );
+    await review.getByRole("button", { name: "Send reminder", exact: true }).click();
+    expect((await sent).status()).toBe(200);
+    await expect(review).toBeHidden();
+    await page.getByRole("tab", { name: "History (1)", exact: true }).click();
+    await expect(
+      page
+        .getByRole("grid", { name: "Sent reminder history", exact: true })
+        .getByText("Ravi Onboarding", { exact: true }),
+    ).toBeVisible();
   } finally {
     await context.close();
     await api.dispose();
