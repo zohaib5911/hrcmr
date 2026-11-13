@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { NumberField } from "@/components/ui/number-field";
 import { Select } from "@/components/ui/select";
 import { TextArea } from "@/components/ui/text-area";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { todayIso } from "@/lib/ui/dates";
@@ -187,11 +188,10 @@ export function CheckForm({ busy, canRun, onSubmit }: Props) {
             </option>
           ))}
         </Select>
-        <TextField
+        <DatePicker
           label="Certificate of Sponsorship assignment date"
-          type="date"
-          value={form.cosDate}
-          onChange={(event) => set("cosDate", event.target.value)}
+          value={form.cosDate || null}
+          onChange={(picked) => set("cosDate", picked ?? "")}
           hint="Leave as today if you have not assigned the CoS yet"
         />
         <Select

@@ -1,3 +1,4 @@
+import { PublicBody, PublicDate, PublicLead } from "@/components/marketing/public-content";
 import { pageMetadata } from "@/lib/seo";
 import type { Metadata, Route } from "next";
 import Link from "next/link";
@@ -36,9 +37,9 @@ export default async function LegalPage({ params }: Props) {
         </p>
         <h1 className="text-large-title text-label font-semibold">{document.title}</h1>
         <p className="text-footnote text-label-secondary mt-3">
-          Draft prepared {LEGAL_DRAFT_DATE}. Not yet approved for launch.
+          Draft prepared <PublicDate value={LEGAL_DRAFT_DATE} />. Not yet approved for launch.
         </p>
-        <p className="text-body text-label-secondary mt-6">{document.introduction}</p>
+        <PublicLead className="mt-6">{document.introduction}</PublicLead>
         <p className="text-callout text-label-secondary mt-4">
           Provider:{" "}
           {brand.legal.companyName ?? "legal company identity awaiting owner confirmation"}.
@@ -73,9 +74,9 @@ export default async function LegalPage({ params }: Props) {
           <section key={section.title} className="mt-8">
             <h2 className="text-title-3 text-label font-semibold">{section.title}</h2>
             {section.paragraphs.map((paragraph) => (
-              <p key={paragraph} className="text-body text-label-secondary mt-3">
+              <PublicBody key={paragraph} className="mt-3">
                 {paragraph}
-              </p>
+              </PublicBody>
             ))}
           </section>
         ))}
@@ -107,7 +108,7 @@ export default async function LegalPage({ params }: Props) {
             >
               ICO cookies guidance
             </a>
-            . Checked {LEGAL_DRAFT_DATE}.
+            . Checked <PublicDate value={LEGAL_DRAFT_DATE} />.
           </p>
         )}
         {document.slug === "register-terms" && (

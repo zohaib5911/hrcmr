@@ -1,5 +1,7 @@
 "use client";
 
+import { DatePicker } from "@/components/ui/date-picker";
+
 import { useState } from "react";
 import { PresetChips } from "@/components/calculators/preset-chips";
 import type { CalculatorPreset } from "@/lib/calculators/frame";
@@ -104,13 +106,11 @@ export function RedundancyPayCalculator() {
             ["redundancyDate", "Redundancy relevant date"],
           ] as const
         ).map(([key, label]) => (
-          <TextField
+          <DatePicker
             key={key}
             label={label}
-            type="date"
-            clearable={false}
-            value={form[key]}
-            onChange={(event) => update(key, event.target.value)}
+            value={form[key] || null}
+            onChange={(value) => update(key, value ?? "")}
           />
         ))}
         <p className="text-footnote text-label-secondary">

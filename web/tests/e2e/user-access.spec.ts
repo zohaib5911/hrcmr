@@ -6,7 +6,7 @@
 import { expect, test } from "../support/fixtures";
 
 import { audit } from "../support/axe";
-import { MAILPIT } from "../support/accounts";
+import { API, csrfHeaders, MAILPIT } from "../support/accounts";
 
 async function open(page: import("@playwright/test").Page) {
   await page.goto("/company/users");
@@ -106,3 +106,41 @@ for (const colorScheme of ["light", "dark"] as const) {
     }
   });
 }
+
+test("linked employee action matches its accessible name in both themes and widths", async ({
+  page,
+}) => {
+  const headers = await csrfHeaders(page.request);
+  const made = await page.request.post(`${API}/employees`, {
+    headers,
+    data: {
+      first_name: "Amira",
+      last_name: "Hassan",
+      employee_number: "ACCESS-LINK",
+      email: "access-link@example.com",
+      hire_date: "2025-01-01",
+    },
+  });
+  expect(made.status(), await made.text()).toBe(201);
+  const employee = await made.json();
+  const users = await (await page.request.get(`${API}/users`)).json();
+  const me = users.users.find((user: { is_you: boolean }) => user.is_you);
+  const linked = await page.request.put(`${API}/users/${me.id}/employee`, {
+    headers,
+    data: { employee_id: employee.id },
+  });
+  expect(linked.status(), await linked.text()).toBe(200);
+  for (const colorScheme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme });
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await open(page);
+      const action = page.getByRole("button", {
+        name: "Change link for Amira Hassan",
+        exact: true,
+      });
+      await expect(action).toHaveText("Change link");
+      await audit(page, `${colorScheme} linked user at ${width}px`);
+    }
+  }
+});

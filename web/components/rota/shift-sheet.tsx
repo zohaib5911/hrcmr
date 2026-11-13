@@ -8,6 +8,8 @@ import { InlineConfirm } from "@/components/ui/inline-confirm";
 import { Select } from "@/components/ui/select";
 import { SheetContent } from "@/components/ui/sheet";
 import { TextArea } from "@/components/ui/text-area";
+import { TimePicker } from "@/components/ui/time-picker";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
@@ -143,15 +145,14 @@ export function RotaShiftSheet({
               }));
             }}
           />
-          <TextField
+          <DatePicker
             label="Shift date"
-            type="date"
             required
             min={week}
             max={addDays(week, 6)}
-            value={date}
-            onChange={(e) => {
-              setDate(e.target.value);
+            value={date || null}
+            onChange={(picked) => {
+              setDate(picked ?? "");
               setStartFold(undefined);
               setEndFold(undefined);
             }}
@@ -180,23 +181,21 @@ export function RotaShiftSheet({
             ))}
           </Select>
           <div className="grid grid-cols-2 gap-3">
-            <TextField
+            <TimePicker
               label="Starts"
-              type="time"
               required
-              value={start}
-              onChange={(e) => {
-                setStart(e.target.value);
+              value={start || null}
+              onChange={(picked) => {
+                setStart(picked ?? "");
                 setStartFold(undefined);
               }}
             />
-            <TextField
+            <TimePicker
               label="Finishes"
-              type="time"
               required
-              value={end}
-              onChange={(e) => {
-                setEnd(e.target.value);
+              value={end || null}
+              onChange={(picked) => {
+                setEnd(picked ?? "");
                 setEndFold(undefined);
               }}
             />

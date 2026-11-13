@@ -12,6 +12,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/icon";
 import { Menu, MenuContent, MenuItem, MenuTrigger } from "@/components/ui/menu";
 import { Sheet } from "@/components/ui/sheet";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { downloadBlob } from "@/lib/attendance";
@@ -259,14 +260,13 @@ export function RotaWorkspace({ initialWeek }: { initialWeek?: string }) {
           >
             Previous week
           </Button>
-          <TextField
+          <DatePicker
             label="Rota week containing"
-            type="date"
-            value={start}
+            value={start || null}
             disabled={busy}
-            onChange={(e) => {
-              if (e.target.value) {
-                setStart(startOfWeek(e.target.value));
+            onChange={(picked) => {
+              if (picked ?? "") {
+                setStart(startOfWeek(picked ?? ""));
                 setOffset(0);
               }
             }}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { SettingsAdmin } from "@/components/platform/settings-admin";
 import { platformApi, dataOrSessionRedirect, sessionStartPath } from "@/lib/platform/guard";
+import { AdminPage } from "@/components/platform/admin-page";
 export const metadata: Metadata = { title: "Settings", robots: { index: false, follow: false } };
 export default async function Page() {
   const api = await platformApi();
@@ -13,15 +14,13 @@ export default async function Page() {
     api.GET("/platform/context").catch(() => null),
   ]);
   return (
-    <main className="min-h-dvh bg-grouped p-5 sm:p-8">
-      <div className="mx-auto max-w-4xl">
-        <SettingsAdmin
-          terms={terms ? dataOrSessionRedirect(terms, "/settings") : null}
-          flags={flags ? dataOrSessionRedirect(flags, "/settings") : null}
-          announcements={announcements ? dataOrSessionRedirect(announcements, "/settings") : null}
-          owner={context ? (dataOrSessionRedirect(context, "/settings")?.owner ?? false) : false}
-        />
-      </div>
-    </main>
+    <AdminPage width="form">
+      <SettingsAdmin
+        terms={terms ? dataOrSessionRedirect(terms, "/settings") : null}
+        flags={flags ? dataOrSessionRedirect(flags, "/settings") : null}
+        announcements={announcements ? dataOrSessionRedirect(announcements, "/settings") : null}
+        owner={context ? (dataOrSessionRedirect(context, "/settings")?.owner ?? false) : false}
+      />
+    </AdminPage>
   );
 }

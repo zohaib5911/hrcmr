@@ -2,10 +2,11 @@
 
 import { PageHeader } from "@/components/app/page-header";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import { StatusChip } from "@/components/ui/status-chip";
+import { FilterDate } from "@/components/platform/filter-date";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { formatUk } from "@/lib/ui/dates";
@@ -33,7 +34,7 @@ export function CompaniesList({
     return `/companies?${query}`;
   };
   return (
-    <div className="mx-auto grid max-w-6xl gap-6">
+    <div className="grid gap-6">
       <PageHeader
         title="Companies"
         description="Search companies and review their access and platform actions."
@@ -54,18 +55,12 @@ export function CompaniesList({
             </option>
           ))}
         </Select>
-        <TextField
+        <FilterDate
           label="Created since"
           name="created_since"
-          type="date"
-          defaultValue={filters.created_since?.slice(0, 10)}
+          defaultValue={filters.created_since}
         />
-        <TextField
-          label="Active since"
-          name="active_since"
-          type="date"
-          defaultValue={filters.active_since?.slice(0, 10)}
-        />
+        <FilterDate label="Active since" name="active_since" defaultValue={filters.active_since} />
         <Button type="submit">Search</Button>
       </form>
       {!data ? (
@@ -74,7 +69,7 @@ export function CompaniesList({
         </Alert>
       ) : (
         <>
-          <p>{data.total} companies</p>
+          <p className="text-callout text-label-secondary">{data.total} companies</p>
           {data.items.length ? (
             <ul className="grid gap-3">
               {data.items.map((c) => (
@@ -82,10 +77,10 @@ export function CompaniesList({
                   <Card>
                     <CardBody className="flex flex-wrap items-center justify-between gap-3 py-4">
                       <div className="min-w-0 break-words">
-                        <a className="text-accent font-medium" href={`/companies/${c.id}`}>
+                        <a className="text-accent-text text-headline" href={`/companies/${c.id}`}>
                           {c.name}
                         </a>
-                        <p>{c.contact_email ?? c.slug}</p>
+                        <p className="text-callout text-label">{c.contact_email ?? c.slug}</p>
                         <p className="text-footnote text-label-secondary">
                           {c.plan} · {c.members} people · Created{" "}
                           {formatUk(c.created_at.slice(0, 10))}
@@ -100,16 +95,22 @@ export function CompaniesList({
               ))}
             </ul>
           ) : (
-            <p>No companies match these filters.</p>
+            <p className="text-callout text-label-secondary">No companies match these filters.</p>
           )}
-          <nav aria-label="Company pages" className="flex flex-wrap gap-4">
+          <nav aria-label="Company pages" className="flex flex-wrap gap-3">
             {filters.offset > 0 ? (
-              <a href={link(Math.max(0, filters.offset - 25))} className="text-accent">
+              <a
+                href={link(Math.max(0, filters.offset - 25))}
+                className={buttonVariants({ variant: "gray", size: "sm" })}
+              >
                 Previous
               </a>
             ) : null}
             {filters.offset + 25 < data.total ? (
-              <a href={link(filters.offset + 25)} className="text-accent">
+              <a
+                href={link(filters.offset + 25)}
+                className={buttonVariants({ variant: "gray", size: "sm" })}
+              >
                 Next
               </a>
             ) : null}

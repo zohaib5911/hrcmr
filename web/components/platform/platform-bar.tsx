@@ -1,3 +1,5 @@
+import { BrandLogo } from "@/components/brand-logo";
+
 /**
  * The red bar across every platform admin page (T17.1), so the admin tools are never mistaken for a
  * tenant page. It is a plain element, not a heading: each page keeps its own h1.
@@ -7,11 +9,14 @@
  */
 export function PlatformBar() {
   return (
-    <div
+    <header
       data-testid="platform-bar"
       className="bg-fixed-admin px-4 py-3 text-center text-sm font-semibold tracking-wide text-on-fixed"
     >
+      <span className="bg-elevated mr-3 inline-flex rounded-control px-2 py-1">
+        <BrandLogo />
+      </span>
       Platform admin
-    </div>
+    </header>
   );
 }

@@ -14,7 +14,10 @@ const OUT = finalQA
   : path.join(ROOT, process.env.DESIGN_AUDIT_STAGE ?? "before");
 const widths = finalQA ? [390, 768, 1280, 1920] : [390, 1280];
 type Screen = { source: string; route: string; group: string; key: string };
-const screens: Screen[] = JSON.parse(readFileSync(path.join(ROOT, "routes.json"), "utf8"));
+const onlyKeys = process.env.AUDIT_KEYS?.split(",");
+const screens: Screen[] = (
+  JSON.parse(readFileSync(path.join(ROOT, "routes.json"), "utf8")) as Screen[]
+).filter((s) => !onlyKeys || onlyKeys.includes(s.key));
 test.skip(!process.env.SCREENSHOTS, "Exhaustive design evidence is explicitly requested.");
 test.use({ storageState: { cookies: [], origins: [] } });
 

@@ -259,7 +259,7 @@ export function DeleteAccountPage({
             }
           }}
           title="Confirm it is you"
-          description="Confirm your password to include the data export."
+          description="Confirm your password to start deleting the company account."
           onSubmit={(event) => void confirmPassword(event)}
           busy={busy}
           problem={stepUpProblem}

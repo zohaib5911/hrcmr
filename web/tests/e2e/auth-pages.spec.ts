@@ -1,3 +1,4 @@
+import { brand } from "@brand";
 /**
  * The sign-in screens (plan T3.1), in a real browser against the production build: each one at the
  * four design widths in both themes has no sideways scroll, no console errors, and passes axe; and
@@ -8,6 +9,8 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { PAGES, answerApi } from "../support/auth-screens";
+import { expectBrandLogo } from "../support/brand";
+
 import { audit } from "../support/axe";
 
 // These are the screens for someone who is not signed in.
@@ -40,6 +43,7 @@ for (const colorScheme of ["light", "dark"] as const) {
           await page.goto("/login"); // any page on the site, so the mock knows the page's origin
           await answerApi(page);
           const problems = await open(page, screen.path, screen.heading);
+          await expectBrandLogo(page.locator("header"), colorScheme);
           if (screen.prepare) await screen.prepare(page);
           if (screen.then) {
             await expect(page.getByRole("heading", { level: 1, name: screen.then })).toBeVisible();
@@ -77,6 +81,7 @@ test("the keyboard reaches every control on the sign-in page in reading order", 
         return (
           label?.textContent ??
           element.getAttribute("aria-label") ??
+          element.querySelector("img")?.alt ??
           element.textContent ??
           ""
         )
@@ -87,7 +92,7 @@ test("the keyboard reaches every control on the sign-in page in reading order", 
   }
   expect(reached).toEqual([
     "Skip to content",
-    "stuffhub",
+    brand.name,
     "United Kingdom",
     "USAComing soon",
     "AustraliaComing soon",

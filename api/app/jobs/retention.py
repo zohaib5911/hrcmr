@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.ai.models import AiInteraction
 from app.db.base import Base
 from app.db.purge import mark_purge
+from app.modules.audit.service import AuditContext, record
 from app.modules.employees.models import Employee, EmployeeDocument
 from app.modules.exports.models import DataExport
 from app.modules.files.models import File
@@ -70,6 +71,7 @@ async def _evidence(db: AsyncSession, storage: Storage | None, now: datetime) ->
             continue
         await mark_purge(db, person.company_id)
         files: set[uuid.UUID | None] = set()
+        counts = {"rtw_checks": 0, "rtw_documents": 0, "sponsor_documents": 0}
         if anniversary(person.leave_date, 2) <= now.date():
             checks = (
                 (RTWCheck.company_id == person.company_id)
@@ -78,7 +80,8 @@ async def _evidence(db: AsyncSession, storage: Storage | None, now: datetime) ->
             )
             files.update((await db.scalars(select(RTWCheck.evidence_file_id).where(checks))).all())
             result = await db.execute(delete(RTWCheck).where(checks))
-            removed += result.rowcount  # type: ignore[attr-defined]
+            counts["rtw_checks"] = result.rowcount  # type: ignore[attr-defined]
+            removed += counts["rtw_checks"]
             docs = (
                 (EmployeeDocument.company_id == person.company_id)
                 & (EmployeeDocument.employee_id == person.id)
@@ -86,7 +89,8 @@ async def _evidence(db: AsyncSession, storage: Storage | None, now: datetime) ->
             )
             files.update((await db.scalars(select(EmployeeDocument.file_id).where(docs))).all())
             result = await db.execute(delete(EmployeeDocument).where(docs))
-            removed += result.rowcount  # type: ignore[attr-defined]
+            counts["rtw_documents"] = result.rowcount  # type: ignore[attr-defined]
+            removed += counts["rtw_documents"]
         sponsor = (SponsorDocument.company_id == person.company_id) & (
             SponsorDocument.employee_id == person.id
         )
@@ -101,10 +105,21 @@ async def _evidence(db: AsyncSession, storage: Storage | None, now: datetime) ->
                 (await db.scalars(select(SponsorDocument.evidence_file_id).where(sponsor))).all()
             )
             result = await db.execute(delete(SponsorDocument).where(sponsor))
-            removed += result.rowcount  # type: ignore[attr-defined]
+            counts["sponsor_documents"] = result.rowcount  # type: ignore[attr-defined]
+            removed += counts["sponsor_documents"]
         for ident in files:
             if ident is not None:
                 removed += await _remove_file(db, storage, ident)
+        if any(counts.values()):
+            await record(
+                db,
+                AuditContext(company_id=person.company_id, actor_user_id=None, actor_type="system"),
+                "employee.retention_purged",
+                entity_type="employee",
+                entity_id=person.id,
+                after=counts,
+                reason="Retention: RTW evidence employment + 2 years / sponsor records + 1 year",
+            )
     return removed
 
 

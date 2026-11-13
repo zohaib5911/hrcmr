@@ -15,12 +15,12 @@ import {
 } from "../../lib/design/catalog";
 import { composite, contrastRatio, parseComputedColour } from "../../lib/design/contrast";
 import { openDesign } from "../support/design-page";
-import { EXPECTED_DARK, EXPECTED_LIGHT } from "../support/expected-tokens";
+import { BRANDED_DARK, BRANDED_LIGHT } from "../support/expected-tokens";
 import { resolveColour } from "../support/colour";
 
 const THEMES = [
-  { theme: "light", expected: EXPECTED_LIGHT },
-  { theme: "dark", expected: EXPECTED_DARK },
+  { theme: "light", expected: BRANDED_LIGHT },
+  { theme: "dark", expected: BRANDED_DARK },
 ] as const;
 
 const themeSwitch = (page: Page) => page.getByRole("group", { name: "Colour theme" });
@@ -93,7 +93,7 @@ test.describe("every token, in both themes", () => {
         theme === "light" ? "rgba(120, 120, 128, 0.12)" : "rgba(120, 120, 128, 0.24)",
       );
       // A derived token shows its real result, not the formula.
-      await expect(shown("--accent-text")).toHaveText(theme === "light" ? "#0060C1" : "#2997FF");
+      await expect(shown("--accent-text")).toHaveText(theme === "light" ? "#5D22B8" : "#A78BFA");
     });
 
     test(`${theme}: every text and control pair meets WCAG AA as the browser resolves it`, async ({

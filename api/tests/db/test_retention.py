@@ -14,6 +14,7 @@ from app.ai.models import AiInteraction
 from app.db.base import Base
 from app.jobs.retention import anniversary, retention_purge_daily
 from app.jobs.scheduled import SCHEDULE
+from app.modules.audit.models import AuditEvent
 from app.modules.exports.models import DataExport
 from app.modules.identity.models import Session
 from tests.db.test_employee_documents import _employee
@@ -164,7 +165,7 @@ async def test_evidence_calendar_cutoffs_preserve_active_unknown_recent_and_shar
     rig: dict[str, Any],
 ) -> None:
     expired, gone = await _evidence(rig, rig["a"], "expired", left="2028-03-01")
-    recent, _ = await _evidence(rig, rig["a"], "recent", left="2028-03-02")
+    recent, _ = await _evidence(rig, rig["a"], "recent", left="2028-03-02", visa_end="2031-01-01")
     active, _ = await _evidence(rig, rig["a"], "active", left="2020-01-01", status="active")
     unknown, _ = await _evidence(rig, rig["a"], "unknown", left=None)
     other, _ = await _evidence(rig, rig["b"], "foreign", left="2029-03-02")
@@ -201,7 +202,37 @@ async def test_evidence_calendar_cutoffs_preserve_active_unknown_recent_and_shar
         assert (
             await c.scalar(text("select count(*) from employees where id=:e"), {"e": expired}) == 1
         )
+    async with AsyncSession(rig["owner"]) as db:
+        events = (
+            await db.scalars(
+                select(AuditEvent).where(AuditEvent.action == "employee.retention_purged")
+            )
+        ).all()
+        assert {event.entity_id for event in events} == {expired, shared}
+        expired_events = [event for event in events if event.entity_id == expired]
+        assert len(expired_events) == 1
+        event = expired_events[0]
+        assert event.company_id == rig["a"]
+        assert event.actor_user_id is None
+        assert event.actor_type == "system"
+        assert event.entity_type == "employee"
+        assert event.after == {"rtw_checks": 2, "rtw_documents": 1, "sponsor_documents": 1}
+        assert event.reason == (
+            "Retention: RTW evidence employment + 2 years / sponsor records + 1 year"
+        )
+        shared_event = next(event for event in events if event.entity_id == shared)
+        assert shared_event.after == {"rtw_checks": 2, "rtw_documents": 1, "sponsor_documents": 0}
+        event_ids = {event.id for event in events}
     assert await retention_purge_daily(ctx) == 0
+    async with AsyncSession(rig["owner"]) as db:
+        assert (
+            set(
+                await db.scalars(
+                    select(AuditEvent.id).where(AuditEvent.action == "employee.retention_purged")
+                )
+            )
+            == event_ids
+        )
     assert anniversary(date(2028, 2, 29), 1) == date(2029, 2, 28)
 
 

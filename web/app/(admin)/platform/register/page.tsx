@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { RegisterAdmin } from "@/components/platform/register-admin";
 import { platformApi, dataOrSessionRedirect, sessionStartPath } from "@/lib/platform/guard";
+import { AdminPage } from "@/components/platform/admin-page";
 
 export const metadata: Metadata = {
   title: "Sponsor register",
@@ -12,10 +13,8 @@ export default async function Page() {
   if (!api) redirect(sessionStartPath("/register"));
   const result = await api.GET("/platform/register/status").catch(() => null);
   return (
-    <main className="min-h-dvh bg-grouped p-5 sm:p-8">
-      <div className="mx-auto max-w-6xl">
-        <RegisterAdmin status={result ? dataOrSessionRedirect(result, "/register") : null} />
-      </div>
-    </main>
+    <AdminPage>
+      <RegisterAdmin status={result ? dataOrSessionRedirect(result, "/register") : null} />
+    </AdminPage>
   );
 }

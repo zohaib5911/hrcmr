@@ -4,11 +4,14 @@
  * flows hold up for a screen reader (landmarks, one heading, a skip link, named controls); and with
  * reduced motion nothing slides or zooms. The /design components are covered by design-a11y.spec.ts.
  */
-import { request as playwrightRequest, type Page } from "@playwright/test";
+import { request as playwrightRequest, type APIRequestContext, type Page } from "@playwright/test";
 
 import { API, createSignedInAdmin, csrfHeaders } from "../support/accounts";
+import { expectBrandLogo } from "../support/brand";
+
 import { audit } from "../support/axe";
 import { expect, test } from "../support/fixtures";
+import { ADMIN_HOST, ADMIN_ORIGIN, signInPlatformAdmin } from "../support/platform";
 
 /** Every signed-in page that takes no id. */
 const APP_PAGES = [
@@ -71,6 +74,18 @@ const PUBLIC_PAGES = [
   "/login",
   "/forgot-password",
   "/verify",
+  // Missing-token states are permanent CI coverage too.
+  "/setup",
+  "/accept-invite",
+  "/verify-email",
+  "/reset-password",
+  "/login/mfa",
+  "/mfa/enrol",
+  // Slugs from the T22.4 sweep; comparisons intentionally render the unpublished 404.
+  "/vs/example",
+  "/compare/hr",
+  "/resources/guides/right-to-work-checks",
+  "/sponsors/changes/2026-11-11",
   "/legal/privacy",
   "/legal/terms",
   "/resources",
@@ -99,14 +114,74 @@ const PUBLIC_PAGES = [
 ] as const;
 
 /** Opens a page and waits until its main heading is on screen. */
-async function open(page: Page, path: string) {
+async function open(page: Page, path: string, expectedStatus?: number) {
   const response = await page.goto(path);
-  expect(response?.status(), path).toBeLessThan(400);
+  if (expectedStatus) expect(response?.status(), path).toBe(expectedStatus);
+  else expect(response?.status(), path).toBeLessThan(400);
   await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
   // Axe reads what is on screen: wait for the data, not a loading skeleton or a half-enabled control.
   await expect(page.locator(".skeleton"), path).toHaveCount(0);
   // ...and for the page's own requests, which disable its controls while they run (busy).
   await page.waitForLoadState("networkidle");
+}
+
+/** T25.5 route acceptance: both audit widths, with no phase-gate screenshots. */
+async function auditAppWidths(page: Page, path: string, label: string) {
+  for (const width of [390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await open(page, path);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+      `${label} at ${width}px`,
+    ).toBeLessThanOrEqual(0);
+    await audit(page, `${label} at ${width}px`);
+  }
+}
+
+/** Fresh records, using the same real API setup as the T22.4 route sweep. */
+async function createRecruitment(request: APIRequestContext, colorScheme: string) {
+  const headers = await csrfHeaders(request);
+  const post = async (path: string, data: unknown) => {
+    const response = await request.post(`${API}${path}`, { headers, data });
+    expect(response.ok(), await response.text()).toBeTruthy();
+    return response.json();
+  };
+  const requisition = await post("/requisitions", {
+    job_title: "Care coordinator",
+    headcount: 2,
+    budget_from: "28000",
+    budget_to: "32000",
+    budget_per: "year",
+  });
+  const approved = await request.patch(`${API}/requisitions/${requisition.id}/status`, {
+    headers,
+    data: { status: "open" },
+  });
+  expect(approved.ok(), await approved.text()).toBeTruthy();
+  const posting = await post("/postings", {
+    requisition_id: requisition.id,
+    title: "Care coordinator",
+    visibility: "external",
+    vacancies: 2,
+    description: "Help our care team plan reliable support for local families.",
+  });
+  const opened = await request.patch(`${API}/postings/${posting.id}/status`, {
+    headers,
+    data: { status: "open" },
+  });
+  expect(opened.ok(), await opened.text()).toBeTruthy();
+  const careers = new URL((await opened.json()).public_link).pathname;
+  const candidate = await post("/candidates", {
+    first_name: "Priya",
+    last_name: "Shah",
+    email: `priya.${colorScheme}@example.com`,
+    source: "Referral",
+  });
+  const application = await post("/applications", {
+    candidate_id: candidate.id,
+    posting_id: posting.id,
+  });
+  return { careers, candidate, application };
 }
 
 for (const colorScheme of ["light", "dark"] as const) {
@@ -116,8 +191,7 @@ for (const colorScheme of ["light", "dark"] as const) {
     test("every signed-in page passes axe", async ({ page }) => {
       test.setTimeout(APP_PAGES.length * 15_000);
       for (const path of APP_PAGES) {
-        await open(page, path);
-        await audit(page, `${colorScheme} ${path}`);
+        await auditAppWidths(page, path, `${colorScheme} ${path}`);
       }
     });
 
@@ -134,8 +208,70 @@ for (const colorScheme of ["light", "dark"] as const) {
       });
       expect(made.status(), await made.text()).toBe(201);
       const { id } = (await made.json()) as { id: string };
-      await open(page, `/employees/${id}`);
-      await audit(page, `${colorScheme} employee profile`);
+      await auditAppWidths(page, `/employees/${id}`, `${colorScheme} employee profile`);
+      // The last dynamic app family in the design inventory: a real assigned course.
+      const headers = await csrfHeaders(page.request);
+      const users = await (await page.request.get(`${API}/users`)).json();
+      const me = users.users.find((user: { is_you: boolean }) => user.is_you);
+      const linked = await page.request.put(`${API}/users/${me.id}/employee`, {
+        headers,
+        data: { employee_id: id },
+      });
+      expect(linked.status(), await linked.text()).toBe(200);
+      const courses = await (await page.request.get(`${API}/learning/courses`)).json();
+      const course = courses.find((item: { slug: string }) => item.slug === "e2e-test-course");
+      expect(course).toBeTruthy();
+      const assigned = await page.request.post(`${API}/learning/assignments`, {
+        headers,
+        data: { course_ids: [course.id], employee_ids: [id], due_on: "2026-12-01" },
+      });
+      expect(assigned.status(), await assigned.text()).toBe(201);
+      const own = await (await page.request.get(`${API}/learning/assignments/own`)).json();
+      expect(own).toHaveLength(1);
+      await auditAppWidths(page, `/learning/assignments/${own[0].id}`, `${colorScheme} learner`);
+    });
+
+    test("policy and recruitment details pass axe", async ({ page, browser }) => {
+      test.setTimeout(90_000);
+      const policy = await page.request.post(`${API}/policies`, {
+        headers: await csrfHeaders(page.request),
+        data: {
+          title: "Staff handbook 2026",
+          category: "employee_handbook",
+          confirmation_mode: "accept",
+          audience_type: "everyone",
+          accept_within_days: 14,
+        },
+      });
+      expect(policy.status(), await policy.text()).toBe(201);
+      const { id } = await policy.json();
+      const { careers, candidate, application } = await createRecruitment(
+        page.request,
+        colorScheme,
+      );
+      for (const path of [
+        `/policies/${id}`,
+        `/recruitment/candidates/${candidate.id}`,
+        `/recruitment/applications/${application.id}`,
+      ]) {
+        await auditAppWidths(page, path, `${colorScheme} ${path}`);
+      }
+      // /careers/[company] and /careers/[company]/[posting] must work for an applicant
+      // without the company administrator's cookies.
+      const context = await browser.newContext({
+        baseURL: new URL(page.url()).origin,
+        storageState: { cookies: [], origins: [] },
+        colorScheme,
+      });
+      try {
+        const publicPage = await context.newPage();
+        for (const path of [careers.split("/").slice(0, 3).join("/"), careers]) {
+          await open(publicPage, path);
+          await audit(publicPage, `${colorScheme} ${path}`);
+        }
+      } finally {
+        await context.close();
+      }
     });
 
     test.describe("signed out", () => {
@@ -143,14 +279,108 @@ for (const colorScheme of ["light", "dark"] as const) {
 
       test("every public page passes axe", async ({ page }) => {
         test.setTimeout(PUBLIC_PAGES.length * 15_000);
-        for (const path of PUBLIC_PAGES) {
-          await open(page, path);
+        // The sweep's stable-ltd slug is fixed, but its id belongs to each fresh test database.
+        const response = await page.request.get(`${API}/public/register/sitemap/0`);
+        expect(response.ok(), await response.text()).toBeTruthy();
+        const { items } = (await response.json()) as {
+          items: { stable_id: string; slug: string }[];
+        };
+        const sponsor = items.find((item) => item.slug === "stable-ltd");
+        expect(sponsor, "the reference register includes Stable Ltd").toBeDefined();
+        const profile = `/sponsors/profile/${sponsor!.stable_id}/${sponsor!.slug}`;
+        for (const path of [...PUBLIC_PAGES, profile]) {
+          const unpublished = path === "/vs/example" || path === "/compare/hr";
+          await open(page, path, unpublished ? 404 : undefined);
           await audit(page, `${colorScheme} ${path}`);
         }
       });
     });
   });
 }
+
+/** Admin-host paths are rewritten to /platform internally by the proxy. */
+const ADMIN_PAGES = [
+  "/",
+  "/audit",
+  "/companies",
+  "/contact",
+  "/courses",
+  "/dossier-links",
+  "/jobs",
+  "/queues",
+  "/register",
+  "/rules",
+  "/settings",
+  "/subscriptions",
+  "/templates",
+  "/users",
+] as const;
+
+test.describe("platform admin", () => {
+  // The production CSP on the local HTTP admin host otherwise blocks axe injection.
+  test.use({ bypassCSP: true, storageState: { cookies: [], origins: [] } });
+
+  for (const colorScheme of ["light", "dark"] as const) {
+    test.describe(`${colorScheme} theme`, () => {
+      test.use({ colorScheme });
+
+      test("every admin page and a company detail pass axe", async ({ page }) => {
+        test.setTimeout((ADMIN_PAGES.length + 1) * 15_000);
+        const account = await signInPlatformAdmin(page, "owner");
+        // Legacy course/rule/dossier SSR also needs the tenant session on the admin host.
+        const tenantCookie = (await page.context().cookies(API)).find(
+          (cookie) => cookie.name === "brand_session",
+        );
+        expect(tenantCookie).toBeDefined();
+        await page.context().addCookies([{ ...tenantCookie!, domain: ADMIN_HOST, path: "/" }]);
+        const list = await page.request.get(`${API}/platform/companies`, {
+          params: { q: account.company },
+        });
+        expect(list.status(), await list.text()).toBe(200);
+        const companies = (await list.json()).items as { id: string; contact_email: string }[];
+        const company =
+          companies.find((item) => item.contact_email === account.email) ?? companies[0];
+        expect(company, "the company search returns a detail page to audit").toBeDefined();
+
+        for (const path of [...ADMIN_PAGES, `/companies/${company!.id}`]) {
+          await test.step(path, async () => {
+            await auditAppWidths(page, `${ADMIN_ORIGIN}${path}`, `${colorScheme} platform ${path}`);
+          });
+        }
+        // These two entry states are checked as SSR on local HTTP. Keep scripts blocked so the
+        // automatic cross-site start cannot navigate away; hydrated HTTPS checks remain at P25.
+        await page.route("**/_next/**", (route) =>
+          route.request().resourceType() === "script" ? route.abort() : route.continue(),
+        );
+        for (const path of ["/session", "/session-required?code=UNREACHABLE"]) {
+          await auditAppWidths(page, `${ADMIN_ORIGIN}${path}`, `${colorScheme} platform ${path}`);
+        }
+      });
+
+      test("the session refusal and pending start pages pass axe", async ({ page }) => {
+        await open(page, `${ADMIN_ORIGIN}/session-required?code=UNAUTHENTICATED`);
+        await expect(
+          page.getByRole("heading", { level: 1, name: "Platform session not started" }),
+        ).toBeVisible();
+        await expectBrandLogo(page.getByTestId("platform-bar"), colorScheme);
+        await audit(page, `${colorScheme} platform /session-required`);
+
+        // Hold the start's auth bootstrap so the page stays on its pending status and cannot navigate.
+        await page.route(/\/(health|auth\/platform-session)(\?|$)/, () => new Promise(() => {}));
+        const response = await page.goto(`${ADMIN_ORIGIN}/session?next=%2F`);
+        expect(response?.status()).toBeLessThan(400);
+        await expect(
+          page.getByRole("heading", { level: 1, name: "Platform session" }),
+        ).toBeVisible();
+        await expect(page.getByRole("status")).toHaveText("Starting a platform session…");
+        await expect(page).toHaveURL(/\/session\?next=%2F$/);
+        await expectBrandLogo(page.getByTestId("platform-bar"), colorScheme);
+        await audit(page, `${colorScheme} platform /session`);
+        await page.unrouteAll({ behavior: "ignoreErrors" });
+      });
+    });
+  }
+});
 
 /** What a screen reader meets first on the main flows: a skip link, the landmarks, one h1, named controls. */
 const MAIN_FLOWS = ["/dashboard", "/employees", "/my-leave", "/rota", "/sponsor-compliance"];

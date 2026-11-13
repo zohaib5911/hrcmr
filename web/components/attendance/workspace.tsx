@@ -14,6 +14,7 @@ import { Select } from "@/components/ui/select";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { StatusChip } from "@/components/ui/status-chip";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { STATUS, type Attendance, type Person, type Status } from "@/lib/attendance";
@@ -248,22 +249,20 @@ export function AttendanceWorkspace({
                 { value: "custom", label: "Custom" },
               ]}
             />
-            <TextField
+            <DatePicker
               label={range === "custom" ? "Start date" : "Selected day"}
-              type="date"
-              value={on}
-              onChange={(e) => {
-                if (parseIso(e.target.value)) setOn(e.target.value);
+              value={on || null}
+              onChange={(picked) => {
+                if (parseIso(picked ?? "")) setOn(picked ?? "");
               }}
             />
             {range === "custom" && (
-              <TextField
+              <DatePicker
                 label="End date"
-                type="date"
-                min={on}
-                value={customEnd}
-                onChange={(e) => {
-                  if (parseIso(e.target.value)) setCustomEnd(e.target.value);
+                min={on || undefined}
+                value={customEnd || null}
+                onChange={(picked) => {
+                  if (parseIso(picked ?? "")) setCustomEnd(picked ?? "");
                 }}
               />
             )}

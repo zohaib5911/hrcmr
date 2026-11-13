@@ -75,6 +75,11 @@ interface DataTableProps<Row> {
   /** Adds an Export button. It is given the rows in the order shown and the columns that are visible. */
   onExport?: (rows: readonly Row[], columns: readonly Column<Row>[]) => void;
   pageSize?: number;
+  /**
+   * Draw the page controls under the table (the default). Turn off when the page itself pages on the
+   * server and passes at most `pageSize` rows, so the screen does not show two pagers.
+   */
+  pager?: boolean;
   /** Above this many rows the table scrolls and draws only the rows in view, instead of paging. */
   virtualiseAfter?: number;
   defaultSort?: { column: string; direction: "asc" | "desc" };
@@ -134,6 +139,7 @@ export function DataTable<Row>({
   rowMenu,
   onExport,
   pageSize = 25,
+  pager = true,
   virtualiseAfter = 200,
   defaultSort,
   className,
@@ -336,36 +342,40 @@ export function DataTable<Row>({
     </div>
   );
 
-  const footer = virtual ? null : (
-    <nav aria-label={`${caption}: pages`} className="flex items-center justify-between gap-3 pt-3">
-      <p className="text-callout text-label-secondary tabular-nums">
-        {sorted.length === 0
-          ? "0 rows"
-          : `${currentPage * pageSize + 1}–${currentPage * pageSize + shown.length} of ${sorted.length}`}
-      </p>
-      <div className="flex items-center gap-1">
-        <IconButton
-          label="Previous page"
-          size="sm"
-          disabled={currentPage === 0}
-          onClick={() => setPage(currentPage - 1)}
-        >
-          <Icon icon={ChevronLeft} size={20} />
-        </IconButton>
-        <span className="text-callout text-label-secondary px-1 tabular-nums">
-          Page {currentPage + 1} of {pageCount}
-        </span>
-        <IconButton
-          label="Next page"
-          size="sm"
-          disabled={currentPage >= pageCount - 1}
-          onClick={() => setPage(currentPage + 1)}
-        >
-          <Icon icon={ChevronRight} size={20} />
-        </IconButton>
-      </div>
-    </nav>
-  );
+  const footer =
+    virtual || !pager ? null : (
+      <nav
+        aria-label={`${caption}: pages`}
+        className="flex items-center justify-between gap-3 pt-3"
+      >
+        <p className="text-callout text-label-secondary tabular-nums">
+          {sorted.length === 0
+            ? "0 rows"
+            : `${currentPage * pageSize + 1}–${currentPage * pageSize + shown.length} of ${sorted.length}`}
+        </p>
+        <div className="flex items-center gap-1">
+          <IconButton
+            label="Previous page"
+            size="sm"
+            disabled={currentPage === 0}
+            onClick={() => setPage(currentPage - 1)}
+          >
+            <Icon icon={ChevronLeft} size={20} />
+          </IconButton>
+          <span className="text-callout text-label-secondary px-1 tabular-nums">
+            Page {currentPage + 1} of {pageCount}
+          </span>
+          <IconButton
+            label="Next page"
+            size="sm"
+            disabled={currentPage >= pageCount - 1}
+            onClick={() => setPage(currentPage + 1)}
+          >
+            <Icon icon={ChevronRight} size={20} />
+          </IconButton>
+        </div>
+      </nav>
+    );
 
   if (loading) {
     return (

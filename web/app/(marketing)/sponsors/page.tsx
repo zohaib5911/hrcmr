@@ -1,3 +1,4 @@
+import { PublicContentFrame, PublicLead } from "@/components/marketing/public-content";
 import { RegisterExplorer } from "@/components/register/explorer";
 import { pageMetadata } from "@/lib/seo";
 
@@ -9,14 +10,14 @@ export const metadata = pageMetadata(
 
 export default function Page() {
   return (
-    <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
+    <PublicContentFrame>
       <header className="mb-8 max-w-3xl">
         <p className="text-accent-text text-subheadline mb-2">Public sponsor register</p>
         <h1 className="text-large-title text-label">Explore the UK sponsor register</h1>
-        <p className="text-label-secondary text-callout mt-3">
+        <PublicLead className="mt-3">
           Find licensed sponsors and see how the register changes over time. We are independent of
           the Home Office. A licence does not mean an employer is hiring.
-        </p>
+        </PublicLead>
       </header>
       <RegisterExplorer />
       <p className="text-label-secondary text-footnote mt-10">
@@ -31,6 +32,6 @@ export default function Page() {
         ratings use the selected publication. An unknown placement or industry means no confident
         match is available.
       </p>
-    </div>
+    </PublicContentFrame>
   );
 }

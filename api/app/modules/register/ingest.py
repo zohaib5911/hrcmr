@@ -23,7 +23,8 @@ if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
 
 PAGE = "https://www.gov.uk/government/publications/register-of-licensed-sponsors-workers"
-HOSTS = {"www.gov.uk", "assets.publishing.service.gov.uk"}
+ASSETS_HOST = "assets.publishing.service.gov.uk"
+HOSTS = {"www.gov.uk", ASSETS_HOST}
 HEADERS = ("Organisation Name", "Town/City", "County", "Type & Rating", "Route")
 
 
@@ -48,7 +49,11 @@ class Links(HTMLParser):
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         href = dict(attrs).get("href")
         if tag == "a" and href and urlsplit(href).path.lower().endswith(".csv"):
-            self.urls.append(allowed(urljoin(PAGE, href)))
+            url = allowed(urljoin(PAGE, href))
+            # The attachment itself is served from the assets host. GOV.UK also links a
+            # "/csv-preview/..." page for the same file on www.gov.uk, which is not the data.
+            if urlsplit(url).hostname == ASSETS_HOST:
+                self.urls.append(url)
 
 
 def discover(html: str) -> str:

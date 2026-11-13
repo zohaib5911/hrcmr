@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { SubscriptionsAdmin } from "@/components/platform/subscriptions-admin";
 import { platformApi, sessionStartPath } from "@/lib/platform/guard";
 import { isPlatformOwner } from "@/lib/platform/owner";
+import { AdminPage } from "@/components/platform/admin-page";
 
 export const metadata: Metadata = {
   title: "Subscriptions",
@@ -15,10 +16,8 @@ export default async function Page() {
   if (!api) redirect(sessionStartPath("/subscriptions"));
   const isOwner = await isPlatformOwner(api, "/subscriptions");
   return (
-    <main className="min-h-dvh bg-grouped p-5 sm:p-8">
-      <div className="mx-auto max-w-6xl">
-        <SubscriptionsAdmin isOwner={isOwner} />
-      </div>
-    </main>
+    <AdminPage>
+      <SubscriptionsAdmin isOwner={isOwner} />
+    </AdminPage>
   );
 }

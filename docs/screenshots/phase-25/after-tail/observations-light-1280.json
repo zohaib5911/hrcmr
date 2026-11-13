@@ -1,0 +1,225 @@
+[
+  {
+    "source": "web/app/design/marketing/page.dev.tsx",
+    "route": "/design/marketing",
+    "group": "dev",
+    "key": "dev-design-marketing",
+    "url": "http://localhost:3101/design/marketing",
+    "status": 200,
+    "filename": "dev-design-marketing-light-1280.png",
+    "title": "Design: marketing | StuffHub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Simple pricing",
+        "fontSize": "73.92px",
+        "lineHeight": "77.616px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [],
+    "smallTargets": [],
+    "errors": [],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif",
+    "axe": []
+  },
+  {
+    "source": "web/app/design/page.dev.tsx",
+    "route": "/design",
+    "group": "dev",
+    "key": "dev-design",
+    "url": "http://localhost:3101/design",
+    "status": 200,
+    "filename": "dev-design-light-1280.png",
+    "title": "Design tokens | StuffHub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Design tokens",
+        "fontSize": "34px",
+        "lineHeight": "41px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [
+      {
+        "tag": "NAV",
+        "text": "TokensButtonsInputsChoicesFilesLayersFeedbackData",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "rgba(246, 246, 248, 0.72)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "1px",
+        "shadow": "none"
+      },
+      {
+        "tag": "DIV",
+        "text": "Sidebar and toolbar material",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "background": "rgba(246, 246, 248, 0.72)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "none"
+      },
+      {
+        "tag": "DIV",
+        "text": "Sheet and popover material",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "background": "color(srgb 1 1 1 / 0.92)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.06) 0px 4px 12px 0px, rgba(0, 0, 0, 0.04) 0px 1px 3px 0px"
+      },
+      {
+        "tag": "DIV",
+        "text": "Sidebar and toolbar material",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "background": "rgba(28, 28, 30, 0.72)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "none"
+      },
+      {
+        "tag": "DIV",
+        "text": "Sheet and popover material",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "weight": "400",
+        "background": "color(srgb 0.109804 0.109804 0.117647 / 0.92)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px"
+      }
+    ],
+    "smallTargets": [
+      {
+        "text": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "text": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "text": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "text": "",
+        "width": 51,
+        "height": 31
+      },
+      {
+        "text": "",
+        "width": 51,
+        "height": 31
+      },
+      {
+        "text": "",
+        "width": 51,
+        "height": 31
+      },
+      {
+        "text": "",
+        "width": 20,
+        "height": 20
+      },
+      {
+        "text": "",
+        "width": 20,
+        "height": 20
+      },
+      {
+        "text": "",
+        "width": 20,
+        "height": 20
+      },
+      {
+        "text": "",
+        "width": 20,
+        "height": 20
+      },
+      {
+        "text": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "text": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "text": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "text": "View all",
+        "width": 54,
+        "height": 20
+      },
+      {
+        "text": "Select all rows on this page",
+        "width": 20,
+        "height": 20
+      }
+    ],
+    "errors": [
+      "2 checks expire in the next 28 days.Grace Hopper (7 days) and Alan Turing (21 days).Review them",
+      "Payment failed.We will try again on 3 Nov 2026. Update your card to avoid losing access.",
+      "Something went wrongWe could not load your employees. Check your connection and try again.Request ID req_01JF3K9X2MCopyTry again"
+    ],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif",
+    "axe": []
+  },
+  {
+    "source": "web/app/verify/page.tsx",
+    "route": "/verify",
+    "group": "public",
+    "key": "public-verify",
+    "url": "http://127.0.0.1:3100/verify",
+    "status": 200,
+    "filename": "public-verify-light-1280.png",
+    "title": "Check a certificate | StuffHub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Check a certificate",
+        "fontSize": "34px",
+        "lineHeight": "41px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [],
+    "smallTargets": [],
+    "errors": [],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif",
+    "axe": []
+  }
+]

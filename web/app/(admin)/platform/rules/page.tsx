@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { RulesEditor } from "@/components/platform/rules-editor";
 import { serverApi } from "@/lib/auth/server";
+import { AdminPage } from "@/components/platform/admin-page";
 
 export const metadata: Metadata = {
   title: "SOC rules",
@@ -15,10 +16,8 @@ export default async function Page() {
   const { data } = await client.GET("/platform/rules");
   if (!data) notFound();
   return (
-    <main className="min-h-dvh bg-grouped p-5 sm:p-8">
-      <div className="mx-auto max-w-6xl">
-        <RulesEditor versions={data.items} />
-      </div>
-    </main>
+    <AdminPage>
+      <RulesEditor versions={data.items} />
+    </AdminPage>
   );
 }

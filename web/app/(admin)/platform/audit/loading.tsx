@@ -1,7 +1,5 @@
+import { AdminPageLoading } from "@/components/platform/admin-page";
+
 export default function Loading() {
-  return (
-    <p role="status" className="p-8">
-      Loading…
-    </p>
-  );
+  return <AdminPageLoading label="Loading the audit log…" />;
 }

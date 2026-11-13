@@ -1,3 +1,5 @@
+import { brand } from "@brand";
+
 /**
  * The colour tokens the design plan (section 5.3) asks for, with the few documented changes made so
  * that every pair passes WCAG AA. Shared by the unit tests (which check globals.css) and the browser
@@ -115,3 +117,16 @@ const expected = (
 
 export const EXPECTED_LIGHT = expected(PLAN_LIGHT, DEVIATIONS.light, ADDED_LIGHT);
 export const EXPECTED_DARK = expected(PLAN_DARK, DEVIATIONS.dark, ADDED_DARK);
+
+export const BRANDED_LIGHT = {
+  ...EXPECTED_LIGHT,
+  "--accent": brand.colours.accent,
+  "--accent-pressed": `color-mix(in srgb, ${brand.colours.accent} 86%, black)`,
+  "--accent-text": `color-mix(in srgb, ${brand.colours.accent} 85%, black)`,
+};
+export const BRANDED_DARK = {
+  ...EXPECTED_DARK,
+  "--accent": brand.colours.accentDark,
+  "--accent-pressed": `color-mix(in srgb, ${brand.colours.accentDark} 86%, black)`,
+  "--accent-text": brand.colours.accentDark,
+};

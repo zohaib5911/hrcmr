@@ -1,3 +1,5 @@
+import { PageHeader } from "@/components/app/page-header";
+import { AdminPage } from "@/components/platform/admin-page";
 import { SessionStart } from "@/components/platform/session-start";
 import { safeNextPath } from "@/lib/platform/session";
 
@@ -12,8 +14,9 @@ export default async function SessionPage({
 }) {
   const { next } = await searchParams;
   return (
-    <main className="mx-auto max-w-xl px-4 py-16">
+    <AdminPage width="narrow" className="pt-10">
+      <PageHeader title="Platform session" />
       <SessionStart next={safeNextPath(next ?? null)} />
-    </main>
+    </AdminPage>
   );
 }

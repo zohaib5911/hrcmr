@@ -25,7 +25,7 @@ export default async function Page() {
       />
       <div className="mx-auto mt-10 max-w-3xl overflow-x-auto">
         {!data || data.bulletins.length === 0 ? (
-          <p className="text-body text-label-secondary">No publications have been recorded yet.</p>
+          <p className="text-lead text-label-secondary">No publications have been recorded yet.</p>
         ) : (
           <table className="text-body w-full text-left">
             <caption className="sr-only">Changes by publication date</caption>

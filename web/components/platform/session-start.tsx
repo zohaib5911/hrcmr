@@ -58,7 +58,7 @@ export function SessionStart({
     });
   }, [next, run, navigate]);
   return (
-    <p role="status" className="text-body">
+    <p role="status" className="mt-4 text-body">
       Starting a platform session…
     </p>
   );

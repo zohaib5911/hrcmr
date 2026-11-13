@@ -21,7 +21,8 @@ if TYPE_CHECKING:
 
 LAYOUTS = Path(__file__).parent / "layouts"
 MAX_VALUE_LENGTH = 300
-ACCENT = "#0062c4"
+ACCENT = "#6D28D9"
+ACCENT_DARK = "#A78BFA"
 
 
 class TemplateError(ValueError):
@@ -404,6 +405,7 @@ def render(template: str, data: dict[str, str], settings: Settings) -> Rendered:
     context = {
         "brand_name": settings.brand_name,
         "accent": ACCENT,
+        "accent_dark": ACCENT_DARK,
         "year": datetime.now(UTC).year,
         "support_email": common["support_email"],
         "web_origin": settings.web_origin,

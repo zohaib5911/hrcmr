@@ -1,11 +1,14 @@
 "use client";
 
+import { PublicDate } from "@/components/marketing/public-content";
+
+import { DatePicker } from "@/components/ui/date-picker";
+
 import { useMemo, useState } from "react";
 
 import { PresetChips } from "@/components/calculators/preset-chips";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
-import { TextField } from "@/components/ui/text-field";
 import type { CalculatorPreset } from "@/lib/calculators/frame";
 import {
   calculateDeadline,
@@ -79,13 +82,11 @@ export function SponsorReportingDeadlineCalculator() {
             </option>
           ))}
         </Select>
-        <TextField
+        <DatePicker
           label="Event date"
-          type="date"
-          clearable={false}
           hint="The date the event happened, or the date you became aware of it for organisation changes."
-          value={form.eventDate}
-          onChange={(event) => update("eventDate", event.target.value)}
+          value={form.eventDate || null}
+          onChange={(value) => update("eventDate", value ?? "")}
         />
         <h2 className="text-title-2 text-label">
           <span className="text-accent-text">2.</span> Where you are
@@ -132,7 +133,9 @@ export function SponsorReportingDeadlineCalculator() {
                 <>
                   <div>
                     <dt className="font-semibold">Latest date to report</dt>
-                    <dd>{result.deadline}</dd>
+                    <dd>
+                      <PublicDate value={result.deadline} />
+                    </dd>
                   </div>
                   <div>
                     <dt className="font-semibold">Working days left</dt>

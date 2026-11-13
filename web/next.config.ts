@@ -20,6 +20,8 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: repoRoot,
   // Downloads read reviewed documents from disk in the standalone server.
   outputFileTracingIncludes: {
+    "/opengraph-image": ["./public/brand/logo.svg"],
+    "/clock/icon": ["./public/brand/clock-*.png"],
     "/resources/templates/download/*": ["./content/templates/*"],
   },
   turbopack: { root: repoRoot },

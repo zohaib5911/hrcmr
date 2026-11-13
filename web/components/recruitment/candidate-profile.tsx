@@ -12,7 +12,7 @@ import { FileDrop } from "@/components/ui/file-drop";
 import { Select } from "@/components/ui/select";
 import { StatusChip } from "@/components/ui/status-chip";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TextField } from "@/components/ui/text-field";
+import { DatePicker } from "@/components/ui/date-picker";
 import { useToast } from "@/components/ui/toast";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
@@ -245,13 +245,12 @@ function RtwPanel({
               </option>
             ))}
           </Select>
-          <TextField
+          <DatePicker
             label="Date of the check"
-            type="date"
             required
             max={new Date().toISOString().slice(0, 10)}
-            value={checkDate}
-            onChange={(e) => setCheckDate(e.target.value)}
+            value={checkDate || null}
+            onChange={(picked) => setCheckDate(picked ?? "")}
             error={problem?.field === "check_date" ? problem.message : undefined}
           />
           <Select

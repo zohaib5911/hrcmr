@@ -1,3 +1,4 @@
+import { brand } from "@brand";
 /**
  * The signed-in app's frame (plan T1.3), in a real browser against the PRODUCTION build: layout at
  * the four design widths in both themes, accessibility, the collapsing sidebar (including that the
@@ -8,6 +9,8 @@ import type { Page } from "@playwright/test";
 import { expect, test } from "../support/fixtures";
 
 import { NAV_GROUPS, NAV_ITEMS } from "../../lib/navigation";
+import { expectBrandLogo } from "../support/brand";
+
 import { audit } from "../support/axe";
 
 const WIDTHS = [390, 768, 1280, 1920] as const;
@@ -60,7 +63,10 @@ for (const colorScheme of THEMES) {
           await expect(page.getByRole("navigation", { name: "Primary" })).toBeVisible({
             visible: !wide,
           });
-          if (wide) expect(await widthOf(page, "#app-sidebar")).toBe(260);
+          if (wide) {
+            expect(await widthOf(page, "#app-sidebar")).toBe(260);
+            await expectBrandLogo(sidebar(page), colorScheme);
+          }
         });
 
         test("has no accessibility violations", async ({ page }) => {
@@ -177,7 +183,7 @@ test.describe("navigation", () => {
     const crumbs = page.getByRole("navigation", { name: "Breadcrumb" });
     await expect(crumbs).toContainText("Compliance");
     await expect(crumbs.getByRole("link", { name: "Sponsor compliance" })).toBeVisible();
-    await expect(page).toHaveTitle("Compliance reminders | stuffhub");
+    await expect(page).toHaveTitle(`Compliance reminders | ${brand.name}`);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Compliance reminders");
   });
 
@@ -319,6 +325,7 @@ const BUILT = new Set([
   "my-work-log",
   "my-shifts",
   "billing",
+  "profile",
 ]);
 
 test.describe("every page in the sidebar", () => {
@@ -331,12 +338,43 @@ test.describe("every page in the sidebar", () => {
       if (!BUILT.has(item.id)) {
         await expect(page.getByRole("heading", { level: 2, name: item.emptyTitle })).toBeVisible();
       }
-      await expect(page).toHaveTitle(`${title} | stuffhub`);
+      await expect(page).toHaveTitle(`${title} | ${brand.name}`);
       await expect(
         page
           .getByRole("navigation", { name: "Main" })
           .getByRole("link", { name: item.label, exact: true }),
       ).toHaveAttribute("aria-current", "page");
     });
+  }
+});
+
+test("the brand icons and social image are served by the production build", async ({
+  page,
+  request,
+}) => {
+  await page.goto("/clock");
+  const manifest = await request.get("/clock/manifest.webmanifest");
+  expect(manifest.status()).toBe(200);
+  const data = await manifest.json();
+  expect(data.theme_color).toBe(brand.colours.accent);
+  expect(data.icons).toHaveLength(4);
+  for (const icon of data.icons) {
+    const response = await request.get(icon.src);
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toContain("image/png");
+  }
+  for (const file of [
+    "/icon.png",
+    "/icon1.png",
+    "/apple-icon.png",
+    "/opengraph-image",
+    "/brand/logo-email.png",
+    "/clock/icon?size=192",
+    "/clock/icon?size=512",
+  ]) {
+    const response = await request.get(file);
+    expect(response.status(), file).toBe(200);
+    expect(response.headers()["content-type"], file).toContain("image/png");
+    expect((await response.body()).subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
   }
 });

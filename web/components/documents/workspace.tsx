@@ -16,6 +16,7 @@ import { FileDrop } from "@/components/ui/file-drop";
 import { LetterDraftSheet } from "@/components/documents/letter-draft-sheet";
 import { Select } from "@/components/ui/select";
 import { StatusChip } from "@/components/ui/status-chip";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TextField } from "@/components/ui/text-field";
 import { useToast } from "@/components/ui/toast";
 import type { components } from "@/lib/api/client";
@@ -439,11 +440,10 @@ function DocumentForm({
             </option>
           ))}
         </Select>
-        <TextField
+        <DatePicker
           label="Next review date (optional)"
-          type="date"
-          value={review}
-          onChange={(e) => setReview(e.target.value)}
+          value={review || null}
+          onChange={(picked) => setReview(picked ?? "")}
           hint="Flagged when overdue or due within 30 days."
         />
         {item ? (

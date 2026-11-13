@@ -1,3 +1,4 @@
+import { PublicBody } from "@/components/marketing/public-content";
 import Link from "next/link";
 import type { Route } from "next";
 import type { ReactNode } from "react";
@@ -32,7 +33,7 @@ export function ResourceHub({
         {children}
       </Section>
       <Section label="Using these resources">
-        <p className="text-body text-label-secondary mx-auto max-w-3xl">
+        <PublicBody className="mx-auto">
           General information only. Check the sources and dates in each resource before acting.
           These resources do not replace legal, immigration or employment advice. Read our{" "}
           <Link
@@ -42,7 +43,7 @@ export function ResourceHub({
             resources disclaimer
           </Link>
           .
-        </p>
+        </PublicBody>
       </Section>
     </>
   );
@@ -65,7 +66,7 @@ export function ResourceCards({
               {title}
             </Link>
           </h3>
-          <p className="text-body text-label-secondary mt-3">{description}</p>
+          <PublicBody className="mt-3">{description}</PublicBody>
           {detail ? <p className="text-footnote text-label-secondary mt-3">{detail}</p> : null}
         </li>
       ))}

@@ -12,6 +12,8 @@ import { Select } from "@/components/ui/select";
 import { Stepper } from "@/components/ui/stepper";
 import { StatusChip } from "@/components/ui/status-chip";
 import { TextArea } from "@/components/ui/text-area";
+import { DatePicker } from "@/components/ui/date-picker";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { TextField } from "@/components/ui/text-field";
 import { useToast } from "@/components/ui/toast";
 import { downloadBlob } from "@/lib/attendance";
@@ -421,12 +423,13 @@ function InterviewsPanel({
       {mayWrite && (
         <form onSubmit={(e) => void schedule(e)} className="flex flex-col gap-4" noValidate>
           <h3 className="text-headline text-label font-semibold">Book an interview</h3>
-          <TextField
-            label="Date and time"
-            type="datetime-local"
+          <DateTimePicker
+            legend="Interview date and time"
+            dateLabel="Interview date"
+            timeLabel="Interview time"
             required
-            value={when}
-            onChange={(e) => setWhen(e.target.value)}
+            value={when || null}
+            onChange={(picked) => setWhen(picked ?? "")}
             error={problem?.field === "scheduled_at" ? problem.message : undefined}
           />
           <div className="grid gap-4 sm:grid-cols-2">
@@ -651,11 +654,10 @@ function OffersPanel({
               ))}
             </Select>
           </div>
-          <TextField
+          <DatePicker
             label="Start date (optional)"
-            type="date"
-            value={start}
-            onChange={(e) => setStart(e.target.value)}
+            value={start || null}
+            onChange={(picked) => setStart(picked ?? "")}
           />
           <div>
             <Button type="submit" variant="filled">

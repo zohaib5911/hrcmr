@@ -73,7 +73,29 @@ function accepted(
 
 export async function audit(page: Page, where: string, mode: Mode = {}) {
   await settled(page);
-  const results = await new AxeBuilder({ page }).withTags(TAGS).exclude(INACTIVE).analyze();
+  const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
+
+  // Only contrast is exempt: inactive controls must still have valid names, roles and ARIA.
+  for (const result of [...results.violations, ...results.incomplete]) {
+    if (result.id !== "color-contrast") continue;
+    const inactive = await Promise.all(
+      result.nodes.map(async (node) => {
+        const target = node.target[0];
+        // Keep complex frame/shadow targets checked rather than exempting an ambiguous element.
+        if (node.target.length !== 1 || typeof target !== "string") return false;
+        // A toast or closing sheet may disappear after axe's snapshot. Keep its result checked
+        // instead of waiting for that transient element to return.
+        return page
+          .locator(target)
+          .evaluateAll(
+            (elements, selector) =>
+              elements.length === 1 && elements[0]?.matches(selector) === true,
+            INACTIVE,
+          );
+      }),
+    );
+    result.nodes = result.nodes.filter((_, index) => !inactive[index]);
+  }
 
   const violations = results.violations.flatMap((v) =>
     v.nodes

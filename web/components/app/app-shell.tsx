@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { ToastProvider } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +12,7 @@ import { MobileTabBar } from "./mobile-tab-bar";
 import { PlanBanner } from "./plan-banner";
 import { SupportBanner } from "./support-banner";
 import { ShortcutProvider } from "./shortcut-provider";
+import { markShellReady } from "./shell-ready";
 import type { ShellSession } from "./shell-types";
 import { Sidebar } from "./sidebar";
 import { UpgradeSheet } from "./upgrade-sheet";
@@ -43,6 +44,8 @@ export function AppShell({
   notificationCount = 0,
 }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
+  // From now on, page loads show a skeleton inside the shell instead of the splash.
+  useEffect(markShellReady, []);
 
   const toggle = useCallback(() => {
     const next = !collapsed;

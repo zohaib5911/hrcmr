@@ -9,7 +9,7 @@
  * internal segment, `/platform`. The proxy rewrites `admin.DOMAIN/companies` to
  * `/platform/companies`, and the internal segment is unreachable from the outside: asking for
  * `/platform/...` directly, on any host, is a 404. The admin pages therefore exist ONLY on the
- * admin host, and the admin host serves nothing else.
+ * admin host, alongside the shared public brand images.
  */
 
 export type HostKind = "admin" | "main";
@@ -78,6 +78,13 @@ export function decideRoute(kind: HostKind, pathname: string): RouteDecision {
   if (kind === "main") return { action: "next" };
   // Only plain paths are mapped onto the admin segment, so an encoded `..` cannot climb out of it.
   if (AMBIGUOUS_PATH.test(pathname)) return { action: "not-found" };
+  // Shared, repository-owned artwork and metadata images also belong on the admin host.
+  if (
+    /^\/brand\/[a-z0-9-]+\.(svg|png)$/.test(pathname) ||
+    /^\/(icon\d*|apple-icon)\.png$/.test(pathname) ||
+    pathname === "/opengraph-image"
+  )
+    return { action: "next" };
   return {
     action: "rewrite",
     pathname: pathname === "/" ? ADMIN_SEGMENT : `${ADMIN_SEGMENT}${pathname}`,
