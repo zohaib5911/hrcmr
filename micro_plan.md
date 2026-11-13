@@ -590,7 +590,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Watch:** same as T25.2. Touch only files of these routes; if a shared component must change, post `say <you> all INFO` first so T25.5 knows.
 - **Done when:** every public-screen row is ticked; affected unit tests and e2e specs pass (via `bus.sh serial`), lint and typecheck clean.
 
-### [ ] T25.3 · B · Whole-project security scan
+### [x] T25.3 · B · Whole-project security scan
 - **Runs in parallel** with the visual work (starts once P22 is merged); the visual blocks change styling only.
 - **Spec:** plan security sections; `docs/security.md` (T21.2) as the threat model; `audit.md` severity scale (P0/P1/P2).
 - **Steps:** 1. Automated: gitleaks over the full history, semgrep, pip-audit, pnpm audit, Trivy images and config, actionlint and zizmor (the CI jobs, run locally), plus the CSP and security headers on the production build. 2. Manual review of every API router: auth, MFA, sessions, CSRF, RBAC matrix, RLS on every table, tenant isolation, platform admin and support mode, file uploads, exports, webhooks (Stripe signature, replay), rate limits, input validation, SSRF in fetchers, secrets handling and logging. 3. (Moved to the P25 gate: check that T25.2/T25.4–T25.6 added no unsafe CSS or inline script.) 4. Write `docs/security-scan-2026.md` with each finding, its severity and the fix.
