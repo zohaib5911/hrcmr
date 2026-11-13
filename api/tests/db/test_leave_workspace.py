@@ -38,6 +38,17 @@ async def test_projection_pending_taken_and_no_get_writes(ready: dict[str, Any])
     row = await submit(ready)
     pending = annual(await me.get(url), ready)
     assert (pending["available"], pending["pending"]) == ("26.00", "5")
+    # The page batches different people's pending requests and ledger rows without mixing them.
+    batch = await ready["admin"].get("/api/v1/leave-balances?on=2026-01-05")
+    assert batch.status_code == 200, batch.text
+    for person in (ready["employee"], ready["other"]):
+        detail = await ready["admin"].get(
+            f"/api/v1/employees/{person}/leave-balances?on=2026-01-05"
+        )
+        assert detail.status_code == 200, detail.text
+        assert [item for item in batch.json()["items"] if item["employee_id"] == str(person)] == (
+            detail.json()["items"]
+        )
     approved = await ready["admin"].post(BASE + f"/requests/{row['id']}/approve", json={})
     assert approved.status_code == 200, approved.text
     final = annual(await me.get(url), ready)
