@@ -34,6 +34,7 @@ test("configure overnight shifts, late policy and regular days off", async ({ pa
   await shift.getByLabel("Finishes", { exact: true }).fill("06:00");
   await shift.getByLabel("Break starts (optional)", { exact: true }).fill("02:00");
   await shift.getByLabel("Break finishes (optional)", { exact: true }).fill("02:30");
+  await shift.getByLabel("Break finishes (optional)", { exact: true }).press("Tab");
   await expect(shift.getByRole("status")).toHaveText(/7.50 hours paid/);
   await shift.getByRole("button", { name: "Save shift type", exact: true }).click();
   await expect(shift).toBeHidden();

@@ -53,6 +53,7 @@ test("leave request, approval, calendar, profile adjustments and own cancellatio
   await form.getByLabel("Leave type", { exact: true }).selectOption({ label: "Annual Leave" });
   await form.getByLabel("Start date", { exact: true }).fill("2026-11-09");
   await form.getByLabel("End date", { exact: true }).fill("2026-11-10");
+  await form.getByLabel("End date", { exact: true }).press("Tab");
   await expect(form.getByRole("status")).toHaveText("2 working days");
   await form.getByRole("button", { name: "Submit request" }).click();
   await expect(form).toBeHidden();
@@ -104,6 +105,7 @@ test("leave request, approval, calendar, profile adjustments and own cancellatio
   const own = page.getByRole("dialog", { name: "Request leave", exact: true });
   await own.getByLabel("Start date", { exact: true }).fill("2026-11-12");
   await own.getByLabel("End date", { exact: true }).fill("2026-11-12");
+  await own.getByLabel("End date", { exact: true }).press("Tab");
   await expect(own.getByRole("status")).toHaveText("1 working days");
   await own.getByRole("button", { name: "Submit request" }).click();
   await expect(own).toBeHidden();
