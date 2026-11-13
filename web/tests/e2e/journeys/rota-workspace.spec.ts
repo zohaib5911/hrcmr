@@ -1,7 +1,7 @@
 /** T9.5 real quick-add/edit, publication snapshots, copy/clear menus and private print. */
-import { API, csrfHeaders } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API, csrfHeaders } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 test("plan shifts, publish to My Shifts, copy scoped weeks and clear only after confirmation", async ({
   page,

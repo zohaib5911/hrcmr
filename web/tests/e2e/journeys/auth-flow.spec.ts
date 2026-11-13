@@ -4,8 +4,8 @@
  */
 import { expect, test, type Page } from "@playwright/test";
 
-import { newAccount, tokenIn, waitForMail } from "../support/accounts";
-import { totp } from "../support/totp";
+import { newAccount, tokenIn, waitForMail } from "../../support/accounts";
+import { totp } from "../../support/totp";
 
 test.use({ storageState: { cookies: [], origins: [] } });
 

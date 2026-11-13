@@ -1,9 +1,9 @@
 /** T7.1: real RTW records/corrections; file scanning is covered by the API service tests. */
 import { request as playwrightRequest } from "@playwright/test";
 
-import { API, createSignedInAdmin, csrfHeaders, newAccount } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API, createSignedInAdmin, csrfHeaders, newAccount } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 test("Right to Work conditionals, explicit saves, evidence selection, correction and directory links", async ({
   browser,

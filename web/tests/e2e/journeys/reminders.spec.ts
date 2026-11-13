@@ -1,9 +1,9 @@
 /** T7.4: explicit review actions, sender history and a received in-app message. */
 import { request as playwrightRequest } from "@playwright/test";
 
-import { API, createSignedInAdmin, csrfHeaders, newAccount } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API, createSignedInAdmin, csrfHeaders, newAccount } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 const expiry = (days: number) =>
   new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
