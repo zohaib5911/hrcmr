@@ -21,7 +21,7 @@ describe("RegisterExplorer", () => {
     render(<RegisterExplorer />);
     await ready();
     expect(screen.getByRole("img", { name: /Register pulse/ })).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: /Schematic map/ })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: /Map of UK regions/ })).toBeInTheDocument();
     for (const name of [
       "Then and now",
       "Sponsors by town",
