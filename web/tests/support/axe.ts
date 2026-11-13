@@ -83,9 +83,14 @@ export async function audit(page: Page, where: string, mode: Mode = {}) {
         const target = node.target[0];
         // Keep complex frame/shadow targets checked rather than exempting an ambiguous element.
         if (node.target.length !== 1 || typeof target !== "string") return false;
+        // A toast or closing sheet may disappear after axe's snapshot. Keep its result checked
+        // instead of waiting for that transient element to return.
         return page
           .locator(target)
-          .evaluate((element, selector) => element.matches(selector), INACTIVE);
+          .evaluateAll(
+            (elements, selector) => elements.length === 1 && elements[0].matches(selector),
+            INACTIVE,
+          );
       }),
     );
     result.nodes = result.nodes.filter((_, index) => !inactive[index]);
