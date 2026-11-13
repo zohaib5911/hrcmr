@@ -7,6 +7,10 @@ accessibility checks). Existing component
 and security specs remain outside this folder. Moving existing workflows here avoids running
 copies of the same tests in CI.
 
+For one journey, use `pnpm test:e2e tests/e2e/journeys/careers.spec.ts --project=production`.
+Playwright combines multiple positional file filters with OR, so adding a filename to
+`test:journeys` still selects the whole journey directory.
+
 The Playwright setup creates its own throwaway API database, Redis database and signed-in account.
 Each journey gets a separate company; role/visitor transitions use separate browser contexts.
 Required local services are Postgres test, Redis, Mailpit, RustFS and ClamAV (see the root compose file).
