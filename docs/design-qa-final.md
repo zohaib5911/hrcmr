@@ -30,6 +30,12 @@ The existing Phase 25 harness still defaults to its original two widths and befo
 | Motion/reduced motion | Screenshots disable animations for stable evidence; they cannot prove frame rate or motion quality. T22.3 checks reduced motion. Dialog entry-scale polish remains finding M. |
 | Calm composition | Existing material recipes and shared cards are coherent. The audit already assigns the reusable composition gaps to T25.2/T25.4–T25.6; this evidence change does not duplicate those implementation blocks. |
 
+## Additional viewport observations
+
+At 768 px, the employee list keeps its 260 px desktop sidebar, leaving a narrow main column. The Right to Work filter wraps tightly and competes with search/archive controls; the tabs and table scroll within their own containers. [Tablet employee list](screenshots/final/app-employees-light-768.png). T25.5 should wrap the shared list toolbar coherently at tablet widths, retaining intentional horizontal table scrolling and accessible labels. This is a composition follow-up even when document overflow is zero. The admin audit table also demonstrates why finding F needs a shared responsive frame rather than isolated page styling.
+
+Visual spot checks include the mobile dashboard and recruitment detail, tablet employee list/admin audit, and wide/dark variants later in this run. The gallery provides the complete evidence matrix; these sampled visual checks do not claim manual inspection of every pixel in every image.
+
 ## Evidence limits
 
 Accounts are synthetic test sign-ups with isolated tenant records; public register data comes from saved fixtures. Invitation/MFA-enrolment views use the existing auth presentation fixtures. No live user data or real payment provider is involved.
