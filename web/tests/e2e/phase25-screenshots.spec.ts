@@ -272,3 +272,66 @@ for (const colorScheme of ["light", "dark"] as const) {
     });
   }
 }
+
+// Surfaces need overlapping content to judge the glass; route screenshots alone cannot show this.
+for (const colorScheme of ["light", "dark"] as const) {
+  for (const width of [390, 1280]) {
+    test(`material overlays ${colorScheme} ${width}`, async ({ browser }) => {
+      test.setTimeout(120_000);
+      const context = await browser.newContext({
+        colorScheme,
+        viewport: { width, height: 900 },
+        baseURL: "http://127.0.0.1:3100",
+        storageState: { cookies: [], origins: [] },
+      });
+      await createSignedInAdmin(context.request);
+      const page = await context.newPage();
+      const results: unknown[] = [];
+      const capture = async (name: string) => {
+        await page.evaluate(() => document.fonts.ready);
+        const dialog = page.getByRole("dialog");
+        await expect(dialog).toBeVisible();
+        await page.screenshot({
+          path: path.join(OUT, `overlay-${name}-${colorScheme}-${width}.png`),
+          animations: "disabled",
+        });
+        results.push({ name, ...(await observe(page)) });
+        await page.keyboard.press("Escape");
+        await expect(dialog).toBeHidden();
+      };
+      try {
+        await page.goto("/dashboard");
+        await page.keyboard.press("Control+k");
+        await expect(page.getByPlaceholder("Search pages")).toBeVisible();
+        await capture("command-palette");
+        await page
+          .getByRole("button", { name: /^Notifications/ })
+          .first()
+          .click();
+        await capture("notifications");
+        await page.goto("/company");
+        await page.getByRole("button", { name: /^Details/ }).click();
+        await capture("company-sheet");
+        await page.goto("/");
+        const reject = page.getByRole("button", { name: "Reject all", exact: true });
+        if (await reject.isVisible()) await reject.click();
+        if (width === 390) {
+          await page.getByRole("button", { name: "Menu", exact: true }).click();
+          await capture("marketing-menu");
+        }
+        await page.evaluate(() => window.scrollTo(0, 350));
+        await page.screenshot({
+          path: path.join(OUT, `overlay-scrolled-marketing-nav-${colorScheme}-${width}.png`),
+          animations: "disabled",
+        });
+        results.push({ name: "scrolled-marketing-nav", ...(await observe(page)) });
+        writeFileSync(
+          path.join(OUT, `overlays-${colorScheme}-${width}.json`),
+          JSON.stringify(results, null, 2) + "\n",
+        );
+      } finally {
+        await context.close();
+      }
+    });
+  }
+}
