@@ -334,6 +334,10 @@ class FileService:
     @staticmethod
     async def _reaches(access: Access, record: File) -> bool:
         """Everyone with full scope; otherwise what the person uploaded or that is within reach."""
+        # Export artifacts must use the dedicated route, which checks company.export,
+        # requester identity and expiry. The general document grant cannot serve them.
+        if record.owner_type == "data_export":
+            return False
         if record.owner_type == "policy_document":
             policy = (
                 await access.db.execute(

@@ -43,6 +43,11 @@ async function adminPage(
   const api = await playwrightRequest.newContext();
   const account = await createSignedInAdmin(api, newAccount("phase16"), { plan });
   if (scheduled) {
+    const steppedUp = await api.post(`${API}/auth/step-up`, {
+      headers: await csrfHeaders(api),
+      data: { password: account.password },
+    });
+    expect(steppedUp.status(), await steppedUp.text()).toBe(200);
     const started = await api.post(`${API}/companies/me/deletion-request`, {
       headers: await csrfHeaders(api),
       data: { export_requested: false },
