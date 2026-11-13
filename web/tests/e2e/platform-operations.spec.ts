@@ -15,7 +15,17 @@ test("an owner opens jobs and filters the platform audit log", async ({ page }) 
   // Admin GET filters must also work with the production CSP blocking local HTTP scripts.
   await page.getByLabel("From date (UTC)", { exact: true }).fill("2026-01-01");
   await page.getByLabel("To date (UTC)", { exact: true }).fill("2026-12-31");
-  await page.getByRole("button", { name: "Apply filters", exact: true }).click();
+  // On the local HTTP host, upgrade-insecure-requests upgrades native form navigation to HTTPS.
+  // Read the native form's wire values and load its GET URL directly; HTTPS interaction stays at P25.
+  const query = await page
+    .getByRole("button", { name: "Apply filters", exact: true })
+    .evaluate((button) => {
+      const form = (button as HTMLButtonElement).form!;
+      return new URLSearchParams(
+        Array.from(new FormData(form), ([key, value]) => [key, String(value)]),
+      ).toString();
+    });
+  await page.goto(`${ADMIN_ORIGIN}/audit?${query}`);
   await expect(page).toHaveURL(/since=2026-01-01&until=2026-12-31/);
   await expect(page.getByRole("grid", { name: "Platform audit events" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Export CSV" })).toHaveAttribute(
