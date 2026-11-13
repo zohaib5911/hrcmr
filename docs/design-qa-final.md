@@ -34,7 +34,7 @@ The existing Phase 25 harness still defaults to its original two widths and befo
 
 At 768 px, the employee list keeps its 260 px desktop sidebar, leaving a narrow main column. The Right to Work filter wraps tightly and competes with search/archive controls; the tabs and table scroll within their own containers. [Tablet employee list](screenshots/final/app-employees-light-768.png). T25.5 should wrap the shared list toolbar coherently at tablet widths, retaining intentional horizontal table scrolling and accessible labels. This is a composition follow-up even when document overflow is zero. The admin audit table also demonstrates why finding F needs a shared responsive frame rather than isolated page styling.
 
-Visual spot checks include the mobile dashboard and recruitment detail, tablet employee list/admin audit, and wide/dark variants later in this run. The gallery provides the complete evidence matrix; these sampled visual checks do not claim manual inspection of every pixel in every image.
+Visual spot checks include the mobile dashboard and recruitment detail, tablet employee list/admin audit, 1920 px recruitment detail, dark mobile company settings and dark desktop public register. The gallery provides the complete evidence matrix; these sampled visual checks do not claim manual inspection of every pixel in every image.
 
 ## Evidence limits
 
@@ -46,4 +46,11 @@ Full-page images place fixed navigation at its viewport position within a longer
 
 ## Measured results
 
-Capture and evidence verification results are recorded here after all eight passes complete.
+- **Playwright: 17 passed in 22.4 minutes** (1 authentication setup, 8 exhaustive route passes, 8 overlay passes), under the shared serial lock. An earlier interrupted attempt exposed the dev hot-refresh loop; the completed run isolates that connection and recaptures the full matrix.
+- **1,128 route PNGs + 34 overlay PNGs = 1,162 screenshots**, with matching observations and an offline gallery. All 127 page files map to the 141-case inventory; no missing or extra source files.
+- **992 axe scans, 0 violations**; the 17 admin cases in each of eight passes are explicitly excluded because local HTTP CSP blocks injected scripts. No claim of admin axe coverage is made.
+- **0 document overflows** across all 1,128 route observations. Internal table/tab scrolling and the tablet toolbar composition finding remain distinct review items.
+- **26 successful Escape dismissals** across modal overlay checks. Eight additional screenshots show scrolled public navigation.
+- **16 expected 404 observations** (two unpublished comparison templates × eight states); every other route observation returned 200.
+- Gallery validation checks all route keys/statuses and expected route/overlay PNGs. PNG signatures/dimensions passed for all 1,162 files; every gallery image and report link resolves locally.
+- Full web lint and TypeScript checks passed. Production build succeeded as part of the serialized Playwright run. No full suite was run in this block; P22 owns that gate check.
