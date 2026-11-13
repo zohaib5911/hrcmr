@@ -7,6 +7,7 @@ hash of the connection, never the address."""
 
 from __future__ import annotations
 
+import ipaddress
 import re
 import uuid  # noqa: TC003 (Pydantic resolves response fields at runtime)
 from datetime import date, timedelta
@@ -18,6 +19,7 @@ from pydantic import BaseModel, EmailStr, Field, StringConstraints
 from sqlalchemy import and_, case, distinct, func, or_, select, tuple_
 from sqlalchemy.orm import aliased
 
+from app.core.client_ip import trusted_proxy_networks
 from app.core.errors import AppError, NotFoundError
 from app.core.rate_limit import RateLimiter, hashed
 from app.core.schemas import RequestModel
@@ -42,12 +44,31 @@ if TYPE_CHECKING:
     from sqlalchemy.sql.selectable import Subquery
 
 READ_PER_CONNECTION = ("public.register.read", 120, 60)  # page reads, per minute
+READ_INTERNAL = ("public.register.read.internal", 6000, 60)
 
 
 async def _limit_reads(request: Request) -> None:
     name, limit, window = READ_PER_CONNECTION
+    key = client_ip(request) or "unknown"
+    peer = request.client.host if request.client else None
+    try:
+        address = ipaddress.ip_address(peer or "")
+    except ValueError:
+        address = None
+    # ISR fetches have no visitor header and share the web server's address. Give trusted
+    # server calls their own budget; forwarding visitor headers would break the ISR cache.
+    if (
+        address is not None
+        and "x-real-ip" not in request.headers
+        and any(
+            address.version == network.version and address in network
+            for network in trusted_proxy_networks(request.app.state.settings)
+        )
+    ):
+        name, limit, window = READ_INTERNAL
+        key = str(address)
     result = await RateLimiter(request.app.state.auth.redis).hit(
-        name, client_ip(request) or "unknown", limit=limit, window_seconds=window
+        name, key, limit=limit, window_seconds=window
     )
     if not result.allowed:
         raise AppError(
