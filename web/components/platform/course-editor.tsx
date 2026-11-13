@@ -204,7 +204,7 @@ export function CourseEditor({ courses: initial }: { courses: Course[] }) {
                       : "text-label-secondary hover:bg-fill-secondary rounded-control w-full px-3 py-2 text-left"
                   }
                 >
-                  <span className="text-callout block truncate">{course.title}</span>
+                  <span className="text-callout block break-words">{course.title}</span>
                   <span className="text-caption block">
                     {course.published ? "Published" : "Draft"} · version {course.version}
                   </span>
