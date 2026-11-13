@@ -1,11 +1,12 @@
 /** T13.1 course player: progress survives a reload, and a check below the pass mark does not complete. */
-import { API, csrfHeaders } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API, csrfHeaders } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 test("a learner moves through a course, a reload keeps their place, and only a passing check completes it", async ({
   page,
   context,
+  browser,
 }) => {
   const api = context.request;
   const headers = await csrfHeaders(api);
@@ -87,6 +88,35 @@ test("a learner moves through a course, a reload keeps their place, and only a p
   await expect(page.getByText("You scored 100%.", { exact: false })).toBeVisible();
   await page.getByRole("button", { name: "Complete the course", exact: true }).click();
   await expect(page.getByText("Completed", { exact: false }).first()).toBeVisible();
+
+  await test.step("download the issued certificate and verify it as a signed-out visitor", async () => {
+    const downloaded = page.waitForEvent("download");
+    await page.getByRole("button", { name: "Download certificate", exact: true }).click();
+    const certificate = await downloaded;
+    expect(await certificate.failure()).toBeNull();
+    const filename = certificate.suggestedFilename();
+    expect(filename).toMatch(/^certificate-.+\.pdf$/);
+    const reference = filename.slice("certificate-".length, -".pdf".length);
+    const visitor = await browser.newContext();
+    try {
+      const publicPage = await visitor.newPage();
+      await publicPage.goto("http://127.0.0.1:3100/verify");
+      await publicPage.getByLabel("Certificate reference", { exact: true }).fill(reference);
+      await publicPage.getByRole("button", { name: "Check certificate", exact: true }).click();
+      const details = publicPage.getByRole("region", { name: "Certificate details" });
+      await expect(details.getByText("Valid certificate", { exact: true })).toBeVisible();
+      await expect(details.getByText(`Lena Learner${stamp}`, { exact: true })).toBeVisible();
+      await expect(details.getByText(course.title, { exact: true })).toBeVisible();
+      await publicPage
+        .getByLabel("Certificate reference", { exact: true })
+        .fill("UNKNOWN-REFERENCE");
+      await publicPage.getByRole("button", { name: "Check certificate", exact: true }).click();
+      await expect(details).toHaveCount(0);
+      await expect(publicPage.getByRole("alert")).toBeVisible();
+    } finally {
+      await visitor.close();
+    }
+  });
 
   await page.setViewportSize({ width: 390, height: 900 });
   await audit(page, "Learning player mobile");

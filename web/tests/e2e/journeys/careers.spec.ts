@@ -1,8 +1,8 @@
 /** T11.6 public careers: a visitor sees an open external posting and applies; a closed one is not found. */
-import { API, csrfHeaders } from "../support/accounts";
-import { expect, test } from "../support/fixtures";
+import { API, csrfHeaders } from "../../support/accounts";
+import { expect, test } from "../../support/fixtures";
 
-import { BASE_URL } from "./helpers";
+import { BASE_URL } from "../helpers";
 
 test("a visitor applies to an open posting, and a closed posting is not found", async ({
   context,

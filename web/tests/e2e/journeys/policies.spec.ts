@@ -1,8 +1,8 @@
 /** T10.3 policy send through the wizard, an employee's typed signature, the admin's Signed row, and /policies closed to employees. */
-import { API, csrfHeaders, newAccount, waitForMail } from "../support/accounts";
-import { expect, test } from "../support/fixtures";
+import { API, csrfHeaders, newAccount, waitForMail } from "../../support/accounts";
+import { expect, test } from "../../support/fixtures";
 
-import { BASE_URL } from "./helpers";
+import { BASE_URL } from "../helpers";
 
 const PDF = Buffer.from(
   "%PDF-1.4\n1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj\n" +
