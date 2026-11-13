@@ -561,7 +561,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 25 — Apple-quality visual pass and final security scan (big model, added by the owner 2026-11-12)
 
-### [ ] T25.1 · B · Visual audit of every screen against the Apple-quality design
+### [x] T25.1 · B · Visual audit of every screen against the Apple-quality design
 - **Spec:** plan §5 (L296–450): principles, typography, colour tokens, materials (glass), motion, layout, components, §5.12 QA checklist. Plan L25: no Apple trademarks, logos, SF Symbols, SF font files or device images.
 - **Steps:** 1. List every route (app, admin, auth, marketing, careers, free tools) from `web/app`. 2. Screenshot each at 390 and 1280 px, light and dark, into `docs/screenshots/phase-25/before/` (copy `web/tests/e2e/phase9-screenshots.spec.ts`; run through `bus.sh serial`). 3. Check each against §5 and §5.12. Look hardest at the glass: translucent sidebar, toolbar, sheets, popovers and the marketing nav (`backdrop-filter: saturate(180%) blur(20px)` over the material tokens, hairline borders, layered soft shadows); also type scale, spacing on the 4 px grid, radius, motion, alignment and empty/loading states. 4. Write `docs/design-audit.md`: one row per screen with each gap, the §5 rule it breaks and the fix (token or component, not per-page CSS), sorted by how many screens a fix touches.
 - **Done when:** `docs/design-audit.md` covers every route, and the before screenshots are saved. No app code changed.
