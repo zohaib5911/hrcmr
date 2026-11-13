@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import { PresetChips } from "@/components/calculators/preset-chips";
+import type { CalculatorPreset } from "@/lib/calculators/frame";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { TextField } from "@/components/ui/text-field";
@@ -16,6 +18,19 @@ import {
 } from "@/lib/calculators/uk-notice-pay-calculator";
 
 const gbp = (n: number) => `£${n.toLocaleString("en-GB", { minimumFractionDigits: 2 })}`;
+
+const presets: readonly CalculatorPreset<{ giver: Giver; contractWeeks: string }>[] = [
+  {
+    id: "employer-six-years",
+    label: "Employer notice, 6 years of service",
+    values: { giver: "employer", contractWeeks: "" },
+  },
+  {
+    id: "resignation-four-weeks",
+    label: "Resignation, 4-week contract notice",
+    values: { giver: "employee", contractWeeks: "4" },
+  },
+];
 
 export function UkNoticePayCalculator() {
   const [jurisdiction, setJurisdiction] = useState<Jurisdiction>("gb");
@@ -55,44 +70,21 @@ export function UkNoticePayCalculator() {
           setAttempted(true);
         }}
       >
-        <div className="flex flex-wrap gap-3" aria-label="Example scenarios">
-          <Button
-            type="button"
-            variant="gray"
-            onClick={() => {
-              setJurisdiction("gb");
-              setGiver("employer");
-              setStatus("employee");
-              setStartDate("2020-06-01");
-              setNoticeDate("2026-11-12");
-              setContractWeeks("");
-              setPayMode("weekly");
-              setAmount("500");
-              setArrangement("work");
-              reset();
-            }}
-          >
-            Employer notice, 6 years of service
-          </Button>
-          <Button
-            type="button"
-            variant="gray"
-            onClick={() => {
-              setJurisdiction("gb");
-              setGiver("employee");
-              setStatus("employee");
-              setStartDate("2020-06-01");
-              setNoticeDate("2026-11-12");
-              setContractWeeks("4");
-              setPayMode("weekly");
-              setAmount("500");
-              setArrangement("work");
-              reset();
-            }}
-          >
-            Resignation, 4-week contract notice
-          </Button>
-        </div>
+        <PresetChips
+          presets={presets}
+          onSelect={(preset) => {
+            setJurisdiction("gb");
+            setGiver(preset.values.giver);
+            setStatus("employee");
+            setStartDate("2020-06-01");
+            setNoticeDate("2026-11-12");
+            setContractWeeks(preset.values.contractWeeks);
+            setPayMode("weekly");
+            setAmount("500");
+            setArrangement("work");
+            reset();
+          }}
+        />
         <h2 className="text-title-2 text-label">1. Your situation</h2>
         <Select
           label="Where do you work?"
