@@ -38,6 +38,12 @@ const OBSCURED =
 const BEHIND_MODAL = /data-aria-hidden="true"|data-radix-focus-guard/;
 const PORTAL = /data-radix-|role="(?:dialog|alertdialog|menu|tooltip|listbox)"/;
 
+/**
+ * Inactive controls are exempt from contrast (WCAG 1.4.3). Axe exempts a disabled button itself, but
+ * not the text span inside our Button (components/ui/button.tsx), which it then reads at 50% opacity.
+ */
+const INACTIVE = 'button:disabled *, [aria-disabled="true"]:not([aria-busy="true"]) *';
+
 export interface Mode {
   /** A modal is open: everything behind it is hidden from assistive technology. */
   modal?: boolean;
@@ -67,7 +73,7 @@ function accepted(
 
 export async function audit(page: Page, where: string, mode: Mode = {}) {
   await settled(page);
-  const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
+  const results = await new AxeBuilder({ page }).withTags(TAGS).exclude(INACTIVE).analyze();
 
   const violations = results.violations.flatMap((v) =>
     v.nodes

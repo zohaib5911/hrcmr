@@ -105,6 +105,8 @@ async function open(page: Page, path: string) {
   await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible();
   // Axe reads what is on screen: wait for the data, not a loading skeleton or a half-enabled control.
   await expect(page.locator(".skeleton"), path).toHaveCount(0);
+  // ...and for the page's own requests, which disable its controls while they run (busy).
+  await page.waitForLoadState("networkidle");
 }
 
 for (const colorScheme of ["light", "dark"] as const) {
