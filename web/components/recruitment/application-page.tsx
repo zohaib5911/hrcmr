@@ -58,6 +58,11 @@ const OFFER_STATUS: Record<
 };
 const PER: Record<Per, string> = { year: "a year", month: "a month", hour: "an hour" };
 
+/** "Offer Letter" -> "Offer letter" for the progress steps; stage identifiers stay as they are. */
+function sentenceCase(label: string): string {
+  return label.charAt(0) + label.slice(1).toLowerCase();
+}
+
 function gbp(value: string): string {
   const number = Number(value);
   return Number.isNaN(number)
@@ -204,8 +209,12 @@ export function ApplicationPage({ applicationId }: { applicationId: string }) {
 
       <Card className="flex flex-col gap-4 p-5">
         <Stepper
-          steps={FORWARD_STAGES.map((stage) => ({ id: stage, label: STAGE_LABEL[stage] }))}
+          steps={FORWARD_STAGES.map((stage) => ({
+            id: stage,
+            label: sentenceCase(STAGE_LABEL[stage]),
+          }))}
           current={ended ? reached : Math.max(0, FORWARD_STAGES.indexOf(app.stage))}
+          orientation="responsive"
         />
         <section aria-labelledby="history" className="flex flex-col gap-2">
           <h2 id="history" className="text-headline text-label font-semibold">

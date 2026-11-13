@@ -406,6 +406,19 @@
   }
 }
 
+/* Grouped-list rows: a hairline between rows, inset 16 px from the leading edge (plan 5.6).
+   A border image, not a pseudo element, so axe can still read the row's background. */
+@utility grouped-rows {
+  & > li + li {
+    border-top: 1px solid transparent;
+    border-image: linear-gradient(to right, transparent 1rem, var(--separator) 1rem) 1;
+  }
+
+  &:dir(rtl) > li + li {
+    border-image: linear-gradient(to left, transparent 1rem, var(--separator) 1rem) 1;
+  }
+}
+
 /* Hit targets: 44 px for touch, 32 px with a mouse (plan 5.4). */
 @utility hit-target {
   min-height: 44px;

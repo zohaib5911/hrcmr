@@ -36,7 +36,11 @@ export function Toolbar({ user, theme, notificationCount }: ToolbarProps) {
     <header className="material-chrome border-separator sticky top-0 z-20 flex h-14 items-center gap-3 border-b px-4 md:px-8">
       <div className="min-w-0 flex-1 lg:flex-none lg:basis-80">
         <Breadcrumbs crumbs={breadcrumbsFor(pathname)} />
-        {title ? <p className="text-title-3 text-label truncate leading-6">{title}</p> : null}
+        {title ? (
+          <p title={title} className="text-title-2 text-label truncate leading-7">
+            {title}
+          </p>
+        ) : null}
       </div>
 
       <div className="hidden min-w-0 flex-1 justify-center lg:flex">

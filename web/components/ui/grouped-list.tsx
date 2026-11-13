@@ -16,7 +16,7 @@ interface GroupedListProps {
   className?: string;
 }
 
-/** The inset grouped list used by the settings pages (plan 5.7): a rounded block of rows with hairlines between. */
+/** The inset grouped list used by the settings pages (plan 5.7): a rounded block of rows with inset hairlines between. */
 export function GroupedList({ heading, description, children, className }: GroupedListProps) {
   return (
     <section aria-label={heading} className={cn("flex flex-col gap-2", className)}>
@@ -24,7 +24,7 @@ export function GroupedList({ heading, description, children, className }: Group
         {heading}
       </h2>
       {description ? <p className="text-callout text-label-secondary px-4">{description}</p> : null}
-      <ul className="bg-elevated rounded-card shadow-e1 divide-separator divide-y overflow-hidden">
+      <ul className="bg-elevated rounded-card shadow-e1 grouped-rows overflow-hidden">
         {children}
       </ul>
     </section>
@@ -51,9 +51,9 @@ export function GroupedRow({ title, detail, icon, href, onClick }: GroupedRowPro
   const content = (
     <>
       {icon ? <span className="text-label-secondary flex shrink-0">{icon}</span> : null}
-      <span className="text-body text-label min-w-0 flex-1 truncate">{title}</span>
+      <span className="text-body text-label min-w-0 flex-1 break-words">{title}</span>
       {detail ? (
-        <span className="text-callout text-label-secondary max-w-[50%] truncate tabular-nums">
+        <span className="text-callout text-label-secondary max-w-[50%] text-right break-words tabular-nums">
           {detail}
         </span>
       ) : null}
