@@ -75,6 +75,20 @@ audit, code or mail side effect. The existing client already handles
 no database/mail effects, then successful start after step-up. Existing authorized
 API and screenshot setup flows must explicitly step up.
 
+**SEC-2026-03 — P1: billing plan mutations skipped required step-up.**
+`api/app/modules/billing/router.py`, `create_checkout_session` and `cancel_plan`,
+admitted an ordinary Company Admin session without recent password/TOTP despite
+plan §4.2. Checkout could call Stripe/create a customer; cancellation could change
+a plan or request a refund. CSRF and `billing.manage` remained enforced.
+
+Fix: check recent step-up before either handler accesses the provider. Reuse the
+billing page's existing password sheet to retry the selected checkout plan or
+cancellation, while preserving its export flow. API regressions reject requests
+before any provider call/audit; existing legitimate tests explicitly step up.
+Client tests check the exact checkout/cancel → step-up → same-action call sequence.
+The Billing Portal is unchanged: it neither changes the selected plan nor cancels
+it (portal cancellation is disabled in provider configuration).
+
 ### Shared control review
 
 - **Identity/MFA/session lifecycle:** `auth/accounts.py`, `router.py`, `sessions.py`,
@@ -147,7 +161,7 @@ required before launch. The P25 gate reviews CSS/script changes from T25.2/T25.4
 | `modules/attendance/router.py` | 4 | T; own/reports record filters, scoped write helper and audit; attendance tests |
 | `modules/audit/router.py` | 2 | T; explicit company predicate, bounded pagination, masked values and audited export; audit tests |
 | `modules/auth/router.py` | 19 | A; token/session kinds, MFA, rotation, step-up, invitation/company membership; auth flow/endpoints tests |
-| `modules/billing/router.py` | 5 | T/S; billing permission/step-up in service, fixed redirects, signed replay-protected webhook; billing/stripe tests |
+| `modules/billing/router.py` | 5 | T/S; SEC-2026-03 plan step-up, billing permission, fixed redirects, signed replay-protected webhook; billing/stripe tests |
 | `modules/companies/compliance_documents.py` | 5 | T; full document scope, scanned/owned file, scoped archive/audit; compliance-documents tests |
 | `modules/companies/key_personnel_router.py` | 7 | T; company-scoped person/proof and document ownership, encrypted identifiers/audit; key-personnel tests |
 | `modules/companies/router.py` | 7 | T; explicit company ID, validated fixed-host lookups, scanned logo and audit; company tests |
@@ -213,8 +227,9 @@ required before launch. The P25 gate reviews CSS/script changes from T25.2/T25.4
 SQLAlchemy's complete registry contains **102 application tables**. 71 carry
 `company_id`: 69 tenant tables, plus the two pre-tenant authentication exceptions
 (`sessions`, `invitations`) looked up by hashed token/user/explicit company.
-`companies` uses its `id` as the tenant key and additional identity/platform
-policies. Global identity/reference/provider/worker tables are deliberately not
+`companies` is a global identity root without RLS (migration 0002, explicitly
+retained by migration 0049); tenant handlers must select its ID from `Access`,
+never a client-provided company context. The catalog check does not claim otherwise. Global identity/reference/provider/worker tables are deliberately not
 classified as tenant data; global does not mean publicly readable. In particular,
 email payloads, tokens and provider events are not exposed by public endpoints.
 
@@ -225,111 +240,145 @@ The migration version table (`alembic_version`) is operational metadata in addit
 to these application tables. Owner-only maintenance and platform policies are
 explicit exceptions, never authority derived from a tenant UUID.
 
-| Table | Reviewed scope |
-| --- | --- |
-| `ai_interactions` | tenant company_id |
-| `announcements` | global |
-| `applications` | tenant company_id |
-| `attendance_imports` | tenant company_id |
-| `attendance_records` | tenant company_id |
-| `audit_events` | tenant company_id |
-| `bank_holidays` | global |
-| `candidates` | tenant company_id |
-| `certificates` | tenant company_id |
-| `change_of_circumstances` | tenant company_id |
-| `companies` | tenant id + identity/platform policies |
-| `company_bank_accounts` | tenant company_id |
-| `company_compliance_documents` | tenant company_id |
-| `company_documents` | tenant company_id |
-| `company_holidays` | tenant company_id |
-| `contact_messages` | global |
-| `course_assignments` | tenant company_id |
-| `courses` | global |
-| `data_exports` | tenant company_id |
-| `day_off_patterns` | tenant company_id |
-| `deletion_requests` | tenant company_id |
-| `departments` | tenant company_id |
-| `designations` | tenant company_id |
-| `dossier_links` | global |
-| `email_outbox` | global |
-| `email_tokens` | global |
-| `emergency_contacts` | tenant company_id |
-| `employee_addresses` | tenant company_id |
-| `employee_assignments` | tenant company_id |
-| `employee_bank_details` | tenant company_id |
-| `employee_compensation` | tenant company_id |
-| `employee_documents` | tenant company_id |
-| `employee_education` | tenant company_id |
-| `employee_memberships` | tenant company_id |
-| `employee_previous_employment` | tenant company_id |
-| `employee_responsibilities` | tenant company_id |
-| `employee_training_records` | tenant company_id |
-| `employees` | tenant company_id |
-| `feature_flags` | global |
-| `files` | tenant company_id |
-| `going_rates` | global |
-| `holiday_types` | tenant company_id |
-| `impersonation_sessions` | tenant company_id |
-| `ineligible_codes` | global |
-| `interviews` | tenant company_id |
-| `invitations` | pre-tenant explicit session/invitation scope |
-| `key_persons` | tenant company_id |
-| `late_policies` | tenant company_id |
-| `leave_ledger` | tenant company_id |
-| `leave_requests` | tenant company_id |
-| `leave_types` | tenant company_id |
-| `leave_year_end_runs` | tenant company_id |
-| `locations` | tenant company_id |
-| `memberships` | tenant company_id |
-| `notification_preferences` | tenant company_id |
-| `notifications` | tenant company_id |
-| `offers` | tenant company_id |
-| `onboarding_dismissals` | tenant company_id |
-| `org_changes` | tenant company_id |
-| `organogram_levels` | tenant company_id |
-| `pay_bands` | tenant company_id |
-| `pay_scale_rates` | global |
-| `pay_schedules` | tenant company_id |
-| `payment_types` | tenant company_id |
-| `platform_admins` | global |
-| `policy_acceptances` | tenant company_id |
-| `policy_documents` | tenant company_id |
-| `postings` | tenant company_id |
-| `register_changes` | global |
-| `register_company_datasets` | global |
-| `register_company_matches` | global |
-| `register_entries` | global |
-| `register_place_datasets` | global |
-| `register_possible_matches` | global |
-| `register_problem_reports` | global |
-| `register_publications` | global |
-| `register_sponsors` | global |
-| `reminders` | tenant company_id |
-| `report_jobs` | tenant company_id |
-| `requisitions` | tenant company_id |
-| `rota_weeks` | tenant company_id |
-| `rtw_checks` | tenant company_id |
-| `rules_versions` | global |
-| `salary_rules` | global |
-| `scheduled_shifts` | tenant company_id |
-| `sessions` | pre-tenant explicit session/invitation scope |
-| `shift_types` | tenant company_id |
-| `shortage_list_entries` | global |
-| `soc_checks` | tenant company_id |
-| `soc_index_entries` | global |
-| `soc_unit_groups` | global |
-| `sponsor_documents` | tenant company_id |
-| `stripe_events` | global |
-| `subscriptions` | tenant company_id |
-| `tax_codes` | tenant company_id |
-| `terms_acceptances` | global |
-| `terms_versions` | global |
-| `timesheet_approvals` | tenant company_id |
-| `trading_hours_days` | tenant company_id |
-| `users` | global |
-| `work_log_entries` | tenant company_id |
-| `working_pattern_days` | tenant company_id |
+| Table | Reviewed scope | Catalog RLS |
+| --- | --- | --- |
+| `ai_interactions` | tenant company_id | enabled |
+| `announcements` | global | deliberately global/pre-tenant, no RLS |
+| `applications` | tenant company_id | enabled |
+| `attendance_imports` | tenant company_id | enabled |
+| `attendance_records` | tenant company_id | enabled |
+| `audit_events` | tenant company_id | enabled |
+| `bank_holidays` | global | deliberately global/pre-tenant, no RLS |
+| `candidates` | tenant company_id | enabled |
+| `certificates` | tenant company_id | enabled |
+| `change_of_circumstances` | tenant company_id | enabled |
+| `companies` | global identity root; explicit company ID in tenant handlers | deliberately global/pre-tenant, no RLS |
+| `company_bank_accounts` | tenant company_id | enabled |
+| `company_compliance_documents` | tenant company_id | enabled |
+| `company_documents` | tenant company_id | enabled |
+| `company_holidays` | tenant company_id | enabled |
+| `contact_messages` | global | deliberately global/pre-tenant, no RLS |
+| `course_assignments` | tenant company_id | enabled |
+| `courses` | global | enabled |
+| `data_exports` | tenant company_id | enabled |
+| `day_off_patterns` | tenant company_id | enabled |
+| `deletion_requests` | tenant company_id | enabled |
+| `departments` | tenant company_id | enabled |
+| `designations` | tenant company_id | enabled |
+| `dossier_links` | global | enabled |
+| `email_outbox` | global | deliberately global/pre-tenant, no RLS |
+| `email_tokens` | global | deliberately global/pre-tenant, no RLS |
+| `emergency_contacts` | tenant company_id | enabled |
+| `employee_addresses` | tenant company_id | enabled |
+| `employee_assignments` | tenant company_id | enabled |
+| `employee_bank_details` | tenant company_id | enabled |
+| `employee_compensation` | tenant company_id | enabled |
+| `employee_documents` | tenant company_id | enabled |
+| `employee_education` | tenant company_id | enabled |
+| `employee_memberships` | tenant company_id | enabled |
+| `employee_previous_employment` | tenant company_id | enabled |
+| `employee_responsibilities` | tenant company_id | enabled |
+| `employee_training_records` | tenant company_id | enabled |
+| `employees` | tenant company_id | enabled |
+| `feature_flags` | global | deliberately global/pre-tenant, no RLS |
+| `files` | tenant company_id | enabled |
+| `going_rates` | global | enabled |
+| `holiday_types` | tenant company_id | enabled |
+| `impersonation_sessions` | tenant company_id | enabled |
+| `ineligible_codes` | global | enabled |
+| `interviews` | tenant company_id | enabled |
+| `invitations` | pre-tenant explicit session/invitation scope | deliberately global/pre-tenant, no RLS |
+| `key_persons` | tenant company_id | enabled |
+| `late_policies` | tenant company_id | enabled |
+| `leave_ledger` | tenant company_id | enabled |
+| `leave_requests` | tenant company_id | enabled |
+| `leave_types` | tenant company_id | enabled |
+| `leave_year_end_runs` | tenant company_id | enabled |
+| `locations` | tenant company_id | enabled |
+| `memberships` | tenant company_id | enabled |
+| `notification_preferences` | tenant company_id | enabled |
+| `notifications` | tenant company_id | enabled |
+| `offers` | tenant company_id | enabled |
+| `onboarding_dismissals` | tenant company_id | enabled |
+| `org_changes` | tenant company_id | enabled |
+| `organogram_levels` | tenant company_id | enabled |
+| `pay_bands` | tenant company_id | enabled |
+| `pay_scale_rates` | global | enabled |
+| `pay_schedules` | tenant company_id | enabled |
+| `payment_types` | tenant company_id | enabled |
+| `platform_admins` | global | deliberately global/pre-tenant, no RLS |
+| `policy_acceptances` | tenant company_id | enabled |
+| `policy_documents` | tenant company_id | enabled |
+| `postings` | tenant company_id | enabled |
+| `register_changes` | global | deliberately global/pre-tenant, no RLS |
+| `register_company_datasets` | global | deliberately global/pre-tenant, no RLS |
+| `register_company_matches` | global | deliberately global/pre-tenant, no RLS |
+| `register_entries` | global | deliberately global/pre-tenant, no RLS |
+| `register_place_datasets` | global | deliberately global/pre-tenant, no RLS |
+| `register_possible_matches` | global | deliberately global/pre-tenant, no RLS |
+| `register_problem_reports` | global | deliberately global/pre-tenant, no RLS |
+| `register_publications` | global | deliberately global/pre-tenant, no RLS |
+| `register_sponsors` | global | deliberately global/pre-tenant, no RLS |
+| `reminders` | tenant company_id | enabled |
+| `report_jobs` | tenant company_id | enabled |
+| `requisitions` | tenant company_id | enabled |
+| `rota_weeks` | tenant company_id | enabled |
+| `rtw_checks` | tenant company_id | enabled |
+| `rules_versions` | global | enabled |
+| `salary_rules` | global | enabled |
+| `scheduled_shifts` | tenant company_id | enabled |
+| `sessions` | pre-tenant explicit session/invitation scope | deliberately global/pre-tenant, no RLS |
+| `shift_types` | tenant company_id | enabled |
+| `shortage_list_entries` | global | enabled |
+| `soc_checks` | tenant company_id | enabled |
+| `soc_index_entries` | global | enabled |
+| `soc_unit_groups` | global | enabled |
+| `sponsor_documents` | tenant company_id | enabled |
+| `stripe_events` | global | deliberately global/pre-tenant, no RLS |
+| `subscriptions` | tenant company_id | enabled |
+| `tax_codes` | tenant company_id | enabled |
+| `terms_acceptances` | global | deliberately global/pre-tenant, no RLS |
+| `terms_versions` | global | deliberately global/pre-tenant, no RLS |
+| `timesheet_approvals` | tenant company_id | enabled |
+| `trading_hours_days` | tenant company_id | enabled |
+| `users` | global | deliberately global/pre-tenant, no RLS |
+| `work_log_entries` | tenant company_id | enabled |
+| `working_pattern_days` | tenant company_id | enabled |
 
 ## Verification results
 
-Targeted results and reproducible commands follow after completion.
+- Pre-fix export regression: **4 failed / 3 deselected** (all parameterised cases
+  returned 200 through generic file metadata instead of 404).
+- Pre-fix deletion regression: **1 failed / 4 deselected** (returned 202 instead of
+  `403 STEP_UP_REQUIRED`).
+- Initial pre-fix billing regression: **2 failed / 13 deselected**; checkout
+  returned 200 and cancellation reached plan validation rather than step-up.
+- Post export/deletion fixes: **483 API security tests passed**, zero failed/skipped
+  in 122.56 seconds. This includes endpoint/RBAC matrices, tenant session and RLS,
+  real-router IDOR sweep, file/export/deletion, auth/MFA/session, platform/SSR/support,
+  billing/signature/replay, nested mass assignment/SSRF, body limits, trusted IP,
+  logs/telemetry, AI redaction, OpenAPI and password/TOTP suites. An earlier isolated
+  authorization/RLS pass was **55 passed**; it is subsumed by this run.
+- Production header/browser CSP suite: **17 passed**, including setup, enforced
+  rejection of missing/wrong/replayed script nonces, matching-nonce positive
+  controls, spoofed incoming headers, nonce uniqueness/propagation, cache and
+  security headers. The configured web server runs the production build,
+  public-env allowlist and static bundle scanner before serving it.
+- Fresh migrated database catalog: **103 tables** (102 application + Alembic),
+  **zero** missing tenant RLS/updated-at triggers, owner-rights views, materialised
+  views or SECURITY DEFINER functions. Runtime `rolsuper=false`, `rolbypassrls=false`.
+  79 tables have RLS enabled; the remaining 24 include Alembic and the deliberately
+  global/pre-tenant tables shown in the inventory.
+- API Ruff check/format: **570 files clean**; mypy: **501 source files clean**.
+- Billing component suite after client retry changes: **6 passed**.
+
+The first API probe accidentally overlapped the other agent's full run and had
+7 failures/44 setup errors from shared PostgreSQL role-password changes (5 passed).
+It is invalid concurrency evidence, not counted as a product failure or pass.
+All subsequent database/browser runs use the shared serial lock; the clean
+55- and 483-test runs above replace it. A first standalone catalog script attempt
+failed import-path setup; rerunning with `PYTHONPATH=.` produced the catalog
+results above. A guessed deletion component-test path matched no tests; the real
+client flow is verified by its browser journey, not claimed as a unit-test pass.
+
+Final billing regression and updated browser journey results follow after completion.
