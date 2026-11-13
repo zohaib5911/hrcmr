@@ -793,39 +793,9 @@
   },
   {
     "source": "web/app/(marketing)/sponsors/profile/[id]/[slug]/page.tsx",
-    "route": "/sponsors/profile/[id]/right-to-work-checks",
+    "route": "/sponsors/profile/[id]/[slug]",
     "group": "public",
-    "key": "public-sponsors-profile-id-right-to-work-checks"
-  },
-  {
-    "source": "web/app/(marketing)/sponsors/profile/[id]/[slug]/page.tsx",
-    "route": "/sponsors/profile/[id]/follow-up-right-to-work-checks",
-    "group": "public",
-    "key": "public-sponsors-profile-id-follow-up-right-to-work-checks"
-  },
-  {
-    "source": "web/app/(marketing)/sponsors/profile/[id]/[slug]/page.tsx",
-    "route": "/sponsors/profile/[id]/right-to-work-changes-october-2026",
-    "group": "public",
-    "key": "public-sponsors-profile-id-right-to-work-changes-october-2026"
-  },
-  {
-    "source": "web/app/(marketing)/sponsors/profile/[id]/[slug]/page.tsx",
-    "route": "/sponsors/profile/[id]/sponsor-licence-audit-preparation",
-    "group": "public",
-    "key": "public-sponsors-profile-id-sponsor-licence-audit-preparation"
-  },
-  {
-    "source": "web/app/(marketing)/sponsors/profile/[id]/[slug]/page.tsx",
-    "route": "/sponsors/profile/[id]/statutory-holiday-entitlement",
-    "group": "public",
-    "key": "public-sponsors-profile-id-statutory-holiday-entitlement"
-  },
-  {
-    "source": "web/app/(marketing)/sponsors/profile/[id]/[slug]/page.tsx",
-    "route": "/sponsors/profile/[id]/sponsor-reporting-duties",
-    "group": "public",
-    "key": "public-sponsors-profile-id-sponsor-reporting-duties"
+    "key": "public-sponsors-profile-id-slug"
   },
   {
     "source": "web/app/(marketing)/sponsors/regions/[region]/page.tsx",
