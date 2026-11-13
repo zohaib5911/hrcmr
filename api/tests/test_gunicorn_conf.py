@@ -52,3 +52,13 @@ def test_gunicorn_own_messages_are_json_and_redacted(
     assert record["logger"] == "gunicorn.error"
     assert "LEAKED-PASSWORD" not in line
     assert "svc:***@db/app" in record["event"]
+
+
+def test_worker_freezes_the_startup_heap_out_of_the_garbage_collector(conf: ModuleType) -> None:
+    import gc
+
+    try:
+        conf.post_worker_init(object())
+        assert gc.get_freeze_count() > 0
+    finally:
+        gc.unfreeze()

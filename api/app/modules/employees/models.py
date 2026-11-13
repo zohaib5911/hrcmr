@@ -149,6 +149,12 @@ class Employee(Base, RecordMixin, TenantMixin):
         ),
         Index("ix_employees_company_id_status", "company_id", "status"),
         Index(
+            "ix_employees_company_id_name",
+            "company_id",
+            func.lower(column("last_name")),
+            func.lower(column("first_name")),
+        ),
+        Index(
             "ix_employees_company_id_ni_number_index",
             "company_id",
             "ni_number_index",

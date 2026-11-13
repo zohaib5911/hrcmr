@@ -6,6 +6,7 @@ Railway provides PORT. Tune the worker count with WEB_CONCURRENCY. Start with:
 
 from __future__ import annotations
 
+import gc
 import multiprocessing
 import os
 from pathlib import Path
@@ -49,3 +50,11 @@ accesslog = None
 errorlog = "-"
 loglevel = "info"
 logger_class = JsonLogger
+
+
+def post_worker_init(worker: Any) -> None:
+    """Move everything loaded at start-up (modules, the app, reference data) out of the garbage
+    collector's view. Otherwise each full collection walks that whole heap: about 180 ms, which
+    showed up as the p95 of the main lists (T22.2). Refcounting still frees objects as usual."""
+    gc.collect()
+    gc.freeze()
