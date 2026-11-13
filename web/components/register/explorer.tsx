@@ -388,25 +388,11 @@ export function RegisterExplorer() {
           </div>
           <section aria-label={`${view} view`}>
             {view === "Map" && (
-              <div className="grid items-start gap-6 md:grid-cols-2">
+              <div className="space-y-3">
                 <RegionMap counts={counts} deltaLabel="since prior publication day" />
-                <div>
-                  <h2 className="text-title-2 mb-3">Regions at a glance</h2>
-                  <dl className="space-y-2">
-                    {REGIONS.map((r) => (
-                      <div className="flex justify-between gap-3" key={r.name}>
-                        <dt>{r.name}</dt>
-                        <dd>
-                          {number(counts[r.name]?.count ?? 0)} ({signed(counts[r.name]?.delta ?? 0)}
-                          )
-                        </dd>
-                      </div>
-                    ))}
-                  </dl>
-                  <p className="text-footnote mt-4">
-                    Schematic map. Unknown placements are included in the totals and listed below.
-                  </p>
-                </div>
+                <p className="text-footnote text-label-secondary">
+                  Unknown placements are included in the totals and listed below.
+                </p>
               </div>
             )}
             {view === "Trend" && <HistoryChart points={data.timeline ?? []} trend />}

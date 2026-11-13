@@ -23,7 +23,14 @@ for (const theme of ["light", "dark"] as const) {
     await expect(
       page.getByRole("status").filter({ hasText: "51 matching sponsors" }),
     ).toBeVisible();
-    await expect(page.getByRole("img", { name: /Schematic map/ })).toBeVisible();
+    await expect(page.getByRole("group", { name: /Map of UK regions/ })).toBeVisible();
+    const london = page.getByRole("button", { name: /^London: / });
+    await london.focus();
+    await page.keyboard.press("Enter");
+    await expect(london).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByTestId("region-tooltip")).toContainText("London");
+    await page.keyboard.press("Escape");
+    await expect(london).toHaveAttribute("aria-pressed", "false");
     expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
     await page.getByRole("button", { name: "Trend", exact: true }).click();
     await expect(page.getByRole("img", { name: "Sponsor count by publication" })).toBeVisible();
