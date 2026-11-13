@@ -376,9 +376,57 @@ The first API probe accidentally overlapped the other agent's full run and had
 7 failures/44 setup errors from shared PostgreSQL role-password changes (5 passed).
 It is invalid concurrency evidence, not counted as a product failure or pass.
 All subsequent database/browser runs use the shared serial lock; the clean
-55- and 483-test runs above replace it. A first standalone catalog script attempt
-failed import-path setup; rerunning with `PYTHONPATH=.` produced the catalog
-results above. A guessed deletion component-test path matched no tests; the real
-client flow is verified by its browser journey, not claimed as a unit-test pass.
-
+55- and 483-test runs above replace it.
 Final billing regression and updated browser journey results follow after completion.
+
+### Reproduction
+
+Install the scanner versions listed above and use the current checkout. These
+are the CI policies; no findings were suppressed or scanner thresholds relaxed.
+Local scanner artifacts stay untracked because raw reports can contain source
+snippets, URLs or sensitive context.
+
+```sh
+gitleaks git --config .gitleaks.toml --redact --no-banner --log-opts=--all
+semgrep scan --error --metrics=off --quiet \
+  --config p/default --config p/python --config p/typescript --config p/nextjs \
+  --config p/dockerfile --config p/github-actions --config p/owasp-top-ten
+trivy config --severity MEDIUM,HIGH,CRITICAL --exit-code 1 --skip-version-check \
+  --skip-files web/Dockerfile.dockerignore .
+actionlint
+zizmor --offline --no-progress --min-severity low .github
+```
+
+Run frozen Python export/pip-audit and both pnpm policies exactly as in
+`.github/workflows/ci.yml` (`audit` job); container image scans remain in its
+`images` matrix. In a read-only home directory, set `UV_TOOL_DIR`,
+`SEMGREP_SETTINGS_FILE` and `SEMGREP_LOG_FILE` to writable local cache paths.
+
+From `api/`, the 483-case security selection was:
+
+```sh
+bash /home/zohaib/cmr_hr/.agent/bus.sh serial -- uv run pytest -q \
+  tests/db/test_exports.py tests/db/test_deletion.py tests/db/test_files.py \
+  tests/db/test_endpoint_security.py tests/db/test_rbac_enforcement.py \
+  tests/db/test_rls_isolation.py tests/db/test_tenant_session.py \
+  tests/db/test_pentest_idor.py tests/db/test_auth_flows.py \
+  tests/db/test_auth_endpoints.py tests/db/test_platform_session.py \
+  tests/db/test_platform_ssr.py tests/db/test_support_mode.py tests/db/test_billing.py \
+  tests/test_pentest.py tests/test_body_limits.py tests/test_client_ip.py \
+  tests/test_logging.py tests/test_telemetry.py tests/test_ai_redaction.py \
+  tests/test_openapi.py tests/test_passwords_and_totp.py tests/test_stripe.py \
+  tests/test_rbac_matrix.py
+```
+
+The final billing tests add two cases to that selection. `uv run python -m
+app.cli check-rls` checks the configured database; the fresh-catalog pass used the
+same five drift guards through `tests.db.support.temporary_database()` on fully
+applied migrations and checked `pg_roles` plus `pg_class`/`pg_policy` as `app_user`.
+
+From `web/`, production browser verification:
+
+```sh
+bash /home/zohaib/cmr_hr/.agent/bus.sh serial -- pnpm exec playwright test \
+  tests/e2e/security-headers.spec.ts tests/e2e/journeys/account-deletion.spec.ts \
+  --project production
+```
