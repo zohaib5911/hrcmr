@@ -12,7 +12,7 @@ Open findings: 0 P0 / 1 P1 / 3 P2 — FIX NEEDED.
 - **Fix:** keep the behaviour (exact names, whole-file duplicate rejection, provenance, flag default off), but stream the CSV (`csv.reader` over `io.TextIOWrapper(gzip/file)`) and keep only the rows whose normalised name is a current or former register sponsor name, plus the names seen twice, so duplicates are still rejected. Store that reduced, compressed index as the dataset content instead of the raw file, and record the original SHA-256 as now. Update `docs/runbooks/register-companies.md`.
 - **Done when:** the existing C4.1.15 tests pass unchanged, and a new test shows a name duplicated in the source file stays unmatched while the stored content holds only sponsor-relevant names.
 
-### [ ] C4.2.3 · P2 · Use the real title-3 type token in platform admin screens (pattern drift)
+### [x] C4.2.3 · P2 · Use the real title-3 type token in platform admin screens (pattern drift) — fixed in PR #110
 - **Problem:** `text-title3` is not a defined token (globals.css defines `--text-title-3`), so these headings get no type style: `web/components/platform/register-admin.tsx:65,88,119` (new in C4.1.19, copied from) `jobs-admin.tsx:63,79` and `queues-admin.tsx:124,170`.
 - **Fix:** replace `text-title3` with `text-title-3` in those three files. Change nothing else.
 - **Done when:** `grep -rn "text-title3" web/components web/app` returns nothing; the platform admin unit tests, lint and typecheck pass.
