@@ -84,34 +84,35 @@ test.describe("Content-Security-Policy", () => {
     }) => {
       const previous = await request.get("/");
       const oldNonce = nonceOf(parseCsp(previous.headers()["content-security-policy"]));
-      const response = await page.goto("/");
-      expect(response).not.toBeNull();
-      const nonce = nonceOf(parseCsp(response!.headers()["content-security-policy"]));
-      expect(nonce).not.toBe(oldNonce);
-
-      // A positive control proves script execution works in this document, even on the local
-      // HTTP test host where upgrade-insecure-requests prevents loading external bundles.
-      await page.evaluate(
-        ({ nonce, oldNonce, invalidNonce }) => {
+      // Inject parser-created scripts into the real response. Scripts appended synchronously
+      // through DevTools page.evaluate inherit the inspector's CSP bypass in Chromium.
+      await page.route("**/*", async (route) => {
+        if (!route.request().isNavigationRequest()) return route.continue();
+        const response = await route.fetch();
+        const nonce = nonceOf(parseCsp(response.headers()["content-security-policy"]));
+        expect(nonce).not.toBe(oldNonce);
+        const invalid =
+          invalidNonce === "missing"
+            ? ""
+            : ` nonce="${invalidNonce === "previous-response" ? oldNonce : "INCORRECT"}"`;
+        // The matching-nonce script is both a positive control and the violation listener.
+        const probes = `<script nonce="${nonce}">
           document.addEventListener("securitypolicyviolation", (event) => {
             if (event.blockedURI === "inline" && event.effectiveDirective === "script-src-elem") {
               document.documentElement.dataset.cspViolation = event.disposition;
             }
           });
-          const allowed = document.createElement("script");
-          allowed.nonce = nonce;
-          allowed.textContent = "document.documentElement.dataset.cspAllowed = 'executed'";
-          document.body.append(allowed);
-
-          const blocked = document.createElement("script");
-          if (invalidNonce !== "missing") {
-            blocked.nonce = invalidNonce === "previous-response" ? oldNonce : "INCORRECT";
-          }
-          blocked.textContent = "document.documentElement.dataset.cspBlocked = 'executed'";
-          document.body.append(blocked);
-        },
-        { nonce, oldNonce, invalidNonce },
-      );
+          document.documentElement.dataset.cspAllowed = "executed";
+        </script><script${invalid}>
+          document.documentElement.dataset.cspBlocked = "executed";
+        </script>`;
+        await route.fulfill({
+          response,
+          body: (await response.text()).replace("</head>", `${probes}</head>`),
+        });
+      });
+      const response = await page.goto("/");
+      expect(response).not.toBeNull();
 
       await expect(page.locator("html")).toHaveAttribute("data-csp-allowed", "executed");
       await expect(page.locator("html")).toHaveAttribute("data-csp-violation", "enforce");
