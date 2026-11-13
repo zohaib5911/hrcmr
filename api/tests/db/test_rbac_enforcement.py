@@ -323,7 +323,7 @@ async def test_every_real_routes_permission_dependencies_match_the_matrix(
     """
     app = setup.client._transport.app  # type: ignore[attr-defined]
     browser = await setup.person(role)
-    checked = 0
+    checked = set()
     async with browser:
         for path, methods, dependant in registered_routes(app):
             if path.startswith("/api/v1/probe/"):
@@ -383,6 +383,7 @@ async def test_every_real_routes_permission_dependencies_match_the_matrix(
                             path,
                             role,
                         )
+                        assert all(value.company_id == setup.company for value in accesses)
                     else:
                         with pytest.raises(AppError) as raised:
                             await solve_dependencies(
@@ -398,8 +399,13 @@ async def test_every_real_routes_permission_dependencies_match_the_matrix(
                             role,
                             raised.value.code,
                         )
-                    checked += 1
-    assert checked > 150
+                    checked.add((method, path))
+    assert checked == {
+        (method, path)
+        for path, methods, dependant in registered_routes(app)
+        if not path.startswith("/api/v1/probe/") and permissions(dependant)
+        for method in methods
+    }
 
 
 # --- the reports chain ------------------------------------------------------------------------------
