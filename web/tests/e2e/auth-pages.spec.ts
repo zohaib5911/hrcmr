@@ -87,7 +87,7 @@ test("the keyboard reaches every control on the sign-in page in reading order", 
   }
   expect(reached).toEqual([
     "Skip to content",
-    "Brand",
+    "stuffhub",
     "United Kingdom",
     "USAComing soon",
     "AustraliaComing soon",
