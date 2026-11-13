@@ -2,6 +2,11 @@
 
 Date: 2026-11-13. Reviewer: codex (BIG). Baseline: `38ceed56097a410237f28bcc529d1eb216bbe29c`.
 
+Result: **one P0 and two P1 findings fixed**, with failing-before/passing-after
+regressions; no outstanding P0/P1 identified in the reviewed source. Requested
+native scans are clean. Production image scans require the PR's mandatory CI jobs;
+HTTPS staging/deployment acceptance remains separate, as detailed below.
+
 Scope: plan §4 and §7, the threat model in `docs/security.md`, all registered API
 routers and SQLAlchemy tables, production headers, dependencies and CI supply chain.
 Severity follows `audit.md`: P0 security/tenant leakage or failing checks; P1 missing
@@ -14,7 +19,7 @@ Native versions match the CI pins. Results collected before the fixes:
 
 | Gate | Local result |
 | --- | --- |
-| gitleaks 8.30.1, full history (`--log-opts=--all`, redacted) | 899 commits, 16.05 MB; zero leaks |
+| gitleaks 8.30.1, full history (`--log-opts=--all`, redacted) | 899 baseline / 904 checkpoint commits, 16.05 / 16.10 MB; zero leaks |
 | Semgrep 1.180.0, all seven CI registry configurations | 1,190 files; zero findings, zero errors |
 | pip-audit 2.10.1, frozen exported lock including development dependencies | No known vulnerabilities |
 | pnpm production moderate+ and all dependencies high+ | Both report no known vulnerabilities |
@@ -59,7 +64,7 @@ requester identity, ready status and expiry, and writes `export.downloaded`.
 and expired artifacts, the requester and another same-company admin/HR admin,
 metadata and download, and absence of a download audit on rejection. Existing
 export tests retain the successful dedicated download and cross-company cases.
-Before/after execution results are recorded below once complete.
+Before/after execution results are recorded below.
 
 **SEC-2026-02 — P1: deletion without an export skipped required step-up.**
 `api/app/modules/deletion/router.py`, `request_deletion`, checked recent
@@ -377,7 +382,28 @@ The first API probe accidentally overlapped the other agent's full run and had
 It is invalid concurrency evidence, not counted as a product failure or pass.
 All subsequent database/browser runs use the shared serial lock; the clean
 55- and 483-test runs above replace it.
-Final billing regression and updated browser journey results follow after completion.
+- The improved pre-fix billing probe used a real active plan for cancellation:
+  **2 failed / 13 deselected**; both actions returned 200 instead of rejecting
+  unauthenticated step-up state. A transition run started before the billing guard
+  edit loaded (25 passed / those same 2 failed); the final rerun below uses the
+  completed guards.
+- Final production browser run after client changes: **18 passed** in 25.4 seconds,
+  including setup, all 16 header/CSP cases and the real deletion journey through
+  password step-up, emailed-code confirmation and withdrawal.
+- Web ESLint and TypeScript passed after the client and test edits; billing
+  component tests remain **6 passed**. No OpenAPI shape changed.
+
+- Final API regression run on completed guards: **27 passed / zero failed or
+  skipped**, in 24.52 seconds (`test_billing.py`, `test_exports.py`,
+  `test_deletion.py`). This includes the seven new security regression cases and
+  existing authorized checkout/cancellation/refund, export and deletion flows.
+- Post-fix Semgrep rerun: **1,190 files, zero findings, zero errors**. Full-history
+  gitleaks checkpoint: **904 commits, zero leaks**. Dependency, configuration and
+  workflow inputs did not change after their clean scans.
+
+All three findings are fixed in this block; no deferred P0/P1 was written into
+`changesneeded.md`. Production-image CI and the existing deployed checks are
+explicit limits of this local report, not local passes.
 
 ### Reproduction
 
