@@ -1,3 +1,4 @@
+import { PublicDate } from "@/components/marketing/public-content";
 import { ResourceHub } from "@/components/resources/hub";
 import { isPublishable, loadTemplates } from "@/lib/templates/manifest";
 import { pageMetadata } from "@/lib/seo";
@@ -29,7 +30,7 @@ export default function TemplatesPage() {
               <h3 className="text-title-3 text-label">{template.title}</h3>
               <p className="text-lead text-label-secondary mt-3">{template.description}</p>
               <p className="text-footnote text-label-secondary mt-3">
-                Version {template.version} · Reviewed: {template.reviewed_on}
+                Version {template.version} · Reviewed: <PublicDate value={template.reviewed_on} />
               </p>
               <a
                 className="text-accent-text mt-4 inline-block underline underline-offset-4"

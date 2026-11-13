@@ -1,3 +1,4 @@
+import { formatUk } from "@/lib/ui/dates";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -22,7 +23,7 @@ describe("public resource hubs", () => {
     for (const { href } of resourceCategories) expect(home).toContain(`href="${href}"`);
     for (const guide of guides) {
       expect(guidePage).toContain(`href="/resources/guides/${guide.slug}"`);
-      expect(guidePage).toContain(guide.reviewedOn);
+      expect(guidePage).toContain(formatUk(guide.reviewedOn));
     }
     expect(resourceTools).toHaveLength(15);
     for (const tool of resourceTools) {
@@ -46,7 +47,8 @@ describe("public resource hubs", () => {
     const html = renderToStaticMarkup(<TemplatesPage />);
     expect(html).toContain(`href="/resources/templates/download/${entry.file}"`);
     expect(html).toContain("Version 1.0");
-    expect(html).toContain("2026-11-12");
+    expect(html).toContain('dateTime="2026-11-12"');
+    expect(html).toContain("12 Nov 2026");
     expect(html).not.toContain("awaiting human review");
   });
 
