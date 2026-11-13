@@ -526,7 +526,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T22.1 · S · Full E2E suite for the top 25 journeys
 - **Spec:** plan L1498. One spec per journey under `web/tests/e2e/journeys/`; one commit per 3–5 journeys.
 
-### [ ] T22.2 · S · Performance budgets
+### [x] T22.2 · S · Performance budgets
 - **Spec:** plan L1499. Seed 1,000 employees (dev seed only); measure p95; add indexes with a migration; EXPLAIN tests for main lists.
 
 ### [ ] T22.3 · S · Accessibility audit
