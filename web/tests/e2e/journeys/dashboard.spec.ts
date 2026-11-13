@@ -1,6 +1,6 @@
 /** T14.1 dashboard: the cards render for an administrator, the set-up checklist can be dismissed, and the page holds at 390 px. */
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 test("the dashboard shows the cards and the set-up checklist, which can be dismissed", async ({
   page,
