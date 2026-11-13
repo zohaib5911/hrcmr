@@ -230,6 +230,67 @@ async def test_read_routes_share_a_connection_budget(
         assert (await other.get(f"{API}{path}")).status_code == 200
 
 
+async def test_internal_reads_have_a_separate_budget(
+    rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        rig["app"].state,
+        "settings",
+        rig["app"].state.settings.model_copy(update={"trusted_proxy_cidrs": "192.0.2.0/24"}),
+    )
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=rig["app"], client=("192.0.2.1", 12345)),
+        base_url="http://test",
+    ) as public:
+        for _ in range(121):
+            response = await public.get(f"{API}/sitemap")
+            assert response.status_code == 200, response.text
+
+
+async def test_trusted_peer_with_visitor_header_keeps_per_visitor_budget(
+    rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        rig["app"].state,
+        "settings",
+        rig["app"].state.settings.model_copy(update={"trusted_proxy_cidrs": "192.0.2.0/24"}),
+    )
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=rig["app"], client=("192.0.2.1", 12345)),
+        base_url="http://test",
+    ) as public:
+        headers = {"X-Real-IP": "198.51.100.1"}
+        for _ in range(120):
+            response = await public.get(f"{API}/sitemap", headers=headers)
+            assert response.status_code == 200, response.text
+        assert (await public.get(f"{API}/sitemap", headers=headers)).status_code == 429
+        assert (
+            await public.get(f"{API}/sitemap", headers={"X-Real-IP": "198.51.100.2"})
+        ).status_code == 200
+        assert (await public.get(f"{API}/sitemap")).status_code == 200
+
+
+async def test_untrusted_peer_keeps_connection_budget(
+    rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        rig["app"].state,
+        "settings",
+        rig["app"].state.settings.model_copy(update={"trusted_proxy_cidrs": "192.0.2.0/24"}),
+    )
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=rig["app"], client=("198.51.100.1", 12345)),
+        base_url="http://test",
+    ) as public:
+        for _ in range(120):
+            response = await public.get(f"{API}/sitemap")
+            assert response.status_code == 200, response.text
+        assert (await public.get(f"{API}/sitemap")).status_code == 429
+        assert (
+            await public.get(f"{API}/sitemap", headers={"X-Real-IP": "198.51.100.2"})
+        ).status_code == 429
+
+
 async def test_explorer_retains_its_own_connection_limit(
     rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
