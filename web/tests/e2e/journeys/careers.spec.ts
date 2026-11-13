@@ -91,7 +91,8 @@ test("a public applicant is interviewed, accepts an offer and becomes an employe
     await expect(convert).toBeDisabled();
     await page.getByRole("button", { name: "Move to Shortlisted", exact: true }).click();
     const interviews = page.getByRole("region", { name: "Interviews", exact: true });
-    await interviews.getByLabel("Date and time", { exact: true }).fill("2026-12-01T10:00");
+    await interviews.getByLabel("Interview date", { exact: true }).fill("1 Dec 2026");
+    await interviews.getByLabel("Interview time", { exact: true }).fill("10:00");
     await interviews.getByRole("button", { name: "Book interview", exact: true }).click();
     await expect(interviews.getByLabel("Outcome", { exact: true })).toBeVisible();
     const calendarDownload = page.waitForEvent("download");
