@@ -192,6 +192,8 @@ for (const colorScheme of ["light", "dark"] as const) {
       await admin.addCookies([{ ...tenantCookie!, domain: "admin.example.test", path: "/" }]);
       const publicContext = await browser.newContext(options);
       const publicPage = await publicContext.newPage();
+      // Evidence writes can trigger dev HMR. Keep the loaded showcase stable while capturing it.
+      await publicPage.routeWebSocket("**/_next/webpack-hmr**", () => {});
       const authContext = await browser.newContext(options);
       const authPage = await authContext.newPage();
       await authPage.goto("/login");
