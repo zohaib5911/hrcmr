@@ -68,7 +68,7 @@ export function DialogContent({
           "max-md:data-[state=open]:slide-in-from-bottom max-md:data-[state=closed]:slide-out-to-bottom",
           // Larger screens: centred, scaling in from 0.96.
           "md:top-1/2 md:left-1/2 md:w-[min(32rem,calc(100vw-2rem))] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-sheet md:p-6",
-          "md:data-[state=open]:zoom-in-95 md:data-[state=closed]:zoom-out-95",
+          "md:data-[state=open]:zoom-in-96 md:data-[state=closed]:zoom-out-96",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
           "duration-[var(--duration-sheet)] motion-reduce:data-[state=open]:zoom-in-100 motion-reduce:data-[state=closed]:zoom-out-100 motion-reduce:max-md:data-[state=open]:slide-in-from-bottom-0 motion-reduce:max-md:data-[state=closed]:slide-out-to-bottom-0",
           className,
