@@ -1,11 +1,14 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
+
 import { PageHeader } from "@/components/app/page-header";
 import { Alert } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Icon } from "@/components/ui/icon";
 import { StatusChip } from "@/components/ui/status-chip";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
@@ -193,8 +196,16 @@ export function CompanyDetail({
     }
   }
   return (
-    <div className="mx-auto grid max-w-6xl gap-6">
-      <a href="/companies" className="text-accent-text">
+    <div className="grid gap-6">
+      <a
+        href="/companies"
+        className={buttonVariants({
+          variant: "plain",
+          size: "sm",
+          className: "-ml-3 justify-self-start",
+        })}
+      >
+        <Icon icon={ChevronLeft} size={16} />
         All companies
       </a>
       <PageHeader title={company.name} description={company.contact_email ?? company.slug} />

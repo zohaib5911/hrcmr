@@ -8,7 +8,7 @@ import { useCan } from "@/components/app/session-context";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
-import { TextField } from "@/components/ui/text-field";
+import { DatePicker } from "@/components/ui/date-picker";
 import type { components } from "@/lib/api/client";
 import { STATUS, type Status } from "@/lib/attendance";
 import { attempt, type Problem } from "@/lib/auth/request";
@@ -92,14 +92,13 @@ export function AttendanceBulk() {
             >
               Previous week
             </Button>
-            <TextField
+            <DatePicker
               label="Week containing"
-              type="date"
-              value={start}
+              value={start || null}
               disabled={locked}
-              onChange={(e) => {
-                if (e.target.value) {
-                  setStart(startOfWeek(e.target.value));
+              onChange={(picked) => {
+                if (picked ?? "") {
+                  setStart(startOfWeek(picked ?? ""));
                   setOffset(0);
                 }
               }}

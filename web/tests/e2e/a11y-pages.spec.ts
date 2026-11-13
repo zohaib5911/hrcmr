@@ -123,6 +123,19 @@ async function open(page: Page, path: string, expectedStatus?: number) {
   await page.waitForLoadState("networkidle");
 }
 
+/** T25.5 route acceptance: both audit widths, with no phase-gate screenshots. */
+async function auditAppWidths(page: Page, path: string, label: string) {
+  for (const width of [390, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    await open(page, path);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+      `${label} at ${width}px`,
+    ).toBeLessThanOrEqual(0);
+    await audit(page, `${label} at ${width}px`);
+  }
+}
+
 /** Fresh records, using the same real API setup as the T22.4 route sweep. */
 async function createRecruitment(request: APIRequestContext, colorScheme: string) {
   const headers = await csrfHeaders(request);
@@ -176,8 +189,7 @@ for (const colorScheme of ["light", "dark"] as const) {
     test("every signed-in page passes axe", async ({ page }) => {
       test.setTimeout(APP_PAGES.length * 15_000);
       for (const path of APP_PAGES) {
-        await open(page, path);
-        await audit(page, `${colorScheme} ${path}`);
+        await auditAppWidths(page, path, `${colorScheme} ${path}`);
       }
     });
 
@@ -194,8 +206,27 @@ for (const colorScheme of ["light", "dark"] as const) {
       });
       expect(made.status(), await made.text()).toBe(201);
       const { id } = (await made.json()) as { id: string };
-      await open(page, `/employees/${id}`);
-      await audit(page, `${colorScheme} employee profile`);
+      await auditAppWidths(page, `/employees/${id}`, `${colorScheme} employee profile`);
+      // The last dynamic app family in the design inventory: a real assigned course.
+      const headers = await csrfHeaders(page.request);
+      const users = await (await page.request.get(`${API}/users`)).json();
+      const me = users.users.find((user: { is_you: boolean }) => user.is_you);
+      const linked = await page.request.put(`${API}/users/${me.id}/employee`, {
+        headers,
+        data: { employee_id: id },
+      });
+      expect(linked.status(), await linked.text()).toBe(200);
+      const courses = await (await page.request.get(`${API}/learning/courses`)).json();
+      const course = courses.find((item: { slug: string }) => item.slug === "e2e-test-course");
+      expect(course).toBeTruthy();
+      const assigned = await page.request.post(`${API}/learning/assignments`, {
+        headers,
+        data: { course_ids: [course.id], employee_ids: [id], due_on: "2026-12-01" },
+      });
+      expect(assigned.status(), await assigned.text()).toBe(201);
+      const own = await (await page.request.get(`${API}/learning/assignments/own`)).json();
+      expect(own).toHaveLength(1);
+      await auditAppWidths(page, `/learning/assignments/${own[0].id}`, `${colorScheme} learner`);
     });
 
     test("policy and recruitment details pass axe", async ({ page, browser }) => {
@@ -221,8 +252,7 @@ for (const colorScheme of ["light", "dark"] as const) {
         `/recruitment/candidates/${candidate.id}`,
         `/recruitment/applications/${application.id}`,
       ]) {
-        await open(page, path);
-        await audit(page, `${colorScheme} ${path}`);
+        await auditAppWidths(page, path, `${colorScheme} ${path}`);
       }
       // /careers/[company] and /careers/[company]/[posting] must work for an applicant
       // without the company administrator's cookies.
@@ -312,9 +342,16 @@ test.describe("platform admin", () => {
 
         for (const path of [...ADMIN_PAGES, `/companies/${company!.id}`]) {
           await test.step(path, async () => {
-            await open(page, `${ADMIN_ORIGIN}${path}`);
-            await audit(page, `${colorScheme} platform ${path}`);
+            await auditAppWidths(page, `${ADMIN_ORIGIN}${path}`, `${colorScheme} platform ${path}`);
           });
+        }
+        // These two entry states are checked as SSR on local HTTP. Keep scripts blocked so the
+        // automatic cross-site start cannot navigate away; hydrated HTTPS checks remain at P25.
+        await page.route("**/_next/**", (route) =>
+          route.request().resourceType() === "script" ? route.abort() : route.continue(),
+        );
+        for (const path of ["/session", "/session-required?code=UNREACHABLE"]) {
+          await auditAppWidths(page, `${ADMIN_ORIGIN}${path}`, `${colorScheme} platform ${path}`);
         }
       });
 

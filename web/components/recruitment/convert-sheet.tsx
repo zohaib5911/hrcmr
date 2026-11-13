@@ -5,6 +5,7 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { FormSheet } from "@/components/company/form-sheet";
 import { Select } from "@/components/ui/select";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TextField } from "@/components/ui/text-field";
 import { useToast } from "@/components/ui/toast";
 import type { components } from "@/lib/api/client";
@@ -113,12 +114,11 @@ export function ConvertSheet({
           onChange={(e) => setNumber(e.target.value)}
           error={problem?.field === "employee_number" ? problem.message : undefined}
         />
-        <TextField
+        <DatePicker
           label="Hire date"
-          type="date"
           required
-          value={hireDate}
-          onChange={(e) => setHireDate(e.target.value)}
+          value={hireDate || null}
+          onChange={(picked) => setHireDate(picked ?? "")}
           hint="Taken from the offer's start date unless you change it."
           error={problem?.field === "hire_date" ? problem.message : undefined}
         />

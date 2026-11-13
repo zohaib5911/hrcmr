@@ -13,6 +13,7 @@ import { KpiCard } from "@/components/ui/kpi-card";
 import { Select } from "@/components/ui/select";
 import { Sheet } from "@/components/ui/sheet";
 import { TextArea } from "@/components/ui/text-area";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
@@ -229,24 +230,22 @@ export function WorkLogWorkspace({ own: ownProp = false }: { own?: boolean }) {
       <div className="flex min-w-0 flex-col gap-5">
         {problem && !remove && <Alert tone="danger" title={problem.message} />}
         <div className="flex flex-wrap items-end gap-3">
-          <TextField
+          <DatePicker
             label="From date"
-            type="date"
-            value={start}
-            onChange={(e) => {
-              if (e.target.value) {
-                setStart(e.target.value);
+            value={start || null}
+            onChange={(picked) => {
+              if (picked ?? "") {
+                setStart(picked ?? "");
                 setOffset(0);
               }
             }}
           />
-          <TextField
+          <DatePicker
             label="To date"
-            type="date"
-            value={end}
-            onChange={(e) => {
-              if (e.target.value) {
-                setEnd(e.target.value);
+            value={end || null}
+            onChange={(picked) => {
+              if (picked ?? "") {
+                setEnd(picked ?? "");
                 setOffset(0);
               }
             }}

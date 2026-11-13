@@ -6,7 +6,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { TextField } from "@/components/ui/text-field";
+import { DatePicker } from "@/components/ui/date-picker";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 
@@ -220,11 +220,10 @@ export function AssignWizard({
 
           {!result && step === 3 ? (
             <div className="flex flex-col gap-4">
-              <TextField
+              <DatePicker
                 label="Due on"
-                type="date"
-                value={dueOn}
-                onChange={(event) => setDueOn(event.target.value)}
+                value={dueOn || null}
+                onChange={(picked) => setDueOn(picked ?? "")}
               />
               <div className="bg-elevated border-separator rounded-card flex flex-col gap-2 border p-4">
                 <p className="text-callout text-label font-semibold">Review</p>

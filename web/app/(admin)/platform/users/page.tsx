@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { UsersAdmin } from "@/components/platform/users-admin";
 import { platformApi, sessionStartPath } from "@/lib/platform/guard";
 import { isPlatformOwner } from "@/lib/platform/owner";
+import { AdminPage } from "@/components/platform/admin-page";
 
 export const metadata: Metadata = {
   title: "Users",
@@ -17,10 +18,8 @@ export default async function Page() {
   // An authenticated, audited read: an expired or refused platform session goes back to the start page.
   await isPlatformOwner(api, "/users");
   return (
-    <main className="min-h-dvh bg-grouped p-5 sm:p-8">
-      <div className="mx-auto max-w-6xl">
-        <UsersAdmin />
-      </div>
-    </main>
+    <AdminPage>
+      <UsersAdmin />
+    </AdminPage>
   );
 }

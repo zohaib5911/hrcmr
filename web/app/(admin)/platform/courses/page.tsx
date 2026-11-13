@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { CourseEditor } from "@/components/platform/course-editor";
 import { serverApi } from "@/lib/auth/server";
+import { AdminPage } from "@/components/platform/admin-page";
 
 export const metadata: Metadata = {
   title: "Courses",
@@ -15,10 +16,8 @@ export default async function Page() {
   const { data } = await client.GET("/admin/courses");
   if (!data) notFound();
   return (
-    <main className="min-h-dvh bg-grouped p-5 sm:p-8">
-      <div className="mx-auto max-w-6xl">
-        <CourseEditor courses={data} />
-      </div>
-    </main>
+    <AdminPage>
+      <CourseEditor courses={data} />
+    </AdminPage>
   );
 }

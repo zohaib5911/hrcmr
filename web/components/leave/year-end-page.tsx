@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { InlineConfirm } from "@/components/ui/inline-confirm";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
@@ -116,14 +117,13 @@ export function YearEndPage({ startMonthDay }: { startMonthDay: string }) {
             void preview();
           }}
         >
-          <TextField
-            type="date"
+          <DatePicker
             label="Leave year starts"
             disabled={busy}
             required
-            value={from}
-            onChange={(e) => {
-              setFrom(e.target.value);
+            value={from || null}
+            onChange={(picked) => {
+              setFrom(picked ?? "");
               setReview(null);
               setOverrides([]);
             }}

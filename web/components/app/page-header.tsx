@@ -6,7 +6,11 @@ interface PageHeaderProps {
   title: string;
   /** One line saying what this page is for. */
   description?: string;
-  /** The page's main action (a filled button) and at most two secondary ones, on the right. */
+  /**
+   * The page's main action (a filled button) and at most two secondary ones, on the right. While the
+   * page shows an EmptyState, leave the add action out: the EmptyState's button is then the one filled
+   * action (design audit row E). It moves up here once the list has something in it.
+   */
   actions?: ReactNode;
   className?: string;
 }

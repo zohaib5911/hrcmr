@@ -5,6 +5,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { SheetContent } from "@/components/ui/sheet";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TextField } from "@/components/ui/text-field";
 import { Toggle } from "@/components/ui/toggle";
 import type { components } from "@/lib/api/client";
@@ -131,20 +132,18 @@ export function RequestSheet({ own, saved }: { own: boolean; saved: () => void }
             </option>
           ))}
         </Select>
-        <TextField
+        <DatePicker
           label="Start date"
-          type="date"
           required
-          value={start}
-          onChange={(e) => setStart(e.target.value)}
+          value={start || null}
+          onChange={(picked) => setStart(picked ?? "")}
         />
-        <TextField
+        <DatePicker
           label="End date"
-          type="date"
           required
-          min={start}
-          value={end}
-          onChange={(e) => setEnd(e.target.value)}
+          min={start || undefined}
+          value={end || null}
+          onChange={(picked) => setEnd(picked ?? "")}
         />
         <Toggle label="Half day at start" checked={halfStart} onCheckedChange={setHalfStart} />
         <Toggle label="Half day at end" checked={halfEnd} onCheckedChange={setHalfEnd} />

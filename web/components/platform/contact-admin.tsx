@@ -117,7 +117,7 @@ export function ContactAdmin() {
             const open = openId === m.id;
             const handled = m.handled_at !== null;
             return (
-              <li key={m.id} className="border-separator rounded-xl border p-4">
+              <li key={m.id} className="bg-elevated rounded-card shadow-e1 p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <span className="text-callout min-w-0 break-words">
                     {m.name}

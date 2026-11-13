@@ -77,7 +77,11 @@ export function LocationsPage({ locations }: { locations: Location[] }) {
       <PageHeader
         title="Locations"
         description="The places your company works from. One is the main address."
-        actions={mayEdit ? <Button onClick={() => setEditing("new")}>Add location</Button> : null}
+        actions={
+          mayEdit && locations.length > 0 ? (
+            <Button onClick={() => setEditing("new")}>Add location</Button>
+          ) : null
+        }
       />
       {locations.length === 0 ? (
         <div className="bg-elevated rounded-card shadow-e1">

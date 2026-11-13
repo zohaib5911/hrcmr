@@ -6,6 +6,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardBody } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import { TextField } from "@/components/ui/text-field";
 import { Toggle } from "@/components/ui/toggle";
 import { Select } from "@/components/ui/select";
@@ -313,18 +314,20 @@ export function SettingsAdmin({
                 <option value="us">US</option>
                 <option value="au">Australia</option>
               </Select>
-              <TextField
-                label="Starts at (local time)"
-                type="datetime-local"
-                value={start}
-                onChange={(e) => setStart(e.target.value)}
+              <DateTimePicker
+                legend="Starts at (local time)"
+                dateLabel="Start date"
+                timeLabel="Start time"
+                value={start || null}
+                onChange={(picked) => setStart(picked ?? "")}
                 required
               />
-              <TextField
-                label="Ends at (local time)"
-                type="datetime-local"
-                value={end}
-                onChange={(e) => setEnd(e.target.value)}
+              <DateTimePicker
+                legend="Ends at (local time)"
+                dateLabel="End date"
+                timeLabel="End time"
+                value={end || null}
+                onChange={(picked) => setEnd(picked ?? "")}
                 required
                 hint="Must be after the start."
               />

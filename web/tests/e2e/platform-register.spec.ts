@@ -12,13 +12,9 @@ test("a support admin sees the seeded register status and navigation", async ({ 
   await page.goto(`${ADMIN_ORIGIN}/register`);
   await expect(page.getByRole("heading", { name: "Sponsor register", exact: true })).toBeVisible();
   await expect(page.getByText("11 Nov 2026", { exact: true })).toBeVisible();
-  await expect(
-    page
-      .locator("div")
-      .filter({ has: page.locator("dt", { hasText: /^Rows in publication$/ }) })
-      .last()
-      .locator("dd"),
-  ).toHaveText("4");
+  await expect(page.getByRole("listitem").filter({ hasText: /^Rows in publication/ })).toHaveText(
+    /^Rows in publication\s*4$/,
+  );
   await expect(page.getByText("No recent import errors.")).toBeVisible();
   await expect(page.getByTestId("platform-bar")).toBeVisible();
 });

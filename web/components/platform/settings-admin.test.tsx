@@ -104,8 +104,11 @@ it("creates a regional announcement and ends it with confirmation", async () => 
   await user.type(screen.getByLabelText("Reason for change"), "Scheduled maintenance");
   await user.type(screen.getByLabelText("Announcement title"), a.title);
   await user.type(screen.getByLabelText("Message"), a.body);
-  await user.type(screen.getByLabelText("Starts at (local time)"), "2026-11-12T10:00");
-  await user.type(screen.getByLabelText("Ends at (local time)"), "2026-11-13T10:00");
+  await user.type(screen.getByLabelText("Start date"), "12 Nov 2026");
+  await user.type(screen.getByLabelText("Start time"), "10:00");
+  await user.type(screen.getByLabelText("End date"), "13 Nov 2026");
+  await user.type(screen.getByLabelText("End time"), "10:00");
+  await user.tab();
   await user.click(screen.getByRole("button", { name: "Create announcement" }));
   expect(post).toHaveBeenCalledWith("/platform/announcements", {
     body: expect.objectContaining({

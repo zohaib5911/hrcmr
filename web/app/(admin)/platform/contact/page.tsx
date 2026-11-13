@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { ContactAdmin } from "@/components/platform/contact-admin";
 import { platformApi, sessionStartPath } from "@/lib/platform/guard";
 import { isPlatformOwner } from "@/lib/platform/owner";
+import { AdminPage } from "@/components/platform/admin-page";
 
 export const metadata: Metadata = {
   title: "Contact messages",
@@ -16,10 +17,8 @@ export default async function Page() {
   // An authenticated, audited read: an expired or refused platform session goes back to the start page.
   await isPlatformOwner(api, "/contact");
   return (
-    <main className="min-h-dvh bg-grouped p-5 sm:p-8">
-      <div className="mx-auto max-w-6xl">
-        <ContactAdmin />
-      </div>
-    </main>
+    <AdminPage>
+      <ContactAdmin />
+    </AdminPage>
   );
 }

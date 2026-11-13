@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { CompanyDetail } from "@/components/platform/company-detail";
 import { platformApi, dataOrSessionRedirect, sessionStartPath } from "@/lib/platform/guard";
+import { AdminPage } from "@/components/platform/admin-page";
 
 export const metadata: Metadata = {
   title: "Company detail",
@@ -19,11 +20,11 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     client.GET("/platform/context", { params: { query: { company_id: id } } }).catch(() => null),
   ]);
   return (
-    <main className="min-h-dvh bg-grouped p-5 sm:p-8">
+    <AdminPage>
       <CompanyDetail
         company={detail ? dataOrSessionRedirect(detail, path) : null}
         context={context ? dataOrSessionRedirect(context, path) : null}
       />
-    </main>
+    </AdminPage>
   );
 }

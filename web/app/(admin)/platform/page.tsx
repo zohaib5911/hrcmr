@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { PlatformOverview } from "@/components/platform/overview";
 import { dataOrSessionRedirect, platformApi, sessionStartPath } from "@/lib/platform/guard";
+import { AdminPage } from "@/components/platform/admin-page";
 
 export const metadata: Metadata = {
   title: "Platform admin",
@@ -17,11 +18,11 @@ export default async function PlatformAdminPage() {
     client.GET("/platform/jobs/queue").catch(() => null),
   ]);
   return (
-    <main className="min-h-dvh bg-grouped p-5 sm:p-8">
+    <AdminPage>
       <PlatformOverview
         metrics={metrics ? dataOrSessionRedirect(metrics, "/") : null}
         queueWaiting={queue ? (dataOrSessionRedirect(queue, "/")?.waiting ?? null) : null}
       />
-    </main>
+    </AdminPage>
   );
 }

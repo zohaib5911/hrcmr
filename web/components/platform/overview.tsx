@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-
+import { PageHeader } from "@/components/app/page-header";
+import { GroupedList, GroupedRow } from "@/components/ui/grouped-list";
 import { KpiCard } from "@/components/ui/kpi-card";
 import type { components } from "@/lib/api/client";
 
@@ -35,13 +35,10 @@ export function PlatformOverview({
   queueWaiting: number | null;
 }) {
   return (
-    <div className="mx-auto max-w-6xl">
-      <h1 className="text-headline">Platform admin</h1>
+    <>
+      <PageHeader title="Platform admin" />
       {metrics ? (
-        <section
-          aria-label="Platform figures"
-          className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        >
+        <section aria-label="Platform figures" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <KpiCard label="Signups, 24 hours" value={metrics.signups_24h} />
           <KpiCard label="Signups, 7 days" value={metrics.signups_7d} />
           <KpiCard label="Active companies" value={metrics.companies_active} />
@@ -66,21 +63,17 @@ export function PlatformOverview({
           ) : null}
         </section>
       ) : (
-        <p role="alert" className="text-body text-label-secondary mt-6">
+        <p role="alert" className="text-body text-label-secondary">
           We could not load the platform figures. Reload the page to try again.
         </p>
       )}
       <nav aria-label="Admin screens" className="mt-8">
-        <ul className="grid gap-2 sm:grid-cols-2">
+        <GroupedList heading="Admin screens">
           {ADMIN_LINKS.map((l) => (
-            <li key={l.href}>
-              <Link href={l.href} className="text-accent-text underline-offset-2 hover:underline">
-                {l.label}
-              </Link>
-            </li>
+            <GroupedRow key={l.href} title={l.label} href={l.href} />
           ))}
-        </ul>
+        </GroupedList>
       </nav>
-    </div>
+    </>
   );
 }

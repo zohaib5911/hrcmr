@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 
-import { PlaceholderPage } from "@/components/app/placeholder-page";
+import { ProfilePage } from "@/components/app/profile-page";
+import { THEME_COOKIE, parseTheme } from "@/lib/theme";
 
 export const metadata: Metadata = { title: "My profile" };
 
-export default function Page() {
-  return <PlaceholderPage id="profile" />;
+export default async function Page() {
+  const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
+  return <ProfilePage theme={theme} />;
 }

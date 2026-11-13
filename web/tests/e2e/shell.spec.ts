@@ -319,6 +319,7 @@ const BUILT = new Set([
   "my-work-log",
   "my-shifts",
   "billing",
+  "profile",
 ]);
 
 test.describe("every page in the sidebar", () => {

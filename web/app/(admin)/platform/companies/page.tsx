@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { CompaniesList, type CompanyFilters } from "@/components/platform/companies-list";
 import { platformApi, dataOrSessionRedirect, sessionStartPath } from "@/lib/platform/guard";
+import { AdminPage } from "@/components/platform/admin-page";
 
 export const metadata: Metadata = { title: "Companies", robots: { index: false, follow: false } };
 export default async function Page({
@@ -31,11 +32,11 @@ export default async function Page({
     .GET("/platform/companies", { params: { query: { ...filters, limit: 25 } } })
     .catch(() => null);
   return (
-    <main className="min-h-dvh bg-grouped p-5 sm:p-8">
+    <AdminPage>
       <CompaniesList
         data={result ? dataOrSessionRedirect(result, "/companies") : null}
         filters={filters}
       />
-    </main>
+    </AdminPage>
   );
 }

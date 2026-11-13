@@ -5,6 +5,8 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { SheetContent } from "@/components/ui/sheet";
+import { TimePicker } from "@/components/ui/time-picker";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TextField } from "@/components/ui/text-field";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { STATUS, type Attendance, type Person, type Status } from "@/lib/attendance";
@@ -94,14 +96,13 @@ export function RecordSheet({
               </option>
             ))}
         </Select>
-        <TextField
+        <DatePicker
           label="Date"
-          type="date"
           required
           disabled={!!row}
-          value={date}
-          onChange={(e) => {
-            setDate(e.target.value);
+          value={date || null}
+          onChange={(picked) => {
+            setDate(picked ?? "");
             setStartFold(undefined);
             setEndFold(undefined);
             setNeedsFold({ start: false, end: false });
@@ -116,13 +117,12 @@ export function RecordSheet({
         </Select>
         {worked && (
           <>
-            <TextField
+            <TimePicker
               label="Clock in"
-              type="time"
               required
-              value={start}
-              onChange={(e) => {
-                setStart(e.target.value);
+              value={start || null}
+              onChange={(picked) => {
+                setStart(picked ?? "");
                 setStartFold(undefined);
                 setNeedsFold((old) => ({ ...old, start: false }));
               }}
@@ -139,13 +139,12 @@ export function RecordSheet({
                 <option value="1">Second occurrence</option>
               </Select>
             )}
-            <TextField
+            <TimePicker
               label="Clock out"
-              type="time"
               required
-              value={end}
-              onChange={(e) => {
-                setEnd(e.target.value);
+              value={end || null}
+              onChange={(picked) => {
+                setEnd(picked ?? "");
                 setEndFold(undefined);
                 setNeedsFold((old) => ({ ...old, end: false }));
               }}

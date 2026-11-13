@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { DossierEditor } from "@/components/compliance/dossier-editor";
 import { ToastProvider } from "@/components/ui/toast";
 import { serverApi } from "@/lib/auth/server";
+import { AdminPage } from "@/components/platform/admin-page";
 
 export const metadata: Metadata = {
   title: "Dossier links",
@@ -15,12 +16,10 @@ export default async function Page() {
   const { data } = await client.GET("/admin/dossier-links");
   if (!data) notFound();
   return (
-    <main className="min-h-dvh bg-grouped p-5 sm:p-8">
-      <div className="mx-auto max-w-5xl">
-        <ToastProvider>
-          <DossierEditor links={data} />
-        </ToastProvider>
-      </div>
-    </main>
+    <AdminPage>
+      <ToastProvider>
+        <DossierEditor links={data} />
+      </ToastProvider>
+    </AdminPage>
   );
 }

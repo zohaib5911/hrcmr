@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { JobsAdmin } from "@/components/platform/jobs-admin";
 import { platformApi, dataOrSessionRedirect, sessionStartPath } from "@/lib/platform/guard";
 import { PAGE_SIZE, pageOffset } from "@/lib/platform/operations";
+import { AdminPage } from "@/components/platform/admin-page";
 export const metadata: Metadata = { title: "Jobs", robots: { index: false, follow: false } };
 export default async function Page({
   searchParams,
@@ -19,14 +20,12 @@ export default async function Page({
       .catch(() => null),
   ]);
   return (
-    <main className="min-h-dvh bg-grouped p-5 sm:p-8">
-      <div className="mx-auto max-w-6xl">
-        <JobsAdmin
-          queue={queue ? dataOrSessionRedirect(queue, "/jobs") : null}
-          failures={failures ? dataOrSessionRedirect(failures, "/jobs") : null}
-          offset={offset}
-        />
-      </div>
-    </main>
+    <AdminPage>
+      <JobsAdmin
+        queue={queue ? dataOrSessionRedirect(queue, "/jobs") : null}
+        failures={failures ? dataOrSessionRedirect(failures, "/jobs") : null}
+        offset={offset}
+      />
+    </AdminPage>
   );
 }
