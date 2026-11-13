@@ -535,7 +535,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T22.4 · S · Design QA sweep with final screenshots
 - **Spec:** plan L1501, §5.12 L439–451. All widths, light/dark → `docs/screenshots/final/`.
 
-### [ ] P22 · S · Phase 22 gate
+### [x] P22 · S · Phase 22 gate
 - Recipe R7.
 
 ### [ ] AUDIT-5 · AUDIT STOP · covers Phases 21–22 — pre-deployment audit
