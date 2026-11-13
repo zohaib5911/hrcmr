@@ -46,8 +46,8 @@ export interface BrandConfig {
 }
 
 export const brand = {
-  name: "Brand",
-  tagline: "Tagline placeholder",
+  name: "stuffhub",
+  tagline: "HR and sponsor compliance, made simple.",
   assistantName: "Assistant",
   colours: {
     accent: "#0071E3",
