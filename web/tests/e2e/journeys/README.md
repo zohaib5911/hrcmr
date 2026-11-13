@@ -2,7 +2,8 @@
 
 Run `pnpm test:journeys` from `web/` (or `pnpm test:e2e` to include them in the full suite).
 The existing E2E wrapper takes the shared agent lock locally. CI discovers these specs through
-`playwright.config.ts`; each spec contains one independently runnable journey. Existing component
+`playwright.config.ts`; each spec covers one independently runnable journey (leave settings also retains four theme/viewport
+accessibility checks). Existing component
 and security specs remain outside this folder. Moving existing workflows here avoids running
 copies of the same tests in CI.
 

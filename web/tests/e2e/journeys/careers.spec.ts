@@ -169,9 +169,16 @@ test("a public applicant is interviewed, accepts an offer and becomes an employe
       headers,
       data: { employee_number: `DUPLICATE-${stamp}`, hire_date: "2026-12-07" },
     });
-    expect(repeat.status(), await repeat.text()).toBe(422);
+    expect(repeat.status(), await repeat.text()).toBe(409);
+    expect((await repeat.json()).error.code).toBe("ALREADY_CONVERTED");
     const hired = await api.get(`${API}/applications/${application.id}`);
     expect(hired.status(), await hired.text()).toBe(200);
     expect((await hired.json()).stage).toBe("hired");
+    const people = await api.get(`${API}/employees`);
+    expect(people.status(), await people.text()).toBe(200);
+    expect((await people.json()).employees).toHaveLength(1);
+    const movedProof = await api.get(`${API}/files/${file.id}`);
+    expect(movedProof.status(), await movedProof.text()).toBe(200);
+    expect(await movedProof.json()).toMatchObject({ owner_type: "employee", owner_id: employee });
   });
 });
