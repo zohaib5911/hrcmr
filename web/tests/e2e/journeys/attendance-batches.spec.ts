@@ -66,6 +66,7 @@ test("preview row errors, import a corrected file, bulk edit and export monthly 
   // then shows the current week (the test only passed while 3 Nov 2026 was in the current week).
   await expect(page.getByRole("combobox", { name: /^Alex Import, / }).first()).toBeVisible();
   await page.getByLabel("Week containing", { exact: true }).fill("2026-11-02");
+  await page.getByLabel("Week containing", { exact: true }).press("Tab");
   const tuesday = page.getByRole("combobox", { name: "Alex Import, 3 Nov 2026", exact: true });
   await expect(tuesday).toHaveValue("present");
   await tuesday.selectOption("late");

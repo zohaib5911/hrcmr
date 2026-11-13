@@ -99,6 +99,7 @@ test("clock from Home, consent to location, clock out and approve a report's com
   await page.goto("/attendance/timesheets");
   await expect(page.getByRole("button", { name: "Review Ben Clock", exact: true })).toBeVisible();
   await page.getByLabel("Timesheet week containing", { exact: true }).fill("2026-01-05");
+  await page.getByLabel("Timesheet week containing", { exact: true }).press("Tab");
   await expect(
     page
       .getByRole("list", { name: "Report timesheets", exact: true })
