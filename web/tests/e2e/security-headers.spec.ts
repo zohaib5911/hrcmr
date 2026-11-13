@@ -28,7 +28,9 @@ test.describe("security headers on every page", () => {
 
 test.describe("Content-Security-Policy", () => {
   test("is strict", async ({ request }) => {
-    const csp = parseCsp((await request.get("/")).headers()["content-security-policy"]);
+    const response = await request.get("/");
+    expect(response.headers()["content-security-policy-report-only"]).toBeUndefined();
+    const csp = parseCsp(response.headers()["content-security-policy"]);
 
     expect(csp.get("default-src")).toEqual(["'self'"]);
     expect(csp.get("frame-ancestors")).toEqual(["'none'"]);
@@ -74,6 +76,48 @@ test.describe("Content-Security-Policy", () => {
     expect(nonceOf(csp)).not.toBe("ATTACKER");
     expect(await response.text()).not.toContain("ATTACKER");
   });
+
+  for (const invalidNonce of ["missing", "incorrect", "previous-response"] as const) {
+    test(`the browser blocks an inline script with a ${invalidNonce} nonce`, async ({
+      page,
+      request,
+    }) => {
+      const previous = await request.get("/");
+      const oldNonce = nonceOf(parseCsp(previous.headers()["content-security-policy"]));
+      const response = await page.goto("/");
+      expect(response).not.toBeNull();
+      const nonce = nonceOf(parseCsp(response!.headers()["content-security-policy"]));
+      expect(nonce).not.toBe(oldNonce);
+
+      // A positive control proves script execution works in this document, even on the local
+      // HTTP test host where upgrade-insecure-requests prevents loading external bundles.
+      await page.evaluate(
+        ({ nonce, oldNonce, invalidNonce }) => {
+          document.addEventListener("securitypolicyviolation", (event) => {
+            if (event.blockedURI === "inline" && event.effectiveDirective === "script-src-elem") {
+              document.documentElement.dataset.cspViolation = event.disposition;
+            }
+          });
+          const allowed = document.createElement("script");
+          allowed.nonce = nonce;
+          allowed.textContent = "document.documentElement.dataset.cspAllowed = 'executed'";
+          document.body.append(allowed);
+
+          const blocked = document.createElement("script");
+          if (invalidNonce !== "missing") {
+            blocked.nonce = invalidNonce === "previous-response" ? oldNonce : "INCORRECT";
+          }
+          blocked.textContent = "document.documentElement.dataset.cspBlocked = 'executed'";
+          document.body.append(blocked);
+        },
+        { nonce, oldNonce, invalidNonce },
+      );
+
+      await expect(page.locator("html")).toHaveAttribute("data-csp-allowed", "executed");
+      await expect(page.locator("html")).toHaveAttribute("data-csp-violation", "enforce");
+      await expect(page.locator("html")).not.toHaveAttribute("data-csp-blocked", "executed");
+    });
+  }
 });
 
 test.describe("other responses", () => {
