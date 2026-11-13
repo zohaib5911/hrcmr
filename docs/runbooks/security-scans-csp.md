@@ -57,6 +57,15 @@ That baseline is historical evidence only: it predates the patched JavaScript
 lockfile. Docker is unavailable inside the agent jail, so current image scans
 run in the new PR's CI, not locally.
 
+T21.3 local verification on 2026-11-13: pip-audit and the complete pnpm audit
+reported no known vulnerabilities; ESLint and TypeScript passed; all 1,466 web
+unit tests (116 files) and 32 guard-script tests passed. The production build,
+public-env allowlist and bundle scan passed while starting the browser test
+servers; all 17 security-header/browser checks passed (including auth setup).
+An initial probe run was 14 passed/3 failed because DevTools-inserted scripts
+bypassed CSP; the corrected probes use parser-created scripts in intercepted
+HTML, with the server's enforcing policy unchanged. No staging run is included.
+
 ## Local enforced CSP checks
 
 `web/proxy.ts` already sends `Content-Security-Policy`, with a fresh nonce on
