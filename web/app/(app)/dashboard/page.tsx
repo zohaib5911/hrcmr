@@ -8,12 +8,13 @@ export const metadata: Metadata = { title: "Dashboard" };
 
 export default function Page() {
   return (
-    <>
-      <DashboardWorkspace />
-      <div className="mt-5 flex flex-wrap gap-3">
-        <ClockLink />
-        <MyShiftsLink />
-      </div>
-    </>
+    <DashboardWorkspace
+      actions={
+        <>
+          <ClockLink />
+          <MyShiftsLink />
+        </>
+      }
+    />
   );
 }

@@ -14,7 +14,8 @@ interface StepperProps {
   steps: readonly Step[];
   /** Index of the step the person is on. Earlier steps are done. */
   current: number;
-  orientation?: "horizontal" | "vertical";
+  /** "responsive" stacks the steps on phones and lays them in a row from md up, so long labels never overlap. */
+  orientation?: "horizontal" | "vertical" | "responsive";
   className?: string;
 }
 
@@ -25,7 +26,9 @@ export function Stepper({ steps, current, orientation = "horizontal", className 
       aria-label="Progress"
       className={cn(
         "flex gap-3",
-        orientation === "horizontal" ? "flex-row items-start" : "flex-col",
+        orientation === "horizontal" && "flex-row items-start",
+        orientation === "vertical" && "flex-col",
+        orientation === "responsive" && "flex-col md:flex-row md:items-start",
         className,
       )}
     >
@@ -35,7 +38,11 @@ export function Stepper({ steps, current, orientation = "horizontal", className 
           <li
             key={step.id}
             aria-current={state === "current" ? "step" : undefined}
-            className={cn("flex min-w-0 gap-3", orientation === "horizontal" && "flex-1")}
+            className={cn(
+              "flex min-w-0 gap-3",
+              orientation === "horizontal" && "flex-1",
+              orientation === "responsive" && "md:flex-1",
+            )}
           >
             <span
               aria-hidden="true"

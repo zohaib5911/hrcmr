@@ -37,11 +37,14 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
 
 /** The home page: a greeting, the company's headline numbers, cards the person may see, and the set-up
  * checklist until it is finished or dismissed (plan 8.2). */
-export function DashboardWorkspace() {
+export function DashboardWorkspace({ actions }: { actions?: ReactNode }) {
   const can = useCan();
   const [data, setData] = useState<Dashboard | null>(null);
   const [problem, setProblem] = useState<Problem | null>(null);
   const [checklist, setChecklist] = useState<Checklist | null>(null);
+  // The checklist sits above the cards: both appear in one render, so neither pushes the other down
+  // after it is painted (CLS budget, T22.2).
+  const [checklistSettled, setChecklistSettled] = useState(false);
   const [hour] = useState(() => new Date().getHours());
 
   useEffect(() => {
@@ -53,7 +56,9 @@ export function DashboardWorkspace() {
     });
     // Only company administrators may set up the company; for everyone else the checklist is hidden.
     void attempt((c) => c.GET("/onboarding/checklist")).then((result) => {
-      if (active && result.ok) setChecklist(result.data);
+      if (!active) return;
+      if (result.ok) setChecklist(result.data);
+      setChecklistSettled(true);
     });
     return () => {
       active = false;
@@ -66,18 +71,20 @@ export function DashboardWorkspace() {
     else setProblem(result.problem);
   }
 
+  const ready = (checklistSettled && data !== null) || problem !== null;
+  const shown = ready ? data : null;
   const hasCards =
-    data !== null &&
+    shown !== null &&
     Boolean(
-      data.needs_attention.length ||
-      data.employees ||
-      data.rtw ||
-      data.off_today ||
-      data.approvals ||
-      data.distribution ||
-      data.learning ||
-      data.my_learning ||
-      data.recruitment,
+      shown.needs_attention.length ||
+      shown.employees ||
+      shown.rtw ||
+      shown.off_today ||
+      shown.approvals ||
+      shown.distribution ||
+      shown.learning ||
+      shown.my_learning ||
+      shown.recruitment,
     );
 
   const quick = [
@@ -107,11 +114,12 @@ export function DashboardWorkspace() {
             ))}
           </div>
         ) : null}
+        {actions ? <div className="mt-2 flex flex-wrap gap-3">{actions}</div> : null}
       </header>
 
       {problem ? <Alert tone="danger" title={problem.message} className="mb-6" /> : null}
 
-      {checklist?.visible ? (
+      {ready && checklist?.visible ? (
         <section
           aria-label="Get set up"
           className="bg-elevated border-separator rounded-card mb-6 flex flex-col gap-3 border p-4"
@@ -145,7 +153,7 @@ export function DashboardWorkspace() {
         </section>
       ) : null}
 
-      {data === null && !problem ? (
+      {shown === null && !problem ? (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <SkeletonCard className="h-40" />
           <SkeletonCard className="h-40" />
@@ -153,20 +161,20 @@ export function DashboardWorkspace() {
         </div>
       ) : null}
 
-      {data ? (
+      {shown ? (
         <>
-          {data.employees || data.rtw ? (
+          {shown.employees || shown.rtw ? (
             <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-              {data.employees ? (
+              {shown.employees ? (
                 <>
-                  <KpiCard label="Employees" value={data.employees.active} />
-                  <KpiCard label="On leave" value={data.employees.on_leave} />
+                  <KpiCard label="Employees" value={shown.employees.active} />
+                  <KpiCard label="On leave" value={shown.employees.on_leave} />
                 </>
               ) : null}
-              {data.rtw ? (
+              {shown.rtw ? (
                 <>
-                  <KpiCard label="Right to Work coverage (%)" value={data.rtw.coverage_percent} />
-                  <KpiCard label="Checks current" value={data.rtw.verified} />
+                  <KpiCard label="Right to Work coverage (%)" value={shown.rtw.coverage_percent} />
+                  <KpiCard label="Checks current" value={shown.rtw.verified} />
                 </>
               ) : null}
             </div>
@@ -181,10 +189,10 @@ export function DashboardWorkspace() {
           ) : null}
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {data.needs_attention.length > 0 ? (
+            {shown.needs_attention.length > 0 ? (
               <Card title="Needs attention">
                 <ul className="flex flex-col gap-2">
-                  {data.needs_attention.map((item) => (
+                  {shown.needs_attention.map((item) => (
                     <li key={item.label} className="flex items-center justify-between gap-2">
                       <span className="text-body text-label">{item.label}</span>
                       <Button variant="gray" size="sm" asChild>
@@ -196,14 +204,14 @@ export function DashboardWorkspace() {
               </Card>
             ) : null}
 
-            {data.rtw ? (
+            {shown.rtw ? (
               <Card title="Right to Work coverage">
                 <p className="text-callout text-label">
-                  {data.rtw.verified} of {data.rtw.checked} people have a current check.
+                  {shown.rtw.verified} of {shown.rtw.checked} people have a current check.
                 </p>
                 <p className="text-footnote text-label-secondary">
-                  Expiring {data.rtw.expiring} · Expired {data.rtw.expired} · Evidence missing{" "}
-                  {data.rtw.evidence_missing} · Not recorded {data.rtw.not_recorded}
+                  Expiring {shown.rtw.expiring} · Expired {shown.rtw.expired} · Evidence missing{" "}
+                  {shown.rtw.evidence_missing} · Not recorded {shown.rtw.not_recorded}
                 </p>
                 <Link href="/employees?rtw=Expiring" className="text-callout text-accent">
                   Review Right to Work
@@ -211,19 +219,19 @@ export function DashboardWorkspace() {
               </Card>
             ) : null}
 
-            {data.off_today ? (
+            {shown.off_today ? (
               <Card title="Who is off">
-                <p className="text-callout text-label">{data.off_today.count} on leave now</p>
+                <p className="text-callout text-label">{shown.off_today.count} on leave now</p>
                 <p className="text-footnote text-label-secondary">
-                  {data.off_today.names.join(", ") || "Nobody"}
+                  {shown.off_today.names.join(", ") || "Nobody"}
                 </p>
               </Card>
             ) : null}
 
-            {data.approvals ? (
+            {shown.approvals ? (
               <Card title="Approvals">
                 <p className="text-callout text-label">
-                  {data.approvals.pending} leave request(s) waiting for a decision
+                  {shown.approvals.pending} leave request(s) waiting for a decision
                 </p>
                 <Link href="/leave" className="text-callout text-accent">
                   Open leave
@@ -231,13 +239,13 @@ export function DashboardWorkspace() {
               </Card>
             ) : null}
 
-            {data.distribution ? (
+            {shown.distribution ? (
               <Card title="Employee distribution">
-                {data.distribution.rows.length === 0 ? (
+                {shown.distribution.rows.length === 0 ? (
                   <p className="text-callout text-label-secondary">No employees yet</p>
                 ) : (
                   <ul className="flex flex-col gap-1">
-                    {data.distribution.rows.map((row) => (
+                    {shown.distribution.rows.map((row) => (
                       <li
                         key={row.department}
                         className="text-body text-label flex justify-between"
@@ -251,15 +259,17 @@ export function DashboardWorkspace() {
               </Card>
             ) : null}
 
-            {data.learning || data.my_learning ? (
+            {shown.learning || shown.my_learning ? (
               <Card title="Learning">
-                {data.learning ? (
-                  <p className="text-callout text-label">{data.learning.overdue} courses overdue</p>
-                ) : null}
-                {data.my_learning ? (
+                {shown.learning ? (
                   <p className="text-callout text-label">
-                    You have {data.my_learning.open} open
-                    {data.my_learning.overdue ? `, ${data.my_learning.overdue} overdue` : ""}.
+                    {shown.learning.overdue} courses overdue
+                  </p>
+                ) : null}
+                {shown.my_learning ? (
+                  <p className="text-callout text-label">
+                    You have {shown.my_learning.open} open
+                    {shown.my_learning.overdue ? `, ${shown.my_learning.overdue} overdue` : ""}.
                   </p>
                 ) : null}
                 <Link href="/learning" className="text-callout text-accent">
@@ -268,10 +278,10 @@ export function DashboardWorkspace() {
               </Card>
             ) : null}
 
-            {data.recruitment ? (
+            {shown.recruitment ? (
               <Card title="Recruitment">
                 <p className="text-callout text-label">
-                  {data.recruitment.latest.join(", ") || "No candidates yet"}
+                  {shown.recruitment.latest.join(", ") || "No candidates yet"}
                 </p>
                 <Link href="/recruitment" className="text-callout text-accent">
                   Open recruitment

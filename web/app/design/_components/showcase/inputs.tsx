@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
 import { DatePicker, DateRangePicker, type DateRange } from "@/components/ui/date-picker";
+import { DateTimePicker } from "@/components/ui/date-time-picker";
 import type { DayMarker } from "@/components/ui/calendar-month";
 import { Icon } from "@/components/ui/icon";
 import { NumberField } from "@/components/ui/number-field";
@@ -32,6 +33,7 @@ export function InputsSection() {
   const [start, setStart] = useState<string | null>("2026-11-01");
   const [dob, setDob] = useState<string | null>(null);
   const [leave, setLeave] = useState<DateRange>({ start: "2026-11-02", end: "2026-11-06" });
+  const [interview, setInterview] = useState<string | null>("2026-11-03T14:00");
 
   return (
     <DocSection
@@ -188,6 +190,13 @@ export function InputsSection() {
             value={leave}
             onChange={setLeave}
             markers={BANK_HOLIDAYS}
+          />
+        </State>
+        <State label="Date and time" className="w-full max-w-xl">
+          <DateTimePicker
+            legend="Interview date and time"
+            value={interview}
+            onChange={setInterview}
           />
         </State>
       </Demo>

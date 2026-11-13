@@ -135,5 +135,7 @@ describe("the company set-up pages", () => {
     ]);
     expect(titleFor("/company/designations")).toBe("Designations");
     expect(titleFor("/company")).toBe("Company");
+    expect(titleFor("/company/pay-bands")).toBe("Pay bands");
+    expect(titleFor("/company/delete-account")).toBe("Delete company account");
   });
 });

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import defaultdict
 from decimal import Decimal
 from fractions import Fraction
 from math import ceil
@@ -26,6 +27,15 @@ if TYPE_CHECKING:
 
 
 async def projected_balances(db: TenantSession, employee: Employee, on: date) -> list[BalanceOut]:
+    return await projected_balances_for_people(db, [employee], on)
+
+
+async def projected_balances_for_people(
+    db: TenantSession, employees: list[Employee], on: date
+) -> list[BalanceOut]:
+    """Load shared settings and page-scoped ledger/request rows once per balance page."""
+    if not employees:
+        return []
     company = (await db.execute(select(Company).where(Company.id == db.company_id))).scalar_one()
     start, end = year_bounds(on, company.leave_year_start_month_day)
     closed = (
@@ -36,7 +46,8 @@ async def projected_balances(db: TenantSession, employee: Employee, on: date) ->
         (
             await db.execute(
                 select(LeaveLedger).where(
-                    LeaveLedger.employee_id == employee.id, LeaveLedger.leave_year_start == start
+                    LeaveLedger.employee_id.in_([employee.id for employee in employees]),
+                    LeaveLedger.leave_year_start == start,
                 )
             )
         ).scalars()
@@ -45,7 +56,7 @@ async def projected_balances(db: TenantSession, employee: Employee, on: date) ->
         (
             await db.execute(
                 select(LeaveRequest).where(
-                    LeaveRequest.employee_id == employee.id,
+                    LeaveRequest.employee_id.in_([employee.id for employee in employees]),
                     LeaveRequest.status == "pending",
                     LeaveRequest.start_date < end,
                     LeaveRequest.end_date >= start,
@@ -53,6 +64,41 @@ async def projected_balances(db: TenantSession, employee: Employee, on: date) ->
             )
         ).scalars()
     )
+    movements_by_employee = defaultdict(list)
+    for movement in movements:
+        movements_by_employee[movement.employee_id].append(movement)
+    pending_by_employee = defaultdict(list)
+    for request in pending:
+        pending_by_employee[request.employee_id].append(request)
+    result = []
+    for employee in employees:
+        result.extend(
+            await _project_employee(
+                db,
+                employee,
+                on,
+                start,
+                end,
+                closed,
+                kinds,
+                movements_by_employee[employee.id],
+                pending_by_employee[employee.id],
+            )
+        )
+    return result
+
+
+async def _project_employee(
+    db: TenantSession,
+    employee: Employee,
+    on: date,
+    start: date,
+    end: date,
+    closed: bool,
+    kinds: list[LeaveType],
+    movements: list[LeaveLedger],
+    pending: list[LeaveRequest],
+) -> list[BalanceOut]:
     # The request snapshot retains exact fractions; use the same rounding as request planning.
     result = []
     for kind in kinds:

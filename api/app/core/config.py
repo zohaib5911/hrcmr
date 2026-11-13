@@ -114,7 +114,7 @@ class Settings(BaseSettings):
     # the admin's own tenant session is untouched and comes back when support mode ends.
     support_session_cookie_name: str = "brand_support_session"
     # The product name in e-mails and in an authenticator app's list (as in brand.config.ts).
-    brand_name: str = "Brand"
+    brand_name: str = "stuffhub"
     field_encryption_keys: SecretStr
     field_encryption_active_kid: str = "k1"
     blind_index_key: SecretStr

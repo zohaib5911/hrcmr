@@ -8,6 +8,8 @@ rotate-keys    Re-encrypt every encrypted column with the active key (after addi
 export-openapi Print (or --output) the OpenAPI document.
 export-data-model Print (or --output) docs/data-model.md, generated from the models.
 email-samples  Send one of every e-mail to the configured mail service (Mailpit on a dev machine).
+seed-perf      Development only: add a company "perf-test" with 1,000 employees and their leave
+               and attendance, to measure the main lists (T22.2). Refused on staging/production.
 load-places    Load a saved ONS Index of Place Names CSV (FILE --version LABEL) for register
                geocoding; later register imports reuse it. See docs/runbooks/register-places.md.
 load-companies Load a Companies House monthly bulk CSV (FILE --version LABEL). Matching needs
@@ -157,6 +159,29 @@ async def _email_samples() -> int:
     return 0
 
 
+async def _seed_perf() -> int:
+    try:
+        from seed.perf import seed_perf_test_company
+    except ModuleNotFoundError:
+        raise SystemExit("seed-perf is for development: seed/ is not in this image.") from None
+
+    settings = get_settings()
+    if settings.app_env.is_deployed:
+        raise SystemExit("seed-perf is for development; it never runs on staging or production.")
+    if settings.database_url_owner is None:
+        raise SystemExit("DATABASE_URL_OWNER is not set.")
+    engine = create_async_engine(settings.database_url_owner.get_secret_value())
+    try:
+        async with engine.begin() as connection:
+            count = await seed_perf_test_company(connection)
+            if count is None:
+                raise SystemExit("Company perf-test already exists; nothing added.")
+    finally:
+        await engine.dispose()
+    print(f"Company perf-test seeded with {count} employees.")  # noqa: T201
+    return 0
+
+
 async def _load_places(content: bytes, source: str, version: str) -> int:
     from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -252,6 +277,7 @@ def main(argv: list[str] | None = None) -> int:
             "export-data-model",
             "rotate-keys",
             "email-samples",
+            "seed-perf",
             "load-places",
             "load-companies",
         ],
@@ -294,6 +320,8 @@ def main(argv: list[str] | None = None) -> int:
         return asyncio.run(_load_places(args.file.read_bytes(), args.file.name, args.version))
     if args.command == "email-samples":
         return asyncio.run(_email_samples())
+    if args.command == "seed-perf":
+        return asyncio.run(_seed_perf())
     if args.command == "export-data-model":
         from app.db.data_model import data_model_markdown
 

@@ -17,7 +17,7 @@ from app.modules.employees.models import Employee, EmployeeAssignment
 from app.modules.leave.calculations import year_bounds
 from app.modules.leave.ledger import balance, lock_employee, move, reconcile
 from app.modules.leave.models import LeaveLedger, LeaveType
-from app.modules.leave.projections import projected_balances
+from app.modules.leave.projections import projected_balances, projected_balances_for_people
 from app.modules.leave.request_models import LeaveRequest
 from app.modules.leave.workspace_schemas import (
     BalanceMoveIn,
@@ -74,9 +74,7 @@ async def balances(
 ) -> BalancePage:
     people = await _people(access, employee_id, own=False, offset=offset, limit=limit + 1)
     day = await _today(access, on)
-    items = [
-        row for person in people[:limit] for row in await projected_balances(access.db, person, day)
-    ]
+    items = await projected_balances_for_people(access.db, people[:limit], day)
     return BalancePage(items=items, next_offset=offset + limit if len(people) > limit else None)
 
 

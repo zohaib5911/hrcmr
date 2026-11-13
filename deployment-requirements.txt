@@ -19,14 +19,14 @@ Companion file to plan.md. Version 1.0, 1 Nov 2026.
 ======================================================================
 1. INFORMATION TO GIVE CLAUDE CODE (not secret, can be typed in chat)
 ======================================================================
-[ ] Brand name (placeholder "Brand" until you decide)
+[x] Brand name: stuffhub (owner, 2026-11-13; set in brand.config.ts)
 [ ] Domain name (example: yourbrand.co.uk)
 [ ] Logo files: SVG (full lockup + square mark), favicon 512x512 PNG
 [ ] Accent colour (default #0071E3)
 [ ] Legal company name, company number, registered office address, country of registration
 [ ] ICO registration number (UK data protection fee - register at ico.org.uk)
 [ ] Support email address (example: support@yourdomain) and reply-time promise
-[ ] Email sender name and address (example: "Brand <no-reply@yourdomain>")
+[ ] Email sender name and address (example: "stuffhub <no-reply@yourdomain>")
 [ ] Prices: Annual GBP 50/year and 10-year GBP 240 once - confirm or change
 [ ] Email addresses of the people who will be Platform Admins (your internal team)
 [ ] Whether to turn on marketing pixels (Meta, Reddit, Google Ads) - default OFF
@@ -108,7 +108,7 @@ R2_BACKUP_SECRET_ACCESS_KEY     its secret                                      
 R2_BUCKET_BACKUPS               brand-prod-backups                                 [PUBLIC]
 BACKUP_AGE_PUBLIC_KEY           age1....                                           [PUBLIC]
 RESEND_API_KEY                  from Resend (sending access, one domain)           [SECRET]
-EMAIL_FROM                      Brand <no-reply@yourdomain>                        [PUBLIC]
+EMAIL_FROM                      stuffhub <no-reply@yourdomain>                     [PUBLIC]
 EMAIL_REPLY_TO                  support@yourdomain                                 [PUBLIC]
 SUPPORT_EMAIL                   support@yourdomain                                 [PUBLIC]
 ANTHROPIC_API_KEY               from Anthropic Console                             [SECRET]

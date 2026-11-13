@@ -523,19 +523,19 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 22 — Quality, performance, accessibility
 
-### [ ] T22.1 · S · Full E2E suite for the top 25 journeys
+### [x] T22.1 · S · Full E2E suite for the top 25 journeys
 - **Spec:** plan L1498. One spec per journey under `web/tests/e2e/journeys/`; one commit per 3–5 journeys.
 
-### [ ] T22.2 · S · Performance budgets
+### [x] T22.2 · S · Performance budgets
 - **Spec:** plan L1499. Seed 1,000 employees (dev seed only); measure p95; add indexes with a migration; EXPLAIN tests for main lists.
 
-### [ ] T22.3 · S · Accessibility audit
+### [x] T22.3 · S · Accessibility audit
 - **Spec:** plan L1500. axe 0 serious on every page (extend `web/tests/e2e/design-a11y.spec.ts`), reduced-motion check.
 
-### [ ] T22.4 · S · Design QA sweep with final screenshots
+### [x] T22.4 · S · Design QA sweep with final screenshots
 - **Spec:** plan L1501, §5.12 L439–451. All widths, light/dark → `docs/screenshots/final/`.
 
-### [ ] P22 · S · Phase 22 gate
+### [x] P22 · S · Phase 22 gate
 - Recipe R7.
 
 ### [ ] AUDIT-5 · AUDIT STOP · covers Phases 21–22 — pre-deployment audit
@@ -561,18 +561,18 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 
 ## Phase 25 — Apple-quality visual pass and final security scan (big model, added by the owner 2026-11-12)
 
-### [ ] T25.1 · B · Visual audit of every screen against the Apple-quality design
+### [x] T25.1 · B · Visual audit of every screen against the Apple-quality design
 - **Spec:** plan §5 (L296–450): principles, typography, colour tokens, materials (glass), motion, layout, components, §5.12 QA checklist. Plan L25: no Apple trademarks, logos, SF Symbols, SF font files or device images.
 - **Steps:** 1. List every route (app, admin, auth, marketing, careers, free tools) from `web/app`. 2. Screenshot each at 390 and 1280 px, light and dark, into `docs/screenshots/phase-25/before/` (copy `web/tests/e2e/phase9-screenshots.spec.ts`; run through `bus.sh serial`). 3. Check each against §5 and §5.12. Look hardest at the glass: translucent sidebar, toolbar, sheets, popovers and the marketing nav (`backdrop-filter: saturate(180%) blur(20px)` over the material tokens, hairline borders, layered soft shadows); also type scale, spacing on the 4 px grid, radius, motion, alignment and empty/loading states. 4. Write `docs/design-audit.md`: one row per screen with each gap, the §5 rule it breaks and the fix (token or component, not per-page CSS), sorted by how many screens a fix touches.
 - **Done when:** `docs/design-audit.md` covers every route, and the before screenshots are saved. No app code changed.
 
-### [ ] T25.2 · B · Apple-quality tokens, materials and shared components (glass)
+### [x] T25.2 · B · Apple-quality tokens, materials and shared components (glass)
 - **Spec:** `docs/design-audit.md` (T25.1) and plan §5. This block may restyle earlier work (the owner's request); behaviour stays the same.
 - **Steps:** 1. Fix the tokens and materials in `web/app/globals.css` first, so most screens improve at once (glass: `backdrop-filter: saturate(180%) blur(20px)` over the material tokens, hairline borders, layered soft shadows). 2. Then the shared components in `web/components/ui/` and the app shell (sidebar, toolbar, sheets, popovers, marketing nav). Tick the `docs/design-audit.md` rows these fix. Leave screen-specific rows to T25.5/T25.6 and the register map to T25.4.
 - **Watch:** our own tokens and components only: no Apple logos, SF Symbols, SF font files or Apple device frames (plan L25, L308). Every glass surface falls back to a solid colour under `prefers-reduced-transparency` and when `backdrop-filter` is unsupported; motion respects `prefers-reduced-motion`; text contrast stays WCAG AA on glass in both themes; no layout shift. Don't change copy, routes or behaviour. Update the `/design` catalog and its expected tokens when tokens change.
 - **Done when:** the token/material/component rows of `docs/design-audit.md` are ticked; web lint, typecheck and unit suite pass; the design and accessibility e2e specs pass in both themes (via `bus.sh serial`).
 
-### [ ] T25.4 · B · Sponsor register map: real UK shape, Apple-style (owner request 2026-11-13)
+### [x] T25.4 · B · Sponsor register map: real UK shape, Apple-style (owner request 2026-11-13)
 - **Spec:** plan §5; the Explore page `/register/explore` (T20.2/T20.3). Runs in parallel with T25.2: touch only the map component, its data file and its tests (no edits to `globals.css`; use the existing tokens).
 - **Steps:** 1. Replace the boxy hand-drawn schematic with the real shape of the UK: the 12 ITL1 regions from the ONS Open Geography Portal boundaries (Open Government Licence; add the attribution line), simplified to a light inline SVG (no map tiles, no third-party map scripts). 2. Make it look Apple-designed: regions on a glass panel with soft depth, a calm colour scale from our tokens, smooth hover/focus highlight and a gentle animated zoom into the chosen region, a glass tooltip with the region figures, and the same in dark mode. 3. Keep it accessible: every region is keyboard-focusable with a label, a table of the same figures sits under the map, and motion and blur fall back under `prefers-reduced-motion` / `prefers-reduced-transparency`. It must work at 360 px. 4. Before/after screenshots of the Explore map into `docs/screenshots/phase-25/`.
 - **Watch:** same as T25.2. Region figures stay exactly what the API returns.
