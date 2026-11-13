@@ -1,10 +1,16 @@
+import gzip
+import hashlib
+import io
+
 import pytest
 
 from app.modules.register.geo import (
     ITL1_REGIONS,
+    build_company_index,
     geocode,
     normalise_places,
     parse_companies,
+    parse_company_index,
     parse_places,
     sic_section,
 )
@@ -63,6 +69,42 @@ def test_companies_ambiguous_names_dropped() -> None:
     assert parse_companies(data) == {"example care ltd": ("01234567", "Q")}
     with pytest.raises(ValueError, match="columns"):
         parse_companies(b"x\n1\n")
+
+
+def test_company_index_streams_keeps_three_fields_and_rejects_far_duplicates() -> None:
+    filler = b"".join(b"Filler %d Ltd,%08d,London,62012\n" % (i, i) for i in range(2000))
+    data = (
+        b"\xef\xbb\xbfCompanyName, CompanyNumber,RegAddress.PostTown,SICCode.SicText_1\n"
+        b"Twin Ltd,00000001,Leeds,62012\n"
+        b"Example Care Ltd,01234567,Secret Street,87100 - Residential nursing\n"
+        + filler
+        + b"TWIN LTD.,00000002,Bath,62012\n"
+    )
+    wanted = {"twin ltd", "example care ltd", "late sponsor ltd"}
+    for source in (data, io.BufferedReader(io.BytesIO(gzip.compress(data)))):
+        index = build_company_index(source, wanted)
+        assert index.companies == {"example care ltd": ("01234567", "Q")}
+        assert index.rows == 2003
+    assert build_company_index(data, set()).sha256 == hashlib.sha256(data).hexdigest()
+    gz = gzip.compress(data)
+    assert build_company_index(gz, set()).sha256 == hashlib.sha256(gz).hexdigest()
+    stored = gzip.decompress(index.content)
+    lines = stored.decode().splitlines()
+    assert lines[:3] == [
+        "name,number,section",
+        "twin ltd,00000001,J",
+        "example care ltd,01234567,Q",
+    ]
+    assert b"Secret Street" not in stored
+    assert b"Leeds" not in stored
+    # Read back: the duplicate stays unmatched; only the requested sponsor names are returned.
+    assert parse_company_index(index.content, wanted) == {"example care ltd": ("01234567", "Q")}
+    assert parse_company_index(index.content, {"filler 7 ltd"}) == {
+        "filler 7 ltd": ("00000007", "J")
+    }
+    assert parse_company_index(gzip.compress(data), {"twin ltd", "filler 7 ltd"}) == {
+        "filler 7 ltd": ("00000007", "J")
+    }  # datasets stored before the index format still read
 
 
 def test_ons_index_of_place_names_is_normalised() -> None:

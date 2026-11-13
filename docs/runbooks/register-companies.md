@@ -8,8 +8,8 @@ all sponsor records unchanged. With the flag off, later imports also leave match
 
 ## Load a monthly edition
 
-Download the monthly Free Company Data Product from Companies House. Extract the CSV locally.
-The loader expects `CompanyName`, `CompanyNumber`, and `SICCode.SicText_1` columns; extra columns
+Download the monthly Free Company Data Product from Companies House. Pass the CSV, or the
+same CSV gzip-compressed (`.csv.gz`); a zip archive must be extracted first. The loader expects `CompanyName`, `CompanyNumber`, and `SICCode.SicText_1` columns; extra columns
 and whitespace around headers are accepted. If the edition comes in multiple CSV parts, combine
 all parts into one CSV with a single header before loading. Loading parts independently would
 miss names duplicated across parts. Use the complete edition so duplicate-name rejection works.
@@ -20,11 +20,12 @@ From `api/`, with `DATABASE_URL_OWNER` and `REGISTER_BULK_MATCH_ENABLED=true` se
 uv run python -m app.cli load-companies /path/to/BasicCompanyData-2026-11.csv --version 2026-11
 ```
 
-The command stores the gzip-compressed file, source filename, edition, original SHA-256,
-unambiguous-name count and load
-time in the owner-only `register_company_datasets` table. Sponsors matched by the bulk loader
+The command streams the file row by row (it never holds the whole file in memory) and stores a
+reduced gzip index: one line per named company with only its normalised name, number and SIC
+section. It also stores the source filename, edition, SHA-256 of the file exactly as supplied,
+the indexed row count and the load time in the owner-only `register_company_datasets` table. Sponsors matched by the bulk loader
 link to that dataset through the owner-only `register_company_matches` table. The newest loaded dataset is active.
-Malformed or wholly unusable files are refused atomically.
+Malformed or empty files are refused atomically.
 
 Matches use the existing exact normalised-name service: no fuzzy guesses. Duplicate names
 remain unmatched. Company numbers retain leading zeros and prefixes. The first SIC code gives
@@ -40,7 +41,10 @@ if a newer file was loaded while disabled, its matches replace older bulk matche
 enabled import. Restart the worker after changing its environment flag. If enabled without a
 loaded dataset, imports still succeed and log `register_companies_missing`.
 
-Old datasets remain available for provenance. The bulk file is large: allow database storage and
-worker memory for the retained files and in-memory exact-name index. Enrichment runs only after
+Old datasets remain available for provenance. Each stored index is far smaller than the raw
+edition (tens of MB, not about 450 MB gzipped). Matching streams the newest index and keeps only
+the rows whose name is a register sponsor's, so worker memory stays near the size of the stored
+index plus the sponsor names. Every row is kept in the index, so a sponsor that first appears in
+a later import can still match, and a name used twice anywhere in the edition stays unmatched. Enrichment runs only after
 a changed register import; an unchanged GOV.UK file is skipped as usual. To apply a dataset
 immediately after enabling the flag, rerun `load-companies` with that edition.
