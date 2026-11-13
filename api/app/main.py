@@ -29,6 +29,7 @@ from app.core.errors import ErrorEnvelope, register_exception_handlers
 from app.core.logging import configure_logging, get_logger
 from app.core.middleware import RequestContextMiddleware
 from app.core.redis import create_redis, ping_redis
+from app.core.telemetry import configure_telemetry
 from app.db.engine import create_engine, ping_database
 from app.integrations.anthropic import Anthropic
 from app.integrations.clamav import ClamAV
@@ -165,6 +166,7 @@ def _install_openapi(app: FastAPI) -> None:
 def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None) -> FastAPI:
     settings = settings or get_settings()
     configure_logging()
+    configure_telemetry(settings)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:

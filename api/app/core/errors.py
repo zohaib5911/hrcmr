@@ -11,6 +11,7 @@ from __future__ import annotations
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
+import sentry_sdk
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -166,6 +167,7 @@ async def _validation_error(request: Request, exc: Exception) -> JSONResponse:
 
 async def _unhandled(request: Request, exc: Exception) -> JSONResponse:
     request_id = _request_id(request)
+    sentry_sdk.capture_exception(exc)
     logger.error(
         "unhandled_exception",
         request_id=request_id,

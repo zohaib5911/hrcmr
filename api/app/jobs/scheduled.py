@@ -26,6 +26,7 @@ from app.jobs.policies import policies_overdue_daily
 from app.jobs.register import register_ingest, register_ingest_manual
 from app.jobs.reports import generate_report, sweep_report_jobs
 from app.jobs.rerun import RERUNNABLE, rerun_name
+from app.jobs.retention import retention_purge_daily
 from app.jobs.rules import rules_watch_daily
 from app.modules.email.outbox import MAX_ATTEMPTS
 from app.modules.files.service import remove_orphans
@@ -71,9 +72,9 @@ SCHEDULE: tuple[Schedule, ...] = (
     Schedule("backups_nightly", _nothing_yet("backups_nightly"), {"hour": 1, "minute": 0}, "T20.2"),
     Schedule(
         "retention_purge_daily",
-        _nothing_yet("retention_purge_daily"),
+        retention_purge_daily,
         {"hour": 2, "minute": 0},
-        "T16.5",
+        "T21.5",
     ),
     Schedule("files_orphans_daily", files_orphans_daily, {"hour": 2, "minute": 30}, "T2.7"),
     Schedule(
