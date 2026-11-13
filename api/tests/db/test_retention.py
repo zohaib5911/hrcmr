@@ -20,7 +20,7 @@ from tests.db.test_employee_documents import _employee
 from tests.db.test_employee_documents import _keys as _keys
 from tests.db.test_employee_documents import rig as rig
 from tests.db.test_exports import _document
-from tests.db.test_rtw import _checker
+from tests.db.test_rtw import _checker, _proof
 
 NOW = datetime(2030, 3, 1, 2, tzinfo=UTC)
 
@@ -126,7 +126,7 @@ async def _evidence(
     hr = await rig["person"]("company_admin", company)
     employee = await _employee(rig, company, number)
     checker = await _checker(hr)
-    file, _ = await _document(rig, company, f"{number}.pdf", "rtw_check")
+    file = uuid.UUID(await _proof(hr, employee))
     # API creates two immutable versions pointing to the same evidence.
     for _ in range(2):
         made = await hr.post(
@@ -144,19 +144,18 @@ async def _evidence(
     async with rig["owner"].begin() as c:
         await c.execute(
             text("update employees set status=:s, leave_date=cast(:d as date) where id=:e"),
-            {"s": status, "d": left, "e": employee},
-        )
-        await c.execute(
-            text(
-                "insert into employee_documents (company_id, employee_id, file_id, category) values (:c,:e,:f,'rtw_evidence')"
-            ),
-            {"c": company, "e": employee, "f": file},
+            {"s": status, "d": date.fromisoformat(left) if left else None, "e": employee},
         )
         await c.execute(
             text(
                 "insert into sponsor_documents (company_id,employee_id,doc_type,visa_route,expiry_date,evidence_file_id,version) values (:c,:e,'visa','skilled_worker',cast(:v as date),:f,1)"
             ),
-            {"c": company, "e": employee, "f": file, "v": visa_end},
+            {
+                "c": company,
+                "e": employee,
+                "f": file,
+                "v": date.fromisoformat(visa_end) if visa_end else None,
+            },
         )
     return employee, file
 

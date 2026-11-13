@@ -1,4 +1,5 @@
-import * as Sentry from "@sentry/nextjs";
+// @vitest-environment jsdom
+import * as Sentry from "@sentry/browser";
 import { describe, expect, it } from "vitest";
 
 import { beforeSend, privacyOptions } from "./telemetry";

@@ -5,12 +5,20 @@ from __future__ import annotations
 import json
 from typing import Any
 
+import pytest
 import sentry_sdk
 from sentry_sdk.envelope import Envelope
 from sentry_sdk.transport import Transport
 
 from app.core.telemetry import before_send, configure_telemetry
 from tests.support import build_settings
+
+
+@pytest.fixture(autouse=True)
+def _client() -> Any:
+    original = sentry_sdk.get_global_scope().client
+    yield
+    sentry_sdk.get_global_scope().set_client(original)
 
 
 class Capture(Transport):
@@ -25,14 +33,16 @@ class Capture(Transport):
 
 
 def test_sdk_scrubs_exception_request_breadcrumbs_locals_and_free_text() -> None:
-    with sentry_sdk.init(
+    client = sentry_sdk.Client(
         dsn="https://public@example.test/1",
         transport=Capture,
         default_integrations=False,
         before_send=before_send,
         include_local_variables=True,
-    ):
-        with sentry_sdk.isolation_scope() as scope:
+    )
+    with sentry_sdk.isolation_scope() as scope:
+        scope.set_client(client)
+        with sentry_sdk.new_scope() as scope:
             scope.set_user({"email": "PRIVATE-USER"})
             scope.set_extra("context", {"passport": "PRIVATE-EXTRA"})
             scope.add_event_processor(
@@ -49,7 +59,7 @@ def test_sdk_scrubs_exception_request_breadcrumbs_locals_and_free_text() -> None
                 raise ValueError("PRIVATE-MESSAGE AB123456C")
             except ValueError:
                 sentry_sdk.capture_exception()
-        transport = sentry_sdk.get_client().transport
+        transport = client.transport
         assert isinstance(transport, Capture)
         assert len(transport.events) == 1
         event = transport.events[0]
