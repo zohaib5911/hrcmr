@@ -1,4 +1,4 @@
-/** T25.1/P25: exhaustive route evidence. Audit observations are recorded, never repaired here. */
+/** T22.4/T25.1/P25: exhaustive route evidence; observations are recorded for the design queue. */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
@@ -8,7 +8,11 @@ import { answerApi } from "../support/auth-screens";
 import { ADMIN_ORIGIN, signInPlatformAdmin } from "../support/platform";
 
 const ROOT = path.resolve(__dirname, "../../../docs/screenshots/phase-25");
-const OUT = path.join(ROOT, process.env.DESIGN_AUDIT_STAGE ?? "before");
+const finalQA = process.env.FINAL_DESIGN_QA === "1";
+const OUT = finalQA
+  ? path.resolve(ROOT, "../final")
+  : path.join(ROOT, process.env.DESIGN_AUDIT_STAGE ?? "before");
+const widths = finalQA ? [390, 768, 1280, 1920] : [390, 1280];
 type Screen = { source: string; route: string; group: string; key: string };
 const screens: Screen[] = JSON.parse(readFileSync(path.join(ROOT, "routes.json"), "utf8"));
 test.skip(!process.env.SCREENSHOTS, "Exhaustive design evidence is explicitly requested.");
@@ -159,7 +163,7 @@ async function observe(page: Page) {
 }
 
 for (const colorScheme of ["light", "dark"] as const) {
-  for (const width of [390, 1280]) {
+  for (const width of widths) {
     test(`all routes ${colorScheme} ${width}`, async ({ browser }) => {
       test.setTimeout(1_800_000);
       mkdirSync(OUT, { recursive: true });
@@ -188,6 +192,8 @@ for (const colorScheme of ["light", "dark"] as const) {
       await admin.addCookies([{ ...tenantCookie!, domain: "admin.example.test", path: "/" }]);
       const publicContext = await browser.newContext(options);
       const publicPage = await publicContext.newPage();
+      // Evidence writes can trigger dev HMR. Keep the loaded showcase stable while capturing it.
+      await publicPage.routeWebSocket("**/_next/webpack-hmr**", () => {});
       const authContext = await browser.newContext(options);
       const authPage = await authContext.newPage();
       await authPage.goto("/login");
@@ -275,7 +281,7 @@ for (const colorScheme of ["light", "dark"] as const) {
 
 // Surfaces need overlapping content to judge the glass; route screenshots alone cannot show this.
 for (const colorScheme of ["light", "dark"] as const) {
-  for (const width of [390, 1280]) {
+  for (const width of widths) {
     test(`material overlays ${colorScheme} ${width}`, async ({ browser }) => {
       test.setTimeout(120_000);
       const context = await browser.newContext({

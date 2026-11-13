@@ -1,0 +1,284 @@
+[
+  {
+    "name": "command-palette",
+    "title": "Dashboard | stuffhub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Dashboard",
+        "fontSize": "34px",
+        "lineHeight": "41px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [
+      {
+        "tag": "ASIDE",
+        "text": "HCHarbourside Care 17945494666543191 year, switch companyOverviewDashboardPeopleEmployeesR",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "rgba(28, 28, 30, 0.72)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "none"
+      },
+      {
+        "tag": "HEADER",
+        "text": "Overview/DashboardDashboardSearchCtrl K",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "rgba(28, 28, 30, 0.72)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "1px",
+        "shadow": "none"
+      },
+      {
+        "tag": "DIV",
+        "text": "SearchPagesDashboardOverviewEmployeesPeopleRecruitmentPeopleOrg chartPeopleLearningPeopleS",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "color(srgb 0.109804 0.109804 0.117647 / 0.92)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px"
+      }
+    ],
+    "smallTargets": [
+      {
+        "text": "Review Right to Work",
+        "width": 274,
+        "height": 20
+      },
+      {
+        "text": "Open leave",
+        "width": 274,
+        "height": 20
+      },
+      {
+        "text": "Open learning",
+        "width": 274,
+        "height": 20
+      },
+      {
+        "text": "Open recruitment",
+        "width": 274,
+        "height": 20
+      }
+    ],
+    "errors": [],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif"
+  },
+  {
+    "name": "notifications",
+    "title": "Dashboard | stuffhub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Dashboard",
+        "fontSize": "34px",
+        "lineHeight": "41px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [
+      {
+        "tag": "ASIDE",
+        "text": "HCHarbourside Care 17945494666543191 year, switch companyOverviewDashboardPeopleEmployeesR",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "rgba(28, 28, 30, 0.72)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "none"
+      },
+      {
+        "tag": "HEADER",
+        "text": "Overview/DashboardDashboardSearchCtrl K",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "rgba(28, 28, 30, 0.72)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "1px",
+        "shadow": "none"
+      },
+      {
+        "tag": "DIV",
+        "text": "NotificationsYou're all caught upApprovals, reminders and policies to sign will appear her",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "color(srgb 0.109804 0.109804 0.117647 / 0.92)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px"
+      }
+    ],
+    "smallTargets": [
+      {
+        "text": "Review Right to Work",
+        "width": 274,
+        "height": 20
+      },
+      {
+        "text": "Open leave",
+        "width": 274,
+        "height": 20
+      },
+      {
+        "text": "Open learning",
+        "width": 274,
+        "height": 20
+      },
+      {
+        "text": "Open recruitment",
+        "width": 274,
+        "height": 20
+      }
+    ],
+    "errors": [],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif"
+  },
+  {
+    "name": "company-sheet",
+    "title": "Company | stuffhub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Company",
+        "fontSize": "34px",
+        "lineHeight": "41px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      },
+      {
+        "tag": "H1",
+        "text": "Company",
+        "fontSize": "34px",
+        "lineHeight": "41px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [
+      {
+        "tag": "ASIDE",
+        "text": "HCHarbourside Care 17945494666543191 year, switch companyOverviewDashboardPeopleEmployeesR",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "rgba(28, 28, 30, 0.72)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "none"
+      },
+      {
+        "tag": "HEADER",
+        "text": "Company/CompanyCompanySearchCtrl K",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "rgba(28, 28, 30, 0.72)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "1px",
+        "shadow": "none"
+      },
+      {
+        "tag": "DIV",
+        "text": "Company detailsWhat your company is called and how to reach it.LogoHCUpload a logoDrag fil",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "color(srgb 0.109804 0.109804 0.117647 / 0.92)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px"
+      }
+    ],
+    "smallTargets": [
+      {
+        "text": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "text": "",
+        "width": 51,
+        "height": 31
+      },
+      {
+        "text": "",
+        "width": 51,
+        "height": 31
+      }
+    ],
+    "errors": [],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif"
+  },
+  {
+    "name": "scrolled-marketing-nav",
+    "title": "HR and sponsor compliance | stuffhub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Look after your people, and your licence.",
+        "fontSize": "73.92px",
+        "lineHeight": "77.616px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [
+      {
+        "tag": "HEADER",
+        "text": "stuffhubFeaturesSponsor compliancePricingResourcesSecuritySign inStart free",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "rgba(28, 28, 30, 0.72)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "1px",
+        "shadow": "none"
+      }
+    ],
+    "smallTargets": [
+      {
+        "text": "Skip to content",
+        "width": 32,
+        "height": 16
+      },
+      {
+        "text": "stuffhub",
+        "width": 80.40625,
+        "height": 25
+      }
+    ],
+    "errors": [],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif"
+  }
+]
