@@ -529,7 +529,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] T22.2 · S · Performance budgets
 - **Spec:** plan L1499. Seed 1,000 employees (dev seed only); measure p95; add indexes with a migration; EXPLAIN tests for main lists.
 
-### [ ] T22.3 · S · Accessibility audit
+### [x] T22.3 · S · Accessibility audit
 - **Spec:** plan L1500. axe 0 serious on every page (extend `web/tests/e2e/design-a11y.spec.ts`), reduced-motion check.
 
 ### [ ] T22.4 · S · Design QA sweep with final screenshots
