@@ -36,3 +36,12 @@ Run browser security checks (including the production build and bundle scan) und
 ```sh
 bash /home/zohaib/cmr_hr/.agent/bus.sh serial -- bash -c 'cd web && pnpm exec playwright test security-headers.spec.ts host-routing.spec.ts auth-flow.spec.ts --project=production'
 ```
+
+## Validation on 2026-11-13
+
+- Full API suite: **1,385 passed**, no failures or skips (458.96 s).
+- Targeted endpoint/RBAC suite before the full run: **26 passed**.
+- Production Playwright authentication, host routing and security headers: **28 passed** (40.3 s), including setup; production build and bundle scan completed as part of server startup.
+- Scanner/public environment tests: **32 passed**; bundle scanner clean.
+- Ruff lint and formatting clean; mypy clean across **493 source files**, with the subsequently tightened matrix files checked again.
+- ZAP staging baseline: **not run**, because no staging target is configured.
