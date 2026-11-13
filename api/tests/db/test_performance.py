@@ -4,6 +4,7 @@ queries use an index rather than reading the whole table."""
 
 from __future__ import annotations
 
+import gc
 import os
 import statistics
 import time
@@ -50,8 +51,13 @@ async def rig(database: DatabaseUnderTest) -> AsyncIterator[dict[str, Any]]:
     app = create_app(build_settings(database_url=database.app_url, redis_url=TEST_REDIS_URL))
     async with LifespanManager(app):
         admin = await sign_in_as(database, SessionStore(redis), app, "company_admin", a)
-        yield {"admin": admin, "a": a, "owner": owner}
-        await admin.aclose()
+        gc.collect()
+        gc.freeze()  # as gunicorn.conf.py post_worker_init does in production
+        try:
+            yield {"admin": admin, "a": a, "owner": owner}
+        finally:
+            gc.unfreeze()
+            await admin.aclose()
     await owner.dispose()
     await redis.flushdb()
     await redis.aclose()
