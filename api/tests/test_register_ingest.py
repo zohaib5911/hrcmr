@@ -15,6 +15,25 @@ def test_discovery_and_parse() -> None:
     assert normalise("  EXAMPLE   Care, Ltd. ") == "example care ltd"
 
 
+def test_discovery_ignores_the_csv_preview_page() -> None:
+    # GOV.UK lists the attachment twice and adds a preview page for it (seen 2026-11-13).
+    asset = "https://assets.publishing.service.gov.uk/media/abc/Register_-_2026-11-12.csv"
+    html = (
+        f'<a href="{asset}">Register</a><a href="{asset}">Download CSV</a>'
+        '<a href="/csv-preview/abc/Register_-_2026-11-12.csv">View online</a>'
+    )
+    assert discover(html) == asset
+
+
+def test_discovery_refuses_two_different_attachments() -> None:
+    html = (
+        '<a href="https://assets.publishing.service.gov.uk/media/a/one.csv">One</a>'
+        '<a href="https://assets.publishing.service.gov.uk/media/b/two.csv">Two</a>'
+    )
+    with pytest.raises(ValueError, match="one current sponsor CSV"):
+        discover(html)
+
+
 @pytest.mark.parametrize(
     "url",
     [
