@@ -16,7 +16,9 @@
     .muted { color: #a1a1a6 !important; }
     .rule { border-color: #38383a !important; }
     .codebox { background: #2c2c2e !important; }
-    a { color: #2997ff !important; }
+    a { color: {{ accent_dark }} !important; }
+    .action { background: {{ accent_dark }} !important; }
+    .action-label { color: #000000 !important; }
   }
   @media only screen and (max-width: 620px) {
     .card { padding: 24px 20px !important; }
@@ -44,8 +46,8 @@
             {% if button_label %}
             <table role="presentation" cellpadding="0" cellspacing="0" style="margin:8px 0 24px 0;">
               <tr>
-                <td style="border-radius:10px;background:{{ accent }};">
-                  <a href="{{ button_link }}" style="display:inline-block;padding:13px 24px;font-size:16px;line-height:20px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;">{{ button_label }}</a>
+                <td class="action" style="border-radius:10px;background:{{ accent }};">
+                  <a class="action-label" href="{{ button_link }}" style="display:inline-block;padding:13px 24px;font-size:16px;line-height:20px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;">{{ button_label }}</a>
                 </td>
               </tr>
             </table>

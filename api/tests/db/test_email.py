@@ -51,6 +51,9 @@ def test_every_template_has_a_sample_and_renders_in_html_and_text() -> None:
             assert not re.search(r"\{[a-z_]+\}", part), name  # no placeholder left unfilled
         assert f'src="{SETTINGS.web_origin}/brand/logo-email.png"' in rendered.html
         assert 'width="269" height="64" alt="Acme HR"' in rendered.html
+        assert "#6D28D9" in rendered.html
+        assert "#A78BFA" in rendered.html
+        assert ".action-label { color: #000000 !important; }" in rendered.html
         assert "logo-email.png" not in rendered.plain
         assert "Acme HR" in rendered.html
         assert "Acme HR" in rendered.plain

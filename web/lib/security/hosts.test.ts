@@ -114,6 +114,24 @@ describe("decideRoute on the main host", () => {
 });
 
 describe("decideRoute on the admin host", () => {
+  it.each([
+    "/brand/logo.svg",
+    "/brand/logo-dark.svg",
+    "/brand/mark-small.svg",
+    "/brand/logo-email.png",
+    "/icon.png",
+    "/icon1.png",
+    "/apple-icon.png",
+    "/opengraph-image",
+  ])("serves shared public artwork %s without rewriting it into an admin page", (path) =>
+    expect(decideRoute("admin", path)).toEqual({ action: "next" }),
+  );
+
+  it.each(["/brand/../platform", "/brand/%2e%2e/platform", "/brand/logo.svg/../../platform"])(
+    "keeps internal paths blocked even under an artwork prefix: %s",
+    (path) => expect(decideRoute("admin", path)).toEqual({ action: "not-found" }),
+  );
+
   it("maps the root to the admin home", () => {
     expect(decideRoute("admin", "/")).toEqual({ action: "rewrite", pathname: ADMIN_SEGMENT });
   });
