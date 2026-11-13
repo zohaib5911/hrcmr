@@ -1,10 +1,6 @@
-"use client";
+import { TextField } from "@/components/ui/text-field";
 
-import { useState } from "react";
-
-import { DatePicker } from "@/components/ui/date-picker";
-
-/** A UK date picker for the admin GET filter forms: the ISO date travels in a hidden field. */
+/** Keep admin GET filters usable before hydration, with native mobile date entry and ISO values. */
 export function FilterDate({
   label,
   name,
@@ -14,11 +10,13 @@ export function FilterDate({
   name: string;
   defaultValue?: string | null | undefined;
 }) {
-  const [value, setValue] = useState<string | null>(defaultValue?.slice(0, 10) || null);
   return (
-    <div>
-      <DatePicker label={label} value={value} onChange={setValue} />
-      <input type="hidden" name={name} value={value ?? ""} />
-    </div>
+    <TextField
+      label={label}
+      name={name}
+      type="date"
+      defaultValue={defaultValue?.slice(0, 10) ?? ""}
+      clearable={false}
+    />
   );
 }
