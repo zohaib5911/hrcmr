@@ -121,7 +121,7 @@ export function QueuesAdmin() {
       ) : null}
 
       <section aria-labelledby="deletions-h" className="mb-10">
-        <h2 id="deletions-h" className="text-title3 mb-3">
+        <h2 id="deletions-h" className="text-title-3 mb-3">
           Deletion requests
         </h2>
         <Select
@@ -167,7 +167,7 @@ export function QueuesAdmin() {
       </section>
 
       <section aria-labelledby="exports-h">
-        <h2 id="exports-h" className="text-title3 mb-3">
+        <h2 id="exports-h" className="text-title-3 mb-3">
           Data exports
         </h2>
         <Select

@@ -62,7 +62,7 @@ export function RegisterAdmin({ status }: { status: Status | null }) {
               <dd>{status.total_sponsors}</dd>
             </div>
           </dl>
-          <h2 className="text-title3 my-4">Latest publication</h2>
+          <h2 className="text-title-3 my-4">Latest publication</h2>
           {publication ? (
             <dl className="mb-6 grid gap-3 sm:grid-cols-2">
               <div>
@@ -85,7 +85,7 @@ export function RegisterAdmin({ status }: { status: Status | null }) {
           ) : (
             <p>No register publications imported yet.</p>
           )}
-          <h2 className="text-title3 my-4">Recent import errors</h2>
+          <h2 className="text-title-3 my-4">Recent import errors</h2>
           {status.errors.length === 0 ? (
             <p>No recent import errors.</p>
           ) : (
@@ -116,7 +116,7 @@ export function RegisterAdmin({ status }: { status: Status | null }) {
           )}
         </>
       )}
-      <h2 className="text-title3 my-4">Rerun import</h2>
+      <h2 className="text-title-3 my-4">Rerun import</h2>
       {error && (
         <Alert tone="danger" title="Could not queue import">
           {error}
