@@ -602,5 +602,5 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Watch:** artwork unchanged apart from the documented plate removal; CSP unchanged (the SVGs contain only circles and paths); WCAG AA in both themes; update the `/design` catalog's expected accent tokens; no copy changes beyond the name.
 - **Done when:** the logo shows in every place in step 3 in both themes, favicons/apple/PWA/OG icons are served; web lint, typecheck and unit suite pass; design, a11y, shell, auth, marketing and careers e2e specs pass (via `bus.sh serial`); API e-mail, config and ics tests pass.
 
-### [ ] P25 · B · Phase 25 gate
+### [x] P25 · B · Phase 25 gate
 - Recipe R7 (full suite via `bus.sh serial`). Plus: after screenshots of every route into `docs/screenshots/phase-25/after/` (same script as T25.1, 390 and 1280 px, light and dark); check that no `docs/design-audit.md` row is left open; check the CSP still needs no unsafe CSS or inline script after the visual blocks (T25.3 step 3). Redeploying staging/production waits until Phases 23–24 are done (parked by the owner).
