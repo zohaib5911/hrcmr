@@ -1,6 +1,8 @@
 # changesneeded.md — audit AUDIT-5 round 2 (2026-11-13, gpt-6.1-sol)
-Scope: audit-5-r1 (87f8d9e)..c595e8d; re-audit C5.1.1–C5.1.4 plus regression checks. Tests at audit: api 1432/0/0, web unit 1477/0, e2e pending, CI green (PR #136 head f7b74ce, all 12 checks pass).
-Ruff/format/mypy, standalone check-rls on a newly provisioned/migrated disposable database, web lint/typecheck, gen:api:check and production build passed locally. Full browser run is in progress. Final audit result pending.
+## Result: PASS
+
+Scope: audit-5-r1 (87f8d9e)..c595e8d; re-audit C5.1.1–C5.1.4 plus regression checks. Tests at audit: api 1432/0/0, web unit 1477/0, e2e 515/0/346, CI green (PR #136 head f7b74ce, all 12 checks pass).
+Ruff/format/mypy, standalone check-rls on a newly provisioned/migrated disposable database, web lint/typecheck, gen:api:check and production build passed locally. Full local browser suite passed (515 passed, 0 failed, 346 expected opt-in screenshot skips); a11y-pages 13 passed and design-a11y 26 passed, with no skips in those two specs. All full suites and the production build ran under the shared serial lock. Counts: 0 P0 / 0 P1 / 1 P2. The P2 coverage follow-up does not block this audit pass.
 
 ### [ ] C5.2.1 · P2 · Include the admin session states in axe coverage (from T22.3)
 - **Problem:** `web/tests/e2e/a11y-pages.spec.ts:270` covers 14 admin lists plus company detail, but omits the other two admin page files: `web/app/(admin)/platform/session/page.tsx` and `web/app/(admin)/platform/session-required/page.tsx`. `web/tests/e2e/platform-admin.spec.ts` checks their redirects/text without axe. The round-1 fix met its explicit route list, but these pending/refusal states still lack permanent accessibility coverage.
