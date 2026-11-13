@@ -8,6 +8,7 @@ they say what happened, and never contain a stack trace, SQL, or the value that 
 
 from __future__ import annotations
 
+import traceback
 from http import HTTPStatus
 from typing import TYPE_CHECKING
 
@@ -173,7 +174,11 @@ async def _unhandled(request: Request, exc: Exception) -> JSONResponse:
         request_id=request_id,
         method=request.method,
         path=request.url.path,
-        exc_info=exc,
+        kind=type(exc).__name__,
+        frames=[
+            {"function": frame.name, "lineno": frame.lineno}
+            for frame in traceback.extract_tb(exc.__traceback__)
+        ],
     )
     return error_response(
         request, status_code=500, code="INTERNAL_ERROR", message=_INTERNAL_MESSAGE

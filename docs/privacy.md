@@ -84,7 +84,8 @@ body is refused before transport. It checks the boundary, not a real model respo
 `api/app/core/logging.py` recursively drops the specification's sensitive keys plus health,
 contact/identity and body/payload/prompt carriers, masks URL credentials and labelled secrets,
 and redacts NI/passport/share-code/salary patterns even in third-party messages. HTTP client INFO
-URLs and uvicorn query-bearing access logging stay disabled. Tests capture JSON emitted by both
+URLs and uvicorn query-bearing access logging stay disabled. Unhandled API errors log only
+exception class and function/line frames, never the arbitrary exception message or source text. Tests capture JSON emitted by both
 structlog and stdlib logging, including formatted exceptions. This does not make arbitrary free
 text safe: callers must continue logging fixed event names and approved metadata, never records,
 CVs, addresses, employee names or exception bodies containing those values.
