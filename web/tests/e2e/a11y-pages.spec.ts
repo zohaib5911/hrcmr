@@ -82,7 +82,6 @@ const PUBLIC_PAGES = [
   "/vs/example",
   "/compare/hr",
   "/resources/guides/right-to-work-checks",
-  "/sponsors/profile/d4cfa9baef1949edbe71a2a854152ec6/stable-ltd",
   "/sponsors/changes/2026-11-11",
   "/legal/privacy",
   "/legal/terms",
@@ -247,7 +246,16 @@ for (const colorScheme of ["light", "dark"] as const) {
 
       test("every public page passes axe", async ({ page }) => {
         test.setTimeout(PUBLIC_PAGES.length * 15_000);
-        for (const path of PUBLIC_PAGES) {
+        // The sweep's stable-ltd slug is fixed, but its id belongs to each fresh test database.
+        const response = await page.request.get(`${API}/public/register/sitemap/0`);
+        expect(response.ok(), await response.text()).toBeTruthy();
+        const { items } = (await response.json()) as {
+          items: { stable_id: string; slug: string }[];
+        };
+        const sponsor = items.find((item) => item.slug === "stable-ltd");
+        expect(sponsor, "the reference register includes Stable Ltd").toBeDefined();
+        const profile = `/sponsors/profile/${sponsor!.stable_id}/${sponsor!.slug}`;
+        for (const path of [...PUBLIC_PAGES, profile]) {
           const unpublished = path === "/vs/example" || path === "/compare/hr";
           await open(page, path, unpublished ? 404 : undefined);
           await audit(page, `${colorScheme} ${path}`);
