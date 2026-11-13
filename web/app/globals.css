@@ -406,20 +406,16 @@
   }
 }
 
-/* Grouped-list rows: a hairline between rows, inset 16 px from the leading edge (plan 5.6). */
+/* Grouped-list rows: a hairline between rows, inset 16 px from the leading edge (plan 5.6).
+   A border image, not a pseudo element, so axe can still read the row's background. */
 @utility grouped-rows {
   & > li + li {
-    position: relative;
+    border-top: 1px solid transparent;
+    border-image: linear-gradient(to right, transparent 1rem, var(--separator) 1rem) 1;
   }
 
-  & > li + li::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    inset-inline: 1rem 0;
-    height: 1px;
-    background-color: var(--separator);
-    pointer-events: none;
+  &:dir(rtl) > li + li {
+    border-image: linear-gradient(to left, transparent 1rem, var(--separator) 1rem) 1;
   }
 }
 
