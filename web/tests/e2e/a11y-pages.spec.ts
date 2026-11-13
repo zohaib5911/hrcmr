@@ -317,6 +317,26 @@ test.describe("platform admin", () => {
           });
         }
       });
+
+      test("the session refusal and pending start pages pass axe", async ({ page }) => {
+        await open(page, `${ADMIN_ORIGIN}/session-required?code=UNAUTHENTICATED`);
+        await expect(
+          page.getByRole("heading", { level: 1, name: "Platform session not started" }),
+        ).toBeVisible();
+        await audit(page, `${colorScheme} platform /session-required`);
+
+        // Hold the start's auth bootstrap so the page stays on its pending status and cannot navigate.
+        await page.route(/\/(health|auth\/platform-session)(\?|$)/, () => new Promise(() => {}));
+        const response = await page.goto(`${ADMIN_ORIGIN}/session?next=%2F`);
+        expect(response?.status()).toBeLessThan(400);
+        await expect(
+          page.getByRole("heading", { level: 1, name: "Platform session" }),
+        ).toBeVisible();
+        await expect(page.getByRole("status")).toHaveText("Starting a platform session…");
+        await expect(page).toHaveURL(/\/session\?next=%2F$/);
+        await audit(page, `${colorScheme} platform /session`);
+        await page.unrouteAll({ behavior: "ignoreErrors" });
+      });
     });
   }
 });
