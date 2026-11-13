@@ -578,7 +578,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Watch:** same as T25.2. Region figures stay exactly what the API returns.
 - **Done when:** the map rows of `docs/design-audit.md` are ticked; map unit tests and the register e2e specs pass (via `bus.sh serial`), lint and typecheck clean.
 
-### [ ] T25.5 · B · Apple-quality pass: signed-in app and platform admin screens
+### [x] T25.5 · B · Apple-quality pass: signed-in app and platform admin screens
 - **Spec:** `docs/design-audit.md` rows for app (`web/app/(app)` and similar), admin and platform-admin routes; plan §5. Runs in parallel with T25.6.
 - **Steps:** fix the leftover rows for these screens one by one, using tokens and shared components (no per-page CSS unless a row says so); tick each row.
 - **Watch:** same as T25.2. Touch only files of these routes; if a shared component must change, post `say <you> all INFO` first so T25.6 knows.
