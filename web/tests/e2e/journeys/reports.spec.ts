@@ -1,7 +1,7 @@
 /** T10.2: the real worker generates fresh private Excel reports for the production UI. */
-import { API, csrfHeaders } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API, csrfHeaders } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 test("request worker-generated reports, download fresh files and keep recent jobs after reload", async ({
   page,

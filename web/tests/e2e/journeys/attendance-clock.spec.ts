@@ -1,7 +1,7 @@
 /** T9.3 real clock actions, consent, install assets and reviewed report approvals. */
-import { API, csrfHeaders } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API, csrfHeaders } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 test("clock from Home, consent to location, clock out and approve a report's completed week", async ({
   page,

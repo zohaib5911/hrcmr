@@ -1,7 +1,7 @@
 /** T10.1: scanned company library, review filters, metadata edits and retained archives. */
-import { API } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 const PDF = Buffer.from(
   "%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\ntrailer\n<< /Root 1 0 R >>\n%%EOF\n",

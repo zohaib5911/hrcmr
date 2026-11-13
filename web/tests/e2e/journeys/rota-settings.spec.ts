@@ -1,7 +1,7 @@
 /** T9.4 prerequisites, overnight shift, scoped rules and archived settings. */
-import { API, csrfHeaders } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API, csrfHeaders } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 test("configure overnight shifts, late policy and regular days off", async ({ page, context }) => {
   const api = context.request;

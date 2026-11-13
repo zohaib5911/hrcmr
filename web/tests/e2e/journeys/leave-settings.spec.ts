@@ -1,8 +1,8 @@
 /** T8.1: leave configuration against real seeded tenants and API, including mobile accessibility. */
 import type { Page } from "@playwright/test";
 
-import { expect, test } from "../support/fixtures";
-import { audit } from "../support/axe";
+import { expect, test } from "../../support/fixtures";
+import { audit } from "../../support/axe";
 
 test.describe.configure({ mode: "serial" });
 

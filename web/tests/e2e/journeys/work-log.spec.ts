@@ -1,7 +1,7 @@
 /** T9.6 own work, same-day editing, original-preserving correction and soft removal. */
-import { API, csrfHeaders } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API, csrfHeaders } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 test("record daily work, edit today, correct with a reason and retain removed history", async ({
   page,

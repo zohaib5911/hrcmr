@@ -1,5 +1,5 @@
 /** T15.6 sponsorship checker: a job is checked, its code confirmed, and the PDF report downloaded. */
-import { expect, test } from "../support/fixtures";
+import { expect, test } from "../../support/fixtures";
 
 const DISCLAIMER = "General guidance, not legal or immigration advice.";
 

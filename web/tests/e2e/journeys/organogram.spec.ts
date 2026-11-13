@@ -1,7 +1,7 @@
 /** T12.2 org chart: search finds a person and opens their card, the list shows the same people, and the PDF downloads. */
-import { API, csrfHeaders } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API, csrfHeaders } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 test("search finds a person on the chart, opens their card, and the list and PDF agree", async ({
   page,

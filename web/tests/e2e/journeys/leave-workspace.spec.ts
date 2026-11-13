@@ -1,7 +1,7 @@
 /** T8.4 real API workflow: own/on-behalf requests, decisions and reasoned balances. */
-import { API, csrfHeaders } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API, csrfHeaders } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 test("leave request, approval, calendar, profile adjustments and own cancellation", async ({
   page,

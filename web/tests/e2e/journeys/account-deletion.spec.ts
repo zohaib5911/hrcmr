@@ -5,8 +5,8 @@
  */
 import { request as playwrightRequest } from "@playwright/test";
 
-import { createSignedInAdmin, newAccount, waitForMail } from "../support/accounts";
-import { expect, test } from "../support/fixtures";
+import { createSignedInAdmin, newAccount, waitForMail } from "../../support/accounts";
+import { expect, test } from "../../support/fixtures";
 
 const dateAfter = (days: number) =>
   new Intl.DateTimeFormat("en-GB", {

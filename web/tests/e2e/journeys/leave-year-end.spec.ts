@@ -1,7 +1,7 @@
 /** T8.5 preview, reasoned override, reviewed commit and persisted closed-year history. */
-import { API, csrfHeaders } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API, csrfHeaders } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 test("review and commit year-end carry-over with an exception", async ({ page, context }) => {
   const api = context.request;
