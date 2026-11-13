@@ -25,6 +25,23 @@ The matrix resolves guards without invoking business handlers. It does not treat
 | Webhook signature | `test_stripe.py` and `test_billing.py`: invalid signatures, replay protection and unchanged state after rejection. |
 | Staging baseline | `.github/workflows/security.yml` runs OWASP ZAP against an HTTPS staging host only. No `STAGING_URL` repository variable exists at this check, so no staging scan was run. Deployment must configure it and run the workflow; this is not a passing scan result. |
 
+## Pen-test style checks (T21.4)
+
+| Check | Coverage |
+| --- | --- |
+| IDOR on every `{id}` route | `api/tests/db/test_pentest_idor.py`: company A's admin, after step-up, calls every tenant route whose path params are ids (from the reviewed inventory) with company B's real employee, department, designation, holiday type and membership ids, and unknown ids elsewhere. Every call is refused (403/404/409/410/422/429), none echoes B's data, and B's rows are unchanged. Platform routes cross companies by design and are covered by `test_platform_*`. |
+| Mass assignment | `api/tests/test_pentest.py` walks every request body model, nested models included (over 100), and requires `extra="forbid"`; `test_openapi.py` checks the top-level bodies in the published schema. |
+| SSRF | `test_pentest.py` pins the modules that may make outbound requests and the only host each names (GOV.UK, postcodes.io, Companies House, plus the Stripe, Resend, Anthropic, Cloudflare and HIBP APIs; ONS place names are loaded from a file by the CLI, never fetched). User input never becomes a URL: postcodes and company numbers are normalised to a fixed pattern first. The register ingest re-checks every redirect against its host allowlist; the rules watch now refuses any redirect off `https://www.gov.uk` (it previously followed redirects anywhere). |
+| Path traversal | Storage keys are server-made UUIDs. `test_pentest.py` checks that upload and export-zip names can never contain a path separator, NUL or a leading dot. |
+| Open redirects | `safeNextPath` is the only `next=` sink (platform session start); `web/lib/security/pentest.test.ts` resolves hostile values against the admin origin and requires the same origin. Export downloads redirect only to server-made presigned links; Stripe return URLs are built from `WEB_ORIGIN`. |
+| Rate limits and lockout | `test_auth_flows.py` and `test_auth_endpoints.py` (lockout growth, unknown-address parity); public forms in `test_contact_public.py`, `test_careers.py`, `test_soc_public.py` and `test_register_public.py`. |
+| Session fixation | `test_auth_flows.py`: signing in, rotating and signing out each issue a new token, and rotation drops step-up. |
+| Clickjacking | The API now sends `Content-Security-Policy: frame-ancestors 'none'`, `X-Frame-Options: DENY`, `nosniff` and `Referrer-Policy: no-referrer` on every response that sets no policy of its own (the policy viewer keeps its `frame-ancestors` for the web origin); `test_pentest.py`. The web app's frame protection is in `security-headers.spec.ts`. |
+| XSS | `pentest.test.ts`: `dangerouslySetInnerHTML` only in the two reviewed files (brand accent CSS from repository config, and escaped JSON-LD tested in `seo.test.ts`); no `innerHTML`, `insertAdjacentHTML`, `document.write`, `eval` or `new Function`. MDX is compiled from repository content at build time; no user Markdown is rendered. Email templates escape every value. |
+| SQL injection | `test_pentest.py`: every `text()` argument in the app is a string literal with bound parameters; the only run-time SQL is the provisioner's DDL from code constants. |
+
+The shared test Redis (database 15) is flushed by every API fixture. Run the IDOR sweep alone, or with `TEST_REDIS_URL` set to a private database number, when another agent is running tests.
+
 Run the complete API suite under the shared lock:
 
 ```sh
