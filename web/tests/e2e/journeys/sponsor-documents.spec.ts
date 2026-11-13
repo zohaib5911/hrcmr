@@ -1,9 +1,9 @@
 /** T7.2: explicit document/version/renewal/withdrawal saves and the sponsored register. */
 import { request as playwrightRequest } from "@playwright/test";
 
-import { API, createSignedInAdmin, csrfHeaders, newAccount } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API, createSignedInAdmin, csrfHeaders, newAccount } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 const dateAfter = (days: number) =>
   new Intl.DateTimeFormat("en-GB", {

@@ -1,7 +1,7 @@
 /** T9.2 scanned files, reviewed import, atomic bulk statuses and downloadable reports. */
-import { API, csrfHeaders } from "../support/accounts";
-import { audit } from "../support/axe";
-import { expect, test } from "../support/fixtures";
+import { API, csrfHeaders } from "../../support/accounts";
+import { audit } from "../../support/axe";
+import { expect, test } from "../../support/fixtures";
 
 test("preview row errors, import a corrected file, bulk edit and export monthly absences", async ({
   page,
