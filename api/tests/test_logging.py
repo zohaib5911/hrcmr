@@ -165,3 +165,34 @@ def test_http_client_libraries_do_not_log_urls_at_info(
     logging.getLogger("httpx").warning("slow response")
     (record,) = lines(capsys)
     assert record["event"] == "slow response"
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        "health",
+        "medical_notes",
+        "visa_number",
+        "body",
+        "payload",
+        "prompt",
+        "date_of_birth",
+        "email",
+        "phone",
+    ],
+)
+def test_privacy_payload_carriers_are_dropped(key: str, capsys: pytest.CaptureFixture[str]) -> None:
+    get_logger("test").info("privacy_probe", details={key: "PRIVATE", "count": 1})
+    (record,) = lines(capsys)
+    assert record["details"] == {"count": 1}
+    assert "PRIVATE" not in json.dumps(record)
+
+
+def test_identifiers_and_labelled_secrets_in_library_text_are_scrubbed(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    logging.getLogger("library").warning("Rejected AB123456C salary £45000 token=PRIVATE")
+    (record,) = lines(capsys)
+    assert "AB123456C" not in record["event"]
+    assert "45000" not in record["event"]
+    assert "PRIVATE" not in record["event"]

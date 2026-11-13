@@ -177,9 +177,12 @@ async def test_unhandled_exception_is_a_safe_500(
     records = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
     crash = next(r for r in records if r["event"] == "unhandled_exception")
     assert crash["request_id"] == error["request_id"]
-    assert "RuntimeError" in crash["exception"]  # the operator sees it...
-    assert "SECRET-STACK-DETAIL" in crash["exception"]
-    assert ":pw@" not in crash["exception"]  # ...but URL credentials are masked
+    assert crash["kind"] == "RuntimeError"
+    assert any(frame["function"] == "boom" for frame in crash["frames"])
+    # Arbitrary exception messages can contain employee data or credentials.
+    assert "SECRET-STACK-DETAIL" not in json.dumps(records)
+    assert ":pw@" not in json.dumps(records)
+    assert "exception" not in crash
     access = next(r for r in records if r["event"] == "http_request")
     assert access["status"] == 500
     assert access["level"] == "error"
