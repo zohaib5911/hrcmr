@@ -37,7 +37,7 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
 
 /** The home page: a greeting, the company's headline numbers, cards the person may see, and the set-up
  * checklist until it is finished or dismissed (plan 8.2). */
-export function DashboardWorkspace() {
+export function DashboardWorkspace({ actions }: { actions?: ReactNode }) {
   const can = useCan();
   const [data, setData] = useState<Dashboard | null>(null);
   const [problem, setProblem] = useState<Problem | null>(null);
@@ -71,7 +71,7 @@ export function DashboardWorkspace() {
     else setProblem(result.problem);
   }
 
-  const ready = checklistSettled || problem !== null;
+  const ready = (checklistSettled && data !== null) || problem !== null;
   const shown = ready ? data : null;
   const hasCards =
     shown !== null &&
@@ -114,6 +114,7 @@ export function DashboardWorkspace() {
             ))}
           </div>
         ) : null}
+        {actions ? <div className="mt-2 flex flex-wrap gap-3">{actions}</div> : null}
       </header>
 
       {problem ? <Alert tone="danger" title={problem.message} className="mb-6" /> : null}

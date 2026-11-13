@@ -23,6 +23,9 @@ test("register detail pages render saved publications with a fresh CSP nonce", a
     const response = await page.goto(route);
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { level: 1, name: heading, exact: true })).toBeVisible();
+    // The visible heading can precede completion of the streamed document. Axe records heading
+    // ancestry selectors, so hydration moving nodes during the scan makes their order undecidable.
+    await page.waitForLoadState("networkidle");
     const reject = page.getByRole("button", { name: "Reject all", exact: true });
     if (await reject.isVisible()) await reject.click();
     await audit(page, route);
