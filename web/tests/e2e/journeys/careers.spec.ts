@@ -1,3 +1,4 @@
+import { expectBrandLogo } from "../../support/brand";
 /** Public application through interview, accepted offer, scanned RTW evidence and employee conversion. */
 import { API, csrfHeaders } from "../../support/accounts";
 import { expect, test } from "../../support/fixtures";
@@ -62,8 +63,16 @@ test("a public applicant is interviewed, accepts an offer and becomes an employe
     const page = await visitor.newPage();
     await page.goto(`/careers/${company}`);
     await expect(page.getByRole("link", { name: new RegExp(title) })).toBeVisible();
+    for (const theme of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme: theme });
+      await expectBrandLogo(page.locator("footer"), theme);
+    }
     await page.getByRole("link", { name: new RegExp(title) }).click();
     await expect(page.getByRole("heading", { name: title, exact: true })).toBeVisible();
+    for (const theme of ["light", "dark"] as const) {
+      await page.emulateMedia({ colorScheme: theme });
+      await expectBrandLogo(page.locator("footer"), theme);
+    }
     await page.getByLabel("First name", { exact: true }).fill("Ivy");
     await page.getByLabel("Last name", { exact: true }).fill("Stone");
     await page.getByLabel("Email", { exact: true }).fill(`ivy-${stamp}@example.com`);

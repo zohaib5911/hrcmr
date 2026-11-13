@@ -1,4 +1,4 @@
-import { brand } from "@brand";
+import { BrandLogo } from "@/components/brand-logo";
 
 import { Spinner } from "@/components/ui/spinner";
 
@@ -10,7 +10,7 @@ export function WorkspaceSplash() {
   return (
     <div role="status" className="bg-canvas fixed inset-0 z-[80] grid place-items-center">
       <div className="flex flex-col items-center gap-4">
-        <p className="text-title-2 text-label font-semibold">{brand.name}</p>
+        <BrandLogo />
         <Spinner className="text-label-secondary size-6" />
         <p className="text-callout text-label-secondary">Loading your workspace…</p>
       </div>

@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
@@ -50,6 +51,9 @@ export default async function Page({
         <section className="text-body whitespace-pre-line">{data.description}</section>
       )}
       <ApplyForm company={company} posting={posting} />
+      <footer className="text-footnote text-label-secondary flex items-center gap-2">
+        Powered by <BrandLogo />
+      </footer>
     </main>
   );
 }

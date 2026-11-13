@@ -5,6 +5,8 @@
  */
 import { expect, test, type Page } from "@playwright/test";
 
+import { expectBrandLogo } from "../support/brand";
+
 import { audit } from "../support/axe";
 
 const WIDTHS = [390, 768, 1280, 1920] as const;
@@ -36,6 +38,8 @@ for (const colorScheme of ["light", "dark"] as const) {
       }) => {
         await page.setViewportSize({ width, height: 900 });
         const problems = await open(page);
+        await expectBrandLogo(page.locator("header").first(), colorScheme);
+        await expectBrandLogo(page.locator("footer").last(), colorScheme);
         const overflow = await page.evaluate(
           () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
         );

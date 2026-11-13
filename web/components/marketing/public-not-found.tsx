@@ -1,3 +1,5 @@
+import { BrandLogo } from "@/components/brand-logo";
+
 import { FileQuestion } from "lucide-react";
 import Link from "next/link";
 
@@ -9,6 +11,9 @@ export function PublicNotFound() {
   return (
     <section aria-label="Page not found" className="bg-canvas text-label min-h-[60vh]">
       <PublicContentFrame>
+        <div className="mb-6 flex justify-center">
+          <BrandLogo />
+        </div>
         <h1 className="text-large-title text-center">Page not found</h1>
         <EmptyState
           icon={FileQuestion}

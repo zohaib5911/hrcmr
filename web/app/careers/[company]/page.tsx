@@ -1,3 +1,4 @@
+import { BrandLogo } from "@/components/brand-logo";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -45,6 +46,9 @@ export default async function Page({ params }: { params: Promise<{ company: stri
           ))}
         </ul>
       )}
+      <footer className="text-footnote text-label-secondary flex items-center gap-2">
+        Powered by <BrandLogo />
+      </footer>
     </main>
   );
 }

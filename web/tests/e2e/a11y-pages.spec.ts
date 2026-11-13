@@ -7,6 +7,8 @@
 import { request as playwrightRequest, type APIRequestContext, type Page } from "@playwright/test";
 
 import { API, createSignedInAdmin, csrfHeaders } from "../support/accounts";
+import { expectBrandLogo } from "../support/brand";
+
 import { audit } from "../support/axe";
 import { expect, test } from "../support/fixtures";
 import { ADMIN_HOST, ADMIN_ORIGIN, signInPlatformAdmin } from "../support/platform";
@@ -360,6 +362,7 @@ test.describe("platform admin", () => {
         await expect(
           page.getByRole("heading", { level: 1, name: "Platform session not started" }),
         ).toBeVisible();
+        await expectBrandLogo(page.getByTestId("platform-bar"), colorScheme);
         await audit(page, `${colorScheme} platform /session-required`);
 
         // Hold the start's auth bootstrap so the page stays on its pending status and cannot navigate.
@@ -371,6 +374,7 @@ test.describe("platform admin", () => {
         ).toBeVisible();
         await expect(page.getByRole("status")).toHaveText("Starting a platform session…");
         await expect(page).toHaveURL(/\/session\?next=%2F$/);
+        await expectBrandLogo(page.getByTestId("platform-bar"), colorScheme);
         await audit(page, `${colorScheme} platform /session`);
         await page.unrouteAll({ behavior: "ignoreErrors" });
       });

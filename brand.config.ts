@@ -29,8 +29,11 @@ export interface BrandConfig {
   readonly logo: {
     /** Full lockup (mark + wordmark), SVG. */
     readonly fullLockup: string;
+    readonly fullLockupDark: string;
     /** Square mark, SVG. */
     readonly mark: string;
+    readonly markDark: string;
+    readonly markSmall: string;
     /** Favicon source, 512 x 512 PNG. */
     readonly favicon: string;
   };
@@ -46,16 +49,19 @@ export interface BrandConfig {
 }
 
 export const brand = {
-  name: "stuffhub",
+  name: "StuffHub",
   tagline: "HR and sponsor compliance, made simple.",
   assistantName: "Assistant",
   colours: {
-    accent: "#0071E3",
-    accentDark: "#2997FF",
+    accent: "#6D28D9",
+    accentDark: "#A78BFA",
   },
   logo: {
     fullLockup: "/brand/logo.svg",
+    fullLockupDark: "/brand/logo-dark.svg",
     mark: "/brand/mark.svg",
+    markDark: "/brand/mark-dark.svg",
+    markSmall: "/brand/mark-small.svg",
     favicon: "/brand/favicon-512.png",
   },
   legal: {

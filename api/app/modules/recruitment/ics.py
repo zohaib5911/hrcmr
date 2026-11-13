@@ -58,7 +58,7 @@ def interview_ics(
     lines = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        "PRODID:-//stuffhub//Recruitment//EN",
+        "PRODID:-//StuffHub//Recruitment//EN",
         "CALSCALE:GREGORIAN",
         "METHOD:REQUEST",
         "BEGIN:VEVENT",
