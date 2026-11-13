@@ -233,7 +233,11 @@ async def test_read_routes_share_a_connection_budget(
 async def test_internal_reads_have_a_separate_budget(
     rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(rig["app"].state.settings, "trusted_proxy_cidrs", "192.0.2.0/24")
+    monkeypatch.setattr(
+        rig["app"].state,
+        "settings",
+        rig["app"].state.settings.model_copy(update={"trusted_proxy_cidrs": "192.0.2.0/24"}),
+    )
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app=rig["app"], client=("192.0.2.1", 12345)),
         base_url="http://test",
@@ -246,7 +250,11 @@ async def test_internal_reads_have_a_separate_budget(
 async def test_trusted_peer_with_visitor_header_keeps_per_visitor_budget(
     rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(rig["app"].state.settings, "trusted_proxy_cidrs", "192.0.2.0/24")
+    monkeypatch.setattr(
+        rig["app"].state,
+        "settings",
+        rig["app"].state.settings.model_copy(update={"trusted_proxy_cidrs": "192.0.2.0/24"}),
+    )
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app=rig["app"], client=("192.0.2.1", 12345)),
         base_url="http://test",
@@ -265,7 +273,11 @@ async def test_trusted_peer_with_visitor_header_keeps_per_visitor_budget(
 async def test_untrusted_peer_keeps_connection_budget(
     rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(rig["app"].state.settings, "trusted_proxy_cidrs", "192.0.2.0/24")
+    monkeypatch.setattr(
+        rig["app"].state,
+        "settings",
+        rig["app"].state.settings.model_copy(update={"trusted_proxy_cidrs": "192.0.2.0/24"}),
+    )
     async with httpx.AsyncClient(
         transport=httpx.ASGITransport(app=rig["app"], client=("198.51.100.1", 12345)),
         base_url="http://test",
