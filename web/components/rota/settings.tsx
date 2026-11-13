@@ -15,6 +15,7 @@ import { SegmentedControl } from "@/components/ui/segmented-control";
 import { Select } from "@/components/ui/select";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { TextArea } from "@/components/ui/text-area";
+import { TimePicker } from "@/components/ui/time-picker";
 import { TextField } from "@/components/ui/text-field";
 import { Toggle } from "@/components/ui/toggle";
 import type { components } from "@/lib/api/client";
@@ -415,33 +416,29 @@ function SettingForm({
                 onChange={(e) => setDescription(e.target.value)}
               />
               <div className="grid grid-cols-2 gap-3">
-                <TextField
+                <TimePicker
                   label="Starts"
-                  type="time"
                   required
-                  value={start}
-                  onChange={(e) => setStart(e.target.value)}
+                  value={start || null}
+                  onChange={(picked) => setStart(picked ?? "")}
                 />
-                <TextField
+                <TimePicker
                   label="Finishes"
-                  type="time"
                   required
-                  value={end}
-                  onChange={(e) => setEnd(e.target.value)}
+                  value={end || null}
+                  onChange={(picked) => setEnd(picked ?? "")}
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <TextField
+                <TimePicker
                   label="Break starts (optional)"
-                  type="time"
-                  value={breakStart}
-                  onChange={(e) => setBreakStart(e.target.value)}
+                  value={breakStart || null}
+                  onChange={(picked) => setBreakStart(picked ?? "")}
                 />
-                <TextField
+                <TimePicker
                   label="Break finishes (optional)"
-                  type="time"
-                  value={breakEnd}
-                  onChange={(e) => setBreakEnd(e.target.value)}
+                  value={breakEnd || null}
+                  onChange={(picked) => setBreakEnd(picked ?? "")}
                 />
               </div>
               <p role="status">

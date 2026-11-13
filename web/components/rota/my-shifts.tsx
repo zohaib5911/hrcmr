@@ -8,7 +8,7 @@ import { ClockLink } from "@/components/attendance/clock";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { DataTable, type Column } from "@/components/ui/data-table";
-import { TextField } from "@/components/ui/text-field";
+import { DatePicker } from "@/components/ui/date-picker";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { addDays, formatUk, parseIso, startOfWeek, todayIso } from "@/lib/ui/dates";
@@ -78,12 +78,11 @@ export function MyShifts({ initialWeek }: { initialWeek?: string }) {
           <Button variant="gray" onClick={() => setStart(addDays(start, -7))}>
             Previous week
           </Button>
-          <TextField
+          <DatePicker
             label="My shifts week containing"
-            type="date"
-            value={start}
-            onChange={(e) => {
-              if (e.target.value) setStart(startOfWeek(e.target.value));
+            value={start || null}
+            onChange={(picked) => {
+              if (picked ?? "") setStart(startOfWeek(picked ?? ""));
             }}
           />
           <Button variant="gray" onClick={() => setStart(addDays(start, 7))}>

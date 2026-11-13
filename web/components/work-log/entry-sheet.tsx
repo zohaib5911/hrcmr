@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { SheetContent } from "@/components/ui/sheet";
 import { TextArea } from "@/components/ui/text-area";
-import { TextField } from "@/components/ui/text-field";
+import { TimePicker } from "@/components/ui/time-picker";
+import { DatePicker } from "@/components/ui/date-picker";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { formatUk } from "@/lib/ui/dates";
@@ -129,31 +130,28 @@ export function WorkLogSheet({
       <form className="flex flex-col gap-4" onSubmit={(e) => void submit(e)}>
         {problem && <Alert tone="danger" title={problem.message} />}
         {row && <p className="text-headline">{row.employee_name}</p>}
-        <TextField
+        <DatePicker
           label="Work date"
-          type="date"
           required
           max={today}
-          value={date}
+          value={date || null}
           disabled={busy || mode === "edit"}
-          onChange={(e) => setDate(e.target.value)}
+          onChange={(picked) => setDate(picked ?? "")}
         />
         <div className="grid grid-cols-2 gap-3">
-          <TextField
+          <TimePicker
             label="From"
-            type="time"
             required
-            value={start}
+            value={start || null}
             disabled={busy}
-            onChange={(e) => setStart(e.target.value)}
+            onChange={(picked) => setStart(picked ?? "")}
           />
-          <TextField
+          <TimePicker
             label="To"
-            type="time"
             required
-            value={end}
+            value={end || null}
             disabled={busy}
-            onChange={(e) => setEnd(e.target.value)}
+            onChange={(picked) => setEnd(picked ?? "")}
           />
         </div>
         <Select

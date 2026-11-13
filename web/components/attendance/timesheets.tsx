@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { InlineConfirm } from "@/components/ui/inline-confirm";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { TextField } from "@/components/ui/text-field";
+import { DatePicker } from "@/components/ui/date-picker";
 import type { components } from "@/lib/api/client";
 import { STATUS } from "@/lib/attendance";
 import { attempt, type Problem } from "@/lib/auth/request";
@@ -104,13 +104,12 @@ export function AttendanceTimesheets() {
       ) : (
         <div className="flex flex-col gap-5">
           <div className="flex flex-wrap items-end gap-3">
-            <TextField
+            <DatePicker
               label="Timesheet week containing"
-              type="date"
-              value={start}
-              onChange={(e) => {
-                if (e.target.value) {
-                  setStart(startOfWeek(e.target.value));
+              value={start || null}
+              onChange={(picked) => {
+                if (picked ?? "") {
+                  setStart(startOfWeek(picked ?? ""));
                   setOffset(0);
                 }
               }}

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Select } from "@/components/ui/select";
 import { TextArea } from "@/components/ui/text-area";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TextField } from "@/components/ui/text-field";
 import { useToast } from "@/components/ui/toast";
 import type { components } from "@/lib/api/client";
@@ -287,17 +288,15 @@ export function PostingSheet({
           />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <TextField
+          <DatePicker
             label="Posted on (optional)"
-            type="date"
-            value={posted}
-            onChange={(e) => setPosted(e.target.value)}
+            value={posted || null}
+            onChange={(picked) => setPosted(picked ?? "")}
           />
-          <TextField
+          <DatePicker
             label="Closes on (optional)"
-            type="date"
-            value={closes}
-            onChange={(e) => setCloses(e.target.value)}
+            value={closes || null}
+            onChange={(picked) => setCloses(picked ?? "")}
             error={fieldError(problem, "closes_on")}
           />
         </div>

@@ -7,6 +7,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { EmptyState } from "@/components/ui/empty-state";
+import { FilterDate } from "@/components/platform/filter-date";
 import { TextField } from "@/components/ui/text-field";
 import { Select } from "@/components/ui/select";
 import { type components } from "@/lib/api/client";
@@ -75,20 +76,8 @@ export function AuditAdmin({
           <option value="platform_admin">Platform admin</option>
           <option value="system">System</option>
         </Select>
-        <TextField
-          label="From date (UTC)"
-          type="date"
-          name="since"
-          defaultValue={filters.since?.slice(0, 10) ?? ""}
-          clearable={false}
-        />
-        <TextField
-          label="To date (UTC)"
-          type="date"
-          name="until"
-          defaultValue={filters.until?.slice(0, 10) ?? ""}
-          clearable={false}
-        />
+        <FilterDate label="From date (UTC)" name="since" defaultValue={filters.since} />
+        <FilterDate label="To date (UTC)" name="until" defaultValue={filters.until} />
         <Button type="submit" className="self-end justify-self-start">
           Apply filters
         </Button>

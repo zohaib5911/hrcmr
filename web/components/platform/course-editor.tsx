@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select } from "@/components/ui/select";
 import { TextArea } from "@/components/ui/text-area";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
@@ -282,17 +283,15 @@ export function CourseEditor({ courses: initial }: { courses: Course[] }) {
               value={draft.sourceUrl}
               onChange={(e) => set("sourceUrl", e.target.value)}
             />
-            <TextField
+            <DatePicker
               label="Source last updated"
-              type="date"
-              value={draft.sourceUpdated}
-              onChange={(e) => set("sourceUpdated", e.target.value)}
+              value={draft.sourceUpdated || null}
+              onChange={(picked) => set("sourceUpdated", picked ?? "")}
             />
-            <TextField
+            <DatePicker
               label="Content reviewed"
-              type="date"
-              value={draft.reviewed}
-              onChange={(e) => set("reviewed", e.target.value)}
+              value={draft.reviewed || null}
+              onChange={(picked) => set("reviewed", picked ?? "")}
             />
             <TextField
               label="Licence note (optional)"

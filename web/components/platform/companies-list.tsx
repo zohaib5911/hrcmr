@@ -6,6 +6,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardBody } from "@/components/ui/card";
 import { Select } from "@/components/ui/select";
 import { StatusChip } from "@/components/ui/status-chip";
+import { FilterDate } from "@/components/platform/filter-date";
 import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { formatUk } from "@/lib/ui/dates";
@@ -54,18 +55,12 @@ export function CompaniesList({
             </option>
           ))}
         </Select>
-        <TextField
+        <FilterDate
           label="Created since"
           name="created_since"
-          type="date"
-          defaultValue={filters.created_since?.slice(0, 10)}
+          defaultValue={filters.created_since}
         />
-        <TextField
-          label="Active since"
-          name="active_since"
-          type="date"
-          defaultValue={filters.active_since?.slice(0, 10)}
-        />
+        <FilterDate label="Active since" name="active_since" defaultValue={filters.active_since} />
         <Button type="submit">Search</Button>
       </form>
       {!data ? (

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import { Select } from "@/components/ui/select";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { DatePicker } from "@/components/ui/date-picker";
 import { TextField } from "@/components/ui/text-field";
 import { attempt, type Problem } from "@/lib/auth/request";
 import type { components } from "@/lib/api/client";
@@ -119,13 +120,12 @@ export function BalancePanel({
   return (
     <section aria-label="Leave balances" className="flex flex-col gap-4">
       <div className="max-w-xs">
-        <TextField
-          type="date"
+        <DatePicker
           label="Allowance as of"
-          value={on}
-          onChange={(e) => {
+          value={on || null}
+          onChange={(picked) => {
             setBusy(true);
-            setOn(e.target.value);
+            setOn(picked ?? "");
           }}
         />
       </div>
