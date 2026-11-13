@@ -408,3 +408,23 @@ async def test_only_the_owner_role_in_a_purge_may_delete_history_rows(rig: dict[
     async with rig["app"].state.engine.connect() as c:
         with pytest.raises(DBAPIError, match="permission denied"):
             await c.execute(text(ledger), {"c": rig["a"]})
+
+
+async def test_starting_deletion_without_export_requires_recent_step_up(
+    rig: dict[str, Any],
+) -> None:
+    from tests.db.test_exports import step_up
+
+    admin = await rig["person"]("company_admin", rig["a"])
+    refused = await admin.post(URL, json={"export_requested": False})
+    assert refused.status_code == 403, refused.text
+    assert refused.json()["error"]["code"] == "STEP_UP_REQUIRED"
+    assert (
+        await _rows(rig, "select id from deletion_requests where company_id = :c", c=rig["a"]) == []
+    )
+    assert rig["sent"] == []
+    await step_up(rig, admin)
+    started = await admin.post(URL, json={"export_requested": False})
+    assert started.status_code == 202, started.text
+    assert started.json()["status"] == "awaiting_code"
+    assert len(rig["sent"]) == 1
