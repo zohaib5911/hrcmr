@@ -141,7 +141,12 @@ def normalise_places(content: bytes) -> bytes:
     ctyltnm, rgn22cd, ctry22cd, lat, long; the year digits vary by edition) or a file already
     in PLACE_HEADERS form, and return the five-column CSV ``parse_places`` reads. One row per
     county spelling, so a sponsor's county can match the current, historic or ceremonial name."""
-    text = content.decode("utf-8-sig")
+    try:
+        text = content.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        # The ONS publishes the Index of Place Names in Windows-1252 (Gaelic and Welsh names
+        # such as "A' Chrìon Làraich" in IPN_GB_2024.csv are not UTF-8 bytes).
+        text = content.decode("cp1252")
     reader = csv.DictReader(io.StringIO(text))
     raw = [h or "" for h in reader.fieldnames or ()]
     if tuple(raw) == PLACE_HEADERS:

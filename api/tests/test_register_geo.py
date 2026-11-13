@@ -123,3 +123,15 @@ def test_ons_index_of_place_names_is_normalised() -> None:
     assert normalise_places(own) == own
     with pytest.raises(ValueError, match="columns"):
         normalise_places(b"place23nm,lat,long\nLeeds,1,1\n")
+
+
+def test_ons_index_in_windows_1252_is_read() -> None:
+    # IPN_GB_2024.csv as published by the ONS is Windows-1252, not UTF-8.
+    ons = (
+        "place24cd,place24nm,ctyhistnm,ctyltnm,rgn24cd,ctry24cd,lat,long\n"
+        "1,A' Chrìon Làraich,Perthshire,Stirling,S99999999,S92000003,56.39,-4.62\n"
+        "2,Ynys Môn,Anglesey,Isle of Anglesey,W99999999,W92000004,53.28,-4.42\n"
+    ).encode("cp1252")
+    places = parse_places(normalise_places(ons))
+    assert geocode(places, "A' Chrìon Làraich", "")[0].region == "Scotland"  # type: ignore[union-attr]
+    assert geocode(places, "Ynys Môn", "Anglesey")[1] == "exact"
