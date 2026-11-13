@@ -506,7 +506,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 ### [x] P20 · S · Phase 20 gate
 - Recipe R7.
 
-### [ ] AUDIT-4 · AUDIT STOP · covers T18.1 → P20
+### [x] AUDIT-4 · AUDIT STOP · covers T18.1 → P20
 
 ---
 
