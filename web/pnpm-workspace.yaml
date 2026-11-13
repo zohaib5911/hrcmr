@@ -9,3 +9,9 @@ onlyBuiltDependencies: []
 # Optional native fallback of the eslint import resolver; its prebuilt binaries ship as packages.
 ignoredBuiltDependencies:
   - unrs-resolver
+
+# T21.3: patched transitive tooling dependencies. Remove each override once its parent
+# requires the patched major: GHSA-3g3m-2fjr-6pw4 (glob), GHSA-g3hv-75wg-m249 (minimatch).
+overrides:
+  "@sentry/bundler-plugins>glob": 14.0.2
+  "@typescript-eslint/typescript-estree>minimatch": 11.0.1
