@@ -584,7 +584,7 @@ API catalogue §11 L1585–1661 · Launch checklist §12 L1662–1680 · Referen
 - **Watch:** same as T25.2. Touch only files of these routes; if a shared component must change, post `say <you> all INFO` first so T25.6 knows.
 - **Done when:** every app/admin row is ticked; affected unit tests and e2e specs pass (via `bus.sh serial`), lint and typecheck clean.
 
-### [ ] T25.6 · B · Apple-quality pass: marketing, auth, careers, free tools and public register screens
+### [x] T25.6 · B · Apple-quality pass: marketing, auth, careers, free tools and public register screens
 - **Spec:** `docs/design-audit.md` rows for marketing, auth, careers, free calculators and the public register (except the map, T25.4); plan §5. Runs in parallel with T25.5.
 - **Steps:** fix the leftover rows for these screens one by one, using tokens and shared components; tick each row.
 - **Watch:** same as T25.2. Touch only files of these routes; if a shared component must change, post `say <you> all INFO` first so T25.5 knows.
