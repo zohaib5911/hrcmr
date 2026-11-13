@@ -55,6 +55,11 @@ _REGION_CODES = {
     "E12000008": "South East",
     "E12000009": "South West",
 }
+# European Electoral Region codes (eer<yy>cd) cover the same nine English regions, in the
+# same order. In IPN_GB_2024.csv the rgn23cd column is blank on about 43,000 rows and says
+# "North East" on about 14,000 rows that are elsewhere (Bristol's locality row among them),
+# while eer23cd is filled and right, so the EER code is read first.
+_EER_CODES = {f"E1500000{i}": name for i, name in enumerate(_REGION_CODES.values(), start=1)}
 _NATION_PREFIX = {"W": "Wales", "S": "Scotland", "N": "Northern Ireland"}
 logger = get_logger("app.register.geo")
 
@@ -120,12 +125,16 @@ def parse_places(content: bytes) -> dict[tuple[str, str], Place]:
     for name, regions in seen.items():
         if len(regions) == 1:
             exact[(name, "")] = first[name]
+        else:  # a row with an empty county must not stand in for a name used in two regions
+            exact.pop((name, ""), None)
     return exact
 
 
 def _ons_region(row: dict[str, str], code_cols: list[str], name_cols: list[str]) -> str | None:
     for col in code_cols:
         code = row.get(col, "").strip().upper()
+        if code in _EER_CODES:
+            return _EER_CODES[code]
         if code in _REGION_CODES:
             return _REGION_CODES[code]
         if code[:1] in _NATION_PREFIX:
@@ -141,7 +150,12 @@ def normalise_places(content: bytes) -> bytes:
     ctyltnm, rgn22cd, ctry22cd, lat, long; the year digits vary by edition) or a file already
     in PLACE_HEADERS form, and return the five-column CSV ``parse_places`` reads. One row per
     county spelling, so a sponsor's county can match the current, historic or ceremonial name."""
-    text = content.decode("utf-8-sig")
+    try:
+        text = content.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        # The ONS publishes the Index of Place Names in Windows-1252 (Gaelic and Welsh names
+        # such as "A' Chrìon Làraich" in IPN_GB_2024.csv are not UTF-8 bytes).
+        text = content.decode("cp1252")
     reader = csv.DictReader(io.StringIO(text))
     raw = [h or "" for h in reader.fieldnames or ()]
     if tuple(raw) == PLACE_HEADERS:
@@ -154,7 +168,7 @@ def normalise_places(content: bytes) -> bytes:
 
     names = cols(r"place\d{2}nm")
     counties = cols(r"cty\d{2}nm|ctyhistnm|ctyltnm")
-    region_codes = cols(r"rgn\d{2}cd") + cols(r"ctry\d{2}cd")
+    region_codes = cols(r"eer\d{2}cd") + cols(r"rgn\d{2}cd") + cols(r"ctry\d{2}cd")
     region_names = cols(r"rgn\d{2}nm") + cols(r"ctry\d{2}nm")
     lat, lon = headers.get("lat"), headers.get("long")
     if not names or not (region_codes or region_names) or lat is None or lon is None:
