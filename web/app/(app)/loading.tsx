@@ -1,5 +1,5 @@
-import { WorkspaceSplash } from "@/components/app/workspace-splash";
+import { RouteLoading } from "@/components/app/route-loading";
 
 export default function Loading() {
-  return <WorkspaceSplash />;
+  return <RouteLoading />;
 }
