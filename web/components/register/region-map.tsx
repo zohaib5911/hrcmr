@@ -35,6 +35,10 @@ const STEPS = [
 ];
 const NONE = { fill: "fill-fill-secondary", swatch: "bg-fill-secondary" };
 const ZOOM_MS = 320;
+/** Sea around the coast, in map units, so the outline never touches the panel edge. */
+const PAD = 24;
+const VIEW_W = MAP_WIDTH + 2 * PAD;
+const VIEW_H = MAP_HEIGHT + 2 * PAD;
 const MAX_ZOOM = 3.5;
 
 const number = (n: number) => n.toLocaleString("en-GB");
@@ -66,9 +70,11 @@ function zoomFor(name: string | null) {
   };
 }
 
+const sponsors = (n: number) => `${number(n)} ${n === 1 ? "sponsor" : "sponsors"}`;
+
 function summary(name: string, c: RegionCount | undefined, deltaLabel: string) {
   const delta = c?.delta ?? 0;
-  return `${name}: ${c ? `${number(c.count)} sponsors` : "no data"}${
+  return `${name}: ${c ? sponsors(c.count) : "no data"}${
     delta ? ` (${signed(delta)} ${deltaLabel})` : ""
   }`;
 }
@@ -132,10 +138,13 @@ export function RegionMap({
 
   // Where the tooltip points: the active region's label, after the zoom, as a share of the panel.
   const activeRegion = REGIONS.find((r) => r.name === active);
-  const tip = activeRegion && {
-    x: ((zoom.x + zoom.scale * activeRegion.label[0]) / MAP_WIDTH) * 100,
-    y: ((zoom.y + zoom.scale * activeRegion.label[1]) / MAP_HEIGHT) * 100,
+  const point = activeRegion && {
+    x: ((PAD + zoom.x + zoom.scale * activeRegion.label[0]) / VIEW_W) * 100,
+    y: ((PAD + zoom.y + zoom.scale * activeRegion.label[1]) / VIEW_H) * 100,
   };
+  // Hidden when that point is off the panel (a table row hovered while zoomed elsewhere).
+  const tip =
+    point && point.x >= 0 && point.x <= 100 && point.y >= 0 && point.y <= 100 ? point : undefined;
   const activeCount = active ? counts[active] : undefined;
 
   // The CSP forbids style="" in server HTML, so the tooltip is placed through the CSSOM instead.
@@ -149,11 +158,11 @@ export function RegionMap({
   });
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-      <figure className="material-sheet rounded-card shadow-e2 border-separator relative overflow-hidden border p-3 sm:p-5">
-        <div className="relative mx-auto max-w-md">
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,30rem)_minmax(0,1fr)]">
+      <figure className="material-sheet rounded-card shadow-e2 border-separator relative mx-auto w-full max-w-[30rem] overflow-hidden border lg:mx-0">
+        <div className="relative">
           <svg
-            viewBox={`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`}
+            viewBox={`${-PAD} ${-PAD} ${VIEW_W} ${VIEW_H}`}
             role="group"
             aria-label="Map of UK regions showing sponsor counts"
             className="block h-auto w-full touch-manipulation"
@@ -195,7 +204,7 @@ export function RegionMap({
                     tabIndex={0}
                     aria-label={summary(r.name, c, deltaLabel)}
                     aria-pressed={selected === r.name}
-                    fillOpacity={dimmed ? 0.45 : 1}
+                    fillOpacity={dimmed ? 0.6 : 1}
                     stroke={isActive ? "var(--accent)" : "var(--bg-elevated)"}
                     strokeWidth={isActive ? 2.5 : 1}
                     strokeLinejoin="round"
@@ -252,14 +261,14 @@ export function RegionMap({
             >
               <p className="text-subheadline text-label font-semibold">{activeRegion.name}</p>
               <p className="text-footnote text-label-secondary" data-tabular>
-                {activeCount ? `${number(activeCount.count)} sponsors` : "No data"}
+                {activeCount ? sponsors(activeCount.count) : "No data"}
                 {activeCount?.delta ? ` · ${signed(activeCount.delta)} ${deltaLabel}` : ""}
               </p>
             </div>
           ) : null}
         </div>
         <div
-          className="text-footnote text-label-secondary mt-3 flex flex-wrap items-center gap-x-4 gap-y-2"
+          className="text-footnote text-label-secondary border-separator flex flex-wrap items-center gap-x-4 gap-y-2 border-t px-4 pt-3 sm:px-5"
           aria-hidden="true"
         >
           <span className="flex items-center gap-1.5">
@@ -285,7 +294,7 @@ export function RegionMap({
             <span className="ml-auto">Choose a region to zoom in</span>
           )}
         </div>
-        <figcaption className="text-caption text-label-secondary mt-3">
+        <figcaption className="text-caption text-label-secondary px-4 pt-3 pb-4 sm:px-5">
           Region boundaries: Office for National Statistics, licensed under the Open Government
           Licence v.3.0. Contains OS data © Crown copyright and database right 2025.
         </figcaption>
