@@ -518,11 +518,11 @@ test("Deferred employee linking and photo selection save only explicitly", async
   expect(links).toBe(0);
   await dialog.getByRole("button", { name: "Save", exact: true }).click();
   await expect(dialog).not.toBeVisible();
-  await expect(page.getByRole("button", { name: "Link employee for Amira Hassan" })).toHaveText(
-    "Change link",
-  );
+  await expect(
+    page.getByRole("button", { name: "Change link for Amira Hassan", exact: true }),
+  ).toHaveText("Change link");
   expect(links).toBe(1);
-  await page.getByRole("button", { name: "Link employee for Amira Hassan" }).click();
+  await page.getByRole("button", { name: "Change link for Amira Hassan", exact: true }).click();
   dialog = page.getByRole("dialog");
   await dialog.getByLabel("Employee", { exact: true }).selectOption("");
   await dialog.getByRole("button", { name: "Save", exact: true }).click();
