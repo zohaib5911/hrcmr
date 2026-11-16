@@ -77,7 +77,7 @@ What was scanned: all 436 API routes mapped to their permission guard (the only 
 - **Fix:** stream the object (`StreamingResponse` over the boto3 body, read in chunks in a thread) instead of `storage.read`; drop `allow-same-origin` from the sandbox unless the browser PDF viewer test fails without it, in which case drop the `sandbox` directive and keep `default-src 'none'; frame-ancestors <web origin>`.
 - **Done when:** the policy viewer e2e test still passes, and a unit test shows the route returns a streamed response.
 
-### [ ] C6.1.12 · P2 · The dashboard set-up list is not clickable and uses the browser's default progress bar
+### [x] C6.1.12 · P2 · The dashboard set-up list is not clickable and uses the browser's default progress bar — fixed in PR #153
 - **Problem:** `web/components/dashboard/workspace.tsx:136` uses a native `<progress>` (dark green on grey, different in every browser) instead of `components/ui/progress.tsx`, and the five set-up steps are plain text, so "Add your company details" does not take you there.
 - **Evidence:** code read and `docs/screenshots/phase-25/after/app-dashboard-light-1280.png`.
 - **Fix:** replace `<progress>` with `<ProgressBar value={(done / total) * 100} label="Set-up progress" />`; give each checklist item an `href` (company profile, departments, new employee, Right to Work, key personnel) and render unfinished items as links with a chevron.
