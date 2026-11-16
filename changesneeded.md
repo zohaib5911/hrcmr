@@ -150,7 +150,7 @@ What is there today (from the Phase 25 screenshots and `web/app/globals.css`): a
 - **Fix:** Apple's large-title pattern: the page keeps the large title; the toolbar title is hidden until the large title scrolls out of view, then fades in (IntersectionObserver on the `h1`). The breadcrumb on detail pages ends with the record name ("People / Employees / Nadia Patel").
 - **Done when:** unit test for the toolbar title visibility; e2e checks the breadcrumb on an employee page.
 
-### [ ] U6.1.6 · P2 · Tidy the action rows
+### [x] U6.1.6 · P2 · Tidy the action rows — fixed in PR #160
 - **Problem:** dashboard quick actions are two rows of grey pills in two different sizes; the employee header mixes buttons and status chips in one row ("Print record", "Not recorded", "Resolve Right to Work", "Active"), so it is unclear what can be pressed.
 - **Fix:** quick actions: one row, one size, each with its icon, the main one in the accent colour, overflow into a "More" menu on phones. Employee header: status chips sit under the name; actions sit together on the right with one primary button.
 - **Done when:** screenshots at 390 and 1280; no wrap to a second row at 1280.
