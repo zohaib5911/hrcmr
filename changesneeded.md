@@ -136,7 +136,7 @@ What is there today (from the Phase 25 screenshots and `web/app/globals.css`): a
 - **Fix:** add a fixed, non-interactive backdrop layer behind `(app)`, `(auth)` and marketing heroes: two or three large, very soft radial gradients in the brand accent and one neighbouring hue at low strength (about 10 to 14% in light, 18 to 22% in dark) over `--bg`, drawn with CSS only (no image, no JS), `position: fixed`, `pointer-events: none`, `contain: strict`. No animation by default; an optional slow drift only when `prefers-reduced-motion: no-preference`. Keep data-heavy areas (tables, forms) on calm ground: the gradient is strongest at the top corners and fades out by 40% of the viewport height.
 - **Done when:** screenshots at 390 and 1280 in both themes show visible depth behind the toolbar and sidebar, axe reports no contrast failures, and Lighthouse performance is unchanged.
 
-### [ ] U6.1.3 · P2 · B · Make the app shell float
+### [x] U6.1.3 · P2 · B · Make the app shell float — fixed in PR #165
 - **Fix:** sidebar (`components/app/sidebar.tsx`), toolbar (`toolbar.tsx`) and mobile tab bar (`mobile-tab-bar.tsx`) move from edge-to-edge bars with a hairline to floating glass: 8 to 12 px inset from the window edge, `rounded-card` (pill shape for the tab bar on phones), `material-glass-regular`, content scrolling underneath. The toolbar turns from clear to glass only after the page scrolls. Fix the clipped last nav item above the user footer ("Rota" is cut in `app-dashboard-light-1280.png`): add a fade mask and bottom padding to the scrolling list.
 - **Done when:** shell e2e and a11y specs pass; no content is hidden under the floating bars at 360, 390, 768 and 1280 (safe-area insets respected).
 
