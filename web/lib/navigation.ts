@@ -398,6 +398,11 @@ export function titleFor(pathname: string): string | undefined {
   return subPage(pathname)?.label ?? findNavItem(pathname)?.label;
 }
 
+/** The address of the listed page this one belongs to: always a page that exists. */
+export function pageHrefFor(pathname: string): string | undefined {
+  return subPage(pathname)?.href ?? findNavItem(pathname)?.href;
+}
+
 export interface Crumb {
   label: string;
   /** Missing for the group (it has no page of its own) and for the current page. */

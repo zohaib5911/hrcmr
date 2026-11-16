@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { IconButton } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Tooltip } from "@/components/ui/tooltip";
-import { breadcrumbsFor, titleFor } from "@/lib/navigation";
+import { breadcrumbsFor, pageHrefFor, titleFor } from "@/lib/navigation";
 import { keyLabel } from "@/lib/platform";
 import { OPEN_PALETTE, OPEN_SHORTCUTS, announce } from "@/lib/shell-events";
 import type { ThemeChoice } from "@/lib/theme";
@@ -33,13 +33,11 @@ export function Toolbar({ user, theme, notificationCount }: ToolbarProps) {
   const heading = usePageHeading(pathname);
   const title = heading.title || titleFor(pathname);
   const crumbs = breadcrumbsFor(pathname);
-  if (
-    heading.title &&
-    heading.title !== titleFor(pathname) &&
-    pathname.split("/").filter(Boolean).length > 1
-  ) {
+  if (heading.title && heading.title !== titleFor(pathname) && pageHrefFor(pathname) !== pathname) {
     const parent = crumbs.at(-1);
-    if (parent) parent.href = pathname.slice(0, pathname.lastIndexOf("/")) || "/";
+    // The page this one was opened from. Cutting the last part off the address is not enough:
+    // /learning/assignments has no page of its own, and a link to nowhere is fetched for ever.
+    if (parent) parent.href = pageHrefFor(pathname);
     crumbs.push({ label: heading.title });
   }
   const apple = useApple();
