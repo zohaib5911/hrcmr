@@ -360,3 +360,26 @@ async def test_a_cv_over_the_limit_is_refused_before_it_is_read(rig: dict[str, A
     await public.aclose()
     assert refused.status_code == 413
     assert await applications_for(rig, rig["a"]) == 0
+
+
+async def test_existing_candidate_public_application_needs_review(rig: dict[str, Any]) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    slug = await company_slug(rig, rig["a"])
+    await open_posting(admin, "First careers")
+    await open_posting(admin, "Second careers")
+    async with anonymous(rig) as public:
+        first = await public.post(f"{API}/public/postings/{slug}/first-careers/apply", data=APPLY)
+        assert first.status_code == 202
+        second = await public.post(
+            f"{API}/public/postings/{slug}/second-careers/apply",
+            data={**APPLY, "first_name": "Imposter", "phone": "0000000000"},
+        )
+        assert second.status_code == 202
+    apps = (await admin.get(API + "/applications")).json()["items"]
+    assert len(apps) == 2
+    assert len({row["candidate_id"] for row in apps}) == 1
+    assert all(row["candidate_name"] == "Ivy Stone" for row in apps)
+    assert {row["posting_title"]: row["needs_review"] for row in apps} == {
+        "First careers": False,
+        "Second careers": True,
+    }

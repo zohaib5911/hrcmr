@@ -51,7 +51,16 @@ export function ApplicationsTab() {
       header: "Candidate",
       primary: true,
       sortValue: (row) => row.candidate_name,
-      cell: (row) => <span className="break-words">{row.candidate_name}</span>,
+      cell: (row) => (
+        <div className="break-words">
+          <span>{row.candidate_name}</span>
+          {row.needs_review && (
+            <p className="text-footnote text-label-secondary">
+              Sent from the public form; details not confirmed
+            </p>
+          )}
+        </div>
+      ),
     },
     {
       id: "posting",
