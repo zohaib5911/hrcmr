@@ -124,6 +124,59 @@ export const COLOUR_TOKENS: readonly ColourToken[] = [
     group: "material",
     use: "Solid stand-in when blur is unavailable or transparency is reduced",
   },
+  {
+    name: "--glass-thin",
+    swatch: "bg-glass-thin",
+    group: "material",
+    use: "Glass for cards (material-glass-thin)",
+  },
+  {
+    name: "--glass-regular",
+    swatch: "bg-glass-regular",
+    group: "material",
+    use: "Glass for floating chrome (material-glass-regular)",
+  },
+  {
+    name: "--glass-thick",
+    swatch: "bg-glass-thick",
+    group: "material",
+    use: "Glass for menus and sheets (material-glass-thick)",
+  },
+  {
+    name: "--glass-stroke",
+    swatch: "bg-glass-stroke",
+    group: "material",
+    use: "The 1 px inner edge of glass",
+  },
+  {
+    name: "--glass-highlight",
+    swatch: "bg-glass-highlight",
+    group: "material",
+    use: "The light along the top edge of glass",
+  },
+  {
+    name: "--backdrop-tint",
+    swatch: "bg-backdrop-tint",
+    group: "material",
+    use: "The strongest colour of the ambient backdrop behind glass",
+  },
+];
+
+/** Glass tiers, thinnest first, and the shadow they share (U6.1.1). */
+export const GLASS_TIERS = ["--glass-thin", "--glass-regular", "--glass-thick"] as const;
+export const GLASS_SHADOW = "--glass-shadow";
+
+/** Text that may sit on glass, with the contrast it needs whatever is behind the glass. */
+export const GLASS_TEXT: readonly { readonly fg: string; readonly min: 3 | 4.5 }[] = [
+  { fg: "--label", min: 4.5 },
+  { fg: "--label-secondary", min: 4.5 },
+  { fg: "--placeholder", min: 4.5 },
+  { fg: "--accent-text", min: 4.5 },
+  { fg: "--success", min: 4.5 },
+  { fg: "--warning", min: 4.5 },
+  { fg: "--danger", min: 4.5 },
+  { fg: "--info", min: 4.5 },
+  { fg: "--label-tertiary", min: 3 },
 ];
 
 export interface Elevation {
@@ -142,6 +195,7 @@ export const ELEVATIONS: readonly Elevation[] = [
 export const THEME_TOKEN_NAMES: readonly string[] = [
   ...COLOUR_TOKENS.map((token) => token.name),
   ...ELEVATIONS.map((elevation) => elevation.name),
+  GLASS_SHADOW,
 ];
 
 // --- Typography (plan 5.2) -----------------------------------------------------------------------

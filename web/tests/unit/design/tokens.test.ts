@@ -10,14 +10,22 @@ import { describe, expect, it } from "vitest";
 import {
   CONTRAST_PAIRS,
   ELEVATIONS,
+  GLASS_TEXT,
+  GLASS_TIERS,
   MARKETING_STYLES,
   RADII,
   THEME_TOKEN_NAMES,
   TYPE_STYLES,
 } from "../../../lib/design/catalog";
-import { contrastRatio } from "../../../lib/design/contrast";
+import { composite, contrastRatio } from "../../../lib/design/contrast";
 import { DURATION } from "../../../lib/motion";
-import { DEVIATIONS, EXPECTED_DARK, EXPECTED_LIGHT } from "../../support/expected-tokens";
+import {
+  BRANDED_DARK,
+  BRANDED_LIGHT,
+  DEVIATIONS,
+  EXPECTED_DARK,
+  EXPECTED_LIGHT,
+} from "../../support/expected-tokens";
 import {
   GLOBALS_CSS,
   LIGHT_BLOCK,
@@ -25,6 +33,7 @@ import {
   blockBody,
   declarations,
   normalise,
+  resolveColour,
   themeBlocks,
   visibleColour,
 } from "../support/css";
@@ -107,6 +116,43 @@ describe("WCAG AA (plan 5.3)", () => {
       expect(contrastRatio(fg, bg)).toBeGreaterThanOrEqual(pair.min);
     });
   }
+});
+
+describe("text stays readable on glass (U6.1.1)", () => {
+  // Glass shows what is behind it. The lightest and darkest things behind it are the plain canvas
+  // and the canvas under the backdrop's strongest tint, in either order depending on the theme.
+  // Checked with the stylesheet's accent and with this brand's accent (brand.config.ts).
+  const sets = [
+    ["light", light],
+    ["dark", explicitDark],
+    ["light, branded", new Map(Object.entries(BRANDED_LIGHT))],
+    ["dark, branded", new Map(Object.entries(BRANDED_DARK))],
+  ] as const;
+  const cases = sets.flatMap(([theme, tokens]) =>
+    GLASS_TIERS.flatMap((tier) =>
+      (["plain", "tinted"] as const).flatMap((backdrop) =>
+        GLASS_TEXT.map(
+          (text) =>
+            [
+              `${theme}: ${text.fg} on ${tier} over the ${backdrop} backdrop`,
+              tokens,
+              tier,
+              backdrop,
+              text,
+            ] as const,
+        ),
+      ),
+    ),
+  );
+
+  it.each(cases)("%s", (_label, tokens, tier, backdrop, text) => {
+    const canvas = visibleColour("--bg", tokens);
+    const behind =
+      backdrop === "plain" ? canvas : composite(resolveColour("--backdrop-tint", tokens), canvas);
+    const surface = composite(resolveColour(tier, tokens), behind);
+    const ratio = contrastRatio(visibleColour(text.fg, tokens), surface);
+    expect(ratio).toBeGreaterThanOrEqual(text.min);
+  });
 });
 
 // ---- Typography (plan 5.2) ---------------------------------------------------------------------
