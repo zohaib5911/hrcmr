@@ -104,6 +104,20 @@ TEMPLATES: dict[str, Template] = {
         ),
         fields=_fields("first_name"),
     ),
+    "two_step_reset": Template(
+        subject="Your two-step verification was reset",
+        heading="Your two-step verification was reset",
+        preheader="If you did not ask for this, act now.",
+        paragraphs=(
+            "Hi {first_name},",
+            "An administrator at {company_name} has reset the two-step verification on your "
+            "{brand_name} account, and you were signed out on all your devices. You will set it "
+            "up again the next time you sign in.",
+            "If you did not ask for this, reset your password straight away at "
+            "{web_origin}/forgot-password and contact {support_email}.",
+        ),
+        fields=_fields("first_name", "company_name"),
+    ),
     "account_exists": Template(
         subject="You already have an account",
         heading="You already have an account",
