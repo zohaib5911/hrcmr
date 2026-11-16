@@ -71,7 +71,7 @@ What was scanned: all 436 API routes mapped to their permission guard (the only 
 - **Fix:** add `web/app/global-error.tsx`, `web/app/(app)/error.tsx`, `web/app/(marketing)/error.tsx` and `web/app/(admin)/platform/error.tsx` built from `components/ui/error-state.tsx` ("Something went wrong", a "Try again" button calling `reset()`, a link home, the error `digest` as the reference), each calling `Sentry.captureException(error)` in an effect.
 - **Done when:** a Playwright test that makes a page throw sees the designed error state in both themes with no axe violations.
 
-### [ ] C6.1.11 · P2 · The inline policy viewer reads the whole file into memory and its sandbox is a no-op
+### [x] C6.1.11 · P2 · The inline policy viewer reads the whole file into memory and its sandbox is a no-op — fixed in PR #154
 - **Problem:** `view_file` (`api/app/modules/policies/own_router.py:105`) loads up to 25 MB into the API process for every view, so a few people opening a large policy at once can exhaust a worker. Its CSP says `sandbox allow-scripts allow-same-origin`, and MDN's `sandbox` documentation notes that this pair lets the framed document remove its own sandbox, so the directive adds nothing.
 - **Evidence:** code read. The file types are limited to scanned PDF/JPEG/PNG and `default-src 'none'` blocks scripts, so there is no script risk today.
 - **Fix:** stream the object (`StreamingResponse` over the boto3 body, read in chunks in a thread) instead of `storage.read`; drop `allow-same-origin` from the sandbox unless the browser PDF viewer test fails without it, in which case drop the `sandbox` directive and keep `default-src 'none'; frame-ancestors <web origin>`.
