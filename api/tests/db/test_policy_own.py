@@ -61,6 +61,8 @@ async def test_own_acceptance_receipt_viewer_and_historical_archive(rig: dict[st
     view = await member.get(API + f"/own/{row['id']}/view")
     assert view.status_code == 200, view.text
     assert view.headers["content-type"] == "application/pdf"
+    assert view.content.startswith(b"%PDF-")  # streamed in pieces, and whole (C6.1.11)
+    assert int(view.headers["content-length"]) == len(view.content)
     assert view.headers["content-disposition"].startswith("inline;")
     assert view.headers["cache-control"] == "private, no-store"
     assert view.headers["x-content-type-options"] == "nosniff"

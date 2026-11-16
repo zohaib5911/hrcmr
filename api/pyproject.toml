@@ -44,7 +44,8 @@ exclude-newer = "14 days"
 # Phase 6 pip-audit security fixes: brotli 1.2.1 (PYSEC-2026-4322), pypdf 6.21.4
 # (CVE-2026-119203/119205/119204 and earlier fixes). Remove these two exceptions
 # after 2026-11-05 (brotli) and 2026-11-12 (pypdf), once the releases clear the cooldown.
-exclude-newer-package = { certifi = "2026-11-01T00:00:00Z", brotli = "2026-11-03T00:00:00Z", pypdf = "2026-11-03T00:00:00Z" }
+# dnspython 2.9.2 (2026-11-03) fixes CVE-2026-128089 (AUDIT-6, C6.1.1). Remove its entry after 2026-11-18.
+exclude-newer-package = { certifi = "2026-11-01T00:00:00Z", brotli = "2026-11-03T00:00:00Z", pypdf = "2026-11-03T00:00:00Z", dnspython = "2026-11-05T00:00:00Z" }
 
 [dependency-groups]
 dev = [

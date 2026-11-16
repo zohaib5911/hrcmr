@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Annotated, cast
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Query, Request, Response
+from fastapi.responses import StreamingResponse
 from sqlalchemy import case, func, or_, select
 
 from app.core.errors import AppError, NotFoundError
@@ -102,7 +103,8 @@ async def view_file(request: Request, access: Access, row: PolicyDocument) -> Re
     files: FileService = request.app.state.files
     if files.storage is None:
         raise AppError("STORAGE_NOT_CONFIGURED", "Document storage is not set up.", status_code=503)
-    content = await files.storage.read(file.storage_key)
+    # In pieces (C6.1.11): a 25 MB policy is never held whole in this process.
+    content = await files.storage.open(file.storage_key)
     await access.audit(
         "policy.file_viewed",
         entity_type="policy_document",
@@ -110,11 +112,12 @@ async def view_file(request: Request, access: Access, row: PolicyDocument) -> Re
         after={"version": row.version},
     )
     await access.db.commit()
-    return Response(
+    return StreamingResponse(
         content,
         media_type=file.mime,
         headers={
             "Content-Disposition": "inline; filename*=UTF-8''" + quote(file.original_name, safe=""),
+            "Content-Length": str(file.size),
             "Cache-Control": "private, no-store",
             "X-Content-Type-Options": "nosniff",
             "Content-Security-Policy": (
