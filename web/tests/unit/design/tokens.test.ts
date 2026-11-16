@@ -156,6 +156,25 @@ describe("text stays readable on glass over the ambient backdrop (U6.1.1, U6.1.2
   });
 });
 
+describe("the closing call to action stays readable (U6.1.8)", () => {
+  // Thick glass over the accent gradient: both of its colours, both themes, both accents.
+  const sets = [
+    ["light", light],
+    ["dark", explicitDark],
+    ["light, branded", new Map(Object.entries(BRANDED_LIGHT))],
+    ["dark, branded", new Map(Object.entries(BRANDED_DARK))],
+  ] as const;
+  const cases = sets.flatMap(([theme, tokens]) =>
+    (["--accent", "--accent-pressed"] as const).map(
+      (stop) => [`${theme}: --label on --glass-thick over ${stop}`, tokens, stop] as const,
+    ),
+  );
+  it.each(cases)("%s", (_label, tokens, stop) => {
+    const surface = composite(resolveColour("--glass-thick", tokens), visibleColour(stop, tokens));
+    expect(contrastRatio(visibleColour("--label", tokens), surface)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
 // ---- Typography (plan 5.2) ---------------------------------------------------------------------
 
 const theme = declarations(blockBody(GLOBALS_CSS, /@theme\s*\{/));
