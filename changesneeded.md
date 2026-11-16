@@ -1,7 +1,7 @@
 # changesneeded.md — audit AUDIT-6 round 1 (2026-11-16, claude-fable-5-2)
 Scope: whole project at 91387bc (owner-requested full audit: bugs, vulnerabilities, speed, UI).   Tests at audit: api 1437/0/0 (ruff and mypy clean), web unit 1485/0 in 120 files (2 files and the type-check could not load in the main checkout: stale node_modules, see Notes), e2e not run, CI green on the last dev run (2026-11-13)
 
-Counts: 1 P0 / 3 P1 / 8 P2 bugs and vulnerabilities, then 7 speed items (`O`) and 9 UI items (`U`).
+Counts: 1 P0 (fixed in this PR) / 3 P1 / 8 P2 bugs and vulnerabilities, then 7 speed items (`O`) and 9 UI items (`U`).
 How each finding was checked is written in its **Evidence** line (code read, command run, or advisory looked up). Nothing here is a guess; anything I could not prove is in "Notes", not in an item.
 Part 1 items are for any agent. Part 2 and Part 3 items are tagged `· B` where they need design judgement; **the owner should read Part 3 before the runners start**, because it changes how the product looks.
 
@@ -11,10 +11,10 @@ What was scanned: all 436 API routes mapped to their permission guard (the only 
 
 # Part 1 — Bugs and vulnerabilities
 
-### [ ] C6.1.1 · P0 · Two locked Python packages have published vulnerabilities; the CI audit job will fail
+### [x] C6.1.1 · P0 · Two locked Python packages have published vulnerabilities; the CI audit job will fail — fixed in this audit's PR
 - **Problem:** `api/uv.lock` pins `dnspython 2.9.0` (pulled in by `email-validator`) and `opentelemetry-api 1.45.1` (pulled in by `fastapi`). Both now have advisories, so the `audit` job in `.github/workflows/ci.yml:250` fails on the next PR and blocks every merge.
 - **Evidence:** `uvx pip-audit` on the exported lock, run 2026-11-16, reports both. Looked up on OSV: GHSA-vvf4-9x63-8xvv / CVE-2026-128089 (dnspython, HIGH: a WKS record makes the zone-file parser allocate huge memory; fixed in 2.9.2) and GHSA-mf5v-w3w3-f6cg / CVE-2026-126360 (opentelemetry-api, MODERATE: quadratic-time `traceparent` parsing blocks the event loop; fixed in 1.45.2). The app parses no zone files, so the first is not reachable; the second is reachable if FastAPI extracts trace context from request headers, so treat it as real.
-- **Fix:** in `api/`: `uv lock --upgrade-package dnspython --upgrade-package opentelemetry-api`, check the lock now has `dnspython >= 2.9.2` and `opentelemetry-api >= 1.45.2`, change nothing else.
+- **Fix (done by the auditor, the CI-green exception in audit.md):** `uv lock --upgrade-package dnspython --upgrade-package opentelemetry-api`; the lock now has `dnspython 2.9.2` and `opentelemetry-api 1.45.2`. dnspython 2.9.2 is younger than the 14-day cooldown, so `api/pyproject.toml` has a dated `exclude-newer-package` entry for it, like certifi and pypdf before; remove it after 2026-11-18.
 - **Done when:** `uv export --no-hashes --no-dev | uvx pip-audit -r /dev/stdin` reports no vulnerabilities, and `uv run pytest -q` still passes.
 
 ### [ ] C6.1.2 · P1 · A company admin can switch off two-step verification for a person's whole account, in every company
