@@ -24,10 +24,12 @@ import { PageHeader } from "@/components/app/page-header";
 import { StatusChip } from "@/components/ui/status-chip";
 import { GroupedList, GroupedRow } from "@/components/ui/grouped-list";
 import { Icon } from "@/components/ui/icon";
+import { CARD_VARIANTS } from "@/components/ui/card";
 import { PLAN_LABELS } from "@/components/app/shell-types";
 import { useCan } from "@/components/app/session-context";
 import type { components } from "@/lib/api/client";
 import { companyLine } from "@/lib/company/details";
+import { cn } from "@/lib/utils";
 
 import { DetailsSheet } from "./details-sheet";
 import { LogoPicture } from "./logo-picture";
@@ -65,7 +67,7 @@ export function CompanyOverview({
       <div className="flex flex-col gap-8">
         <section
           aria-label="Your company"
-          className="bg-elevated rounded-card shadow-e1 flex items-center gap-4 p-5"
+          className={cn(CARD_VARIANTS.glass, "flex items-center gap-4 p-5")}
         >
           <LogoPicture name={company.name} hasLogo={company.has_logo} size="lg" />
           <div className="min-w-0 flex-1">

@@ -29,6 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TextField } from "@/components/ui/text-field";
 import { useToast } from "@/components/ui/toast";
 import { Toggle } from "@/components/ui/toggle";
+import { CARD_VARIANTS } from "@/components/ui/card";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { STATUS_LABEL } from "@/lib/employees/list";
 import {
@@ -39,6 +40,7 @@ import {
   type EmployeeStatus,
 } from "@/lib/employees/profile";
 import type { PersonalTab as PersonalData } from "@/lib/employees/personal";
+import { cn } from "@/lib/utils";
 
 const TONE = {
   active: "success",
@@ -218,7 +220,7 @@ function SummaryCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-elevated rounded-card shadow-e1 flex flex-col gap-2 p-5">
+    <div className={cn(CARD_VARIANTS.glass, "flex flex-col gap-2 p-5")}>
       <p className="text-footnote text-label-secondary flex items-center gap-2 font-medium">
         <Icon icon={icon} size={16} />
         {label}

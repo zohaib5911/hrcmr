@@ -2,9 +2,22 @@ import { createElement, type ComponentProps, type ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
-/** A surface for one thing. Soft shadow in light, a hairline in dark (plan 5.4). */
-export function Card({ className, ...props }: ComponentProps<"div">) {
-  return <div className={cn("bg-elevated rounded-card shadow-e1", className)} {...props} />;
+/** The two card looks (U6.1.4). Glass for summaries and short cards; solid for dense data (tables,
+ * long forms, detail panels), where glass would hurt reading. */
+export const CARD_VARIANTS = {
+  glass: "material-glass-thin rounded-card",
+  solid: "bg-elevated rounded-card shadow-e1",
+} as const;
+
+export type CardVariant = keyof typeof CARD_VARIANTS;
+
+/** A surface for one thing. Solid unless asked for glass. */
+export function Card({
+  variant = "solid",
+  className,
+  ...props
+}: ComponentProps<"div"> & { variant?: CardVariant }) {
+  return <div className={cn(CARD_VARIANTS[variant], className)} {...props} />;
 }
 
 interface CardHeaderProps {
