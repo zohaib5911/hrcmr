@@ -71,9 +71,32 @@ function accepted(
   return false;
 }
 
+/**
+ * The ambient backdrop (components/ui/ambient-backdrop.tsx) is a gradient, and axe can decide no
+ * contrast over a gradient. It is hidden for the scan only, so axe still decides every text on the
+ * plain canvas; tests/unit/design/tokens.test.ts checks every text token on each translucent
+ * surface over the backdrop's strongest tint, which is the worst it can be.
+ */
+async function withoutBackdrop<T>(page: Page, run: () => Promise<T>): Promise<T> {
+  const toggle = (hidden: boolean) =>
+    page.evaluate((hide) => {
+      for (const element of document.querySelectorAll<HTMLElement>("[data-ambient-backdrop]")) {
+        element.style.visibility = hide ? "hidden" : "";
+      }
+    }, hidden);
+  await toggle(true);
+  try {
+    return await run();
+  } finally {
+    await toggle(false);
+  }
+}
+
 export async function audit(page: Page, where: string, mode: Mode = {}) {
   await settled(page);
-  const results = await new AxeBuilder({ page }).withTags(TAGS).analyze();
+  const results = await withoutBackdrop(page, () =>
+    new AxeBuilder({ page }).withTags(TAGS).analyze(),
+  );
 
   // Only contrast is exempt: inactive controls must still have valid names, roles and ARIA.
   for (const result of [...results.violations, ...results.incomplete]) {

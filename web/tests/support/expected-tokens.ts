@@ -96,7 +96,7 @@ const ADDED_LIGHT: Record<string, string> = {
   "--glass-stroke": "rgba(255,255,255,0.6)",
   "--glass-highlight": "rgba(255,255,255,0.8)",
   "--glass-shadow": "0 8px 32px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)",
-  "--backdrop-tint": "color-mix(in srgb, var(--accent) 10%, transparent)",
+  "--backdrop-tint": "color-mix(in srgb, var(--accent) 8%, transparent)",
   "--e1": "0 1px 2px rgba(0,0,0,0.04), 0 1px 1px rgba(0,0,0,0.02)",
   "--e2": "0 4px 12px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)",
   "--e3": "0 20px 50px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06)",
