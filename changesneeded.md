@@ -145,7 +145,7 @@ What is there today (from the Phase 25 screenshots and `web/app/globals.css`): a
 - **Fix:** `components/ui/card.tsx` and `kpi-card.tsx` get one look: `material-glass-thin`, no hard border, the inner edge highlight, `--radius-card`. Use solid `bg-elevated` only for dense data (tables, long forms) where glass would hurt reading. KPI tiles gain a small status line and an icon so a "0" is not the only content; empty cards show the existing `empty-state` with one action instead of blank space.
 - **Done when:** the dashboard, employee detail and company pages use only the two card variants; screenshots updated.
 
-### [ ] U6.1.5 · P2 · Remove the doubled page title and fix the breadcrumb on detail pages
+### [x] U6.1.5 · P2 · Remove the doubled page title and fix the breadcrumb on detail pages — fixed in PR #159
 - **Problem:** the toolbar shows "Dashboard" and the page shows "Dashboard" again directly under it (`app-dashboard-light-1280.png`); on a person's page the toolbar says "Employees" while the page is "Nadia Patel" (`app-employees-id-dark-1280.png`).
 - **Fix:** Apple's large-title pattern: the page keeps the large title; the toolbar title is hidden until the large title scrolls out of view, then fades in (IntersectionObserver on the `h1`). The breadcrumb on detail pages ends with the record name ("People / Employees / Nadia Patel").
 - **Done when:** unit test for the toolbar title visibility; e2e checks the breadcrumb on an employee page.
