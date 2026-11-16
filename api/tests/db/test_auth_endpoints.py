@@ -250,6 +250,19 @@ async def test_a_post_without_the_csrf_header_is_refused(world: World) -> None:
     assert response.json()["error"]["code"] == "CSRF_INVALID"
 
 
+async def test_a_csrf_header_that_is_not_ascii_is_refused_not_a_crash(world: World) -> None:
+    """C6.1.5: comparing non-ASCII text raised a TypeError, which answered 500."""
+    transport = world.client._transport
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as bare:
+        response = await bare.post(
+            "/api/v1/auth/login",
+            json={"email": "ada@example.com", "password": PASSWORD},
+            headers={b"Cookie": b"csrf=abc", b"X-CSRF-Token": "ab\u00e9".encode("latin-1")},
+        )
+    assert response.status_code == 403
+    assert response.json()["error"]["code"] == "CSRF_INVALID"
+
+
 async def test_too_many_wrong_passwords_lock_sign_in(world: World) -> None:
     await signed_up(world)
     browser = world.new_browser()

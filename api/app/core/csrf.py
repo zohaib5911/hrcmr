@@ -63,7 +63,12 @@ class CsrfMiddleware:
 
         if method in UNSAFE_METHODS and not path.startswith(EXEMPT_PREFIXES):
             supplied = headers.get(CSRF_HEADER)
-            if not cookie or not supplied or not hmac.compare_digest(cookie, supplied):
+            # Bytes, not text: compare_digest raises TypeError on non-ASCII text (a 500).
+            if (
+                not cookie
+                or not supplied
+                or not hmac.compare_digest(cookie.encode(), supplied.encode())
+            ):
                 response = JSONResponse(
                     {
                         "error": {
