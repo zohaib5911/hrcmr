@@ -53,6 +53,7 @@ Checks:
 | `posting_id` | UUID | no |  | references `postings` |
 | `stage` | VARCHAR(16) | no | `applied` |  |
 | `stage_history` | JSONB | no | `[]` |  |
+| `needs_review` | BOOLEAN | no | `false` |  |
 | `cover_note` | TEXT | yes |  |  |
 | `applied_via` | VARCHAR(14) | no | `admin` |  |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
