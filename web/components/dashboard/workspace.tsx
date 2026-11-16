@@ -182,7 +182,7 @@ export function DashboardWorkspace({ actions }: { actions?: ReactNode }) {
           {data ? data.status_line : "Loading your day"}
         </p>
         {quick.length > 0 ? (
-          <div className="mt-2 flex items-center gap-2" aria-label="Quick actions">
+          <div className="mt-2 flex items-center gap-2" role="group" aria-label="Quick actions">
             {quick.map((item, index) => (
               <Button
                 key={item.href}
