@@ -59,7 +59,7 @@ What was scanned: all 436 API routes mapped to their permission guard (the only 
 - **Fix:** move the limit to the start of the route: add `async def check_ai_limit(request, access)` in `app/ai/service.py` (the existing block from `generate`), call it right after `ai_ready`, and let `generate` take `limit_checked=True` to skip the second count.
 - **Done when:** a test sends 31 requests with an unreadable PDF and gets 429 on the 31st; existing AI tests pass.
 
-### [ ] C6.1.9 · P2 · The careers apply form adds a stranger's CV and application to an existing candidate with the same e-mail
+### [x] C6.1.9 · P2 · The careers apply form adds a stranger's CV and application to an existing candidate with the same e-mail — fixed in PR #157
 - **Problem:** `apply` (`api/app/modules/recruitment/public.py`) looks the candidate up by e-mail only and attaches the new application and uploaded file to that record. A visitor who knows an applicant's address can put files and applications on their record, and can make the platform send an `application_received` e-mail to any address.
 - **Evidence:** code read; Turnstile and 20 per hour per address limit the volume, so P2.
 - **Fix:** keep matching by e-mail (recruiters want one record), but mark what came in unconfirmed: add a `needs_review` flag on applications that arrive from the public form for a candidate who already existed, shown in the application list ("Sent from the public form; details not confirmed"). Never overwrite the stored name or phone from the form (already true; add the test).
