@@ -117,7 +117,7 @@ What was scanned: all 436 API routes mapped to their permission guard (the only 
 - **Fix:** add a small stale-while-revalidate cache in `web/lib/api` keyed by path + query (show the last answer at once, refresh in the background, drop on sign-out or company switch), and use it in the list pages first (employees, leave, recruitment, documents). Prefetch a row's detail on hover/focus.
 - **Done when:** navigating list → detail → back shows the list instantly in the journey e2e test, with a background refresh.
 
-### [ ] O6.1.7 · P2 · B · Front-door hardening that belongs with deployment (do with Phase 23)
+### [x] O6.1.7 · P2 · B · Front-door hardening that belongs with deployment (do with Phase 23) — fixed in PR #162
 - **Problem / Fix:** (a) add `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Resource-Policy: same-site` to `baseSecurityHeaders` in `web/lib/security/csp.ts`; (b) Cloudflare: cache `/_next/static` for a year (immutable), enable Brotli and HTTP/3, add the WAF rate rule for `/api/v1/public/*` and `/api/v1/auth/*`; (c) require step-up before `POST /auth/platform-session` (`api/app/modules/rbac/platform_session.py`) so a stolen tenant session of a platform admin cannot open the admin site by itself.
 - **Done when:** the header unit tests list the new headers; the platform-session test needs step-up; the Cloudflare items are ticked in `docs/runbooks`.
 
