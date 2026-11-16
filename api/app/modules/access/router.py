@@ -10,7 +10,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import select
 
-from app.core.errors import AppError, ConflictError, NotFoundError
+from app.core.errors import AppError, ConflictError, ForbiddenError, NotFoundError
 from app.core.rbac_matrix import ROLE_PERMISSIONS
 from app.db.session import GlobalDb  # noqa: TC001
 from app.modules.access.roles import groups_for
@@ -35,7 +35,7 @@ from app.modules.auth.policy import mfa_required
 from app.modules.auth.sessions import require_step_up
 from app.modules.companies.models import Company
 from app.modules.employees.models import Employee
-from app.modules.identity.models import Invitation, Membership, User
+from app.modules.identity.models import Invitation, Membership, PlatformAdmin, User
 from app.modules.rbac.deps import Access, require
 from app.modules.rbac.rules import (
     check_can_change_role,
@@ -352,6 +352,28 @@ async def reset_two_step(
         raise AppError(
             "NOTHING_TO_RESET", "They have not set up two-step verification.", status_code=409
         )
+    # The account is the person's own, across every company (C6.1.2). One company's admin must
+    # not take the second step off an account that also opens another company or the admin site.
+    await db.act_as(user.id)
+    elsewhere = (
+        await db.execute(
+            select(Membership.id).where(
+                Membership.user_id == user.id, Membership.company_id != access.company_id
+            )
+        )
+    ).first()
+    staff = (
+        await db.execute(select(PlatformAdmin.id).where(PlatformAdmin.user_id == user.id))
+    ).first()
+    await db.act_as(access.caller.user_id)
+    if elsewhere is not None or staff is not None:
+        raise ForbiddenError(
+            "This person also has access elsewhere, so only they or support can reset their "
+            "two-step verification."
+        )
+    company_name = (
+        await access.db.execute(select(Company.name).where(Company.id == access.company_id))
+    ).scalar_one()
     auth.auth.disable_mfa(user)
     await access.audit(
         "user.two_step_reset",
@@ -362,6 +384,11 @@ async def reset_two_step(
     await access.db.commit()
     await auth.sessions.revoke_all(db, user.id)
     await db.commit()
+    await auth.mailer.send_template(
+        to=str(user.email),
+        template="two_step_reset",
+        data={"first_name": user.first_name, "company_name": company_name},
+    )
     return _member(member, user, you=access.caller.user_id)
 
 

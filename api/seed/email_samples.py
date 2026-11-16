@@ -29,6 +29,7 @@ SAMPLES: dict[str, dict[str, str]] = {
         "link": f"{SAMPLE_BASE}/reset-password?token=example",
     },
     "password_changed": {"first_name": "Amira"},
+    "two_step_reset": {"first_name": "Amira", "company_name": "Harbourside Care Ltd"},
     "account_exists": {
         "first_name": "Amira",
         "sign_in_link": f"{SAMPLE_BASE}/login",

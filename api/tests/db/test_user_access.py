@@ -355,6 +355,61 @@ async def test_resetting_two_step_needs_a_recent_confirmation(rig: dict[str, Any
     assert (await phone_lost.get(f"{API}/company")).status_code == 401  # signed out everywhere
     assert (await admin.post(f"{API}/users/{them['id']}/reset-two-step")).status_code == 409
     assert "user.two_step_reset" in await _audit_actions(rig)
+    told = [d for _, name, d in rig["mail"].sent if name == "two_step_reset"]
+    assert len(told) == 1  # the person is told: a reset is never silent
+    assert told[0]["company_name"]
+
+
+@pytest.mark.parametrize("elsewhere", ["second_company", "platform_admin"])
+async def test_two_step_is_not_reset_for_someone_with_access_elsewhere(
+    rig: dict[str, Any], elsewhere: str
+) -> None:
+    """C6.1.2: the account is global, so one company's admin must not take the second step off
+    someone who also belongs to another company, or who is one of our own staff."""
+    admin = await rig["person"]("company_admin", rig["a"])
+    shared = await rig["person"]("employee", rig["a"])
+    them = _row((await admin.get(f"{API}/users")).json(), role="employee")
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text("update users set mfa_enabled = true where id = :u"),
+            {"u": them["user_id"]},
+        )
+        await c.execute(
+            text("update sessions set mfa_passed_at = now() where user_id = :u"),
+            {"u": them["user_id"]},
+        )
+        if elsewhere == "second_company":
+            await c.execute(
+                text("insert into memberships (user_id, company_id, role) values (:u, :c, :r)"),
+                {"u": them["user_id"], "c": rig["b"], "r": "employee"},
+            )
+        else:
+            await c.execute(
+                text("insert into platform_admins (user_id, level) values (:u, 'support')"),
+                {"u": them["user_id"]},
+            )
+    await _confirm(rig, admin)
+
+    refused = await admin.post(f"{API}/users/{them['id']}/reset-two-step")
+    assert refused.status_code == 403, refused.text
+    assert refused.json()["error"]["code"] == "FORBIDDEN"
+    async with rig["owner"].connect() as c:
+        kept = (
+            await c.execute(
+                text("select mfa_enabled from users where id = :u"),
+                {"u": them["user_id"]},
+            )
+        ).scalar_one()
+        live = (
+            await c.execute(
+                text("select count(*) from sessions where user_id = :u and revoked_at is null"),
+                {"u": them["user_id"]},
+            )
+        ).scalar_one()
+    assert kept is True
+    assert live >= 1  # their sessions were not ended
+    assert shared is not None
+    assert not [1 for _, name, _ in rig["mail"].sent if name == "two_step_reset"]
 
 
 async def test_the_two_step_policy_is_read_changed_audited_and_counted(rig: dict[str, Any]) -> None:
