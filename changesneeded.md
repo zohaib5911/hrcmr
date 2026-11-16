@@ -102,7 +102,7 @@ What was scanned: all 436 API routes mapped to their permission guard (the only 
 - **Fix:** one migration adding GIN trigram indexes (`gin_trgm_ops`) on `register_sponsors.organisation_name` and `register_sponsors.town`, and expression indexes on `lower(first_name || ' ' || last_name)` for `employees` and `candidates` (PostgreSQL docs, pg_trgm: these serve `LIKE`/`ILIKE` with a leading wildcard). Debounce the explorer input by 250 ms and require 2+ characters in `web/components/register/explorer.tsx`.
 - **Done when:** `EXPLAIN` of the explore query on the loaded register shows a bitmap index scan; `docs/data-model.md` regenerated; `check-rls` passes.
 
-### [ ] O6.1.4 · P2 · No code is loaded on demand
+### [x] O6.1.4 · P2 · No code is loaded on demand — fixed in PR #161
 - **Problem:** there is not one `next/dynamic` or `lazy()` in `web/` and 206 of 387 component files are client components, so heavy, rarely used pieces (command palette, QR code for MFA, org chart, rota grid, calculators) ship with the pages that merely contain them.
 - **Fix:** load on first use with `next/dynamic`: `command-palette`, `shortcuts-sheet`, the `qrcode` import in MFA enrolment, the organogram canvas, the rota week grid. Record `next build` First Load JS per route before and after.
 - **Done when:** First Load JS for `/dashboard` and `/` is lower in the build output and e2e still passes.
