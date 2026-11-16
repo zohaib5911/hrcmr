@@ -1,0 +1,268 @@
+[
+  {
+    "name": "command-palette",
+    "title": "Dashboard | StuffHub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Dashboard",
+        "fontSize": "34px",
+        "lineHeight": "41px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [
+      {
+        "tag": "DIV",
+        "text": "SearchPagesDashboardOverviewEmployeesPeopleRecruitmentPeopleOrg chartPeopleLearningPeopleS",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "color(srgb 0.109804 0.109804 0.117647 / 0.92)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px"
+      }
+    ],
+    "smallTargets": [
+      {
+        "text": "Add your company details",
+        "width": 209,
+        "height": 22
+      },
+      {
+        "text": "Add departments and locations",
+        "width": 245,
+        "height": 22
+      },
+      {
+        "text": "Add your first employee",
+        "width": 194,
+        "height": 22
+      },
+      {
+        "text": "Record a first Right to Work check",
+        "width": 266,
+        "height": 22
+      },
+      {
+        "text": "Add key personnel",
+        "width": 155,
+        "height": 22
+      },
+      {
+        "text": "Review Right to Work",
+        "width": 272,
+        "height": 20
+      },
+      {
+        "text": "Open leave",
+        "width": 272,
+        "height": 20
+      },
+      {
+        "text": "Open learning",
+        "width": 272,
+        "height": 20
+      }
+    ],
+    "errors": [],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif"
+  },
+  {
+    "name": "notifications",
+    "title": "Dashboard | StuffHub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Dashboard",
+        "fontSize": "34px",
+        "lineHeight": "41px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [
+      {
+        "tag": "DIV",
+        "text": "NotificationsYou're all caught upApprovals, reminders and policies to sign will appear her",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "color(srgb 0.109804 0.109804 0.117647 / 0.92)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px"
+      }
+    ],
+    "smallTargets": [
+      {
+        "text": "Add your company details",
+        "width": 209,
+        "height": 22
+      },
+      {
+        "text": "Add departments and locations",
+        "width": 245,
+        "height": 22
+      },
+      {
+        "text": "Add your first employee",
+        "width": 194,
+        "height": 22
+      },
+      {
+        "text": "Record a first Right to Work check",
+        "width": 266,
+        "height": 22
+      },
+      {
+        "text": "Add key personnel",
+        "width": 155,
+        "height": 22
+      },
+      {
+        "text": "Review Right to Work",
+        "width": 272,
+        "height": 20
+      },
+      {
+        "text": "Open leave",
+        "width": 272,
+        "height": 20
+      },
+      {
+        "text": "Open learning",
+        "width": 272,
+        "height": 20
+      }
+    ],
+    "errors": [],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif"
+  },
+  {
+    "name": "company-sheet",
+    "title": "Company | StuffHub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Company",
+        "fontSize": "34px",
+        "lineHeight": "41px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [
+      {
+        "tag": "DIV",
+        "text": "Company detailsWhat your company is called and how to reach it.LogoHCUpload a logoDrag fil",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "color(srgb 0.109804 0.109804 0.117647 / 0.92)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px"
+      }
+    ],
+    "smallTargets": [
+      {
+        "text": "",
+        "width": 1,
+        "height": 1
+      },
+      {
+        "text": "",
+        "width": 51,
+        "height": 31
+      },
+      {
+        "text": "",
+        "width": 51,
+        "height": 31
+      }
+    ],
+    "errors": [],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif"
+  },
+  {
+    "name": "scrolled-marketing-nav",
+    "title": "HR and sponsor compliance | StuffHub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Look after your people, and your licence.",
+        "fontSize": "73.92px",
+        "lineHeight": "77.616px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [
+      {
+        "tag": "HEADER",
+        "text": "FeaturesSponsor compliancePricingResourcesSecuritySign inStart free",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "rgba(28, 28, 30, 0.72)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "1px",
+        "shadow": "none"
+      },
+      {
+        "tag": "SECTION",
+        "text": "We use cookies that keep the site working. With your say-so we would also use marketing co",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "color(srgb 0.109804 0.109804 0.117647 / 0.92)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "0px",
+        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px"
+      }
+    ],
+    "smallTargets": [
+      {
+        "text": "Skip to content",
+        "width": 32,
+        "height": 16
+      },
+      {
+        "text": "Sensitive details encrypted",
+        "width": 202,
+        "height": 20
+      },
+      {
+        "text": "Every company's data kept apart",
+        "width": 244,
+        "height": 20
+      },
+      {
+        "text": "Free employer tools",
+        "width": 153,
+        "height": 20
+      }
+    ],
+    "errors": [],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif"
+  }
+]

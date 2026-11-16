@@ -131,7 +131,7 @@ export default function HomePage() {
         ]}
       >
         <TrustRow />
-        <HeroShot className="mt-10" />
+        <HeroShot className="mt-10 max-md:mt-40" />
       </Hero>
 
       <Section tone="raised" id="features">
