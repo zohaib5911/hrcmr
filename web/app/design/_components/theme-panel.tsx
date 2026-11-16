@@ -42,6 +42,13 @@ const CHIPS = [
   { className: "bg-info-tint text-info", label: "Pending" },
 ] as const;
 
+// Written out in full so Tailwind finds every class.
+const GLASS = [
+  { utility: "material-glass-thin", name: "Thin", use: "Cards" },
+  { utility: "material-glass-regular", name: "Regular", use: "Floating sidebar and toolbar" },
+  { utility: "material-glass-thick", name: "Thick", use: "Menus and sheets" },
+] as const;
+
 function Swatch({ token }: { token: ColourToken }) {
   return (
     <li className="flex flex-col gap-2">
@@ -177,6 +184,30 @@ export function ThemePanel({ theme }: { theme: "light" | "dark" }) {
           <div className="material-sheet rounded-popover shadow-e2 text-callout text-label px-3 py-2">
             Sheet and popover material
           </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <h3 className="text-headline">Glass</h3>
+        {/* The canvas with the backdrop's strongest tint and a coloured shape, for the glass to blur. */}
+        <div className="bg-canvas rounded-card relative overflow-hidden">
+          <div aria-hidden className="bg-backdrop-tint absolute inset-0" />
+          <div
+            aria-hidden
+            className="bg-accent absolute -top-6 left-1/3 h-24 w-24 rounded-full opacity-60"
+          />
+          <ul className="relative grid gap-3 p-4 sm:grid-cols-3">
+            {GLASS.map((glass) => (
+              <li
+                key={glass.utility}
+                data-glass={glass.utility}
+                className={`${glass.utility} rounded-card flex flex-col gap-1 p-4`}
+              >
+                <span className="text-headline text-label">{glass.name}</span>
+                <span className="text-footnote text-label-secondary">{glass.use}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>
