@@ -75,6 +75,23 @@ def build_prompt(instruction: str, data: Any, pseudonymiser: Pseudonymiser) -> s
     return f"{text}\n\nData:\n{json.dumps(safe, ensure_ascii=False, default=str)}"
 
 
+async def check_ai_limit(request: Request, access: Access) -> None:
+    """Count one AI use against the person's hourly limit, and refuse past it.
+
+    ``generate`` calls it. A route that does heavy work before asking the AI (reading a CV) calls
+    it first and passes ``limit_checked=True``, so the heavy work is limited too (C6.1.8)."""
+    name, limit, window = AI_PER_USER
+    result = await RateLimiter(request.app.state.auth.redis).hit(
+        name, str(access.caller.user_id), limit=limit, window_seconds=window
+    )
+    if not result.allowed:
+        raise AppError(
+            "RATE_LIMITED",
+            "You have used the AI 30 times this hour. Try again later.",
+            status_code=429,
+        )
+
+
 async def generate(
     request: Request,
     access: Access,
@@ -86,21 +103,14 @@ async def generate(
     names: list[str] | None = None,
     fast: bool = True,
     max_tokens: int = 1024,
+    limit_checked: bool = False,
 ) -> str:
     """``names`` are full names the instruction or data may hold; each is labelled before send."""
     client = client_for(request)
     if client is None or not await ai_ready(request, access):
         raise AppError("AI_UNAVAILABLE", "AI features are turned off.", status_code=409)
-    name, limit, window = AI_PER_USER
-    result = await RateLimiter(request.app.state.auth.redis).hit(
-        name, str(access.caller.user_id), limit=limit, window_seconds=window
-    )
-    if not result.allowed:
-        raise AppError(
-            "RATE_LIMITED",
-            "You have used the AI 30 times this hour. Try again later.",
-            status_code=429,
-        )
+    if not limit_checked:
+        await check_ai_limit(request, access)
     pseudonymiser = Pseudonymiser()
     for name in names or []:
         pseudonymiser.label(name)
