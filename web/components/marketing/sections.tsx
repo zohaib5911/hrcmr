@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { cn } from "@/lib/utils";
+import { AmbientBackdrop } from "@/components/ui/ambient-backdrop";
 
 /**
  * The building blocks of the public website's pages (plan 5.9): full-width sections that alternate
@@ -119,7 +120,8 @@ interface HeroProps {
 /** A huge headline, a short sub-head and one pair of buttons: the first thing on a page. */
 export function Hero({ title, lead, eyebrow, actions = [], children }: HeroProps) {
   return (
-    <Section tone="page" className="pt-16 pb-12 md:pt-28 md:pb-20">
+    <Section tone="page" className="relative isolate overflow-hidden pt-16 pb-12 md:pt-28 md:pb-20">
+      <AmbientBackdrop scope="section" />
       <SectionHeading level={1} title={title} lead={lead} eyebrow={eyebrow} />
       <Actions actions={actions} className="mt-8 justify-center" />
       {children ? <div className="mt-12 md:mt-16">{children}</div> : null}

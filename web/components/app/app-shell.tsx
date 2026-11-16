@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { ToastProvider } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AmbientBackdrop } from "@/components/ui/ambient-backdrop";
 import { saveSidebarState } from "@/lib/sidebar-dom";
 import type { ThemeChoice } from "@/lib/theme";
 
@@ -61,7 +62,8 @@ export function AppShell({
     <TooltipProvider>
       <ToastProvider>
         <ShortcutProvider onToggleSidebar={toggle}>
-          <div data-collapsed={collapsed} className="group/shell min-h-dvh">
+          <div data-collapsed={collapsed} className="group/shell isolate min-h-dvh">
+            <AmbientBackdrop />
             <a
               href="#main"
               className="bg-elevated text-accent-text rounded-control shadow-e2 focus-visible:outline-accent fixed top-2 left-2 z-[90] -translate-y-20 px-4 py-2 font-medium focus:translate-y-0"

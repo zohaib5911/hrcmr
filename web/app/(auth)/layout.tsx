@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { BrandLogo } from "@/components/brand-logo";
+import { AmbientBackdrop } from "@/components/ui/ambient-backdrop";
 import { brand } from "@brand";
 
 export const metadata: Metadata = {
@@ -14,7 +15,8 @@ export const metadata: Metadata = {
 /** The frame around the sign-in screens: the brand, one centred panel, and nothing else to do. */
 export default function AuthLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <div className="bg-grouped flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col isolate">
+      <AmbientBackdrop />
       <a
         href="#content"
         className="bg-elevated text-label rounded-control focus:shadow-e3 sr-only z-50 px-4 py-2 focus:not-sr-only focus:fixed focus:top-3 focus:left-3"
