@@ -19,7 +19,7 @@ from botocore.exceptions import BotoCoreError, ClientError
 from app.core.logging import get_logger
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import AsyncIterator, Callable
     from datetime import datetime
 
     from app.core.config import Settings
@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 logger = get_logger("app.storage")
 
 PRESIGN_SECONDS = 60
+STREAM_CHUNK = 256 * 1024
 T = TypeVar("T")
 
 
@@ -106,6 +107,24 @@ class Storage:
                 body.close()
 
         return await self._call(run)
+
+    async def open(self, key: str) -> AsyncIterator[bytes]:
+        """The object in pieces, for a file too big to hold in memory (an inline policy view).
+
+        The object is opened before this returns, so a missing object or a storage failure raises
+        here, before any response has started; the pieces are then read as they are sent."""
+        body = await self._call(
+            lambda: self._client.get_object(Bucket=self._bucket, Key=key)["Body"]
+        )
+
+        async def pieces() -> AsyncIterator[bytes]:
+            try:
+                while chunk := await asyncio.to_thread(body.read, STREAM_CHUNK):
+                    yield bytes(chunk)
+            finally:
+                await asyncio.to_thread(body.close)
+
+        return pieces()
 
     async def delete(self, key: str) -> None:
         await self._call(lambda: self._client.delete_object(Bucket=self._bucket, Key=key))
