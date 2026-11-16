@@ -118,7 +118,7 @@ describe("WCAG AA (plan 5.3)", () => {
   }
 });
 
-describe("text stays readable on glass (U6.1.1)", () => {
+describe("text stays readable on glass over the ambient backdrop (U6.1.1, U6.1.2)", () => {
   // Glass shows what is behind it. The lightest and darkest things behind it are the plain canvas
   // and the canvas under the backdrop's strongest tint, in either order depending on the theme.
   // Checked with the stylesheet's accent and with this brand's accent (brand.config.ts).
@@ -129,7 +129,8 @@ describe("text stays readable on glass (U6.1.1)", () => {
     ["dark, branded", new Map(Object.entries(BRANDED_DARK))],
   ] as const;
   const cases = sets.flatMap(([theme, tokens]) =>
-    GLASS_TIERS.flatMap((tier) =>
+    // The sidebar and toolbar material sits over the backdrop's strongest corner too.
+    [...GLASS_TIERS, "--sidebar-material"].flatMap((tier) =>
       (["plain", "tinted"] as const).flatMap((backdrop) =>
         GLASS_TEXT.map(
           (text) =>
