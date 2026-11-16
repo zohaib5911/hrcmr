@@ -49,7 +49,7 @@ describe("opening the command palette", () => {
     await setup();
     expect(screen.queryByRole("dialog")).toBeNull();
     await userEvent.keyboard(keys);
-    expect(palette()).toBeVisible();
+    expect(await screen.findByRole("dialog", { name: "Search" })).toBeVisible();
     expect(combobox()).toHaveFocus();
   });
 
@@ -246,7 +246,7 @@ describe("the shortcuts sheet", () => {
   it("opens with ?, and from the help button", async () => {
     await setup();
     await userEvent.keyboard("?");
-    expect(screen.getByRole("dialog", { name: "Keyboard shortcuts" })).toBeVisible();
+    expect(await screen.findByRole("dialog", { name: "Keyboard shortcuts" })).toBeVisible();
     await userEvent.keyboard("{Escape}");
     expect(screen.queryByRole("dialog")).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: "Help and keyboard shortcuts" }));

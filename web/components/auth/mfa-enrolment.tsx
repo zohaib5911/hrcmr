@@ -1,7 +1,6 @@
 "use client";
 
 import { Copy, Download } from "lucide-react";
-import QRCode from "qrcode";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { brand } from "@brand";
@@ -49,6 +48,7 @@ export function MfaEnrolment({ onDone, onSignOut }: MfaEnrolmentProps) {
       setProblem(outcome.problem);
       return;
     }
+    const { default: QRCode } = await import("qrcode");
     const qr = await QRCode.toDataURL(outcome.data.otpauth_uri, {
       width: 208,
       // The image carries its own white ground and quiet zone, which scanners need in dark mode too.
