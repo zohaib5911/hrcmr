@@ -86,30 +86,6 @@
   --sidebar-material: rgba(246, 246, 248, 0.72);
   --sidebar-material-solid: #f6f6f8;
 
-  /* The ambient backdrop (U6.1.2, components/ui/ambient-backdrop.tsx): one glow of the backdrop tint
-   in the top-left corner and one in a neighbouring hue (the same tint turned 40 degrees towards blue) in the
-   top-right. They never overlap, so nothing behind glass is stronger than --backdrop-tint, which is
-   what the contrast test assumes. Static: nothing here repaints. */
-  @utility ambient-backdrop {
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    contain: strict;
-    background: radial-gradient(50% 40% at 0% 0%, var(--backdrop-tint), transparent);
-
-    &::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(50% 36% at 100% 0%, var(--backdrop-tint), transparent);
-      filter: hue-rotate(-40deg);
-    }
-
-    @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
-      display: none;
-    }
-  }
-
   /* Glass (U6.1.1): the elevated surface at three strengths, a light inner edge, a top highlight
      and a soft wide shadow. The backdrop tint is the colour the ambient backdrop is drawn with. */
   --glass-thin: color-mix(in srgb, var(--bg-elevated) 55%, transparent);
@@ -462,6 +438,30 @@
   @media (prefers-reduced-transparency: reduce) {
     background-color: var(--bg-elevated);
     backdrop-filter: none;
+  }
+}
+
+/* The ambient backdrop (U6.1.2, components/ui/ambient-backdrop.tsx): one glow of the backdrop tint
+   in the top-left corner and one in a neighbouring hue (the same tint turned 40 degrees towards
+   blue) in the top-right. They never overlap, so nothing behind glass is stronger than
+   --backdrop-tint, which is what the contrast test assumes. Static: nothing here repaints. */
+@utility ambient-backdrop {
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  contain: strict;
+  background: radial-gradient(50% 40% at 0% 0%, var(--backdrop-tint), transparent);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(50% 36% at 100% 0%, var(--backdrop-tint), transparent);
+    filter: hue-rotate(-40deg);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    display: none;
   }
 }
 
