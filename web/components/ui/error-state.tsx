@@ -15,7 +15,7 @@ interface ErrorStateProps {
   /** The API's request id, so support can find the failure. */
   requestId?: string;
   onRetry?: () => void;
-  headingLevel?: 2 | 3 | 4;
+  headingLevel?: 1 | 2 | 3 | 4;
   className?: string;
 }
 
