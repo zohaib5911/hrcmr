@@ -51,7 +51,7 @@ export function Toolbar({ user, theme, notificationCount }: ToolbarProps) {
       className={cn(
         // Floating, 12 px from the edges (below the notch on phones). Clear at the top of the page;
         // glass once content scrolls under it (U6.1.3).
-        "rounded-card sticky top-[max(0.75rem,env(safe-area-inset-top))] z-20 mx-3 mt-3 flex h-14 items-center gap-3 px-4 md:mx-0 md:mr-3 md:px-5",
+        "rounded-card sticky top-[max(0.75rem,env(safe-area-inset-top))] z-20 mx-3 mt-3 flex h-14 items-center gap-3 px-4 md:px-5",
         scrolled ? "material-glass-regular" : "bg-transparent",
       )}
     >

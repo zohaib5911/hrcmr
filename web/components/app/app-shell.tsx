@@ -71,7 +71,7 @@ export function AppShell({
               Skip to content
             </a>
             <Sidebar collapsed={collapsed} onToggle={toggle} session={session} badges={badges} />
-            <div className="flex min-h-dvh flex-col transition-[padding] motion-sheet motion-reduce:transition-none md:pl-[284px] md:group-data-[collapsed=true]/shell:pl-[96px]">
+            <div className="flex min-h-dvh flex-col transition-[padding] motion-sheet motion-reduce:transition-none md:pl-[272px] md:group-data-[collapsed=true]/shell:pl-[84px]">
               <SupportBanner />
               <Toolbar
                 user={session?.user ?? null}
