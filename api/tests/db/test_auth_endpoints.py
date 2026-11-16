@@ -317,6 +317,27 @@ async def test_forgot_password_is_neutral_and_the_link_resets_and_signs_everyone
     assert reuse.status_code == 410
 
 
+async def test_changing_a_password_is_limited_like_step_up(world: World) -> None:
+    """C6.1.3: five wrong tries in five minutes, then even the right password must wait."""
+    await signed_up(world)
+    for _ in range(5):
+        wrong = await world.client.post(
+            "/api/v1/auth/change-password",
+            json={"current_password": "not it at all!", "new_password": NEW_PASSWORD},
+        )
+        assert wrong.status_code == 401
+    for current in ("not it at all!", PASSWORD):
+        limited = await world.client.post(
+            "/api/v1/auth/change-password",
+            json={"current_password": current, "new_password": NEW_PASSWORD},
+        )
+        assert limited.status_code == 429
+        assert limited.json()["error"]["code"] == "RATE_LIMITED"
+    actions = [r[0] for r in await world.sql(AUDIT_ACTIONS + " order by created_at")]
+    assert actions.count("auth.step_up.failed") == 5
+    assert "auth.password.changed" not in actions
+
+
 async def test_changing_a_password_needs_the_current_one_and_ends_other_sessions(
     world: World,
 ) -> None:
