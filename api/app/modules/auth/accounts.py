@@ -410,7 +410,11 @@ async def invitation_details(db: GlobalSession, token: str) -> tuple[str, str, s
         await db.execute(select(Company.name).where(Company.id == invitation.company_id))
     ).scalar_one()
     has_account = (
-        await db.execute(select(User.id).where(User.email == invitation.email))
+        await db.execute(
+            select(User.id).where(
+                User.email == invitation.email, User.email_verified_at.is_not(None)
+            )
+        )
     ).first() is not None
     return company, str(invitation.email), invitation.role, invitation.expires_at, has_account
 
@@ -433,7 +437,7 @@ async def accept_invite(
         await db.execute(select(User).where(User.email == invitation.email))
     ).scalar_one_or_none()
     new_user: User | None = None
-    if existing is None:
+    if existing is None or existing.email_verified_at is None:
         if not accept_terms:
             raise AppError(
                 "TERMS_REQUIRED",
@@ -446,14 +450,17 @@ async def accept_invite(
                 "PASSWORD_REQUIRED", "Choose a password.", status_code=422, field="password"
             )
         await check_password(password)
-        new_user = User(
-            email=str(invitation.email),
-            first_name=first_name.strip(),
-            last_name=last_name.strip(),
-            password_hash=hash_password(password),
-            email_verified_at=now(),  # the link only reached them by e-mail
-        )
-        db.add(new_user)
+        if existing is None:
+            new_user = User(email=str(invitation.email))
+            db.add(new_user)
+        else:
+            new_user = existing
+            auth.auth.disable_mfa(new_user)
+            await auth.sessions.revoke_all(db, new_user.id)
+        new_user.first_name = first_name.strip()
+        new_user.last_name = last_name.strip()
+        new_user.password_hash = hash_password(password)
+        new_user.email_verified_at = now()  # the link only reached them by e-mail
         await db.flush()
     else:
         spend_verification_time()
