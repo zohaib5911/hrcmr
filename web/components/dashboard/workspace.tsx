@@ -1,6 +1,7 @@
 "use client";
 
-import { Check, Circle, LayoutDashboard } from "lucide-react";
+import { Check, ChevronRight, Circle, LayoutDashboard } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { type ReactNode, useEffect, useState } from "react";
 
@@ -10,12 +11,40 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { KpiCard } from "@/components/ui/kpi-card";
+import { ProgressBar } from "@/components/ui/progress";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 
 type Dashboard = components["schemas"]["DashboardOut"];
 type Checklist = components["schemas"]["ChecklistOut"];
+
+/** Where each unfinished set-up step is done (keys from the API's checklist, C6.1.12). */
+export const STEP_LINKS: Record<string, Route> = {
+  company_details: "/company",
+  departments_locations: "/company/departments",
+  first_employee: "/employees/new",
+  first_rtw: "/employees",
+  key_personnel: "/company/key-personnel",
+};
+
+function StepLabel({ item }: { item: Checklist["items"][number] }) {
+  const href = STEP_LINKS[item.key];
+  if (item.done || !href) {
+    return (
+      <span className={item.done ? "text-label-secondary line-through" : ""}>{item.label}</span>
+    );
+  }
+  return (
+    <Link
+      href={href}
+      className="text-accent-text inline-flex items-center gap-1 font-medium hover:underline"
+    >
+      {item.label}
+      <Icon icon={ChevronRight} size={16} />
+    </Link>
+  );
+}
 
 function greeting(hour: number): string {
   if (hour < 12) return "Good morning";
@@ -133,19 +162,15 @@ export function DashboardWorkspace({ actions }: { actions?: ReactNode }) {
           <p className="text-footnote text-label-secondary">
             {checklist.done} of {checklist.total} done
           </p>
-          <progress
-            className="h-2 w-full"
-            value={checklist.done}
-            max={checklist.total}
-            aria-label="Set-up progress"
+          <ProgressBar
+            value={checklist.total > 0 ? (checklist.done / checklist.total) * 100 : 0}
+            label="Set-up progress"
           />
           <ul className="flex flex-col gap-2">
             {checklist.items.map((item) => (
               <li key={item.key} className="text-body text-label flex items-center gap-2">
                 <Icon icon={item.done ? Check : Circle} size={16} />
-                <span className={item.done ? "text-label-secondary line-through" : ""}>
-                  {item.label}
-                </span>
+                <StepLabel item={item} />
                 <span className="sr-only">{item.done ? "(done)" : "(to do)"}</span>
               </li>
             ))}
