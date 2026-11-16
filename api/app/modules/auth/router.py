@@ -10,6 +10,7 @@ from fastapi import APIRouter, Request, Response
 from sqlalchemy import select
 
 from app.core.errors import AppError, ConflictError, ForbiddenError
+from app.core.rate_limit import RateLimiter
 from app.core.totp import generate_secret, provisioning_uri
 from app.db.session import GlobalDb  # noqa: TC001  (FastAPI reads the annotation at run time)
 from app.modules.auth import accounts
@@ -237,7 +238,16 @@ async def change_password(
     from app.modules.auth.passwords import hash_password, verify_password
 
     user = caller.user
+    # The same question as step-up ("is this the password?"), so the same limit and the same
+    # bucket (C6.1.3): a stolen session cannot use this route to guess without end.
+    limit = await RateLimiter(auth.redis).hit(
+        "stepup-user", str(user.id), limit=5, window_seconds=300
+    )
+    if not limit.allowed:
+        raise RateLimitedError(limit.retry_after)
     if not user.password_hash or not verify_password(user.password_hash, body.current_password):
+        await _audit(db, request, caller, "auth.step_up.failed")
+        await db.commit()
         raise AppError(
             "INVALID_CREDENTIALS",
             "Your current password is not right.",
