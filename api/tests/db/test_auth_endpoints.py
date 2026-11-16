@@ -680,3 +680,34 @@ async def test_failed_reset_transaction_keeps_password_and_reset_link(
             "/api/v1/auth/reset-password", json={"token": token, "new_password": NEW_PASSWORD}
         )
     ).status_code == 204
+
+
+async def test_invitation_reclaims_an_unverified_account(world: World) -> None:
+    await signed_up(world)
+    stranger = world.new_browser()
+    assert (
+        await stranger.post(
+            "/api/v1/auth/signup", json=signup_body("sam@example.com", company_name="Stranger")
+        )
+    ).status_code == 202
+    token = await _invite(world, "sam@example.com")
+    browser = world.new_browser()
+    details = (await browser.get(f"/api/v1/auth/invitations/{token}")).json()
+    assert details["has_account"] is False
+    body = {"first_name": "Sam", "last_name": "Jones", "accept_terms": True}
+    missing = await browser.post(f"/api/v1/auth/invitations/{token}/accept", json=body)
+    assert missing.status_code == 422
+    accepted = await browser.post(
+        f"/api/v1/auth/invitations/{token}/accept", json={**body, "password": NEW_PASSWORD}
+    )
+    assert accepted.status_code == 200
+    assert (await stranger.get("/api/v1/auth/me")).status_code == 401
+    login = world.new_browser()
+    old = await login.post(
+        "/api/v1/auth/login", json={"email": "sam@example.com", "password": PASSWORD}
+    )
+    assert old.status_code == 401
+    new = await login.post(
+        "/api/v1/auth/login", json={"email": "sam@example.com", "password": NEW_PASSWORD}
+    )
+    assert new.status_code == 200
