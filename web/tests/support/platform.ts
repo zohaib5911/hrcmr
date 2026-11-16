@@ -63,6 +63,13 @@ export async function signInPlatformAdmin(
     data: { code: totp(PLATFORM_TOTP_SECRET) },
   });
   expect(challenge.status(), await challenge.text()).toBe(200);
+  // The platform session needs a fresh step-up (O6.1.7). The password, not the code: the same
+  // authenticator code is refused a second time.
+  const stepped = await page.request.post(`${API}/auth/step-up`, {
+    headers: await csrfHeaders(page.request),
+    data: { password: account.password },
+  });
+  expect(stepped.status(), await stepped.text()).toBe(200);
 
   const started = await page.request.post(`${API}/auth/platform-session`, {
     headers: await csrfHeaders(page.request),

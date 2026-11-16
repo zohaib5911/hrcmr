@@ -7,6 +7,7 @@ import {
   generateNonce,
   originOf,
   permissionsPolicy,
+  resourcePolicy,
 } from "./csp";
 
 function directives(csp: string): Map<string, string[]> {
@@ -137,6 +138,17 @@ describe("baseSecurityHeaders", () => {
       expect(headers["X-Content-Type-Options"]).toBe("nosniff");
       expect(headers["X-Frame-Options"]).toBe("DENY");
       expect(headers["Referrer-Policy"]).toBe("strict-origin-when-cross-origin");
+      expect(headers["Cross-Origin-Opener-Policy"]).toBe("same-origin");
+      expect(headers["Cross-Origin-Resource-Policy"]).toBe("same-site");
+    }
+  });
+
+  it("lets other sites embed only the e-mail logo, link previews and icons", () => {
+    for (const path of ["/brand/logo-email.png", "/opengraph-image", "/icon.png", "/favicon.ico"]) {
+      expect(resourcePolicy(path)).toBe("cross-origin");
+    }
+    for (const path of ["/", "/pricing", "/dashboard", "/_next/static/chunks/a.js", "/branding"]) {
+      expect(resourcePolicy(path)).toBe("same-site");
     }
   });
 

@@ -13,6 +13,7 @@ from sqlalchemy import text
 
 from tests.db.support import DatabaseUnderTest
 from tests.db.test_platform_session import API, _rig
+from tests.support import step_up
 
 SSR_SECRET = "ssssssssssssssssssssssssssssssss"
 TARGET = f"{API}/platform/metrics"
@@ -40,6 +41,7 @@ def _ssr_headers(cookie: str, ip: str, *, age: int = 0) -> dict[str, str]:
 async def test_ssr_verified_visitor_allowlist_and_audit(database: DatabaseUnderTest) -> None:
     async with _rig(database, "127.0.0.1,203.0.113.7", platform_ssr_secret=SSR_SECRET) as rig:
         admin = await rig["admin"]()
+        await step_up(admin)
         assert (await admin.post(f"{API}/auth/platform-session")).status_code == 201
         cookie = admin.cookies.get("brand_platform_session")
         headers = _ssr_headers(f"brand_platform_session={cookie}", "203.0.113.7")

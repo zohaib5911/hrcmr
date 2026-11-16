@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.learning.loader import load_courses
 from tests.db.test_employee_documents import rig as rig
+from tests.support import step_up
 
 API = "/api/v1"
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "courses"
@@ -68,6 +69,7 @@ async def _as_platform_admin(rig: dict[str, Any], admin: Any) -> None:
         )
         await c.execute(text("update users set mfa_enabled=true where id=:u"), {"u": platform_id})
     # The platform cookie (T17.1): the admin pages accept nothing else.
+    await step_up(admin)
     started = await admin.post(API + "/auth/platform-session")
     assert started.status_code == 201, started.text
 

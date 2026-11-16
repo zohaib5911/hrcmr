@@ -16,7 +16,7 @@ from sqlalchemy import text
 from app.jobs.rerun import RERUNNABLE
 from app.jobs.scheduled import functions
 from tests.db.test_employee_documents import rig as rig
-from tests.support import TEST_REDIS_URL
+from tests.support import TEST_REDIS_URL, step_up
 
 API = "/api/v1"
 
@@ -32,6 +32,7 @@ async def _platform_admin(rig: dict[str, Any], level: str) -> Any:
             {"u": me, "l": level},
         )
         await c.execute(text("update users set mfa_enabled=true where id=:u"), {"u": me})
+    await step_up(admin)
     started = await admin.post(f"{API}/auth/platform-session")
     assert started.status_code == 201, started.text
     return admin

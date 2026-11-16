@@ -25,6 +25,7 @@ from app.modules.auth.deps import (
     user_agent,
 )
 from app.modules.auth.policy import require_mfa_satisfied
+from app.modules.auth.sessions import require_step_up
 from app.modules.identity.models import PlatformAdmin
 from app.modules.rbac.platform import require_allowed_network
 
@@ -71,6 +72,9 @@ async def start_platform_session(
     # Mandatory MFA: a platform admin with no authenticator set up is refused (ENROL), and one
     # whose session has not passed the second step never reaches this line (signed_in_caller).
     require_mfa_satisfied(state_for(caller, policy="all", role=None, platform_admin=True))
+    # A stolen tenant session must not open the admin site by itself: the person confirms their
+    # password or authenticator code again, within the last 10 minutes (O6.1.7).
+    require_step_up(caller.session)
     token, data = await auth.sessions.create(
         db,
         user_id=caller.user_id,

@@ -87,12 +87,35 @@ export function permissionsPolicy(pathname: string): string {
   return `camera=(), microphone=(), geolocation=${geolocation}`;
 }
 
+/**
+ * Files other sites may embed: the logo in our e-mails (opened in webmail on another site), link
+ * previews and icons. Everything else is for this site and its subdomains only.
+ */
+export const EMBEDDABLE_PATH_PREFIXES = [
+  "/brand/",
+  "/opengraph-image",
+  "/icon",
+  "/apple-icon",
+  "/favicon.ico",
+];
+
+/** Cross-Origin-Resource-Policy for a path (O6.1.7): who may load it as an image, script or frame. */
+export function resourcePolicy(pathname: string): "same-site" | "cross-origin" {
+  return EMBEDDABLE_PATH_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+    ? "cross-origin"
+    : "same-site";
+}
+
 /** Headers every response gets, whatever the route. Also applied to static assets by next.config. */
 export function baseSecurityHeaders(isProduction: boolean): Record<string, string> {
   return {
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "strict-origin-when-cross-origin",
+    // A page we open in a new tab, or that opens us, gets no handle on the other window (O6.1.7).
+    "Cross-Origin-Opener-Policy": "same-origin",
+    // The path-dependent value (resourcePolicy) replaces this where other sites may embed a file.
+    "Cross-Origin-Resource-Policy": "same-site",
     // Browsers only honour HSTS over HTTPS; sending it from `next dev` would only confuse.
     ...(isProduction
       ? { "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload" }
