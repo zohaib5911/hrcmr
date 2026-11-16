@@ -65,7 +65,7 @@ What was scanned: all 436 API routes mapped to their permission guard (the only 
 - **Fix:** keep matching by e-mail (recruiters want one record), but mark what came in unconfirmed: add a `needs_review` flag on applications that arrive from the public form for a candidate who already existed, shown in the application list ("Sent from the public form; details not confirmed"). Never overwrite the stored name or phone from the form (already true; add the test).
 - **Done when:** a test applies twice with the same e-mail and different names: one candidate, original name kept, second application flagged.
 
-### [ ] C6.1.10 · P2 · No error pages: an unexpected rendering error shows the framework's bare screen
+### [x] C6.1.10 · P2 · No error pages: an unexpected rendering error shows the framework's bare screen — fixed in PR #152
 - **Problem:** there is no `error.tsx` or `global-error.tsx` anywhere under `web/app` (only `not-found.tsx` and six `loading.tsx`). A thrown error in any page gives Next.js's default error screen with no way back, no reference and no Sentry capture from the boundary.
 - **Evidence:** `find web/app -name "error.tsx" -o -name "global-error.tsx"` returns nothing.
 - **Fix:** add `web/app/global-error.tsx`, `web/app/(app)/error.tsx`, `web/app/(marketing)/error.tsx` and `web/app/(admin)/platform/error.tsx` built from `components/ui/error-state.tsx` ("Something went wrong", a "Try again" button calling `reset()`, a link home, the error `digest` as the reference), each calling `Sentry.captureException(error)` in an effect.
