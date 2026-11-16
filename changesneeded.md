@@ -140,7 +140,7 @@ What is there today (from the Phase 25 screenshots and `web/app/globals.css`): a
 - **Fix:** sidebar (`components/app/sidebar.tsx`), toolbar (`toolbar.tsx`) and mobile tab bar (`mobile-tab-bar.tsx`) move from edge-to-edge bars with a hairline to floating glass: 8 to 12 px inset from the window edge, `rounded-card` (pill shape for the tab bar on phones), `material-glass-regular`, content scrolling underneath. The toolbar turns from clear to glass only after the page scrolls. Fix the clipped last nav item above the user footer ("Rota" is cut in `app-dashboard-light-1280.png`): add a fade mask and bottom padding to the scrolling list.
 - **Done when:** shell e2e and a11y specs pass; no content is hidden under the floating bars at 360, 390, 768 and 1280 (safe-area insets respected).
 
-### [ ] U6.1.4 · P2 · B · One card style, on glass
+### [x] U6.1.4 · P2 · B · One card style, on glass — fixed in PR #166
 - **Problem:** the dashboard mixes bordered cards ("Get set up", "Approvals") with borderless ones (the four KPI tiles); section cards are mostly empty space.
 - **Fix:** `components/ui/card.tsx` and `kpi-card.tsx` get one look: `material-glass-thin`, no hard border, the inner edge highlight, `--radius-card`. Use solid `bg-elevated` only for dense data (tables, long forms) where glass would hurt reading. KPI tiles gain a small status line and an icon so a "0" is not the only content; empty cards show the existing `empty-state` with one action instead of blank space.
 - **Done when:** the dashboard, employee detail and company pages use only the two card variants; screenshots updated.
