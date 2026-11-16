@@ -15,9 +15,9 @@ export const DialogClose = DialogPrimitive.Close;
 
 /** The dimmed backdrop's classes. Shared with Sheet and ConfirmDialog (which has its own Radix context). */
 export const OVERLAY_CLASSES = cn(
+  // The scrim blurs the page (U6.1.9) and appears at once: fading a full-screen blur would redraw
+  // the blur on every frame of the fade. The sheet or dialog on top still fades and moves in.
   "bg-scrim scrim-blur fixed inset-0 z-50",
-  "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
-  "duration-[var(--duration-small)]",
 );
 
 export function Overlay({ className, ...props }: ComponentProps<typeof DialogPrimitive.Overlay>) {
@@ -62,7 +62,7 @@ export function DialogContent({
       <Overlay />
       <DialogPrimitive.Content
         className={cn(
-          "material-sheet text-label shadow-e3 fixed z-50 flex max-h-[calc(100dvh-2rem)] flex-col outline-none",
+          "material-modal text-label shadow-e3 fixed z-50 flex max-h-[calc(100dvh-2rem)] flex-col outline-none",
           // Phones: a sheet rising from the bottom edge.
           "max-md:inset-x-0 max-md:bottom-0 max-md:rounded-t-sheet max-md:px-5 max-md:pt-3 max-md:pb-[max(1.25rem,env(safe-area-inset-bottom))]",
           "max-md:data-[state=open]:slide-in-from-bottom max-md:data-[state=closed]:slide-out-to-bottom",

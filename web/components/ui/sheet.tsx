@@ -46,7 +46,7 @@ export function SheetContent({
       <Overlay />
       <DialogPrimitive.Content
         className={cn(
-          "material-sheet text-label shadow-e3 fixed z-50 flex flex-col outline-none",
+          "material-modal text-label shadow-e3 fixed z-50 flex flex-col outline-none",
           "max-md:inset-x-0 max-md:bottom-0 max-md:max-h-[85dvh] max-md:rounded-t-sheet max-md:px-5 max-md:pt-3 max-md:pb-[max(1.25rem,env(safe-area-inset-bottom))]",
           "max-md:data-[state=open]:slide-in-from-bottom max-md:data-[state=closed]:slide-out-to-bottom",
           "md:inset-y-0 md:w-[440px] md:max-w-[calc(100vw-2rem)] md:p-6",

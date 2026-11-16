@@ -516,21 +516,19 @@
 
 /* Glass (U6.1.1): thin for cards, regular for floating chrome, thick for menus and sheets. Solid
    when blur is missing or transparency is reduced; solid with a visible edge for more contrast. */
+/* Thin glass is translucent but does not blur (U6.1.9). A page has many cards, and only the soft,
+   almost flat backdrop is behind them, so blurring it changed nothing to see but cost a blur layer
+   per card on every frame of an animation. Real blur stays for the chrome (regular) and for sheets
+   (thick): at most three blurred layers are ever stacked. */
 @utility material-glass-thin {
   background-color: var(--glass-thin);
-  backdrop-filter: saturate(180%) blur(24px);
   box-shadow:
     inset 0 1px 0 var(--glass-highlight),
     0 0 0 1px var(--glass-stroke),
     var(--glass-shadow);
 
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    background-color: var(--bg-elevated);
-  }
-
   @media (prefers-reduced-transparency: reduce) {
     background-color: var(--bg-elevated);
-    backdrop-filter: none;
   }
 
   @media (prefers-contrast: more) {
@@ -635,6 +633,16 @@
     & > * {
       animation: none;
     }
+  }
+}
+
+/* Sheets, dialogs and the palette sit on the blurred scrim (U6.1.9): the page behind is already
+   blurred, so their own surface is the same 92% as material-sheet without a second blur on top. */
+@utility material-modal {
+  background-color: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--bg-elevated);
   }
 }
 
