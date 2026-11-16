@@ -109,6 +109,9 @@ test("a profile opens from the list, moves through the lifecycle, and then can o
   await page.getByRole("grid", { name: "Employees" }).getByText("Cara Doyle").dblclick();
 
   await expect(page.getByRole("heading", { level: 1, name: "Cara Doyle" })).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Breadcrumb" }).locator('[aria-current="page"]'),
+  ).toHaveText("Cara Doyle");
   await expect(page.getByText("E500 · Joined 6 Jan 2025")).toBeVisible();
   await expect(page.getByText("Upload the signed agreement first.")).toBeVisible();
   await expect(page.getByRole("switch", { name: /Opted out of the 48-hour week/ })).toBeDisabled();

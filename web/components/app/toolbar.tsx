@@ -16,6 +16,7 @@ import { Breadcrumbs } from "./breadcrumbs";
 import { NotificationsBell } from "./notifications-bell";
 import type { ShellUser } from "./shell-types";
 import { useApple } from "./use-apple";
+import { usePageHeading } from "./use-page-heading";
 
 interface ToolbarProps {
   user: ShellUser | null;
@@ -29,15 +30,30 @@ interface ToolbarProps {
  */
 export function Toolbar({ user, theme, notificationCount }: ToolbarProps) {
   const pathname = usePathname();
-  const title = titleFor(pathname);
+  const heading = usePageHeading(pathname);
+  const title = heading.title || titleFor(pathname);
+  const crumbs = breadcrumbsFor(pathname);
+  if (
+    heading.title &&
+    heading.title !== titleFor(pathname) &&
+    pathname.split("/").filter(Boolean).length > 1
+  ) {
+    const parent = crumbs.at(-1);
+    if (parent) parent.href = pathname.slice(0, pathname.lastIndexOf("/")) || "/";
+    crumbs.push({ label: heading.title });
+  }
   const apple = useApple();
   const hint = apple ? "⌘K" : `${keyLabel("Mod", false)} K`;
   return (
     <header className="material-chrome border-separator sticky top-0 z-20 flex h-14 items-center gap-3 border-b px-4 md:px-8">
       <div className="min-w-0 flex-1 lg:flex-none lg:basis-80">
-        <Breadcrumbs crumbs={breadcrumbsFor(pathname)} />
+        <Breadcrumbs crumbs={crumbs} />
         {title ? (
-          <p title={title} className="text-title-2 text-label truncate leading-7">
+          <p
+            title={title}
+            aria-hidden={heading.visible}
+            className={`text-title-2 text-label truncate leading-7 transition-opacity motion-reduce:transition-none ${heading.visible ? "opacity-0" : "opacity-100"}`}
+          >
             {title}
           </p>
         ) : null}
