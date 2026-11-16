@@ -241,11 +241,11 @@ describe("the toolbar's controls", () => {
     // There are two: the wide search box and the phone icon. Either opens the palette.
     for (const button of screen.getAllByRole("button", { name: /^Search/ })) {
       await userEvent.click(button);
-      expect(screen.getByRole("dialog", { name: "Search" })).toBeVisible();
+      expect(await screen.findByRole("dialog", { name: "Search" })).toBeVisible();
       await userEvent.keyboard("{Escape}");
     }
     await userEvent.click(screen.getByRole("button", { name: "Help and keyboard shortcuts" }));
-    expect(screen.getByRole("dialog", { name: "Keyboard shortcuts" })).toBeVisible();
+    expect(await screen.findByRole("dialog", { name: "Keyboard shortcuts" })).toBeVisible();
     expect(heard).toEqual(["palette", "palette", "shortcuts"]);
   });
 
