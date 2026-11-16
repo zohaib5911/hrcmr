@@ -5,12 +5,12 @@ import { avatarTone, initials, type AvatarTone } from "@/lib/ui/avatar";
 import { cn } from "@/lib/utils";
 
 const TONES: Record<AvatarTone, string> = {
-  accent: "bg-accent-tint text-accent-text",
-  success: "bg-success-tint text-success",
-  warning: "bg-warning-tint text-warning",
-  danger: "bg-danger-tint text-danger",
-  info: "bg-info-tint text-info",
-  neutral: "bg-fill-secondary text-label",
+  accent: "bg-avatar-accent text-label",
+  success: "bg-avatar-success text-label",
+  warning: "bg-avatar-warning text-label",
+  danger: "bg-avatar-danger text-label",
+  info: "bg-avatar-info text-label",
+  neutral: "bg-avatar-neutral text-label",
 };
 
 export const avatarSize = cva(

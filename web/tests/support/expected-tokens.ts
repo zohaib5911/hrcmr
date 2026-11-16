@@ -69,6 +69,13 @@ export const DEVIATIONS = {
 
 /** Tokens the plan does not list, which the pairs above need (see PROGRESS.md decision 30). */
 const ADDED_LIGHT: Record<string, string> = {
+  "--avatar-accent": "#e0dbf5",
+  "--avatar-success": "#e3dbf5",
+  "--avatar-warning": "#e6dbf5",
+  "--avatar-danger": "#eadbf5",
+  "--avatar-info": "#eddbf5",
+  "--avatar-neutral": "#f0dbf5",
+
   "--placeholder": "#636366", // the plan's #6E6E73 is 4.0:1 on an input fill over the canvas
   "--accent-text": "color-mix(in srgb, var(--accent) 85%, black)",
   "--accent-tint": "color-mix(in srgb, var(--accent) 12%, transparent)",
@@ -90,6 +97,13 @@ const ADDED_LIGHT: Record<string, string> = {
 
 const DARK_RING = "0 0 0 1px rgba(255,255,255,0.08)"; // plan 5.4: borders, not shadows, in dark
 const ADDED_DARK: Record<string, string> = {
+  "--avatar-accent": "#241957",
+  "--avatar-success": "#2c1957",
+  "--avatar-warning": "#341957",
+  "--avatar-danger": "#3c1957",
+  "--avatar-info": "#441957",
+  "--avatar-neutral": "#4d1957",
+
   "--placeholder": "#A1A1A6",
   "--accent-text": "var(--accent)",
   "--accent-tint": "color-mix(in srgb, var(--accent) 12%, transparent)",

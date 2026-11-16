@@ -20,6 +20,13 @@ export interface ColourToken {
 }
 
 export const COLOUR_TOKENS: readonly ColourToken[] = [
+  { name: "--avatar-accent", swatch: "bg-avatar-accent", group: "accent", use: "Avatar tint 1" },
+  { name: "--avatar-success", swatch: "bg-avatar-success", group: "accent", use: "Avatar tint 2" },
+  { name: "--avatar-warning", swatch: "bg-avatar-warning", group: "accent", use: "Avatar tint 3" },
+  { name: "--avatar-danger", swatch: "bg-avatar-danger", group: "accent", use: "Avatar tint 4" },
+  { name: "--avatar-info", swatch: "bg-avatar-info", group: "accent", use: "Avatar tint 5" },
+  { name: "--avatar-neutral", swatch: "bg-avatar-neutral", group: "accent", use: "Avatar tint 6" },
+
   { name: "--bg", swatch: "bg-canvas", group: "surface", use: "App canvas" },
   { name: "--bg-elevated", swatch: "bg-elevated", group: "surface", use: "Cards and sheets" },
   { name: "--bg-grouped", swatch: "bg-grouped", group: "surface", use: "Settings-style lists" },
@@ -328,6 +335,13 @@ const STATUS = [
 ] as const;
 
 export const CONTRAST_PAIRS: readonly ContrastPair[] = [
+  { fg: "--label", bg: "--avatar-accent", min: 4.5, use: "Avatar initials" },
+  { fg: "--label", bg: "--avatar-success", min: 4.5, use: "Avatar initials" },
+  { fg: "--label", bg: "--avatar-warning", min: 4.5, use: "Avatar initials" },
+  { fg: "--label", bg: "--avatar-danger", min: 4.5, use: "Avatar initials" },
+  { fg: "--label", bg: "--avatar-info", min: 4.5, use: "Avatar initials" },
+  { fg: "--label", bg: "--avatar-neutral", min: 4.5, use: "Avatar initials" },
+
   ...SURFACES.flatMap((bg): ContrastPair[] => [
     { fg: "--label", bg, min: 4.5, use: "Primary text" },
     { fg: "--label-secondary", bg, min: 4.5, use: "Secondary text" },
