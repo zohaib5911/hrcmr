@@ -71,7 +71,7 @@ export function AppShell({
               Skip to content
             </a>
             <Sidebar collapsed={collapsed} onToggle={toggle} session={session} badges={badges} />
-            <div className="flex min-h-dvh flex-col transition-[padding] motion-sheet motion-reduce:transition-none md:pl-[260px] md:group-data-[collapsed=true]/shell:pl-[72px]">
+            <div className="flex min-h-dvh flex-col transition-[padding] motion-sheet motion-reduce:transition-none md:pl-[284px] md:group-data-[collapsed=true]/shell:pl-[96px]">
               <SupportBanner />
               <Toolbar
                 user={session?.user ?? null}
@@ -81,7 +81,7 @@ export function AppShell({
               <main
                 id="main"
                 tabIndex={-1}
-                className="page-app w-full flex-1 pt-6 pb-28 outline-none md:pb-10"
+                className="page-app w-full flex-1 pt-6 pb-[calc(6.5rem+env(safe-area-inset-bottom))] outline-none md:pb-10"
               >
                 <PlanBanner />
                 <AnnouncementBanner />

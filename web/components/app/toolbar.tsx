@@ -10,6 +10,7 @@ import { breadcrumbsFor, pageHrefFor, titleFor } from "@/lib/navigation";
 import { keyLabel } from "@/lib/platform";
 import { OPEN_PALETTE, OPEN_SHORTCUTS, announce } from "@/lib/shell-events";
 import type { ThemeChoice } from "@/lib/theme";
+import { cn } from "@/lib/utils";
 
 import { AvatarMenu } from "./avatar-menu";
 import { Breadcrumbs } from "./breadcrumbs";
@@ -17,6 +18,7 @@ import { NotificationsBell } from "./notifications-bell";
 import type { ShellUser } from "./shell-types";
 import { useApple } from "./use-apple";
 import { usePageHeading } from "./use-page-heading";
+import { useScrolled } from "./use-scrolled";
 
 interface ToolbarProps {
   user: ShellUser | null;
@@ -41,9 +43,18 @@ export function Toolbar({ user, theme, notificationCount }: ToolbarProps) {
     crumbs.push({ label: heading.title });
   }
   const apple = useApple();
+  const scrolled = useScrolled();
   const hint = apple ? "⌘K" : `${keyLabel("Mod", false)} K`;
   return (
-    <header className="material-chrome border-separator sticky top-0 z-20 flex h-14 items-center gap-3 border-b px-4 md:px-8">
+    <header
+      data-scrolled={scrolled}
+      className={cn(
+        // Floating, 12 px from the edges (below the notch on phones). Clear at the top of the page;
+        // glass once content scrolls under it (U6.1.3).
+        "rounded-card sticky top-[max(0.75rem,env(safe-area-inset-top))] z-20 mx-3 mt-3 flex h-14 items-center gap-3 px-4 md:mx-0 md:mr-3 md:px-5",
+        scrolled ? "material-glass-regular" : "bg-transparent",
+      )}
+    >
       <div className="min-w-0 flex-1 lg:flex-none lg:basis-80">
         <Breadcrumbs crumbs={crumbs} />
         {title ? (
