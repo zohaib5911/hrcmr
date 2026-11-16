@@ -99,6 +99,7 @@ async def match_cv(
         data=data,
         fast=False,
         max_tokens=1500,
+        limit_checked=True,  # the route counted this use before it read the file
     )
     parsed = parse_cv_reply(reply, cv_text)
     if parsed is None:

@@ -1,8 +1,9 @@
 """``POST /soc/resume-match``: a CV compared with one SOC code (plan 8.17 step 4, T15.5).
 
 The CV is read in memory and never stored. Its checks run in this order, and each can refuse:
-AI is on (409 otherwise, before the file is read), size, PDF or DOCX by name, real content, virus
-scan, readable text. Only then are contact details taken out and Claude asked for the comparison.
+AI is on (409 otherwise, before the file is read), the person's hourly AI limit, size, PDF or DOCX
+by name, real content, virus scan, readable text. Only then are contact details taken out and
+Claude asked for the comparison.
 """
 
 from __future__ import annotations
@@ -15,7 +16,7 @@ from fastapi import APIRouter, Depends, Form, Request, UploadFile
 from pydantic import BaseModel
 from sqlalchemy import select
 
-from app.ai.service import ai_ready
+from app.ai.service import ai_ready, check_ai_limit
 from app.core.errors import AppError, NotFoundError
 from app.modules.files.validation import ALLOWED, extension_of, safe_filename, sniff
 from app.modules.rbac.deps import Access, require
@@ -59,6 +60,8 @@ async def resume_match(
 ) -> SocCvMatchOut:
     if not await ai_ready(request, access):
         raise AppError("AI_UNAVAILABLE", "AI features are turned off.", status_code=409)
+    # Before the file is read: scanning and text extraction are the costly part (C6.1.8).
+    await check_ai_limit(request, access)
     data = await cv.read(MAX_CV_BYTES + 1)
     if len(data) > MAX_CV_BYTES:
         raise AppError("PAYLOAD_TOO_LARGE", "That CV is larger than 10 MB.", status_code=413)

@@ -98,3 +98,19 @@ async def test_contact_details_never_reach_claude_and_only_quotes_from_the_cv_ar
     assert find_restricted(sent[0]) == []
     assert "Served customers at the till" in sent[0]
     assert "Serve customers in a shop." in sent[0]
+
+
+async def test_unreadable_files_count_against_the_hourly_limit(rig: dict[str, Any]) -> None:
+    """C6.1.8: the limit applies before the file is read, so bad files cannot be sent without end."""
+    fake_claude(rig["app"], reply="{}")
+    user = await rig["person"]("recruiter", rig["a"])
+    for _ in range(30):
+        bad = await user.post(
+            API + "/resume-match",
+            data={"soc_code": "7111"},
+            files={"cv": ("cv.docx", b"not a document", DOCX_MIME)},
+        )
+        assert bad.status_code == 415, bad.text
+    limited = await _upload(user, cv_docx(CV_LINES))
+    assert limited.status_code == 429
+    assert limited.json()["error"]["code"] == "RATE_LIMITED"
