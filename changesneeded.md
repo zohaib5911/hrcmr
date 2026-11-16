@@ -155,7 +155,7 @@ What is there today (from the Phase 25 screenshots and `web/app/globals.css`): a
 - **Fix:** quick actions: one row, one size, each with its icon, the main one in the accent colour, overflow into a "More" menu on phones. Employee header: status chips sit under the name; actions sit together on the right with one primary button.
 - **Done when:** screenshots at 390 and 1280; no wrap to a second row at 1280.
 
-### [ ] U6.1.7 · P2 · One accent everywhere
+### [x] U6.1.7 · P2 · One accent everywhere — fixed in PR #158
 - **Problem:** the brand accent is violet, but the plan chip ("1 year") is blue, avatars are pink and red, and the set-up bar is green.
 - **Fix:** plan chip uses `accent-tint`/`accent-text`; avatars take a tint from a fixed 6-colour set derived from the accent hue (chosen by a hash of the name) with the same lightness in each theme; the progress bar uses the accent (C6.1.12). Status colours stay for status only.
 - **Done when:** the design-audit page lists no non-token colours; contrast tests pass.
