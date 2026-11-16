@@ -12,6 +12,8 @@ import {
   Clock,
   CalendarClock,
   MoreHorizontal,
+  ShieldCheck,
+  BadgeCheck,
 } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
@@ -22,6 +24,7 @@ import { type ReactNode, useEffect, useState } from "react";
 import { useCan } from "@/components/app/session-context";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { CARD_VARIANTS } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Icon } from "@/components/ui/icon";
 import { KpiCard } from "@/components/ui/kpi-card";
@@ -29,6 +32,7 @@ import { ProgressBar } from "@/components/ui/progress";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
+import { cn } from "@/lib/utils";
 
 type Dashboard = components["schemas"]["DashboardOut"];
 type Checklist = components["schemas"]["ChecklistOut"];
@@ -68,14 +72,22 @@ function greeting(hour: number): string {
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <section
-      aria-label={title}
-      className="bg-elevated border-separator rounded-card flex flex-col gap-3 border p-4"
-    >
+    <section aria-label={title} className={cn(CARD_VARIANTS.glass, "flex flex-col gap-3 p-4")}>
       <h2 className="text-headline text-label">{title}</h2>
       {children}
     </section>
   );
+}
+
+/** What the "Checks current" tile says under its number: the most urgent Right to Work fact. */
+function rtwStatus(rtw: NonNullable<Dashboard["rtw"]>): {
+  text: string;
+  tone: "success" | "warning" | "danger" | "neutral";
+} {
+  if (rtw.expired > 0) return { text: `${rtw.expired} expired`, tone: "danger" };
+  if (rtw.expiring > 0) return { text: `${rtw.expiring} expiring soon`, tone: "warning" };
+  if (rtw.verified > 0) return { text: "None expiring soon", tone: "success" };
+  return { text: "No checks recorded yet", tone: "neutral" };
 }
 
 /** The home page: a greeting, the company's headline numbers, cards the person may see, and the set-up
@@ -228,7 +240,7 @@ export function DashboardWorkspace({ actions }: { actions?: ReactNode }) {
       {ready && checklist?.visible ? (
         <section
           aria-label="Get set up"
-          className="bg-elevated border-separator rounded-card mb-6 flex flex-col gap-3 border p-4"
+          className={cn(CARD_VARIANTS.glass, "mb-6 flex flex-col gap-3 p-4")}
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-headline text-label">Get set up</h2>
@@ -269,14 +281,40 @@ export function DashboardWorkspace({ actions }: { actions?: ReactNode }) {
             <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
               {shown.employees ? (
                 <>
-                  <KpiCard label="Employees" value={shown.employees.active} />
-                  <KpiCard label="On leave" value={shown.employees.on_leave} />
+                  <KpiCard
+                    label="Employees"
+                    icon={Users}
+                    value={shown.employees.active}
+                    status={{
+                      text: shown.employees.active === 1 ? "Active record" : "Active records",
+                    }}
+                  />
+                  <KpiCard
+                    label="On leave"
+                    icon={CalendarDays}
+                    value={shown.employees.on_leave}
+                    status={{
+                      text: shown.employees.on_leave === 0 ? "Everyone is in" : "Away today",
+                    }}
+                  />
                 </>
               ) : null}
               {shown.rtw ? (
                 <>
-                  <KpiCard label="Right to Work coverage (%)" value={shown.rtw.coverage_percent} />
-                  <KpiCard label="Checks current" value={shown.rtw.verified} />
+                  <KpiCard
+                    label="Right to Work coverage (%)"
+                    icon={ShieldCheck}
+                    value={shown.rtw.coverage_percent}
+                    status={{
+                      text: `${shown.rtw.verified} of ${shown.rtw.checked} people checked`,
+                    }}
+                  />
+                  <KpiCard
+                    label="Checks current"
+                    icon={BadgeCheck}
+                    value={shown.rtw.verified}
+                    status={rtwStatus(shown.rtw)}
+                  />
                 </>
               ) : null}
             </div>
@@ -344,7 +382,22 @@ export function DashboardWorkspace({ actions }: { actions?: ReactNode }) {
             {shown.distribution ? (
               <Card title="Employee distribution">
                 {shown.distribution.rows.length === 0 ? (
-                  <p className="text-callout text-label-secondary">No employees yet</p>
+                  <EmptyState
+                    icon={Users}
+                    title="No employees yet"
+                    description="Departments and headcounts appear here as you add people."
+                    headingLevel={3}
+                    className="px-0 py-4"
+                    {...(can("employee.profile.write")
+                      ? {
+                          action: (
+                            <Button size="sm" asChild>
+                              <Link href="/employees/new">Add employee</Link>
+                            </Button>
+                          ),
+                        }
+                      : {})}
+                  />
                 ) : (
                   <ul className="flex flex-col gap-1">
                     {shown.distribution.rows.map((row) => (
@@ -382,12 +435,27 @@ export function DashboardWorkspace({ actions }: { actions?: ReactNode }) {
 
             {shown.recruitment ? (
               <Card title="Recruitment">
-                <p className="text-callout text-label">
-                  {shown.recruitment.latest.join(", ") || "No candidates yet"}
-                </p>
-                <Link href="/recruitment" className="text-callout text-accent">
-                  Open recruitment
-                </Link>
+                {shown.recruitment.latest.length === 0 ? (
+                  <EmptyState
+                    icon={Users}
+                    title="No candidates yet"
+                    description="The newest candidates appear here when people apply or you add them."
+                    headingLevel={3}
+                    className="px-0 py-4"
+                    action={
+                      <Button size="sm" variant="gray" asChild>
+                        <Link href="/recruitment">Open recruitment</Link>
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <>
+                    <p className="text-callout text-label">{shown.recruitment.latest.join(", ")}</p>
+                    <Link href="/recruitment" className="text-callout text-accent">
+                      Open recruitment
+                    </Link>
+                  </>
+                )}
               </Card>
             ) : null}
           </div>
