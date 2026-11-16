@@ -95,6 +95,70 @@ for (const colorScheme of THEMES) {
   });
 }
 
+test.describe("the floating bars (U6.1.3)", () => {
+  for (const width of [360, 390, 768, 1280] as const) {
+    test.describe(`at ${width} px`, () => {
+      test.use({ viewport: { width, height: 700 } });
+
+      test("float 12 px in, keep content clear, and the toolbar turns to glass on scroll", async ({
+        page,
+      }) => {
+        await open(page);
+        const toolbar = page.locator("header").first();
+        await expect(toolbar).toHaveAttribute("data-scrolled", "false");
+        expect(Math.round((await toolbar.boundingBox())?.y ?? 0)).toBe(12);
+        const overflow = await page.evaluate(
+          () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        );
+        expect(overflow).toBeLessThanOrEqual(0);
+
+        const main = await page.locator("main").boundingBox();
+        if (width >= 768) {
+          const bar = await sidebar(page).boundingBox();
+          expect(Math.round(bar?.x ?? 0)).toBe(12);
+          expect(Math.round(bar?.y ?? 0)).toBe(12);
+          expect(main?.x ?? 0).toBeGreaterThanOrEqual((bar?.x ?? 0) + (bar?.width ?? 0) - 1);
+        } else {
+          const tabs = await page.getByRole("navigation", { name: "Primary" }).boundingBox();
+          expect(Math.round(tabs?.x ?? 0)).toBe(12);
+          expect(Math.round((tabs?.y ?? 0) + (tabs?.height ?? 0))).toBe(700 - 12);
+          await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+          const last = await page
+            .locator("main > :last-child")
+            .evaluate((el) => el.getBoundingClientRect().bottom);
+          expect(last).toBeLessThanOrEqual(tabs?.y ?? 0);
+        }
+
+        // A short page may not scroll at all: give it room, then scroll content under the toolbar.
+        await page.evaluate(() => {
+          const room = document.createElement("div");
+          room.style.height = "2000px";
+          document.querySelector("main")?.append(room);
+          window.scrollTo(0, 200);
+        });
+        await expect(toolbar).toHaveAttribute("data-scrolled", "true");
+        expect(Math.round((await toolbar.boundingBox())?.y ?? 0)).toBe(12);
+      });
+    });
+  }
+
+  test.describe("on a short window", () => {
+    test.use({ viewport: { width: 1280, height: 600 } });
+
+    test("the last sidebar item scrolls fully into view above the user card", async ({ page }) => {
+      await open(page);
+      const nav = page.getByRole("navigation", { name: "Main" });
+      await nav.evaluate((el) => el.scrollTo(0, el.scrollHeight));
+      const last = await nav.locator("li").last().boundingBox();
+      const navBox = await nav.boundingBox();
+      // The last 24 px of the list fade out; the last item ends above that fade.
+      expect((last?.y ?? 0) + (last?.height ?? 0)).toBeLessThanOrEqual(
+        (navBox?.y ?? 0) + (navBox?.height ?? 0) - 24 + 1,
+      );
+    });
+  });
+});
+
 test.describe("collapsing the sidebar", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 

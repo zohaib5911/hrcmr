@@ -62,7 +62,7 @@ interface SidebarProps {
 }
 
 /**
- * The translucent sidebar (plan 5.6): 260 px wide, 72 px when collapsed (the `[` key), grouped with
+ * The floating glass sidebar (plan 5.6, U6.1.3): 260 px wide, 72 px when collapsed (the `[` key), grouped with
  * small-caps captions. The company is at the top and the person at the bottom. Phones do not show
  * it: they get the tab bar.
  */
@@ -73,12 +73,18 @@ export function Sidebar({ collapsed, onToggle, session, badges }: SidebarProps) 
     <aside
       id="app-sidebar"
       className={cn(
-        "material-chrome border-separator fixed inset-y-0 left-0 z-30 hidden flex-col border-r md:flex",
+        // Floating glass, 12 px in from the window edges (U6.1.3).
+        "material-glass-regular rounded-card fixed top-3 bottom-3 left-3 z-30 hidden flex-col overflow-hidden md:flex",
         "w-[260px] group-data-[collapsed=true]/shell:w-[72px] transition-[width] motion-sheet motion-reduce:transition-none",
       )}
     >
       <CompanySwitcher session={session} />
-      <nav aria-label="Main" className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 pb-3">
+      {/* The last items fade out under the user card instead of being cut off; the bottom padding
+          lets the last one scroll fully into view. */}
+      <nav
+        aria-label="Main"
+        className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto px-3 pb-6 [mask-image:linear-gradient(to_bottom,black_calc(100%-1.5rem),transparent)]"
+      >
         {groups.map((group) => (
           <div key={group.id} className="pt-3">
             <h2 className="text-caption text-label-secondary px-3 pb-1 font-medium tracking-wider uppercase group-data-[collapsed=true]/shell:sr-only">

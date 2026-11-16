@@ -30,7 +30,7 @@ export function MobileTabBar() {
   return (
     <nav
       aria-label="Primary"
-      className="material-chrome border-separator fixed inset-x-0 bottom-0 z-30 border-t pb-[env(safe-area-inset-bottom)] md:hidden"
+      className="material-glass-regular rounded-pill fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-30 overflow-hidden md:hidden"
     >
       <ul className="grid grid-cols-6">
         {MOBILE_TABS.map((tab) => {
