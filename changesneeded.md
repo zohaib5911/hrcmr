@@ -35,7 +35,7 @@ What was scanned: all 436 API routes mapped to their permission guard (the only 
 - **Fix:** make it one atomic step: a small Lua script registered once with `self._redis.register_script` (`INCR`; if the result is 1 or `TTL` is -1 then `EXPIRE key window`; return count and ttl). Keep the method's signature and return value.
 - **Done when:** a new test in the limiter's test file creates the key with no expiry, calls `hit`, and shows the key now has a positive TTL; all current rate-limit tests pass.
 
-### [ ] C6.1.5 · P2 · A non-ASCII character in the CSRF header or Stripe signature gives a 500 instead of a refusal
+### [x] C6.1.5 · P2 · A non-ASCII character in the CSRF header or Stripe signature gives a 500 instead of a refusal — fixed in PR #150
 - **Problem:** `hmac.compare_digest` raises `TypeError` for `str` values that are not ASCII. `api/app/core/csrf.py:66` compares the cookie with the header as strings, and `api/app/integrations/stripe.py:119` compares signature strings. Header bytes above 0x7F reach both (Starlette decodes headers as latin-1), so anyone can make these two paths return 500 and fill the error log and Sentry.
 - **Evidence:** `python3 -c "import hmac; hmac.compare_digest('abc','ab\xe9')"` raises `TypeError: comparing strings with non-ASCII characters is not supported` (Python docs, `hmac.compare_digest`).
 - **Fix:** compare bytes in both places: `hmac.compare_digest(cookie.encode("utf-8"), supplied.encode("utf-8"))`; same for `expected`/`given` in `verify_signature`.
