@@ -82,16 +82,20 @@ export function ProfilePage({
       <PageHeader
         title={name}
         description={`${profile.employee_number} · ${joinedLine(profile.hire_date, today())}`}
+        badges={
+          <>
+            <RTWChip status={profile.rtw_status} />
+            <StatusChip tone={TONE[profile.status]}>{STATUS_LABEL[profile.status]}</StatusChip>
+          </>
+        }
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <PrintRecord id={profile.id} />
-            <RTWChip status={profile.rtw_status} />
             {mayReadRtw && profile.rtw_status !== "verified" && (
-              <Button variant="gray" size="sm" onClick={() => setTab("rtw")}>
+              <Button variant="filled" size="sm" onClick={() => setTab("rtw")}>
                 Resolve Right to Work
               </Button>
             )}
-            <StatusChip tone={TONE[profile.status]}>{STATUS_LABEL[profile.status]}</StatusChip>
           </div>
         }
       />
@@ -170,9 +174,7 @@ function Overview({ profile }: { profile: EmployeeProfile }) {
     <div className="flex flex-col gap-8">
       <section aria-label="Summary" className="grid gap-4 sm:grid-cols-2">
         <SummaryCard icon={ShieldCheck} label="Right to Work">
-          <div>
-            <RTWChip status={profile.rtw_status} />
-          </div>
+          <div></div>
           {profile.rtw_follow_up_due_on && (
             <p className="text-callout text-label-secondary">
               Follow-up due {shortDate(profile.rtw_follow_up_due_on)}

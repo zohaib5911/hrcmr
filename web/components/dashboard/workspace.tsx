@@ -1,8 +1,22 @@
 "use client";
 
-import { Check, ChevronRight, Circle, LayoutDashboard } from "lucide-react";
+import {
+  Check,
+  ChevronRight,
+  Circle,
+  LayoutDashboard,
+  UserPlus,
+  Users,
+  CalendarDays,
+  Upload,
+  Clock,
+  CalendarClock,
+  MoreHorizontal,
+} from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Menu, MenuTrigger, MenuContent, MenuItem } from "@/components/ui/menu";
 import { type ReactNode, useEffect, useState } from "react";
 
 import { useCan } from "@/components/app/session-context";
@@ -116,11 +130,44 @@ export function DashboardWorkspace({ actions }: { actions?: ReactNode }) {
       shown.recruitment,
     );
 
+  const router = useRouter();
   const quick = [
-    { href: "/employees/new", label: "Add employee", show: can("employee.profile.write") },
-    { href: "/recruitment", label: "Add candidate", show: can("recruitment.candidate.write") },
-    { href: "/my-leave", label: "Request leave", show: can("leave.request.create_own") },
-    { href: "/documents", label: "Upload document", show: can("document.file.write") },
+    {
+      href: "/employees/new",
+      label: "Add employee",
+      icon: UserPlus,
+      show: can("employee.profile.write"),
+    },
+    {
+      href: "/recruitment",
+      label: "Add candidate",
+      icon: Users,
+      show: can("recruitment.candidate.write"),
+    },
+    {
+      href: "/my-leave",
+      label: "Request leave",
+      icon: CalendarDays,
+      show: can("leave.request.create_own"),
+    },
+    {
+      href: "/documents",
+      label: "Upload document",
+      icon: Upload,
+      show: can("document.file.write"),
+    },
+    {
+      href: "/clock",
+      label: "Clock in or out",
+      icon: Clock,
+      show: can("attendance.record.write", "attendance.record.write_own"),
+    },
+    {
+      href: "/my-shifts",
+      label: "My shifts",
+      icon: CalendarClock,
+      show: can("rota.scheduled_shift.read_own"),
+    },
   ].filter((item) => item.show);
 
   return (
@@ -135,12 +182,42 @@ export function DashboardWorkspace({ actions }: { actions?: ReactNode }) {
           {data ? data.status_line : "Loading your day"}
         </p>
         {quick.length > 0 ? (
-          <div className="mt-2 flex flex-wrap gap-2">
-            {quick.map((item) => (
-              <Button key={item.href} variant="gray" size="sm" asChild>
-                <Link href={item.href}>{item.label}</Link>
+          <div className="mt-2 flex items-center gap-2" aria-label="Quick actions">
+            {quick.map((item, index) => (
+              <Button
+                key={item.href}
+                variant={index === 0 ? "filled" : "gray"}
+                size="sm"
+                className={index > 0 ? "hidden lg:inline-flex" : ""}
+                asChild
+              >
+                <Link href={item.href}>
+                  <Icon icon={item.icon} size={16} />
+                  {item.label}
+                </Link>
               </Button>
             ))}
+            {quick.length > 1 && (
+              <Menu>
+                <MenuTrigger asChild>
+                  <Button variant="gray" size="sm" className="lg:hidden">
+                    <Icon icon={MoreHorizontal} size={16} />
+                    More
+                  </Button>
+                </MenuTrigger>
+                <MenuContent>
+                  {quick.slice(1).map((item) => (
+                    <MenuItem
+                      key={item.href}
+                      icon={<Icon icon={item.icon} size={16} />}
+                      onSelect={() => router.push(item.href)}
+                    >
+                      {item.label}
+                    </MenuItem>
+                  ))}
+                </MenuContent>
+              </Menu>
+            )}
           </div>
         ) : null}
         {actions ? <div className="mt-2 flex flex-wrap gap-3">{actions}</div> : null}
