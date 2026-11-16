@@ -12,6 +12,7 @@ party.
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 from enum import StrEnum
 from functools import lru_cache
@@ -66,6 +67,39 @@ def spend_verification_time() -> None:
     """Do the work of checking a password that does not exist, so an unknown e-mail address takes as
     long to answer as a known one with the wrong password."""
     verify_password(_dummy_hash(), "a different password")
+
+
+_password_slots = asyncio.Semaphore(2)
+
+
+async def hash_password_async(password: str) -> str:
+    async with _password_slots:
+        task = asyncio.create_task(asyncio.to_thread(hash_password, password))
+        try:
+            return await asyncio.shield(task)
+        except asyncio.CancelledError:
+            await task
+            raise
+
+
+async def verify_password_async(stored_hash: str, password: str) -> bool:
+    async with _password_slots:
+        task = asyncio.create_task(asyncio.to_thread(verify_password, stored_hash, password))
+        try:
+            return await asyncio.shield(task)
+        except asyncio.CancelledError:
+            await task
+            raise
+
+
+async def spend_verification_time_async() -> None:
+    async with _password_slots:
+        task = asyncio.create_task(asyncio.to_thread(spend_verification_time))
+        try:
+            await asyncio.shield(task)
+        except asyncio.CancelledError:
+            await task
+            raise
 
 
 @lru_cache

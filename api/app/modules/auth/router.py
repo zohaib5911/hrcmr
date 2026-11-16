@@ -235,7 +235,7 @@ async def change_password(
     auth: Auth,
     caller: SignedIn,
 ) -> MeResponse:
-    from app.modules.auth.passwords import hash_password, verify_password
+    from app.modules.auth.passwords import hash_password_async, verify_password_async
 
     user = caller.user
     # The same question as step-up ("is this the password?"), so the same limit and the same
@@ -245,7 +245,9 @@ async def change_password(
     )
     if not limit.allowed:
         raise RateLimitedError(limit.retry_after)
-    if not user.password_hash or not verify_password(user.password_hash, body.current_password):
+    if not user.password_hash or not await verify_password_async(
+        user.password_hash, body.current_password
+    ):
         await _audit(db, request, caller, "auth.step_up.failed")
         await db.commit()
         raise AppError(
@@ -255,7 +257,7 @@ async def change_password(
             field="current_password",
         )
     await accounts.check_password(body.new_password, field="new_password")
-    user.password_hash = hash_password(body.new_password)
+    user.password_hash = await hash_password_async(body.new_password)
     user.requires_password_change = False
     await auth.sessions.revoke_all(db, user.id, except_session_id=caller.session.session_id)
     await _audit(db, request, caller, "auth.password.changed")

@@ -39,10 +39,10 @@ from app.core.totp import (
     verify_totp,
 )
 from app.modules.auth.passwords import (
-    hash_password,
+    hash_password_async,
     needs_rehash,
-    spend_verification_time,
-    verify_password,
+    spend_verification_time_async,
+    verify_password_async,
 )
 from app.modules.companies.models import Company
 from app.modules.identity.models import Membership, User
@@ -215,9 +215,9 @@ class AuthService:
         user = (await db.execute(select(User).where(User.email == email))).scalar_one_or_none()
         usable = user is not None and user.is_active and user.password_hash is not None
         if usable and user is not None and user.password_hash is not None:
-            valid = verify_password(user.password_hash, password)
+            valid = await verify_password_async(user.password_hash, password)
         else:
-            spend_verification_time()
+            await spend_verification_time_async()
             valid = False
         if not valid or user is None:
             await self._record_failure(email, user)
@@ -228,7 +228,7 @@ class AuthService:
         user.locked_until = None
         user.last_login_at = datetime.now(UTC)
         if user.password_hash and needs_rehash(user.password_hash):
-            user.password_hash = hash_password(password)
+            user.password_hash = await hash_password_async(password)
 
         await self._alert_if_new_device(user, ip, user_agent)
         return await self.open_session(db, user, ip=ip, user_agent=user_agent)
@@ -345,7 +345,7 @@ class AuthService:
             raise RateLimitedError(result.retry_after)
         ok = False
         if password is not None and user.password_hash:
-            ok = verify_password(user.password_hash, password)
+            ok = await verify_password_async(user.password_hash, password)
         elif code is not None:
             ok = await self._check_second_factor(user, code)
         if not ok:
