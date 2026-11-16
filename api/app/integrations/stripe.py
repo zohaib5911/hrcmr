@@ -116,7 +116,7 @@ def verify_signature(
     if timestamp is None or not signatures:
         raise StripeSignatureError("malformed signature")
     expected = sign(payload, secret, timestamp).rsplit("=", 1)[1]
-    if not any(hmac.compare_digest(expected, given) for given in signatures):
+    if not any(hmac.compare_digest(expected.encode(), given.encode()) for given in signatures):
         raise StripeSignatureError("signature does not match")
     if abs((now if now is not None else time.time()) - timestamp) > tolerance:
         raise StripeSignatureError("signature is too old")

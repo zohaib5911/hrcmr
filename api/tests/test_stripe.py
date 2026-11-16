@@ -42,6 +42,7 @@ def test_any_v1_signature_may_match_while_a_secret_is_rolled() -> None:
         (BODY.replace(b"evt_1", b"evt_2"), sign(BODY, SECRET, NOW), NOW),  # body changed
         (BODY, sign(BODY, SECRET, NOW), NOW + 301),  # too old: a replay
         (b"[]", sign(b"[]", SECRET, NOW), NOW),  # signed, but not an event
+        (BODY, f"t={NOW},v1=\u00e9", NOW),  # not ASCII: refused, not a crash (C6.1.5)
     ],
 )
 def test_anything_else_is_refused(body: bytes, header: str | None, now: int) -> None:
