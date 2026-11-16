@@ -163,6 +163,17 @@
         "blur": "none",
         "border": "0px",
         "shadow": "none"
+      },
+      {
+        "tag": "H1",
+        "text": "Company",
+        "fontSize": "34px",
+        "lineHeight": "41px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
       }
     ],
     "overflow": 0,

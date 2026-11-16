@@ -227,17 +227,6 @@
         "blur": "saturate(1.8) blur(20px)",
         "border": "1px",
         "shadow": "none"
-      },
-      {
-        "tag": "SECTION",
-        "text": "We use cookies that keep the site working. With your say-so we would also use marketing co",
-        "fontSize": "15px",
-        "lineHeight": "22px",
-        "weight": "400",
-        "background": "color(srgb 0.109804 0.109804 0.117647 / 0.92)",
-        "blur": "saturate(1.8) blur(20px)",
-        "border": "0px",
-        "shadow": "rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(255, 255, 255, 0.08) 0px 0px 0px 1px"
       }
     ],
     "smallTargets": [
