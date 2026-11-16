@@ -24,7 +24,7 @@ export function GroupedList({ heading, description, children, className }: Group
         {heading}
       </h2>
       {description ? <p className="text-callout text-label-secondary px-4">{description}</p> : null}
-      <ul className="bg-elevated rounded-card shadow-e1 grouped-rows overflow-hidden">
+      <ul className="bg-elevated rounded-card shadow-e1 grouped-rows stagger-rise overflow-hidden">
         {children}
       </ul>
     </section>
@@ -42,7 +42,8 @@ interface GroupedRowProps {
 }
 
 const ROW =
-  "flex min-h-14 w-full items-center gap-3 px-4 py-3 text-left transition-colors motion-micro hover:bg-fill-secondary " +
+  "flex min-h-14 w-full items-center gap-3 px-4 py-3 text-left transition-[background-color,scale] motion-micro hover:bg-fill-secondary " +
+  "active:scale-(--press-scale) active:duration-(--press-duration) " +
   "focus-visible:outline-accent focus-visible:outline-2 focus-visible:-outline-offset-2 outline-none";
 
 /** One row: an icon, a title, what it holds, and a chevron. A whole row is the link or the button. */

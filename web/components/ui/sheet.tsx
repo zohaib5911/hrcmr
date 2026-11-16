@@ -54,7 +54,7 @@ export function SheetContent({
             ? "md:right-0 md:rounded-l-sheet md:data-[state=open]:slide-in-from-right md:data-[state=closed]:slide-out-to-right"
             : "md:left-0 md:rounded-r-sheet md:data-[state=open]:slide-in-from-left md:data-[state=closed]:slide-out-to-left",
           "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0",
-          "duration-[var(--duration-sheet)] motion-reduce:data-[state=open]:slide-in-from-right-0 motion-reduce:data-[state=closed]:slide-out-to-right-0 motion-reduce:data-[state=open]:slide-in-from-left-0 motion-reduce:data-[state=closed]:slide-out-to-left-0 motion-reduce:max-md:data-[state=open]:slide-in-from-bottom-0 motion-reduce:max-md:data-[state=closed]:slide-out-to-bottom-0",
+          "duration-[var(--duration-sheet)] ease-(--ease-spring) motion-reduce:data-[state=open]:slide-in-from-right-0 motion-reduce:data-[state=closed]:slide-out-to-right-0 motion-reduce:data-[state=open]:slide-in-from-left-0 motion-reduce:data-[state=closed]:slide-out-to-left-0 motion-reduce:max-md:data-[state=open]:slide-in-from-bottom-0 motion-reduce:max-md:data-[state=closed]:slide-out-to-bottom-0",
           className,
         )}
         {...props}

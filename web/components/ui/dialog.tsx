@@ -15,7 +15,7 @@ export const DialogClose = DialogPrimitive.Close;
 
 /** The dimmed backdrop's classes. Shared with Sheet and ConfirmDialog (which has its own Radix context). */
 export const OVERLAY_CLASSES = cn(
-  "bg-scrim fixed inset-0 z-50",
+  "bg-scrim scrim-blur fixed inset-0 z-50",
   "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
   "duration-[var(--duration-small)]",
 );
@@ -70,7 +70,7 @@ export function DialogContent({
           "md:top-1/2 md:left-1/2 md:w-[min(32rem,calc(100vw-2rem))] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-sheet md:p-6",
           "md:data-[state=open]:zoom-in-96 md:data-[state=closed]:zoom-out-96",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
-          "duration-[var(--duration-sheet)] motion-reduce:data-[state=open]:zoom-in-100 motion-reduce:data-[state=closed]:zoom-out-100 motion-reduce:max-md:data-[state=open]:slide-in-from-bottom-0 motion-reduce:max-md:data-[state=closed]:slide-out-to-bottom-0",
+          "duration-[var(--duration-sheet)] ease-(--ease-spring) motion-reduce:data-[state=open]:zoom-in-100 motion-reduce:data-[state=closed]:zoom-out-100 motion-reduce:max-md:data-[state=open]:slide-in-from-bottom-0 motion-reduce:max-md:data-[state=closed]:slide-out-to-bottom-0",
           className,
         )}
         {...props}

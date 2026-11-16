@@ -232,11 +232,60 @@
   --duration-sheet: 320ms;
   /* How far things travel when they enter; reduced motion leaves only the fade. */
   --motion-distance: 8px;
+  /* U6.1.9: press feedback, entrance stagger and the page cross-fade (PRESS, STAGGER, PAGE_FADE). */
+  --press-scale: 0.98;
+  --press-duration: 80ms;
+  --stagger-step: 20ms;
+  --page-fade-out: 120ms;
+  --page-fade-in: 160ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
     --motion-distance: 0px;
+    --press-scale: 1;
+    --stagger-step: 0ms;
+    --page-fade-out: 0ms;
+    --page-fade-in: 0ms;
+  }
+}
+
+/* Page changes cross-fade (U6.1.9, components/app/page-transition.tsx). Only the page content takes
+   part: the shell stays still, and clicks go straight through to the live page. */
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+::view-transition-old(.page-fade) {
+  animation: var(--page-fade-out) var(--ease-standard) both page-fade-out;
+}
+
+::view-transition-new(.page-fade) {
+  animation: var(--page-fade-in) var(--ease-standard) both page-fade-in;
+}
+
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* List rows and cards entering (U6.1.9, the stagger-rise utility). */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--motion-distance);
   }
 }
 
@@ -536,6 +585,66 @@
     background-color: var(--bg-elevated);
     backdrop-filter: none;
     box-shadow: 0 0 0 1px var(--label-secondary);
+  }
+}
+
+/* List rows and cards fade and rise 8 px on first paint, 20 ms apart, the last starting by 180 ms
+   (lib/motion.ts STAGGER). Off with reduced motion. */
+@utility stagger-rise {
+  & > * {
+    animation: rise-in var(--duration-small) var(--ease-spring) both;
+  }
+
+  & > :nth-child(2) {
+    animation-delay: calc(var(--stagger-step) * 1);
+  }
+
+  & > :nth-child(3) {
+    animation-delay: calc(var(--stagger-step) * 2);
+  }
+
+  & > :nth-child(4) {
+    animation-delay: calc(var(--stagger-step) * 3);
+  }
+
+  & > :nth-child(5) {
+    animation-delay: calc(var(--stagger-step) * 4);
+  }
+
+  & > :nth-child(6) {
+    animation-delay: calc(var(--stagger-step) * 5);
+  }
+
+  & > :nth-child(7) {
+    animation-delay: calc(var(--stagger-step) * 6);
+  }
+
+  & > :nth-child(8) {
+    animation-delay: calc(var(--stagger-step) * 7);
+  }
+
+  & > :nth-child(9) {
+    animation-delay: calc(var(--stagger-step) * 8);
+  }
+
+  & > :nth-child(n + 10) {
+    animation-delay: calc(var(--stagger-step) * 9);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    & > * {
+      animation: none;
+    }
+  }
+}
+
+/* The scrim behind sheets and dialogs blurs the page (U6.1.9). The blur itself never animates;
+   only the scrim's opacity fades. No blur when transparency is reduced. */
+@utility scrim-blur {
+  backdrop-filter: blur(8px);
+
+  @media (prefers-reduced-transparency: reduce) {
+    backdrop-filter: none;
   }
 }
 

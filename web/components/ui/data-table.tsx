@@ -398,7 +398,7 @@ export function DataTable<Row>({
     return (
       <div className={className}>
         {toolbar}
-        <ul aria-label={caption} className="flex flex-col gap-3">
+        <ul aria-label={caption} className="stagger-rise flex flex-col gap-3">
           {shown.map((row) => {
             const id = getRowId(row);
             const isPicked = pickedIds.has(id);
@@ -551,7 +551,7 @@ export function DataTable<Row>({
               ) : null}
             </tr>
           </thead>
-          <tbody>
+          <tbody className={virtual ? undefined : "stagger-rise"}>
             {virtual && start > 0 ? (
               <tr aria-hidden="true">
                 <td colSpan={columnCount} height={start} className="p-0" />

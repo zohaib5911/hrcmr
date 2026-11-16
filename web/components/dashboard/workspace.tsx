@@ -278,7 +278,7 @@ export function DashboardWorkspace({ actions }: { actions?: ReactNode }) {
       {shown ? (
         <>
           {shown.employees || shown.rtw ? (
-            <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <div className="stagger-rise mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
               {shown.employees ? (
                 <>
                   <KpiCard
@@ -328,7 +328,7 @@ export function DashboardWorkspace({ actions }: { actions?: ReactNode }) {
             />
           ) : null}
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="stagger-rise grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {shown.needs_attention.length > 0 ? (
               <Card title="Needs attention">
                 <ul className="flex flex-col gap-2">

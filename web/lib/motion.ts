@@ -51,3 +51,31 @@ export function presets(reduced: boolean) {
 export function countUpSeconds(reduced: boolean): number {
   return reduced ? 0 : 0.8;
 }
+
+/**
+ * Press feedback (U6.1.9): buttons and rows shrink to 0.98 for 80 ms while held. With reduced
+ * motion they keep their size (the colour change still shows the press).
+ */
+export const PRESS = { scale: 0.98, ms: 80 } as const;
+
+export function pressScale(reduced: boolean): number {
+  return reduced ? 1 : PRESS.scale;
+}
+
+/**
+ * List rows and cards rise in on first paint, 20 ms apart. The last delay is capped at 180 ms, so a
+ * list of any length has started within 200 ms. With reduced motion nothing is delayed or moved.
+ */
+export const STAGGER = { stepMs: 20, maxMs: 180 } as const;
+
+export function staggerDelayMs(index: number, reduced: boolean): number {
+  if (reduced) return 0;
+  return Math.min(Math.max(index, 0) * STAGGER.stepMs, STAGGER.maxMs);
+}
+
+/** The cross-fade between pages (view transitions, where the browser supports them). */
+export const PAGE_FADE = { outMs: 120, inMs: 160 } as const;
+
+export function pageFadeMs(reduced: boolean): { outMs: number; inMs: number } {
+  return reduced ? { outMs: 0, inMs: 0 } : PAGE_FADE;
+}

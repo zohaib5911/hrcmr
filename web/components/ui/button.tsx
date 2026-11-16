@@ -10,7 +10,8 @@ export const buttonVariants = cva(
   [
     "relative inline-flex shrink-0 items-center justify-center gap-2 rounded-control font-semibold whitespace-nowrap select-none",
     "transition-[background-color,transform,opacity] motion-micro hit-target",
-    "active:scale-[0.98] motion-reduce:active:scale-100",
+    // Pressed: 0.98 for 80 ms (lib/motion.ts PRESS); --press-scale is 1 with reduced motion.
+    "active:scale-(--press-scale) active:duration-(--press-duration)",
     "disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none",
     // A button that is busy is not dimmed (it is working); one that is merely unavailable is.
     "[&[aria-disabled=true]:not([aria-busy=true])]:opacity-50",
