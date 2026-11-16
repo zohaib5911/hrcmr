@@ -16,6 +16,13 @@ test("the dashboard shows the cards and the set-up checklist, which can be dismi
     page.getByRole("region", { name: "Employee distribution", exact: true }),
   ).toBeVisible();
 
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const actions = page.locator('[aria-label="Quick actions"]');
+  const tops = await actions
+    .getByRole("link")
+    .evaluateAll((links) => links.map((link) => Math.round(link.getBoundingClientRect().top)));
+  expect(new Set(tops).size).toBe(1);
+  await page.screenshot({ path: "/tmp/u616-dashboard-1280.png" });
   await page
     .getByRole("region", { name: "Get set up", exact: true })
     .getByRole("button", { name: "Dismiss", exact: true })
@@ -28,6 +35,10 @@ test("the dashboard shows the cards and the set-up checklist, which can be dismi
   await expect(page.getByRole("region", { name: "Get set up", exact: true })).toHaveCount(0);
 
   await page.setViewportSize({ width: 390, height: 900 });
+  await actions.getByRole("button", { name: "More", exact: true }).click();
+  await expect(page.getByRole("menuitem", { name: "Upload document" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await page.screenshot({ path: "/tmp/u616-dashboard-390.png" });
   await audit(page, "Dashboard mobile");
   expect(
     await page.evaluate(

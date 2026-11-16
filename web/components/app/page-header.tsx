@@ -6,6 +6,7 @@ interface PageHeaderProps {
   title: string;
   /** One line saying what this page is for. */
   description?: string;
+  badges?: ReactNode;
   /**
    * The page's main action (a filled button) and at most two secondary ones, on the right. While the
    * page shows an EmptyState, leave the add action out: the EmptyState's button is then the one filled
@@ -16,7 +17,7 @@ interface PageHeaderProps {
 }
 
 /** The Large Title at the top of a page (plan 5.6): the one `<h1>`, a sentence, and the actions. */
-export function PageHeader({ title, description, actions, className }: PageHeaderProps) {
+export function PageHeader({ title, description, badges, actions, className }: PageHeaderProps) {
   return (
     <header
       className={cn("flex flex-wrap items-end justify-between gap-x-6 gap-y-3 pb-6", className)}
@@ -26,6 +27,7 @@ export function PageHeader({ title, description, actions, className }: PageHeade
         {description ? (
           <p className="text-callout text-label-secondary mt-1 max-w-2xl">{description}</p>
         ) : null}
+        {badges ? <div className="mt-2 flex flex-wrap gap-2">{badges}</div> : null}
       </div>
       {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
     </header>
