@@ -24,9 +24,9 @@ from app.modules.auth.audit import security_event
 from app.modules.auth.invitations import accept_invitation, find_valid_invitation
 from app.modules.auth.passwords import (
     PasswordProblem,
-    hash_password,
+    hash_password_async,
     password_problems,
-    spend_verification_time,
+    spend_verification_time_async,
 )
 from app.modules.auth.policy import mfa_state
 from app.modules.auth.schemas import (
@@ -165,7 +165,9 @@ async def sign_up(
         )
     await check_turnstile(auth, request.turnstile_token, ip)
     await check_password(request.password)
-    password_hash = hash_password(request.password)  # always done, so timing does not give it away
+    password_hash = await hash_password_async(
+        request.password
+    )  # always done, so timing does not give it away
 
     email = str(request.email).strip().lower()
     existing = (await db.execute(select(User).where(User.email == email))).scalar_one_or_none()
@@ -238,7 +240,7 @@ async def resend_verification(
         raise RateLimitedError(result.retry_after)
     user = (await db.execute(select(User).where(User.email == email))).scalar_one_or_none()
     if user is None or user.email_verified_at is not None or not user.is_active:
-        spend_verification_time()
+        await spend_verification_time_async()
         return
     token = await issue_email_token(db, user.id, "verify", VERIFY_TTL)
     await db.commit()
@@ -268,7 +270,7 @@ async def forgot_password(
         raise RateLimitedError(result.retry_after)
     user = (await db.execute(select(User).where(User.email == email))).scalar_one_or_none()
     if user is None or not user.is_active:
-        spend_verification_time()
+        await spend_verification_time_async()
         return
     token = await issue_email_token(db, user.id, "reset", RESET_TTL)
     await db.commit()
@@ -292,7 +294,7 @@ async def reset_password(
     await check_password(new_password, field="new_password")
     row = await consume_email_token(db, token, "reset")
     user = (await db.execute(select(User).where(User.id == row.user_id))).scalar_one()
-    user.password_hash = hash_password(new_password)
+    user.password_hash = await hash_password_async(new_password)
     user.requires_password_change = False
     user.failed_login_count = 0
     user.locked_until = None
@@ -459,11 +461,11 @@ async def accept_invite(
             await auth.sessions.revoke_all(db, new_user.id)
         new_user.first_name = first_name.strip()
         new_user.last_name = last_name.strip()
-        new_user.password_hash = hash_password(password)
+        new_user.password_hash = await hash_password_async(password)
         new_user.email_verified_at = now()  # the link only reached them by e-mail
         await db.flush()
     else:
-        spend_verification_time()
+        await spend_verification_time_async()
     user = new_user if new_user is not None else existing
     if user is None:  # unreachable: one of the two branches above set it
         raise AppError("INVITATION_INVALID", "This invitation is not valid.", status_code=410)
