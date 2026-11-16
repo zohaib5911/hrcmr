@@ -26,6 +26,18 @@ def hashed(*parts: str) -> str:
     return hashlib.sha256("\x00".join(parts).lower().encode("utf-8")).hexdigest()[:32]
 
 
+# Count and expiry in one atomic step (C6.1.4). As two commands, a window ending between them left a
+# counter with no expiry, which then refused its subject for ever. The script also repairs any such
+# counter it meets (TTL of -1).
+_HIT = """
+local count = redis.call('INCR', KEYS[1])
+if count == 1 or redis.call('TTL', KEYS[1]) < 0 then
+  redis.call('EXPIRE', KEYS[1], ARGV[1])
+end
+return {count, redis.call('TTL', KEYS[1])}
+"""
+
+
 class RateLimiter:
     def __init__(self, redis: Redis, *, prefix: str = "rl") -> None:
         self._redis = redis
@@ -36,13 +48,9 @@ class RateLimiter:
     ) -> RateLimitResult:
         """Count one attempt by ``subject`` (an IP, an e-mail) against the ``name`` limit."""
         key = f"{self._prefix}:{name}:{hashed(subject)}"
-        # Create the key with its expiry first, so a crash between the two calls can never leave a
-        # counter that never resets.
-        await self._redis.set(key, 0, ex=window_seconds, nx=True)
-        count = int(await self._redis.incr(key))
-        ttl = await self._redis.ttl(key)
-        retry_after = ttl if ttl > 0 else window_seconds
-        return RateLimitResult(count <= limit, max(limit - count, 0), retry_after)
+        count, ttl = await self._redis.eval(_HIT, 1, key, window_seconds)
+        retry_after = int(ttl) if int(ttl) > 0 else window_seconds
+        return RateLimitResult(int(count) <= limit, max(limit - int(count), 0), retry_after)
 
     async def reset(self, name: str, subject: str) -> None:
         await self._redis.delete(f"{self._prefix}:{name}:{hashed(subject)}")
