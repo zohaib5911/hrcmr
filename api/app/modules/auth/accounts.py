@@ -480,7 +480,15 @@ async def accept_invite(
         db.add(Membership(user_id=user.id, company_id=invitation.company_id, role=invitation.role))
     if new_user is not None:
         terms = await current_terms(db)
-        db.add(TermsAcceptance(user_id=new_user.id, version=terms.version, ip=ip))
+        acceptance = (
+            await db.execute(
+                select(TermsAcceptance).where(
+                    TermsAcceptance.user_id == new_user.id, TermsAcceptance.version == terms.version
+                )
+            )
+        ).scalar_one_or_none()
+        if acceptance is None:
+            db.add(TermsAcceptance(user_id=new_user.id, version=terms.version, ip=ip))
     await record(
         db,
         AuditContext(company_id=invitation.company_id, actor_user_id=user.id, ip=ip),

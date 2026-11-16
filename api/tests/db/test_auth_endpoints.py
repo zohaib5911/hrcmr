@@ -668,7 +668,7 @@ async def test_invitation_reclaims_an_unverified_account(world: World) -> None:
         await stranger.post(
             "/api/v1/auth/signup", json=signup_body("sam@example.com", company_name="Stranger")
         )
-    ).status_code == 201
+    ).status_code == 202
     token = await _invite(world, "sam@example.com")
     browser = world.new_browser()
     details = (await browser.get(f"/api/v1/auth/invitations/{token}")).json()
