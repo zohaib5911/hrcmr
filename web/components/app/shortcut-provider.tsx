@@ -1,6 +1,7 @@
 "use client";
 
 import type { Route } from "next";
+import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
@@ -14,8 +15,13 @@ import {
 } from "react";
 
 import { useCan } from "@/components/app/session-context";
-import { CommandPalette, type CommandItem } from "@/components/ui/command-palette";
-import { KeyboardShortcutsSheet } from "@/components/ui/shortcuts-sheet";
+import type { CommandItem } from "@/components/ui/command-palette";
+const CommandPalette = dynamic(() =>
+  import("@/components/ui/command-palette").then((m) => m.CommandPalette),
+);
+const KeyboardShortcutsSheet = dynamic(() =>
+  import("@/components/ui/shortcuts-sheet").then((m) => m.KeyboardShortcutsSheet),
+);
 import { attempt } from "@/lib/auth/request";
 import { NAV_ITEMS, findNavItem, type NavGroup } from "@/lib/navigation";
 import { RECENT_PAGES_KEY, parseRecent, pushRecent, serialiseRecent } from "@/lib/recent-pages";
@@ -108,6 +114,8 @@ export function ShortcutProvider({ onToggleSidebar, children }: ShortcutProvider
   const pathname = usePathname();
   const apple = useApple();
 
+  const [paletteLoaded, setPaletteLoaded] = useState(false);
+  const [sheetLoaded, setSheetLoaded] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [recent, setRecent] = useState<string[]>([]);
@@ -129,6 +137,7 @@ export function ShortcutProvider({ onToggleSidebar, children }: ShortcutProvider
 
   const openPalette = useCallback(() => {
     setRecent(readRecent());
+    setPaletteLoaded(true);
     setPaletteOpen(true);
   }, []);
 
@@ -161,6 +170,7 @@ export function ShortcutProvider({ onToggleSidebar, children }: ShortcutProvider
           openPalette();
           break;
         case "shortcuts":
+          setSheetLoaded(true);
           setSheetOpen(true);
           break;
         case "toggle-sidebar":
@@ -191,7 +201,10 @@ export function ShortcutProvider({ onToggleSidebar, children }: ShortcutProvider
 
   // The toolbar's search box and help button ask for these by name.
   useEffect(() => {
-    const showSheet = () => setSheetOpen(true);
+    const showSheet = () => {
+      setSheetLoaded(true);
+      setSheetOpen(true);
+    };
     window.addEventListener(OPEN_PALETTE, openPalette);
     window.addEventListener(OPEN_SHORTCUTS, showSheet);
     return () => {
@@ -282,16 +295,20 @@ export function ShortcutProvider({ onToggleSidebar, children }: ShortcutProvider
   return (
     <RegistryContext.Provider value={registry}>
       {children}
-      <CommandPalette
-        open={paletteOpen}
-        onOpenChange={setPaletteOpen}
-        items={[...pages, ...actions]}
-        recent={recentItems}
-        remote={remote}
-        onQueryChange={searchPeople}
-        onSelect={(item) => router.push(item.href as Route)}
-      />
-      <KeyboardShortcutsSheet open={sheetOpen} onOpenChange={setSheetOpen} apple={apple} />
+      {paletteLoaded && (
+        <CommandPalette
+          open={paletteOpen}
+          onOpenChange={setPaletteOpen}
+          items={[...pages, ...actions]}
+          recent={recentItems}
+          remote={remote}
+          onQueryChange={searchPeople}
+          onSelect={(item) => router.push(item.href as Route)}
+        />
+      )}
+      {sheetLoaded && (
+        <KeyboardShortcutsSheet open={sheetOpen} onOpenChange={setSheetOpen} apple={apple} />
+      )}
     </RegistryContext.Provider>
   );
 }

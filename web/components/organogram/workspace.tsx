@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Network } from "lucide-react";
 import { type KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 
@@ -14,7 +15,10 @@ import { Toggle } from "@/components/ui/toggle";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 
-import { type CanvasHandle, OrgCanvas } from "./canvas";
+import type { CanvasHandle } from "./canvas";
+const OrgCanvas = dynamic(() => import("./canvas").then((m) => m.OrgCanvas), {
+  loading: () => <SkeletonCard />,
+});
 import { PersonInspector } from "./inspector";
 import { findPeople, flatten, layoutTree, type OrgPerson } from "./layout";
 import { OrgList } from "./list-view";
