@@ -373,6 +373,7 @@ async def application_out(db: TenantSession, row: Application, today: date) -> A
             for entry in row.stage_history
         ],
         cover_note=row.cover_note,
+        needs_review=row.needs_review,
         applied_via=cast("Literal['admin', 'careers_page']", row.applied_via),
         candidate_rtw_status=await candidate_rtw_status(db, row.candidate_id, today),
         created_at=row.created_at,

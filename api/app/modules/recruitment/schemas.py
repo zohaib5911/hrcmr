@@ -231,6 +231,7 @@ class ApplicationOut(BaseModel):
     stage_label: str
     stage_history: list[StageEntry]
     cover_note: str | None
+    needs_review: bool = False
     applied_via: Literal["admin", "careers_page"]
     candidate_rtw_status: RTWStatus
     created_at: datetime

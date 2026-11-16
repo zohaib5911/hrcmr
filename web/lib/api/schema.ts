@@ -6289,6 +6289,11 @@ export interface components {
              */
             id: string;
             /**
+             * Needs Review
+             * @default false
+             */
+            needs_review: boolean;
+            /**
              * Posting Id
              * Format: uuid
              */

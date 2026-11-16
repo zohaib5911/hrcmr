@@ -8,6 +8,7 @@ from decimal import Decimal  # noqa: TC003
 from typing import Any
 
 from sqlalchemy import (
+    Boolean,
     CheckConstraint,
     Date,
     DateTime,
@@ -162,6 +163,7 @@ class Application(Base, RecordMixin, TenantMixin):
     stage_history: Mapped[list[dict[str, Any]]] = mapped_column(
         JSONB, nullable=False, server_default="[]"
     )
+    needs_review: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
     cover_note: Mapped[str | None] = mapped_column(Text)
     applied_via: Mapped[str] = mapped_column(String(14), nullable=False, server_default="admin")
 

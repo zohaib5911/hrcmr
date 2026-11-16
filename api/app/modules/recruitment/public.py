@@ -294,6 +294,7 @@ async def apply(
                 .limit(1)
             )
         ).scalar_one_or_none()
+        needs_review = candidate is not None
         if candidate is None:
             candidate = Candidate(
                 id=uuid7(),
@@ -330,7 +331,9 @@ async def apply(
                     kinds=CV_KINDS,
                     max_bytes=CV_MAX_BYTES,
                 )
-            await _record_application(tenant, company, posting, candidate, body, ip, request)
+            await _record_application(
+                tenant, company, posting, candidate, body, ip, request, needs_review=needs_review
+            )
         await tenant.commit()
     return ApplyOut()
 
@@ -343,6 +346,8 @@ async def _record_application(
     body: ApplyIn,
     ip: str | None,
     request: Request,
+    *,
+    needs_review: bool,
 ) -> None:
     moment = datetime.now(UTC).isoformat()
     application = Application(
@@ -354,6 +359,7 @@ async def _record_application(
         stage_history=[{"stage": "applied", "at": moment, "by": None}],
         cover_note=body.what_you_bring,
         applied_via="careers_page",
+        needs_review=needs_review,
     )
     tenant.add(application)
     await tenant.flush()
