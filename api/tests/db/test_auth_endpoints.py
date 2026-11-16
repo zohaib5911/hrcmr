@@ -257,7 +257,7 @@ async def test_a_csrf_header_that_is_not_ascii_is_refused_not_a_crash(world: Wor
         response = await bare.post(
             "/api/v1/auth/login",
             json={"email": "ada@example.com", "password": PASSWORD},
-            headers={"Cookie": "csrf=abc", "X-CSRF-Token": "ab\u00e9".encode("latin-1")},
+            headers={b"Cookie": b"csrf=abc", b"X-CSRF-Token": "ab\u00e9".encode("latin-1")},
         )
     assert response.status_code == 403
     assert response.json()["error"]["code"] == "CSRF_INVALID"
