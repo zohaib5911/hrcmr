@@ -24,6 +24,7 @@ from app.modules.soc_rules.source import PAGE_KINDS, RulesSource, load_rules_sou
 from tests.db.support import DatabaseUnderTest, engine_for, temporary_database
 from tests.db.test_employee_documents import rig as rig
 from tests.db.test_soc_match import _load_sample
+from tests.support import step_up
 
 API = "/api/v1"
 RULES = Path(__file__).resolve().parents[3] / "data" / "raw" / "rules"
@@ -94,6 +95,7 @@ async def _as_platform_admin(rig: dict[str, Any], admin: Any) -> None:
         )
         await c.execute(text("update users set mfa_enabled=true where id=:u"), {"u": platform_id})
     # The platform cookie (T17.1): the admin pages accept nothing else.
+    await step_up(admin)
     started = await admin.post(f"{API}/auth/platform-session")
     assert started.status_code == 201, started.text
 

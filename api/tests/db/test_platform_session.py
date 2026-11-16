@@ -21,7 +21,7 @@ from app.db.session import GlobalSession
 from app.main import create_app
 from app.modules.auth.sessions import SessionStore
 from tests.db.support import DatabaseUnderTest, engine_for
-from tests.support import TEST_REDIS_URL, build_settings
+from tests.support import TEST_REDIS_URL, build_settings, step_up
 
 API = "/api/v1"
 TENANT_COOKIE = "brand_session"
@@ -63,7 +63,9 @@ async def _rig(
         client.headers["X-CSRF-Token"] = "t"
         return client
 
-    async def admin(*, mfa_enabled: bool = True, mfa_passed: bool = True) -> httpx.AsyncClient:
+    async def admin(
+        *, mfa_enabled: bool = True, mfa_passed: bool = True, stepped_up: bool = True
+    ) -> httpx.AsyncClient:
         """A company admin who is also a platform admin, signed in on the tenant cookie only."""
         user = uuid7()
         async with owner.begin() as c:
@@ -94,7 +96,7 @@ async def _rig(
             )
         engine: AsyncEngine = engine_for(database.app_url, poolclass=NullPool)
         async with GlobalSession(engine) as db:
-            token, _ = await sessions.create(
+            token, data = await sessions.create(
                 db,
                 user_id=user,
                 company_id=company,
@@ -103,6 +105,8 @@ async def _rig(
                 mfa_passed=mfa_passed,
             )
             await db.commit()
+        if stepped_up:
+            await sessions.mark_step_up(token, data)
         await engine.dispose()
         client = browser({TENANT_COOKIE: token})
         client.user = user  # type: ignore[attr-defined]
@@ -172,6 +176,19 @@ async def test_a_session_that_has_not_passed_mfa_gets_no_platform_session(
         assert refused.status_code == 403, refused.text
         assert refused.json()["error"]["code"] == "MFA_REQUIRED"
         assert admin.cookies.get(PLATFORM_COOKIE) is None
+
+
+async def test_a_platform_session_needs_a_fresh_step_up(database: DatabaseUnderTest) -> None:
+    # O6.1.7: a stolen tenant session of a platform admin cannot open the admin site by itself.
+    async with _rig(database) as rig:
+        admin = await rig["admin"](stepped_up=False)
+        refused = await admin.post(f"{API}/auth/platform-session")
+        assert refused.status_code == 403, refused.text
+        assert refused.json()["error"]["code"] == "STEP_UP_REQUIRED"
+        assert admin.cookies.get(PLATFORM_COOKIE) is None
+        assert (await admin.get(f"{API}/platform/rules")).status_code == 403
+        await step_up(admin)
+        assert (await admin.post(f"{API}/auth/platform-session")).status_code == 201
 
 
 async def test_the_platform_cookie_is_its_own_and_every_request_is_audited(

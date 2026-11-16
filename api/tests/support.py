@@ -44,3 +44,20 @@ def build_settings(**overrides: Any) -> Settings:
     values.update(overrides)
     values = {k: v for k, v in values.items() if v is not None}
     return Settings(_env_file=None, **values)
+
+
+async def step_up(client: Any, cookie: str = "brand_session") -> None:
+    """Marks the client's tenant session as just stepped up, as POST /auth/step-up would."""
+    from redis.asyncio import Redis
+
+    from app.modules.auth.sessions import SessionStore
+
+    redis = Redis.from_url(TEST_REDIS_URL, decode_responses=True)
+    try:
+        store = SessionStore(redis)
+        token = client.cookies.get(cookie)
+        data = await store.get(token)
+        assert data is not None, "no live session to step up"
+        await store.mark_step_up(token, data)
+    finally:
+        await redis.aclose()

@@ -11,6 +11,7 @@ import {
   generateNonce,
   originOf,
   permissionsPolicy,
+  resourcePolicy,
 } from "@/lib/security/csp";
 import { classifyHost, decideRoute, hostnameOf } from "@/lib/security/hosts";
 
@@ -76,6 +77,7 @@ export function proxy(request: NextRequest): NextResponse {
   for (const [name, value] of Object.entries(baseSecurityHeaders(isProduction))) {
     response.headers.set(name, value);
   }
+  response.headers.set("Cross-Origin-Resource-Policy", resourcePolicy(pathname));
   if (kind === "admin") response.headers.set("X-Robots-Tag", "noindex, nofollow");
   return response;
 }

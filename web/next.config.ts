@@ -4,7 +4,11 @@ import createMDX from "@next/mdx";
 
 import type { NextConfig } from "next";
 
-import { baseSecurityHeaders, permissionsPolicy } from "./lib/security/csp";
+import {
+  EMBEDDABLE_PATH_PREFIXES,
+  baseSecurityHeaders,
+  permissionsPolicy,
+} from "./lib/security/csp";
 
 // The repository root: brand.config.ts lives there, outside this folder.
 const repoRoot = path.resolve(process.cwd(), "..");
@@ -39,11 +43,20 @@ const nextConfig: NextConfig = {
     // proxy skips (the `matcher` exclusions in proxy.ts) never need a browser feature, so they get
     // the strictest value here. Pages are not listed, or this would overwrite the proxy's value.
     const unproxied = ["/_next/static/:path*", "/_next/image", "/favicon.ico", "/healthz"];
+    // Files other sites may embed (the e-mail logo, link previews, icons). Listed after the
+    // catch-all, so this Cross-Origin-Resource-Policy wins; proxy.ts sets the same per path.
+    const embeddable = EMBEDDABLE_PATH_PREFIXES.map((prefix) =>
+      prefix.endsWith("/") ? `${prefix}:path*` : `${prefix}(.*)`,
+    );
     return [
       { source: "/:path*", headers },
       ...unproxied.map((source) => ({
         source,
         headers: [{ key: "Permissions-Policy", value: permissionsPolicy("/") }],
+      })),
+      ...embeddable.map((source) => ({
+        source,
+        headers: [{ key: "Cross-Origin-Resource-Policy", value: "cross-origin" }],
       })),
     ];
   },

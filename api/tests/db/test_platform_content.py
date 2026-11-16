@@ -14,6 +14,7 @@ from typing import Any
 from sqlalchemy import text
 
 from tests.db.test_employee_documents import rig as rig
+from tests.support import step_up
 
 API = "/api/v1"
 BILLING = f"{API}/billing/subscription"  # needs billing.manage, so the terms check applies
@@ -30,6 +31,7 @@ async def _platform_admin(rig: dict[str, Any], level: str) -> Any:
             {"u": me, "l": level},
         )
         await c.execute(text("update users set mfa_enabled=true where id=:u"), {"u": me})
+    await step_up(admin)
     started = await admin.post(f"{API}/auth/platform-session")
     assert started.status_code == 201, started.text
     return admin

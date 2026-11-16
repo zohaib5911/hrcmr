@@ -15,6 +15,7 @@ from sqlalchemy.exc import DBAPIError
 from app.db.session import GlobalSession
 from app.modules.compliance.dossier_models import DossierLink
 from tests.db.test_compliance_hub import rig as rig
+from tests.support import step_up
 
 API = "/api/v1"
 
@@ -64,6 +65,7 @@ async def test_official_dossier_checklist_and_platform_edits_require_mfa(
         await c.execute(text("update users set mfa_enabled=true where id=:u"), {"u": platform_id})
     # This fixture's signed session already passed MFA; setting the enrolled flag makes the
     # otherwise unchanged session satisfy the mandatory platform policy.
+    await step_up(admin)
     started = await admin.post(API + "/auth/platform-session")
     assert started.status_code == 201, started.text
     assert (await admin.get(API + "/admin/dossier-links")).status_code == 200

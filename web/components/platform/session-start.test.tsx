@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SessionStart, startFromBrowser, type StartResult } from "./session-start";
@@ -21,6 +22,29 @@ describe("SessionStart", () => {
     await waitFor(() =>
       expect(navigate).toHaveBeenCalledWith("/session-required?code=MFA_REQUIRED"),
     );
+  });
+
+  it("asks for a code when a step-up is needed, then starts the session", async () => {
+    const navigate = vi.fn();
+    const run = vi
+      .fn<() => Promise<StartResult>>()
+      .mockResolvedValueOnce({ ok: false, code: "STEP_UP_REQUIRED" })
+      .mockResolvedValueOnce({ ok: true });
+    const stepUp = vi
+      .fn<(code: string) => Promise<StartResult>>()
+      .mockResolvedValueOnce({ ok: false, code: "INVALID_CODE" })
+      .mockResolvedValueOnce({ ok: true });
+    render(<SessionStart next="/rules" run={run} stepUp={stepUp} navigate={navigate} />);
+    const field = await screen.findByLabelText("Code");
+    await userEvent.type(field, "000000");
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(await screen.findByText("That code did not work. Try again.")).toBeVisible();
+    expect(navigate).not.toHaveBeenCalled();
+    await userEvent.type(screen.getByLabelText("Code"), "123 456");
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith("/rules"));
+    expect(stepUp).toHaveBeenLastCalledWith("123456");
+    expect(run).toHaveBeenCalledTimes(2);
   });
 
   it("goes to the home page when the next path is not safe", async () => {
