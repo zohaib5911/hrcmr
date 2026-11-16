@@ -38,6 +38,12 @@
 
   /* Surfaces */
   --bg: #f5f5f7;
+  --avatar-accent: #e0dbf5;
+  --avatar-success: #e3dbf5;
+  --avatar-warning: #e6dbf5;
+  --avatar-danger: #eadbf5;
+  --avatar-info: #eddbf5;
+  --avatar-neutral: #f0dbf5;
   --bg-elevated: #ffffff;
   --bg-grouped: #f2f2f7;
   --fill-secondary: rgba(120, 120, 128, 0.12);
@@ -92,6 +98,12 @@
     color-scheme: dark;
 
     --bg: #000000;
+    --avatar-accent: #241957;
+    --avatar-success: #2c1957;
+    --avatar-warning: #341957;
+    --avatar-danger: #3c1957;
+    --avatar-info: #441957;
+    --avatar-neutral: #4d1957;
     --bg-elevated: #1c1c1e;
     --bg-grouped: #000000;
     --fill-secondary: rgba(120, 120, 128, 0.24);
@@ -140,6 +152,12 @@
   color-scheme: dark;
 
   --bg: #000000;
+  --avatar-accent: #241957;
+  --avatar-success: #2c1957;
+  --avatar-warning: #341957;
+  --avatar-danger: #3c1957;
+  --avatar-info: #441957;
+  --avatar-neutral: #4d1957;
   --bg-elevated: #1c1c1e;
   --bg-grouped: #000000;
   --fill-secondary: rgba(120, 120, 128, 0.24);
@@ -296,6 +314,12 @@
   --color-accent-pressed: var(--accent-pressed);
   --color-accent-text: var(--accent-text);
   --color-accent-tint: var(--accent-tint);
+  --color-avatar-accent: var(--avatar-accent);
+  --color-avatar-success: var(--avatar-success);
+  --color-avatar-warning: var(--avatar-warning);
+  --color-avatar-danger: var(--avatar-danger);
+  --color-avatar-info: var(--avatar-info);
+  --color-avatar-neutral: var(--avatar-neutral);
   --color-on-accent: var(--on-accent);
   --color-on-fixed: var(--on-fixed);
   --color-fixed-admin: var(--fixed-admin);

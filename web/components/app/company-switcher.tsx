@@ -9,7 +9,6 @@ import { Avatar } from "@/components/ui/avatar";
 import { Icon } from "@/components/ui/icon";
 import { Menu, MenuContent, MenuItem, MenuLabel, MenuTrigger } from "@/components/ui/menu";
 import { SkeletonPerson } from "@/components/ui/skeleton";
-import { StatusChip } from "@/components/ui/status-chip";
 import { attempt } from "@/lib/auth/request";
 import { cn } from "@/lib/utils";
 
@@ -46,9 +45,9 @@ export function CompanySwitcher({ session }: { session: ShellSession | null }) {
             <Avatar name={company.name} size="md" decorative />
             <span className="min-w-0 flex-1 group-data-[collapsed=true]/shell:sr-only">
               <span className="text-headline text-label block truncate">{company.name}</span>
-              <StatusChip tone={company.plan === "free" ? "neutral" : "info"} className="mt-0.5">
+              <span className="bg-accent-tint text-accent-text rounded-pill text-footnote mt-0.5 inline-flex px-2.5 py-0.5 font-medium">
                 {PLAN_LABELS[company.plan]}
-              </StatusChip>
+              </span>
             </span>
             <Icon
               icon={ChevronsUpDown}
