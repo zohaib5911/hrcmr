@@ -53,7 +53,7 @@ What was scanned: all 436 API routes mapped to their permission guard (the only 
 - **Fix:** in `accept_invite`, when `existing.email_verified_at is None`, treat the invitee as new: require `password` and `accept_terms`, replace `password_hash`, set `email_verified_at`, clear the `mfa_*` fields, `revoke_all` sessions, and return the user so they are signed in. Make `invitation_details` report `has_account=False` for that case so the web form asks for a password.
 - **Done when:** a test signs up an address (unverified), invites it from another company, accepts with a new password, and shows the old password no longer signs in while the new one does.
 
-### [ ] C6.1.8 · P2 · The CV match reads a 10 MB PDF before it checks the AI rate limit
+### [x] C6.1.8 · P2 · The CV match reads a 10 MB PDF before it checks the AI rate limit — fixed in PR #151
 - **Problem:** `POST /soc/resume-match` (`api/app/modules/soc/cv_router.py:90`) virus-scans and runs `pypdf` text extraction in a worker thread (which cannot be cancelled) before `generate()` applies `AI_PER_USER`. A signed-in user can loop crafted PDFs and keep the thread pool busy without ever being limited.
 - **Evidence:** code read; the limiter is only inside `app/ai/service.py:generate`.
 - **Fix:** move the limit to the start of the route: add `async def check_ai_limit(request, access)` in `app/ai/service.py` (the existing block from `generate`), call it right after `ai_ready`, and let `generate` take `limit_checked=True` to skip the second count.
