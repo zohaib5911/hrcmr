@@ -8,7 +8,7 @@ import type { LucideIcon } from "lucide-react";
 import { rankPages } from "@/lib/search";
 import { cn } from "@/lib/utils";
 
-import { OVERLAY_CLASSES } from "./dialog";
+import { PALETTE_SCRIM_CLASSES } from "./dialog";
 import { Icon } from "./icon";
 
 export interface CommandItem {
@@ -103,7 +103,7 @@ export function CommandPalette({
       }}
     >
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className={OVERLAY_CLASSES} />
+        <DialogPrimitive.Overlay className={PALETTE_SCRIM_CLASSES} />
         <DialogPrimitive.Content
           aria-describedby={undefined}
           className={cn(

@@ -20,6 +20,13 @@ export const OVERLAY_CLASSES = cn(
   "bg-scrim scrim-blur fixed inset-0 z-50",
 );
 
+/**
+ * The command palette's scrim: dimmed, not blurred (decision U6.1.9). The palette is opened often
+ * and must open in one smooth step; a blurred page behind it is redrawn on every frame of its
+ * zoom, which made the opening stutter on slow devices.
+ */
+export const PALETTE_SCRIM_CLASSES = "bg-scrim fixed inset-0 z-50";
+
 export function Overlay({ className, ...props }: ComponentProps<typeof DialogPrimitive.Overlay>) {
   return <DialogPrimitive.Overlay className={cn(OVERLAY_CLASSES, className)} {...props} />;
 }
