@@ -2,8 +2,10 @@ import Image from "next/image";
 
 import { cn } from "@/lib/utils";
 
-import darkShot from "@/public/marketing/dashboard-dark.webp";
-import lightShot from "@/public/marketing/dashboard-light.webp";
+// Plain paths, not module imports: the type check runs before a build, when Next.js's image module
+// types do not exist yet. Width and height are the captures' own size (1280 x 800).
+const lightShot = "/marketing/dashboard-light.webp";
+const darkShot = "/marketing/dashboard-dark.webp";
 
 /**
  * The real dashboard in a glass window (U6.1.8). Both themes are drawn and CSS shows the one that
@@ -15,6 +17,8 @@ export function HeroShot({ className }: { className?: string }) {
     "The dashboard: a set-up checklist, headline numbers for employees, leave and Right to Work, and cards for approvals, learning and recruitment.";
   const shared = {
     sizes: "(min-width: 1152px) 1088px, calc(100vw - 2rem)",
+    width: 1280,
+    height: 800,
     className: "rounded-control h-auto w-full",
   } as const;
   return (
