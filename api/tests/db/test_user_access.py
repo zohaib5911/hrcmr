@@ -20,7 +20,7 @@ from app.main import create_app
 from app.modules.auth.sessions import SessionStore
 from tests.db.api_support import sign_in_as, two_companies
 from tests.db.support import DatabaseUnderTest, engine_for
-from tests.support import TEST_REDIS_URL, build_settings
+from tests.support import TEST_REDIS_URL, build_settings, csrf_ready
 
 API = "/api/v1"
 
@@ -206,9 +206,8 @@ async def test_an_invitation_is_listed_resent_cancelled_and_accepted(rig: dict[s
     newcomer = httpx.AsyncClient(
         transport=httpx.ASGITransport(app=rig["app"], raise_app_exceptions=False),
         base_url="http://test",
-        headers={"X-CSRF-Token": "t"},
-        cookies={"csrf": "t"},
     )
+    csrf_ready(newcomer, rig["app"])
     accepted = await newcomer.post(
         f"{API}/auth/invitations/{third_token}/accept",
         json={

@@ -31,7 +31,7 @@ from app.modules.auth.sessions import SessionStore
 from app.modules.files.service import KEY_PREFIX, remove_orphans
 from app.modules.files.validation import MAX_BYTES
 from tests.db.support import DatabaseUnderTest, engine_for
-from tests.support import TEST_REDIS_URL, build_settings
+from tests.support import TEST_REDIS_URL, build_settings, csrf_ready
 
 S3_ENDPOINT = os.environ.get("TEST_S3_ENDPOINT", "http://localhost:9000")
 S3_BUCKET = os.environ.get("TEST_S3_BUCKET", "files-dev")
@@ -129,8 +129,7 @@ async def api(database: DatabaseUnderTest) -> AsyncIterator[dict[str, Any]]:
             base_url="http://test",
         )
         browser.cookies.set("brand_session", token)
-        browser.cookies.set("csrf", "t")
-        browser.headers["X-CSRF-Token"] = "t"
+        csrf_ready(browser, app)
         clients.append(browser)
         return browser
 

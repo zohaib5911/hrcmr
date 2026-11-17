@@ -39,7 +39,6 @@ from tests.db.support import DatabaseUnderTest, engine_for
 from tests.route_support import permissions, registered_routes
 from tests.support import TEST_REDIS_URL, build_settings
 
-CSRF = "a-test-csrf-token"
 # One permission of every kind: whole-company, reports-only, own-only, and the ones that only the
 # top role has. (The full 120 x 6 table is checked as data in tests/test_rbac_matrix.py.)
 SAMPLE = [

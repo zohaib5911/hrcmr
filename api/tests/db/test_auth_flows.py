@@ -10,7 +10,7 @@ from datetime import UTC, datetime, timedelta
 
 import httpx
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from redis.asyncio import Redis
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncEngine
@@ -503,13 +503,31 @@ async def test_an_invitation_works_once_and_expires_after_72_hours(engine: Async
 # --- CSRF -------------------------------------------------------------------------------------------
 
 
+CSRF_SECRET = "csrf-test-secret"
+
+
 def _csrf_app() -> FastAPI:
     app = FastAPI()
-    app.add_middleware(CsrfMiddleware, secure=False)
+    app.add_middleware(
+        CsrfMiddleware,
+        secret=CSRF_SECRET,
+        session_cookies=("brand_session", "brand_platform_session", "brand_support_session"),
+        secure=False,
+    )
 
     @app.get("/page")
     async def page() -> dict[str, str]:
         return {"ok": "yes"}
+
+    @app.post("/sign-in")
+    async def sign_in(response: Response) -> dict[str, str]:
+        response.set_cookie("brand_session", "session-after-sign-in", httponly=True)
+        return {"signed_in": "yes"}
+
+    @app.post("/sign-out")
+    async def sign_out(response: Response) -> dict[str, str]:
+        response.delete_cookie("brand_session")
+        return {"signed_out": "yes"}
 
     @app.post("/change")
     async def change() -> dict[str, str]:
@@ -544,6 +562,66 @@ async def test_a_state_changing_request_needs_the_csrf_header_to_match_the_cooki
         allowed = await client.post("/change", headers={"X-CSRF-Token": cookie})
         assert allowed.status_code == 200
         assert (await client.get("/page")).status_code == 200  # reads never need it
+
+
+def _sent(cookies: dict[str, str], token: str | None = None) -> dict[str, str]:
+    """Exactly these cookies and this header, with no cookie jar in between."""
+    headers = {"Cookie": "; ".join(f"{name}={value}" for name, value in cookies.items())}
+    if token is not None:
+        headers["X-CSRF-Token"] = token
+    return headers
+
+
+async def test_a_hand_made_csrf_pair_is_refused_and_the_refusal_carries_a_real_token() -> None:
+    # C6.1.6: a cookie planted from a sibling subdomain (csrf=x + header x) no longer passes.
+    transport = httpx.ASGITransport(app=_csrf_app())
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        refused = await client.post("/change", headers=_sent({"csrf": "x"}, "x"))
+        assert refused.status_code == 403
+        assert refused.json()["error"]["code"] == "CSRF_INVALID"
+        fresh = refused.cookies.get("csrf")
+        assert fresh
+        assert fresh != "x"
+        retried = await client.post("/change", headers=_sent({"csrf": fresh}, fresh))
+        assert retried.status_code == 200
+
+
+async def test_a_csrf_token_belongs_to_one_session_and_is_renewed_when_the_session_changes() -> (
+    None
+):
+    transport = httpx.ASGITransport(app=_csrf_app())
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        anonymous = (await client.get("/page", headers=_sent({}))).cookies.get("csrf")
+        assert anonymous
+
+        # Signing in changes the session cookie, so the same response renews the token.
+        signed_in = await client.post("/sign-in", headers=_sent({"csrf": anonymous}, anonymous))
+        assert signed_in.status_code == 200
+        session = signed_in.cookies.get("brand_session")
+        renewed = signed_in.cookies.get("csrf")
+        assert session == "session-after-sign-in"
+        assert renewed
+        assert renewed != anonymous
+        mine = {"brand_session": session, "csrf": renewed}
+        assert (await client.post("/change", headers=_sent(mine, renewed))).status_code == 200
+
+        # The token minted before sign-in is refused with the new session cookie.
+        stale = {"brand_session": session, "csrf": anonymous}
+        assert (await client.post("/change", headers=_sent(stale, anonymous))).status_code == 403
+
+        # A token minted for one session cookie is refused with another.
+        theirs = {"brand_session": "someone-elses-session", "csrf": renewed}
+        assert (await client.post("/change", headers=_sent(theirs, renewed))).status_code == 403
+
+        # Signing out renews it again, for no session.
+        out = await client.post("/sign-out", headers=_sent(mine, renewed))
+        assert out.status_code == 200
+        after = out.cookies.get("csrf")
+        assert after
+        assert after != renewed
+        assert (
+            await client.post("/change", headers=_sent({"csrf": after}, after))
+        ).status_code == 200
 
 
 async def test_a_post_with_no_cookie_at_all_is_refused_and_webhooks_are_exempt() -> None:

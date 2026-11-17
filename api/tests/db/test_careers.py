@@ -17,6 +17,7 @@ from tests.db.test_company import png
 from tests.db.test_employee_documents import _keys as _keys
 from tests.db.test_employee_documents import rig as rig
 from tests.db.test_files import PDF
+from tests.support import csrf_ready
 
 API = "/api/v1"
 LIST_KEYS = {"company", "has_logo", "postings"}
@@ -55,16 +56,12 @@ async def company_slug(rig: dict[str, Any], company: Any) -> str:
         )
 
 
-CSRF = "careers-test-csrf"
-
-
 def anonymous(rig: dict[str, Any]) -> httpx.AsyncClient:
     """A visitor who is not signed in; the CSRF cookie and header match, as a browser sends them."""
     browser = httpx.AsyncClient(
         transport=httpx.ASGITransport(app=rig["app"]), base_url="http://test"
     )
-    browser.cookies.set("csrf", CSRF)
-    browser.headers["X-CSRF-Token"] = CSRF
+    csrf_ready(browser, rig["app"])
     return browser
 
 

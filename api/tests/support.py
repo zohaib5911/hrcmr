@@ -61,3 +61,33 @@ async def step_up(client: Any, cookie: str = "brand_session") -> None:
         await store.mark_step_up(token, data)
     finally:
         await redis.aclose()
+
+
+def csrf_ready(client: Any, app: Any) -> Any:
+    """Gives a test client what the web app has (C6.1.6): a CSRF token signed for the session
+    cookies it holds now, and before every request the current ``csrf`` cookie copied into the
+    ``X-CSRF-Token`` header. When a response renews the token (sign-in, sign-out), the next request
+    uses the new one, as in a browser. Call it after setting the client's session cookies."""
+    from app.core.csrf import CSRF_COOKIE, CSRF_HEADER, new_csrf_token
+
+    settings = app.state.settings
+    names = (
+        settings.session_cookie_name,
+        settings.platform_session_cookie_name,
+        settings.support_session_cookie_name,
+    )
+    held = {cookie.name: cookie.value for cookie in client.cookies.jar}
+    token = new_csrf_token(
+        settings.session_secret.get_secret_value().encode(), tuple(held.get(n) for n in names)
+    )
+    # The domain the server's own Set-Cookie gets, so a renewed token replaces this one.
+    host = client.base_url.host
+    client.cookies.set(CSRF_COOKIE, token, domain=host if "." in host else f"{host}.local")
+
+    async def copy_token(request: Any) -> None:
+        current = [cookie.value for cookie in client.cookies.jar if cookie.name == CSRF_COOKIE]
+        if current:
+            request.headers[CSRF_HEADER] = current[-1]
+
+    client.event_hooks["request"].append(copy_token)
+    return client

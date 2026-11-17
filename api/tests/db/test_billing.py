@@ -109,7 +109,7 @@ async def _deliver(
     body = json.dumps(event).encode()
     stripe = anonymous(rig)
     stripe.cookies.clear()  # Stripe has no browser: no cookie and no CSRF header
-    del stripe.headers["X-CSRF-Token"]
+    stripe.headers.pop("X-CSRF-Token", None)
     async with stripe:
         return await stripe.post(
             f"{API}/webhooks/stripe",

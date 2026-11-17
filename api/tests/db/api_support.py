@@ -13,6 +13,7 @@ from app.db.ids import uuid7
 from app.db.session import GlobalSession
 from app.integrations.anthropic import Anthropic
 from tests.db.support import engine_for
+from tests.support import csrf_ready
 
 if TYPE_CHECKING:
     from app.modules.auth.sessions import SessionStore
@@ -80,8 +81,7 @@ async def sign_in_as(
         base_url="http://test",
     )
     browser.cookies.set("brand_session", token)
-    browser.cookies.set("csrf", "t")
-    browser.headers["X-CSRF-Token"] = "t"
+    csrf_ready(browser, app)
     return browser
 
 

@@ -35,7 +35,7 @@ from app.modules.audit.service import (
 from app.modules.auth.sessions import SessionStore
 from app.modules.companies.models import Company
 from tests.db.support import DatabaseUnderTest, engine_for
-from tests.support import TEST_REDIS_URL, build_settings
+from tests.support import TEST_REDIS_URL, build_settings, csrf_ready
 
 # --- masking (no database) --------------------------------------------------------------------------
 
@@ -317,8 +317,7 @@ async def api(database: DatabaseUnderTest) -> AsyncIterator[dict[str, Any]]:
         await engine.dispose()
         browser = httpx.AsyncClient(transport=transport, base_url="http://test")
         browser.cookies.set("brand_session", token)
-        browser.cookies.set("csrf", "t")
-        browser.headers["X-CSRF-Token"] = "t"
+        csrf_ready(browser, app)
         browser.user = user  # type: ignore[attr-defined]
         return browser
 
