@@ -64,7 +64,9 @@ export function tokenIn(text: string, path: string): string {
   return match?.[1] ?? "";
 }
 
-/** Signs up, confirms the address from the e-mail, and leaves the session in `request`. */
+/** Signs up, confirms the address from the e-mail, and leaves the session in `request`.
+ * The CSRF token is bound to the session (C6.1.6): after anything that signs in or out, call
+ * `csrfHeaders` again rather than reusing the old headers. */
 export async function createSignedInAdmin(
   request: APIRequestContext,
   account: Account = newAccount(),
@@ -96,8 +98,9 @@ export async function createSignedInAdmin(
   if (plan === "annual") {
     // A new company is on the free plan, which is read-only (T16.2). The test API stands in for
     // Stripe's webhook and puts it on a paid plan (api/tests/e2e_server.py).
+    // Verifying the address signed the person in, which renews the CSRF token (C6.1.6).
     const paid = await request.post(`${API}/e2e/paid-plan`, {
-      headers,
+      headers: await csrfHeaders(request),
       data: { email: account.email },
     });
     expect(paid.status(), await paid.text()).toBe(200);
