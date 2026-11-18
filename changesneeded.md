@@ -107,7 +107,7 @@ What was scanned: all 436 API routes mapped to their permission guard (the only 
 - **Fix:** load on first use with `next/dynamic`: `command-palette`, `shortcuts-sheet`, the `qrcode` import in MFA enrolment, the organogram canvas, the rota week grid. Record `next build` First Load JS per route before and after.
 - **Done when:** First Load JS for `/dashboard` and `/` is lower in the build output and e2e still passes.
 
-### [ ] O6.1.5 · P2 · Each API request opens two database sessions and re-reads the same rows
+### [x] O6.1.5 · P2 · Each API request opens two database sessions and re-reads the same rows — fixed in PR #174
 - **Problem:** `require()` (`api/app/modules/rbac/deps.py`) runs 4 to 5 queries on a global session (user, membership + company, terms version, terms acceptance) and then opens a second tenant session, for every request. The pool is 5 + 5 per worker (`db/engine.py`).
 - **Fix:** cache the current terms version in process for 60 s; cache "user X accepted version V" in Redis after the first positive answer; combine membership, company and acceptance into one query. Do not cache membership status or role (they must take effect at once).
 - **Done when:** a query-count test shows `require()` issues at most 2 statements on a warm cache; p95 of the list endpoints from T22.2 is re-measured and recorded.
