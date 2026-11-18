@@ -94,11 +94,25 @@ def cell(value: Any) -> str:
     return str(value)
 
 
+def spreadsheet_text(value: str) -> str:
+    """Force formula-capable cells to text, including control-prefixed spreadsheet input."""
+    candidate = value.lstrip(" \t\r\n")
+    if candidate[:1] in ("=", "+", "-", "@", "\uff1d", "\uff0b", "\uff0d", "\uff20") or value[
+        :1
+    ] in (
+        "\t",
+        "\r",
+        "\n",
+    ):
+        return "'" + value
+    return value
+
+
 def csv_text(headers: list[str], rows: list[list[str]]) -> bytes:
     buffer = io.StringIO()
     writer = csv.writer(buffer)
-    writer.writerow(headers)
-    writer.writerows(rows)
+    writer.writerow([spreadsheet_text(value) for value in headers])
+    writer.writerows([spreadsheet_text(value) for value in row] for row in rows)
     return buffer.getvalue().encode("utf-8")
 
 

@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import json
 import uuid
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING
 
@@ -25,7 +25,7 @@ from sqlalchemy import select, update
 
 from app.core.errors import AppError
 from app.modules.auth.tokens import hash_token, new_token
-from app.modules.identity.models import Session
+from app.modules.identity.models import Session, User
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -38,6 +38,21 @@ ABSOLUTE_TIMEOUT = timedelta(days=14)
 STEP_UP_WINDOW = timedelta(minutes=10)
 _DB_TOUCH_EVERY = timedelta(minutes=5)
 _KEY = "sess:"
+# Modify only the current value, never recreate a key removed by revocation and never overwrite
+# a concurrent privilege update with an old request's snapshot. Preserve the existing expiry.
+_PATCH = """
+local raw = redis.call('GET', KEYS[1])
+if not raw then return false end
+local data = cjson.decode(raw)
+data[ARGV[1]] = ARGV[2]
+local changed = cjson.encode(data)
+redis.call('SET', KEYS[1], changed, 'XX', 'KEEPTTL')
+return changed
+"""
+
+
+def _ended() -> AppError:
+    return AppError("UNAUTHENTICATED", "Sign in to continue.", status_code=401)
 
 
 def utcnow() -> datetime:
@@ -105,9 +120,23 @@ class SessionStore:
         return max(int(min(IDLE_TIMEOUT.total_seconds(), remaining)), 0)
 
     async def _save(self, token: str, data: SessionData) -> None:
+        """Initial creation only. Refresh and privilege changes must not call this."""
         ttl = self._ttl(data)
-        if ttl > 0:
-            await self._redis.set(_KEY + hash_token(token), json.dumps(asdict(data)), ex=ttl)
+        if ttl <= 0 or not await self._redis.set(
+            _KEY + hash_token(token), json.dumps(asdict(data)), ex=ttl, nx=True
+        ):
+            raise _ended()
+
+    async def _patch(self, token: str, field: str, value: str) -> SessionData:
+        raw = await self._redis.eval(_PATCH, 1, _KEY + hash_token(token), field, value)
+        if not raw:
+            raise _ended()
+        return SessionData(**json.loads(raw))
+
+    @staticmethod
+    async def _lock_user(db: AsyncSession, user_id: uuid.UUID) -> None:
+        # Creation/rotation cannot insert a session outside a concurrent revoke-all sweep.
+        await db.execute(select(User.id).where(User.id == user_id).with_for_update())
 
     # --- lifecycle ----------------------------------------------------------------------------
 
@@ -125,6 +154,7 @@ class SessionStore:
         support_id: uuid.UUID | None = None,
     ) -> tuple[str, SessionData]:
         """Start a session. Returns the token to put in the cookie, and what is known about it."""
+        await self._lock_user(db, user_id)
         now = self._now()
         expires = absolute_expiry or now + ABSOLUTE_TIMEOUT
         token = new_token()
@@ -165,7 +195,9 @@ class SessionStore:
         if data.absolute_expiry <= self._now():
             await self._redis.delete(_KEY + hash_token(token))
             return None
-        await self._save(token, data)  # slide the idle window
+        # EXPIRE can only extend an existing key: a concurrent revoke remains final.
+        if not await self._redis.expire(_KEY + hash_token(token), self._ttl(data)):
+            return None
         return data
 
     async def touch(self, db: AsyncSession, token: str, data: SessionData) -> SessionData:
@@ -176,14 +208,10 @@ class SessionStore:
         await db.execute(
             update(Session).where(Session.id == uuid.UUID(data.session_id)).values(last_seen_at=now)
         )
-        data = replace(data, db_seen_at=now.isoformat())
-        await self._save(token, data)
-        return data
+        return await self._patch(token, "db_seen_at", now.isoformat())
 
     async def mark_step_up(self, token: str, data: SessionData) -> SessionData:
-        data = replace(data, step_up_at=self._now().isoformat())
-        await self._save(token, data)
-        return data
+        return await self._patch(token, "step_up_at", self._now().isoformat())
 
     async def rotate(
         self,
@@ -203,6 +231,16 @@ class SessionStore:
         be None) replaces it. Step-up does not carry over: a change of standing must be confirmed
         again.
         """
+        await self._lock_user(db, uuid.UUID(data.user_id))
+        # Only one rotation may consume a live token. A revoked/previously rotated token cannot
+        # mint a new session from an already authenticated request's stale data.
+        raw = await self._redis.getdel(_KEY + hash_token(token))
+        if raw is None:
+            raise _ended()
+        current = SessionData(**json.loads(raw))
+        if current.absolute_expiry <= self._now():
+            raise _ended()
+        data = current
         await self.revoke(db, token, data)
         if change_company:
             new_company = company_id
@@ -247,6 +285,7 @@ class SessionStore:
         self, db: AsyncSession, user_id: uuid.UUID, *, except_session_id: str | None = None
     ) -> int:
         """Sign a person out everywhere (password change, "sign out of all devices")."""
+        await self._lock_user(db, user_id)
         rows = (
             await db.execute(
                 select(Session.id, Session.token_hash).where(

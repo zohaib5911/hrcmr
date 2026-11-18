@@ -9,6 +9,7 @@ from sqlalchemy import func, select
 
 from app.core.errors import AppError, ConflictError, ForbiddenError
 from app.core.rbac_matrix import Role, has_permission
+from app.modules.companies.models import Company
 from app.modules.identity.models import Membership
 
 if TYPE_CHECKING:
@@ -58,11 +59,12 @@ async def ensure_company_keeps_an_admin(
     """Refuse a change that would leave the company with no active Company Admin.
 
     Call it before demoting, suspending or removing a membership. ``db`` is a tenant session."""
+    await db.execute(select(Company.id).where(Company.id == company_id).with_for_update())
     membership = (
         await db.execute(
-            select(Membership).where(
-                Membership.id == membership_id, Membership.company_id == company_id
-            )
+            select(Membership)
+            .where(Membership.id == membership_id, Membership.company_id == company_id)
+            .execution_options(populate_existing=True)
         )
     ).scalar_one_or_none()
     if membership is None:

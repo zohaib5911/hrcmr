@@ -300,7 +300,12 @@ class AuthService:
 
     async def _user(self, db: AsyncSession, data: SessionData) -> User:
         user = (
-            await db.execute(select(User).where(User.id == uuid.UUID(data.user_id)))
+            await db.execute(
+                select(User)
+                .where(User.id == uuid.UUID(data.user_id))
+                .with_for_update()
+                .execution_options(populate_existing=True)
+            )
         ).scalar_one_or_none()
         if user is None:
             raise InvalidCredentialsError
