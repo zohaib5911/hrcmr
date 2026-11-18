@@ -165,6 +165,9 @@ export function DataTable<Row>({
   const [density, setDensity] = useState<Density>("comfortable");
   const [page, setPage] = useState(0);
   const [activeId, setActiveId] = useState<string | null>(null);
+  // A mouse or finger pressing a row focuses the table too. That focus must not highlight the first
+  // row: it scrolled the page to the top between press and release, so the click missed its row.
+  const pressing = useRef(false);
   const phone = useSyncExternalStore(
     subscribePhone,
     () => window.matchMedia(PHONE).matches,
@@ -486,7 +489,12 @@ export function DataTable<Row>({
           aria-activedescendant={activeIndex >= 0 ? domId(shown[activeIndex] as Row) : undefined}
           aria-multiselectable={selectable || undefined}
           onKeyDown={onKeyDown}
+          onPointerDown={() => {
+            pressing.current = true;
+            window.setTimeout(() => (pressing.current = false), 0);
+          }}
           onFocus={(event) => {
+            if (pressing.current) return; // the pressed row becomes active instead (row onPointerDown)
             if (event.target === event.currentTarget && activeId === null) moveTo(0);
           }}
           className="group/table w-full border-collapse text-left outline-none focus-visible:outline-accent focus-visible:outline-2 focus-visible:-outline-offset-2"
@@ -586,6 +594,7 @@ export function DataTable<Row>({
                   data-active={id === activeId || undefined}
                   onClick={onRowOpen ? (event) => openFromClick(event, row) : undefined}
                   onPointerEnter={onRowIntent ? () => onRowIntent(row) : undefined}
+                  onPointerDown={() => setActiveId(id)}
                   className={cn(
                     ROW_HEIGHT[density].class,
                     "border-separator border-b last:border-b-0",

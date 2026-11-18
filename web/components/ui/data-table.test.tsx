@@ -179,6 +179,28 @@ describe("DataTable opening a row", () => {
   });
 });
 
+describe("DataTable pressing a row", () => {
+  it("highlights the pressed row, never jumps to the first one, and opens it", async () => {
+    const user = userEvent.setup();
+    const onRowOpen = vi.fn();
+    const scrolled: string[] = [];
+    const original = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = function (this: Element) {
+      scrolled.push(this.textContent ?? "");
+    };
+    try {
+      render(<Table onRowOpen={onRowOpen} />);
+      const grid = screen.getByRole("grid", { name: "People" });
+      await user.click(within(grid).getByText("Katherine Johnson"));
+      expect(onRowOpen).toHaveBeenCalledWith(expect.objectContaining({ id: "4" }));
+      expect(grid.querySelector("tr[data-active]")?.textContent).toContain("Katherine Johnson");
+      expect(scrolled.some((text) => text.includes("Grace Hopper"))).toBe(false);
+    } finally {
+      Element.prototype.scrollIntoView = original;
+    }
+  });
+});
+
 describe("DataTable keyboard", () => {
   it("J and K move the highlight, Enter opens the row, Space selects it", async () => {
     const onRowOpen = vi.fn();
