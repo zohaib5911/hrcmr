@@ -3,6 +3,8 @@
 import { PublicDate } from "@/components/marketing/public-content";
 import { formatUk } from "@/lib/ui/dates";
 
+import type { Route } from "next";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardHeader } from "@/components/ui/card";
@@ -86,12 +88,24 @@ function Breakdown({
   );
 }
 
+/** The sponsor's public profile page. */
+function profileHref(s: Sponsor): Route {
+  return `/sponsors/profile/${s.id}/${s.slug}` as Route;
+}
+
+const PROFILE_LINK =
+  "text-accent-text rounded-control underline-offset-2 hover:underline focus-visible:outline-accent focus-visible:outline-2";
+
 function SponsorList({ rows }: { rows: Sponsor[] }) {
   return (
     <ul className="divide-separator divide-y">
       {rows.map((s) => (
         <li key={s.id} className="py-4">
-          <h3 className="text-headline">{s.name}</h3>
+          <h3 className="text-headline">
+            <Link href={profileHref(s)} prefetch={false} className={PROFILE_LINK}>
+              {s.name}
+            </Link>
+          </h3>
           <p>
             {s.town || "Town unknown"} · {s.region ?? "Region unknown"}
           </p>
@@ -446,7 +460,9 @@ export function RegisterExplorer() {
                     {data.results?.map((s) => (
                       <tr key={s.id} className="border-separator border-t">
                         <th scope="row" className="p-3">
-                          {s.name}
+                          <Link href={profileHref(s)} prefetch={false} className={PROFILE_LINK}>
+                            {s.name}
+                          </Link>
                         </th>
                         <td className="p-3">{s.town || "Unknown"}</td>
                         <td className="p-3">{s.region ?? "Unknown"}</td>
