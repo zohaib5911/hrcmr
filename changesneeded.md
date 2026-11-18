@@ -112,7 +112,7 @@ What was scanned: all 436 API routes mapped to their permission guard (the only 
 - **Fix:** cache the current terms version in process for 60 s; cache "user X accepted version V" in Redis after the first positive answer; combine membership, company and acceptance into one query. Do not cache membership status or role (they must take effect at once).
 - **Done when:** a query-count test shows `require()` issues at most 2 statements on a warm cache; p95 of the list endpoints from T22.2 is re-measured and recorded.
 
-### [ ] O6.1.6 · P2 · Lists reload from scratch on every visit
+### [x] O6.1.6 · P2 · Lists reload from scratch on every visit — fixed in PR #175
 - **Problem:** pages fetch in `useEffect` (75 component files) with no shared client cache, so going back to a list shows the skeleton again and refetches.
 - **Fix:** add a small stale-while-revalidate cache in `web/lib/api` keyed by path + query (show the last answer at once, refresh in the background, drop on sign-out or company switch), and use it in the list pages first (employees, leave, recruitment, documents). Prefetch a row's detail on hover/focus.
 - **Done when:** navigating list → detail → back shows the list instantly in the journey e2e test, with a background refresh.
