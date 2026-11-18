@@ -1,0 +1,64 @@
+[
+  {
+    "source": "web/app/(marketing)/page.tsx",
+    "route": "/",
+    "group": "public",
+    "key": "public",
+    "url": "http://127.0.0.1:3100/",
+    "status": 200,
+    "filename": "public-light-390.png",
+    "title": "HR and sponsor compliance | StuffHub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Look after your people, and your licence.",
+        "fontSize": "40px",
+        "lineHeight": "42px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [
+      {
+        "tag": "HEADER",
+        "text": "FeaturesSponsor compliancePricingResourcesSecuritySign inStart free",
+        "fontSize": "15px",
+        "lineHeight": "22px",
+        "weight": "400",
+        "background": "rgba(246, 246, 248, 0.72)",
+        "blur": "saturate(1.8) blur(20px)",
+        "border": "1px",
+        "shadow": "none"
+      }
+    ],
+    "smallTargets": [
+      {
+        "text": "Skip to content",
+        "width": 32,
+        "height": 16
+      },
+      {
+        "text": "Sensitive details encrypted",
+        "width": 202,
+        "height": 20
+      },
+      {
+        "text": "Every company's data kept apart",
+        "width": 244,
+        "height": 20
+      },
+      {
+        "text": "Free employer tools",
+        "width": 153,
+        "height": 20
+      }
+    ],
+    "errors": [],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif",
+    "axe": []
+  }
+]

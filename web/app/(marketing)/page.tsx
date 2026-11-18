@@ -3,17 +3,21 @@ import { pageMetadata } from "@/lib/seo";
 import type { Metadata } from "next";
 import {
   BadgeCheck,
-  BellRing,
+  Calculator,
   CalendarDays,
   Clock,
   FileText,
   GraduationCap,
+  Lock,
   ShieldCheck,
 } from "lucide-react";
+import Link from "next/link";
 
 import { brand } from "@brand";
 
 import { Faq } from "@/components/marketing/faq";
+import { HeroShot } from "@/components/marketing/hero-shot";
+import { ReminderPreview } from "@/components/marketing/reminder-preview";
 import {
   Band,
   CtaBand,
@@ -22,7 +26,7 @@ import {
   Section,
   SectionHeading,
 } from "@/components/marketing/sections";
-import { Card, CardBody } from "@/components/ui/card";
+import { Icon } from "@/components/ui/icon";
 import { SIGN_IN, SIGN_UP } from "@/lib/marketing-nav";
 
 export const metadata: Metadata = pageMetadata(
@@ -85,6 +89,35 @@ const FEATURES = [
   },
 ] as const;
 
+/** Short, true reasons to trust it (U6.1.8): each one links to where it is explained. */
+const TRUST = [
+  { icon: Lock, text: "Sensitive details encrypted", href: "/security" },
+  { icon: ShieldCheck, text: "Every company's data kept apart", href: "/security" },
+  { icon: Calculator, text: "Free employer tools", href: "/resources/tools" },
+] as const;
+
+function TrustRow() {
+  return (
+    <ul
+      aria-label="Why employers trust it"
+      className="flex flex-wrap justify-center gap-x-6 gap-y-3"
+    >
+      {TRUST.map((item) => (
+        <li key={item.text}>
+          <Link
+            href={item.href}
+            prefetch={false}
+            className="text-callout text-label-secondary hover:text-label inline-flex items-center gap-2 underline-offset-2 hover:underline"
+          >
+            <Icon icon={item.icon} size={16} />
+            {item.text}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export default function HomePage() {
   return (
     <>
@@ -96,7 +129,10 @@ export default function HomePage() {
           { label: SIGN_UP.label, href: SIGN_UP.href },
           { label: SIGN_IN.label, href: SIGN_IN.href, variant: "plain" },
         ]}
-      />
+      >
+        <TrustRow />
+        <HeroShot className="mt-10 max-md:mt-40" />
+      </Hero>
 
       <Section tone="raised" id="features">
         <SectionHeading
@@ -116,21 +152,7 @@ export default function HomePage() {
           "A clear list of what to report, and by when.",
           "Everything is kept with its evidence, ready for an audit.",
         ]}
-        media={
-          <Card className="p-6">
-            <CardBody className="flex items-start gap-4">
-              <span className="bg-warning-tint text-warning inline-flex size-11 shrink-0 items-center justify-center rounded-full">
-                <BellRing aria-hidden strokeWidth={1.5} className="size-6" />
-              </span>
-              <div>
-                <p className="text-headline text-label">Reminders are sent before they are due</p>
-                <p className="text-body text-label-secondary mt-1">
-                  Visa, passport and right to work follow-up dates appear here, soonest first.
-                </p>
-              </div>
-            </CardBody>
-          </Card>
-        }
+        media={<ReminderPreview />}
       />
 
       <Section tone="raised" id="faq">

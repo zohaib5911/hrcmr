@@ -154,7 +154,10 @@ export function FeatureGrid({
       )}
     >
       {features.map((feature) => (
-        <li key={feature.title} className="rounded-card border-separator border p-6">
+        <li
+          key={feature.title}
+          className="material-glass-thin rounded-card motion-small p-6 transition-transform hover:-translate-y-1 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+        >
           <span className="bg-accent-tint text-accent-text mb-4 inline-flex size-11 items-center justify-center rounded-full">
             <Icon icon={feature.icon} size={24} />
           </span>
@@ -228,10 +231,19 @@ export function CtaBand({
   actions: readonly Action[];
 }) {
   return (
-    <section aria-label="Get started" className="bg-accent-tint py-16 md:py-24">
+    <section aria-label="Get started" className="relative isolate overflow-hidden py-16 md:py-24">
+      {/* The accent gradient (U6.1.8). Decorative, so the accessibility scan leaves it out like the
+          ambient backdrop; tokens.test.ts checks the card's text over both of its colours. */}
+      <div
+        aria-hidden
+        data-ambient-backdrop="section"
+        className="from-accent to-accent-pressed absolute inset-0 -z-10 bg-linear-to-br"
+      />
       <div className="page-marketing">
-        <SectionHeading title={title} lead={lead} strongLead />
-        <Actions actions={actions} className="mt-8 justify-center" />
+        <div className="material-glass-thick rounded-sheet mx-auto max-w-3xl px-6 py-10 md:px-12">
+          <SectionHeading title={title} lead={lead} strongLead />
+          <Actions actions={actions} className="mt-8 justify-center" />
+        </div>
       </div>
     </section>
   );
