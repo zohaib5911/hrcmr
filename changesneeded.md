@@ -165,7 +165,7 @@ What is there today (from the Phase 25 screenshots and `web/app/globals.css`): a
 - **Fix:** hero: the ambient backdrop (U6.1.2) and a real product shot (the dashboard, in a glass window frame, light and dark variants, `next/image` with `priority` and fixed dimensions so nothing shifts). Feature cards on `material-glass-thin` with a hover lift. "Know what is due": a small reminder list that looks like the product instead of one line. Closing band: accent gradient with a glass call-to-action card. Add a short trust row (where data is kept, the security page, the free tools). Keep every claim true; no invented customer logos or figures.
 - **Done when:** Lighthouse on `/` keeps LCP under 2.5 s and CLS under 0.1 on mobile; a11y spec passes; screenshots updated.
 
-### [ ] U6.1.9 · P2 · B · Motion and touch polish
+### [x] U6.1.9 · P2 · B · Motion and touch polish — fixed in PR #170
 - **Fix:** sheets, popovers, the command palette and menus open with the existing spring (`--ease-spring`) from their trigger, with a scrim that blurs the page behind (off under reduced transparency); buttons and rows get a pressed state (scale 0.98, 80 ms); page changes use the View Transitions API for a short cross-fade where supported; list rows and cards fade and rise 8 px on first paint, staggered by 20 ms, never more than 200 ms in total. All of it off under `prefers-reduced-motion`. Limit blur to at most three stacked glass layers per screen and never animate `backdrop-filter` itself (it repaints every frame).
 - **Done when:** `lib/motion.test.ts` covers the reduced-motion paths; a Playwright trace of opening the command palette on a throttled CPU shows no long frames.
 
