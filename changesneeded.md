@@ -41,7 +41,7 @@ What was scanned: all 436 API routes mapped to their permission guard (the only 
 - **Fix:** compare bytes in both places: `hmac.compare_digest(cookie.encode("utf-8"), supplied.encode("utf-8"))`; same for `expected`/`given` in `verify_signature`.
 - **Done when:** tests send `X-CSRF-Token: é` (expect 403 `CSRF_INVALID`) and a `Stripe-Signature` with `v1=é` (expect 400 `WEBHOOK_SIGNATURE_INVALID`).
 
-### [ ] C6.1.6 · P2 · The CSRF token is a bare double-submit cookie shared with every subdomain
+### [x] C6.1.6 · P2 · The CSRF token is a bare double-submit cookie shared with every subdomain — fixed in PR #171
 - **Problem:** `CsrfMiddleware` (`api/app/core/csrf.py`) accepts any request whose header equals the `csrf` cookie, and the cookie is set with `Domain=.DOMAIN`. The token is not tied to the session and is never changed at sign-in. Anything that can set a cookie for the parent domain (a future subdomain with user content, a subdomain takeover) can plant its own token and pass the check. OWASP's CSRF Prevention Cheat Sheet calls this the "naive double-submit" weakness and recommends the signed variant bound to the session.
 - **Evidence:** code read. Not exploitable today (no such subdomain exists, SameSite=Lax is the first lock), which is why this is P2 hardening.
 - **Fix:** issue the token as `<random>.<HMAC-SHA256(session_secret, random + "|" + session cookie value or "anon")>` and verify the HMAC in the middleware as well as the equality; issue a fresh token when the session cookie changes (sign-in, MFA, company switch). The web client needs no change (it copies the cookie into the header).
