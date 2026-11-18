@@ -199,6 +199,43 @@ async def test_nobody_gets_in_without_a_session(setup: Setup) -> None:
     assert response.json()["error"]["code"] == "UNAUTHENTICATED"
 
 
+async def test_a_warm_request_checks_membership_company_and_terms_in_one_statement(
+    setup: Setup,
+) -> None:
+    """O6.1.5: the terms version is cached per process and an acceptance in Redis, so on a warm
+    cache ``require()`` reads the database once (membership with company); the role and status are
+    still read on every request."""
+    app = setup.client._transport.app  # type: ignore[attr-defined]
+    seen: list[str] = []
+    watched = ("memberships", "companies", "terms_versions", "terms_acceptances")
+
+    @event.listens_for(app.state.engine.sync_engine, "before_cursor_execute")
+    def count(conn: Any, cursor: Any, statement: str, *args: Any) -> None:
+        if any(table in statement for table in watched):
+            seen.append(statement)
+
+    try:
+        async with await setup.person("company_admin") as admin:
+            assert (await admin.get("/api/v1/probe/company.overview.read")).status_code == 200
+            cold = list(seen)
+            seen.clear()
+            assert (await admin.get("/api/v1/probe/company.overview.read")).status_code == 200
+            warm = list(seen)
+
+            # A role change takes effect at once: it is never cached.
+            await setup.owner("update memberships set status = 'suspended'")
+            refused = await admin.get("/api/v1/probe/company.overview.read")
+            assert refused.json()["error"]["code"] == "ACCOUNT_SUSPENDED"
+    finally:
+        event.remove(app.state.engine.sync_engine, "before_cursor_execute", count)
+
+    assert any("terms_versions" in statement for statement in cold), cold
+    assert len(warm) == 1, warm
+    assert "memberships" in warm[0], warm
+    assert "terms_acceptances" not in warm[0], warm
+    assert not any("terms_versions" in statement for statement in warm), warm
+
+
 async def test_standing_checks_come_before_the_permission(setup: Setup) -> None:
     async with await setup.person("company_admin", verified=False) as unverified:
         refused = await unverified.get("/api/v1/probe/company.overview.read")

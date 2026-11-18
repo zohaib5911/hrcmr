@@ -68,6 +68,7 @@ from app.modules.platform_admin.schemas import (
     UserRow,
     UsersOut,
 )
+from app.modules.rbac.deps import forget_terms_version
 from app.modules.rbac.platform import PlatformAccess, require_platform
 from app.modules.support.models import ImpersonationSession
 
@@ -296,7 +297,9 @@ async def list_terms_versions(access: Reader) -> TermsVersionsOut:
 
 
 @router.post("/platform/terms-versions", status_code=201, response_model=TermsVersionRow)
-async def publish_terms_version(body: TermsIn, access: Content) -> TermsVersionRow:
+async def publish_terms_version(
+    body: TermsIn, access: Content, request: Request
+) -> TermsVersionRow:
     """Publish a new terms version. Everyone must accept it before using the product (T17.5)."""
     if not await _is_owner(access):
         raise ForbiddenError("Only an owner can publish a terms version.")
@@ -309,6 +312,7 @@ async def publish_terms_version(body: TermsIn, access: Content) -> TermsVersionR
         now=datetime.now(UTC),
     )
     await access.db.commit()
+    forget_terms_version(request.app)  # O6.1.5: other processes see it within 60 s
     return terms.row(published, current=True)
 
 
