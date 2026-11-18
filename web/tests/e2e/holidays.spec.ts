@@ -52,7 +52,7 @@ test("trading hours start unset and each row saves by itself", async ({ page }) 
   await page.reload();
   await expect(page.getByLabel("Monday opens", { exact: true })).toHaveValue("08:30");
   await expect(page.getByLabel("Monday closes", { exact: true })).toHaveValue("17:30");
-  await expect(page.getByText("Open 1 day a week")).toBeVisible();
+  await expect(page.getByText("Open 1 day a week").first()).toBeVisible();
   await audit(page, "trading hours");
 });
 
