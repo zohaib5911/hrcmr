@@ -21,6 +21,7 @@ import { formatUk } from "@/lib/ui/dates";
 
 import { CHECK_TYPE, OUTCOME, RTW_STATUS, type RtwCheckType, type RtwOutcome } from "./rtw";
 import { STAGE_LABEL, STAGE_TONE } from "./stages";
+import { cacheKey, cached, remember } from "@/lib/api/cache";
 
 type Candidate = components["schemas"]["CandidateOut"];
 type RtwTab = components["schemas"]["RTWTab"];
@@ -35,7 +36,10 @@ export function CandidateProfile({ candidateId }: { candidateId: string }) {
   const can = useCan();
   const mayRead = can("recruitment.candidate.read");
   const mayWrite = can("recruitment.candidate.write");
-  const [candidate, setCandidate] = useState<Candidate | null>(null);
+  // Fetched ahead from the list (O6.1.6) when there is one; refreshed below either way.
+  const [candidate, setCandidate] = useState<Candidate | null>(
+    () => cached<Candidate>(cacheKey(`/candidates/${candidateId}`)) ?? null,
+  );
   const [problem, setProblem] = useState<Problem | null>(null);
   const [version, setVersion] = useState(0);
   const [tab, setTab] = useState("overview");
@@ -47,8 +51,10 @@ export function CandidateProfile({ candidateId }: { candidateId: string }) {
       c.GET("/candidates/{candidate_id}", { params: { path: { candidate_id: candidateId } } }),
     ).then((result) => {
       if (!active) return;
-      if (result.ok) setCandidate(result.data);
-      else setProblem(result.problem);
+      if (result.ok) {
+        remember(cacheKey(`/candidates/${candidateId}`), result.data);
+        setCandidate(result.data);
+      } else setProblem(result.problem);
     });
     return () => {
       active = false;

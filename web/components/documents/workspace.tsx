@@ -23,6 +23,7 @@ import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { formatUk } from "@/lib/ui/dates";
 import { formatBytes } from "@/lib/ui/files";
+import { cacheKey, cached, remember } from "@/lib/api/cache";
 
 type Document = components["schemas"]["CompanyDocumentOut"];
 type Documents = components["schemas"]["CompanyDocuments"];
@@ -55,7 +56,7 @@ export function DocumentsWorkspace() {
   const [due, setDue] = useState(false);
   const [archived, setArchived] = useState(false);
   const [offset, setOffset] = useState(0);
-  const [data, setData] = useState<Documents | null>(null);
+  const [fetched, setData] = useState<Documents | null>(null);
   const [loaded, setLoaded] = useState("");
   const [version, setVersion] = useState(0);
   const [opened, setOpened] = useState<Document | "new" | null>(null);
@@ -64,26 +65,34 @@ export function DocumentsWorkspace() {
   const [problem, setProblem] = useState<Problem | null>(null);
   const [downloading, setDownloading] = useState<string | null>(null);
   const key = JSON.stringify([search, category, due, archived, offset, version]);
+  // O6.1.6: this view's answer once it is in; until then the last one this tab had for it (no
+  // skeleton when coming back), while the fresh one loads in the background.
+  const cacheId = cacheKey("/documents", {
+    search,
+    category: category || undefined,
+    review_due: due,
+    show_archived: archived,
+    offset,
+    limit: 50,
+  });
+  const hit = loaded === key ? undefined : cached<Documents>(cacheId);
+  const data = hit ?? fetched;
   useEffect(() => {
     if (!mayRead) return;
     let active = true;
-    void attempt((c) =>
-      c.GET("/documents", {
-        params: {
-          query: {
-            search,
-            category: category || undefined,
-            review_due: due,
-            show_archived: archived,
-            offset,
-            limit: 50,
-          },
-        },
-      }),
-    ).then((result) => {
+    const query = {
+      search,
+      category: category || undefined,
+      review_due: due,
+      show_archived: archived,
+      offset,
+      limit: 50,
+    };
+    void attempt((c) => c.GET("/documents", { params: { query } })).then((result) => {
       if (!active) return;
       setLoaded(key);
       if (result.ok) {
+        remember(cacheId, result.data);
         setData(result.data);
         setProblem(null);
       } else setProblem(result.problem);
@@ -91,7 +100,7 @@ export function DocumentsWorkspace() {
     return () => {
       active = false;
     };
-  }, [mayRead, search, category, due, archived, offset, version, key]);
+  }, [mayRead, search, category, due, archived, offset, version, key, cacheId]);
   async function download(row: Document) {
     setDownloading(row.id);
     const result = await attempt((c) =>
@@ -266,7 +275,7 @@ export function DocumentsWorkspace() {
             columns={columns}
             rows={data?.items ?? []}
             getRowId={(r) => r.id}
-            loading={loaded !== key && !problem}
+            loading={loaded !== key && !hit && !problem}
             pageSize={50}
             empty={
               <EmptyState

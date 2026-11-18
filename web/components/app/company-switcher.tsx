@@ -13,6 +13,7 @@ import { attempt } from "@/lib/auth/request";
 import { cn } from "@/lib/utils";
 
 import { PLAN_LABELS, type ShellSession } from "./shell-types";
+import { clearApiCache } from "@/lib/api/cache";
 
 /** The company at the top of the sidebar: logo, name and plan, and a menu to switch (plan 5.6). */
 export function CompanySwitcher({ session }: { session: ShellSession | null }) {
@@ -68,7 +69,11 @@ export function CompanySwitcher({ session }: { session: ShellSession | null }) {
                 if (other.id === company.id) return;
                 void attempt((client) =>
                   client.POST("/auth/switch-company", { body: { company_id: other.id } }),
-                ).then((outcome) => outcome.ok && router.refresh());
+                ).then((outcome) => {
+                  if (!outcome.ok) return;
+                  clearApiCache();
+                  router.refresh();
+                });
               }}
               icon={
                 other.id === company.id ? (

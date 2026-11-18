@@ -17,14 +17,31 @@ import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 
 import { RTW_STATUS } from "./rtw";
+import { cacheKey, cached, prefetch, remember } from "@/lib/api/cache";
 
 export type Candidate = components["schemas"]["CandidateOut"];
+
+const listKey = (search: string) => cacheKey("/candidates", { search, limit: 100 });
+
+/** The candidate's profile, fetched ahead when the person points at or moves to their row. */
+export function prefetchCandidate(candidateId: string): Promise<void> {
+  return prefetch(cacheKey(`/candidates/${candidateId}`), () =>
+    attempt((c) =>
+      c.GET("/candidates/{candidate_id}", { params: { path: { candidate_id: candidateId } } }),
+    ),
+  );
+}
 
 /** The candidates tab: add a candidate, search, and open a profile with its right-to-work status. */
 export function CandidatesTab({ mayWrite }: { mayWrite: boolean }) {
   const router = useRouter();
-  const [rows, setRows] = useState<Candidate[] | null>(null);
   const [search, setSearch] = useState("");
+  // O6.1.6: the answer for this search once it is in; until then the last one this tab had (no
+  // skeleton when coming back), while the fresh one loads in the background.
+  const key = listKey(search);
+  const [answer, setAnswer] = useState<{ key: string; items: Candidate[] } | null>(null);
+  const rows =
+    answer?.key === key ? answer.items : (cached<{ items: Candidate[] }>(key)?.items ?? null);
   const [version, setVersion] = useState(0);
   const [problem, setProblem] = useState<Problem | null>(null);
   const [adding, setAdding] = useState(false);
@@ -35,7 +52,8 @@ export function CandidatesTab({ mayWrite }: { mayWrite: boolean }) {
       (result) => {
         if (!active) return;
         if (result.ok) {
-          setRows(result.data.items);
+          remember(key, result.data);
+          setAnswer({ key, items: result.data.items });
           setProblem(null);
         } else setProblem(result.problem);
       },
@@ -43,7 +61,7 @@ export function CandidatesTab({ mayWrite }: { mayWrite: boolean }) {
     return () => {
       active = false;
     };
-  }, [search, version]);
+  }, [key, search, version]);
 
   const columns: Column<Candidate>[] = [
     {
@@ -101,6 +119,7 @@ export function CandidatesTab({ mayWrite }: { mayWrite: boolean }) {
         getRowId={(row) => row.id}
         loading={rows === null && !problem}
         onRowOpen={(row) => router.push(`/recruitment/candidates/${row.id}`)}
+        onRowIntent={(row) => void prefetchCandidate(row.id)}
         empty={
           <EmptyState
             icon={UserRound}

@@ -22,6 +22,7 @@ import { ApplicationsTab } from "./applications-tab";
 import { CandidatesTab } from "./candidates-tab";
 import { PostingsTab } from "./postings-tab";
 import { RequisitionSheet, type Requisition } from "./requisition-sheet";
+import type { RecruitmentTab } from "./tabs";
 
 type Summary = components["schemas"]["RecruitmentSummary"];
 type Status = Requisition["status"];
@@ -59,7 +60,11 @@ function budget(row: Requisition): string {
 }
 
 /** The Recruitment workspace: the pipeline's intro, four counts, and the requisitions tab. */
-export function RecruitmentWorkspace() {
+export function RecruitmentWorkspace({
+  initialTab = "requisitions",
+}: {
+  initialTab?: RecruitmentTab;
+}) {
   const can = useCan();
   const mayRead = can("recruitment.requisition.read");
   const mayWrite = can("recruitment.requisition.write");
@@ -71,7 +76,16 @@ export function RecruitmentWorkspace() {
   const [version, setVersion] = useState(0);
   const [problem, setProblem] = useState<Problem | null>(null);
   const [sheet, setSheet] = useState<Requisition | "new" | null>(null);
-  const [tab, setTab] = useState("requisitions");
+  const [tab, setTab] = useState<string>(initialTab);
+  // The tab is part of the address (O6.1.6), so coming back from a candidate opens the candidate
+  // list again. replaceState: no page load, and no extra history entry per tab.
+  function chooseTab(next: string) {
+    setTab(next);
+    const url = new URL(window.location.href);
+    if (next === "requisitions") url.searchParams.delete("tab");
+    else url.searchParams.set("tab", next);
+    window.history.replaceState(window.history.state, "", url);
+  }
 
   useEffect(() => {
     if (!mayRead) return;
@@ -173,7 +187,7 @@ export function RecruitmentWorkspace() {
         <KpiCard label="Applications in progress" value={counts?.applications_in_progress ?? 0} />
       </div>
 
-      <Tabs value={tab} onValueChange={setTab}>
+      <Tabs value={tab} onValueChange={chooseTab}>
         <TabsList aria-label="Recruitment">
           <TabsTrigger value="requisitions">
             Requisitions ({counts?.requisitions ?? total})

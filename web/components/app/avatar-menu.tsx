@@ -25,6 +25,7 @@ import { parseTheme, type ThemeChoice } from "@/lib/theme";
 import { applyTheme } from "@/lib/theme-dom";
 
 import type { ShellUser } from "./shell-types";
+import { clearApiCache } from "@/lib/api/cache";
 
 /** The person's menu, top right: their profile, and the colour theme (plan 5.3: chosen in My Profile). */
 export function AvatarMenu({ user, theme }: { user: ShellUser | null; theme: ThemeChoice }) {
@@ -70,6 +71,7 @@ export function AvatarMenu({ user, theme }: { user: ShellUser | null; theme: The
           icon={<Icon icon={LogOut} size={16} />}
           onSelect={() => {
             void attempt((client) => client.POST("/auth/logout")).then(() => {
+              clearApiCache();
               router.push("/login");
               router.refresh();
             });

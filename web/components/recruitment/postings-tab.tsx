@@ -15,6 +15,7 @@ import { attempt, type Problem } from "@/lib/auth/request";
 import { formatUk } from "@/lib/ui/dates";
 
 import { PostingSheet, type Posting } from "./posting-sheet";
+import { cacheKey, cached, remember } from "@/lib/api/cache";
 
 type Status = Posting["status"];
 
@@ -27,9 +28,13 @@ const STATUS: Record<Status, { label: string; tone: "neutral" | "success" | "dan
 /** The Postings tab: each posting's visibility, closing date, vacancies, status and public link. */
 export function PostingsTab({ mayWrite }: { mayWrite: boolean }) {
   const toast = useToast();
-  const [rows, setRows] = useState<Posting[] | null>(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<Status | "">("");
+  // O6.1.6: this query's answer once in; until then the last one this tab had.
+  const key = cacheKey("/postings", { search, status: status || undefined, limit: 100 });
+  const [answer, setAnswer] = useState<{ key: string; items: Posting[] } | null>(null);
+  const rows =
+    answer?.key === key ? answer.items : (cached<{ items: Posting[] }>(key)?.items ?? null);
   const [version, setVersion] = useState(0);
   const [problem, setProblem] = useState<Problem | null>(null);
   const [sheet, setSheet] = useState<Posting | "new" | null>(null);
@@ -43,14 +48,15 @@ export function PostingsTab({ mayWrite }: { mayWrite: boolean }) {
     ).then((result) => {
       if (!active) return;
       if (result.ok) {
-        setRows(result.data.items);
+        remember(key, result.data);
+        setAnswer({ key, items: result.data.items });
         setProblem(null);
       } else setProblem(result.problem);
     });
     return () => {
       active = false;
     };
-  }, [search, status, version]);
+  }, [key, search, status, version]);
 
   async function copy(link: string) {
     try {
