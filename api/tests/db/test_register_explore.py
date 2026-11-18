@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.session import GlobalSession
 from app.modules.register.ingest import ingest
 from app.modules.register.models import Sponsor
-from app.modules.register.public import ExploreQuery, explore_data
+from app.modules.register.public import ExploreQuery, explore_data, place_name
 from tests.db.support import DatabaseUnderTest, engine_for
 from tests.test_register_ingest import FIXTURES
 
@@ -51,6 +51,10 @@ async def test_explore_snapshots_filters_counts_and_pulse(database: DatabaseUnde
             assert len(out.facets["route"]) == 2
             stable = next(s for s in out.results if s.name == "Stable Ltd")
             assert len(stable.routes) == len(stable.ratings) == 2
+            # Towns read as people write them, and each result links to its public profile.
+            assert stable.town == "Leeds"
+            assert stable.slug == "stable-ltd"
+            assert "Leeds" in {bucket.label for bucket in out.sections["towns"]}
             historic = await explore_data(db, ExploreQuery(publication_id=out.publications[0].id))
             assert historic.total == 3
             assert "Gone Ltd" in {s.name for s in historic.results}
@@ -82,3 +86,12 @@ async def test_explore_snapshots_filters_counts_and_pulse(database: DatabaseUnde
             )
         await reader.dispose()
         await engine.dispose()
+
+
+def test_place_names_read_as_people_write_them() -> None:
+    assert place_name("leeds") == "Leeds"
+    assert place_name("newcastle upon tyne") == "Newcastle upon Tyne"
+    assert place_name("st albans") == "St Albans"
+    assert place_name("stratford on avon") == "Stratford on Avon"
+    assert place_name("the wirral") == "The Wirral"
+    assert place_name("") == ""

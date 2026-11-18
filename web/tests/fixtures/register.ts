@@ -30,6 +30,7 @@ export const registerFixture: components["schemas"]["ExploreOut"] = {
   results: [
     {
       id: "stable",
+      slug: "stable-ltd",
       name: "Stable Ltd",
       town: "Leeds",
       region: "Yorkshire and The Humber",

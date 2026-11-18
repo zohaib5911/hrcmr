@@ -165,3 +165,21 @@ def test_empty_county_row_does_not_decide_an_ambiguous_town() -> None:
     places = parse_places(own)
     assert geocode(places, "Sheffield", "") == (None, "none")
     assert geocode(places, "Sheffield", "South Yorkshire")[1] == "exact"
+
+
+def test_a_county_that_names_the_region_places_an_ambiguous_town() -> None:
+    # IPN_GB_2024.csv: the Hounslow built-up area runs into Spelthorne (Surrey, South East), so the
+    # town alone is ambiguous, and register rows give the county as "London" or "Greater London".
+    ons = (
+        b"place23nm,ctyhistnm,cty23nm,eer23cd,lat,long\n"
+        b"Hounslow,Middlesex,Outer London,E15000007,51.47,-0.36\n"
+        b"Hounslow,Middlesex,Surrey,E15000008,51.45,-0.45\n"
+    )
+    places = parse_places(normalise_places(ons))
+    assert geocode(places, "Hounslow", "") == (None, "none")  # still never guessed
+    for county in ("London", "Greater London"):
+        place, precision = geocode(places, "Hounslow", county)
+        assert precision == "exact"
+        assert place is not None
+        assert place.region == "London"
+    assert geocode(places, "Hounslow", "South East")[0].region == "South East"  # type: ignore[union-attr]

@@ -13148,6 +13148,8 @@ export interface components {
             region: string | null;
             /** Routes */
             routes: string[];
+            /** Slug */
+            slug: string;
             /** Town */
             town: string;
         };

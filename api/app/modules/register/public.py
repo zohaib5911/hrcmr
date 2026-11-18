@@ -87,6 +87,41 @@ BULLETIN_LIMIT = 500
 KINDS = ("added", "removed", "returned")
 
 
+# Words kept lower case inside a place name ("Newcastle upon Tyne", "Stratford on Avon").
+_PLACE_SMALL_WORDS = frozenset(
+    {
+        "and",
+        "by",
+        "cum",
+        "de",
+        "en",
+        "in",
+        "la",
+        "le",
+        "les",
+        "next",
+        "of",
+        "on",
+        "sur",
+        "the",
+        "under",
+        "upon",
+        "with",
+    }
+)
+
+
+def place_name(value: str) -> str:
+    """A town or county as people write it. The register stores them normalised (lower case, no
+    punctuation) because they are part of the matching key, so they are formatted for display:
+    "newcastle upon tyne" -> "Newcastle upon Tyne", "st albans" -> "St Albans"."""
+    words = value.split()
+    return " ".join(
+        word if index and word in _PLACE_SMALL_WORDS else word[:1].upper() + word[1:]
+        for index, word in enumerate(words)
+    )
+
+
 def slugify(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-") or "sponsor"
 
@@ -336,7 +371,9 @@ async def region(slug: Annotated[str, Path(max_length=60)], db: GlobalDb) -> Reg
             )
         ]
         changes = [
-            RegionChange(stable_id=s.stable_id, name=s.organisation_name, town=s.town, change=c)
+            RegionChange(
+                stable_id=s.stable_id, name=s.organisation_name, town=place_name(s.town), change=c
+            )
             for s, c in (
                 await db.execute(
                     select(Sponsor, latest_day.c.change)
@@ -351,7 +388,7 @@ async def region(slug: Annotated[str, Path(max_length=60)], db: GlobalDb) -> Reg
         region=name,
         slug=slug,
         sponsors=total,
-        towns=[RegionTown(town=t, count=n) for t, n in towns],
+        towns=[RegionTown(town=place_name(t), count=n) for t, n in towns],
         routes=routes,
         latest_changes=changes,
         last_published=latest.published_on if latest else None,
@@ -379,7 +416,7 @@ def _sponsor(s: Sponsor) -> BulletinSponsor:
         stable_id=s.stable_id,
         slug=slugify(s.organisation_name),
         name=s.organisation_name,
-        town=s.town,
+        town=place_name(s.town),
         region=s.region_itl1,
     )
 
@@ -480,8 +517,8 @@ async def profile(
         stable_id=s.stable_id,
         slug=slugify(s.organisation_name),
         name=s.organisation_name,
-        town=s.town,
-        county=s.county,
+        town=place_name(s.town),
+        county=place_name(s.county),
         region=s.region_itl1,
         region_slug=slugify(s.region_itl1) if s.region_itl1 else None,
         current=s.current,
@@ -570,6 +607,7 @@ class Bucket(BaseModel):
 
 class SponsorOut(BaseModel):
     id: str
+    slug: str  # with ``id``, the public profile: /sponsors/profile/{id}/{slug}
     name: str
     town: str
     region: str | None
@@ -685,8 +723,9 @@ async def sponsors(
     return [
         SponsorOut(
             id=s.stable_id,
+            slug=slugify(s.organisation_name),
             name=s.organisation_name,
-            town=s.town,
+            town=place_name(s.town),
             region=s.region_itl1,
             industry=s.sic_section,
             precision=s.place_precision,
@@ -747,6 +786,10 @@ async def explore_data(db: AsyncSession, query: ExploreQuery) -> ExploreOut:
         ("industries", Sponsor.sic_section),
     ):
         out.sections[name] = await buckets(db, ids, column)
+    out.sections["towns"] = [
+        bucket.model_copy(update={"label": place_name(bucket.label)})
+        for bucket in out.sections["towns"]
+    ]
     out.previous_regions = await buckets(db, before, Sponsor.region_itl1)
     daily_prior = [p for p in pubs[:index] if p.published_on < selected.published_on]
     daily_id = daily_prior[-1].id if daily_prior else selected.id

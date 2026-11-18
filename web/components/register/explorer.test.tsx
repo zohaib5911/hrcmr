@@ -41,6 +41,10 @@ describe("RegisterExplorer", () => {
     ).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "List" }));
     expect(screen.getByRole("heading", { name: "Stable Ltd" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Stable Ltd" })).toHaveAttribute(
+      "href",
+      "/sponsors/profile/stable/stable-ltd",
+    );
     expect(screen.getByRole("button", { name: "Previous page" })).toBeDisabled();
     await user.click(screen.getByRole("button", { name: "Next page" }));
     await waitFor(() =>

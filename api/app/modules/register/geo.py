@@ -149,7 +149,8 @@ def normalise_places(content: bytes) -> bytes:
     """Accept the ONS Index of Place Names CSV (columns such as place22nm, cty22nm, ctyhistnm,
     ctyltnm, rgn22cd, ctry22cd, lat, long; the year digits vary by edition) or a file already
     in PLACE_HEADERS form, and return the five-column CSV ``parse_places`` reads. One row per
-    county spelling, so a sponsor's county can match the current, historic or ceremonial name."""
+    county spelling, so a sponsor's county can match the current, historic or ceremonial name,
+    or the region itself."""
     try:
         text = content.decode("utf-8-sig")
     except UnicodeDecodeError:
@@ -183,7 +184,10 @@ def normalise_places(content: bytes) -> bytes:
         region = _ons_region(values, region_codes, region_names)
         if not name or region is None:
             continue
-        for county in {values[c].strip() for c in counties} or {""}:
+        # A sponsor's "county" is often its region ("London", "Greater London"): the region's own
+        # name counts as one more county spelling, so such a town is placed exactly, not guessed.
+        aliases = {region} | ({"Greater London"} if region == "London" else set())
+        for county in ({values[c].strip() for c in counties} or {""}) | aliases:
             key = (normalise(name), normalise(county), region)
             if key in seen:
                 continue
