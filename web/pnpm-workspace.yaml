@@ -3,6 +3,19 @@
 # A version published less than 14 days ago is not installed. This gives the community time to
 # spot and pull a compromised release before it can reach this repository.
 minimumReleaseAge: 20160
+# FIX-dev (2026-11-18, owner-approved): next 16.4.5 fixes GHSA-mfr8-8qww-v76h and
+# GHSA-vc7v-qv4w-wrv8 and is younger than the cooldown. Remove these lines after 2026-11-30.
+minimumReleaseAgeExclude:
+  - "next@16.4.5"
+  - "@next/env@16.4.5"
+  - "@next/swc-darwin-arm64@16.4.5"
+  - "@next/swc-darwin-x64@16.4.5"
+  - "@next/swc-linux-arm64-gnu@16.4.5"
+  - "@next/swc-linux-arm64-musl@16.4.5"
+  - "@next/swc-linux-x64-gnu@16.4.5"
+  - "@next/swc-linux-x64-musl@16.4.5"
+  - "@next/swc-win32-arm64-msvc@16.4.5"
+  - "@next/swc-win32-x64-msvc@16.4.5"
 
 # Dependencies are not allowed to run install scripts unless listed here.
 onlyBuiltDependencies: []
@@ -15,3 +28,11 @@ ignoredBuiltDependencies:
 overrides:
   "@sentry/bundler-plugins>glob": 14.0.2
   "@typescript-eslint/typescript-estree>minimatch": 11.0.1
+
+# FIX-dev (2026-11-18, owner-approved): GHSA-fc5q-39xc-vjpf (picomatch ReDoS) has no patched release.
+# picomatch is reached only through @sentry/nextjs > @rollup/plugin-commonjs, a build-time plugin
+# that matches this project's own file globs, never request input. Remove once a patched picomatch
+# exists (Dependabot will raise it).
+auditConfig:
+  ignoreGhsas:
+    - GHSA-fc5q-39xc-vjpf
