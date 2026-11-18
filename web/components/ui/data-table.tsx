@@ -67,6 +67,8 @@ interface DataTableProps<Row> {
   onSelectedChange?: (ids: ReadonlySet<string>) => void;
   /** Enter on the highlighted row, or a click on the row's open button on phones. */
   onRowOpen?: (row: Row) => void;
+  /** The person is about to open this row (pointer over it, or keyboard on it): fetch ahead. */
+  onRowIntent?: (row: Row) => void;
   /**
    * The actions for one row, as `MenuItem`s. Adds a "more" button to every row, and "." opens the menu
    * of the highlighted row. Leave it out for a table whose rows have no actions.
@@ -136,6 +138,7 @@ export function DataTable<Row>({
   selected,
   onSelectedChange,
   onRowOpen,
+  onRowIntent,
   rowMenu,
   onExport,
   pageSize = 25,
@@ -235,7 +238,10 @@ export function DataTable<Row>({
 
   function moveTo(index: number) {
     const row = shown[Math.min(Math.max(index, 0), shown.length - 1)];
-    if (row) setActiveId(getRowId(row));
+    if (row) {
+      setActiveId(getRowId(row));
+      onRowIntent?.(row);
+    }
   }
 
   function onKeyDown(event: KeyboardEvent<HTMLTableElement>) {
@@ -434,6 +440,8 @@ export function DataTable<Row>({
                     variant="tinted"
                     size="sm"
                     className="self-start"
+                    onFocus={onRowIntent ? () => onRowIntent(row) : undefined}
+                    onPointerEnter={onRowIntent ? () => onRowIntent(row) : undefined}
                     onClick={() => onRowOpen(row)}
                   >
                     Open<span className="sr-only"> {nameOf(row)}</span>
@@ -562,6 +570,7 @@ export function DataTable<Row>({
                   aria-rowindex={index + 1 + (virtual ? 0 : currentPage * pageSize)}
                   data-active={id === activeId || undefined}
                   onDoubleClick={() => onRowOpen?.(row)}
+                  onPointerEnter={onRowIntent ? () => onRowIntent(row) : undefined}
                   className={cn(
                     ROW_HEIGHT[density].class,
                     "border-separator border-b last:border-b-0",

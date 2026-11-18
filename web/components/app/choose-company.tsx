@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { attempt, type Problem } from "@/lib/auth/request";
 
 import type { ShellCompany } from "./shell-types";
+import { clearApiCache } from "@/lib/api/cache";
 
 /** Shown when someone belongs to several companies and has not picked one for this visit. */
 export function ChooseCompany({ companies }: { companies: readonly ShellCompany[] }) {
@@ -23,6 +24,7 @@ export function ChooseCompany({ companies }: { companies: readonly ShellCompany[
       client.POST("/auth/switch-company", { body: { company_id: id } }),
     );
     if (outcome.ok) {
+      clearApiCache();
       router.refresh();
       return;
     }

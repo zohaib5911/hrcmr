@@ -20,6 +20,7 @@ import { monthGrid, todayIso, formatUk, formatUkLong } from "@/lib/ui/dates";
 import { COLOUR_CLASS } from "@/lib/company/holidays";
 import { BalancePanel, days } from "./balances";
 import { RequestSheet, DecisionSheet, type LeaveRequest } from "./request-sheet";
+import { cacheKey, cached, remember } from "@/lib/api/cache";
 
 type Mode = "workspace" | "own" | "approvals";
 export function LeaveHome({ mode = "workspace" }: { mode?: Mode }) {
@@ -126,8 +127,10 @@ export function RequestList({
   changed?: () => void;
 }) {
   const can = useCan();
-  const [rows, setRows] = useState<LeaveRequest[]>([]);
-  const [busy, setBusy] = useState(true);
+  // O6.1.6: the last answer at once (no skeleton when coming back), refreshed in the background.
+  const leaveKey = cacheKey(`/leave/${mode}`);
+  const [rows, setRows] = useState<LeaveRequest[]>(() => cached<LeaveRequest[]>(leaveKey) ?? []);
+  const [busy, setBusy] = useState(() => cached(leaveKey) === undefined);
   const [status, setStatus] = useState("all");
   const [problem, setProblem] = useState<Problem | null>(null);
   const [reviewing, setReviewing] = useState<LeaveRequest | null>(null);
@@ -145,6 +148,7 @@ export function RequestList({
       if (!active) return;
       setBusy(false);
       if (result.ok) {
+        remember(leaveKey, result.data);
         setRows(result.data);
         setProblem(null);
       } else {
@@ -156,7 +160,7 @@ export function RequestList({
     return () => {
       active = false;
     };
-  }, [mode, refresh, version, employeeId]);
+  }, [mode, refresh, version, employeeId, leaveKey]);
   function saved() {
     setReviewing(null);
     setVersion((v) => v + 1);
