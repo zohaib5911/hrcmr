@@ -8,7 +8,7 @@ import type { LucideIcon } from "lucide-react";
 import { rankPages } from "@/lib/search";
 import { cn } from "@/lib/utils";
 
-import { OVERLAY_CLASSES } from "./dialog";
+import { PALETTE_SCRIM_CLASSES } from "./dialog";
 import { Icon } from "./icon";
 
 export interface CommandItem {
@@ -103,14 +103,14 @@ export function CommandPalette({
       }}
     >
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className={OVERLAY_CLASSES} />
+        <DialogPrimitive.Overlay className={PALETTE_SCRIM_CLASSES} />
         <DialogPrimitive.Content
           aria-describedby={undefined}
           className={cn(
-            "material-sheet rounded-sheet shadow-e3 text-label fixed top-[8vh] left-1/2 z-50 flex max-h-[70vh] w-[min(40rem,calc(100vw-1.5rem))] -translate-x-1/2 flex-col overflow-hidden outline-none md:top-[14vh]",
+            "material-modal rounded-sheet shadow-e3 text-label fixed top-[8vh] left-1/2 z-50 flex max-h-[70vh] w-[min(40rem,calc(100vw-1.5rem))] -translate-x-1/2 flex-col overflow-hidden outline-none md:top-[14vh]",
             "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-96",
             "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-96",
-            "duration-[var(--duration-small)] motion-reduce:data-[state=open]:zoom-in-100 motion-reduce:data-[state=closed]:zoom-out-100",
+            "duration-[var(--duration-small)] ease-(--ease-spring) motion-reduce:data-[state=open]:zoom-in-100 motion-reduce:data-[state=closed]:zoom-out-100",
           )}
         >
           <DialogPrimitive.Title className="sr-only">Search</DialogPrimitive.Title>

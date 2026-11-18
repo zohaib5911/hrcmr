@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
+  startTransition,
   useCallback,
   useContext,
   useEffect,
@@ -138,7 +139,25 @@ export function ShortcutProvider({ onToggleSidebar, children }: ShortcutProvider
   const openPalette = useCallback(() => {
     setRecent(readRecent());
     setPaletteLoaded(true);
-    setPaletteOpen(true);
+    // A transition (U6.1.9): React renders the palette's rows in slices, so the key press itself
+    // never waits for the whole list.
+    startTransition(() => setPaletteOpen(true));
+  }, []);
+
+  // Load the palette and the shortcuts sheet (closed) once the page is idle (U6.1.9). They stay out
+  // of the first load (O6.1.4), and opening one is then only a render: on a slow phone, fetching
+  // and running their code at the key press made the first frames of the opening long.
+  useEffect(() => {
+    const warm = () => {
+      setPaletteLoaded(true);
+      setSheetLoaded(true);
+    };
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(warm, { timeout: 4000 });
+      return () => window.cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(warm, 2000);
+    return () => window.clearTimeout(id);
   }, []);
 
   // Remember the page for the palette's "Recent" list.

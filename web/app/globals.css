@@ -232,11 +232,25 @@
   --duration-sheet: 320ms;
   /* How far things travel when they enter; reduced motion leaves only the fade. */
   --motion-distance: 8px;
+  /* U6.1.9: press feedback and the entrance stagger (PRESS, STAGGER in lib/motion.ts). */
+  --press-scale: 0.98;
+  --press-duration: 80ms;
+  --stagger-step: 20ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
     --motion-distance: 0px;
+    --press-scale: 1;
+    --stagger-step: 0ms;
+  }
+}
+
+/* List rows and cards entering (U6.1.9, the stagger-rise utility). */
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    translate: 0 var(--motion-distance);
   }
 }
 
@@ -467,21 +481,19 @@
 
 /* Glass (U6.1.1): thin for cards, regular for floating chrome, thick for menus and sheets. Solid
    when blur is missing or transparency is reduced; solid with a visible edge for more contrast. */
+/* Thin glass is translucent but does not blur (U6.1.9). A page has many cards, and only the soft,
+   almost flat backdrop is behind them, so blurring it changed nothing to see but cost a blur layer
+   per card on every frame of an animation. Real blur stays for the chrome (regular) and for sheets
+   (thick): at most three blurred layers are ever stacked. */
 @utility material-glass-thin {
   background-color: var(--glass-thin);
-  backdrop-filter: saturate(180%) blur(24px);
   box-shadow:
     inset 0 1px 0 var(--glass-highlight),
     0 0 0 1px var(--glass-stroke),
     var(--glass-shadow);
 
-  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-    background-color: var(--bg-elevated);
-  }
-
   @media (prefers-reduced-transparency: reduce) {
     background-color: var(--bg-elevated);
-    backdrop-filter: none;
   }
 
   @media (prefers-contrast: more) {
@@ -536,6 +548,76 @@
     background-color: var(--bg-elevated);
     backdrop-filter: none;
     box-shadow: 0 0 0 1px var(--label-secondary);
+  }
+}
+
+/* List rows and cards fade and rise 8 px on first paint, 20 ms apart, the last starting by 180 ms
+   (lib/motion.ts STAGGER). Off with reduced motion. */
+@utility stagger-rise {
+  & > * {
+    animation: rise-in var(--duration-small) var(--ease-spring) both;
+  }
+
+  & > :nth-child(2) {
+    animation-delay: calc(var(--stagger-step) * 1);
+  }
+
+  & > :nth-child(3) {
+    animation-delay: calc(var(--stagger-step) * 2);
+  }
+
+  & > :nth-child(4) {
+    animation-delay: calc(var(--stagger-step) * 3);
+  }
+
+  & > :nth-child(5) {
+    animation-delay: calc(var(--stagger-step) * 4);
+  }
+
+  & > :nth-child(6) {
+    animation-delay: calc(var(--stagger-step) * 5);
+  }
+
+  & > :nth-child(7) {
+    animation-delay: calc(var(--stagger-step) * 6);
+  }
+
+  & > :nth-child(8) {
+    animation-delay: calc(var(--stagger-step) * 7);
+  }
+
+  & > :nth-child(9) {
+    animation-delay: calc(var(--stagger-step) * 8);
+  }
+
+  & > :nth-child(n + 10) {
+    animation-delay: calc(var(--stagger-step) * 9);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    & > * {
+      animation: none;
+    }
+  }
+}
+
+/* Sheets, dialogs and the palette sit on the blurred scrim (U6.1.9): the page behind is already
+   blurred, so their own surface is the same 92% as material-sheet without a second blur on top. */
+@utility material-modal {
+  background-color: color-mix(in srgb, var(--bg-elevated) 92%, transparent);
+
+  @media (prefers-reduced-transparency: reduce) {
+    background-color: var(--bg-elevated);
+  }
+}
+
+/* The scrim behind sheets and dialogs blurs the page (U6.1.9). The blur itself never animates;
+   only the scrim's opacity fades. No blur when transparency is reduced. */
+@utility scrim-blur {
+  backdrop-filter: blur(8px);
+
+  @media (prefers-reduced-transparency: reduce) {
+    backdrop-filter: none;
   }
 }
 

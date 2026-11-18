@@ -15,10 +15,17 @@ export const DialogClose = DialogPrimitive.Close;
 
 /** The dimmed backdrop's classes. Shared with Sheet and ConfirmDialog (which has its own Radix context). */
 export const OVERLAY_CLASSES = cn(
-  "bg-scrim fixed inset-0 z-50",
-  "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
-  "duration-[var(--duration-small)]",
+  // The scrim blurs the page (U6.1.9) and appears at once: fading a full-screen blur would redraw
+  // the blur on every frame of the fade. The sheet or dialog on top still fades and moves in.
+  "bg-scrim scrim-blur fixed inset-0 z-50",
 );
+
+/**
+ * The command palette's scrim: dimmed, not blurred (decision U6.1.9). The palette is opened often
+ * and must open in one smooth step; a blurred page behind it is redrawn on every frame of its
+ * zoom, which made the opening stutter on slow devices.
+ */
+export const PALETTE_SCRIM_CLASSES = "bg-scrim fixed inset-0 z-50";
 
 export function Overlay({ className, ...props }: ComponentProps<typeof DialogPrimitive.Overlay>) {
   return <DialogPrimitive.Overlay className={cn(OVERLAY_CLASSES, className)} {...props} />;
@@ -62,7 +69,7 @@ export function DialogContent({
       <Overlay />
       <DialogPrimitive.Content
         className={cn(
-          "material-sheet text-label shadow-e3 fixed z-50 flex max-h-[calc(100dvh-2rem)] flex-col outline-none",
+          "material-modal text-label shadow-e3 fixed z-50 flex max-h-[calc(100dvh-2rem)] flex-col outline-none",
           // Phones: a sheet rising from the bottom edge.
           "max-md:inset-x-0 max-md:bottom-0 max-md:rounded-t-sheet max-md:px-5 max-md:pt-3 max-md:pb-[max(1.25rem,env(safe-area-inset-bottom))]",
           "max-md:data-[state=open]:slide-in-from-bottom max-md:data-[state=closed]:slide-out-to-bottom",
@@ -70,7 +77,7 @@ export function DialogContent({
           "md:top-1/2 md:left-1/2 md:w-[min(32rem,calc(100vw-2rem))] md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-sheet md:p-6",
           "md:data-[state=open]:zoom-in-96 md:data-[state=closed]:zoom-out-96",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0",
-          "duration-[var(--duration-sheet)] motion-reduce:data-[state=open]:zoom-in-100 motion-reduce:data-[state=closed]:zoom-out-100 motion-reduce:max-md:data-[state=open]:slide-in-from-bottom-0 motion-reduce:max-md:data-[state=closed]:slide-out-to-bottom-0",
+          "duration-[var(--duration-sheet)] ease-(--ease-spring) motion-reduce:data-[state=open]:zoom-in-100 motion-reduce:data-[state=closed]:zoom-out-100 motion-reduce:max-md:data-[state=open]:slide-in-from-bottom-0 motion-reduce:max-md:data-[state=closed]:slide-out-to-bottom-0",
           className,
         )}
         {...props}

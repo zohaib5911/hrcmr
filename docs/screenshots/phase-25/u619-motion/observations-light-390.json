@@ -1,0 +1,119 @@
+[
+  {
+    "source": "web/app/(app)/dashboard/page.tsx",
+    "route": "/dashboard",
+    "group": "app",
+    "key": "app-dashboard",
+    "url": "http://127.0.0.1:3100/dashboard",
+    "status": 200,
+    "filename": "app-dashboard-light-390.png",
+    "title": "Dashboard | StuffHub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Dashboard",
+        "fontSize": "34px",
+        "lineHeight": "41px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [],
+    "smallTargets": [
+      {
+        "text": "Add your company details",
+        "width": 209,
+        "height": 22
+      },
+      {
+        "text": "Add departments and locations",
+        "width": 245,
+        "height": 22
+      },
+      {
+        "text": "Record a first Right to Work check",
+        "width": 266,
+        "height": 22
+      },
+      {
+        "text": "Add key personnel",
+        "width": 155,
+        "height": 22
+      },
+      {
+        "text": "Review Right to Work",
+        "width": 326,
+        "height": 20
+      },
+      {
+        "text": "Open leave",
+        "width": 326,
+        "height": 20
+      },
+      {
+        "text": "Open learning",
+        "width": 326,
+        "height": 20
+      },
+      {
+        "text": "Open recruitment",
+        "width": 326,
+        "height": 20
+      }
+    ],
+    "errors": [],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif",
+    "axe": []
+  },
+  {
+    "source": "web/app/(app)/employees/[id]/page.tsx",
+    "route": "/employees/[id]",
+    "group": "app",
+    "key": "app-employees-id",
+    "url": "http://127.0.0.1:3100/employees/01a1e8c3-7993-74fd-868c-0f9e2afa99b1",
+    "status": 200,
+    "filename": "app-employees-id-light-390.png",
+    "title": "Employee | StuffHub",
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Nadia Patel",
+        "fontSize": "34px",
+        "lineHeight": "41px",
+        "weight": "700",
+        "background": "rgba(0, 0, 0, 0)",
+        "blur": "none",
+        "border": "0px",
+        "shadow": "none"
+      }
+    ],
+    "overflow": 0,
+    "materials": [],
+    "smallTargets": [
+      {
+        "text": "Employees",
+        "width": 62,
+        "height": 16
+      },
+      {
+        "text": "",
+        "width": 51,
+        "height": 31
+      },
+      {
+        "text": "Signed opt-out agreement",
+        "width": 1,
+        "height": 1
+      }
+    ],
+    "errors": [
+      "No Right to Work check recordedOpen Right to Work to review or record a check."
+    ],
+    "font": "-apple-system, BlinkMacSystemFont, inter, \"inter Fallback\", interExtended, system-ui, \"Segoe UI\", Roboto, sans-serif",
+    "axe": []
+  }
+]

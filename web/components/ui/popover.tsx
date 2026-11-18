@@ -44,6 +44,8 @@ export function PopoverContent({
           "material-sheet rounded-popover shadow-e2 text-body text-label z-50 max-w-[calc(100vw-1.5rem)] outline-none",
           "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
           "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
+          // Grows from its trigger, on the spring (U6.1.9).
+          "origin-(--radix-popover-content-transform-origin) ease-(--ease-spring)",
           "duration-[var(--duration-small)] motion-reduce:data-[state=open]:zoom-in-100 motion-reduce:data-[state=closed]:zoom-out-100",
           className,
         )}

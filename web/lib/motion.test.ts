@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { DURATION, SPRING, countUpSeconds, fade, presets, sheet } from "./motion";
+import {
+  DURATION,
+  PRESS,
+  SPRING,
+  STAGGER,
+  countUpSeconds,
+  fade,
+  presets,
+  pressScale,
+  sheet,
+  staggerDelayMs,
+} from "./motion";
 
 describe("motion tokens (plan 5.5)", () => {
   it("uses the default spring from the plan", () => {
@@ -51,5 +62,31 @@ describe("countUpSeconds", () => {
   it("counts up over 0.8 s, or shows the final number at once when reduced", () => {
     expect(countUpSeconds(false)).toBe(0.8);
     expect(countUpSeconds(true)).toBe(0);
+  });
+});
+
+describe("press feedback (U6.1.9)", () => {
+  it("shrinks to 0.98 for 80 ms", () => {
+    expect(PRESS).toEqual({ scale: 0.98, ms: 80 });
+    expect(pressScale(false)).toBe(0.98);
+  });
+
+  it("keeps its size with reduced motion", () => {
+    expect(pressScale(true)).toBe(1);
+  });
+});
+
+describe("entrance stagger (U6.1.9)", () => {
+  it("starts items 20 ms apart and never later than 180 ms, so a list is under way within 200 ms", () => {
+    expect(STAGGER).toEqual({ stepMs: 20, maxMs: 180 });
+    expect([0, 1, 2, 9, 10, 500].map((i) => staggerDelayMs(i, false))).toEqual([
+      0, 20, 40, 180, 180, 180,
+    ]);
+    expect(staggerDelayMs(-3, false)).toBe(0);
+    expect(STAGGER.maxMs).toBeLessThan(200);
+  });
+
+  it("delays nothing with reduced motion", () => {
+    for (const index of [0, 1, 5, 50]) expect(staggerDelayMs(index, true)).toBe(0);
   });
 });
