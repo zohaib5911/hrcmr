@@ -82,6 +82,8 @@ test("[ collapses and expands the sidebar, and typing in the palette does not tr
   await expect.poll(async () => (await sidebar.boundingBox())?.width ?? 0).toBe(wide);
 
   await page.keyboard.press("Control+k");
+  // The palette loads on demand (O6.1.4): type once it is there, as a person does.
+  await expect(palette(page)).toBeFocused();
   await page.keyboard.type("g?[n");
   await expect(palette(page)).toHaveValue("g?[n");
   await expect(sheet(page)).toBeHidden();
