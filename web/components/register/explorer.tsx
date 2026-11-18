@@ -14,6 +14,9 @@ type Data = components["schemas"]["ExploreOut"];
 type Sponsor = components["schemas"]["SponsorOut"];
 type Bucket = components["schemas"]["Bucket"];
 type Query = NonNullable<paths["/public/register/explore"]["get"]["parameters"]["query"]>;
+
+/** How long the search box waits after the last key before it searches (O6.1.3). */
+export const SEARCH_PAUSE_MS = 250;
 type View = "Map" | "Trend" | "Table" | "List";
 const control =
   "bg-elevated border-separator text-label rounded-control min-h-11 w-full border px-3 py-2";
@@ -225,6 +228,18 @@ export function RegisterExplorer() {
   const data = response?.data;
   const update = (patch: Partial<Query>) =>
     setQuery((current) => ({ ...current, page: 1, ...patch }));
+  // Search as the visitor types, once they pause (O6.1.3): 250 ms after the last key, and only for
+  // two characters or more (or an empty box, which clears the search). One letter matches most of
+  // the register and is never sent.
+  const term = search.trim();
+  useEffect(() => {
+    if (term.length === 1 || term === (query.q ?? "")) return;
+    const wait = window.setTimeout(
+      () => setQuery((current) => ({ ...current, page: 1, q: term })),
+      SEARCH_PAUSE_MS,
+    );
+    return () => window.clearTimeout(wait);
+  }, [term, query.q]);
   const selectedIndex = Math.max(
     0,
     data?.publications?.findIndex((p) => p.id === data.selected?.id) ?? 0,
@@ -241,7 +256,7 @@ export function RegisterExplorer() {
         className="flex flex-wrap items-end gap-3"
         onSubmit={(event) => {
           event.preventDefault();
-          update({ q: search });
+          if (term.length !== 1) update({ q: term });
         }}
       >
         <label className="min-w-0 flex-1">

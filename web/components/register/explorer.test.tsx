@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { registerFixture } from "@/tests/fixtures/register";
-import { RegisterExplorer } from "./explorer";
+import { RegisterExplorer, SEARCH_PAUSE_MS } from "./explorer";
 
 const get = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/auth/request", () => ({
@@ -114,5 +114,38 @@ describe("RegisterExplorer", () => {
     expect(screen.getByText(/No sponsors match these filters/)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Table" }));
     expect(screen.getByRole("button", { name: "Next page" })).toBeDisabled();
+  });
+
+  it("searches once the visitor pauses, and never for a single letter (O6.1.3)", async () => {
+    render(<RegisterExplorer />);
+    await ready();
+    get.mockClear();
+    vi.useFakeTimers();
+    const pause = (ms: number) => act(() => vi.advanceTimersByTimeAsync(ms));
+    try {
+      const box = screen.getByRole("searchbox");
+      fireEvent.change(box, { target: { value: "L" } });
+      await pause(SEARCH_PAUSE_MS * 2);
+      expect(get).not.toHaveBeenCalled();
+
+      for (const value of ["Le", "Lee", "Leed", "Leeds"]) {
+        fireEvent.change(box, { target: { value } });
+        await pause(SEARCH_PAUSE_MS - 50);
+      }
+      expect(get).not.toHaveBeenCalled();
+      await pause(50);
+      expect(get).toHaveBeenCalledTimes(1);
+      expect(get).toHaveBeenLastCalledWith("/public/register/explore", {
+        params: { query: { window: "30", page: 1, q: "Leeds" } },
+      });
+
+      fireEvent.change(box, { target: { value: "" } });
+      await pause(SEARCH_PAUSE_MS);
+      expect(get).toHaveBeenLastCalledWith("/public/register/explore", {
+        params: { query: { window: "30", page: 1, q: "" } },
+      });
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

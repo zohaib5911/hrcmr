@@ -1,6 +1,6 @@
 """Trigram indexes for search anywhere in a name (O6.1.3): the public sponsor explorer (organisation
-name and town) and the in-app search (employee and candidate full names). pg_trgm serves
-`lower(x) LIKE '%text%'`, which a b-tree cannot. EXPLAIN checks in tests/db/test_performance.py."""
+name and town, searched with ILIKE) and the in-app search (employee and candidate full names,
+`lower(first || ' ' || last) LIKE`). pg_trgm serves both with a leading wildcard; a b-tree cannot. EXPLAIN checks in tests/db/test_performance.py."""
 
 from __future__ import annotations
 
@@ -24,15 +24,15 @@ def upgrade() -> None:
     op.create_index(
         "ix_register_sponsors_name_trgm",
         "register_sponsors",
-        [sa.func.lower(sa.column("organisation_name")).label("name")],
+        ["organisation_name"],
         postgresql_using="gin",
-        postgresql_ops={"name": "gin_trgm_ops"},
+        postgresql_ops={"organisation_name": "gin_trgm_ops"},
         if_not_exists=True,
     )
     op.create_index(
         "ix_register_sponsors_town_trgm",
         "register_sponsors",
-        [sa.func.lower(sa.column("town")).label("town")],
+        ["town"],
         postgresql_using="gin",
         postgresql_ops={"town": "gin_trgm_ops"},
         if_not_exists=True,

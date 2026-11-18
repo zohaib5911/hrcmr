@@ -134,6 +134,23 @@ EXPLAINED = {
         "order by start_date desc, id desc limit 200",
         "ix_leave_requests_company_id_start_date",
     ),
+    # O6.1.3: search anywhere in a name, as the queries write it (lower(x) LIKE '%text%').
+    "public sponsor search by name": (
+        "select id from register_sponsors where organisation_name ilike '%' || 'care' || '%'",
+        "ix_register_sponsors_name_trgm",
+    ),
+    "public sponsor search by town": (
+        "select id from register_sponsors where town ilike '%' || 'leed' || '%'",
+        "ix_register_sponsors_town_trgm",
+    ),
+    "people search by full name": (
+        "select id from employees where lower(first_name || ' ' || last_name) like '%ira ha%'",
+        "ix_employees_full_name_trgm",
+    ),
+    "candidate search by full name": (
+        "select id from candidates where lower(first_name || ' ' || last_name) like '%ira ha%'",
+        "ix_candidates_full_name_trgm",
+    ),
     "attendance for a month": (
         "select id from attendance_records where company_id = :c "
         "and date between current_date - 30 and current_date order by date desc limit 50",
