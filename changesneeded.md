@@ -160,7 +160,7 @@ What is there today (from the Phase 25 screenshots and `web/app/globals.css`): a
 - **Fix:** plan chip uses `accent-tint`/`accent-text`; avatars take a tint from a fixed 6-colour set derived from the accent hue (chosen by a hash of the name) with the same lightness in each theme; the progress bar uses the accent (C6.1.12). Status colours stay for status only.
 - **Done when:** the design-audit page lists no non-token colours; contrast tests pass.
 
-### [ ] U6.1.8 · P2 · B · Give the marketing site something to look at
+### [x] U6.1.8 · P2 · B · Give the marketing site something to look at — fixed in PR #167
 - **Problem:** the home page (`public-light-1280.png`) is text and outlined boxes only: no product picture, an almost empty "Know what is due" panel, a flat lavender band, nothing that builds trust.
 - **Fix:** hero: the ambient backdrop (U6.1.2) and a real product shot (the dashboard, in a glass window frame, light and dark variants, `next/image` with `priority` and fixed dimensions so nothing shifts). Feature cards on `material-glass-thin` with a hover lift. "Know what is due": a small reminder list that looks like the product instead of one line. Closing band: accent gradient with a glass call-to-action card. Add a short trust row (where data is kept, the security page, the free tools). Keep every claim true; no invented customer logos or figures.
 - **Done when:** Lighthouse on `/` keeps LCP under 2.5 s and CLS under 0.1 on mobile; a11y spec passes; screenshots updated.
