@@ -21,7 +21,7 @@ from app.db.session import GlobalSession
 from app.main import create_app
 from app.modules.auth.sessions import SessionStore
 from tests.db.support import DatabaseUnderTest, engine_for
-from tests.support import TEST_REDIS_URL, build_settings, step_up
+from tests.support import TEST_REDIS_URL, build_settings, csrf_ready, step_up
 
 API = "/api/v1"
 TENANT_COOKIE = "brand_session"
@@ -59,8 +59,7 @@ async def _rig(
         client = httpx.AsyncClient(transport=transport, base_url="http://test")
         for name, value in cookies.items():
             client.cookies.set(name, value)
-        client.cookies.set("csrf", "t")
-        client.headers["X-CSRF-Token"] = "t"
+        csrf_ready(client, app)
         return client
 
     async def admin(

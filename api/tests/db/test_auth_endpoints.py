@@ -23,11 +23,10 @@ from app.db.session import GlobalSession
 from app.main import create_app
 from app.modules.auth.invitations import create_invitation
 from tests.db.support import DatabaseUnderTest, engine_for
-from tests.support import TEST_REDIS_URL, build_settings
+from tests.support import TEST_REDIS_URL, build_settings, csrf_ready
 
 PASSWORD = "a long, unusual passphrase 42"
 NEW_PASSWORD = "another long, unusual passphrase 77"
-CSRF = "a-test-csrf-token"
 # The audit trail cannot be emptied between tests (that is the point of it), so ask only about the
 # companies this test created.
 AUDIT_ACTIONS = "select action from audit_events where company_id in (select id from companies)"
@@ -66,8 +65,7 @@ class World:
     def new_browser(self) -> httpx.AsyncClient:
         transport = self.client._transport
         browser = httpx.AsyncClient(transport=transport, base_url="http://test")
-        browser.cookies.set("csrf", CSRF)
-        browser.headers["X-CSRF-Token"] = CSRF
+        csrf_ready(browser, transport.app)  # type: ignore[attr-defined]
         return browser
 
 
@@ -87,8 +85,7 @@ async def world(database: DatabaseUnderTest) -> AsyncIterator[World]:
     async with LifespanManager(app):
         transport = httpx.ASGITransport(app=app, raise_app_exceptions=False)
         async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
-            client.cookies.set("csrf", CSRF)
-            client.headers["X-CSRF-Token"] = CSRF
+            csrf_ready(client, app)
             yield World(client, mail, database, redis)
     await redis.flushdb()
     await redis.aclose()

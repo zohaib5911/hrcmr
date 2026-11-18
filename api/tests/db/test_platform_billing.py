@@ -257,7 +257,7 @@ async def test_a_ten_year_refund_ends_the_plan_and_the_later_webhook_changes_not
     body = json.dumps(event).encode()
     stripe = anonymous(rig)
     stripe.cookies.clear()  # Stripe has no browser: no cookie and no CSRF header
-    del stripe.headers["X-CSRF-Token"]
+    stripe.headers.pop("X-CSRF-Token", None)
     async with stripe:
         sent = await stripe.post(
             f"{API}/webhooks/stripe",

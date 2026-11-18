@@ -15,7 +15,7 @@ from pydantic import BaseModel
 from app.core.config import Settings
 from app.core.errors import ConflictError, ForbiddenError, NotFoundError, PlanRequiredError
 from app.main import create_app
-from tests.support import build_settings
+from tests.support import build_settings, csrf_ready
 from tests.test_config import DEPLOYED_EXTRAS
 
 
@@ -74,8 +74,7 @@ async def client(capsys: pytest.CaptureFixture[str]) -> AsyncIterator[httpx.Asyn
         async with httpx.AsyncClient(transport=transport, base_url="http://test") as http:
             capsys.readouterr()
             # Like a browser that already has its CSRF cookie and sends the matching header.
-            http.cookies.set("csrf", "a-test-csrf-token")
-            http.headers["X-CSRF-Token"] = "a-test-csrf-token"
+            csrf_ready(http, app)
             yield http
 
 

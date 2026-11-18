@@ -242,6 +242,12 @@ def create_app(settings: Settings | None = None, *, mailer: Mailer | None = None
     )
     app.add_middleware(
         CsrfMiddleware,
+        secret=settings.session_secret.get_secret_value(),
+        session_cookies=(
+            settings.session_cookie_name,
+            settings.platform_session_cookie_name,
+            settings.support_session_cookie_name,
+        ),
         secure=settings.app_env.is_deployed,
         cookie_domain=f".{settings.domain}" if settings.app_env.is_deployed else None,
     )
