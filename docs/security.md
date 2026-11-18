@@ -97,6 +97,17 @@ flowchart LR
 
 - Scripts use a per-request nonce plus `strict-dynamic`; there is no `'unsafe-inline'` for scripts (`web/lib/security/csp.ts`).
 - `<style>` elements use the nonce too.
+- **Every page is rendered per request, including the public site (O6.1.1, decision 2026-11-16).**
+  A nonce must be new for every response, so a page carrying one cannot be prebuilt or cached at the
+  edge (a cached page would hand the same nonce to every visitor). The hash-based alternative,
+  Next.js `experimental.sri`, was tested on Next.js 16.4.2 with a minimal static App Router page:
+  external chunks get `integrity`, but the inline `self.__next_f` flight scripts carry neither nonce
+  nor hash, so under `script-src 'self'` the browser blocks them and the page never hydrates.
+  `proxy.ts` cannot add per-page hashes (it never sees the response body), and they change on every
+  ISR regeneration. Static or ISR marketing pages would therefore need `'unsafe-inline'`, which is
+  not accepted. What is cached instead: the register pages' API data (`registerGet` uses
+  `fetch` `next.revalidate`) and every `/_next/static` file (`docs/runbooks/cloudflare-edge.md`).
+  Revisit when Next.js hashes or nonces its inline flight scripts in static output.
 - **Accepted exception:** `style-src-attr 'unsafe-inline'`. The animation library sets `style` attributes at run time (transforms and opacity while a layer opens, closes or slides), and a nonce cannot be attached to an attribute. It allows inline `style="..."` attributes only; it does not allow `<style>` elements or any script. Components may not use the `style` prop themselves (an ESLint rule bans it), so the exception is not used by our own markup. Decided by the owner on 2026-11-02.
 
 ### The visitor's IP address
