@@ -106,7 +106,7 @@ test("a profile opens from the list, moves through the lifecycle, and then can o
   await page.getByLabel("Employee number", { exact: true }).fill("E500");
   await page.getByLabel("Hire date", { exact: true }).fill("6 Jan 2025");
   await page.getByRole("button", { name: "Add employee" }).click();
-  await page.getByRole("grid", { name: "Employees" }).getByText("Cara Doyle").dblclick();
+  await page.getByRole("grid", { name: "Employees" }).getByText("Cara Doyle").click();
 
   await expect(page.getByRole("heading", { level: 1, name: "Cara Doyle" })).toBeVisible();
   await expect(

@@ -30,7 +30,7 @@ test("list, then a candidate, then back: the list is there at once and refreshes
   );
   await row.hover();
   await ahead;
-  await row.dblclick();
+  await row.click();
   await expect(page).toHaveURL(new RegExp(`/recruitment/candidates/${candidateId}$`));
   await expect(page.getByRole("heading", { level: 1, name })).toBeVisible();
 
