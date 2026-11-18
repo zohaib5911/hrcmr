@@ -11,9 +11,11 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
+    Index,
     LargeBinary,
     String,
     UniqueConstraint,
+    column,
     func,
 )
 from sqlalchemy.orm import Mapped, mapped_column
@@ -59,7 +61,23 @@ class CompanyDataset(Base, UUIDPrimaryKeyMixin):
 
 class Sponsor(Base, UUIDPrimaryKeyMixin):
     __tablename__ = "register_sponsors"
-    __table_args__ = (UniqueConstraint("normalised_name", "town", "county"),)
+    __table_args__ = (
+        UniqueConstraint("normalised_name", "town", "county"),
+        # The public explorer searches anywhere in the name or town (O6.1.3): trigram indexes serve
+        # `lower(x) LIKE '%text%'`, which a b-tree cannot.
+        Index(
+            "ix_register_sponsors_name_trgm",
+            func.lower(column("organisation_name")).label("name"),
+            postgresql_using="gin",
+            postgresql_ops={"name": "gin_trgm_ops"},
+        ),
+        Index(
+            "ix_register_sponsors_town_trgm",
+            func.lower(column("town")).label("town"),
+            postgresql_using="gin",
+            postgresql_ops={"town": "gin_trgm_ops"},
+        ),
+    )
     stable_id: Mapped[str] = mapped_column(
         String(32), unique=True, default=lambda: uuid.uuid4().hex
     )

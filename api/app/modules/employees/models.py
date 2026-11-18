@@ -148,6 +148,15 @@ class Employee(Base, RecordMixin, TenantMixin):
             unique=True,
         ),
         Index("ix_employees_company_id_status", "company_id", "status"),
+        # Search by full name anywhere in it (O6.1.3, search/router.py).
+        Index(
+            "ix_employees_full_name_trgm",
+            func.lower(
+                column("first_name").op("||")(literal_column("' '")).op("||")(column("last_name"))
+            ).label("full_name"),
+            postgresql_using="gin",
+            postgresql_ops={"full_name": "gin_trgm_ops"},
+        ),
         Index(
             "ix_employees_company_id_name",
             "company_id",

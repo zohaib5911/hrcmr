@@ -13,12 +13,16 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     Numeric,
     String,
     Text,
     UniqueConstraint,
     Uuid,
+    column,
+    func,
+    literal_column,
 )
 from sqlalchemy.dialects.postgresql import ARRAY, JSONB
 from sqlalchemy.orm import Mapped, mapped_column
@@ -119,6 +123,15 @@ class Candidate(Base, RecordMixin, TenantMixin):
     __tablename__ = "candidates"
     __table_args__ = (
         UniqueConstraint("company_id", "id", name="uq_candidates_company_id_id"),
+        # Search by full name anywhere in it (O6.1.3, search/router.py).
+        Index(
+            "ix_candidates_full_name_trgm",
+            func.lower(
+                column("first_name").op("||")(literal_column("' '")).op("||")(column("last_name"))
+            ).label("full_name"),
+            postgresql_using="gin",
+            postgresql_ops={"full_name": "gin_trgm_ops"},
+        ),
         CheckConstraint("length(trim(first_name)) > 0", name="first_name"),
         CheckConstraint("length(trim(last_name)) > 0", name="last_name"),
     )
