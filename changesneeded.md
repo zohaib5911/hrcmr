@@ -97,7 +97,7 @@ What was scanned: all 436 API routes mapped to their permission guard (the only 
 - **Fix:** run them off the loop: `await asyncio.to_thread(verify_password, …)` at each call site (argon2-cffi releases the GIL while hashing). Add a module-level `asyncio.Semaphore(2)` around them so a login flood cannot take 64 MB × many threads.
 - **Done when:** a test starts a slow fake hash and shows `/health` still answers meanwhile; auth tests pass.
 
-### [ ] O6.1.3 · P1 · Public sponsor search scans the whole register on every keystroke
+### [x] O6.1.3 · P1 · Public sponsor search scans the whole register on every keystroke — fixed in PR #173
 - **Problem:** `GET /public/register/explore?q=` (`api/app/modules/register/public.py:613`) and the in-app search (`search/router.py:66`, recruitment, documents, policies) use `ILIKE '%text%'` / `lower(x) LIKE '%text%'`. `pg_trgm` is installed (`alembic/versions/20261101_0001_foundations.py:23`) but only the SOC table has a trigram index, so these are full scans; the register one is public and unauthenticated.
 - **Fix:** one migration adding GIN trigram indexes (`gin_trgm_ops`) on `register_sponsors.organisation_name` and `register_sponsors.town`, and expression indexes on `lower(first_name || ' ' || last_name)` for `employees` and `candidates` (PostgreSQL docs, pg_trgm: these serve `LIKE`/`ILIKE` with a leading wildcard). Debounce the explorer input by 250 ms and require 2+ characters in `web/components/register/explorer.tsx`.
 - **Done when:** `EXPLAIN` of the explore query on the loaded register shows a bitmap index scan; `docs/data-model.md` regenerated; `check-rls` passes.
