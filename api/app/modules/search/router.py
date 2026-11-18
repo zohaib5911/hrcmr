@@ -11,7 +11,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel
-from sqlalchemy import func, or_, select
+from sqlalchemy import ColumnElement, func, literal_column, or_, select
 
 from app.core.rbac_matrix import Scope, scope_for
 from app.modules.employees.models import Employee
@@ -21,6 +21,9 @@ from app.modules.recruitment.models import Candidate
 router = APIRouter(tags=["search"])
 Searcher = Annotated[Access, Depends(require("company.overview.read"))]
 LIMIT = 8
+# A literal space, not a bound parameter, so `lower(first_name || ' ' || last_name)` matches the
+# trigram indexes on employees and candidates exactly, in every plan (O6.1.3).
+SPACE: ColumnElement[str] = literal_column("' '")
 CURRENT = ("active", "on_leave")
 
 
@@ -53,7 +56,7 @@ async def search(access: Searcher, q: Annotated[str, Query(max_length=100)] = ""
         return SearchOut(people=[], candidates=[])
     people: list[PersonHitOut] = []
     if _company_wide(access.role, "employee.profile.read"):
-        full_name = func.lower(Employee.first_name + " " + Employee.last_name)
+        full_name = func.lower(Employee.first_name + SPACE + Employee.last_name)
         rows = (
             await access.db.execute(
                 select(
@@ -82,7 +85,7 @@ async def search(access: Searcher, q: Annotated[str, Query(max_length=100)] = ""
         ]
     candidates: list[CandidateHitOut] = []
     if _company_wide(access.role, "recruitment.candidate.read"):
-        candidate_name = func.lower(Candidate.first_name + " " + Candidate.last_name)
+        candidate_name = func.lower(Candidate.first_name + SPACE + Candidate.last_name)
         candidate_rows = (
             await access.db.execute(
                 select(Candidate.id, Candidate.first_name, Candidate.last_name)
