@@ -83,6 +83,13 @@ async function withoutBackdrop<T>(page: Page, run: () => Promise<T>): Promise<T>
       for (const element of document.querySelectorAll<HTMLElement>("[data-ambient-backdrop]")) {
         element.style.visibility = hide ? "hidden" : "";
       }
+      // Rows that arrived after settled() may still be rising in (U6.1.9 stagger-rise): axe must
+      // judge the colours they settle at, so any finite animation is finished now.
+      if (hide) {
+        for (const animation of document.getAnimations()) {
+          if (animation.effect?.getComputedTiming().iterations !== Infinity) animation.finish();
+        }
+      }
     }, hidden);
   await toggle(true);
   try {

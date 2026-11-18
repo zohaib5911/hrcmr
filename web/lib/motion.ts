@@ -72,10 +72,3 @@ export function staggerDelayMs(index: number, reduced: boolean): number {
   if (reduced) return 0;
   return Math.min(Math.max(index, 0) * STAGGER.stepMs, STAGGER.maxMs);
 }
-
-/** The cross-fade between pages (view transitions, where the browser supports them). */
-export const PAGE_FADE = { outMs: 120, inMs: 160 } as const;
-
-export function pageFadeMs(reduced: boolean): { outMs: number; inMs: number } {
-  return reduced ? { outMs: 0, inMs: 0 } : PAGE_FADE;
-}

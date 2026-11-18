@@ -2,13 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   DURATION,
-  PAGE_FADE,
   PRESS,
   SPRING,
   STAGGER,
   countUpSeconds,
   fade,
-  pageFadeMs,
   presets,
   pressScale,
   sheet,
@@ -90,16 +88,5 @@ describe("entrance stagger (U6.1.9)", () => {
 
   it("delays nothing with reduced motion", () => {
     for (const index of [0, 1, 5, 50]) expect(staggerDelayMs(index, true)).toBe(0);
-  });
-});
-
-describe("page cross-fade (U6.1.9)", () => {
-  it("fades out in 120 ms and in over 160 ms", () => {
-    expect(PAGE_FADE).toEqual({ outMs: 120, inMs: 160 });
-    expect(pageFadeMs(false)).toEqual(PAGE_FADE);
-  });
-
-  it("swaps at once with reduced motion", () => {
-    expect(pageFadeMs(true)).toEqual({ outMs: 0, inMs: 0 });
   });
 });

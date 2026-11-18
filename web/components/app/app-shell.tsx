@@ -5,7 +5,6 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { ToastProvider } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AmbientBackdrop } from "@/components/ui/ambient-backdrop";
-import { PageTransition } from "./page-transition";
 import { saveSidebarState } from "@/lib/sidebar-dom";
 import type { ThemeChoice } from "@/lib/theme";
 
@@ -86,7 +85,7 @@ export function AppShell({
               >
                 <PlanBanner />
                 <AnnouncementBanner />
-                <PageTransition>{children}</PageTransition>
+                {children}
               </main>
             </div>
             <MobileTabBar />

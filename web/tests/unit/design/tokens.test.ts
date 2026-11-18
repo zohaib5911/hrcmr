@@ -18,7 +18,7 @@ import {
   TYPE_STYLES,
 } from "../../../lib/design/catalog";
 import { composite, contrastRatio } from "../../../lib/design/contrast";
-import { DURATION, PAGE_FADE, PRESS, STAGGER } from "../../../lib/motion";
+import { DURATION, PRESS, STAGGER } from "../../../lib/motion";
 import {
   BRANDED_DARK,
   BRANDED_LIGHT,
@@ -289,19 +289,15 @@ describe("U6.1.9 motion numbers in CSS match lib/motion.ts, and reduced motion s
     blockBody(GLOBALS_CSS, /@media \(prefers-reduced-motion: reduce\)\s*\{\s*:root\s*\{/),
   );
 
-  it("press, stagger and page fade", () => {
+  it("press and stagger", () => {
     expect(root.get("--press-scale")).toBe(String(PRESS.scale));
     expect(root.get("--press-duration")).toBe(`${PRESS.ms}ms`);
     expect(root.get("--stagger-step")).toBe(`${STAGGER.stepMs}ms`);
-    expect(root.get("--page-fade-out")).toBe(`${PAGE_FADE.outMs}ms`);
-    expect(root.get("--page-fade-in")).toBe(`${PAGE_FADE.inMs}ms`);
   });
 
-  it("reduced motion: no press scale, no stagger, no page fade, no travel", () => {
+  it("reduced motion: no press scale, no stagger, no travel", () => {
     expect(reduced.get("--press-scale")).toBe("1");
     expect(reduced.get("--stagger-step")).toBe("0ms");
-    expect(reduced.get("--page-fade-out")).toBe("0ms");
-    expect(reduced.get("--page-fade-in")).toBe("0ms");
     expect(reduced.get("--motion-distance")).toBe("0px");
   });
 
