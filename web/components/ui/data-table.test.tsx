@@ -157,6 +157,28 @@ describe("DataTable selection", () => {
   });
 });
 
+describe("DataTable opening a row", () => {
+  it("opens on one click, once for a double click, and not from a control inside the row", async () => {
+    const user = userEvent.setup();
+    const onRowOpen = vi.fn();
+    render(
+      <Table selectable selected={new Set()} onSelectedChange={() => {}} onRowOpen={onRowOpen} />,
+    );
+    const grid = screen.getByRole("grid", { name: "People" });
+    await user.click(within(grid).getByText("Ada Lovelace"));
+    expect(onRowOpen).toHaveBeenCalledTimes(1);
+    expect(onRowOpen).toHaveBeenLastCalledWith(expect.objectContaining({ id: "2" }));
+
+    onRowOpen.mockClear();
+    await user.dblClick(within(grid).getByText("Alan Turing"));
+    expect(onRowOpen).toHaveBeenCalledTimes(1);
+
+    onRowOpen.mockClear();
+    await user.click(screen.getByRole("checkbox", { name: "Select Grace Hopper" }));
+    expect(onRowOpen).not.toHaveBeenCalled();
+  });
+});
+
 describe("DataTable keyboard", () => {
   it("J and K move the highlight, Enter opens the row, Space selects it", async () => {
     const onRowOpen = vi.fn();

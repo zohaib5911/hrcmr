@@ -50,7 +50,7 @@ test("a new free company subscribes, adds its first employee and reviews their R
     await page.getByLabel("Employee number", { exact: true }).fill("FIRST-1");
     await page.getByLabel("Hire date", { exact: true }).fill("6 Jan 2025");
     await page.getByRole("button", { name: "Add employee", exact: true }).click();
-    await page.getByRole("grid", { name: "Employees" }).getByText("Ravi Onboarding").dblclick();
+    await page.getByRole("grid", { name: "Employees" }).getByText("Ravi Onboarding").click();
     await expect(page.getByRole("heading", { name: "Ravi Onboarding", exact: true })).toBeVisible();
     const employee = page.url().split("/").at(-1)!;
     const users = await context.request.get(`${API}/users`);

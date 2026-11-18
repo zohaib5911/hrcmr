@@ -19,6 +19,7 @@ import {
   useState,
   useSyncExternalStore,
   type KeyboardEvent,
+  type MouseEvent,
   type ReactNode,
 } from "react";
 
@@ -48,6 +49,10 @@ export interface Column<Row> {
 }
 
 type Density = "comfortable" | "compact";
+/** Elements inside a row that handle their own clicks: the row does not open for these. */
+const OWN_CLICK =
+  'a, button, input, select, textarea, label, [role="button"], [role="menuitem"], [role="checkbox"], [role="switch"], [role="menu"]';
+
 const ROW_HEIGHT: Record<Density, { class: string; estimate: number }> = {
   comfortable: { class: "h-13", estimate: 52 },
   compact: { class: "h-9", estimate: 36 },
@@ -234,6 +239,16 @@ export function DataTable<Row>({
       else next.delete(getRowId(row));
     }
     onSelectedChange(next);
+  }
+
+  // One click on a row opens it (it used to take a double-click). Clicks on something inside the row
+  // that does its own thing (a link, a button, a checkbox, a menu, a field) are left to it; so is
+  // selecting text, and the second click of a double-click, so nothing opens twice.
+  function openFromClick(event: MouseEvent<HTMLTableRowElement>, row: Row) {
+    if (!onRowOpen || event.detail > 1) return;
+    if ((event.target as HTMLElement).closest(OWN_CLICK)) return;
+    if (window.getSelection()?.toString()) return;
+    onRowOpen(row);
   }
 
   function moveTo(index: number) {
@@ -569,11 +584,12 @@ export function DataTable<Row>({
                   aria-selected={selectable ? isPicked : undefined}
                   aria-rowindex={index + 1 + (virtual ? 0 : currentPage * pageSize)}
                   data-active={id === activeId || undefined}
-                  onDoubleClick={() => onRowOpen?.(row)}
+                  onClick={onRowOpen ? (event) => openFromClick(event, row) : undefined}
                   onPointerEnter={onRowIntent ? () => onRowIntent(row) : undefined}
                   className={cn(
                     ROW_HEIGHT[density].class,
                     "border-separator border-b last:border-b-0",
+                    onRowOpen && "hover:bg-fill-secondary cursor-pointer transition-colors",
                     isPicked && "bg-accent-tint",
                     "data-[active]:group-focus-visible/table:ring-accent data-[active]:group-focus-visible/table:ring-2 data-[active]:group-focus-visible/table:ring-inset",
                   )}

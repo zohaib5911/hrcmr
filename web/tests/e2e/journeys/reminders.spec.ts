@@ -114,7 +114,7 @@ test("Reminder review saves and snoozes explicitly, sends once and keeps receive
   const history = page.getByRole("grid", { name: "Sent reminder history", exact: true });
   await expect(history.getByText("Amira Hassan", { exact: true })).toBeVisible();
   await expect(history.getByText("Email queued", { exact: true })).toBeVisible();
-  await history.getByText("Kai Reed", { exact: true }).dblclick();
+  await history.getByText("Kai Reed", { exact: true }).click();
   await expect(dialog.getByText(/^Sent by Amira Hassan on /)).toBeVisible();
   await expect(dialog.getByRole("button", { name: "Send reminder", exact: true })).toHaveCount(0);
   await expect(

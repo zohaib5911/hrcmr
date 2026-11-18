@@ -156,7 +156,7 @@ test("Organisation changes calculate twenty days, retain reports and handle prom
   await expect(dialog).not.toBeVisible();
   expect(saves).toBe(1);
   const grid = page.getByRole("grid", { name: "Organisation changes", exact: true });
-  await grid.getByText("Address changed", { exact: true }).dblclick();
+  await grid.getByText("Address changed", { exact: true }).click();
   const details = page.getByRole("dialog", { name: "Change details", exact: true });
   await details.getByRole("button", { name: "Edit entry", exact: true }).click();
   dialog = page.getByRole("dialog", { name: "Edit organisation change", exact: true });
@@ -168,7 +168,7 @@ test("Organisation changes calculate twenty days, retain reports and handle prom
   await dialog.getByRole("button", { name: "Save", exact: true }).click();
   await expect(dialog).not.toBeVisible();
   expect(saves).toBe(2);
-  await grid.getByText("Ownership changed", { exact: true }).dblclick();
+  await grid.getByText("Ownership changed", { exact: true }).click();
   await details.getByRole("button", { name: "Mark as reported", exact: true }).click();
   dialog = page.getByRole("dialog", { name: "Mark as reported", exact: true });
   await dialog.getByLabel("Date reported in SMS", { exact: true }).fill("1 Oct 2026");
@@ -177,7 +177,7 @@ test("Organisation changes calculate twenty days, retain reports and handle prom
   await expect(dialog).not.toBeVisible();
   expect(saves).toBe(3);
   await expect(grid.getByText("Reported", { exact: true })).toBeVisible();
-  await grid.getByText("Ownership changed", { exact: true }).dblclick();
+  await grid.getByText("Ownership changed", { exact: true }).click();
   await expect(details.getByText("Reported after the deadline", { exact: true })).toBeVisible();
   await expect(details.getByRole("button", { name: "Edit entry", exact: true })).toHaveCount(0);
   await expect(details.getByRole("button", { name: "Archive entry", exact: true })).toHaveCount(0);
@@ -193,9 +193,7 @@ test("Organisation changes calculate twenty days, retain reports and handle prom
   await dialog.getByRole("button", { name: "Save", exact: true }).click();
   await expect(dialog).not.toBeVisible();
   expect(saves).toBe(4);
-  await grid
-    .getByText("Authorising Officer or Key Contact replacement", { exact: true })
-    .dblclick();
+  await grid.getByText("Authorising Officer or Key Contact replacement", { exact: true }).click();
   await expect(details.getByText("Report promptly", { exact: true })).toBeVisible();
   await details.getByRole("button", { name: "Archive entry", exact: true }).click();
   dialog = page.getByRole("dialog", { name: "Archive organisation entry", exact: true });

@@ -14,7 +14,7 @@ test("create a requisition, approve it, and cancel another after confirming", as
   const approved = page.getByRole("row", { name: /Warehouse operative/ });
   await expect(approved.getByText("Draft", { exact: true })).toBeVisible();
 
-  await approved.dblclick();
+  await approved.click();
   const edit = page.getByRole("dialog", { name: "Requisition", exact: true });
   await edit.getByLabel("Status", { exact: true }).selectOption("open");
   await edit.getByRole("button", { name: "Save changes", exact: true }).click();
@@ -28,7 +28,7 @@ test("create a requisition, approve it, and cancel another after confirming", as
   await second.getByRole("button", { name: "Create requisition", exact: true }).click();
   await expect(second).toBeHidden();
   const cancelled = page.getByRole("row", { name: /Night auditor/ });
-  await cancelled.dblclick();
+  await cancelled.click();
   const detail = page.getByRole("dialog", { name: "Requisition", exact: true });
   await detail.getByRole("button", { name: "Cancel requisition", exact: true }).click();
   const confirm = page.getByRole("alertdialog", { name: "Cancel this requisition?", exact: true });

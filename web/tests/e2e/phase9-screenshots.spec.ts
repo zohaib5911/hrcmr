@@ -362,7 +362,7 @@ for (const colorScheme of ["light", "dark"] as const) {
           await page
             .getByRole("grid", { name: "Work log entries", exact: true })
             .getByText("Reviewed daily reception checks and handover notes.", { exact: true })
-            .dblclick();
+            .click();
         await expect(
           page.getByRole("dialog", { name: "Work log entry", exact: true }),
         ).toBeVisible();
