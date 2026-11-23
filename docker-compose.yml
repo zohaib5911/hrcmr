@@ -110,7 +110,7 @@ services:
 
   # One-shot job: creates the private bucket `files-dev`, then exits 0. Safe to run repeatedly.
   rustfs-init:
-    image: amazon/aws-cli:2.39.3
+    image: amazon/aws-cli:2.39.6
     depends_on:
       rustfs:
         condition: service_healthy
@@ -138,7 +138,7 @@ services:
   # Mailpit: catches every outgoing e-mail. SMTP localhost:1025, inbox + API http://localhost:8025
   # ---------------------------------------------------------------------------------------------
   mailpit:
-    image: axllent/mailpit:v1.33.0
+    image: axllent/mailpit:v1.33.1
     environment:
       MP_MAX_MESSAGES: "1000"
     ports:
@@ -177,7 +177,7 @@ services:
   # ---------------------------------------------------------------------------------------------
   stripe-cli:
     profiles: ["stripe"]
-    image: stripe/stripe-cli:v1.55.6
+    image: stripe/stripe-cli:v1.55.8
     environment:
       STRIPE_API_KEY: ${STRIPE_SECRET_KEY:-}
     extra_hosts:
