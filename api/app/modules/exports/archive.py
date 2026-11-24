@@ -39,7 +39,7 @@ logger = get_logger("app.exports")
 ZIP = "application/zip"
 # The app's own outputs are not the company's documents (they are regenerated on request).
 DERIVED_OWNERS = ("report_result", "data_export")
-LEFT_OUT_TABLES = frozenset({"sessions"})
+LEFT_OUT_TABLES = frozenset({"sessions", "checkout_attempts"})
 NEVER_EXPORTED = frozenset(
     {
         "token_hash",

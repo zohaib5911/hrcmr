@@ -3,6 +3,7 @@ columns, step-up before asking, one at a time, a 7-day link that needs the reque
 
 from __future__ import annotations
 
+import csv
 import io
 import uuid
 import zipfile
@@ -15,10 +16,21 @@ from sqlalchemy import text
 from app.jobs.audit import JobAudit
 from app.jobs.queue import open_queue
 from app.jobs.scheduled import functions
+from app.modules.exports.archive import csv_text
 from tests.db.test_employee_documents import _keys as _keys
 from tests.db.test_employee_documents import rig as rig
 
 API = "/api/v1"
+
+
+def test_archive_csv_writes_formula_like_user_text_as_text() -> None:
+    values = ["=1+1", " +1", "\uff1d1+1", "\nline", 'ordinary,"value"']
+    csv_body = csv_text(["name"], [[value] for value in values]).decode()
+    assert list(csv.reader(io.StringIO(csv_body))) == [
+        ["name"],
+        *[["'" + value] for value in values[:-1]],
+        [values[-1]],
+    ]
 
 
 async def run(rig: dict[str, Any]) -> None:

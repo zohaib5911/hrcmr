@@ -394,6 +394,31 @@ async def _as_owner(rig: dict[str, Any], sql: str, *, purge_for: uuid.UUID | Non
         await c.execute(text(sql), {"c": rig["a"]})
 
 
+async def test_storage_failure_leaves_deletion_frozen_and_retryable(rig: dict[str, Any]) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    scheduled = await _schedule(rig, admin)
+    now = datetime.fromisoformat(scheduled["scheduled_for"]) + timedelta(minutes=1)
+
+    class StorageDown:
+        async def list_objects(self, prefix: str) -> list[object]:
+            raise RuntimeError("temporary storage outage")
+
+    ctx = {
+        "owner_engine": rig["owner"],
+        "stripe": FakeStripe(),
+        "storage": StorageDown(),
+        "now": now,
+    }
+    assert await deletion_executor_hourly(ctx) == 0
+    assert await _rows(rig, "select status from companies where id=:c", c=rig["a"]) == [
+        ("pending_deletion",)
+    ]
+    assert (await admin.delete(URL)).status_code == 403
+    assert (await admin.get(URL)).status_code == 403
+    ctx["storage"] = rig["app"].state.files.storage
+    assert await deletion_executor_hourly(ctx) == 1
+
+
 async def test_only_the_owner_role_in_a_purge_may_delete_history_rows(rig: dict[str, Any]) -> None:
     await _seed(rig, rig["a"], "A")
     ledger = "delete from leave_ledger where company_id = :c"

@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from sqlalchemy import Table
     from sqlalchemy.ext.asyncio import AsyncSession
 
-KEPT_TABLES = frozenset({"subscriptions", "deletion_requests"})
+KEPT_TABLES = frozenset({"subscriptions", "payment_refunds", "deletion_requests"})
 _MARK = text("select set_config('app.purge_company_id', :company_id, true)")
 
 

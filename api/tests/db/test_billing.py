@@ -7,6 +7,7 @@ and ends a refunded 10-year plan. Only a role with billing.manage may start Chec
 
 from __future__ import annotations
 
+import asyncio
 import json
 import time
 from datetime import UTC, datetime, timedelta
@@ -47,6 +48,9 @@ class FakeStripe:
             "items": {"data": [{"current_period_start": START, "current_period_end": END}]},
         }
         self.customer_company = ""
+        self.checkout_status: dict[str, str] = {}
+        self.checkout_operations: dict[str, str] = {}
+        self.lose_checkout_response = False
         self.fail_cancel = False  # makes the immediate cancel (DELETE) refuse
 
     def __call__(self, request: httpx.Request) -> httpx.Response:
@@ -55,7 +59,19 @@ class FakeStripe:
         if path == "/v1/customers":
             return httpx.Response(200, json={"id": "cus_1"})
         if path == "/v1/checkout/sessions":
-            return httpx.Response(200, json={"id": "cs_1", "url": "https://checkout.stripe.com/c"})
+            key = request.headers["Idempotency-Key"]
+            ident = self.checkout_operations.setdefault(
+                key, f"cs_{len(self.checkout_operations) + 1}"
+            )
+            self.checkout_status.setdefault(ident, "open")
+            if self.lose_checkout_response:
+                return httpx.Response(503)
+            return self.checkout(ident)
+        if path.startswith("/v1/checkout/sessions/"):
+            ident = path.split("/")[4]
+            if path.endswith("/expire"):
+                self.checkout_status[ident] = "expired"
+            return self.checkout(ident)
         if path == "/v1/billing_portal/sessions":
             return httpx.Response(200, json={"url": "https://billing.stripe.com/p"})
         if path == "/v1/subscriptions/sub_1" and request.method == "POST":  # cancel at period end
@@ -78,6 +94,16 @@ class FakeStripe:
         if path == "/v1/customers/cus_1":
             return httpx.Response(200, json={"id": "cus_1", "metadata": self.customer_company})
         return httpx.Response(404, json={})
+
+    def checkout(self, ident: str) -> httpx.Response:
+        return httpx.Response(
+            200,
+            json={
+                "id": ident,
+                "url": "https://checkout.stripe.com/c",
+                "status": self.checkout_status[ident],
+            },
+        )
 
 
 @pytest.fixture(autouse=True)
@@ -171,7 +197,12 @@ async def test_checkout_makes_one_customer_and_a_session_for_the_plan(
 
     again = await admin.post(f"{API}/billing/checkout-session", json={"plan": "ten_year"})
     assert again.status_code == 200
-    assert [r.url.path for r in fake.requests[2:]] == ["/v1/checkout/sessions"]  # same customer
+    assert [r.url.path for r in fake.requests[2:]] == [
+        "/v1/checkout/sessions/cs_1",
+        "/v1/checkout/sessions/cs_1/expire",
+        "/v1/checkout/sessions",
+    ]
+    assert fake.checkout_status == {"cs_1": "expired", "cs_2": "open"}
     assert (
         await _count(
             rig,
@@ -182,6 +213,61 @@ async def test_checkout_makes_one_customer_and_a_session_for_the_plan(
     )
     portal = await admin.post(f"{API}/billing/portal-session")
     assert portal.json() == {"url": "https://billing.stripe.com/p"}
+
+
+async def test_concurrent_checkout_reuses_one_open_session(
+    rig: dict[str, Any], fake: FakeStripe
+) -> None:
+    admins = [await rig["person"]("company_admin", rig["a"]) for _ in range(2)]
+    for admin in admins:
+        await step_up(rig, admin)
+    url = f"{API}/billing/checkout-session"
+    results = await asyncio.gather(*(admin.post(url, json={"plan": "annual"}) for admin in admins))
+    assert [result.status_code for result in results] == [200, 200]
+    assert len(fake.checkout_operations) == 1
+    fake.checkout_status["cs_1"] = "complete"
+    blocked = await admins[0].post(url, json={"plan": "ten_year"})
+    assert blocked.status_code == 409
+    assert blocked.json()["error"]["code"] == "CHECKOUT_PENDING"
+    assert len(fake.checkout_operations) == 1
+
+
+async def test_checkout_timeout_retries_same_reservation(
+    rig: dict[str, Any], fake: FakeStripe
+) -> None:
+    admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
+    url = f"{API}/billing/checkout-session"
+    fake.lose_checkout_response = True
+    assert (await admin.post(url, json={"plan": "annual"})).status_code == 502
+    fake.lose_checkout_response = False
+    assert (await admin.post(url, json={"plan": "annual"})).status_code == 200
+    assert len(fake.checkout_operations) == 1
+
+
+async def test_refund_before_checkout_never_grants_entitlement(
+    rig: dict[str, Any], fake: FakeStripe
+) -> None:
+    await _clear_events(rig)
+    payment = {
+        "customer": "cus_1",
+        "payment_intent": "pi_refunded_first",
+        "metadata": {"company_id": str(rig["a"])},
+    }
+    refunded = _event("evt_refunded_first", "charge.refunded", {**payment, "refunded": True})
+    completed = _event(
+        "evt_paid_after_refund",
+        "checkout.session.completed",
+        {
+            **payment,
+            "object": "checkout.session",
+            "mode": "payment",
+            "payment_status": "paid",
+        },
+    )
+    for event in (refunded, completed, refunded):
+        assert (await _deliver(rig, event)).status_code == 200
+        assert (await _company(rig))["plan"] == "free"
 
 
 async def test_payments_not_set_up_say_so(rig: dict[str, Any]) -> None:

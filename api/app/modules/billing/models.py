@@ -13,7 +13,8 @@ from __future__ import annotations
 import uuid  # noqa: TC003  (SQLAlchemy resolves the Mapped[...] annotations at runtime)
 from datetime import datetime  # noqa: TC003  (same)
 
-from sqlalchemy import CheckConstraint, DateTime, ForeignKey, String, Uuid, func
+from sqlalchemy import CheckConstraint, DateTime, ForeignKey, Index, String, Uuid, column, func
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, RecordMixin, TenantMixin, UUIDPrimaryKeyMixin
@@ -46,6 +47,37 @@ class Subscription(Base, RecordMixin, TenantMixin):
     current_period_end: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     cancel_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     refunded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class CheckoutAttempt(Base, RecordMixin, TenantMixin):
+    """Keep the exact Stripe request and idempotency key across app or network failures."""
+
+    __tablename__ = "checkout_attempts"
+    __table_args__ = (
+        Index(
+            "uq_checkout_attempts_open",
+            "company_id",
+            unique=True,
+            postgresql_where=column("closed_at").is_(None),
+        ),
+    )
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    request_data: Mapped[dict[str, str]] = mapped_column(JSONB, nullable=False)
+    stripe_session_id: Mapped[str | None] = mapped_column(String(255), unique=True)
+    closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class PaymentRefund(Base, RecordMixin, TenantMixin):
+    """A refund exists independently of the checkout event's delivery order."""
+
+    __tablename__ = "payment_refunds"
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("companies.id", ondelete="RESTRICT"), nullable=False, index=True
+    )
+    stripe_payment_intent_id: Mapped[str] = mapped_column(String(80), nullable=False, unique=True)
+    refunded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class StripeEvent(Base, UUIDPrimaryKeyMixin):

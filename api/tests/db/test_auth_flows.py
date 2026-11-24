@@ -3,6 +3,7 @@ required by policy, step-up enforcement and invitation expiry, against a real da
 
 from __future__ import annotations
 
+import asyncio
 import os
 import uuid
 from collections.abc import AsyncIterator, Iterator
@@ -18,8 +19,10 @@ from sqlalchemy.pool import NullPool
 
 from app.core.crypto import KeyRing, set_keyring
 from app.core.csrf import CsrfMiddleware
+from app.core.errors import AppError
 from app.core.totp import generate_secret, totp
 from app.db.session import GlobalSession
+from app.modules.auth.accounts import TokenInvalidError, consume_email_token, issue_email_token
 from app.modules.auth.invitations import (
     InvitationInvalidError,
     accept_invitation,
@@ -242,6 +245,64 @@ async def test_signing_in_rotating_and_signing_out_change_the_token_each_time(
     assert all(hash_token(first.token) != row.token_hash or row.revoked_at for row in rows)
 
 
+async def test_revoked_session_cannot_be_refreshed_or_rotated(
+    engine: AsyncEngine,
+    auth: AuthService,
+    sessions: SessionStore,
+    redis: Redis,
+    clock: Clock,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    signed_in = await _login(engine, auth, ip="203.0.113.50")
+    reading = asyncio.Event()
+    resume = asyncio.Event()
+    get = redis.get
+
+    async def pause(key: str) -> str | None:
+        value = await get(key)
+        reading.set()
+        await resume.wait()
+        return value
+
+    monkeypatch.setattr(redis, "get", pause)
+    async with asyncio.TaskGroup() as group:
+        pending = group.create_task(sessions.get(signed_in.token))
+        await reading.wait()
+        async with GlobalSession(engine) as db:
+            await sessions.revoke(db, signed_in.token)
+            await db.commit()
+        resume.set()
+    assert pending.result() is None
+    clock.advance(minutes=6)
+    with pytest.raises(AppError, match="Sign in"):
+        await sessions.mark_step_up(signed_in.token, signed_in.session)
+    async with GlobalSession(engine) as db:
+        with pytest.raises(AppError, match="Sign in"):
+            await sessions.touch(db, signed_in.token, signed_in.session)
+    async with GlobalSession(engine) as db:
+        with pytest.raises(AppError, match="Sign in"):
+            await sessions.rotate(db, signed_in.token, signed_in.session)
+    assert await sessions.get(signed_in.token) is None
+
+
+async def test_email_token_is_consumed_in_only_one_transaction(engine: AsyncEngine) -> None:
+    async with GlobalSession(engine) as db:
+        user_id = (await db.execute(select(User.id).where(User.email == EMAIL))).scalar_one()
+        token = await issue_email_token(db, user_id, "reset", timedelta(minutes=5))
+        await db.commit()
+
+    async def redeem() -> bool:
+        async with GlobalSession(engine) as db:
+            try:
+                await consume_email_token(db, token, "reset")
+            except TokenInvalidError:
+                return False
+            await db.commit()
+            return True
+
+    assert sorted(await asyncio.gather(redeem(), redeem())) == [False, True]
+
+
 async def test_the_database_keeps_only_a_hash_of_the_token(
     engine: AsyncEngine, auth: AuthService
 ) -> None:
@@ -341,6 +402,33 @@ async def test_the_second_step_is_asked_for_and_a_code_works_once(
             await auth.complete_mfa(
                 db, token=second.token, data=second.session, code=code, ip=None, user_agent=None
             )
+
+
+async def test_concurrent_recovery_code_use_is_accepted_once(
+    engine: AsyncEngine, auth: AuthService
+) -> None:
+    _, codes = await _enrol(engine, auth)
+    left = await _login(engine, auth, ip="203.0.113.10")
+    right = await _login(engine, auth, ip="203.0.113.11")
+
+    async def verify(outcome: LoginOutcome) -> bool:
+        async with GlobalSession(engine) as db:
+            await db.get(User, uuid.UUID(outcome.session.user_id))  # caller loads the user first
+            try:
+                await auth.complete_mfa(
+                    db,
+                    token=outcome.token,
+                    data=outcome.session,
+                    code=codes[0],
+                    ip=None,
+                    user_agent=None,
+                )
+            except InvalidMfaCodeError:
+                return False
+            await db.commit()
+            return True
+
+    assert sorted(await asyncio.gather(verify(left), verify(right))) == [False, True]
 
 
 async def test_a_recovery_code_works_once(engine: AsyncEngine, auth: AuthService) -> None:

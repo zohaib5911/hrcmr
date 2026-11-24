@@ -29,7 +29,7 @@ from app.core.crypto import encrypt
 from app.core.logging import get_logger
 from app.modules.audit.service import AuditContext, record
 from app.modules.billing.entitlements import GRACE
-from app.modules.billing.models import StripeEvent, Subscription
+from app.modules.billing.models import CheckoutAttempt, PaymentRefund, StripeEvent, Subscription
 from app.modules.companies.models import Company
 from app.modules.email.models import EmailOutbox
 from app.modules.email.outbox import PAYLOAD_CONTEXT
@@ -51,6 +51,8 @@ LIVE_STATUSES = frozenset({"active", "trialing", "past_due"})
 HANDLED = frozenset(
     {
         "checkout.session.completed",
+        "checkout.session.async_payment_succeeded",
+        "checkout.session.async_payment_failed",
         "invoice.paid",
         "invoice.payment_failed",
         "customer.subscription.updated",
@@ -146,7 +148,9 @@ async def handle_event(
         company_id = await _company_for(stripe, obj)
         if company_id is not None:
             await db.scope_to_company(company_id)
-            company = await db.get(Company, company_id)
+            company = await db.get(
+                Company, company_id, with_for_update=True, populate_existing=True
+            )
             if company is not None and _belongs(company, obj):
                 await _apply(db, stripe, company, str(kind), obj, event, web_origin)
                 outcome = "applied"
@@ -179,9 +183,17 @@ async def _apply(
     if customer and company.stripe_customer_id is None:
         company.stripe_customer_id = customer
     action = "billing.subscription_updated"
-    if kind == "checkout.session.completed":
+    if kind.startswith("checkout.session."):
+        attempt_id = _company_uuid((obj.get("metadata") or {}).get("checkout_attempt_id"))
+        attempt = await db.get(CheckoutAttempt, attempt_id) if attempt_id is not None else None
+        if kind == "checkout.session.async_payment_failed":
+            if attempt is not None:
+                attempt.closed_at = datetime.now(UTC)
+            return
         if obj.get("payment_status") not in ("paid", "no_payment_required"):
             return  # a delayed payment method: nothing is bought until it is paid
+        if attempt is not None:
+            attempt.closed_at = datetime.now(UTC)
         action = "billing.plan_purchased"
         if obj.get("mode") == "subscription" and _id(obj.get("subscription")):
             await _sync_subscription(db, stripe, company, str(_id(obj.get("subscription"))))
@@ -276,6 +288,12 @@ async def _sync_subscription(
 async def _ten_year_paid(
     db: GlobalSession, company: Company, payment_intent: str, event: dict[str, Any]
 ) -> None:
+    # An earlier-delivered refund is authoritative even when no purchase row existed yet.
+    refund = await db.scalar(
+        select(PaymentRefund).where(PaymentRefund.stripe_payment_intent_id == payment_intent)
+    )
+    if refund is not None:
+        return
     paid_at = _when(event.get("created")) or datetime.now(UTC)
     ends = _plus_years(paid_at, TEN_YEARS)
     row = await subscription_row(db, stripe_payment_intent_id=payment_intent)
@@ -308,6 +326,16 @@ async def _refunded(
         return False  # a partial refund changes no plan
     refunded_at = _when(event.get("created")) or datetime.now(UTC)
     payment_intent = _id(charge.get("payment_intent"))
+    if payment_intent:
+        await db.execute(
+            insert(PaymentRefund)
+            .values(
+                company_id=company.id,
+                stripe_payment_intent_id=payment_intent,
+                refunded_at=refunded_at,
+            )
+            .on_conflict_do_nothing(index_elements=["stripe_payment_intent_id"])
+        )
     row = (
         await subscription_row(db, stripe_payment_intent_id=payment_intent)
         if payment_intent

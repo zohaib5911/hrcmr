@@ -1,7 +1,7 @@
 """Daily privacy retention (T21.5). Owner-only, tenant-scoped history deletion.
 
-No end date means no inferred expiry. Active employees are never purged. Object
-removal precedes commit: storage failures roll back metadata and retry next run.
+No end date means no inferred expiry. Active employees are never purged. Metadata
+removal commits first; the retryable orphan sweep removes unreferenced objects afterwards.
 """
 
 from __future__ import annotations
@@ -51,7 +51,8 @@ async def _remove_file(db: AsyncSession, storage: Storage | None, ident: uuid.UU
                     return 0
     if storage is None:
         raise RuntimeError("Retention requires object storage")
-    await storage.delete(row.storage_key)
+    # Keep the object until metadata deletion commits. The daily orphan sweep removes it
+    # afterwards; a SQL rollback therefore never resurrects a reference to missing bytes.
     await db.delete(row)
     await db.flush()
     return 1

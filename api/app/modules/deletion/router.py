@@ -293,6 +293,12 @@ async def withdraw_deletion(access: Deleter) -> Response:
     row = await _open(db, lock=True)
     if row is None:
         raise NotFoundError
+    if row.started_at is not None:
+        raise AppError(
+            "DELETION_STARTED",
+            "Deletion has started and can no longer be withdrawn.",
+            status_code=409,
+        )
     was_scheduled = row.confirmed_at is not None
     row.withdrawn_at, row.withdrawn_by = now, me
     row.code_hash, row.code_expires_at = None, None
