@@ -213,14 +213,20 @@ class AuthService:
         await self._check_limits(email, ip)
 
         user = (await db.execute(select(User).where(User.email == email))).scalar_one_or_none()
-        usable = user is not None and user.is_active and user.password_hash is not None
-        if usable and user is not None and user.password_hash is not None:
-            valid = await verify_password_async(user.password_hash, password)
+        verified_hash = user.password_hash if user is not None and user.is_active else None
+        if verified_hash is not None:
+            valid = await verify_password_async(verified_hash, password)
         else:
             await spend_verification_time_async()
             valid = False
         if not valid or user is None:
             await self._record_failure(email, user)
+            raise InvalidCredentialsError
+
+        # Password verification runs off-lock. Recheck the hash under the same user lock that
+        # serializes session creation and password reset, so an old password cannot win a race.
+        user = await db.get(User, user.id, with_for_update=True, populate_existing=True)
+        if user is None or not user.is_active or user.password_hash != verified_hash:
             raise InvalidCredentialsError
 
         await self._clear_failures(email)

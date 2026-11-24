@@ -84,6 +84,7 @@ async def start_platform_session(
         mfa_passed=True,
         absolute_expiry=datetime.now(UTC) + PLATFORM_SESSION_LIFETIME,
         platform=True,
+        parent_token=caller.token,
     )
     await record(db, _audit(request, caller.user_id), "platform.session.started")
     await db.commit()

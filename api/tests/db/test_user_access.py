@@ -3,6 +3,7 @@ count, and that another company's people never appear."""
 
 from __future__ import annotations
 
+import asyncio
 import os
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable, Iterator
@@ -78,6 +79,34 @@ async def rig(database: DatabaseUnderTest) -> AsyncIterator[dict[str, Any]]:
     await owner.dispose()
     await redis.flushdb()
     await redis.aclose()
+
+
+async def test_concurrent_admin_demotions_keep_one_admin(rig: dict[str, Any]) -> None:
+    admins = [await rig["person"]("company_admin", rig["a"]) for _ in range(2)]
+    urls: list[str] = []
+    for admin in admins:
+        token = admin.cookies.get("brand_session")
+        data = await rig["sessions"].get(token)
+        await rig["sessions"].mark_step_up(token, data)
+        users = (await admin.get(f"{API}/users")).json()["users"]
+        membership = next(user["id"] for user in users if user["is_you"])
+        urls.append(f"{API}/users/{membership}/role")
+    results = await asyncio.gather(
+        *(
+            admin.patch(url, json={"role": "hr_admin"})
+            for admin, url in zip(admins, urls, strict=True)
+        )
+    )
+    assert sorted(result.status_code for result in results) == [200, 409]
+    async with rig["owner"].connect() as db:
+        count = await db.scalar(
+            text(
+                "select count(*) from memberships where company_id=:c and role='company_admin' "
+                "and status='active'"
+            ),
+            {"c": rig["a"]},
+        )
+    assert count == 1
 
 
 async def test_the_list_filters_and_counts_unlinked_users(rig: dict[str, Any]) -> None:
@@ -548,7 +577,6 @@ async def test_sensitive_access_changes_require_fresh_step_up(
     rig: dict[str, Any],
     expired: bool,
 ) -> None:
-    from dataclasses import replace
     from datetime import timedelta
 
     from app.modules.auth.sessions import utcnow
@@ -561,13 +589,8 @@ async def test_sensitive_access_changes_require_fresh_step_up(
     invite = await admin.post(f"{API}/users/invitations", json={**INVITE, "role": "hr_admin"})
     assert invite.status_code == 201
     token = admin.cookies.get("brand_session")
-    data = await rig["sessions"].get(token)
-    await rig["sessions"]._save(
-        token,
-        replace(
-            data,
-            step_up_at=(utcnow() - timedelta(minutes=11)).isoformat() if expired else None,
-        ),
+    await rig["sessions"]._patch(
+        token, "step_up_at", (utcnow() - timedelta(minutes=11)).isoformat() if expired else None
     )
     before = await _audit_actions(rig)
     calls: list[Callable[[], Awaitable[httpx.Response]]] = [

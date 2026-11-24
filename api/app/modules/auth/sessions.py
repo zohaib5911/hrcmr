@@ -44,7 +44,7 @@ _PATCH = """
 local raw = redis.call('GET', KEYS[1])
 if not raw then return false end
 local data = cjson.decode(raw)
-data[ARGV[1]] = ARGV[2]
+data[ARGV[1]] = cjson.decode(ARGV[2])
 local changed = cjson.encode(data)
 redis.call('SET', KEYS[1], changed, 'XX', 'KEEPTTL')
 return changed
@@ -127,8 +127,8 @@ class SessionStore:
         ):
             raise _ended()
 
-    async def _patch(self, token: str, field: str, value: str) -> SessionData:
-        raw = await self._redis.eval(_PATCH, 1, _KEY + hash_token(token), field, value)
+    async def _patch(self, token: str, field: str, value: str | None) -> SessionData:
+        raw = await self._redis.eval(_PATCH, 1, _KEY + hash_token(token), field, json.dumps(value))
         if not raw:
             raise _ended()
         return SessionData(**json.loads(raw))
@@ -152,9 +152,12 @@ class SessionStore:
         absolute_expiry: datetime | None = None,
         platform: bool = False,
         support_id: uuid.UUID | None = None,
+        parent_token: str | None = None,
     ) -> tuple[str, SessionData]:
         """Start a session. Returns the token to put in the cookie, and what is known about it."""
         await self._lock_user(db, user_id)
+        if parent_token is not None and await self.get(parent_token) is None:
+            raise _ended()
         now = self._now()
         expires = absolute_expiry or now + ABSOLUTE_TIMEOUT
         token = new_token()
@@ -196,7 +199,8 @@ class SessionStore:
             await self._redis.delete(_KEY + hash_token(token))
             return None
         # EXPIRE can only extend an existing key: a concurrent revoke remains final.
-        if not await self._redis.expire(_KEY + hash_token(token), self._ttl(data)):
+        ttl = self._ttl(data)
+        if ttl <= 0 or not await self._redis.expire(_KEY + hash_token(token), ttl):
             return None
         return data
 

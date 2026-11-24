@@ -16,6 +16,7 @@ from sqlalchemy.exc import DBAPIError
 
 from app.core.crypto import DecryptionError, decrypt
 from app.db.base import Base
+from app.integrations.storage import StoredObject
 from app.jobs.deletion import deletion_executor_hourly
 from app.modules.email.outbox import PAYLOAD_CONTEXT
 from tests.db.test_employee_documents import _keys as _keys
@@ -328,7 +329,7 @@ async def test_the_executor_deletes_only_the_due_company_and_keeps_a_stub(
     due = datetime.now(UTC) + timedelta(days=7, minutes=1)
     assert await deletion_executor_hourly({**ctx, "stripe": FakeStripe(fail=True), "now": due}) == 0
     assert (await _rows(rig, "select status from companies where id = :c", c=rig["a"])) == [
-        ("active",)
+        ("pending_deletion",)
     ]
 
     assert await deletion_executor_hourly({**ctx, "now": due}) == 1
@@ -399,14 +400,26 @@ async def test_storage_failure_leaves_deletion_frozen_and_retryable(rig: dict[st
     scheduled = await _schedule(rig, admin)
     now = datetime.fromisoformat(scheduled["scheduled_for"]) + timedelta(minutes=1)
 
-    class StorageDown:
-        async def list_objects(self, prefix: str) -> list[object]:
-            raise RuntimeError("temporary storage outage")
+    storage = rig["app"].state.files.storage
+    first = await _seed(rig, rig["a"], "partial")
+    prefix = f"company/{rig['a']}/"
+    second = prefix + "zz-pending"
+    await storage.put(second, io.BytesIO(b"file"), content_type="text/plain", size=4)
+
+    class PartialFailure:
+        async def list_objects(self, prefix: str) -> list[StoredObject]:
+            objects: list[StoredObject] = await storage.list_objects(prefix)
+            return objects
+
+        async def delete(self, key: str) -> None:
+            if key == second:
+                raise RuntimeError("temporary storage outage")
+            await storage.delete(key)
 
     ctx = {
         "owner_engine": rig["owner"],
         "stripe": FakeStripe(),
-        "storage": StorageDown(),
+        "storage": PartialFailure(),
         "now": now,
     }
     assert await deletion_executor_hourly(ctx) == 0
@@ -415,8 +428,13 @@ async def test_storage_failure_leaves_deletion_frozen_and_retryable(rig: dict[st
     ]
     assert (await admin.delete(URL)).status_code == 403
     assert (await admin.get(URL)).status_code == 403
-    ctx["storage"] = rig["app"].state.files.storage
+    assert {obj.key for obj in await storage.list_objects(prefix)} == {second}
+    assert await _rows(rig, "select storage_key from files where storage_key=:k", k=first) == [
+        (first,)
+    ]
+    ctx["storage"] = storage
     assert await deletion_executor_hourly(ctx) == 1
+    assert await storage.list_objects(prefix) == []
 
 
 async def test_only_the_owner_role_in_a_purge_may_delete_history_rows(rig: dict[str, Any]) -> None:

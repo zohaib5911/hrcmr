@@ -258,7 +258,7 @@ async def test_revoked_session_cannot_be_refreshed_or_rotated(
     resume = asyncio.Event()
     get = redis.get
 
-    async def pause(key: str) -> str | None:
+    async def pause(key: str) -> bytes | str | None:
         value = await get(key)
         reading.set()
         await resume.wait()

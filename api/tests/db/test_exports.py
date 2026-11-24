@@ -154,11 +154,15 @@ async def test_export_holds_only_the_requesters_company_and_no_secrets(
         assert archive.read(f"documents/{file_id}/contract-a.txt") == body
         loose_id, loose_body = documents["loose"]
         assert archive.read(f"documents/{loose_id}/loose-a.txt") == loose_body
-        assert f"{loose_id},loose-a.txt" in archive.read("documents.csv").decode()
+        index = csv.DictReader(io.StringIO(archive.read("documents.csv").decode()))
+        assert any(
+            entry["id"] == str(loose_id) and entry["original_name"] == "loose-a.txt"
+            for entry in index
+        )
 
         # Secret, network and storage columns never leave the system.
         def header(path: str) -> set[str]:
-            return set(archive.read(path).decode().splitlines()[0].split(","))
+            return set(next(csv.reader(io.StringIO(archive.read(path).decode()))))
 
         assert "storage_key" not in header("tables/files.csv")
         assert "token_hash" not in header("tables/invitations.csv")
