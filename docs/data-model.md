@@ -250,6 +250,20 @@ Checks:
 - `change_type in ('did_not_start', 'unauthorised_absence', 'sponsorship_stopped', 'salary_reduced', 'job_or_soc_changed', 'work_location_changed', 'working_hours_changed', 'unpaid_reduced_absence', 'other')`
 - `deadline_date > change_date`
 
+## `checkout_attempts`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `request_data` | JSONB | no |  |  |
+| `stripe_session_id` | VARCHAR(255) | yes |  | unique |
+| `closed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
+
 ## `companies`
 
 | Column | Type | Null | Default | Notes |
@@ -531,6 +545,7 @@ Checks:
 | `withdrawn_by` | UUID | yes |  | references `users` |
 | `export_requested` | BOOLEAN | no | `false` |  |
 | `export_id` | UUID | yes |  |  |
+| `started_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `completed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 | `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
@@ -1456,6 +1471,19 @@ Checks:
 - `(pay_day_kind = 'weekday' and pay_day_value between 1 and 7) or (pay_day_kind = 'day_of_month' and pay_day_value between 1 and 28) or (pay_day_kind in ('last_day', 'last_working_day') and pay_day_value is null)`
 - `frequency in ('weekly', 'fortnightly', 'four_weekly', 'monthly')`
 - `pay_day_kind in ('weekday', 'day_of_month', 'last_day', 'last_working_day')`
+
+## `payment_refunds`
+
+| Column | Type | Null | Default | Notes |
+|---|---|---|---|---|
+| `company_id` | UUID | no |  | references `companies` |
+| `stripe_payment_intent_id` | VARCHAR(80) | no |  | unique |
+| `refunded_at` | TIMESTAMP WITH TIME ZONE | no |  |  |
+| `id` | UUID | no | `uuid_generate_v7()` | primary key |
+| `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
+| `created_by` | UUID | yes |  |  |
+| `updated_by` | UUID | yes |  |  |
 
 ## `payment_types`
 
