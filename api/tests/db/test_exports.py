@@ -3,6 +3,7 @@ columns, step-up before asking, one at a time, a 7-day link that needs the reque
 
 from __future__ import annotations
 
+import csv
 import io
 import uuid
 import zipfile
@@ -15,10 +16,21 @@ from sqlalchemy import text
 from app.jobs.audit import JobAudit
 from app.jobs.queue import open_queue
 from app.jobs.scheduled import functions
+from app.modules.exports.archive import csv_text
 from tests.db.test_employee_documents import _keys as _keys
 from tests.db.test_employee_documents import rig as rig
 
 API = "/api/v1"
+
+
+def test_archive_csv_writes_formula_like_user_text_as_text() -> None:
+    values = ["=1+1", " +1", "\uff1d1+1", "\nline", 'ordinary,"value"']
+    csv_body = csv_text(["name"], [[value] for value in values]).decode()
+    assert list(csv.reader(io.StringIO(csv_body))) == [
+        ["name"],
+        *[["'" + value] for value in values[:-1]],
+        [values[-1]],
+    ]
 
 
 async def run(rig: dict[str, Any]) -> None:
@@ -142,11 +154,15 @@ async def test_export_holds_only_the_requesters_company_and_no_secrets(
         assert archive.read(f"documents/{file_id}/contract-a.txt") == body
         loose_id, loose_body = documents["loose"]
         assert archive.read(f"documents/{loose_id}/loose-a.txt") == loose_body
-        assert f"{loose_id},loose-a.txt" in archive.read("documents.csv").decode()
+        index = csv.DictReader(io.StringIO(archive.read("documents.csv").decode()))
+        assert any(
+            entry["id"] == str(loose_id) and entry["original_name"] == "loose-a.txt"
+            for entry in index
+        )
 
         # Secret, network and storage columns never leave the system.
         def header(path: str) -> set[str]:
-            return set(archive.read(path).decode().splitlines()[0].split(","))
+            return set(next(csv.reader(io.StringIO(archive.read(path).decode()))))
 
         assert "storage_key" not in header("tables/files.csv")
         assert "token_hash" not in header("tables/invitations.csv")

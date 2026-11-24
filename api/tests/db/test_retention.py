@@ -236,7 +236,9 @@ async def test_evidence_calendar_cutoffs_preserve_active_unknown_recent_and_shar
     assert anniversary(date(2028, 2, 29), 1) == date(2029, 2, 28)
 
 
-async def test_storage_failure_rolls_back_evidence_and_retries(rig: dict[str, Any]) -> None:
+async def test_retention_does_not_delete_storage_inside_the_transaction(
+    rig: dict[str, Any],
+) -> None:
     emp, file = await _evidence(rig, rig["a"], "retry", left="2020-01-01")
 
     class Down:
@@ -244,16 +246,14 @@ async def test_storage_failure_rolls_back_evidence_and_retries(rig: dict[str, An
             raise RuntimeError("storage unavailable")
 
     ctx = {"owner_engine": rig["owner"], "storage": Down(), "now": NOW}
-    with pytest.raises(RuntimeError, match="storage unavailable"):
-        await retention_purge_daily(ctx)
+    assert await retention_purge_daily(ctx) >= 4
     async with rig["owner"].connect() as c:
         assert (
             await c.scalar(text("select count(*) from rtw_checks where subject_id=:e"), {"e": emp})
-            == 2
+            == 0
         )
-        assert await c.scalar(text("select count(*) from files where id=:f"), {"f": file}) == 1
-    ctx["storage"] = rig["app"].state.files.storage
-    assert await retention_purge_daily(ctx) >= 4
+        assert await c.scalar(text("select count(*) from files where id=:f"), {"f": file}) == 0
+    assert await retention_purge_daily(ctx) == 0
 
 
 async def test_missing_owner_is_an_observable_failure() -> None:

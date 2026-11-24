@@ -181,6 +181,28 @@ async def purge_company(
         if company is None:
             return False
 
+        if request.started_at is None:
+            # Commit the irreversible phase BEFORE removing any external object. A failed purge
+            # stays frozen and retryable; it can no longer masquerade as a withdrawable request.
+            request.started_at = now
+            company.status = "pending_deletion"
+            await db.commit()
+            # Reacquire both locks after the commit. Another worker may have finished meanwhile.
+            request = (
+                await db.execute(
+                    select(DeletionRequest)
+                    .where(DeletionRequest.id == request_id)
+                    .with_for_update(skip_locked=True)
+                    .execution_options(populate_existing=True)
+                )
+            ).scalar_one_or_none()
+            if request is None or request.completed_at is not None:
+                return False
+            company = await db.get(
+                Company, company_id, with_for_update=True, populate_existing=True
+            )
+            if company is None:
+                return False
         await _stop_billing(stripe, company)
         keys = list(
             (await db.execute(select(File.storage_key).where(File.company_id == company_id)))

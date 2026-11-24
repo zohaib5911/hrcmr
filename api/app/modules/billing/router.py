@@ -21,7 +21,7 @@ from app.core.schemas import RequestModel
 from app.db.session import GlobalDb  # noqa: TC001  (FastAPI reads the dependency at runtime)
 from app.integrations.stripe import StripeError, StripeSignatureError
 from app.modules.auth.sessions import require_step_up
-from app.modules.billing import service
+from app.modules.billing import checkout, service
 from app.modules.billing.models import Subscription
 from app.modules.companies.models import Company
 from app.modules.rbac.deps import Access, require
@@ -141,40 +141,18 @@ async def create_checkout_session(
     stripe = _stripe(request)
     if not stripe.enabled:
         raise _not_set_up()
-    company = await _company(access)
-    if _has_live_plan(company):
-        raise AppError(
-            "PLAN_ALREADY_ACTIVE",
-            "Your plan is already active. To change plan, contact support.",
-            status_code=409,
-        )
-    origin = request.app.state.settings.web_origin
     try:
-        if company.stripe_customer_id is None:
-            customer = await stripe.create_customer(
-                company_id=str(company.id), name=company.name, email=company.contact_email
-            )
-            company.stripe_customer_id = str(customer["id"])
-            # Kept even if Checkout fails next, so the company never gets a second customer.
-            await access.db.commit()
-        session = await stripe.create_checkout_session(
-            company_id=str(company.id),
-            customer=company.stripe_customer_id,
-            plan=body.plan,
-            success_url=f"{origin}{BILLING_PATH}?checkout=success",
-            cancel_url=f"{origin}{BILLING_PATH}?checkout=cancelled",
-            idempotency_key=f"checkout-{company.id}-{uuid.uuid4()}",
-        )
+        url = await checkout.start(access, stripe, body.plan, request.app.state.settings.web_origin)
     except StripeError as exc:
         raise _unavailable(exc) from exc
     await access.audit(
         "billing.checkout_started",
         entity_type="company",
-        entity_id=company.id,
+        entity_id=access.company_id,
         after={"plan": body.plan},
     )
     await access.db.commit()
-    return RedirectOut(url=str(session["url"]))
+    return RedirectOut(url=url)
 
 
 @router.post("/billing/portal-session", response_model=RedirectOut)

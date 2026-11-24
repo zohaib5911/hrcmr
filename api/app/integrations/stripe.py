@@ -191,14 +191,18 @@ class Stripe:
         success_url: str,
         cancel_url: str,
         idempotency_key: str,
+        attempt_id: str | None = None,
+        price_id: str | None = None,
     ) -> dict[str, Any]:
         """Annual is a subscription; 10-year is a one-off payment. Both carry the company id and the
         plan in metadata, so every later event names the company it belongs to."""
         tags = {"company_id": company_id, "plan": plan}
+        if attempt_id is not None:
+            tags["checkout_attempt_id"] = attempt_id
         data: dict[str, Any] = {
             "customer": customer,
             "client_reference_id": company_id,
-            "line_items": [{"price": self.price_for(plan), "quantity": 1}],
+            "line_items": [{"price": (price_id or self.price_for(plan)), "quantity": 1}],
             "success_url": success_url,
             "cancel_url": cancel_url,
             "metadata": tags,
@@ -208,6 +212,16 @@ class Stripe:
         else:
             data |= {"mode": "payment", "payment_intent_data": {"metadata": tags}}
         return await self._post("/v1/checkout/sessions", data, idempotency_key=idempotency_key)
+
+    async def retrieve_checkout_session(self, session_id: str) -> dict[str, Any]:
+        return await self._get("/v1/checkout/sessions", session_id)
+
+    async def expire_checkout_session(self, session_id: str) -> dict[str, Any]:
+        return await self._post(
+            f"/v1/checkout/sessions/{_checked(session_id)}/expire",
+            {},
+            idempotency_key=f"expire-{session_id}",
+        )
 
     async def create_portal_session(
         self, *, customer: str, return_url: str, idempotency_key: str

@@ -129,8 +129,10 @@ def _row(company: Company, members: int, last_active_at: datetime | None) -> Com
     )
 
 
-async def company_or_404(db: GlobalSession, company_id: uuid.UUID) -> Company:
-    company = await db.get(Company, company_id)
+async def company_or_404(
+    db: GlobalSession, company_id: uuid.UUID, *, lock: bool = False
+) -> Company:
+    company = await db.get(Company, company_id, with_for_update=lock, populate_existing=lock)
     if company is None:
         raise NotFoundError("We could not find that company.")
     return company

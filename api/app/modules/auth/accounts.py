@@ -129,7 +129,12 @@ async def issue_email_token(
 
 async def consume_email_token(db: GlobalSession, token: str, purpose: str) -> EmailToken:
     row = (
-        await db.execute(select(EmailToken).where(EmailToken.token_hash == hash_token(token)))
+        await db.execute(
+            select(EmailToken)
+            .where(EmailToken.token_hash == hash_token(token))
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
     ).scalar_one_or_none()
     if row is None or row.purpose != purpose or row.used_at is not None or row.expires_at <= now():
         raise TokenInvalidError

@@ -39,7 +39,7 @@ logger = get_logger("app.exports")
 ZIP = "application/zip"
 # The app's own outputs are not the company's documents (they are regenerated on request).
 DERIVED_OWNERS = ("report_result", "data_export")
-LEFT_OUT_TABLES = frozenset({"sessions"})
+LEFT_OUT_TABLES = frozenset({"sessions", "checkout_attempts"})
 NEVER_EXPORTED = frozenset(
     {
         "token_hash",
@@ -94,11 +94,20 @@ def cell(value: Any) -> str:
     return str(value)
 
 
+def spreadsheet_text(value: str) -> str:
+    """Force formula-capable cells to text, including control-prefixed spreadsheet input."""
+    candidate = value.lstrip(" \t\r\n")
+    prefixes = ("=", "+", "-", "@", "\uff1d", "\uff0b", "\uff0d", "\uff20")
+    if candidate.startswith(prefixes) or value.startswith(("\t", "\r", "\n")):
+        return "'" + value
+    return value
+
+
 def csv_text(headers: list[str], rows: list[list[str]]) -> bytes:
     buffer = io.StringIO()
-    writer = csv.writer(buffer)
-    writer.writerow(headers)
-    writer.writerows(rows)
+    writer = csv.writer(buffer, quoting=csv.QUOTE_ALL)
+    writer.writerow([spreadsheet_text(value) for value in headers])
+    writer.writerows([spreadsheet_text(value) for value in row] for row in rows)
     return buffer.getvalue().encode("utf-8")
 
 

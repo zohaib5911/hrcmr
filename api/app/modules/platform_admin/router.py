@@ -160,7 +160,7 @@ async def get_company(company_id: uuid.UUID, access: Reader) -> CompanyDetailOut
 async def suspend_company(
     company_id: uuid.UUID, body: ReasonIn, access: Writer
 ) -> CompanyDetailOut:
-    company = await companies.company_or_404(access.db, company_id)
+    company = await companies.company_or_404(access.db, company_id, lock=True)
     await companies.suspend(access.db, access.audit_context, company, body.reason)
     await access.db.commit()
     return await companies.detail(access.db, company)
@@ -170,7 +170,7 @@ async def suspend_company(
 async def reactivate_company(
     company_id: uuid.UUID, body: ReasonIn, access: Writer
 ) -> CompanyDetailOut:
-    company = await companies.company_or_404(access.db, company_id)
+    company = await companies.company_or_404(access.db, company_id, lock=True)
     await companies.reactivate(access.db, access.audit_context, company, body.reason)
     await access.db.commit()
     return await companies.detail(access.db, company)
