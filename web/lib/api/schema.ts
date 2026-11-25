@@ -4055,26 +4055,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/platform/refunds": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Issue Refund
-         * @description A full refund of the latest payment on a purchase. Owner only (T17.4).
-         */
-        post: operations["platform_admin_issue_refund"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/platform/register/holds/{publication_id}/approve": {
         parameters: {
             query?: never;
@@ -12009,27 +11989,6 @@ export interface components {
         RedirectOut: {
             /** Url */
             url: string;
-        };
-        /** RefundIn */
-        RefundIn: {
-            /**
-             * Confirm
-             * @description The second confirmation: must be true to issue the refund.
-             */
-            confirm: boolean;
-            /** Reason */
-            reason: string;
-            /**
-             * Subscription Id
-             * Format: uuid
-             */
-            subscription_id: string;
-        };
-        /** RefundOut */
-        RefundOut: {
-            /** Stripe Refund Id */
-            stripe_refund_id: string;
-            subscription: components["schemas"]["SubscriptionRow"];
         };
         /** RegionChange */
         RegionChange: {
@@ -26329,48 +26288,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["MetricsOut"];
-                };
-            };
-            /** @description The request could not be completed. `error.code` says why. */
-            "4XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorEnvelope"];
-                };
-            };
-            /** @description Something failed on our side. Quote `error.request_id` to support. */
-            "5XX": {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorEnvelope"];
-                };
-            };
-        };
-    };
-    platform_admin_issue_refund: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RefundIn"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RefundOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

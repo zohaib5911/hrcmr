@@ -14,10 +14,11 @@ export const metadata: Metadata = {
 export default async function Page() {
   const api = await platformApi();
   if (!api) redirect(sessionStartPath("/subscriptions"));
-  const isOwner = await isPlatformOwner(api, "/subscriptions");
+  // An authenticated, audited read: an expired or refused platform session goes back to the start page.
+  await isPlatformOwner(api, "/subscriptions");
   return (
     <AdminPage>
-      <SubscriptionsAdmin isOwner={isOwner} />
+      <SubscriptionsAdmin />
     </AdminPage>
   );
 }

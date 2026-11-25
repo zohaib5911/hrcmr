@@ -245,15 +245,6 @@ class Stripe:
         """A payment, with its customer and metadata (a dispute names only the payment)."""
         return await self._get("/v1/payment_intents", payment_intent_id)
 
-    async def create_refund(self, *, payment_intent: str, idempotency_key: str) -> dict[str, Any]:
-        """A full refund of one payment. The key is the payment's own, so a retry never
-        refunds twice."""
-        return await self._post(
-            "/v1/refunds",
-            {"payment_intent": _checked(payment_intent)},
-            idempotency_key=idempotency_key,
-        )
-
     async def cancel_at_period_end(
         self, subscription_id: str, *, idempotency_key: str
     ) -> dict[str, Any]:

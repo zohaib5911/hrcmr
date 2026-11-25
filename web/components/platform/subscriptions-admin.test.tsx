@@ -1,16 +1,14 @@
 // @vitest-environment jsdom
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { SubscriptionsAdmin } from "./subscriptions-admin";
 
 const get = vi.fn();
-const post = vi.fn();
 
 vi.mock("@/lib/auth/request", () => ({
   attempt: async (fn: (c: unknown) => Promise<{ data?: unknown; error?: unknown }>) => {
-    const r = await fn({ GET: get, POST: post });
+    const r = await fn({ GET: get });
     return r.error ? { ok: false, problem: r.error } : { ok: true, data: r.data };
   },
 }));
@@ -31,12 +29,6 @@ const row = {
 
 beforeEach(() => {
   get.mockResolvedValue({ data: { items: [row], total: 1 } });
-  post.mockResolvedValue({
-    data: {
-      subscription: { ...row, refunded_at: "2026-11-12T10:00:00Z" },
-      stripe_refund_id: "re_1",
-    },
-  });
 });
 afterEach(() => {
   cleanup();
@@ -45,44 +37,16 @@ afterEach(() => {
 
 describe("SubscriptionsAdmin", () => {
   it("lists subscriptions with Stripe ids as text", async () => {
-    render(<SubscriptionsAdmin isOwner />);
+    render(<SubscriptionsAdmin />);
     expect(await screen.findByText("Acme Care")).toBeInTheDocument();
     expect(screen.getByText(/pi_123/)).toBeInTheDocument();
   });
 
-  it("hides Refund from a support-level admin", async () => {
-    render(<SubscriptionsAdmin isOwner={false} />);
+  it("offers no refund action to anyone", async () => {
+    render(<SubscriptionsAdmin />);
     await screen.findByText("Acme Care");
-    expect(screen.queryByRole("button", { name: "Refund" })).not.toBeInTheDocument();
-  });
-
-  it("needs a reason, then confirms and sends confirm: true once", async () => {
-    render(<SubscriptionsAdmin isOwner />);
-    await screen.findByText("Acme Care");
-    expect(screen.getByRole("button", { name: "Refund" })).toBeDisabled();
-    await userEvent.type(screen.getByLabelText("Refund reason"), "Customer asked in 14 days");
-    await userEvent.click(screen.getByRole("button", { name: "Refund" }));
-    expect(post).not.toHaveBeenCalled();
-    await userEvent.click(await screen.findByRole("button", { name: "Refund in full" }));
-    await waitFor(() => expect(post).toHaveBeenCalledTimes(1));
-    expect(post.mock.calls[0]?.[0]).toBe("/platform/refunds");
-    expect(post.mock.calls[0]?.[1].body).toEqual({
-      subscription_id: "s1",
-      reason: "Customer asked in 14 days",
-      confirm: true,
-    });
-    expect(await screen.findByText(/^Refunded \d/)).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Refund" })).not.toBeInTheDocument();
-  });
-
-  it("shows the API's message when the refund is refused", async () => {
-    post.mockResolvedValue({ error: { code: "ALREADY_REFUNDED", message: "Already refunded." } });
-    render(<SubscriptionsAdmin isOwner />);
-    await screen.findByText("Acme Care");
-    await userEvent.type(screen.getByLabelText("Refund reason"), "Customer asked");
-    await userEvent.click(screen.getByRole("button", { name: "Refund" }));
-    await userEvent.click(await screen.findByRole("button", { name: "Refund in full" }));
-    expect(await screen.findByText("Already refunded.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /refund/i })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/refund reason/i)).not.toBeInTheDocument();
   });
 });
 
@@ -91,7 +55,7 @@ describe("SubscriptionsAdmin expired platform session", () => {
     const replace = vi.fn();
     vi.stubGlobal("location", { ...window.location, replace });
     get.mockResolvedValue({ error: { code, message: "no" } });
-    render(<SubscriptionsAdmin isOwner />);
+    render(<SubscriptionsAdmin />);
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/session?next=%2Fsubscriptions"));
     vi.unstubAllGlobals();
   });

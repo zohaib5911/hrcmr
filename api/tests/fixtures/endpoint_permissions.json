@@ -371,7 +371,6 @@
   "POST /api/v1/platform/impersonation/{support_id}/end": ["platform.impersonate"],
   "POST /api/v1/platform/impersonation/{support_id}/writes": ["platform.impersonate"],
   "POST /api/v1/platform/jobs/failures/{failure_id}/rerun": ["platform.jobs.run"],
-  "POST /api/v1/platform/refunds": ["platform.billing.refund"],
   "POST /api/v1/platform/register/holds/{publication_id}/approve": ["platform.jobs.run"],
   "POST /api/v1/platform/register/run": ["platform.jobs.run"],
   "POST /api/v1/platform/rules/{version_id}/publish": ["platform.rules.publish"],

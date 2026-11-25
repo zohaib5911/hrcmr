@@ -202,7 +202,7 @@ ROLE_PERMISSIONS: dict[str, frozenset[str]] = {
 # never mixed with the tenant roles above.
 PLATFORM_PERMISSIONS: frozenset[str] = _words(
     """
-    platform.companies.read platform.companies.write platform.billing.refund
+    platform.companies.read platform.companies.write
     platform.impersonate platform.rules.publish platform.content.write platform.jobs.run
     platform.audit.read
     """

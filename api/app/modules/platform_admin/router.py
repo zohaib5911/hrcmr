@@ -17,7 +17,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Path, Query, Request, Response
 from sqlalchemy import select
 
-from app.core.errors import AppError, ForbiddenError
+from app.core.errors import ForbiddenError
 from app.jobs.queue import open_queue
 from app.modules.identity.models import PlatformAdmin
 from app.modules.platform_admin import (
@@ -58,8 +58,6 @@ from app.modules.platform_admin.schemas import (
     OptionalReasonIn,
     PlatformContextOut,
     ReasonIn,
-    RefundIn,
-    RefundOut,
     RegisterStatusOut,
     SubscriptionsOut,
     TermsIn,
@@ -75,7 +73,6 @@ from app.modules.support.models import ImpersonationSession
 router = APIRouter(tags=["platform-admin"])
 Reader = Annotated[PlatformAccess, Depends(require_platform("platform.companies.read"))]
 Writer = Annotated[PlatformAccess, Depends(require_platform("platform.companies.write"))]
-Refunder = Annotated[PlatformAccess, Depends(require_platform("platform.billing.refund"))]
 Content = Annotated[PlatformAccess, Depends(require_platform("platform.content.write"))]
 Rerunner = Annotated[PlatformAccess, Depends(require_platform("platform.jobs.run"))]
 PLAN_PATTERN = "^(free|annual|ten_year)$"
@@ -216,34 +213,6 @@ async def list_subscriptions(
 ) -> SubscriptionsOut:
     return await billing.subscriptions(
         access.db, plan=plan, refunded=refunded, limit=limit, offset=offset
-    )
-
-
-@router.post("/platform/refunds", response_model=RefundOut)
-async def issue_refund(body: RefundIn, request: Request, access: Refunder) -> RefundOut:
-    """A full refund of the latest payment on a purchase. Owner only (T17.4)."""
-    if not await _is_owner(access):
-        raise ForbiddenError("Only an owner can issue a refund.")
-    if not body.confirm:
-        raise AppError(
-            "CONFIRMATION_REQUIRED",
-            "Confirm that this payment should be refunded in full.",
-            status_code=422,
-            field="confirm",
-        )
-    subscription = await billing.subscription_or_404(access.db, body.subscription_id)
-    refund_id = await billing.refund(
-        access.db,
-        request.app.state.stripe,
-        access.audit_context,
-        subscription,
-        reason=body.reason,
-        now=datetime.now(UTC),
-    )
-    await access.db.commit()
-    return RefundOut(
-        subscription=await billing.row_for(access.db, subscription),
-        stripe_refund_id=refund_id,
     )
 
 
