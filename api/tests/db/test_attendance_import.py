@@ -153,7 +153,7 @@ async def test_stale_rows_company_zone_and_leave_sync_are_rechecked(
     protected = await preview(imports)
     assert protected.status_code == 201, protected.text
     assert protected.json()["rows_valid"] == 0
-    assert "Approved leave" in protected.json()["rows"][0]["errors"][0]
+    assert "approved leave" in protected.json()["rows"][0]["errors"][0]
 
 
 async def test_commit_audit_failure_rolls_back_every_row(
@@ -199,3 +199,35 @@ async def test_xlsx_template_formula_errors_and_virus_rejection(imports: dict[st
             )
         ).all()
         assert "private-sick" not in str(events)
+
+
+OPEN_SHIFT = text(
+    "insert into attendance_records (company_id, employee_id, date, status, clock_in, source) "
+    "values (:c, :e, '2026-11-03', 'present', '2026-11-03 09:00+00', 'clock')"
+)
+
+
+async def test_an_open_clock_record_is_a_preview_error_and_a_stale_commit_is_refused(
+    imports: dict[str, Any],
+) -> None:
+    """ISS-18: preview and commit use one eligibility rule for the existing record."""
+    params = {"c": imports["a"], "e": imports["employee"]}
+    clean = (await preview(imports)).json()  # previewed before anyone clocked in
+    assert clean["rows_valid"] == 1
+    async with imports["owner"].begin() as c:
+        await c.execute(OPEN_SHIFT, params)
+
+    refused = await imports["admin"].post(BASE + f"/{clean['id']}/commit")
+    assert refused.status_code == 409, refused.text
+    async with imports["owner"].connect() as c:
+        rows = (
+            await c.execute(
+                text("select source, clock_out from attendance_records where employee_id = :e"),
+                params,
+            )
+        ).all()
+    assert [(r.source, r.clock_out) for r in rows] == [("clock", None)]  # nothing written
+
+    shown = (await preview(imports)).json()
+    assert shown["rows_valid"] == 0
+    assert "Clock out before" in shown["rows"][0]["errors"][0]

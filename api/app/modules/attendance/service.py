@@ -91,6 +91,19 @@ def snapshot(row: AttendanceRecord) -> dict[str, Any]:
     }
 
 
+def check_replaceable(
+    row: AttendanceRecord | None, source: Literal["manual", "import", "grid"]
+) -> None:
+    """Whether ``source`` may replace the existing record. Import preview and every save use this
+    one rule (ISS-18), so a preview never accepts a row its commit would refuse."""
+    if row is not None and (row.source == "leave_sync" or row.leave_request_id is not None):
+        raise ConflictError(
+            "This attendance comes from approved leave and cannot be replaced by a manual record."
+        )
+    if row is not None and row.source == "clock" and row.clock_out is None and source != "manual":
+        raise ConflictError("Clock out before changing this record through bulk entry or import.")
+
+
 async def save_record(
     access: Access, body: AttendanceIn, *, source: Literal["manual", "import", "grid"] = "manual"
 ) -> tuple[AttendanceRecord, Employee, Company]:
@@ -124,12 +137,7 @@ async def save_record(
             .with_for_update()
         )
     ).scalar_one_or_none()
-    if row is not None and (row.source == "leave_sync" or row.leave_request_id is not None):
-        raise ConflictError(
-            "This attendance comes from approved leave and cannot be replaced by a manual record."
-        )
-    if row is not None and row.source == "clock" and row.clock_out is None and source != "manual":
-        raise ConflictError("Clock out before changing this record through bulk entry or import.")
+    check_replaceable(row, source)
     status_only = source == "grid" and not (
         {"clock_in", "clock_out", "unpaid_break_minutes"} & body.model_fields_set
     )
