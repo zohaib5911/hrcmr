@@ -547,6 +547,8 @@ Checks:
 | `export_id` | UUID | yes |  |  |
 | `started_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `completed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `failures` | SMALLINT | no | `0` |  |
+| `retry_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `id` | UUID | no | `uuid_generate_v7()` | primary key |
 | `created_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |
 | `updated_at` | TIMESTAMP WITH TIME ZONE | no | `now()` |  |

@@ -75,3 +75,7 @@ class DeletionRequest(Base, RecordMixin, TenantMixin):
     export_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # ISS-30: after a failed purge the request waits until this time, so a batch of persistent
+    # failures cannot hold back companies behind it. Null = due now.
+    failures: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default="0")
+    retry_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
