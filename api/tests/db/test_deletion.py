@@ -332,7 +332,9 @@ async def test_the_executor_deletes_only_the_due_company_and_keeps_a_stub(
         ("pending_deletion",)
     ]
 
-    assert await deletion_executor_hourly({**ctx, "now": due}) == 1
+    assert await deletion_executor_hourly({**ctx, "now": due}) == 0  # waits for its backoff
+    later = due + timedelta(hours=1)
+    assert await deletion_executor_hourly({**ctx, "now": later}) == 1
     assert [call for call, _ in stripe.calls] == ["retrieve", "cancel"]
 
     # Company a: only the kept records and one audit stub remain.
@@ -433,6 +435,7 @@ async def test_storage_failure_leaves_deletion_frozen_and_retryable(rig: dict[st
         (first,)
     ]
     ctx["storage"] = storage
+    ctx["now"] = now + timedelta(hours=1)  # after the failed purge's backoff (ISS-30)
     assert await deletion_executor_hourly(ctx) == 1
     assert await storage.list_objects(prefix) == []
 
@@ -473,3 +476,61 @@ async def test_starting_deletion_without_export_requires_recent_step_up(
     assert started.status_code == 202, started.text
     assert started.json()["status"] == "awaiting_code"
     assert len(rig["sent"]) == 1
+
+
+async def test_persistent_failures_ahead_do_not_starve_a_healthy_purge(
+    rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ISS-30: 20 requests that keep failing, due first, and one healthy request behind them."""
+    from app.jobs import deletion as job
+
+    healthy = rig["a"]
+    admin = await rig["person"]("company_admin", healthy)
+    scheduled = await _schedule(rig, admin)
+    now = datetime.fromisoformat(scheduled["scheduled_for"]) + timedelta(minutes=1)
+    failing = [uuid.uuid4() for _ in range(job.BATCH)]
+    async with rig["owner"].begin() as c:
+        for i, request in enumerate(failing):
+            company = uuid.uuid4()
+            await c.execute(
+                text(
+                    "insert into companies (id, name, slug, plan, subscription_status) "
+                    "values (:c, :n, :n, 'annual', 'active')"
+                ),
+                {"c": company, "n": f"stuck-{company.hex[:12]}"},
+            )
+            await c.execute(
+                text(
+                    "insert into deletion_requests (id, company_id, confirmed_at, scheduled_for) "
+                    "values (:i, :c, :t, :s)"
+                ),
+                # Due earlier than the healthy one, so they come first in the batch.
+                {"i": request, "c": company, "t": now, "s": now - timedelta(days=1, minutes=i)},
+            )
+
+    real = job.purge_company
+
+    async def purge(
+        owner: Any, storage: Any, stripe: Any, company: Any, request: Any, **kw: Any
+    ) -> int:
+        if request in failing:
+            raise RuntimeError("persistent failure")
+        return await real(owner, storage, stripe, company, request, **kw)
+
+    monkeypatch.setattr(job, "purge_company", purge)
+    ctx = {
+        "owner_engine": rig["owner"],
+        "stripe": FakeStripe(),
+        "storage": rig["app"].state.files.storage,
+    }
+    first = await job.deletion_executor_hourly({**ctx, "now": now})
+    second = await job.deletion_executor_hourly({**ctx, "now": now + timedelta(minutes=5)})
+    assert first + second == 1  # the healthy company was reached
+    assert await _rows(rig, "select status from companies where id=:c", c=healthy) == [("deleted",)]
+    retry = await _rows(
+        rig,
+        "select count(*) from deletion_requests where id = any(:ids) and completed_at is null "
+        "and failures >= 1 and retry_at is not null",
+        ids=failing,
+    )
+    assert retry == [(job.BATCH,)]  # the failed purges remain, waiting to be retried

@@ -15,10 +15,10 @@ from __future__ import annotations
 
 import json
 import uuid  # noqa: TC003
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import delete, exists, select
+from sqlalchemy import delete, exists, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -44,6 +44,8 @@ if TYPE_CHECKING:
 logger = get_logger("app.deletion")
 
 BATCH = 20
+# The wait after the 1st, 2nd, 3rd... failed purge (ISS-30); the last value repeats.
+RETRY_BACKOFF = (timedelta(hours=1), timedelta(hours=4), timedelta(hours=12), timedelta(hours=24))
 KEY_PREFIX = "company/{company_id}/"
 # Company columns emptied in the stub. Kept: id, status, plan and subscription fields, Stripe ids
 # (for the payment records), and settings with no personal data.
@@ -70,6 +72,7 @@ def due(now: datetime) -> Any:
         DeletionRequest.withdrawn_at.is_(None),
         DeletionRequest.completed_at.is_(None),
         DeletionRequest.scheduled_for <= now,
+        or_(DeletionRequest.retry_at.is_(None), DeletionRequest.retry_at <= now),
     )
 
 
@@ -249,6 +252,27 @@ async def purge_company(
     return True
 
 
+async def _postpone(owner: AsyncEngine, request_id: uuid.UUID, now: datetime) -> None:
+    """A failed purge waits for its backoff and stays retryable; the batch moves on (ISS-30)."""
+    async with AsyncSession(owner) as db:
+        failures = (
+            await db.scalar(
+                update(DeletionRequest)
+                .where(DeletionRequest.id == request_id)
+                .values(failures=DeletionRequest.failures + 1)
+                .returning(DeletionRequest.failures)
+            )
+            or 1
+        )
+        wait = RETRY_BACKOFF[min(failures, len(RETRY_BACKOFF)) - 1]
+        await db.execute(
+            update(DeletionRequest)
+            .where(DeletionRequest.id == request_id)
+            .values(retry_at=now + wait)
+        )
+        await db.commit()
+
+
 async def deletion_executor_hourly(ctx: dict[str, Any]) -> int:
     owner: AsyncEngine | None = ctx.get("owner_engine")
     if owner is None:
@@ -257,7 +281,15 @@ async def deletion_executor_hourly(ctx: dict[str, Any]) -> int:
     stripe: Stripe = ctx.get("stripe") or Stripe.from_settings(ctx["settings"])
     async with AsyncSession(owner) as db:
         waiting = (
-            await db.execute(due(now).order_by(DeletionRequest.scheduled_for).limit(BATCH))
+            await db.execute(
+                due(now)
+                .order_by(
+                    DeletionRequest.failures,
+                    DeletionRequest.scheduled_for,
+                    DeletionRequest.id,
+                )
+                .limit(BATCH)
+            )
         ).all()
     done = 0
     for company_id, request_id in waiting:
@@ -270,4 +302,5 @@ async def deletion_executor_hourly(ctx: dict[str, Any]) -> int:
             logger.warning(
                 "company_deletion_failed", company_id=str(company_id), kind=type(exc).__name__
             )
+            await _postpone(owner, request_id, now)
     return done
