@@ -209,3 +209,67 @@ async def test_rota_publish_e_mail_follows_the_preference(ready: dict[str, Any],
     assert published.status_code == 200, published.text
     assert await _delivery(ready, quiet_user, "rota.published", "rota_published") == (1, 0)
     assert await _delivery(ready, plain_user, "rota.published", "rota_published") == (1, 1)
+
+
+async def test_a_suspended_member_gets_no_digest_for_that_company_only(
+    rig: dict[str, Any],
+) -> None:
+    """ISS-08: the suspended membership stops company A's digest; company B's still goes."""
+    employee = await rig["person"]("employee", rig["a"])
+    me = await _me(employee)
+    await employee.put(API + "/me/notification-preferences", json={"mode": "daily"})
+    await _notice(rig, me["user_id"], rig["a"], "learning.overdue", "A notice")
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text("update users set email_verified_at = now() where id = :u"), {"u": me["user_id"]}
+        )
+        await c.execute(
+            text(
+                "update memberships set status = 'suspended' where user_id = :u and company_id = :c"
+            ),
+            {"u": me["user_id"], "c": rig["a"]},
+        )
+        await c.execute(
+            text(
+                "insert into memberships (user_id, company_id, role, status) "
+                "values (:u, :c, 'employee', 'active')"
+            ),
+            {"u": me["user_id"], "c": rig["b"]},
+        )
+        await c.execute(
+            text(
+                "insert into notification_preferences (user_id, company_id, mode) "
+                "values (:u, :c, 'daily')"
+            ),
+            {"u": me["user_id"], "c": rig["b"]},
+        )
+    await _notice(rig, me["user_id"], rig["b"], "learning.overdue", "B notice")
+    set_keyring(KeyRing(keys={"k1": os.urandom(32)}, active_kid="k1", blind_key=os.urandom(32)))
+    try:
+        await reconcile_digests(rig["owner"], "http://web.test", now=datetime.now(UTC))
+    finally:
+        set_keyring(None)
+    async with rig["owner"].connect() as c:
+        rows = dict(
+            (
+                await c.execute(
+                    text(
+                        "select company_id, count(*) filter (where digested_at is null) "
+                        "from notifications where user_id = :u group by company_id"
+                    ),
+                    {"u": me["user_id"]},
+                )
+            ).all()
+        )
+        sent = (
+            await c.execute(
+                text(
+                    "select count(*) from email_outbox o join users u on u.email = o.to_address "
+                    "where u.id = :u and o.template = 'notifications_digest'"
+                ),
+                {"u": me["user_id"]},
+            )
+        ).scalar_one()
+    assert rows[rig["a"]] == 1  # A's notice is not digested: no digest for company A
+    assert rows[rig["b"]] == 0  # B's was
+    assert sent == 1
