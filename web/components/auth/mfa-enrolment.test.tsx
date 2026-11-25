@@ -61,7 +61,7 @@ describe("MfaEnrolment", () => {
       ok: false,
       problem: { code: "NETWORK", message: "We could not reach the server." },
     });
-    render(<MfaEnrolment onDone={vi.fn()} onSignOut={vi.fn()} />);
+    render(<MfaEnrolment onDone={vi.fn()} onSignOut={vi.fn().mockResolvedValue(null)} />);
     expect(await screen.findByText("We could not reach the server.")).toBeInTheDocument();
     await waitFor(() => expect(attempt).toHaveBeenCalledTimes(1));
     expect(screen.getByRole("button", { name: "Sign out" })).toBeInTheDocument();
