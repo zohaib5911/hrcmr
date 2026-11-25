@@ -293,6 +293,66 @@ async def test_pay_schedules_need_a_pay_day_that_fits_the_frequency(rig: dict[st
     assert actions == ["pay_schedule.created"] * 3 + ["pay_schedule.updated"]
 
 
+@pytest.mark.parametrize(
+    ("path", "table", "field", "body"),
+    [
+        ("tax-codes", "tax_codes", "code", {"code": "1257L", "deduction_percentage": "0"}),
+        ("payment-types", "payment_types", "name", {"name": "Hourly", "min_hourly_rate": "12"}),
+        (
+            "pay-bands",
+            "pay_bands",
+            "name",
+            {"name": "Grade 3", "min_annual": "28000", "max_annual": "34000"},
+        ),
+        (
+            "pay-schedules",
+            "pay_schedules",
+            "name",
+            {
+                "name": "Weekly Friday",
+                "frequency": "weekly",
+                "pay_day_kind": "weekday",
+                "pay_day_value": 5,
+            },
+        ),
+    ],
+)
+async def test_concurrent_creates_that_differ_only_in_case_save_one_and_refuse_one(
+    rig: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+    path: str,
+    table: str,
+    field: str,
+    body: dict[str, Any],
+) -> None:
+    """ISS-39: both requests pass the name precheck; the unique index decides, as a 409."""
+    import asyncio
+
+    from app.modules.pay import router as pay_router
+
+    async def passes(*_args: Any, **_kwargs: Any) -> None:
+        return None
+
+    monkeypatch.setattr(pay_router, "_free", passes)  # both are past the check at once
+    admin = await rig["person"]("company_admin", rig["a"])
+    upper = {**body, field: body[field].upper()}
+    lower = {**body, field: body[field].lower()}
+    answers = await asyncio.gather(
+        admin.post(f"{API}/{path}", json=upper), admin.post(f"{API}/{path}", json=lower)
+    )
+    assert sorted(r.status_code for r in answers) == [201, 409], [r.text for r in answers]
+    [refused] = [r for r in answers if r.status_code == 409]
+    assert refused.json()["error"]["field"] == field
+    async with rig["owner"].connect() as c:
+        saved = (
+            await c.execute(
+                text(f"select count(*) from {table} where company_id = :c"),  # noqa: S608
+                {"c": rig["a"]},
+            )
+        ).scalar_one()
+    assert saved == 1
+
+
 async def _primaries(rig: dict[str, Any]) -> list[str]:
     async with rig["owner"].connect() as c:
         rows = await c.execute(

@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Annotated, Any
 
 from fastapi import APIRouter, Depends
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 
 from app.core.errors import AppError, ConflictError, NotFoundError
 from app.modules.companies.models import Company
@@ -76,6 +77,20 @@ async def _free(
         query = query.where(model.id != except_id)
     if (await access.db.execute(query)).first() is not None:
         raise ConflictError(f"That {field} is already in use.", field=field)
+
+
+async def _add_named(access: Access, row: Any, table: str, name: str, field: str) -> None:
+    """Insert ``row``. Two requests can both pass ``_free`` (ISS-39); the loser hits the
+    case-insensitive unique index and gets the same field-level 409 as the precheck. Its
+    savepoint is rolled back; any other database error is raised as before."""
+    try:
+        async with access.db.begin_nested():
+            access.db.add(row)
+            await access.db.flush()
+    except IntegrityError as exc:
+        if f"uq_{table}_company_id_{name}" not in str(exc.orig):
+            raise
+        raise ConflictError(f"That {field} is already in use.", field=field) from None
 
 
 def _q(value: Decimal) -> Decimal:
@@ -285,8 +300,7 @@ async def list_tax_codes(access: TaxReads) -> list[TaxCodeOut]:
 async def create_tax_code(body: TaxCodeIn, access: TaxWrites) -> TaxCodeOut:
     await _free(access, TaxCode, TaxCode.code, body.code, "code")
     row = TaxCode(company_id=access.company_id, **body.model_dump())
-    access.db.add(row)
-    await access.db.flush()
+    await _add_named(access, row, "tax_codes", "code", "code")
     await access.audit(
         "tax_code.created", entity_type="tax_code", entity_id=row.id, after=_tax_json(row)
     )
@@ -366,8 +380,7 @@ async def create_payment_type(body: PaymentTypeIn, access: TypeWrites) -> Paymen
         "name",
     )
     row = PaymentType(company_id=access.company_id, **body.model_dump())
-    access.db.add(row)
-    await access.db.flush()
+    await _add_named(access, row, "payment_types", "name", "name")
     await access.audit(
         "payment_type.created", entity_type="payment_type", entity_id=row.id, after=_type_json(row)
     )
@@ -456,8 +469,7 @@ async def create_pay_band(body: PayBandIn, access: BandWrites) -> PayBandOut:
         "name",
     )
     row = PayBand(company_id=access.company_id, **body.model_dump())
-    access.db.add(row)
-    await access.db.flush()
+    await _add_named(access, row, "pay_bands", "name", "name")
     await access.audit(
         "pay_band.created", entity_type="pay_band", entity_id=row.id, after=_band_json(row)
     )
@@ -549,8 +561,7 @@ async def create_pay_schedule(body: PayScheduleIn, access: ScheduleWrites) -> Pa
         "name",
     )
     row = PaySchedule(company_id=access.company_id, **body.model_dump())
-    access.db.add(row)
-    await access.db.flush()
+    await _add_named(access, row, "pay_schedules", "name", "name")
     await access.audit(
         "pay_schedule.created",
         entity_type="pay_schedule",
