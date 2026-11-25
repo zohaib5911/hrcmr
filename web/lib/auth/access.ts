@@ -43,7 +43,7 @@ export const NAV_PERMISSIONS: Readonly<Record<string, readonly string[]>> = {
   attendance: ["attendance.record.read", "attendance.record.read_own"],
   rota: ["rota.shift.read", "rota.duty_roster.read"],
   "work-log": ["work_log.entry.read"],
-  "my-documents": ["document.file.read_own"],
+  "my-documents": ["document.file.read_own", "employee.rtw.read_own", "policy.acceptance.read_own"],
   company: ["company.overview.read", "company.profile.read"],
   users: ["rbac.user.read"],
   billing: ["billing.manage"],
