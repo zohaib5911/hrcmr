@@ -14,6 +14,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
 from app.core.errors import AppError, ConflictError, NotFoundError
+from app.modules.companies.models import Company
 from app.modules.pay.models import BankAccount, PayBand, PaymentType, PaySchedule, TaxCode
 from app.modules.pay.schemas import (
     BankAccountIn,
@@ -129,6 +130,14 @@ def _bank_audit(row: BankAccount) -> dict[str, object]:
     }
 
 
+async def _lock_company(access: Access) -> None:
+    """Serialize changes to which account is the main one (ISS-27): the company row is locked for
+    the rest of the transaction, so two requests cannot both make an account primary."""
+    await access.db.execute(
+        select(Company.id).where(Company.id == access.company_id).with_for_update()
+    )
+
+
 async def _make_only_primary(access: Access, keep: uuid.UUID) -> None:
     others = (
         await access.db.execute(
@@ -141,6 +150,7 @@ async def _make_only_primary(access: Access, keep: uuid.UUID) -> None:
     ).scalars()
     for other in others:
         other.is_primary = False
+    await access.db.flush()  # the old main account is demoted before the new one is promoted
 
 
 @router.get("/bank-accounts", summary="The company's bank accounts, masked")
@@ -164,20 +174,22 @@ async def create_bank_account(body: BankAccountIn, access: BankWrites) -> BankAc
         body.label,
         "label",
     )
+    await _lock_company(access)
     first = (
         await access.db.execute(
             select(func.count()).select_from(BankAccount).where(BankAccount.archived_at.is_(None))
         )
     ).scalar_one() == 0
+    primary = body.is_primary or first
     row = BankAccount(
-        company_id=access.company_id,
-        **body.model_dump(exclude={"is_primary"}),
-        is_primary=body.is_primary or first,
+        company_id=access.company_id, **body.model_dump(exclude={"is_primary"}), is_primary=False
     )
     access.db.add(row)
     await access.db.flush()
-    if row.is_primary:
+    if primary:
         await _make_only_primary(access, row.id)
+        row.is_primary = True
+        await access.db.flush()
     await access.audit(
         "bank_account.created",
         entity_type="bank_account",
@@ -192,6 +204,8 @@ async def create_bank_account(body: BankAccountIn, access: BankWrites) -> BankAc
 async def update_bank_account(
     account_id: uuid.UUID, body: BankAccountPatch, access: BankWrites
 ) -> BankAccountOut:
+    if body.is_primary is not None:
+        await _lock_company(access)
     row: BankAccount = await _live(access, BankAccount, account_id)
     changes = body.model_dump(exclude_unset=True)
     if any(
@@ -214,10 +228,10 @@ async def update_bank_account(
     # last four digits must still be audited. Only the field names go in the trail.
     changed = [name for name, value in changes.items() if getattr(row, name) != value]
     before = _bank_audit(row)
-    for name, value in changes.items():
-        setattr(row, name, value)
     if changes.get("is_primary"):
         await _make_only_primary(access, row.id)
+    for name, value in changes.items():
+        setattr(row, name, value)
     if changed:
         await access.audit(
             "bank_account.updated",
@@ -233,6 +247,7 @@ async def update_bank_account(
 
 @router.delete("/bank-accounts/{account_id}", status_code=204, summary="Archive a bank account")
 async def archive_bank_account(account_id: uuid.UUID, access: BankWrites) -> None:
+    await _lock_company(access)
     row: BankAccount = await _live(access, BankAccount, account_id)
     others = (
         await access.db.execute(
