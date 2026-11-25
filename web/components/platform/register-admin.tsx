@@ -31,6 +31,7 @@ export function RegisterAdmin({ status }: { status: Status | null }) {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const publication = status?.last_publication;
+  const held = status?.held_import;
   // Both owner and support admins can read status and run imports. The API enforces
   // platform.jobs.run again; unavailable status or a refused action disables reruns.
   const canRun = status !== null && !denied;
@@ -45,6 +46,27 @@ export function RegisterAdmin({ status }: { status: Status | null }) {
         c.POST("/platform/register/run", { body: { reason: reason.trim() } }),
       );
       if (result.ok) setNotice("Register import queued. Reload later to see the latest status.");
+      else {
+        setError(result.problem.message);
+        if (["UNAUTHENTICATED", "FORBIDDEN"].includes(result.problem.code)) setDenied(true);
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function approveHeld() {
+    if (!held || !canRun || busy || !validReason) return;
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      const result = await attempt((c) =>
+        c.POST("/platform/register/holds/{publication_id}/approve", {
+          params: { path: { publication_id: held.id } },
+          body: { reason: reason.trim() },
+        }),
+      );
+      if (result.ok) setNotice("Held import approved and queued. Reload later to see it applied.");
       else {
         setError(result.problem.message);
         if (["UNAUTHENTICATED", "FORBIDDEN"].includes(result.problem.code)) setDenied(true);
@@ -84,6 +106,20 @@ export function RegisterAdmin({ status }: { status: Status | null }) {
               </p>
             </>
           )}
+          {held ? (
+            <Alert
+              tone={held.status === "held" ? "warning" : "info"}
+              title={
+                held.status === "held"
+                  ? "An import is held for review"
+                  : "A held import is approved and applies on the next run"
+              }
+            >
+              The file of {formatUk(held.published_on)} has {held.row_count} rows and would remove
+              unusually many current sponsors, so the public register was left as it was. If the
+              official register really shrank, give a reason below and apply it.
+            </Alert>
+          ) : null}
           <h2 className="text-title-3 text-label my-4">Recent import errors</h2>
           {status.errors.length === 0 ? (
             <p className="text-callout text-label-secondary">No recent import errors.</p>
@@ -119,7 +155,7 @@ export function RegisterAdmin({ status }: { status: Status | null }) {
         onChange={(e) => setReason(e.target.value)}
         disabled={!canRun || busy}
       />
-      <div className="mt-4">
+      <div className="mt-4 flex flex-wrap gap-3">
         <ConfirmDialog
           trigger={
             <Button variant="gray" disabled={!canRun || busy || !validReason}>
@@ -132,6 +168,20 @@ export function RegisterAdmin({ status }: { status: Status | null }) {
           confirmDisabled={!canRun || busy || !validReason}
           onConfirm={rerun}
         />
+        {held?.status === "held" ? (
+          <ConfirmDialog
+            trigger={
+              <Button variant="gray" disabled={!canRun || busy || !validReason}>
+                Apply held import
+              </Button>
+            }
+            title="Apply the held import?"
+            description="Sponsors missing from that file will be shown as removed from the public register. The approval is audited."
+            confirmLabel="Apply import"
+            confirmDisabled={!canRun || busy || !validReason}
+            onConfirm={approveHeld}
+          />
+        ) : null}
       </div>
     </>
   );

@@ -507,6 +507,26 @@ async def register_status(access: Reader) -> RegisterStatusOut:
     return await register.status(access.db)
 
 
+@router.post(
+    "/platform/register/holds/{publication_id}/approve",
+    status_code=202,
+    response_model=JobRerunOut,
+)
+async def approve_register_hold(
+    publication_id: uuid.UUID, body: ReasonIn, request: Request, access: Rerunner
+) -> JobRerunOut:
+    """Apply an import that was held for removing unusually many sponsors (ISS-11)."""
+    queue = await open_queue(request.app.state.settings)
+    try:
+        made = await register.approve_hold(
+            access.db, access.audit_context, publication_id, reason=body.reason, queue=queue
+        )
+    finally:
+        await queue.close()
+    await access.db.commit()
+    return made
+
+
 @router.post("/platform/register/run", status_code=202, response_model=JobRerunOut)
 async def run_register(body: ReasonIn, request: Request, access: Rerunner) -> JobRerunOut:
     queue = await open_queue(request.app.state.settings)
