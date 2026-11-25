@@ -247,3 +247,58 @@ async def test_timesheet_incomplete_and_clock_audit_rollback(
         assert (
             await c.execute(text("select clock_out from attendance_records"))
         ).scalar_one() is None
+
+
+async def test_the_timesheet_page_uses_a_bounded_number_of_queries(
+    ready: dict[str, Any],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """ISS-38: 1 person or 3 people (one with no records) cost the same queries, and the page's
+    fingerprints are the ones approval checks."""
+    import uuid
+
+    from sqlalchemy import event
+
+    manager = await manager_for(ready)
+    at(monkeypatch, "2026-01-12T09:00:00+00:00")
+    assert (await put(ready)).status_code == 200
+    engine = ready["app"].state.engine.sync_engine
+    statements: list[str] = []
+
+    def count(conn: Any, cursor: Any, statement: str, *args: Any) -> None:
+        statements.append(statement)
+
+    async def page_queries() -> tuple[int, list[dict[str, Any]]]:
+        statements.clear()
+        event.listen(engine, "before_cursor_execute", count)
+        try:
+            page = await manager.get(API + "/timesheets?start=2026-01-05&limit=50")
+        finally:
+            event.remove(engine, "before_cursor_execute", count)
+        assert page.status_code == 200, page.text
+        return len(statements), page.json()["items"]
+
+    one, items = await page_queries()
+    assert len(items) == 1
+    async with ready["owner"].begin() as c:
+        for n in range(2):
+            ident = uuid.uuid4()
+            await c.execute(
+                text(
+                    "insert into employees (id,company_id,employee_number,first_name,last_name,email,hire_date) values (:i,:c,:n,'Extra','Report','x@example.com','2025-01-01')"
+                ),
+                {"i": ident, "c": ready["a"], "n": f"EXTRA{n}"},
+            )
+            await c.execute(
+                text(
+                    "insert into employee_assignments (company_id,employee_id,employment_type,effective_from,reporting_authority_employee_id) values (:c,:e,'full_time','2025-01-01',:m)"
+                ),
+                {"c": ready["a"], "e": ident, "m": ready["other"]},
+            )
+    three, items = await page_queries()
+    assert len(items) == 3
+    assert three == one  # the page size does not add queries
+    sheet = next(item for item in items if item["employee_id"] == str(ready["employee"]))
+    body = {k: sheet[k] for k in ("employee_id", "period_start", "fingerprint")}
+    approved = await manager.post(API + f"/timesheets/{sheet['id']}/approve", json=body)
+    assert approved.status_code == 200, approved.text  # same fingerprint as the single view
