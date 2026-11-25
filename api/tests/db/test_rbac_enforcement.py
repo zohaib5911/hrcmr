@@ -8,6 +8,7 @@ import uuid
 from collections.abc import AsyncIterator
 from contextlib import AsyncExitStack
 from datetime import UTC, datetime
+from functools import partial
 from typing import Any
 
 import httpx
@@ -530,6 +531,10 @@ async def test_reports_are_found_at_any_depth_per_chain_and_never_across_compani
         await app_engine.dispose()
 
 
+def _fixed(at: datetime) -> datetime:
+    return at
+
+
 async def test_a_reporting_hand_over_follows_the_company_local_date(
     database: DatabaseUnderTest,
 ) -> None:
@@ -569,7 +574,7 @@ async def test_a_reporting_hand_over_follows_the_company_local_date(
         ]:
             async with TenantSession(app_engine, company_id=company_a) as db:
                 await db.execute(text("set local time zone 'UTC'"))
-                graph = ReportsGraph(db, company_a, clock=lambda at=instant: at)
+                graph = ReportsGraph(db, company_a, clock=partial(_fixed, instant))
                 assert await graph.is_report(reports_to, person)
                 other = new_manager if reports_to == old_manager else old_manager
                 assert not await graph.is_report(other, person)
