@@ -46,6 +46,7 @@ logger = get_logger("app.files")
 
 KEY_PREFIX = "company/"
 ORPHAN_GRACE = timedelta(hours=24)
+ORPHAN_PAGE = 1000  # storage keys listed and checked per step
 _HASH_CHUNK = 1024 * 1024
 _OWNER_TYPE = re.compile(r"[a-z][a-z_]{0,39}")
 
@@ -396,25 +397,26 @@ async def remove_orphans(
     from sqlalchemy import column, table
 
     cutoff = (now or datetime.now(UTC)) - older_than
-    objects = [o for o in await storage.list_objects(KEY_PREFIX) if o.last_modified < cutoff]
-    if not objects:
-        return 0
     files = table("files", column("storage_key"))
-    known: set[str] = set()
-    async with owner_engine.connect() as connection:
-        keys = [o.key for o in objects]
-        for start in range(0, len(keys), 1000):
-            result = await connection.execute(
-                select(files.c.storage_key).where(
-                    files.c.storage_key.in_(keys[start : start + 1000])
-                )
-            )
-            known.update(row[0] for row in result)
     removed = 0
-    for stored in objects:
-        if stored.key not in known:
-            await storage.delete(stored.key)
-            removed += 1
+    # One storage page at a time (ISS-36): its old keys are checked against the database and the
+    # unreferenced ones removed before the next page is listed, so memory follows the page size.
+    async for page in storage.list_pages(KEY_PREFIX, page_size=ORPHAN_PAGE):
+        keys = [o.key for o in page if o.last_modified < cutoff]
+        if not keys:
+            continue
+        async with owner_engine.connect() as connection:
+            known = set(
+                (
+                    await connection.execute(
+                        select(files.c.storage_key).where(files.c.storage_key.in_(keys))
+                    )
+                ).scalars()
+            )
+        for key in keys:
+            if key not in known:
+                await storage.delete(key)
+                removed += 1
     if removed:
         logger.info("orphans_removed", count=removed)
     return removed
