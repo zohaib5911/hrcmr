@@ -36,7 +36,9 @@ def _snapshot(row: OrganogramLevel) -> dict[str, Any]:
 async def org_chart(access: Reads) -> OrgChartOut:
     # Visa/RTW chips only for people who may read RTW for the whole company (not "own" only).
     with_rtw = scope_for(access.role, "employee.rtw.read") is Scope.ALL
-    tree = await service.org_chart(access.db, access.company_id, with_rtw=with_rtw)
+    tree = await service.org_chart(
+        access.db, access.company_id, with_rtw=with_rtw, today=await access.reports.today()
+    )
     return OrgChartOut(rtw_visible=with_rtw, unassigned=tree)
 
 
@@ -47,7 +49,9 @@ async def org_chart(access: Reads) -> OrgChartOut:
 )
 async def org_chart_pdf(access: Reads) -> Response:
     with_rtw = scope_for(access.role, "employee.rtw.read") is Scope.ALL
-    tree = await service.org_chart(access.db, access.company_id, with_rtw=with_rtw)
+    tree = await service.org_chart(
+        access.db, access.company_id, with_rtw=with_rtw, today=await access.reports.today()
+    )
     generated = datetime.now(UTC).strftime("%d %b %Y %H:%M UTC")
     html = org_chart_html(
         [person.model_dump(mode="json") for person in tree],

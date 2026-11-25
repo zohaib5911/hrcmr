@@ -123,7 +123,9 @@ async def assign_courses(body: CourseAssignmentIn, access: AssignWrites) -> Assi
             field="course_ids",
         )
     # Every person is resolved and checked before a single row is written.
-    people = await report.people_for(access.db, access.company_id, body)
+    people = await report.people_for(
+        access.db, access.company_id, body, await access.reports.today()
+    )
     values = [
         {
             "id": uuid7(),
@@ -208,6 +210,7 @@ async def assignment_report(
         department_id=department_id,
         status=status,
         search=search,
+        today=await access.reports.today(),
     )
     total = (
         await access.db.execute(select(func.count()).select_from(query.subquery()))
@@ -219,7 +222,7 @@ async def assignment_report(
 @router.get("/learning/summary", response_model=LearningSummaryOut)
 async def learning_summary(access: ReportReads) -> LearningSummaryOut:
     _company_wide(access)
-    return await report.summary(access.db, access.company_id)
+    return await report.summary(access.db, access.company_id, await access.reports.today())
 
 
 @router.get(
@@ -243,6 +246,7 @@ async def assignment_export(
                 department_id=department_id,
                 status=status,
                 search=search,
+                today=await access.reports.today(),
             )
         )
     ).all()
