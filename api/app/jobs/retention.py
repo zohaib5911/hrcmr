@@ -58,14 +58,62 @@ async def _remove_file(db: AsyncSession, storage: Storage | None, ident: uuid.UU
     return 1
 
 
+BATCH = 100  # leavers locked and committed per step
+
+
+def _candidates(today: date) -> Any:
+    """Leavers who may be due (ISS-34): left at least a year ago (the shortest window, and an
+    anniversary is never less than 365 days on) and who still hold evidence. The exact rules
+    are checked per person below; this only keeps recent leavers out of the locks."""
+    rtw = select(RTWCheck.id).where(
+        RTWCheck.company_id == Employee.company_id,
+        RTWCheck.subject_type == "employee",
+        RTWCheck.subject_id == Employee.id,
+    )
+    rtw_docs = select(EmployeeDocument.id).where(
+        EmployeeDocument.company_id == Employee.company_id,
+        EmployeeDocument.employee_id == Employee.id,
+        EmployeeDocument.category == "rtw_evidence",
+    )
+    sponsor = select(SponsorDocument.id).where(
+        SponsorDocument.company_id == Employee.company_id,
+        SponsorDocument.employee_id == Employee.id,
+    )
+    return select(Employee.id).where(
+        Employee.status.in_(("leaver", "archived")),
+        Employee.leave_date.is_not(None),
+        Employee.leave_date <= today - timedelta(days=365),
+        or_(rtw.exists(), rtw_docs.exists(), sponsor.exists()),
+    )
+
+
 async def _evidence(db: AsyncSession, storage: Storage | None, now: datetime) -> int:
-    people = (
-        await db.scalars(
-            select(Employee)
-            .where(Employee.status.in_(("leaver", "archived")), Employee.leave_date.is_not(None))
-            .with_for_update(skip_locked=True)
-        )
-    ).all()
+    """Purge due evidence a bounded batch of leavers at a time, committing each batch, so an
+    interrupted run keeps what it finished and the next run resumes with the rest."""
+    removed, after = 0, None
+    while True:
+        query = _candidates(now.date()).order_by(Employee.id).limit(BATCH)
+        if after is not None:
+            query = query.where(Employee.id > after)
+        ids = list((await db.scalars(query)).all())
+        if not ids:
+            return removed
+        after = ids[-1]
+        people = (
+            await db.scalars(
+                select(Employee)
+                .where(Employee.id.in_(ids))
+                .order_by(Employee.id)
+                .with_for_update(skip_locked=True)
+            )
+        ).all()
+        removed += await _purge_people(db, storage, now, people)
+        await db.commit()
+
+
+async def _purge_people(
+    db: AsyncSession, storage: Storage | None, now: datetime, people: Any
+) -> int:
     removed = 0
     for person in people:
         if person.leave_date is None:
