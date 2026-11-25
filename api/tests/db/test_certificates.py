@@ -166,6 +166,8 @@ async def test_a_00_30_london_summer_completion_keeps_its_local_day(
 
     sheet = await admin.get(API + "/learning/assignments.xlsx")
     assert sheet.status_code == 200, sheet.text
-    rows = list(load_workbook(io.BytesIO(sheet.content)).active.iter_rows(values_only=True))
+    active = load_workbook(io.BytesIO(sheet.content)).active
+    assert active is not None
+    rows = list(active.iter_rows(values_only=True))
     [row] = [r for r in rows if r and r[0] == name]
     assert row[-1] == "2026-07-15"
