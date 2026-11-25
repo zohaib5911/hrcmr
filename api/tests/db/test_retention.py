@@ -259,3 +259,48 @@ async def test_retention_does_not_delete_storage_inside_the_transaction(
 async def test_missing_owner_is_an_observable_failure() -> None:
     with pytest.raises(RuntimeError, match="owner_engine"):
         await retention_purge_daily({})
+
+
+async def test_recent_leavers_are_skipped_and_an_interrupted_run_resumes(
+    rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ISS-34: only possibly-due leavers are locked, in committed batches."""
+    from app.jobs import retention
+
+    first, _ = await _evidence(rig, rig["a"], "batch-1", left="2027-01-01")
+    second, _ = await _evidence(rig, rig["a"], "batch-2", left="2027-01-02")
+    recent, _ = await _evidence(rig, rig["a"], "batch-recent", left="2029-06-01")
+    async with AsyncSession(rig["owner"]) as db:
+        candidates = set(await db.scalars(retention._candidates(NOW.date())))
+    assert {first, second} <= candidates
+    assert recent not in candidates  # left under a year ago: never locked
+
+    monkeypatch.setattr(retention, "BATCH", 1)
+    real, calls = retention._purge_people, []
+
+    async def interrupted(db: Any, storage: Any, now: Any, people: Any) -> int:
+        calls.append(1)
+        if len(calls) == 2:
+            raise RuntimeError("worker stopped")
+        return await real(db, storage, now, people)
+
+    monkeypatch.setattr(retention, "_purge_people", interrupted)
+    ctx = {"owner_engine": rig["owner"], "storage": rig["app"].state.files.storage, "now": NOW}
+    with pytest.raises(RuntimeError):
+        await retention_purge_daily(ctx)
+
+    async def checks(employee: uuid.UUID) -> int:
+        async with rig["owner"].connect() as c:
+            return int(
+                await c.scalar(
+                    text("select count(*) from rtw_checks where subject_id=:e"), {"e": employee}
+                )
+                or 0
+            )
+
+    done = [e for e in (first, second) if await checks(e) == 0]
+    assert len(done) == 1  # the first batch was committed before the stop
+    monkeypatch.setattr(retention, "_purge_people", real)
+    await retention_purge_daily(ctx)
+    assert await checks(first) == await checks(second) == 0
+    assert await checks(recent) == 2
