@@ -125,12 +125,14 @@ async def removal_limit(db: AsyncSession, current: int) -> int:
 
 
 async def ingest(db: AsyncSession, client: httpx.AsyncClient, on: date) -> str:
+    # Serialize whole imports, scheduled and manual, before choosing and downloading the source
+    # (ISS-12): a run that waited here fetches the source as it is now, so an older download can
+    # never be applied after a newer one. Caller owns commit/rollback; network timeouts still apply.
+    await db.execute(select(func.pg_advisory_xact_lock(20201101)))
     html = await download(client, PAGE, 5_000_000)
     url = discover(html.decode("utf-8"))
     content = await download(client, url, 50_000_000)
     digest = hashlib.sha256(content).hexdigest()
-    # Serialize snapshot writers, including manual reruns. Caller owns commit/rollback.
-    await db.execute(select(func.pg_advisory_xact_lock(20201101)))
     previous = await db.scalar(
         select(Publication)
         .where(Publication.status == COMPLETE)

@@ -177,3 +177,43 @@ async def test_a_truncated_file_is_held_and_a_reviewed_reduction_applies(
             await db.rollback()
     finally:
         await engine.dispose()
+
+
+async def test_overlapping_imports_end_on_the_newer_source(database: DatabaseUnderTest) -> None:
+    """ISS-12: a slow download of the older file cannot be applied after the newer one."""
+    engine = engine_for(database.owner_url)
+    source = {"csv": _register(range(10))}
+    first_download = asyncio.Event()
+
+    async def handler(request: httpx.Request) -> httpx.Response:
+        if not request.url.path.endswith(".csv"):
+            return httpx.Response(200, content=(FIXTURES / "publication.html").read_bytes())
+        served = source["csv"]
+        if not first_download.is_set():
+            first_download.set()
+            source["csv"] = _register(range(12))  # GOV.UK publishes a newer file meanwhile
+            await asyncio.sleep(0.3)  # this older download is slow
+        return httpx.Response(200, content=served)
+
+    async def run(on: date) -> str:
+        async with (
+            AsyncSession(engine) as db,
+            httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client,
+        ):
+            result = await ingest(db, client, on)
+            await db.commit()
+            return result
+
+    try:
+        older = asyncio.create_task(run(date(2026, 11, 20)))
+        await first_download.wait()
+        newer = asyncio.create_task(run(date(2026, 11, 20)))
+        await asyncio.gather(older, newer)
+        async with AsyncSession(engine) as db:
+            names = set(
+                (await db.scalars(select(Sponsor.organisation_name).where(Sponsor.current))).all()
+            )
+        assert names == {f"Sponsor {i} Ltd" for i in range(12)}
+        assert await run(date(2026, 11, 21)) == "unchanged"
+    finally:
+        await engine.dispose()
