@@ -3,10 +3,11 @@
 The list reads the database only: the Stripe ids are shown so that a lookup in Stripe's own
 dashboard is one click away, and no Stripe call is made per row.
 
-A refund is one full refund of the latest payment behind a purchase: an annual plan's latest
-invoice, or a 10-year payment. It goes through the T16 Stripe client with the same idempotency key
-the self-serve refund uses (``refund-{payment_intent}``), so one payment is refunded at most once,
-however the two paths race or a request is retried. The refund is recorded and audited here.
+Customers have no refund action (plan 8.16: cancelling only stops renewal). This owner-only refund
+is discretionary, for support cases such as a duplicate or mistaken charge. It is one full refund
+of the latest payment behind a purchase: an annual plan's latest invoice, or a 10-year payment. It
+goes through the T16 Stripe client with the idempotency key ``refund-{payment_intent}``, so one
+payment is refunded at most once however a request is retried. It is recorded and audited here.
 
 A 10-year refund ends the company's plan in the same step (the same change as ``_refunded`` in
 billing/service.py); the later ``charge.refunded`` webhook then changes nothing. An annual refund

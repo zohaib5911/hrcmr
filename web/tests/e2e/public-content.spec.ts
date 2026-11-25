@@ -10,7 +10,7 @@ const ROUTES = [
   "/legal/cookies",
   "/legal/dpa",
   "/legal/privacy",
-  "/legal/refunds",
+  "/legal/cancellation",
   "/legal/register-terms",
   "/legal/resources-disclaimer",
   "/legal/subprocessors",

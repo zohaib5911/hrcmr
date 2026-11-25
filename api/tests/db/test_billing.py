@@ -325,7 +325,7 @@ async def test_the_annual_plan_starts_from_the_live_subscription_and_a_replay_do
     assert company["subscription_status"] == "active"
     assert company["subscription_started_at"] == started
     assert company["subscription_ends_at"] == datetime.fromtimestamp(END, UTC)
-    assert company["cooling_off_ends_at"] == started + timedelta(days=14)
+    assert company["cooling_off_ends_at"] is None  # no money-back window on new purchases
     assert company["stripe_subscription_id"] == "sub_1"
     audit = "select count(*) from audit_events where company_id = :c and action like 'billing.%'"
     events = await _count(rig, audit)
@@ -386,7 +386,7 @@ async def test_the_ten_year_plan_starts_from_the_payment_and_ends_on_a_full_refu
     started = datetime.fromtimestamp(START, UTC)
     assert company["plan"] == "ten_year"
     assert company["subscription_ends_at"] == started.replace(year=started.year + 10)
-    assert company["cooling_off_ends_at"] == started + timedelta(days=14)
+    assert company["cooling_off_ends_at"] is None  # no money-back window on new purchases
 
     admin = await rig["person"]("company_admin", rig["a"])
     await step_up(rig, admin)
@@ -623,8 +623,17 @@ async def _start_ten_year(rig: dict[str, Any], fake: FakeStripe, days_ago: int) 
     fake.requests.clear()
 
 
-async def test_cancel_inside_14_days_refunds_the_first_payment_then_ends_the_plan(
-    rig: dict[str, Any], fake: FakeStripe
+REFUNDS_AUDIT = (
+    "select count(*) from audit_events where company_id = :c and action = 'billing.refunded'"
+)
+CANCELS_AUDIT = (
+    "select count(*) from audit_events where company_id = :c and action = 'billing.cancelled'"
+)
+
+
+@pytest.mark.parametrize("days_ago", [3, 20])  # inside and outside the old 14-day window
+async def test_cancel_stops_the_annual_renewal_and_never_asks_stripe_for_a_refund(
+    rig: dict[str, Any], fake: FakeStripe, days_ago: int
 ) -> None:
     admin = await rig["person"]("company_admin", rig["a"])
     await step_up(rig, admin)
@@ -632,82 +641,18 @@ async def test_cancel_inside_14_days_refunds_the_first_payment_then_ends_the_pla
     nothing = await admin.post(f"{API}/billing/cancel")  # on the free plan: no plan to end
     assert (nothing.status_code, nothing.json()["error"]["code"]) == (409, "NO_PLAN_TO_CANCEL")
 
-    await _start_annual(rig, fake, days_ago=13)
+    begin = await _start_annual(rig, fake, days_ago=days_ago)
     assert (await hr.post(f"{API}/billing/cancel")).status_code == 403  # billing.manage only
     shown = (await admin.get(f"{API}/billing/subscription")).json()
-    assert shown["cooling_off_ends_at"] is not None
+    assert "cooling_off_ends_at" not in shown
     assert "@" in shown["support_email"]
 
     cancelled = await admin.post(f"{API}/billing/cancel")
     assert cancelled.status_code == 200, cancelled.text
-    assert cancelled.json()["refunded"] is True
-    # Refund first (keyed by its payment), then end the subscription at once.
-    assert [(r.method, r.url.path) for r in fake.requests] == [
-        ("GET", "/v1/subscriptions/sub_1"),
-        ("GET", "/v1/invoices/in_1"),
-        ("POST", "/v1/refunds"),
-        ("GET", "/v1/subscriptions/sub_1"),
-        ("DELETE", "/v1/subscriptions/sub_1"),
-        ("GET", "/v1/subscriptions/sub_1"),
-    ]
-    refund = fake.requests[2]
-    assert dict(parse_qsl(refund.content.decode())) == {"payment_intent": "pi_annual_1"}
-    assert refund.headers["Idempotency-Key"] == "refund-pi_annual_1"
-
-    company = await _company(rig)
-    assert (company["plan"], company["subscription_status"]) == ("free", "canceled")
-    assert (
-        await _count(
-            rig,
-            "select count(*) from subscriptions where company_id = :c and refunded_at is not null",
-        )
-        == 1
-    )
-    refunds = (
-        "select count(*) from audit_events where company_id = :c and action = 'billing.refunded'"
-    )
-    assert await _count(rig, refunds) == 1
-    assert (
-        await _count(
-            rig,
-            "select count(*) from audit_events where company_id = :c and action = 'billing.cancelled'",
-        )
-        == 1
-    )
-
-    # Stripe then tells us about the refund: nothing changes and nothing is recorded twice.
-    refunded = _event(
-        "evt_annual_refund",
-        "charge.refunded",
-        {
-            "object": "charge",
-            "refunded": True,
-            "payment_intent": "pi_annual_1",
-            "customer": "cus_1",
-            "metadata": {"company_id": str(rig["a"])},
-        },
-    )
-    assert (await _deliver(rig, refunded)).status_code == 200
-    assert await _count(rig, refunds) == 1
-    assert (await admin.get(f"{API}/billing/subscription")).json()["plan"] == "free"
-    again = await admin.post(f"{API}/billing/cancel")
-    assert (again.status_code, again.json()["error"]["code"]) == (409, "NO_PLAN_TO_CANCEL")
-
-
-async def test_cancel_after_14_days_ends_the_annual_plan_at_the_period_end_with_no_refund(
-    rig: dict[str, Any], fake: FakeStripe
-) -> None:
-    begin = await _start_annual(rig, fake, days_ago=15)
-    admin = await rig["person"]("company_admin", rig["a"])
-    await step_up(rig, admin)
-
-    cancelled = await admin.post(f"{API}/billing/cancel")
-    assert cancelled.status_code == 200, cancelled.text
     body = cancelled.json()
-    assert body["refunded"] is False
-    assert datetime.fromisoformat(body["ends_at"]) == datetime.fromtimestamp(
-        begin + 365 * 86400, UTC
-    )
+    assert "refunded" not in body
+    ends_at = datetime.fromtimestamp(begin + 365 * 86400, UTC)
+    assert datetime.fromisoformat(body["ends_at"]) == ends_at
     assert [(r.method, r.url.path) for r in fake.requests] == [
         ("POST", "/v1/subscriptions/sub_1"),
         ("GET", "/v1/subscriptions/sub_1"),
@@ -718,67 +663,38 @@ async def test_cancel_after_14_days_ends_the_annual_plan_at_the_period_end_with_
 
     company = await _company(rig)
     assert (company["plan"], company["subscription_status"]) == ("annual", "active")
-    shown = (await admin.get(f"{API}/billing/subscription")).json()
-    assert shown["cancel_at"] is not None
-    refunds = (
-        "select count(*) from audit_events where company_id = :c and action = 'billing.refunded'"
-    )
-    assert await _count(rig, refunds) == 0
+    assert (await admin.get(f"{API}/billing/subscription")).json()["cancel_at"] is not None
+    assert await _count(rig, REFUNDS_AUDIT) == 0
+    assert await _count(rig, CANCELS_AUDIT) == 1
 
-
-async def test_a_cancel_that_fails_after_the_refund_ends_the_plan_on_retry_without_refunding_twice(
-    rig: dict[str, Any], fake: FakeStripe
-) -> None:
-    await _start_annual(rig, fake, days_ago=13)
-    admin = await rig["person"]("company_admin", rig["a"])
-    await step_up(rig, admin)
-    fake.fail_cancel = True
-    failed = await admin.post(f"{API}/billing/cancel")
-    assert (failed.status_code, failed.json()["error"]["code"]) == (502, "PAYMENTS_UNAVAILABLE")
-    # The refund is kept; the plan is not yet ended.
-    assert (await _company(rig))["plan"] == "annual"
-    assert (
-        await _count(
-            rig,
-            "select count(*) from subscriptions where company_id = :c and refunded_at is not null",
-        )
-        == 1
-    )
-
-    fake.fail_cancel = False
+    # Cancelling again changes nothing and asks Stripe for nothing.
     fake.requests.clear()
-    done = await admin.post(f"{API}/billing/cancel")
-    assert done.status_code == 200, done.text
-    assert done.json()["refunded"] is True
-    # Stripe is not asked to refund again: only the subscription is ended.
-    assert [(r.method, r.url.path) for r in fake.requests] == [
-        ("GET", "/v1/subscriptions/sub_1"),
-        ("DELETE", "/v1/subscriptions/sub_1"),
-        ("GET", "/v1/subscriptions/sub_1"),
-    ]
-    assert (await _company(rig))["subscription_status"] == "canceled"
-    refunds = (
-        "select count(*) from audit_events where company_id = :c and action = 'billing.refunded'"
-    )
-    assert await _count(rig, refunds) == 1
+    again = await admin.post(f"{API}/billing/cancel")
+    assert again.status_code == 200, again.text
+    assert datetime.fromisoformat(again.json()["ends_at"]) == ends_at
+    assert fake.requests == []
+    assert await _count(rig, CANCELS_AUDIT) == 1
 
 
-async def test_the_ten_year_plan_is_refunded_inside_14_days_and_has_nothing_to_cancel_after(
-    rig: dict[str, Any], fake: FakeStripe
+@pytest.mark.parametrize("days_ago", [3, 20])
+async def test_a_ten_year_plan_never_renews_so_there_is_nothing_to_cancel(
+    rig: dict[str, Any], fake: FakeStripe, days_ago: int
 ) -> None:
-    await _start_ten_year(rig, fake, days_ago=13)
+    await _start_ten_year(rig, fake, days_ago=days_ago)
     admin = await rig["person"]("company_admin", rig["a"])
     await step_up(rig, admin)
-    cancelled = await admin.post(f"{API}/billing/cancel")
-    assert cancelled.status_code == 200, cancelled.text
-    assert cancelled.json()["refunded"] is True
-    assert [(r.method, r.url.path) for r in fake.requests] == [("POST", "/v1/refunds")]
-    refund = fake.requests[0]
-    assert dict(parse_qsl(refund.content.decode())) == {"payment_intent": "pi_1"}
-    assert refund.headers["Idempotency-Key"] == "refund-pi_1"
+    late = await admin.post(f"{API}/billing/cancel")
+    assert (late.status_code, late.json()["error"]["code"]) == (409, "NOTHING_TO_CANCEL")
     company = await _company(rig)
-    assert (company["plan"], company["subscription_status"]) == ("free", "refunded")
+    assert (company["plan"], company["subscription_status"]) == ("ten_year", "active")
+    assert fake.requests == []  # no refund, no Stripe call at all
+    assert await _count(rig, REFUNDS_AUDIT) == 0
 
+
+async def test_a_provider_refund_of_a_ten_year_payment_still_ends_the_plan(
+    rig: dict[str, Any], fake: FakeStripe
+) -> None:
+    await _start_ten_year(rig, fake, days_ago=3)
     refunded = _event(
         "evt_ten_refund",
         "charge.refunded",
@@ -791,22 +707,12 @@ async def test_the_ten_year_plan_is_refunded_inside_14_days_and_has_nothing_to_c
         },
     )
     assert (await _deliver(rig, refunded)).status_code == 200
-    refunds = (
-        "select count(*) from audit_events where company_id = :c and action = 'billing.refunded'"
-    )
-    assert await _count(rig, refunds) == 1
-
-
-async def test_a_ten_year_plan_after_14_days_has_nothing_to_cancel(
-    rig: dict[str, Any], fake: FakeStripe
-) -> None:
-    await _start_ten_year(rig, fake, days_ago=15)
-    admin = await rig["person"]("company_admin", rig["a"])
-    await step_up(rig, admin)
-    late = await admin.post(f"{API}/billing/cancel")
-    assert (late.status_code, late.json()["error"]["code"]) == (409, "NOTHING_TO_CANCEL")
-    assert (await _company(rig))["plan"] == "ten_year"
-    assert fake.requests == []  # the 14-day check is made before any Stripe call
+    company = await _company(rig)
+    assert (company["plan"], company["subscription_status"]) == ("free", "refunded")
+    assert await _count(rig, REFUNDS_AUDIT) == 1
+    assert (await _deliver(rig, refunded)).status_code == 200  # a replay changes nothing
+    assert await _count(rig, REFUNDS_AUDIT) == 1
+    assert fake.requests == []
 
 
 @pytest.mark.parametrize("action", ["checkout-session", "cancel"])

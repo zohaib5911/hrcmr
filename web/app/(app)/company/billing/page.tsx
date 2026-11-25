@@ -6,7 +6,7 @@ import { serverApi } from "@/lib/auth/server";
 
 export const metadata: Metadata = { title: "Billing" };
 
-/** The company's plan (plan 8.16): the plan card, the 14-day guarantee, cancel and payment details. */
+/** The company's plan (plan 8.16): the plan card, cancelling renewal and payment details. */
 export default async function Page({
   searchParams,
 }: {

@@ -13,11 +13,11 @@ import { SIGN_UP } from "@/lib/marketing-nav";
 export const metadata: Metadata = pageMetadata(
   "/pricing",
   "Pricing",
-  `Two simple plans for ${brand.name}, with unlimited employees on both and a ${PRICING.refundDays}-day money-back guarantee.`,
+  `Two simple plans for ${brand.name}: an annual plan you can stop renewing at any time, or one payment for ten years.`,
 );
 
 const INCLUDED = [
-  "Unlimited employees",
+  "One price, whatever your headcount",
   "Sponsor compliance reminders and reporting duties",
   "Right to work records",
   "Leave, attendance and rota",
@@ -33,8 +33,8 @@ const FAQ = [
       "We keep the product small and focused, we do not run a sales team, and we would rather have many small employers than a few large ones. The price does not change with the number of people you employ.",
   },
   {
-    question: "Is there a limit on employees?",
-    answer: "No. Every plan has unlimited employees, so the price per person falls as you grow.",
+    question: "Does the price depend on how many people I employ?",
+    answer: "No. Each plan has one price, so the price per person falls as you grow.",
   },
   {
     question: "What does the free plan include?",
@@ -42,8 +42,9 @@ const FAQ = [
       "You can set up your company and look around. To add people and keep records you need a paid plan.",
   },
   {
-    question: "How do refunds work?",
-    answer: `Cancel within ${PRICING.refundDays} days of paying and the full amount is returned to your card automatically.`,
+    question: "How does cancelling work?",
+    answer:
+      "Cancel the annual plan at any time and it will not renew: you keep full access until the end of the year you paid for. The 10 year plan is a single payment that never renews. Payments are not refunded when you cancel.",
   },
   {
     question: "What happens when the plan ends?",
@@ -62,7 +63,7 @@ export default function PricingPage() {
       <Hero
         eyebrow="Pricing"
         title="Two plans. No surprises."
-        lead="Unlimited employees on both, and the full amount back within the first two weeks if it is not for you."
+        lead="One price whatever your headcount. Stop renewing the annual plan whenever you like."
       />
       <Section tone="page" label="Plans" className="pt-0 md:pt-0">
         <PricingCards
@@ -119,7 +120,7 @@ export default function PricingPage() {
       </Section>
       <CtaBand
         title="Start with the free plan"
-        lead={`Upgrade when you are ready. ${PRICING.refundDays}-day money-back guarantee.`}
+        lead="Upgrade when you are ready."
         actions={[{ label: SIGN_UP.label, href: SIGN_UP.href }]}
       />
     </>

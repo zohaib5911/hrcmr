@@ -24,7 +24,6 @@ function billing(overrides: Partial<Billing>): Billing {
   return {
     cancel_at: null,
     comp_until: null,
-    cooling_off_ends_at: null,
     ends_at: null,
     has_billing_account: false,
     payment_grace_ends_at: null,
@@ -132,7 +131,7 @@ describe("BillingPage plan step-up (T25.3)", () => {
         return { ok: false, problem: { code: "STEP_UP_REQUIRED", message: "Confirm it is you." } };
       }
       if (requests.length === 2) return { ok: true, data: undefined };
-      return { ok: true, data: { refunded: false, ends_at: "2027-11-09T10:00:00Z" } };
+      return { ok: true, data: { ends_at: "2027-11-09T10:00:00Z" } };
     });
     const user = userEvent.setup();
     renderPage(

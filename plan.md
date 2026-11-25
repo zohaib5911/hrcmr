@@ -1081,8 +1081,7 @@ Each module lists **screens**, **behaviour rules** and **reference data**. The b
   - The UI shows an upgrade sheet.
 - **`/company/billing`:**
   - plan card (plan, price, cycle, renews, status, customer since);
-  - 14-day money-back banner with its end date;
-  - **Cancel subscription:** within 14 days, an automatic full refund through the Stripe Refunds API; after 14 days, cancel at period end;
+  - **Cancel subscription** (annual): stops renewal; access continues to the end of the paid term; no refund. The 10-year plan is a one-off purchase that never renews, so it has nothing to cancel. There is no money-back guarantee and customer cancellation never calls Stripe's Refunds API (owner decision, issues.md #1, 2026-11-25). Only a platform owner can refund, at their discretion (e.g. a duplicate charge);
   - "Payment details & invoices" opens the Stripe Billing Portal session;
   - plan change annual ↔ 10-year: handled by support in v1 (button "Contact support"), automated later.
 - **Webhooks** (`/webhooks/stripe`): checkout.session.completed, invoice.paid, invoice.payment_failed (grace 7 days + emails), customer.subscription.updated/deleted, charge.refunded. Idempotent.

@@ -32,6 +32,10 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   typedRoutes: true,
+  // The refund-policy page became the cancellation terms (no money-back guarantee).
+  async redirects() {
+    return [{ source: "/legal/refunds", destination: "/legal/cancellation", permanent: true }];
+  },
   // Static assets bypass the proxy, so they get the base security headers here. The proxy sets
   // the per-request Content-Security-Policy and the same base headers on every page.
   async headers() {
