@@ -9,6 +9,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { DatePicker } from "@/components/ui/date-picker";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
+import { allEmployees } from "@/lib/employees/list";
 
 type Course = components["schemas"]["CourseCardOut"];
 type Department = components["schemas"]["DepartmentOut"];
@@ -62,11 +63,9 @@ export function AssignWizard({
   useEffect(() => {
     if (!open || scope !== "named" || people.length > 0) return;
     let active = true;
-    void attempt((c) => c.GET("/employees", { params: { query: { archived: false } } })).then(
-      (r) => {
-        if (active && r.ok) setPeople(r.data.employees);
-      },
-    );
+    void attempt((c) => allEmployees(c, { archived: false })).then((r) => {
+      if (active && r.ok) setPeople(r.data.employees);
+    });
     return () => {
       active = false;
     };

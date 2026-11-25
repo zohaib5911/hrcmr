@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/toast";
 import type { components } from "@/lib/api/schema";
 import { attempt, type Problem } from "@/lib/auth/request";
 import type { AccessUser } from "@/lib/company/access";
+import { allEmployees } from "@/lib/employees/list";
 
 export function EmployeeLinkSheet({ user, onClose }: { user: AccessUser; onClose: () => void }) {
   const router = useRouter();
@@ -19,9 +20,7 @@ export function EmployeeLinkSheet({ user, onClose }: { user: AccessUser; onClose
   useEffect(() => {
     let active = true;
     async function load() {
-      const result = await attempt((c) =>
-        c.GET("/employees", { params: { query: { archived: true } } }),
-      );
+      const result = await attempt((c) => allEmployees(c, { archived: true }));
       if (!active) return;
       setLoading(false);
       if (result.ok) setEmployees(result.data.employees);

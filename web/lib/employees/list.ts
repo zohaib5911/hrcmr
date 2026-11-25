@@ -1,4 +1,4 @@
-import type { components } from "@/lib/api/client";
+import type { ApiClient, components, paths } from "@/lib/api/client";
 
 import { rtwMatches, type RTWFilter } from "@/lib/employees/rtw";
 
@@ -76,4 +76,24 @@ export function departmentsIn(rows: readonly EmployeeRow[]): string[] {
   return [...new Set(rows.map((r) => r.department).filter((d): d is string => !!d))].sort((a, b) =>
     a.localeCompare(b),
   );
+}
+
+/**
+ * Every employee the list matches, following the API's pages (audit finding 3: one page used to be
+ * all anyone saw). Returns the first failed answer as it came, so callers handle errors as before.
+ */
+export async function allEmployees(
+  client: ApiClient,
+  query: Omit<paths["/employees"]["get"]["parameters"]["query"] & object, "offset"> = {},
+) {
+  let offset = 0;
+  const employees: EmployeeRow[] = [];
+  for (;;) {
+    const page = await client.GET("/employees", { params: { query: { ...query, offset } } });
+    if (!page.data) return page;
+    employees.push(...page.data.employees);
+    const next = page.data.next_offset;
+    if (next == null || next <= offset) return { ...page, data: { ...page.data, employees } };
+    offset = next;
+  }
 }

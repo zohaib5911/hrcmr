@@ -22,6 +22,7 @@ import { attempt, type Problem } from "@/lib/auth/request";
 import { addDays, addMonths, formatUk, parseIso, startOfWeek, todayIso } from "@/lib/ui/dates";
 import { AttendanceExports } from "./exports";
 import { RecordSheet } from "./record-sheet";
+import { allEmployees } from "@/lib/employees/list";
 
 type Page = components["schemas"]["AttendancePage"];
 type Summary = components["schemas"]["AttendanceSummary"];
@@ -78,7 +79,7 @@ export function AttendanceWorkspace({
   useEffect(() => {
     let active = true;
     if (mayFilterPeople || mayWrite)
-      void attempt((c) => c.GET("/employees")).then((result) => {
+      void attempt((c) => allEmployees(c)).then((result) => {
         if (!active) return;
         if (result.ok) setPeople(result.data.employees);
         else setProblem(result.problem);

@@ -19,6 +19,7 @@ import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { formatUk, todayIso } from "@/lib/ui/dates";
 import { WorkLogSheet, type Entry, type Responsibility } from "./entry-sheet";
+import { allEmployees } from "@/lib/employees/list";
 
 type Page = components["schemas"]["WorkLogPage"];
 type Person = components["schemas"]["EmployeeRow"];
@@ -94,9 +95,7 @@ export function WorkLogWorkspace({ own: ownProp = false }: { own?: boolean }) {
   useEffect(() => {
     let active = true;
     if (!own)
-      void attempt((c) =>
-        c.GET("/employees", { params: { query: { archived: showArchived } } }),
-      ).then((result) => {
+      void attempt((c) => allEmployees(c, { archived: showArchived })).then((result) => {
         if (active && result.ok) setPeople(result.data.employees);
       });
     if (own)

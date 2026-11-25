@@ -32,6 +32,7 @@ import {
   waitingOn,
   type Stage,
 } from "./stages";
+import { allEmployees } from "@/lib/employees/list";
 
 type Application = components["schemas"]["ApplicationOut"];
 type Interview = components["schemas"]["InterviewOut"];
@@ -296,17 +297,15 @@ function InterviewsPanel({
   useEffect(() => {
     if (!mayWrite) return;
     let active = true;
-    void attempt((c) => c.GET("/employees", { params: { query: { status: "active" } } })).then(
-      (result) => {
-        if (active && result.ok)
-          setPeople(
-            result.data.employees.map((row) => ({
-              id: row.id,
-              name: `${row.first_name} ${row.last_name}`,
-            })),
-          );
-      },
-    );
+    void attempt((c) => allEmployees(c, { status: "active" })).then((result) => {
+      if (active && result.ok)
+        setPeople(
+          result.data.employees.map((row) => ({
+            id: row.id,
+            name: `${row.first_name} ${row.last_name}`,
+          })),
+        );
+    });
     return () => {
       active = false;
     };

@@ -29,7 +29,10 @@ class EmployeeRow(BaseModel):
 
 class EmployeeList(BaseModel):
     employees: list[EmployeeRow]
-    total: int = Field(description="Matches before the 2000-row cap.")
+    total: int = Field(description="Every match, on all pages.")
+    next_offset: int | None = Field(
+        default=None, description="Pass as offset for the next page; null on the last page."
+    )
 
 
 class EmployeeSummary(BaseModel):
