@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import uuid  # noqa: TC003
 from datetime import UTC, date, datetime
 from typing import Annotated
@@ -19,7 +18,7 @@ from app.integrations.storage import PRESIGN_SECONDS
 from app.modules.companies.compliance_documents import _today
 from app.modules.employees.document_router import _files
 from app.modules.employees.employment_router import _locked_employee
-from app.modules.employees.record_pdf import record_html, render_pdf
+from app.modules.employees.record_pdf import record_html, render_pdf_async
 from app.modules.employees.router import _employee
 from app.modules.files.models import File
 from app.modules.files.schemas import DownloadOut
@@ -296,7 +295,7 @@ async def evidence_pdf(employee_id: uuid.UUID, check_id: uuid.UUID, access: Repo
             "and the record of the check."
         ),
     )
-    pdf = await asyncio.to_thread(render_pdf, html)
+    pdf = await render_pdf_async(html)
     await access.audit(
         "employee.rtw_evidence_exported",
         entity_type="employee",

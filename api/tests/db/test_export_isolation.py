@@ -21,14 +21,13 @@ async def test_foreign_employee_exports_are_404_without_rendering_or_audit(
     monkeypatch: pytest.MonkeyPatch,
     role: str,
 ) -> None:
-    from app.modules.compliance import sponsor_pdf
     from app.modules.employees import record_pdf
 
     def unexpected_render(html: str) -> bytes:
         pytest.fail("A foreign or missing employee must never reach PDF rendering")
 
+    # Every PDF route renders through record_pdf.render_pdf (ISS-35's bounded renderer).
     monkeypatch.setattr(record_pdf, "render_pdf", unexpected_render)
-    monkeypatch.setattr(sponsor_pdf, "render_pdf", unexpected_render)
     foreign = await _employee(rig, rig["b"], "PRIVATE-FOREIGN")
     client = await rig["person"](role, rig["a"])
     for suffix in ("record.pdf", "sponsor-record.pdf"):
@@ -58,7 +57,7 @@ async def test_dossier_is_shared_guidance_and_checklist_audit_stays_in_callers_c
     rig: dict[str, Any],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from app.modules.compliance import dossier_router
+    from app.modules.employees import record_pdf
 
     await _employee(rig, rig["b"], "PRIVATE-FOREIGN")
     a = await rig["person"]("company_admin", rig["a"])
@@ -76,7 +75,7 @@ async def test_dossier_is_shared_guidance_and_checklist_audit_stays_in_callers_c
         rendered.append(html)
         return b"%PDF-checklist"
 
-    monkeypatch.setattr(dossier_router, "render_pdf", render)
+    monkeypatch.setattr(record_pdf, "render_pdf", render)
     result = await a.get(
         API + "/compliance/rtw-checklist.pdf", params={"company_id": str(rig["b"])}
     )

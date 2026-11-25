@@ -24,7 +24,7 @@ from app.modules.attendance.schemas import AttendanceIn, AttendanceStatus
 from app.modules.attendance.service import save_record
 from app.modules.attendance.workbooks import xlsx_bytes
 from app.modules.employees.models import Employee
-from app.modules.employees.record_pdf import render_pdf
+from app.modules.employees.record_pdf import render_pdf_async
 from app.modules.rbac.deps import Access, require
 
 if TYPE_CHECKING:
@@ -268,7 +268,7 @@ async def export_pdf(
         generated=datetime.now(UTC).isoformat(),
         rows=records,
     )
-    content = await asyncio.to_thread(render_pdf, html)
+    content = await render_pdf_async(html)
     await _export_audit(access, start, end, len(rows), "pdf")
     return Response(
         content,

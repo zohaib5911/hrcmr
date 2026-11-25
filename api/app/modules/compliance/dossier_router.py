@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import uuid  # noqa: TC003
 from datetime import UTC, datetime
 from typing import Annotated
@@ -14,7 +13,7 @@ from app.core.errors import NotFoundError
 from app.modules.audit.service import record
 from app.modules.compliance.dossier_models import DossierLink
 from app.modules.compliance.dossier_schemas import DossierLinkIn, DossierLinkOut, DossierOut
-from app.modules.employees.record_pdf import record_html, render_pdf
+from app.modules.employees.record_pdf import record_html, render_pdf_async
 from app.modules.rbac.deps import Access, require
 from app.modules.rbac.platform import PlatformAccess, require_platform
 
@@ -161,7 +160,7 @@ async def checklist(access: Reads) -> Response:
         notice="Use alongside the current GOV.UK guidance and record the evidence "
         "in the employee's Right to Work tab.",
     )
-    pdf = await asyncio.to_thread(render_pdf, html)
+    pdf = await render_pdf_async(html)
     await access.audit("compliance.checklist_downloaded", entity_type="dossier")
     await access.db.commit()
     return Response(

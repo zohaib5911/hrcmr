@@ -7,12 +7,11 @@ rules version. The PDF is made by the same WeasyPrint route as the employee reco
 
 from __future__ import annotations
 
-import asyncio
 from typing import TYPE_CHECKING, Any
 
 from jinja2 import Environment
 
-from app.modules.employees.record_pdf import render_pdf
+from app.modules.employees.record_pdf import render_pdf_async
 
 if TYPE_CHECKING:
     from app.modules.soc.models import SocCheck
@@ -148,4 +147,4 @@ def report_html(row: SocCheck) -> str:
 
 
 async def report_pdf(row: SocCheck) -> bytes:
-    return await asyncio.to_thread(render_pdf, report_html(row))
+    return await render_pdf_async(report_html(row))

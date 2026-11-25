@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import json
 import uuid
 from datetime import UTC, date, datetime, timedelta
@@ -22,7 +21,7 @@ from app.modules.email.models import EmailOutbox
 from app.modules.email.outbox import PAYLOAD_CONTEXT
 from app.modules.email.templates import check
 from app.modules.employees.models import Employee
-from app.modules.employees.record_pdf import render_pdf
+from app.modules.employees.record_pdf import render_pdf_async
 from app.modules.identity.models import Membership, User
 from app.modules.notifications.models import Notification
 from app.modules.notifications.preferences import email_modes
@@ -245,7 +244,7 @@ async def print_week(week_start: date, access: Reads) -> Response:
             shifts=shifts,
         )
     )
-    content = await asyncio.to_thread(render_pdf, html)
+    content = await render_pdf_async(html)
     await access.audit(
         "rota.week_printed", after={"week_start": week_start.isoformat(), "shifts": len(shifts)}
     )

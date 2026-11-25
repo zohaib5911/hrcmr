@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import uuid  # noqa: TC003
 from datetime import UTC, datetime
 from typing import Annotated, Any
@@ -12,7 +11,7 @@ from fastapi import APIRouter, Depends, Response
 from app.modules.companies.router import _company
 from app.modules.compliance.reference import CHANGE_TYPES
 from app.modules.compliance.router import employee_changes
-from app.modules.employees.record_pdf import record_html, render_pdf
+from app.modules.employees.record_pdf import record_html, render_pdf_async
 from app.modules.employees.router import _employee
 from app.modules.rbac.deps import Access, require
 from app.modules.rtw.router import checks
@@ -127,7 +126,7 @@ async def sponsor_pdf(employee_id: uuid.UUID, access: Reports) -> Response:
         "Salary is included only when the requester may read compensation. "
         "Historical versions and entered change snapshots are retained.",
     )
-    pdf = await asyncio.to_thread(render_pdf, html)
+    pdf = await render_pdf_async(html)
     await access.audit(
         "employee.sponsor_record_exported", entity_type="employee", entity_id=employee_id
     )
