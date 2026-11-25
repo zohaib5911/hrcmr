@@ -217,7 +217,7 @@ A UK HR and **sponsor-licence compliance** SaaS for small employers. It does **n
 - **Invitations:** single-use link tokens (hashed, 72 h expiry). This is an **improvement on the reference**, which emails no link and makes the admin share an initial password. Users set their own password; the admin never sees it.
 - **Email verification** is required before a company can do anything beyond setup.
 - **Rate limits (Redis):**
-  - login 5 per minute per IP and 10 per hour per account, with progressive lockout and a notification email;
+  - login: 20 FAILED attempts per minute per IP (a right password never counts, so colleagues behind one office address all get in) and 10 per hour per account, with progressive lockout and a notification email;
   - password reset 3 per hour per email;
   - signup 5 per hour per IP plus Turnstile;
   - AI 30 per hour per user;
