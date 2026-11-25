@@ -96,15 +96,27 @@ function problemFrom(error: unknown, response: Response): Problem {
  * state-changing request must send it back. A visitor's very first request to the API is often one
  * of those (signing up, signing in), so if the cookie is missing a harmless GET is made first.
  */
+const bootstraps = new Map<string, Promise<void>>();
+
 export async function ensureCsrfCookie(
   base: () => string = () => baseUrl(),
   cookies: () => string = () => document.cookie,
   get: typeof fetch = (...args) => fetch(...args),
 ): Promise<void> {
   if (readCookie(CSRF_COOKIE, cookies())) return;
-  const response = await get(`${base()}/health`, { credentials: "include" });
-  // Read the (tiny) body so the browser can finish the request.
-  await response.text();
+  // Parallel first requests share one bootstrap per API origin (ISS-24). It is forgotten once it
+  // settles, so a failed one can be tried again and a later missing cookie fetches a new one.
+  const origin = base();
+  let pending = bootstraps.get(origin);
+  if (!pending) {
+    pending = (async () => {
+      const response = await get(`${origin}/health`, { credentials: "include" });
+      // Read the (tiny) body so the browser can finish the request.
+      await response.text();
+    })().finally(() => bootstraps.delete(origin));
+    bootstraps.set(origin, pending);
+  }
+  await pending;
 }
 
 /** Runs one API call. A successful call with no body (204, 202) comes back as `data: undefined`. */

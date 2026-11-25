@@ -321,3 +321,40 @@ async def test_the_leave_deduction_flag_keeps_on_omission_saves_false_and_refuse
     assert name == "Summer closure"  # nothing in the refused request was saved
     saved = await admin.patch(url, json={"deduct_from_annual_leave": False})
     assert saved.json()["deduct_from_annual_leave"] is False
+
+
+async def test_a_moved_future_holiday_replaces_its_old_date_and_history_stays(
+    rig: dict[str, Any],
+) -> None:
+    """ISS-19: the feed's upcoming dates are reconciled; past dates and bad feeds change nothing."""
+    from datetime import date
+
+    today = date(2026, 6, 1)
+    assert await import_bank_holidays(rig["owner"], feed_client(), today=today) == 5
+    moved = {
+        **FEED,
+        "england-and-wales": {
+            "events": [
+                {"title": "New Year's Day", "date": "2026-01-01"},
+                {"title": "Christmas Day", "date": "2026-12-28"},  # moved from the 25th
+            ]
+        },
+        "northern-ireland": {"events": [{"title": "Boxing Day", "date": "2026-12-26"}]},
+    }
+    assert await import_bank_holidays(rig["owner"], feed_client(moved), today=today) == 5
+
+    async def dates(region: str) -> list[str]:
+        async with rig["owner"].connect() as c:
+            rows = await c.execute(
+                text("select on_date from bank_holidays where region = :r order by on_date"),
+                {"r": region},
+            )
+            return [str(row[0]) for row in rows]
+
+    assert await dates("england-and-wales") == ["2026-01-01", "2026-12-28"]
+    assert await dates("northern-ireland") == ["2026-03-17", "2026-12-26"]  # March is history
+
+    incomplete = {**moved, "scotland": {"events": []}}
+    with pytest.raises(FeedError):
+        await import_bank_holidays(rig["owner"], feed_client(incomplete), today=today)
+    assert await dates("england-and-wales") == ["2026-01-01", "2026-12-28"]

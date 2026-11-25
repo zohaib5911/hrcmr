@@ -3,6 +3,7 @@ e-mail preferences save and validate; the daily digest is sent once per notice."
 
 from __future__ import annotations
 
+import json
 import os
 import uuid
 from datetime import UTC, datetime
@@ -273,3 +274,97 @@ async def test_a_suspended_member_gets_no_digest_for_that_company_only(
     assert rows[rig["a"]] == 1  # A's notice is not digested: no digest for company A
     assert rows[rig["b"]] == 0  # B's was
     assert sent == 1
+
+
+async def test_payment_and_deletion_notices_reach_the_bell_of_those_who_may_act(
+    rig: dict[str, Any],
+) -> None:
+    """ISS-15: the three account notices are listed, counted and can be marked read."""
+    admin = await rig["person"]("company_admin", rig["a"])
+    employee = await rig["person"]("employee", rig["a"])
+    admin_user = (await _me(admin))["user_id"]
+    employee_user = (await _me(employee))["user_id"]
+    kinds = ("billing.payment_failed", "account.deletion_scheduled", "account.deletion_withdrawn")
+    ids = [await _notice(rig, admin_user, rig["a"], kind, kind) for kind in kinds]
+    for kind in kinds:  # the same kinds for someone who may not act on them
+        await _notice(rig, employee_user, rig["a"], kind, kind)
+
+    feed = (await admin.get(API + "/notifications")).json()
+    assert set(ids) <= {item["id"] for item in feed["items"]}
+    assert feed["unread"] >= 3
+    read = await admin.patch(API + f"/notifications/{ids[0]}", json={"read": True})
+    assert read.status_code == 200, read.text
+    assert (await admin.post(API + "/notifications/read-all")).status_code in (200, 204)
+    after = (await admin.get(API + "/notifications")).json()
+    assert after["unread"] == 0
+
+    hidden = (await employee.get(API + "/notifications")).json()
+    assert not {item["kind"] for item in hidden["items"]} & set(kinds)
+
+
+async def test_overlapping_digest_runs_send_one_email_covering_each_notice_once(
+    rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ISS-28: two workers at once send one digest; a run that fails can be retried."""
+    import asyncio
+
+    from app.jobs import notifications as digest_job
+
+    employee = await rig["person"]("employee", rig["a"])
+    me = await _me(employee)
+    await employee.put(API + "/me/notification-preferences", json={"mode": "daily"})
+    for title in ("One", "Two", "Three"):
+        await _notice(rig, me["user_id"], rig["a"], "learning.overdue", title)
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text("update users set email_verified_at = now() where id = :u"), {"u": me["user_id"]}
+        )
+        email = (
+            await c.execute(text("select email from users where id = :u"), {"u": me["user_id"]})
+        ).scalar_one()
+
+    async def mails() -> list[str]:
+        async with rig["owner"].connect() as c:
+            rows = await c.execute(
+                text(
+                    "select payload from email_outbox where to_address = :e "
+                    "and template = 'notifications_digest'"
+                ),
+                {"e": email},
+            )
+            return [row[0] for row in rows]
+
+    set_keyring(KeyRing(keys={"k1": os.urandom(32)}, active_kid="k1", blind_key=os.urandom(32)))
+    try:
+
+        def refuse(*_args: Any) -> None:
+            raise RuntimeError("template store down")
+
+        with monkeypatch.context() as patch:
+            patch.setattr(digest_job, "check", refuse)
+            with pytest.raises(RuntimeError):
+                await reconcile_digests(rig["owner"], "http://web.test", now=datetime.now(UTC))
+        assert await mails() == []  # rolled back: nothing sent, nothing marked
+
+        now = datetime.now(UTC)
+        await asyncio.gather(
+            reconcile_digests(rig["owner"], "http://web.test", now=now),
+            reconcile_digests(rig["owner"], "http://web.test", now=now),
+        )
+        [payload] = await mails()
+        from app.core.crypto import decrypt
+        from app.modules.email.outbox import PAYLOAD_CONTEXT
+
+        assert json.loads(decrypt(payload, context=PAYLOAD_CONTEXT))["count"] == "3"
+    finally:
+        set_keyring(None)
+    async with rig["owner"].connect() as c:
+        waiting = (
+            await c.execute(
+                text(
+                    "select count(*) from notifications where user_id = :u and digested_at is null"
+                ),
+                {"u": me["user_id"]},
+            )
+        ).scalar_one()
+    assert waiting == 0

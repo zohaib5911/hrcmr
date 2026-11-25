@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
-import { formatUk } from "@/lib/ui/dates";
+import { formatUk, ukDayIso } from "@/lib/ui/dates";
 
 import { CertificateButton } from "./certificate-button";
 
@@ -352,7 +352,7 @@ function CheckPanel({
           </p>
           {completed ? (
             <p className="text-callout text-success">
-              Completed{completedAt ? ` on ${formatUk(completedAt.slice(0, 10))}` : ""}.
+              Completed{completedAt ? ` on ${formatUk(ukDayIso(completedAt))}` : ""}.
             </p>
           ) : passed ? (
             <div className="flex flex-wrap gap-3">

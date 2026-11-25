@@ -78,9 +78,24 @@ async def preview_own(body: LeaveDatesIn, access: Creates) -> LeavePreview:
     return await _preview(access, _own(access), body)
 
 
+PAGE = 200
+Status = Annotated[str | None, Query(pattern="^(pending|approved|rejected|cancelled)$")]
+Limit = Annotated[int, Query(ge=1, le=PAGE)]
+Offset = Annotated[int, Query(ge=0)]
+
+
 async def _list(
-    access: Access, *, own: bool = False, approvals: bool = False, status: str | None = None
+    access: Access,
+    *,
+    own: bool = False,
+    approvals: bool = False,
+    status: str | None = None,
+    employee_id: uuid.UUID | None = None,
+    limit: int = PAGE,
+    offset: int = 0,
 ) -> list[LeaveRequestOut]:
+    """Newest first by (start date, id). The filters apply before the page is cut (ISS-16), so a
+    page is never short of rows that match; a full page means the next ``offset`` may hold more."""
     query = (
         select(LeaveRequest, Employee, LeaveType)
         .join(Employee, Employee.id == LeaveRequest.employee_id)
@@ -104,6 +119,8 @@ async def _list(
             query = query.where(LeaveRequest.employee_id != access.employee_id)
     elif status is not None:
         query = query.where(LeaveRequest.status == status)
+    if employee_id is not None:  # narrows what the scope above allows, never widens it
+        query = query.where(LeaveRequest.employee_id == employee_id)
     return [
         LeaveRequestOut.model_validate(row).model_copy(
             update={
@@ -113,26 +130,35 @@ async def _list(
                 "colour": kind.colour,
             }
         )
-        for row, employee, kind in (await access.db.execute(query.limit(200))).all()
+        for row, employee, kind in (
+            await access.db.execute(query.limit(limit).offset(offset))
+        ).all()
     ]
 
 
 @router.get("/requests", response_model=list[LeaveRequestOut])
 async def requests(
     access: Reads,
-    status: Annotated[str | None, Query(pattern="^(pending|approved|rejected|cancelled)$")] = None,
+    status: Status = None,
+    employee_id: uuid.UUID | None = None,
+    limit: Limit = PAGE,
+    offset: Offset = 0,
 ) -> list[LeaveRequestOut]:
-    return await _list(access, status=status)
+    return await _list(access, status=status, employee_id=employee_id, limit=limit, offset=offset)
 
 
 @router.get("/requests/own", response_model=list[LeaveRequestOut])
-async def own_requests(access: Reads) -> list[LeaveRequestOut]:
-    return await _list(access, own=True)
+async def own_requests(
+    access: Reads, status: Status = None, limit: Limit = PAGE, offset: Offset = 0
+) -> list[LeaveRequestOut]:
+    return await _list(access, own=True, status=status, limit=limit, offset=offset)
 
 
 @router.get("/approvals/own", response_model=list[LeaveRequestOut])
-async def own_approvals(access: Approves) -> list[LeaveRequestOut]:
-    return await _list(access, approvals=True)
+async def own_approvals(
+    access: Approves, limit: Limit = PAGE, offset: Offset = 0
+) -> list[LeaveRequestOut]:
+    return await _list(access, approvals=True, limit=limit, offset=offset)
 
 
 async def _notify_decision(access: Access, row: LeaveRequest, request: Request) -> None:

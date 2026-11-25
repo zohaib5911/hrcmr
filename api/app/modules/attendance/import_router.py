@@ -22,7 +22,7 @@ from app.modules.attendance.batch_schemas import AttendanceImportOut, ImportRowO
 from app.modules.attendance.models import AttendanceImport, AttendanceRecord
 from app.modules.attendance.router import Writes, _company
 from app.modules.attendance.schemas import AttendanceIn
-from app.modules.attendance.service import save_record, times
+from app.modules.attendance.service import check_replaceable, save_record, times
 from app.modules.attendance.workbooks import (
     HEADERS,
     MAX_BYTES,
@@ -208,10 +208,7 @@ async def preview(file: UploadFile, request: Request, access: Writes) -> Attenda
             _employment(employee, body.date)
             times(body, ZoneInfo(company.timezone))
             existing = await _existing(access, employee.id, body.date)
-            if existing is not None and (
-                existing.source == "leave_sync" or existing.leave_request_id
-            ):
-                raise ValueError("Approved leave attendance cannot be replaced by an import.")
+            check_replaceable(existing, "import")
             result.update(
                 input=body.model_dump(mode="json"),
                 expected=_fingerprint(employee, existing),

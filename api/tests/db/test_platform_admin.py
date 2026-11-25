@@ -327,3 +327,61 @@ async def test_platform_context_exposes_permissions_and_only_own_live_support(
     ended = await admin.post(f"{API}/platform/impersonation/{session_id}/end")
     assert ended.status_code == 200, ended.text
     assert (await admin.get(path)).json()["support"] is None
+
+
+async def test_concurrent_extensions_both_count_for_ten_year_and_complimentary_access(
+    rig: dict[str, Any],
+) -> None:
+    """ISS-26: two grants at once add both lots of days, and both are in the history."""
+    import asyncio
+
+    admin, _ = await _platform_admin(rig, "support")
+    company = str(rig["a"])
+    url = f"{API}/platform/companies/{company}/extend-plan"
+
+    async def both(first: int, second: int) -> None:
+        answers = await asyncio.gather(
+            admin.post(url, json={"days": first, "reason": "Goodwill one"}),
+            admin.post(url, json={"days": second, "reason": "Goodwill two"}),
+        )
+        assert [r.status_code for r in answers] == [200, 200], [r.text for r in answers]
+
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text("update companies set plan='annual', comp_until=null where id=:c"), {"c": rig["a"]}
+        )
+    before = datetime.now(UTC)
+    await both(10, 20)
+    async with rig["owner"].connect() as c:
+        comp = (
+            await c.execute(text("select comp_until from companies where id=:c"), {"c": rig["a"]})
+        ).scalar_one()
+    assert timedelta(days=30) <= comp - before < timedelta(days=30, minutes=5)
+
+    end = datetime.now(UTC) + timedelta(days=365 * 9)
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text(
+                "update companies set plan='ten_year', subscription_status='active', "
+                "subscription_ends_at=:e where id=:c"
+            ),
+            {"e": end, "c": rig["a"]},
+        )
+    await both(5, 7)
+    async with rig["owner"].connect() as c:
+        new_end = (
+            await c.execute(
+                text("select subscription_ends_at from companies where id=:c"), {"c": rig["a"]}
+            )
+        ).scalar_one()
+        extended = (
+            await c.execute(
+                text(
+                    "select count(*) from audit_events where entity_id=:c "
+                    "and action='platform.company_plan_extended'"
+                ),
+                {"c": rig["a"]},
+            )
+        ).scalar_one()
+    assert new_end - end == timedelta(days=12)
+    assert extended == 2

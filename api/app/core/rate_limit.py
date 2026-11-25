@@ -49,7 +49,9 @@ class RateLimiter:
         """Count one attempt by ``subject`` (an IP, an e-mail) against the ``name`` limit."""
         key = f"{self._prefix}:{name}:{hashed(subject)}"
         count, ttl = await self._redis.eval(_HIT, 1, key, window_seconds)
-        retry_after = int(ttl) if int(ttl) > 0 else window_seconds
+        # TTL 0 means under a second is left: wait one second, not a whole new window (ISS-23).
+        # A negative TTL (no expiry, which the script repairs) falls back to the full window.
+        retry_after = max(int(ttl), 1) if int(ttl) >= 0 else window_seconds
         return RateLimitResult(int(count) <= limit, max(limit - int(count), 0), retry_after)
 
     async def reset(self, name: str, subject: str) -> None:

@@ -180,7 +180,8 @@ async def reactivate_company(
 async def extend_company_plan(
     company_id: uuid.UUID, body: ExtendIn, access: Writer
 ) -> CompanyDetailOut:
-    company = await companies.company_or_404(access.db, company_id)
+    # Locked until the commit (ISS-26): concurrent grants each extend the end the other left.
+    company = await companies.company_or_404(access.db, company_id, lock=True)
     await companies.extend_plan(
         access.db,
         access.audit_context,
@@ -251,7 +252,7 @@ async def list_deletion_requests(
     access: Reader,
     status: Annotated[
         str | None,
-        Query(pattern="^(awaiting_code|scheduled|withdrawn|completed)$"),
+        Query(pattern="^(awaiting_code|scheduled|in_progress|withdrawn|completed)$"),
     ] = None,
     limit: Annotated[int, Query(ge=1, le=queues.PAGE_MAX)] = 50,
     offset: Annotated[int, Query(ge=0, le=100_000)] = 0,

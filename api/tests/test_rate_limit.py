@@ -44,3 +44,26 @@ async def test_a_counter_without_an_expiry_is_given_one(redis: Redis) -> None:
 async def test_a_new_window_always_has_an_expiry(redis: Redis) -> None:
     await RateLimiter(redis).hit("t", "fresh", limit=5, window_seconds=30)
     assert 0 < await redis.ttl(f"rl:t:{hashed('fresh')}") <= 30
+
+
+class _ZeroTtl:
+    """Redis answering as it does with under a second left in the window."""
+
+    def __init__(self, ttl: int) -> None:
+        self.ttl = ttl
+
+    async def eval(self, *_args: object) -> list[int]:
+        return [11, self.ttl]
+
+
+async def test_a_window_about_to_end_asks_for_one_second_not_a_new_hour() -> None:
+    """ISS-23: TTL 0 on the hourly limit means retry in one second."""
+    result = await RateLimiter(_ZeroTtl(0)).hit(  # type: ignore[arg-type]
+        "login-account", "someone", limit=10, window_seconds=3600
+    )
+    assert not result.allowed
+    assert result.retry_after == 1
+    missing = await RateLimiter(_ZeroTtl(-1)).hit(  # type: ignore[arg-type]
+        "login-account", "someone", limit=10, window_seconds=3600
+    )
+    assert missing.retry_after == 3600

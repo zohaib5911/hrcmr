@@ -36,7 +36,7 @@ def parse(data: dict[str, Any]) -> list[Holiday]:
     found: list[Holiday] = []
     for region in REGIONS:
         events = (data.get(region) or {}).get("events")
-        if not isinstance(events, list):
+        if not isinstance(events, list) or not events:  # an incomplete feed changes nothing
             raise FeedError(f"no events for {region}")
         for event in events:
             try:
