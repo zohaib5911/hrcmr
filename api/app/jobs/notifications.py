@@ -20,7 +20,7 @@ from app.modules.companies.models import Company
 from app.modules.email.models import EmailOutbox
 from app.modules.email.outbox import PAYLOAD_CONTEXT
 from app.modules.email.templates import check
-from app.modules.identity.models import User
+from app.modules.identity.models import Membership, User
 from app.modules.notifications.models import Notification, NotificationPreference
 
 if TYPE_CHECKING:
@@ -30,9 +30,20 @@ TEMPLATE = "notifications_digest"
 
 
 async def send_digests(db: TenantSession, web_origin: str, now: datetime) -> int:
-    daily = select(NotificationPreference.user_id).where(
-        NotificationPreference.company_id == db.company_id,
-        NotificationPreference.mode == "daily",
+    # Only people whose membership of this company is active (ISS-08): a suspended member's
+    # notices wait, and their other companies are unaffected.
+    daily = (
+        select(NotificationPreference.user_id)
+        .join(
+            Membership,
+            (Membership.user_id == NotificationPreference.user_id)
+            & (Membership.company_id == NotificationPreference.company_id),
+        )
+        .where(
+            NotificationPreference.company_id == db.company_id,
+            NotificationPreference.mode == "daily",
+            Membership.status == "active",
+        )
     )
     waiting = (
         await db.execute(
