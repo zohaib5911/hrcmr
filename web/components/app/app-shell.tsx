@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { Fragment, useCallback, useEffect, useState, type ReactNode } from "react";
 
 import { ToastProvider } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AmbientBackdrop } from "@/components/ui/ambient-backdrop";
 import { saveSidebarState } from "@/lib/sidebar-dom";
+import { useCacheContext } from "@/lib/api/cache";
 import type { ThemeChoice } from "@/lib/theme";
 
 import { AnnouncementBanner } from "./announcement-banner";
@@ -44,6 +45,7 @@ export function AppShell({
   badges = {},
   notificationCount = 0,
 }: AppShellProps) {
+  const cacheContext = useCacheContext();
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   // From now on, page loads show a skeleton inside the shell instead of the splash.
   useEffect(markShellReady, []);
@@ -85,7 +87,8 @@ export function AppShell({
               >
                 <PlanBanner />
                 <AnnouncementBanner />
-                {children}
+                {/* Remounted on a company switch or sign-out, so no earlier state stays on screen. */}
+                <Fragment key={`${session?.company.id ?? ""}:${cacheContext}`}>{children}</Fragment>
               </main>
             </div>
             <MobileTabBar />

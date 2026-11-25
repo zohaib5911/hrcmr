@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useEffect, useState } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { NAV_GROUPS, NAV_ITEMS } from "@/lib/navigation";
@@ -346,5 +347,42 @@ describe("the phone tab bar", () => {
       "aria-current",
       "true",
     );
+  });
+});
+
+describe("a company switch (ISS-02)", () => {
+  it("clears the page's state at once, and a late answer cannot bring the old rows back", async () => {
+    const AppShell = await loadShell("/recruitment");
+    const { clearApiCache } = await import("@/lib/api/cache");
+    const answers: Array<(rows: string) => void> = [];
+    function Rows() {
+      const [rows, setRows] = useState("loading");
+      useEffect(() => {
+        let active = true;
+        answers.push((value) => {
+          if (active) setRows(value);
+        });
+        return () => {
+          active = false;
+        };
+      }, []);
+      return <p>{rows}</p>;
+    }
+    render(
+      <AppShell initialCollapsed={false} theme="system" session={SESSION}>
+        <Rows />
+      </AppShell>,
+    );
+    act(() => answers[0]?.("old company candidate"));
+    expect(screen.getByText("old company candidate")).toBeInTheDocument();
+    const late = answers[0];
+
+    act(() => clearApiCache());
+    expect(screen.queryByText("old company candidate")).not.toBeInTheDocument();
+    expect(screen.getByText("loading")).toBeInTheDocument();
+    act(() => late?.("old company candidate"));
+    expect(screen.queryByText("old company candidate")).not.toBeInTheDocument();
+    act(() => answers[1]?.("new company candidate"));
+    expect(screen.getByText("new company candidate")).toBeInTheDocument();
   });
 });
