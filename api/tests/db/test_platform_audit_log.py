@@ -10,6 +10,7 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
+import pytest
 from sqlalchemy import text
 
 from tests.db.test_employee_documents import rig as rig
@@ -103,3 +104,23 @@ async def test_the_export_is_csv_and_is_itself_recorded(rig: dict[str, Any]) -> 
     assert lines[0].startswith("Time (UTC),Who,Action")
     assert [line for line in lines[1:] if reason in line], exported.text
     assert await _exports(rig) == before + 1  # the export is recorded, once
+
+
+async def test_the_export_pages_by_time_and_id_while_events_arrive(
+    rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ISS-10: equal timestamps, new events between pages; each expected row once, in order."""
+    from app.modules.platform_admin import audit_log
+    from tests.db.audit_export_race import same_moment_events, write_between_pages
+
+    prefix = f"keyset{uuid.uuid4().hex[:6]}"
+    expected = await same_moment_events(rig["owner"], None, prefix, 7)
+    admin = await _platform_admin(rig, "support")
+    monkeypatch.setattr(audit_log, "EXPORT_PAGE", 2)
+    monkeypatch.setattr(audit_log, "EXPORT_LIMIT", 5)
+    write_between_pages(monkeypatch, rig["owner"], None, prefix)
+    exported = await admin.get(f"{API}/platform/audit/export?action={prefix}.")
+    monkeypatch.undo()
+    assert exported.status_code == 200, exported.text
+    lines = exported.text.lstrip("\ufeff").splitlines()
+    assert [line.split(",")[2] for line in lines[1:]] == expected[:5]

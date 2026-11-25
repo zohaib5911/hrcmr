@@ -7,7 +7,7 @@ import csv
 import io
 import uuid
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING, Annotated
+from typing import TYPE_CHECKING, Annotated, Any
 
 from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy import select, tuple_
@@ -20,6 +20,7 @@ from app.modules.rbac.deps import Access, require
 
 if TYPE_CHECKING:
     from sqlalchemy import Select
+    from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(tags=["audit"])
 
@@ -136,6 +137,19 @@ async def list_audit_events(
     )
 
 
+async def read_one_snapshot(db: AsyncSession) -> None:
+    """Start a REPEATABLE READ transaction, so every page of an export reads the same snapshot
+    (ISS-10). Nothing has been written yet when an export starts, so ending the request's first
+    transaction loses nothing; the session's company and user are set again on the new one."""
+    await db.commit()
+    await db.connection(execution_options={"isolation_level": "REPEATABLE READ"})
+
+
+def after_key(query: Any, event: AuditEvent) -> Any:
+    """The next page of a newest-first query: strictly after ``event`` by (time, id)."""
+    return query.where(tuple_(AuditEvent.created_at, AuditEvent.id) < (event.created_at, event.id))
+
+
 def csv_cell(value: object) -> str:
     """A CSV cell that a spreadsheet will show as text, never run as a formula (OWASP)."""
     text = "" if value is None else str(value)
@@ -166,9 +180,11 @@ async def export_audit_events(
     writer.writerow(
         ["Time (UTC)", "Who", "Action", "What", "Summary", "Reason", "IP address", "Request id"]
     )
-    written, offset = 0, 0
+    await read_one_snapshot(access.db)
+    written, page = 0, base
     while written < EXPORT_LIMIT:
-        result = await access.db.execute(base.limit(_EXPORT_PAGE).offset(offset))
+        size = min(_EXPORT_PAGE, EXPORT_LIMIT - written)
+        result = await access.db.execute(page.limit(size))
         rows = [(row[0], row[1], row[2]) for row in result.all()]
         if not rows:
             break
@@ -186,7 +202,7 @@ async def export_audit_events(
                 ]
             )
             written += 1
-        offset += _EXPORT_PAGE
+        page = after_key(base, rows[-1][0])
     await access.audit(
         "audit.exported", entity_type="audit_events", summary=f"Exported {written} events"
     )
