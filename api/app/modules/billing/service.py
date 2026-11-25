@@ -205,11 +205,13 @@ async def _apply(
         if kind == "checkout.session.async_payment_failed":
             if attempt is not None:
                 attempt.closed_at = datetime.now(UTC)
+                company.checkout_reserved_until = None  # the place is free again
             return
         if obj.get("payment_status") not in ("paid", "no_payment_required"):
             return  # a delayed payment method: nothing is bought until it is paid
         if attempt is not None:
             attempt.closed_at = datetime.now(UTC)
+        company.checkout_reserved_until = None  # the live plan holds the place from now on
         action = "billing.plan_purchased"
         if obj.get("mode") == "subscription" and _id(obj.get("subscription")):
             await _sync_subscription(db, stripe, company, str(_id(obj.get("subscription"))))

@@ -849,3 +849,99 @@ async def test_a_dispute_for_another_customer_is_ignored(
     assert (await _deliver(rig, lost)).status_code == 200
     company = await _company(rig)
     assert (company["plan"], company["subscription_status"]) == ("ten_year", "active")
+
+
+async def test_the_platform_takes_no_more_subscriptions_than_its_limit(
+    rig: dict[str, Any], fake: FakeStripe, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Audit finding 4: at most SUBSCRIPTION_LIMIT (2,000) subscriptions. Here the limit is 1."""
+    from app.modules.billing import checkout
+
+    monkeypatch.setattr(checkout, "SUBSCRIPTION_LIMIT", 1)
+    url = f"{API}/billing/checkout-session"
+    async with rig["owner"].begin() as c:  # company b already holds the only place
+        await c.execute(
+            text(
+                "update companies set plan = 'annual', subscription_status = 'active', "
+                "subscription_ends_at = now() + interval '200 days' where id = :b"
+            ),
+            {"b": rig["b"]},
+        )
+    admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
+    full = await admin.post(url, json={"plan": "annual"})
+    assert (full.status_code, full.json()["error"]["code"]) == (409, "SUBSCRIPTIONS_FULL")
+    assert fake.requests == []  # refused before any Stripe call
+
+    async with rig["owner"].begin() as c:  # b's plan lapses: its place is free again
+        await c.execute(
+            text("update companies set subscription_status = 'canceled' where id = :b"),
+            {"b": rig["b"]},
+        )
+    assert (await admin.post(url, json={"plan": "annual"})).status_code == 200
+
+
+async def test_an_open_checkout_holds_its_place_until_it_ends(
+    rig: dict[str, Any], fake: FakeStripe, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.modules.billing import checkout
+
+    monkeypatch.setattr(checkout, "SUBSCRIPTION_LIMIT", 1)
+    url = f"{API}/billing/checkout-session"
+    a = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, a)
+    assert (await a.post(url, json={"plan": "annual"})).status_code == 200  # a holds the place
+    async with rig["owner"].begin() as c:  # b is a returning customer, already known to Stripe
+        await c.execute(
+            text("update companies set stripe_customer_id = 'cus_b' where id = :b"),
+            {"b": rig["b"]},
+        )
+    b = await rig["person"]("company_admin", rig["b"])
+    await step_up(rig, b)
+    fake.requests.clear()
+    full = await b.post(url, json={"plan": "ten_year"})
+    assert (full.status_code, full.json()["error"]["code"]) == (409, "SUBSCRIPTIONS_FULL")
+    assert fake.requests == []
+
+    # a's payment fails: the place is released and b can buy.
+    async with rig["owner"].connect() as c:
+        attempt = (
+            await c.execute(
+                text("select id from checkout_attempts where company_id = :c"), {"c": rig["a"]}
+            )
+        ).scalar_one()
+    failed = _event(
+        "evt_a_failed",
+        "checkout.session.async_payment_failed",
+        {
+            "object": "checkout.session",
+            "customer": "cus_1",
+            "metadata": {"company_id": str(rig["a"]), "checkout_attempt_id": str(attempt)},
+        },
+    )
+    assert (await _deliver(rig, failed)).status_code == 200
+    assert (await b.post(url, json={"plan": "ten_year"})).status_code == 200
+
+
+async def test_concurrent_checkouts_for_the_last_place_admit_exactly_one(
+    rig: dict[str, Any], fake: FakeStripe, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.modules.billing import checkout
+
+    monkeypatch.setattr(checkout, "SUBSCRIPTION_LIMIT", 1)
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text("update companies set stripe_customer_id = 'cus_' || slug"),
+        )
+    admins = []
+    for company in (rig["a"], rig["b"]):
+        admin = await rig["person"]("company_admin", company)
+        await step_up(rig, admin)
+        admins.append(admin)
+    url = f"{API}/billing/checkout-session"
+    results = await asyncio.gather(*(x.post(url, json={"plan": "annual"}) for x in admins))
+    assert sorted(r.status_code for r in results) == [200, 409]
+    assert (
+        await _count(rig, "select count(*) from companies where checkout_reserved_until > now()")
+        == 1
+    )

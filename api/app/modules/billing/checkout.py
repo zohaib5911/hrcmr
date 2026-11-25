@@ -1,11 +1,17 @@
-"""Serialize Checkout, retaining the same provider request after an ambiguous response."""
+"""Serialize Checkout, retaining the same provider request after an ambiguous response.
+
+The platform takes at most ``SUBSCRIPTION_LIMIT`` subscriptions. A company with a live paid plan
+holds a place, and so does a company whose Stripe Checkout is open (``checkout_reserved_until``), so
+two companies paying at the same moment cannot both take the last place. The count runs under one
+platform-wide lock. Renewals of plans already held are never refused.
+"""
 
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 
 from app.core.errors import AppError
 from app.integrations.stripe import StripeError
@@ -16,6 +22,9 @@ from app.modules.companies.models import Company
 if TYPE_CHECKING:
     from app.integrations.stripe import Stripe
     from app.modules.rbac.deps import Access
+
+SUBSCRIPTION_LIMIT = 2000  # the owner's ceiling for the whole platform (decided 2026-11-25)
+RESERVATION = timedelta(hours=24)  # as long as a Stripe Checkout session can stay open
 
 
 def _pending() -> AppError:
@@ -45,6 +54,42 @@ async def _lock_company(access: Access) -> Company:
             status_code=409,
         )
     return company
+
+
+def _full() -> AppError:
+    return AppError(
+        "SUBSCRIPTIONS_FULL",
+        "We are not taking new subscriptions at the moment. Contact support to join the waiting "
+        "list.",
+        status_code=409,
+    )
+
+
+async def _places_held(access: Access, company: Company, now: datetime) -> int:
+    """Places other companies hold: a live paid plan, or a Stripe Checkout still open."""
+    live = (
+        (Company.plan != "free")
+        & Company.subscription_status.in_(LIVE_STATUSES)
+        & or_(Company.subscription_ends_at.is_(None), Company.subscription_ends_at > now)
+    )
+    held = await access.db.scalar(
+        select(func.count(Company.id)).where(
+            Company.id != company.id, or_(live, Company.checkout_reserved_until > now)
+        )
+    )
+    return int(held or 0)
+
+
+async def _take_place(access: Access, company: Company) -> None:
+    """Refuse a new purchase once every place is held, else hold one. Called inside the transaction
+    that records the reservation, so the platform lock is held until that commit."""
+    now = datetime.now(UTC)
+    await access.db.execute(
+        select(func.pg_advisory_xact_lock(func.hashtextextended("subscription-places", 0)))
+    )
+    if await _places_held(access, company, now) >= SUBSCRIPTION_LIMIT:
+        raise _full()
+    company.checkout_reserved_until = now + RESERVATION
 
 
 async def _provider_session(
@@ -98,12 +143,17 @@ async def start(access: Access, stripe: Stripe, plan: str, origin: str) -> str:
         if status != "expired":
             raise _pending()
         attempt.closed_at = datetime.now(UTC)
+        company.checkout_reserved_until = None
         await db.flush()
+    # Fail fast before any Stripe call; the locked check below is the one that holds the place.
+    if await _places_held(access, company, datetime.now(UTC)) >= SUBSCRIPTION_LIMIT:
+        raise _full()
     if company.stripe_customer_id is None:
         customer = await stripe.create_customer(
             company_id=str(company.id), name=company.name, email=company.contact_email
         )
         company.stripe_customer_id = str(customer["id"])
+    await _take_place(access, company)
     attempt = CheckoutAttempt(
         company_id=company.id,
         request_data={

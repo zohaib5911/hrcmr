@@ -304,6 +304,7 @@ Checks:
 | `cooling_off_ends_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `payment_grace_ends_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `comp_until` | TIMESTAMP WITH TIME ZONE | yes |  |  |
+| `checkout_reserved_until` | TIMESTAMP WITH TIME ZONE | yes |  |  |
 | `stripe_customer_id` | VARCHAR(80) | yes |  | unique |
 | `stripe_subscription_id` | VARCHAR(80) | yes |  | unique |
 | `setup_checklist_dismissed_at` | TIMESTAMP WITH TIME ZONE | yes |  |  |
