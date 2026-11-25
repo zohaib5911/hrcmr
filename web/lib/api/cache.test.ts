@@ -1,6 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { MAX_ANSWERS, cacheKey, cached, clearApiCache, prefetch, remember } from "./cache";
+import {
+  MAX_ANSWERS,
+  cacheContext,
+  cacheKey,
+  cached,
+  clearApiCache,
+  prefetch,
+  remember,
+} from "./cache";
 
 beforeEach(() => clearApiCache());
 
@@ -39,5 +47,23 @@ describe("the GET answer cache (O6.1.6)", () => {
     const failing = vi.fn().mockResolvedValue({ ok: false, problem: { code: "X", message: "x" } });
     await prefetch("/candidates/c2", failing);
     expect(cached("/candidates/c2")).toBeUndefined();
+  });
+
+  it("never keeps an answer for a request started before a switch or sign-out (ISS-02)", async () => {
+    const from = cacheContext();
+    let finish: (value: unknown) => void = () => {};
+    const late = prefetch(
+      "/candidates/old",
+      () => new Promise((resolve) => (finish = resolve)) as never,
+    );
+    clearApiCache(); // the company switch happens while the request is out
+    expect(cacheContext()).toBe(from + 1);
+    remember("/candidates", { items: ["old company"] }, from);
+    finish({ ok: true, data: { id: "old" } });
+    await late;
+    expect(cached("/candidates")).toBeUndefined();
+    expect(cached("/candidates/old")).toBeUndefined();
+    remember("/candidates", { items: ["new company"] });
+    expect(cached("/candidates")).toEqual({ items: ["new company"] });
   });
 });
