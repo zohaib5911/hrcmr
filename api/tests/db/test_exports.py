@@ -327,3 +327,29 @@ async def test_a_large_document_is_copied_into_the_archive_in_pieces() -> None:
                 digest.update(chunk)
     assert digest.hexdigest() == expected
     assert peak < 4 * (1 << 20)  # well under the 32 MiB file
+
+
+async def test_two_simultaneous_requests_queue_one_export(rig: dict[str, Any]) -> None:
+    """ISS-25: one 202, one 409, one queued row; another company still queues its own."""
+    import asyncio
+
+    admin = await rig["person"]("company_admin", rig["a"])
+    await step_up(rig, admin)
+    answers = await asyncio.gather(
+        admin.post(f"{API}/companies/me/export"), admin.post(f"{API}/companies/me/export")
+    )
+    assert sorted(r.status_code for r in answers) == [202, 409], [r.text for r in answers]
+    [lost] = [r for r in answers if r.status_code == 409]
+    assert lost.json()["error"]["code"] == "EXPORT_IN_PROGRESS"
+    async with rig["owner"].connect() as c:
+        queued = (
+            await c.execute(
+                text("select count(*) from data_exports where company_id=:c and status='queued'"),
+                {"c": rig["a"]},
+            )
+        ).scalar_one()
+    assert queued == 1
+
+    other = await rig["person"]("company_admin", rig["b"])
+    await step_up(rig, other)
+    assert (await other.post(f"{API}/companies/me/export")).status_code == 202

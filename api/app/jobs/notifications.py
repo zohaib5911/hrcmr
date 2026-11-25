@@ -11,7 +11,7 @@ import json
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import func, select, update
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.crypto import encrypt
@@ -46,19 +46,23 @@ async def send_digests(db: TenantSession, web_origin: str, now: datetime) -> int
         )
     )
     waiting = (
-        await db.execute(
-            select(Notification.user_id, func.count())
-            .where(
-                Notification.company_id == db.company_id,
-                Notification.digested_at.is_(None),
-                Notification.created_at <= now,
-                Notification.user_id.in_(daily),
+        (
+            await db.execute(
+                select(Notification.user_id)
+                .where(
+                    Notification.company_id == db.company_id,
+                    Notification.digested_at.is_(None),
+                    Notification.created_at <= now,
+                    Notification.user_id.in_(daily),
+                )
+                .group_by(Notification.user_id)
             )
-            .group_by(Notification.user_id)
         )
-    ).all()
+        .scalars()
+        .all()
+    )
     sent = 0
-    for user_id, count in waiting:
+    for user_id in waiting:
         person = (
             await db.execute(
                 select(User.first_name, User.email).where(
@@ -71,6 +75,28 @@ async def send_digests(db: TenantSession, web_origin: str, now: datetime) -> int
         if person is None:  # no verified address to send to; the notices wait for the next digest
             continue
         first, email = person
+        # Claim this person's notices once (ISS-28): an overlapping run skips the locked rows, and
+        # the e-mail and the "digested" mark are written for exactly these ids in one transaction,
+        # so a rollback leaves them to be claimed again.
+        claimed = (
+            (
+                await db.execute(
+                    select(Notification.id)
+                    .where(
+                        Notification.company_id == db.company_id,
+                        Notification.user_id == user_id,
+                        Notification.digested_at.is_(None),
+                        Notification.created_at <= now,
+                    )
+                    .with_for_update(skip_locked=True)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        if not claimed:
+            continue
+        count = len(claimed)
         data = {
             "first_name": " ".join(first.split()) or "there",
             "count": str(count),
@@ -85,14 +111,7 @@ async def send_digests(db: TenantSession, web_origin: str, now: datetime) -> int
             )
         )
         await db.execute(
-            update(Notification)
-            .where(
-                Notification.company_id == db.company_id,
-                Notification.user_id == user_id,
-                Notification.digested_at.is_(None),
-                Notification.created_at <= now,
-            )
-            .values(digested_at=now)
+            update(Notification).where(Notification.id.in_(claimed)).values(digested_at=now)
         )
         sent += 1
     return sent

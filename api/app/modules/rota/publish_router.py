@@ -21,12 +21,14 @@ from app.modules.attendance.router import _company
 from app.modules.email.models import EmailOutbox
 from app.modules.email.outbox import PAYLOAD_CONTEXT
 from app.modules.email.templates import check
+from app.modules.employees.models import Employee
 from app.modules.employees.record_pdf import render_pdf
 from app.modules.identity.models import Membership, User
 from app.modules.notifications.models import Notification
 from app.modules.notifications.preferences import email_modes
 from app.modules.rbac.deps import Access, require
-from app.modules.rota.week_models import RotaWeek
+from app.modules.rota.models import ShiftType
+from app.modules.rota.week_models import RotaWeek, ScheduledShift
 from app.modules.rota.week_router import Reads, Writes  # noqa: TC001
 from app.modules.rota.week_schemas import ActionOut, OwnShifts, ShiftOut, WeekVersion
 from app.modules.rota.weeks import check_monday, lock_week, monday, rows, shift_out, write_ids
@@ -39,6 +41,46 @@ def _canonical(items: list[dict[str, object]]) -> str:
     return json.dumps(sorted(items, key=lambda r: str(r["id"])), sort_keys=True)
 
 
+OTHERS_PAGE = 1000
+
+
+async def _others_unchanged(
+    access: Access,
+    week_start: date,
+    ids: frozenset[uuid.UUID],
+    published: list[dict[str, object]],
+    zone: ZoneInfo,
+) -> bool:
+    """Whether everyone outside the publisher's scope has exactly their published shifts, read a
+    page at a time so a large week never has to be held at once."""
+    expected = {str(r["id"]): _canonical([r]) for r in published}
+    seen, after = 0, None
+    while True:
+        query = (
+            select(ScheduledShift, Employee, ShiftType.name)
+            .join(Employee, Employee.id == ScheduledShift.employee_id)
+            .outerjoin(ShiftType, ShiftType.id == ScheduledShift.shift_type_id)
+            .where(
+                ScheduledShift.date >= week_start,
+                ScheduledShift.date <= week_start + timedelta(days=6),
+                ScheduledShift.employee_id.not_in(ids),
+            )
+            .order_by(ScheduledShift.id)
+            .limit(OTHERS_PAGE)
+        )
+        if after is not None:
+            query = query.where(ScheduledShift.id > after)
+        page = (await access.db.execute(query)).all()
+        for row, employee, name in page:
+            dumped = shift_out(row, employee, name, zone).model_dump(mode="json")
+            if expected.get(str(row.id)) != _canonical([dumped]):
+                return False
+        seen += len(page)
+        if len(page) < OTHERS_PAGE:
+            return seen == len(expected)
+        after = page[-1][0].id
+
+
 @router.post("/weeks/{week_start}/publish", response_model=ActionOut)
 async def publish(
     week_start: date, body: WeekVersion, access: Writes, request: Request
@@ -46,9 +88,12 @@ async def publish(
     week = await lock_week(access, week_start, body.version)
     ids = await write_ids(access)
     company = await _company(access)
-    current = [
-        shift_out(r, e, name, ZoneInfo(company.timezone)).model_dump(mode="json")
-        for r, e, name in await rows(access, week_start)
+    zone = ZoneInfo(company.timezone)
+    # Only the publisher's own scope is loaded (ISS-32), so the per-action limit is about their
+    # team, not the whole company's week.
+    incoming = [
+        shift_out(r, e, name, zone).model_dump(mode="json")
+        for r, e, name in await rows(access, week_start, ids)
     ]
     previous = week.published_shifts
     allowed_ids = {str(i) for i in ids} if ids is not None else None
@@ -56,8 +101,8 @@ async def publish(
     def allowed(employee: object) -> bool:
         return allowed_ids is None or employee in allowed_ids
 
-    incoming = [r for r in current if allowed(r["employee_id"])]
-    combined = [r for r in previous if not allowed(r["employee_id"])] + incoming
+    others = [r for r in previous if not allowed(r["employee_id"])]
+    combined = others + incoming
     affected = {str(r["employee_id"]) for r in [*previous, *incoming] if allowed(r["employee_id"])}
     changed = {
         e
@@ -66,7 +111,12 @@ async def publish(
         != _canonical([r for r in combined if r["employee_id"] == e])
     }
     week.published_shifts = combined
-    week.status = "published" if _canonical(combined) == _canonical(current) else "draft"
+    # The whole week is published only when no other team has drafts left outstanding.
+    week.status = (
+        "published"
+        if ids is None or await _others_unchanged(access, week_start, ids, others, zone)
+        else "draft"
+    )
     week.published_at, week.published_by = datetime.now(UTC), access.caller.user_id
     week.version += 1
     recipients = (

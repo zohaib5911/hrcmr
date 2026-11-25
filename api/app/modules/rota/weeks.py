@@ -24,6 +24,9 @@ if TYPE_CHECKING:
     from app.modules.rbac.deps import Access
 
 
+ACTION_LIMIT = 5000  # shifts one action may load
+
+
 def monday(day: date) -> date:
     try:
         start = day - timedelta(days=day.weekday())
@@ -127,11 +130,11 @@ async def rows(
     result = (
         await access.db.execute(
             query.order_by(ScheduledShift.date, ScheduledShift.starts_at, ScheduledShift.id).limit(
-                5001
+                ACTION_LIMIT + 1
             )
         )
     ).all()
-    if len(result) > 5000:
+    if len(result) > ACTION_LIMIT:
         raise AppError(
             "ROTA_TOO_LARGE", "This week has too many shifts for one action.", status_code=422
         )
