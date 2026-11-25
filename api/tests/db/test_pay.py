@@ -128,6 +128,39 @@ async def test_bank_accounts_are_stored_encrypted_and_only_shown_masked(
     assert "123456" not in str(rows)
 
 
+async def test_a_new_account_number_with_the_same_last_digits_is_audited_once(
+    rig: dict[str, Any],
+) -> None:
+    """ISS-07: the masked values look the same, but the change is still recorded, without digits."""
+    admin = await rig["person"]("company_admin", rig["a"])
+    made = (await admin.post(f"{API}/bank-accounts", json=ACCOUNT)).json()
+    sql = (
+        "select summary, before, after from audit_events "
+        "where action = 'bank_account.updated' and entity_id = :i"
+    )
+
+    async def events() -> list[Any]:
+        async with rig["owner"].connect() as c:
+            return list((await c.execute(text(sql), {"i": made["id"]})).all())
+
+    same = await admin.patch(f"{API}/bank-accounts/{made['id']}", json={"sort_code": "12-34-56"})
+    assert same.status_code == 200, same.text
+    assert await events() == []  # nothing really changed
+
+    changed = await admin.patch(
+        f"{API}/bank-accounts/{made['id']}",
+        json={"account_number": "11114321", "sort_code": "65-43-56"},
+    )
+    assert changed.status_code == 200, changed.text
+    assert changed.json()["account_number_masked"] == "••••4321"  # looks the same
+    rows = await events()
+    assert len(rows) == 1
+    assert "account_number" in rows[0].summary
+    assert "sort_code" in rows[0].summary
+    for secret in ("11114321", "87654321", "654356", "65-43-56", "123456", "12-34-56"):
+        assert secret not in str(rows)
+
+
 async def test_bank_accounts_are_for_company_admins_and_private_to_the_company(
     rig: dict[str, Any],
 ) -> None:
