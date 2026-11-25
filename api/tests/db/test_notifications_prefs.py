@@ -273,3 +273,29 @@ async def test_a_suspended_member_gets_no_digest_for_that_company_only(
     assert rows[rig["a"]] == 1  # A's notice is not digested: no digest for company A
     assert rows[rig["b"]] == 0  # B's was
     assert sent == 1
+
+
+async def test_payment_and_deletion_notices_reach_the_bell_of_those_who_may_act(
+    rig: dict[str, Any],
+) -> None:
+    """ISS-15: the three account notices are listed, counted and can be marked read."""
+    admin = await rig["person"]("company_admin", rig["a"])
+    employee = await rig["person"]("employee", rig["a"])
+    admin_user = (await _me(admin))["user_id"]
+    employee_user = (await _me(employee))["user_id"]
+    kinds = ("billing.payment_failed", "account.deletion_scheduled", "account.deletion_withdrawn")
+    ids = [await _notice(rig, admin_user, rig["a"], kind, kind) for kind in kinds]
+    for kind in kinds:  # the same kinds for someone who may not act on them
+        await _notice(rig, employee_user, rig["a"], kind, kind)
+
+    feed = (await admin.get(API + "/notifications")).json()
+    assert set(ids) <= {item["id"] for item in feed["items"]}
+    assert feed["unread"] >= 3
+    read = await admin.patch(API + f"/notifications/{ids[0]}", json={"read": True})
+    assert read.status_code == 200, read.text
+    assert (await admin.post(API + "/notifications/read-all")).status_code in (200, 204)
+    after = (await admin.get(API + "/notifications")).json()
+    assert after["unread"] == 0
+
+    hidden = (await employee.get(API + "/notifications")).json()
+    assert not {item["kind"] for item in hidden["items"]} & set(kinds)

@@ -58,6 +58,11 @@ def _kinds(access: Access) -> tuple[str, ...]:
         kinds += ("compliance.reminders_due",)
     if scope_for(access.role, "leave.request.approve") is not None:
         kinds += ("leave.request_created",)
+    # Account matters, sent to company admins (ISS-15): shown to whoever may act on them.
+    if scope_for(access.role, "billing.manage") is not None:
+        kinds += ("billing.payment_failed",)
+    if scope_for(access.role, "company.delete") is not None:
+        kinds += ("account.deletion_scheduled", "account.deletion_withdrawn")
     return kinds
 
 
