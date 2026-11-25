@@ -59,6 +59,27 @@ def utcnow() -> datetime:
     return datetime.now(UTC)
 
 
+def _instant(value: object) -> datetime | None:
+    """A stored timestamp, or None when it is not an ISO date-time with a time zone."""
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo is not None else None
+
+
+def _is_uuid(value: object) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        uuid.UUID(value)
+    except ValueError:
+        return False
+    return True
+
+
 @dataclass(frozen=True)
 class SessionData:
     session_id: str
@@ -76,6 +97,47 @@ class SessionData:
     # A support-mode session (T17.3) names its ``impersonation_sessions`` row. Only the support
     # cookie carries it; the row says whether it is still live and whether writes are on.
     support_id: str | None = None
+
+    @classmethod
+    def parse(cls, raw: str | bytes) -> SessionData | None:
+        """The stored session, or None when it cannot safely be read (ISS-05). Older records
+        without the optional fields still read; unknown fields are ignored."""
+        try:
+            stored = json.loads(raw)
+        except (TypeError, ValueError):
+            return None
+        if not isinstance(stored, dict):
+            return None
+        if not (_is_uuid(stored.get("session_id")) and _is_uuid(stored.get("user_id"))):
+            return None
+        company = stored.get("company_id")
+        if company is not None and not _is_uuid(company):
+            return None
+        if _instant(stored.get("created_at")) is None or _instant(stored.get("expires_at")) is None:
+            return None
+        for name in ("mfa_passed_at", "step_up_at"):
+            value = stored.get(name)
+            if value is not None and _instant(value) is None:
+                return None
+        seen = stored.get("db_seen_at", "")
+        if seen and _instant(seen) is None:
+            return None
+        platform = stored.get("platform", False)
+        support = stored.get("support_id")
+        if not isinstance(platform, bool) or not (support is None or isinstance(support, str)):
+            return None
+        return cls(
+            session_id=stored["session_id"],
+            user_id=stored["user_id"],
+            company_id=company,
+            created_at=stored["created_at"],
+            expires_at=stored["expires_at"],
+            mfa_passed_at=stored.get("mfa_passed_at"),
+            step_up_at=stored.get("step_up_at"),
+            db_seen_at=seen or "",
+            platform=platform,
+            support_id=support,
+        )
 
     def _when(self, value: str | None) -> datetime | None:
         return datetime.fromisoformat(value) if value else None
@@ -129,9 +191,12 @@ class SessionStore:
 
     async def _patch(self, token: str, field: str, value: str | None) -> SessionData:
         raw = await self._redis.eval(_PATCH, 1, _KEY + hash_token(token), field, json.dumps(value))
-        if not raw:
+        data = SessionData.parse(raw) if raw else None
+        if data is None:
+            if raw:
+                await self._redis.delete(_KEY + hash_token(token))
             raise _ended()
-        return SessionData(**json.loads(raw))
+        return data
 
     @staticmethod
     async def _lock_user(db: AsyncSession, user_id: uuid.UUID) -> None:
@@ -194,8 +259,8 @@ class SessionStore:
         raw = await self._redis.get(_KEY + hash_token(token))
         if raw is None:
             return None
-        data = SessionData(**json.loads(raw))
-        if data.absolute_expiry <= self._now():
+        data = SessionData.parse(raw)
+        if data is None or data.absolute_expiry <= self._now():
             await self._redis.delete(_KEY + hash_token(token))
             return None
         # EXPIRE can only extend an existing key: a concurrent revoke remains final.
@@ -207,7 +272,8 @@ class SessionStore:
     async def touch(self, db: AsyncSession, token: str, data: SessionData) -> SessionData:
         """Record on the database row that the session is still in use, at most every 5 minutes."""
         now = self._now()
-        if now - datetime.fromisoformat(data.db_seen_at) < _DB_TOUCH_EVERY:
+        seen = _instant(data.db_seen_at)  # an older record may not have it yet
+        if seen is not None and now - seen < _DB_TOUCH_EVERY:
             return data
         await db.execute(
             update(Session).where(Session.id == uuid.UUID(data.session_id)).values(last_seen_at=now)
@@ -241,8 +307,8 @@ class SessionStore:
         raw = await self._redis.getdel(_KEY + hash_token(token))
         if raw is None:
             raise _ended()
-        current = SessionData(**json.loads(raw))
-        if current.absolute_expiry <= self._now():
+        current = SessionData.parse(raw)
+        if current is None or current.absolute_expiry <= self._now():
             raise _ended()
         data = current
         await self.revoke(db, token, data)
