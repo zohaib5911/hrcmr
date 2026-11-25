@@ -18,19 +18,34 @@ import {
   MenuSeparator,
   MenuTrigger,
 } from "@/components/ui/menu";
-import { attempt } from "@/lib/auth/request";
+import { signOut } from "@/lib/auth/sign-out";
+import { useToast } from "@/components/ui/toast";
 import { initials } from "@/lib/ui/avatar";
 import { cn } from "@/lib/utils";
 import { parseTheme, type ThemeChoice } from "@/lib/theme";
 import { applyTheme } from "@/lib/theme-dom";
 
 import type { ShellUser } from "./shell-types";
-import { clearApiCache } from "@/lib/api/cache";
 
 /** The person's menu, top right: their profile, and the colour theme (plan 5.3: chosen in My Profile). */
 export function AvatarMenu({ user, theme }: { user: ShellUser | null; theme: ThemeChoice }) {
   const [choice, setChoice] = useState(theme);
   const router = useRouter();
+  const toast = useToast();
+
+  async function leave() {
+    const outcome = await signOut();
+    if (outcome.ok) {
+      router.push("/login");
+      router.refresh();
+      return;
+    }
+    toast.show({
+      title: outcome.problem.message,
+      tone: "danger",
+      action: { label: "Try again", onClick: () => void leave() },
+    });
+  }
   return (
     <Menu>
       <MenuTrigger asChild>
@@ -67,16 +82,7 @@ export function AvatarMenu({ user, theme }: { user: ShellUser | null; theme: The
         >
           My profile
         </MenuItem>
-        <MenuItem
-          icon={<Icon icon={LogOut} size={16} />}
-          onSelect={() => {
-            void attempt((client) => client.POST("/auth/logout")).then(() => {
-              clearApiCache();
-              router.push("/login");
-              router.refresh();
-            });
-          }}
-        >
+        <MenuItem icon={<Icon icon={LogOut} size={16} />} onSelect={() => void leave()}>
           Sign out
         </MenuItem>
         <MenuSeparator />

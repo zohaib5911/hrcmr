@@ -26,13 +26,20 @@ interface MfaEnrolmentProps {
   /** Called when the person says they have saved their recovery codes. */
   onDone: () => void;
   /** Offered where the person cannot skip the set-up (a company policy), so they can leave. */
-  onSignOut?: () => void;
+  /** Resolves to a problem when signing out failed; it is shown next to the button. */
+  onSignOut?: () => Promise<Problem | null>;
 }
 
 /** Setting up an authenticator app: scan the code, confirm with one 6-digit code, keep the 10 recovery codes. */
 export function MfaEnrolment({ onDone, onSignOut }: MfaEnrolmentProps) {
   const [setup, setSetup] = useState<Setup | null>(null);
   const [problem, setProblem] = useState<Problem | null>(null);
+  const [signOutProblem, setSignOutProblem] = useState<Problem | null>(null);
+
+  async function leave() {
+    setSignOutProblem(null);
+    setSignOutProblem((await onSignOut?.()) ?? null);
+  }
   const [code, setCode] = useState("");
   const [fieldError, setFieldError] = useState<string | undefined>();
   const [busy, setBusy] = useState(false);
@@ -152,9 +159,12 @@ export function MfaEnrolment({ onDone, onSignOut }: MfaEnrolmentProps) {
           Try again
         </Button>
         {onSignOut ? (
-          <Button variant="plain" onClick={onSignOut}>
-            Sign out
-          </Button>
+          <>
+            {signOutProblem ? <Alert tone="danger" title={signOutProblem.message} /> : null}
+            <Button variant="plain" onClick={() => void leave()}>
+              Sign out
+            </Button>
+          </>
         ) : null}
       </div>
     ) : (
@@ -210,9 +220,12 @@ export function MfaEnrolment({ onDone, onSignOut }: MfaEnrolmentProps) {
         Confirm
       </Button>
       {onSignOut ? (
-        <Button variant="plain" onClick={onSignOut}>
-          Sign out
-        </Button>
+        <>
+          {signOutProblem ? <Alert tone="danger" title={signOutProblem.message} /> : null}
+          <Button variant="plain" onClick={() => void leave()}>
+            Sign out
+          </Button>
+        </>
       ) : null}
     </form>
   );

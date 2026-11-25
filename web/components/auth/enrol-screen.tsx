@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 
-import { attempt } from "@/lib/auth/request";
+import { signOut } from "@/lib/auth/sign-out";
 
 import { MfaEnrolment } from "./mfa-enrolment";
 
@@ -15,8 +15,12 @@ export function EnrolScreen() {
         router.push("/dashboard");
         router.refresh();
       }}
-      onSignOut={() => {
-        void attempt((client) => client.POST("/auth/logout")).then(() => router.push("/login"));
+      onSignOut={async () => {
+        const outcome = await signOut();
+        if (!outcome.ok) return outcome.problem;
+        router.push("/login");
+        router.refresh();
+        return null;
       }}
     />
   );

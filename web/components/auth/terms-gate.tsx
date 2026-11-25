@@ -8,6 +8,7 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { attempt, type Problem } from "@/lib/auth/request";
+import { signOut } from "@/lib/auth/sign-out";
 
 /**
  * Shown over everything when there are terms the person has not accepted (plan 8.1): nothing behind
@@ -39,9 +40,15 @@ export function TermsGate({ version }: { version: string }) {
     setProblem(outcome.problem);
   }
 
-  async function signOut() {
-    await attempt((client) => client.POST("/auth/logout"));
+  async function leave() {
+    setProblem(null);
+    const outcome = await signOut();
+    if (!outcome.ok) {
+      setProblem(outcome.problem);
+      return;
+    }
     router.push("/login");
+    router.refresh();
   }
 
   return (
@@ -103,7 +110,7 @@ export function TermsGate({ version }: { version: string }) {
             <Button size="lg" loading={busy} onClick={() => void accept()}>
               Continue
             </Button>
-            <Button variant="plain" onClick={() => void signOut()}>
+            <Button variant="plain" onClick={() => void leave()}>
               Sign out
             </Button>
           </div>
