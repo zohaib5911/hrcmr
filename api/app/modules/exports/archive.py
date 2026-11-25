@@ -14,10 +14,12 @@ import hashlib
 import io
 import json
 import re
+import shutil
+import tempfile
 import zipfile
 from datetime import date, datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, BinaryIO
+from typing import IO, TYPE_CHECKING, Any, BinaryIO
 
 from sqlalchemy import or_, select
 
@@ -133,15 +135,68 @@ def readme(company_name: str, when: datetime, missing: int) -> bytes:
     return ("\n".join(lines) + "\n").encode("utf-8")
 
 
-async def _rows(
-    db: AsyncSession, table: Table, key: Column[Any], company_id: uuid.UUID
-) -> tuple[list[str], list[list[str]]]:
+ROW_BATCH = 1000  # rows read from the database per step
+SPOOL_LIMIT = 1 << 20  # the document index stays in memory up to 1 MiB, then goes to disk
+INDEX_HEADERS = [
+    "id",
+    "original_name",
+    "mime",
+    "size",
+    "sha256",
+    "category",
+    "owner_type",
+    "uploaded_at",
+    "status",
+    "path",
+]
+
+
+def _csv_writer(stream: IO[str]) -> Any:
+    writer = csv.writer(stream, quoting=csv.QUOTE_ALL)
+
+    class Safe:
+        def row(self, values: list[str]) -> None:
+            writer.writerow([spreadsheet_text(value) for value in values])
+
+    return Safe()
+
+
+async def _write_table(
+    db: AsyncSession,
+    archive: zipfile.ZipFile,
+    table: Table,
+    key: Column[Any],
+    company_id: uuid.UUID,
+) -> None:
+    """One table's CSV, written into the zip a batch of rows at a time (ISS-33)."""
     columns = exported_columns(table)
     statement = select(*columns).where(key == company_id)
     if "id" in table.c:
         statement = statement.order_by(table.c["id"])
-    result = await db.execute(statement)
-    return [c.name for c in columns], [[cell(v) for v in row] for row in result.all()]
+    with (
+        archive.open(f"tables/{table.name}.csv", "w", force_zip64=True) as raw,
+        io.TextIOWrapper(raw, encoding="utf-8", newline="") as text,
+    ):
+        out = _csv_writer(text)
+        out.row([c.name for c in columns])
+        result = await db.stream(statement.execution_options(yield_per=ROW_BATCH))
+        async for batch in result.partitions(ROW_BATCH):
+            for row in batch:
+                out.row([cell(v) for v in row])
+
+
+async def _write_document(
+    archive: zipfile.ZipFile, storage: Storage, record: File, path: str
+) -> bool:
+    """Copies one file into the zip piece by piece. False if storage cannot open it."""
+    try:
+        pieces = await storage.open(record.storage_key)
+    except StorageError:
+        return False
+    with archive.open(path, "w", force_zip64=True) as entry:
+        async for piece in pieces:
+            entry.write(piece)
+    return True
 
 
 async def write_archive(
@@ -152,69 +207,56 @@ async def write_archive(
     when: datetime,
     target: BinaryIO,
 ) -> int:
-    """Writes the zip to ``target``. Returns how many documents could not be read."""
-    missing = 0
-    index_rows: list[list[str]] = []
-    with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-        for table, key in sources():
-            headers, rows = await _rows(db, table, key, company_id)
-            archive.writestr(f"tables/{table.name}.csv", csv_text(headers, rows))
+    """Writes the zip to ``target``. Returns how many documents could not be read.
 
-        documents = (
-            (
-                await db.execute(
-                    select(File)
-                    .where(
-                        File.scan_status == "clean",
-                        or_(File.owner_type.is_(None), File.owner_type.not_in(DERIVED_OWNERS)),
-                    )
-                    .order_by(File.created_at, File.id)
+    Nothing is held whole (ISS-33): table rows are read and written in batches, file bodies are
+    copied in storage-sized pieces, and the document index is spooled (to disk past 1 MiB)."""
+    missing = 0
+    with (
+        zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as archive,
+        tempfile.SpooledTemporaryFile(max_size=SPOOL_LIMIT, mode="w+b") as spool,
+        io.TextIOWrapper(spool, encoding="utf-8", newline="") as index_text,
+    ):
+        for table, key in sources():
+            await _write_table(db, archive, table, key, company_id)
+
+        index = _csv_writer(index_text)
+        index.row(INDEX_HEADERS)
+        documents = await db.stream(
+            select(File)
+            .where(
+                File.scan_status == "clean",
+                or_(File.owner_type.is_(None), File.owner_type.not_in(DERIVED_OWNERS)),
+            )
+            .order_by(File.created_at, File.id)
+            .execution_options(yield_per=ROW_BATCH)
+        )
+        async for batch in documents.scalars().partitions(ROW_BATCH):
+            for record in batch:
+                path = f"documents/{record.id}/{safe_name(record.original_name)}"
+                status = "included"
+                if not await _write_document(archive, storage, record, path):
+                    logger.warning("export_document_missing", file_id=str(record.id))
+                    missing += 1
+                    status, path = "missing", ""
+                index.row(
+                    [
+                        str(record.id),
+                        record.original_name,
+                        record.mime,
+                        str(record.size),
+                        record.sha256 or "",
+                        record.category or "",
+                        record.owner_type or "",
+                        cell(record.created_at),
+                        status,
+                        path,
+                    ]
                 )
-            )
-            .scalars()
-            .all()
-        )
-        for record in documents:
-            path = f"documents/{record.id}/{safe_name(record.original_name)}"
-            status = "included"
-            try:
-                archive.writestr(path, await storage.read(record.storage_key))
-            except StorageError:
-                logger.warning("export_document_missing", file_id=str(record.id))
-                missing += 1
-                status, path = "missing", ""
-            index_rows.append(
-                [
-                    str(record.id),
-                    record.original_name,
-                    record.mime,
-                    str(record.size),
-                    record.sha256 or "",
-                    record.category or "",
-                    record.owner_type or "",
-                    cell(record.created_at),
-                    status,
-                    path,
-                ]
-            )
-        archive.writestr(
-            "documents.csv",
-            csv_text(
-                [
-                    "id",
-                    "original_name",
-                    "mime",
-                    "size",
-                    "sha256",
-                    "category",
-                    "owner_type",
-                    "uploaded_at",
-                    "status",
-                    "path",
-                ],
-                index_rows,
-            ),
-        )
+        index_text.flush()
+        spool.seek(0)
+        with archive.open("documents.csv", "w", force_zip64=True) as entry:
+            shutil.copyfileobj(spool, entry, 1 << 16)
         archive.writestr("README.txt", readme(company_name, when, missing))
     return missing
 
