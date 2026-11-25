@@ -226,6 +226,27 @@ async def _sheet(access: Access, employee: Employee, start: date) -> TimesheetOu
             )
         ).scalars()
     )
+    approval = (
+        await access.db.execute(
+            select(TimesheetApproval).where(
+                TimesheetApproval.employee_id == employee.id,
+                TimesheetApproval.period_start == start,
+            )
+        )
+    ).scalar_one_or_none()
+    return _build_sheet(access, employee, start, records, approval, await _company(access))
+
+
+def _build_sheet(
+    access: Access,
+    employee: Employee,
+    start: date,
+    records: list[AttendanceRecord],
+    approval: TimesheetApproval | None,
+    company: Company,
+) -> TimesheetOut:
+    """One week's timesheet from rows already loaded (the single and the page views share it)."""
+    end = start + timedelta(days=6)
     fingerprint = hashlib.sha256(
         json.dumps(
             [
@@ -241,16 +262,7 @@ async def _sheet(access: Access, employee: Employee, start: date) -> TimesheetOu
             sort_keys=True,
         ).encode()
     ).hexdigest()
-    approval = (
-        await access.db.execute(
-            select(TimesheetApproval).where(
-                TimesheetApproval.employee_id == employee.id,
-                TimesheetApproval.period_start == start,
-            )
-        )
-    ).scalar_one_or_none()
     current = approval is not None and approval.fingerprint == fingerprint
-    company = await _company(access)
     return TimesheetOut(
         id=_sheet_id(access.company_id, employee.id, start),
         employee_id=employee.id,
@@ -296,8 +308,40 @@ async def timesheets(
             )
         ).scalars()
     )
+    page = people[:limit]
+    # Set-based (ISS-38): the company once, then the page's attendance and approvals in one query
+    # each, whatever the page size, including people with no records.
+    company = await _company(access)
+    page_ids = [e.id for e in page]
+    records: dict[uuid.UUID, list[AttendanceRecord]] = {e.id: [] for e in page}
+    approvals: dict[uuid.UUID, TimesheetApproval] = {}
+    if page_ids:
+        for record in (
+            await access.db.execute(
+                select(AttendanceRecord)
+                .where(
+                    AttendanceRecord.employee_id.in_(page_ids),
+                    AttendanceRecord.date >= monday,
+                    AttendanceRecord.date <= monday + timedelta(days=6),
+                )
+                .order_by(AttendanceRecord.date, AttendanceRecord.id)
+            )
+        ).scalars():
+            records[record.employee_id].append(record)
+        for approval in (
+            await access.db.execute(
+                select(TimesheetApproval).where(
+                    TimesheetApproval.employee_id.in_(page_ids),
+                    TimesheetApproval.period_start == monday,
+                )
+            )
+        ).scalars():
+            approvals[approval.employee_id] = approval
     return TimesheetPage(
-        items=[await _sheet(access, e, monday) for e in people[:limit]],
+        items=[
+            _build_sheet(access, e, monday, records[e.id], approvals.get(e.id), company)
+            for e in page
+        ],
         next_offset=offset + limit if len(people) > limit else None,
     )
 
