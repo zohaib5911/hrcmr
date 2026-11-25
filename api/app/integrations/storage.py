@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, BinaryIO, TypeVar
+from typing import TYPE_CHECKING, Any, BinaryIO, TypeVar
 
 import boto3
 from botocore.client import Config
@@ -169,6 +169,32 @@ class Storage:
             return found
 
         return await self._call(run)
+
+    async def list_pages(
+        self, prefix: str, *, page_size: int = 1000
+    ) -> AsyncIterator[list[StoredObject]]:
+        """The objects under ``prefix`` one page at a time (ISS-36), never the whole listing."""
+        token: str | None = None
+        while True:
+
+            def run(token: str | None = token) -> dict[str, Any]:
+                options: dict[str, Any] = {
+                    "Bucket": self._bucket,
+                    "Prefix": prefix,
+                    "MaxKeys": page_size,
+                }
+                if token:
+                    options["ContinuationToken"] = token
+                return dict(self._client.list_objects_v2(**options))
+
+            page = await self._call(run)
+            yield [
+                StoredObject(item["Key"], item["LastModified"], int(item["Size"]))
+                for item in page.get("Contents", [])
+            ]
+            token = page.get("NextContinuationToken") if page.get("IsTruncated") else None
+            if not token:
+                return
 
     async def _call(self, run: Callable[[], T]) -> T:
         try:

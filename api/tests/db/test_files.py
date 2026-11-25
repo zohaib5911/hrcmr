@@ -334,3 +334,43 @@ async def test_attendance_import_file_is_not_kept_by_a_demoted_uploader(
             await owner.dispose()
         assert (await admin.get(f"/api/v1/files/{ident}")).status_code == 404
         assert (await admin.get(f"/api/v1/files/{ident}/download")).status_code == 404
+
+
+async def test_the_cleanup_works_one_storage_page_at_a_time(
+    api: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ISS-36: across several pages only old unreferenced objects go; pages stay page-sized."""
+    from app.modules.files import service
+
+    app = api["start"](CLAMAV_PORT)
+    storage = _storage()
+    async with LifespanManager(app):
+        admin = await api["person"](app, "hr_admin", api["a"])
+        assert (await _upload(admin, "kept.pdf", PDF)).status_code == 201
+        (row,) = await _rows(api["db"], api["a"])
+        owner = engine_for(api["db"].owner_url, poolclass=NullPool)
+        later = datetime.now(UTC) + timedelta(days=2)
+        try:
+            await remove_orphans(storage, owner, now=later)  # leftovers from earlier runs
+            strays = [f"{KEY_PREFIX}{api['a']}/{uuid.uuid4().hex}" for _ in range(5)]
+            for key in strays:
+                await storage.put(key, io.BytesIO(b"x"), content_type="text/plain", size=1)
+            sizes: list[int] = []
+            real = storage.list_pages
+
+            async def pages(prefix: str, *, page_size: int = 1000) -> Any:
+                async for page in real(prefix, page_size=page_size):
+                    sizes.append(len(page))
+                    yield page
+
+            monkeypatch.setattr(storage, "list_pages", pages)
+            monkeypatch.setattr(service, "ORPHAN_PAGE", 2)
+            assert await remove_orphans(storage, owner) == 0  # inside the grace period
+            assert await remove_orphans(storage, owner, now=later) == 5
+        finally:
+            await owner.dispose()
+        assert max(sizes) <= 2  # no page larger than asked
+        assert len(sizes) >= 3  # several pages
+        assert not any([await storage.exists(key) for key in strays])
+        assert await storage.exists(row["storage_key"])
+        await storage.delete(row["storage_key"])
