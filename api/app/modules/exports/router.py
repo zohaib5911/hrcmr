@@ -14,6 +14,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 
 from app.core.errors import AppError, NotFoundError
 from app.core.logging import get_logger
@@ -99,8 +100,19 @@ async def request_export(request: Request, access: Exporter) -> ExportOut:
             status_code=409,
         )
     row = DataExport(company_id=access.company_id, requested_by=access.caller.user_id)
-    access.db.add(row)
-    await access.db.flush()
+    try:
+        async with access.db.begin_nested():
+            access.db.add(row)
+            await access.db.flush()
+    except IntegrityError as exc:
+        if "uq_data_exports_one_queued" not in str(exc.orig):
+            raise
+        # Another request queued one at the same moment: the same answer as the check above.
+        raise AppError(
+            "EXPORT_IN_PROGRESS",
+            "An export is already being prepared. It will be ready soon.",
+            status_code=409,
+        ) from None
     await access.audit("export.requested", entity_type="data_export", entity_id=row.id)
     await access.db.commit()
     await enqueue(request, row)

@@ -429,3 +429,57 @@ async def test_day_off_leave_warning_and_lateness_uses_published_schedule(
     clock = await me.post("/api/v1/attendance/clock-in", json={})
     assert clock.status_code == 200, clock.text
     assert clock.json()["active"]["status"] == "late"
+
+
+async def test_a_manager_publishes_a_small_team_in_a_week_too_large_for_one_action(
+    ready: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ISS-32: the manager's scope is applied before the limit; others' snapshots are kept and
+    the week is published only when no other team has drafts outstanding."""
+    from app.modules.rota import weeks
+
+    admin = ready["admin"]
+    manager = await manager_for(ready)
+    mine = await admin.post(API + "/scheduled-shifts", json=payload(ready))
+    other = await admin.post(
+        API + "/scheduled-shifts", json=payload(ready, employee_id=str(ready["other"]), version=1)
+    )
+    assert mine.status_code == other.status_code == 201
+    assert (
+        await admin.post(API + "/weeks/2026-01-05/publish", json={"version": 2})
+    ).status_code == 200
+    assert (
+        await admin.put(
+            API + f"/scheduled-shifts/{other.json()['shift']['id']}",
+            json=payload(ready, employee_id=str(ready["other"]), ends_at="19:00", version=3),
+        )
+    ).status_code == 200  # another team's draft, not yet published
+
+    monkeypatch.setattr(weeks, "ACTION_LIMIT", 1)  # the company's week is over the limit
+    published = await manager.post(API + "/weeks/2026-01-05/publish", json={"version": 4})
+    assert published.status_code == 200, published.text
+    async with ready["owner"].connect() as c:
+        status = (
+            await c.execute(text("select status from rota_weeks where week_start = '2026-01-05'"))
+        ).scalar_one()
+        snapshot = (
+            await c.execute(
+                text("select published_shifts from rota_weeks where week_start = '2026-01-05'")
+            )
+        ).scalar_one()
+    assert status == "draft"  # the other team's change is still outstanding
+    kept = [s for s in snapshot if s["employee_id"] == str(ready["other"])]
+    assert [s["ends_local"] for s in kept] == ["17:00"]  # their published shift is unchanged
+
+    monkeypatch.setattr(weeks, "ACTION_LIMIT", 5000)
+    assert (
+        await admin.post(API + "/weeks/2026-01-05/publish", json={"version": 5})
+    ).status_code == 200
+    monkeypatch.setattr(weeks, "ACTION_LIMIT", 1)
+    again = await manager.post(API + "/weeks/2026-01-05/publish", json={"version": 6})
+    assert again.status_code == 200, again.text
+    async with ready["owner"].connect() as c:
+        status = (
+            await c.execute(text("select status from rota_weeks where week_start = '2026-01-05'"))
+        ).scalar_one()
+    assert status == "published"

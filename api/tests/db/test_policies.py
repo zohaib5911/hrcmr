@@ -429,3 +429,35 @@ async def test_a_policy_file_over_one_megabyte_is_accepted(rig: dict[str, Any]) 
         files={"file": ("handbook.pdf", large, "application/pdf")},
     )
     assert uploaded.status_code == 200, uploaded.text
+
+
+async def test_a_grown_audience_still_gets_catch_up_and_one_company_failing_stops_no_other(
+    rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ISS-31: past the send limit the daily job assigns in batches; failures stay per company."""
+    from app.jobs import policies as policy_job
+    from app.modules.policies import service
+
+    admin = await rig["person"]("company_admin", rig["a"])
+    await _employee(rig, rig["a"], "GROW0")
+    marked = await document(admin, title="Growing pack", auto_send_new_starters=True)
+    assert (await send(admin, marked)).status_code == 200
+    for i in range(1, 6):
+        await _employee(rig, rig["a"], f"GROW{i}")
+    monkeypatch.setattr(service, "MAX_RECIPIENTS", 2)  # the audience is now past the limit
+    monkeypatch.setattr(service, "CATCH_UP_BATCH", 2)
+
+    real = service.mark_overdue
+    calls: list[Any] = []
+
+    async def overdue(db: Any, audit: Any, today: Any, origin: str) -> int:
+        calls.append(db.company_id)
+        if db.company_id == rig["b"]:
+            raise RuntimeError("company b is broken")
+        return await real(db, audit, today, origin)
+
+    monkeypatch.setattr(service, "mark_overdue", overdue)
+    await policy_job.reconcile_policies(rig["owner"], "https://app.example.test")
+    assert {rig["a"], rig["b"]} <= set(calls)  # b failed, and a was still handled
+    people = (await admin.get(API + f"/{marked['id']}/acceptances")).json()
+    assert len(people) == 6

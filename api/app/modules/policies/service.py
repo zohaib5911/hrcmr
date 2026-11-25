@@ -32,6 +32,8 @@ from app.modules.sponsor_documents.models import SponsorDocument
 if TYPE_CHECKING:
     import uuid
 
+    from sqlalchemy import Select
+
     from app.db.session import TenantSession
     from app.modules.audit.service import AuditContext
     from app.modules.policies.reference import (
@@ -43,6 +45,7 @@ if TYPE_CHECKING:
     )
 
 MAX_RECIPIENTS = 5000
+CATCH_UP_BATCH = 1000  # the daily job's assignments per step for one policy
 
 
 def now() -> datetime:
@@ -121,14 +124,10 @@ class Candidate:
         return f"{self.first_name} {self.last_name}".strip()
 
 
-async def audience(
-    db: TenantSession,
-    row: PolicyDocument,
-    today: date,
-    *,
-    lock: bool = False,
-    only: list[uuid.UUID] | None = None,
-) -> list[Candidate]:
+def _audience_query(
+    row: PolicyDocument, today: date, only: list[uuid.UUID] | None
+) -> Select[uuid.UUID, str, str, str]:
+    """Everyone the policy's audience names today (no limit, no order)."""
     query = select(
         Employee.id, Employee.first_name, Employee.last_name, Employee.employee_number
     ).where(Employee.status.in_(("active", "on_leave")))
@@ -163,7 +162,19 @@ async def audience(
         )
     if only is not None:
         query = query.where(Employee.id.in_(only))
-    query = query.order_by(Employee.id).limit(MAX_RECIPIENTS + 1)
+    return query
+
+
+async def audience(
+    db: TenantSession,
+    row: PolicyDocument,
+    today: date,
+    *,
+    lock: bool = False,
+    only: list[uuid.UUID] | None = None,
+) -> list[Candidate]:
+    """The audience for an interactive send: refused above MAX_RECIPIENTS people."""
+    query = _audience_query(row, today, only).order_by(Employee.id).limit(MAX_RECIPIENTS + 1)
     if lock:
         query = query.with_for_update(of=Employee)
     rows = (await db.execute(query)).all()
@@ -583,41 +594,47 @@ async def assign_new_starters(
     )
     created = 0
     for row in sent:
-        people = await audience(db, row, today, only=only)
-        if not people:
-            continue
-        existing = set(
-            (
+        # Only people without an acceptance yet, a bounded batch at a time (ISS-31): an audience
+        # that grew past the interactive send limit still gets its catch-up assignments.
+        while True:
+            people = (
                 await db.execute(
-                    select(PolicyAcceptance.employee_id).where(
-                        PolicyAcceptance.policy_document_id == row.id,
-                        PolicyAcceptance.employee_id.in_([p.id for p in people]),
+                    _audience_query(row, today, only)
+                    .where(
+                        ~select(PolicyAcceptance.id)
+                        .where(
+                            PolicyAcceptance.policy_document_id == row.id,
+                            PolicyAcceptance.employee_id == Employee.id,
+                        )
+                        .exists()
                     )
+                    .order_by(Employee.id)
+                    .limit(CATCH_UP_BATCH)
                 )
-            ).scalars()
-        )
-        fresh = [
-            PolicyAcceptance(
-                company_id=db.company_id,
-                policy_document_id=row.id,
-                employee_id=p.id,
-                due_on=today + timedelta(days=row.accept_within_days),
+            ).all()
+            if not people:
+                break
+            fresh = [
+                PolicyAcceptance(
+                    company_id=db.company_id,
+                    policy_document_id=row.id,
+                    employee_id=ident,
+                    due_on=today + timedelta(days=row.accept_within_days),
+                )
+                for ident, *_ in people
+            ]
+            db.add_all(fresh)
+            await db.flush()
+            await notify(db, row, fresh, web_origin)
+            await record(
+                db,
+                audit,
+                "policy.assigned_new_starters",
+                entity_type="policy_document",
+                entity_id=row.id,
+                after={"version": row.version, "recipients": len(fresh)},
             )
-            for p in people
-            if p.id not in existing
-        ]
-        if not fresh:
-            continue
-        db.add_all(fresh)
-        await db.flush()
-        await notify(db, row, fresh, web_origin)
-        await record(
-            db,
-            audit,
-            "policy.assigned_new_starters",
-            entity_type="policy_document",
-            entity_id=row.id,
-            after={"version": row.version, "recipients": len(fresh)},
-        )
-        created += len(fresh)
+            created += len(fresh)
+            if len(people) < CATCH_UP_BATCH:
+                break
     return created
