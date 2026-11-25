@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Protocol
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from app.core.crypto import DecryptionError, decrypt, encrypt
 from app.core.logging import get_logger
@@ -99,7 +99,14 @@ class EmailDelivery:
             row = (
                 await db.execute(
                     select(EmailOutbox)
-                    .where(EmailOutbox.id == outbox_id, EmailOutbox.status == "pending")
+                    .where(
+                        EmailOutbox.id == outbox_id,
+                        EmailOutbox.status == "pending",
+                        # Not before its backoff (ISS-29): an early duplicate job sends nothing
+                        # and uses no attempt; the sweep queues it again once it is due.
+                        # The database clock when none is given, as new rows are stamped with it.
+                        EmailOutbox.next_attempt_at <= (moment if now is not None else func.now()),
+                    )
                     .with_for_update(skip_locked=True)
                 )
             ).scalar_one_or_none()
