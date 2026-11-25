@@ -27,8 +27,8 @@ from sqlalchemy import select
 from app.core.errors import AppError
 from app.core.logging import get_logger
 from app.core.rate_limit import (
+    LOGIN_FAILURES_PER_IP,
     LOGIN_PER_ACCOUNT,
-    LOGIN_PER_IP,
     RateLimiter,
     hashed,
 )
@@ -162,18 +162,21 @@ class AuthService:
     # --- sign-in -----------------------------------------------------------------------
 
     async def _check_limits(self, email: str, ip: str | None) -> None:
-        for (name, limit, window), subject in (
-            (LOGIN_PER_IP, ip or "unknown"),
-            (LOGIN_PER_ACCOUNT, email),
-        ):
-            result = await self._limiter.hit(name, subject, limit=limit, window_seconds=window)
-            if not result.allowed:
-                raise RateLimitedError(result.retry_after)
+        name, limit, _ = LOGIN_FAILURES_PER_IP
+        failures, retry_after = await self._limiter.count(name, ip or "unknown")
+        if failures >= limit:
+            raise RateLimitedError(retry_after)
+        name, limit, window = LOGIN_PER_ACCOUNT
+        result = await self._limiter.hit(name, email, limit=limit, window_seconds=window)
+        if not result.allowed:
+            raise RateLimitedError(result.retry_after)
         locked_for = await self._redis.ttl(f"login:lock:{hashed(email)}")
         if locked_for > 0:
             raise RateLimitedError(locked_for)
 
-    async def _record_failure(self, email: str, user: User | None) -> None:
+    async def _record_failure(self, email: str, user: User | None, ip: str | None) -> None:
+        name, limit, window = LOGIN_FAILURES_PER_IP
+        await self._limiter.hit(name, ip or "unknown", limit=limit, window_seconds=window)
         key = hashed(email)
         failures = int(await self._redis.incr(f"login:fails:{key}"))
         await self._redis.expire(f"login:fails:{key}", _FAILS_TTL)
@@ -220,7 +223,7 @@ class AuthService:
             await spend_verification_time_async()
             valid = False
         if not valid or user is None:
-            await self._record_failure(email, user)
+            await self._record_failure(email, user, ip)
             raise InvalidCredentialsError
 
         # Password verification runs off-lock. Recheck the hash under the same user lock that

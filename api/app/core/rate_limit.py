@@ -54,12 +54,21 @@ class RateLimiter:
         retry_after = max(int(ttl), 1) if int(ttl) >= 0 else window_seconds
         return RateLimitResult(int(count) <= limit, max(limit - int(count), 0), retry_after)
 
+    async def count(self, name: str, subject: str) -> tuple[int, int]:
+        """How many attempts ``subject`` has made in the current window, and the seconds left in
+        it, without counting one more (a limit that only failures should use up)."""
+        key = f"{self._prefix}:{name}:{hashed(subject)}"
+        count, ttl = await self._redis.get(key), await self._redis.ttl(key)
+        return int(count or 0), max(int(ttl), 1)
+
     async def reset(self, name: str, subject: str) -> None:
         await self._redis.delete(f"{self._prefix}:{name}:{hashed(subject)}")
 
 
 # The limits from plan.md 4.2, named so a router asks for one by name.
-LOGIN_PER_IP = ("login-ip", 5, 60)
+# Only FAILED sign-ins count per IP: colleagues share one office address, and each right password
+# must get in. The per-account limit and the progressive lockout still protect every account.
+LOGIN_FAILURES_PER_IP = ("login-ip-failures", 20, 60)
 LOGIN_PER_ACCOUNT = ("login-account", 10, 3600)
 PASSWORD_RESET_PER_EMAIL = ("reset-email", 3, 3600)
 SIGNUP_PER_IP = ("signup-ip", 5, 3600)

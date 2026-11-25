@@ -211,15 +211,37 @@ async def test_a_good_sign_in_clears_the_count(engine: AsyncEngine, auth: AuthSe
             await _login(engine, auth, password="wrong", ip=f"203.0.113.{50 + attempt}")
 
 
-async def test_too_many_attempts_from_one_address_are_refused(
+async def test_too_many_failures_from_one_address_are_refused(
     engine: AsyncEngine, auth: AuthService
 ) -> None:
-    emails = [f"user{n}@example.com" for n in range(6)]
-    for email in emails[:5]:
+    emails = [f"user{n}@example.com" for n in range(20)]
+    for email in emails:
         with pytest.raises(InvalidCredentialsError):
             await _login(engine, auth, email=email, password="x", ip="192.0.2.1")
-    with pytest.raises(RateLimitedError):
-        await _login(engine, auth, email=emails[5], password="x", ip="192.0.2.1")
+    with pytest.raises(RateLimitedError):  # even the right password, from that address
+        await _login(engine, auth, ip="192.0.2.1")
+    assert (await _login(engine, auth, ip="192.0.2.2")).mfa_challenge is False
+
+
+async def test_thirty_colleagues_behind_one_office_address_all_sign_in(
+    database: DatabaseUnderTest, engine: AsyncEngine, auth: AuthService
+) -> None:
+    """Audit finding 2: right passwords never use up the per-address limit."""
+    owner = engine_for(database.owner_url, poolclass=NullPool)
+    digest = hash_password(PASSWORD)
+    async with owner.begin() as connection:
+        for n in range(30):
+            await connection.execute(
+                text(
+                    "insert into users (email, first_name, last_name, password_hash, is_active) "
+                    "values (:e, 'P', 'Q', :h, true)"
+                ),
+                {"e": f"colleague{n}@example.com", "h": digest},
+            )
+    await owner.dispose()
+    for n in range(30):
+        outcome = await _login(engine, auth, email=f"colleague{n}@example.com", ip="192.0.2.9")
+        assert outcome.mfa_challenge is False
 
 
 # --- sessions ------------------------------------------------------------------------------------
