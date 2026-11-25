@@ -24,13 +24,13 @@ const PLANS: Record<Plan, { name: string; price: string; about: string; choose: 
   annual: {
     name: "1 year plan",
     price: "£50 a year",
-    about: "Renews every year, by card.",
+    about: "Renews every year, by card. Cancel any time to stop the next renewal.",
     choose: "Choose 1 year",
   },
   ten_year: {
     name: "10 year plan",
     price: "£240, paid once",
-    about: "One payment that covers 10 years.",
+    about: "One payment that covers 10 years. It does not renew.",
     choose: "Choose 10 years",
   },
 };
@@ -115,7 +115,6 @@ export function BillingPage({
 
   const plan = paidPlan(billing);
   const live = isLive(billing, plan, moment);
-  const refundable = live && before(billing.cooling_off_ends_at, moment);
   const pastDue = billing.subscription_status === "past_due";
   const inGrace = pastDue && before(billing.payment_grace_ends_at, moment);
   const lapsed = pastDue && billing.payment_grace_ends_at !== null && !inGrace;
@@ -212,12 +211,8 @@ export function BillingPage({
       return;
     }
     toast.show({
-      title: outcome.data.refunded
-        ? "Your plan is cancelled and refunded"
-        : `Your plan ends on ${onDay(outcome.data.ends_at)}`,
-      description: outcome.data.refunded
-        ? "The payment goes back to the card you paid with."
-        : "It will not renew.",
+      title: `Your plan ends on ${onDay(outcome.data.ends_at)}`,
+      description: "It will not renew.",
       tone: "success",
     });
     router.refresh();
@@ -227,7 +222,7 @@ export function BillingPage({
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Billing"
-        description="The company's plan, the money-back guarantee, and payment details."
+        description="The company's plan, cancelling renewal, and payment details."
       />
 
       {checkout === "success" ? (
@@ -255,11 +250,6 @@ export function BillingPage({
       {lapsed ? (
         <Alert tone="danger" title="Full access has ended">
           Your last payment did not go through. Update your payment details to carry on.
-        </Alert>
-      ) : null}
-      {refundable ? (
-        <Alert tone="info" title="14-day money-back guarantee">
-          You can cancel until {onDay(billing.cooling_off_ends_at)} for a full refund.
         </Alert>
       ) : null}
       {before(billing.comp_until, moment) ? (
@@ -308,9 +298,7 @@ export function BillingPage({
               <Card key={key}>
                 <CardHeader title={PLANS[key].name} description={PLANS[key].price} />
                 <CardBody className="flex flex-col gap-4">
-                  <p className="text-label-secondary">
-                    {PLANS[key].about} Cancel within 14 days for a full refund.
-                  </p>
+                  <p className="text-label-secondary">{PLANS[key].about}</p>
                   <Button variant="filled" disabled={busy} onClick={() => void choose(key)}>
                     {PLANS[key].choose}
                   </Button>
@@ -325,25 +313,11 @@ export function BillingPage({
         <Card>
           <CardHeader title="Cancel your plan" headingLevel={2} />
           <CardBody className="flex flex-col gap-4">
-            {refundable ? (
+            {plan === "annual" && billing.cancel_at === null ? (
               <>
                 <p className="text-label-secondary">
-                  Cancel now and get a full refund. Your plan ends straight away.
-                </p>
-                <ConfirmDialog
-                  trigger={<Button variant="gray">Cancel and refund</Button>}
-                  title="Cancel and refund?"
-                  description="Your plan ends straight away and the full payment goes back to the card you paid with. To have a plan again, you will need to subscribe."
-                  confirmLabel="Cancel and refund"
-                  destructive
-                  onConfirm={cancel}
-                />
-              </>
-            ) : plan === "annual" && billing.cancel_at === null ? (
-              <>
-                <p className="text-label-secondary">
-                  Your plan stays active until {onDay(billing.ends_at)}. It will not renew, and
-                  there is no refund after 14 days.
+                  Cancelling stops the renewal. Your plan stays active until{" "}
+                  {onDay(billing.ends_at)}, the end of the paid year. There is no refund.
                 </p>
                 <ConfirmDialog
                   trigger={<Button variant="gray">Cancel subscription</Button>}
@@ -361,8 +335,8 @@ export function BillingPage({
               </p>
             ) : (
               <p className="text-label-secondary">
-                Your 10 year plan does not renew, so there is nothing to cancel. To end it early,
-                contact support.
+                Your 10 year plan is a one-off purchase that does not renew, so there is nothing to
+                cancel. It runs until {onDay(billing.ends_at)}.
               </p>
             )}
           </CardBody>

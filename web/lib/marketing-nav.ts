@@ -68,7 +68,7 @@ export const FOOTER_COLUMNS: readonly FooterColumn[] = [
       { label: "Subprocessors", href: to("/legal/subprocessors") },
       { label: "AI policy", href: to("/legal/ai-policy") },
       { label: "Complaints", href: to("/legal/complaints") },
-      { label: "Refunds and cancellation", href: to("/legal/refunds") },
+      { label: "Cancellation terms", href: to("/legal/cancellation") },
       { label: "Resources disclaimer", href: to("/legal/resources-disclaimer") },
       { label: "Register terms", href: to("/legal/register-terms") },
     ],

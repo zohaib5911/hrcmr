@@ -23,7 +23,7 @@ const PRINCIPLES = [
   },
   {
     title: "Keep it affordable",
-    body: "A simple price that does not grow with your headcount, and your money back in the first two weeks.",
+    body: "A simple price that does not grow with your headcount, and an annual plan you can stop renewing at any time.",
   },
 ] as const;
 

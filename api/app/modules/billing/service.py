@@ -19,7 +19,7 @@ import hashlib
 import json
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import select
@@ -43,7 +43,6 @@ if TYPE_CHECKING:
 
 logger = get_logger("app.billing")
 
-COOLING_OFF = timedelta(days=14)
 TEN_YEARS = 10
 # Stripe statuses in which an annual plan is still the company's plan. ``past_due`` is a failed
 # renewal still being retried; the grace period for it is T16.2's.
@@ -279,7 +278,6 @@ async def _sync_subscription(
         company.plan = "annual"
         if started and company.subscription_started_at != started:
             company.subscription_started_at = started
-            company.cooling_off_ends_at = started + COOLING_OFF
     elif status in ("canceled", "incomplete_expired", "unpaid"):
         company.plan = "free"
         company.subscription_ends_at = _when(live.get("ended_at")) or end
@@ -314,7 +312,6 @@ async def _ten_year_paid(
     company.subscription_status = "active"
     company.subscription_started_at = row.current_period_start
     company.subscription_ends_at = row.current_period_end
-    company.cooling_off_ends_at = (row.current_period_start or paid_at) + COOLING_OFF
 
 
 async def _refunded(
@@ -408,7 +405,6 @@ async def _start_grace(
 
 
 ENDED = frozenset({"canceled", "incomplete_expired"})
-REFUND_NOT_FOUND = "We could not find the payment to refund. Contact support."
 
 
 class CancelError(Exception):
@@ -422,7 +418,6 @@ class CancelError(Exception):
 
 @dataclass(frozen=True)
 class Cancellation:
-    refunded: bool
     ends_at: datetime | None
 
 
@@ -434,26 +429,23 @@ async def cancel_plan(
     *,
     now: datetime,
 ) -> Cancellation:
-    """Plan 8.16. Within 14 days of the start the first payment is refunded in full and the plan
-    ends now. After 14 days an annual plan ends at the end of its period, with no refund. A 10-year
-    plan does not renew, so after its 14 days there is nothing to cancel."""
-    before = summary(company)
-    if company.cooling_off_ends_at is not None and now < company.cooling_off_ends_at:
-        await _refund_and_end(db, stripe, company, context, now=now)
-        cancellation = Cancellation(refunded=True, ends_at=company.subscription_ends_at)
-    elif company.plan == "annual" and company.stripe_subscription_id:
-        subscription_id = company.stripe_subscription_id
-        await stripe.cancel_at_period_end(
-            subscription_id, idempotency_key=f"cancel-period-{subscription_id}"
-        )
-        await _sync_subscription(db, stripe, company, subscription_id)
-        cancellation = Cancellation(refunded=False, ends_at=company.subscription_ends_at)
-    else:
+    """Plan 8.16. Cancelling an annual plan stops its renewal: access continues to the end of the
+    paid term and nothing is refunded. A 10-year plan is a one-off purchase that never renews, so
+    there is nothing to cancel. Cancelling never asks Stripe for a refund."""
+    if company.plan != "annual" or not company.stripe_subscription_id:
         raise CancelError(
             "NOTHING_TO_CANCEL",
-            "This plan does not renew, so there is nothing to cancel. "
-            "Contact support to end it early.",
+            "This plan does not renew, so there is nothing to cancel. It ends on its end date.",
         )
+    before = summary(company)
+    subscription_id = company.stripe_subscription_id
+    row = await subscription_row(db, stripe_subscription_id=subscription_id)
+    if row is not None and row.cancel_at is not None:
+        return Cancellation(ends_at=company.subscription_ends_at)  # already cancelled
+    await stripe.cancel_at_period_end(
+        subscription_id, idempotency_key=f"cancel-period-{subscription_id}"
+    )
+    await _sync_subscription(db, stripe, company, subscription_id)
     await record(
         db,
         context,
@@ -462,85 +454,14 @@ async def cancel_plan(
         entity_id=company.id,
         before=before,
         after=summary(company),
-        summary=(
-            "Plan cancelled with a full refund"
-            if cancellation.refunded
-            else "Plan cancelled at the end of its period"
-        ),
+        summary="Renewal cancelled; the plan ends at the end of its paid term",
     )
     await db.commit()
-    return cancellation
-
-
-async def _refund_and_end(
-    db: TenantSession,
-    stripe: Stripe,
-    company: Company,
-    context: AuditContext,
-    *,
-    now: datetime,
-) -> None:
-    """A full refund of the first payment, then the plan ends at once. The refund is committed
-    before the subscription is ended, so a retry after a failed call finds it refunded and does not
-    ask Stripe again."""
-    subscription_id = company.stripe_subscription_id if company.plan == "annual" else None
-    if subscription_id:
-        row = await subscription_row(db, stripe_subscription_id=subscription_id)
-    else:
-        row = await _live_ten_year(db, company)
-    if row is None:
-        raise CancelError("NOTHING_TO_REFUND", REFUND_NOT_FOUND)
-    if row.refunded_at is None:
-        if subscription_id:
-            payment_intent = await _first_payment_intent(stripe, subscription_id)
-        else:
-            payment_intent = row.stripe_payment_intent_id
-        if payment_intent is None:
-            raise CancelError("NOTHING_TO_REFUND", REFUND_NOT_FOUND)
-        await stripe.create_refund(
-            payment_intent=payment_intent, idempotency_key=f"refund-{payment_intent}"
-        )
-        row.refunded_at = now
-        if row.plan == "ten_year":
-            row.status = "refunded"
-        await record(
-            db,
-            context,
-            "billing.refunded",
-            entity_type="company",
-            entity_id=company.id,
-            summary="Full refund of the first payment, within the 14 days",
-        )
-        await db.commit()
-    if subscription_id:
-        live = await stripe.retrieve_subscription(subscription_id)
-        if live.get("status") not in ENDED:
-            await stripe.cancel_now(subscription_id)
-        await _sync_subscription(db, stripe, company, subscription_id)
-    else:
-        company.plan = "free"
-        company.subscription_status = "refunded"
-        company.subscription_ends_at = now
-
-
-async def _live_ten_year(db: TenantSession, company: Company) -> Subscription | None:
-    return (
-        (
-            await db.execute(
-                select(Subscription).where(
-                    Subscription.company_id == company.id,
-                    Subscription.plan == "ten_year",
-                    Subscription.refunded_at.is_(None),
-                )
-            )
-        )
-        .scalars()
-        .first()
-    )
+    return Cancellation(ends_at=company.subscription_ends_at)
 
 
 async def _first_payment_intent(stripe: Stripe, subscription_id: str) -> str | None:
-    """The payment behind the subscription's latest invoice (the first one, within 14 days)."""
+    """The payment behind the subscription's latest invoice (used by the owner-only refund)."""
     live = await stripe.retrieve_subscription(subscription_id)
     invoice_id = _id(live.get("latest_invoice"))
     if invoice_id is None:

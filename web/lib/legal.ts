@@ -31,7 +31,7 @@ export const LEGAL_DOCUMENTS: readonly LegalDocument[] = [
       {
         title: "Plans, payments and ending access",
         paragraphs: [
-          "The free plan provides the access shown at sign-up. Paid annual and one-off 10-year plans have the price and period shown at checkout. Annual plans renew unless cancelled; the 10-year plan does not renew. Our refunds and cancellation page explains the 14-day guarantee.",
+          "The free plan provides the access shown at sign-up. Paid annual and one-off 10-year plans have the price and period shown at checkout. Annual plans renew unless cancelled; cancelling stops the next renewal and access continues to the end of the paid term. The 10-year plan is a one-off purchase that does not renew. Payments are not refunded on cancellation; our cancellation terms page explains this.",
           "Failed payment can lead to read-only access after the payment grace period. We may restrict access to protect security or address abuse. Export your records before requesting account deletion; cancelling a paid plan does not itself delete your account.",
         ],
       },
@@ -230,27 +230,27 @@ export const LEGAL_DOCUMENTS: readonly LegalDocument[] = [
     ],
   },
   {
-    slug: "refunds",
-    title: "Refunds and cancellation",
+    slug: "cancellation",
+    title: "Cancellation terms",
     introduction:
-      "The product offers a 14-day money-back guarantee on the first payment for an annual or one-off 10-year plan. This draft describes the implemented billing flow.",
+      "How cancelling an annual or one-off 10-year plan works. This draft describes the implemented billing flow.",
     sections: [
       {
-        title: "Within 14 days",
+        title: "Annual plan",
         paragraphs: [
-          "An authorised billing administrator can cancel in the app's billing page during the initial 14-day window. The flow requests a full refund of the first payment and ends the paid plan. If payment or refund processing fails, contact support; a bank may take time to show a processed refund.",
+          "An authorised billing administrator can cancel in the app's billing page at any time. Cancelling stops the next renewal: the plan stays active until the end of the year already paid for, then ends and nothing more is charged. Payments already made are not refunded on cancellation.",
         ],
       },
       {
-        title: "After 14 days",
+        title: "10-year plan",
         paragraphs: [
-          "An annual cancellation stops renewal at the end of the current paid period, with no automatic refund. The one-off 10-year plan does not renew and has no in-app cancellation after the guarantee window. Contact support for a disputed charge or exceptional issue. These proposed terms do not remove mandatory legal rights.",
+          "The 10-year plan is a single payment that does not renew, so there is nothing to cancel. It runs until its end date. Contact support for a disputed charge or exceptional issue. These proposed terms do not remove mandatory legal rights.",
         ],
       },
       {
         title: "Records and account deletion",
         paragraphs: [
-          "Cancellation and account deletion are separate. Export records before requesting deletion. Confirmed deletion is scheduled seven days later and can be withdrawn before then. Final prices, tax wording, renewal notices and refund terms need solicitor and owner approval before paid launch.",
+          "Cancellation and account deletion are separate. Export records before requesting deletion. Confirmed deletion is scheduled seven days later and can be withdrawn before then. Final prices, tax wording, renewal notices and cancellation terms need solicitor and owner approval before paid launch.",
         ],
       },
     ],

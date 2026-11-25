@@ -981,8 +981,8 @@ export interface paths {
         put?: never;
         /**
          * Cancel Plan
-         * @description Cancels the plan. Within 14 days of the start: a full refund through Stripe, and the plan
-         *     ends now. After that: an annual plan ends at the end of its period, with no refund.
+         * @description Cancels an annual plan's renewal: access continues to the end of the paid term, with no
+         *     refund. A 10-year plan never renews, so there is nothing to cancel.
          */
         post: operations["billing_cancel_plan"];
         delete?: never;
@@ -1023,8 +1023,8 @@ export interface paths {
         put?: never;
         /**
          * Create Portal Session
-         * @description Stripe's Billing Portal: card details and invoices. Cancelling is done on our billing page,
-         *     so the 14-day refund rule applies (the portal's own cancel is switched off in Stripe).
+         * @description Stripe's Billing Portal: card details and invoices. Cancelling is done on our billing page
+         *     (the portal's own cancel is switched off in Stripe).
          */
         post: operations["billing_create_portal_session"];
         delete?: never;
@@ -6864,8 +6864,6 @@ export interface components {
             cancel_at: string | null;
             /** Comp Until */
             comp_until: string | null;
-            /** Cooling Off Ends At */
-            cooling_off_ends_at: string | null;
             /** Ends At */
             ends_at: string | null;
             /** Has Billing Account */
@@ -7097,8 +7095,6 @@ export interface components {
         CancelOut: {
             /** Ends At */
             ends_at: string | null;
-            /** Refunded */
-            refunded: boolean;
         };
         /** CandidateFile */
         CandidateFile: {

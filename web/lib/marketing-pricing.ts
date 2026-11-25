@@ -5,8 +5,6 @@
 export const PRICING = {
   annual: { amount: 50, years: 1 },
   tenYear: { amount: 240, years: 10 },
-  /** Days in which a paid plan is refunded in full, automatically. */
-  refundDays: 14,
 } as const;
 
 const WHOLE_POUNDS = new Intl.NumberFormat("en-GB", {

@@ -43,7 +43,6 @@ class BillingOut(BaseModel):
     subscription_status: str | None
     started_at: datetime | None
     ends_at: datetime | None
-    cooling_off_ends_at: datetime | None
     payment_grace_ends_at: datetime | None
     cancel_at: datetime | None
     comp_until: datetime | None  # complimentary access a platform admin granted, if any
@@ -52,8 +51,7 @@ class BillingOut(BaseModel):
 
 
 class CancelOut(BaseModel):
-    refunded: bool  # True: the first payment was refunded and the plan ended now
-    ends_at: datetime | None  # when access ends: now after a refund, else the end of the period
+    ends_at: datetime | None  # when access ends: the end of the paid term
 
 
 class CheckoutIn(RequestModel):
@@ -122,7 +120,6 @@ async def read_subscription(request: Request, access: Manager) -> BillingOut:
         subscription_status=company.subscription_status,
         started_at=company.subscription_started_at,
         ends_at=company.subscription_ends_at,
-        cooling_off_ends_at=company.cooling_off_ends_at,
         payment_grace_ends_at=company.payment_grace_ends_at,
         cancel_at=latest.cancel_at if isinstance(latest, Subscription) else None,
         comp_until=company.comp_until,
@@ -157,8 +154,8 @@ async def create_checkout_session(
 
 @router.post("/billing/portal-session", response_model=RedirectOut)
 async def create_portal_session(request: Request, access: Manager) -> RedirectOut:
-    """Stripe's Billing Portal: card details and invoices. Cancelling is done on our billing page,
-    so the 14-day refund rule applies (the portal's own cancel is switched off in Stripe)."""
+    """Stripe's Billing Portal: card details and invoices. Cancelling is done on our billing page
+    (the portal's own cancel is switched off in Stripe)."""
     stripe = _stripe(request)
     if not stripe.enabled:
         raise _not_set_up()
@@ -183,8 +180,8 @@ async def create_portal_session(request: Request, access: Manager) -> RedirectOu
 
 @router.post("/billing/cancel", response_model=CancelOut)
 async def cancel_plan(request: Request, access: Manager) -> CancelOut:
-    """Cancels the plan. Within 14 days of the start: a full refund through Stripe, and the plan
-    ends now. After that: an annual plan ends at the end of its period, with no refund."""
+    """Cancels an annual plan's renewal: access continues to the end of the paid term, with no
+    refund. A 10-year plan never renews, so there is nothing to cancel."""
     require_step_up(access.caller.session)
     stripe = _stripe(request)
     if not stripe.enabled:
@@ -200,7 +197,7 @@ async def cancel_plan(request: Request, access: Manager) -> CancelOut:
         raise AppError(exc.code, exc.message, status_code=409) from exc
     except StripeError as exc:
         raise _unavailable(exc) from exc
-    return CancelOut(refunded=done.refunded, ends_at=done.ends_at)
+    return CancelOut(ends_at=done.ends_at)
 
 
 @webhook_router.post("/webhooks/stripe", response_model=WebhookOut)
