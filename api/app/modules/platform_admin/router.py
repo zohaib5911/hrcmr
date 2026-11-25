@@ -180,7 +180,8 @@ async def reactivate_company(
 async def extend_company_plan(
     company_id: uuid.UUID, body: ExtendIn, access: Writer
 ) -> CompanyDetailOut:
-    company = await companies.company_or_404(access.db, company_id)
+    # Locked until the commit (ISS-26): concurrent grants each extend the end the other left.
+    company = await companies.company_or_404(access.db, company_id, lock=True)
     await companies.extend_plan(
         access.db,
         access.audit_context,
