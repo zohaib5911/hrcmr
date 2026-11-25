@@ -2,10 +2,11 @@
 #
 # The baseline is passive: it crawls the site for a few minutes and inspects the responses (headers,
 # cookies, leaked information). It does not attack. It still only ever runs against staging:
-#   - the target must be an https:// URL with a `staging` label in its host name, so a typo or a
-#     manual run cannot point it at production or at somebody else's site;
-#   - the target comes from the STAGING_URL repository VARIABLE (not a secret; it is a public URL),
-#     or from the "target" input when run by hand.
+#   - scripts/zap-target.mjs checks the target: its origin must be exactly the STAGING_URL
+#     repository VARIABLE's (or one listed in STAGING_ORIGINS), https on the default port, with no
+#     credentials and a `staging` label, so a typo or a manual run cannot point it elsewhere;
+#   - the crawl is held to that origin by a ZAP context (-n) whose only include rule is it;
+#   - the target is STAGING_URL, or the "target" input (on an approved origin) when run by hand.
 # Until staging exists (Phase 23) there is no URL, and the job says so in a warning and in the run
 # summary instead of pretending to have scanned anything.
 #
@@ -48,45 +49,37 @@ jobs:
         with:
           persist-credentials: false
 
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24.x
+          package-manager-cache: false
+
       - name: Choose the target
         id: target
         env:
           INPUT_TARGET: ${{ inputs.target }}
           STAGING_URL: ${{ vars.STAGING_URL }}
+          STAGING_ORIGINS: ${{ vars.STAGING_ORIGINS }}
         run: |
-          target="${INPUT_TARGET:-$STAGING_URL}"
-          if [ -z "$target" ]; then
+          mkdir -m 777 zap-wrk
+          node scripts/zap-target.mjs zap-wrk/staging.context > target.out
+          cat target.out >> "$GITHUB_OUTPUT"
+          if grep -qx 'skip=true' target.out; then
             echo "::warning title=ZAP baseline skipped::No staging URL yet. Set the STAGING_URL repository variable (Settings > Secrets and variables > Actions > Variables) once staging exists."
             echo "### ZAP baseline skipped" >> "$GITHUB_STEP_SUMMARY"
             echo "No staging URL is configured, so nothing was scanned." >> "$GITHUB_STEP_SUMMARY"
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-            exit 0
           fi
-          case "$target" in
-            https://*) ;;
-            *) echo "::error::The target must start with https://"; exit 1 ;;
-          esac
-          host="${target#https://}"
-          host="${host%%/*}"
-          host="${host%%:*}"
-          case ".$host." in
-            *.staging.*) ;;
-            *) echo "::error::Refusing to scan '$host': only hosts with a 'staging' label are allowed."; exit 1 ;;
-          esac
-          echo "skip=false" >> "$GITHUB_OUTPUT"
-          echo "url=$target" >> "$GITHUB_OUTPUT"
 
       - name: ZAP baseline scan
         if: ${{ steps.target.outputs.skip != 'true' }}
         env:
           TARGET_URL: ${{ steps.target.outputs.url }}
         run: |
-          # The ZAP container runs as its own user, so the working folder must be writable by it.
-          mkdir -m 777 zap-wrk
+          # The ZAP container runs as its own user, so the working folder is world-writable (above).
           cp .zap/rules.tsv zap-wrk/rules.tsv
           # -I: a WARN-level alert does not fail the run; FAIL-level alerts (rules.tsv) do.
           docker run --rm -v "$PWD/zap-wrk:/zap/wrk:rw" "$ZAP_IMAGE" zap-baseline.py \
-            -t "$TARGET_URL" -c rules.tsv -m 5 -T 20 -I \
+            -t "$TARGET_URL" -n staging.context -c rules.tsv -m 5 -T 20 -I \
             -r report.html -J report.json -w report.md
 
       - name: Add the report to the run summary
