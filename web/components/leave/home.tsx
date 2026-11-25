@@ -23,6 +23,8 @@ import { RequestSheet, DecisionSheet, type LeaveRequest } from "./request-sheet"
 import { cacheKey, cached, remember } from "@/lib/api/cache";
 
 type Mode = "workspace" | "own" | "approvals";
+/** The API's page size for leave requests. */
+export const LEAVE_PAGE = 200;
 export function LeaveHome({ mode = "workspace" }: { mode?: Mode }) {
   const can = useCan();
   const [view, setView] = useState<"calendar" | "requests" | "balances">(
@@ -128,28 +130,28 @@ export function RequestList({
 }) {
   const can = useCan();
   // O6.1.6: the last answer at once (no skeleton when coming back), refreshed in the background.
-  const leaveKey = cacheKey(`/leave/${mode}`);
+  const [status, setStatus] = useState("all");
+  // ISS-16: the server filters by person and status before it cuts a page, and further pages
+  // load on request, so no request is silently left out.
+  const filter = mode === "approvals" ? "all" : status;
+  const leaveKey = cacheKey(`/leave/${mode}`, { employeeId, status: filter });
   const [rows, setRows] = useState<LeaveRequest[]>(() => cached<LeaveRequest[]>(leaveKey) ?? []);
   const [busy, setBusy] = useState(() => cached(leaveKey) === undefined);
-  const [status, setStatus] = useState("all");
+  const [more, setMore] = useState(false);
+  const [moreBusy, setMoreBusy] = useState(false);
   const [problem, setProblem] = useState<Problem | null>(null);
   const [reviewing, setReviewing] = useState<LeaveRequest | null>(null);
   const [version, setVersion] = useState(0);
   useEffect(() => {
     let active = true;
     async function load() {
-      const result = await attempt((c) =>
-        mode === "approvals"
-          ? c.GET("/leave/approvals/own")
-          : mode === "own"
-            ? c.GET("/leave/requests/own")
-            : c.GET("/leave/requests"),
-      );
+      const result = await page(0);
       if (!active) return;
       setBusy(false);
       if (result.ok) {
         remember(leaveKey, result.data);
         setRows(result.data);
+        setMore(result.data.length === LEAVE_PAGE);
         setProblem(null);
       } else {
         setRows([]);
@@ -160,7 +162,30 @@ export function RequestList({
     return () => {
       active = false;
     };
-  }, [mode, refresh, version, employeeId, leaveKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- page() reads the same inputs
+  }, [mode, refresh, version, employeeId, filter, leaveKey]);
+  function page(offset: number) {
+    const status = filter === "all" ? undefined : (filter as LeaveRequest["status"]);
+    return attempt((c) =>
+      mode === "approvals"
+        ? c.GET("/leave/approvals/own", { params: { query: { limit: LEAVE_PAGE, offset } } })
+        : mode === "own"
+          ? c.GET("/leave/requests/own", {
+              params: { query: { limit: LEAVE_PAGE, offset, status } },
+            })
+          : c.GET("/leave/requests", {
+              params: { query: { limit: LEAVE_PAGE, offset, status, employee_id: employeeId } },
+            }),
+    );
+  }
+  async function loadMore() {
+    setMoreBusy(true);
+    const result = await page(rows.length);
+    setMoreBusy(false);
+    if (!result.ok) return setProblem(result.problem);
+    setRows((current) => [...current, ...result.data]);
+    setMore(result.data.length === LEAVE_PAGE);
+  }
   function saved() {
     setReviewing(null);
     setVersion((v) => v + 1);
@@ -175,10 +200,7 @@ export function RequestList({
     if (result.ok) saved();
     else setProblem(result.problem);
   }
-  const visible = rows.filter(
-    (r) =>
-      (!employeeId || r.employee_id === employeeId) && (status === "all" || r.status === status),
-  );
+  const visible = rows;
   const columns: Column<LeaveRequest>[] = [
     {
       id: "employee",
@@ -269,6 +291,13 @@ export function RequestList({
           />
         }
       />
+      {more ? (
+        <div>
+          <Button variant="gray" loading={moreBusy} onClick={() => void loadMore()}>
+            Show more requests
+          </Button>
+        </div>
+      ) : null}
       <Sheet
         open={reviewing !== null}
         onOpenChange={(open) => {

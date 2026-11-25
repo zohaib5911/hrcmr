@@ -459,3 +459,39 @@ async def test_missing_calendar_and_negative_policy_enabled(ready: dict[str, Any
     assert approved.status_code == 200, approved.text
     async with ready["owner"].connect() as c:
         assert (await c.execute(text("select sum(days) from leave_ledger"))).scalar_one() == -7
+
+
+async def test_filters_apply_before_the_page_and_every_page_is_reachable(
+    ready: dict[str, Any],
+) -> None:
+    """ISS-16: newer requests for someone else cannot push a person's history off the page."""
+    admin = ready["admin"]
+    mine = await submit(ready, start="2026-01-05", end="2026-01-05")  # the oldest request
+    other = {**payload(ready), "employee_id": str(ready["other"])}
+    newer = []
+    for day in ("2026-02-02", "2026-02-03", "2026-02-04"):
+        made = await admin.post(
+            BASE + "/requests", json={**other, "start_date": day, "end_date": day}
+        )
+        assert made.status_code == 201, made.text
+        newer.append(made.json()["id"])
+
+    first = (await admin.get(BASE + "/requests", params={"limit": 2})).json()
+    assert [r["id"] for r in first] == [newer[2], newer[1]]  # newest first, a full page
+    history = (
+        await admin.get(
+            BASE + "/requests", params={"employee_id": str(ready["employee"]), "limit": 2}
+        )
+    ).json()
+    assert [r["id"] for r in history] == [mine["id"]]
+    pending = (await admin.get(BASE + "/requests", params={"status": "pending", "limit": 2})).json()
+    assert len(pending) == 2
+
+    pages, offset = [], 0
+    while True:
+        page = (await admin.get(BASE + "/requests", params={"limit": 2, "offset": offset})).json()
+        pages += [r["id"] for r in page]
+        if len(page) < 2:
+            break
+        offset += 2
+    assert pages == [*reversed(newer), mine["id"]]  # all four, once each, in a stable order
