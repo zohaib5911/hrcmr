@@ -422,10 +422,15 @@ async def test_storage_failure_leaves_deletion_frozen_and_retryable(rig: dict[st
         "storage": PartialFailure(),
         "now": now,
     }
+    assert await _queue_status(rig) == "scheduled"  # ISS-22: nothing irreversible yet
     assert await deletion_executor_hourly(ctx) == 0
     assert await _rows(rig, "select status from companies where id=:c", c=rig["a"]) == [
         ("pending_deletion",)
     ]
+    assert await _queue_status(rig) == "in_progress"
+    assert await deletion_executor_hourly(ctx) == 0  # a retry that fails again
+    assert await _queue_status(rig) == "in_progress"
+    assert await _queue_status(rig, "scheduled") is None  # not under the scheduled filter
     assert (await admin.delete(URL)).status_code == 403
     assert (await admin.get(URL)).status_code == 403
     assert {obj.key for obj in await storage.list_objects(prefix)} == {second}
@@ -435,6 +440,17 @@ async def test_storage_failure_leaves_deletion_frozen_and_retryable(rig: dict[st
     ctx["storage"] = storage
     assert await deletion_executor_hourly(ctx) == 1
     assert await storage.list_objects(prefix) == []
+    assert await _queue_status(rig) == "completed"
+
+
+async def _queue_status(rig: dict[str, Any], status: str | None = None) -> str | None:
+    """What the platform deletion queue shows for company A (optionally under a filter)."""
+    from app.db.session import GlobalSession
+    from app.modules.platform_admin import queues
+
+    async with GlobalSession(rig["owner"]) as db:
+        page = await queues.deletion_requests(db, status=status, limit=100, offset=0)
+    return next((row.status for row in page.items if row.company_id == rig["a"]), None)
 
 
 async def test_only_the_owner_role_in_a_purge_may_delete_history_rows(rig: dict[str, Any]) -> None:

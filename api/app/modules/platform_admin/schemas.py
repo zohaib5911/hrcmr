@@ -146,7 +146,7 @@ class DeletionRequestRow(BaseModel):
     id: uuid.UUID
     company_id: uuid.UUID
     company_name: str
-    status: str  # awaiting_code | scheduled | withdrawn | completed
+    status: str  # awaiting_code | scheduled | in_progress | withdrawn | completed
     requested_at: datetime
     scheduled_for: datetime | None
     withdrawn_at: datetime | None
