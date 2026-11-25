@@ -1,44 +1,27 @@
-"""Subscriptions and refunds for the platform admins (T17.4, plan 8.16).
+"""Subscriptions for the platform admins (T17.4, plan 8.16).
 
 The list reads the database only: the Stripe ids are shown so that a lookup in Stripe's own
 dashboard is one click away, and no Stripe call is made per row.
 
-Customers have no refund action (plan 8.16: cancelling only stops renewal). This owner-only refund
-is discretionary, for support cases such as a duplicate or mistaken charge. It is one full refund
-of the latest payment behind a purchase: an annual plan's latest invoice, or a 10-year payment. It
-goes through the T16 Stripe client with the idempotency key ``refund-{payment_intent}``, so one
-payment is refunded at most once however a request is retried. It is recorded and audited here.
-
-A 10-year refund ends the company's plan in the same step (the same change as ``_refunded`` in
-billing/service.py); the later ``charge.refunded`` webhook then changes nothing. An annual refund
-only records the refund of one payment (for example a duplicate charge). The annual subscription
-keeps running.
+There is no refund action, for customers or for the platform (owner decision, 2026-11-25: payments
+are never refunded). A payment the provider reverses (a refund made in Stripe itself, or a lost
+dispute) is still reconciled by the webhook in billing/service.py and shows here as refunded.
 """
 
 from __future__ import annotations
 
-import uuid  # noqa: TC003  (SQLAlchemy reads the types at runtime)
-from datetime import datetime  # noqa: TC003  (same)
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import and_, func, select
 
-from app.core.errors import AppError, NotFoundError
-from app.core.logging import get_logger
-from app.integrations.stripe import StripeError
-from app.modules.audit.service import AuditContext, record
 from app.modules.billing.models import Subscription
-from app.modules.billing.service import _first_payment_intent
 from app.modules.companies.models import Company
 from app.modules.platform_admin.schemas import SubscriptionRow, SubscriptionsOut
 
 if TYPE_CHECKING:
     from app.db.session import GlobalSession
-    from app.integrations.stripe import Stripe
 
-logger = get_logger("app.platform_admin")
 PAGE_MAX = 100
-UNAVAILABLE = "We could not reach our payment provider. Try again in a few minutes."
 
 
 def _row(subscription: Subscription, company_name: str) -> SubscriptionRow:
@@ -83,83 +66,3 @@ async def subscriptions(
     )
     items = [_row(subscription, name) for subscription, name in rows.all()]
     return SubscriptionsOut(items=items, total=int(total or 0))
-
-
-async def subscription_or_404(db: GlobalSession, subscription_id: uuid.UUID) -> Subscription:
-    subscription = await db.get(Subscription, subscription_id)
-    if subscription is None:
-        raise NotFoundError("We could not find that purchase.")
-    return subscription
-
-
-async def row_for(db: GlobalSession, subscription: Subscription) -> SubscriptionRow:
-    name = await db.scalar(select(Company.name).where(Company.id == subscription.company_id))
-    return _row(subscription, name or "")
-
-
-async def _payment_to_refund(stripe: Stripe, subscription: Subscription) -> str | None:
-    if subscription.plan == "annual":
-        if subscription.stripe_subscription_id is None:
-            return None
-        return await _first_payment_intent(stripe, subscription.stripe_subscription_id)
-    return subscription.stripe_payment_intent_id
-
-
-async def refund(
-    db: GlobalSession,
-    stripe: Stripe,
-    context: AuditContext,
-    subscription: Subscription,
-    *,
-    reason: str,
-    now: datetime,
-) -> str:
-    """Refund the latest payment behind ``subscription`` in full. Returns Stripe's refund id.
-
-    A 10-year refund also ends the company's plan now; an annual refund does not cancel the
-    subscription (see the module docstring).
-
-    Nothing is committed here: the caller commits once the refund is recorded. If that commit
-    fails after Stripe refunded, a retry sends the same idempotency key and Stripe answers with the
-    first refund, so the payment is still refunded once."""
-    if subscription.refunded_at is not None:
-        raise AppError(
-            "ALREADY_REFUNDED", "This payment has already been refunded.", status_code=409
-        )
-    if not stripe.enabled:
-        raise AppError("PAYMENTS_NOT_SET_UP", "Payments are not set up yet.", status_code=503)
-    try:
-        payment_intent = await _payment_to_refund(stripe, subscription)
-        if payment_intent is None:
-            raise AppError(
-                "NOTHING_TO_REFUND",
-                "There is no payment to refund on this purchase.",
-                status_code=409,
-            )
-        answer = await stripe.create_refund(
-            payment_intent=payment_intent, idempotency_key=f"refund-{payment_intent}"
-        )
-    except StripeError as exc:
-        logger.warning(
-            "refund_stripe_failed", subscription_id=str(subscription.id), reason=str(exc)
-        )
-        raise AppError("PAYMENTS_UNAVAILABLE", UNAVAILABLE, status_code=502) from exc
-    subscription.refunded_at = now
-    if subscription.plan == "ten_year":
-        subscription.status = "refunded"
-        company = await db.get(Company, subscription.company_id)
-        if company is not None and company.plan == "ten_year":
-            company.plan = "free"
-            company.subscription_status = "refunded"
-            company.subscription_ends_at = now
-    await record(
-        db,
-        context,
-        "platform.refund_issued",
-        entity_type="company",
-        entity_id=subscription.company_id,
-        after={"subscription_id": str(subscription.id), "plan": subscription.plan},
-        reason=reason,
-        summary=f"Full refund of the latest {subscription.plan} payment",
-    )
-    return str(answer.get("id", ""))

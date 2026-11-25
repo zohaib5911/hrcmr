@@ -8,8 +8,6 @@ database, as the webhook would have written them."""
 
 from __future__ import annotations
 
-import json
-import time
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -19,8 +17,7 @@ import pytest
 from pydantic import SecretStr
 from sqlalchemy import text
 
-from app.integrations.stripe import Stripe, sign
-from tests.db.test_careers import anonymous
+from app.integrations.stripe import Stripe
 from tests.db.test_employee_documents import rig as rig
 from tests.support import step_up
 
@@ -139,14 +136,6 @@ async def _audit(rig: dict[str, Any], entity: uuid.UUID) -> list[tuple[str, str 
         return [(str(action), reason) for action, reason in rows.all()]
 
 
-def _refund_body(row: uuid.UUID, **extra: Any) -> dict[str, Any]:
-    return {
-        "subscription_id": str(row),
-        "reason": "Duplicate charge, ticket 1234",
-        "confirm": True,
-    } | extra
-
-
 async def test_only_a_platform_admin_reads_the_subscriptions(rig: dict[str, Any]) -> None:
     company_admin = await rig["person"]("company_admin", rig["a"])
     assert (await company_admin.get(f"{API}/platform/subscriptions")).status_code == 403
@@ -167,156 +156,15 @@ async def test_the_subscription_list_shows_every_company_and_filters(rig: dict[s
     assert refunded == {"items": [], "total": 0}
 
 
-async def test_a_support_admin_cannot_refund_and_nothing_is_sent_to_stripe(
+async def test_there_is_no_refund_action_even_for_an_owner(
     rig: dict[str, Any], fake: FakeStripe
 ) -> None:
-    row = await _seed_ten_year(rig, rig["a"], "pi_ten")
-    admin = await _platform_admin(rig, "support")
-    refused = await admin.post(f"{API}/platform/refunds", json=_refund_body(row))
-    assert refused.status_code == 403, refused.text
-    assert fake.refunds() == []
-    assert await _refunded_at(rig, row) is None
-
-
-async def test_a_refund_needs_the_second_confirmation(
-    rig: dict[str, Any], fake: FakeStripe
-) -> None:
+    """Owner decision 2026-11-25: payments are never refunded, so the refund action is gone."""
     row = await _seed_ten_year(rig, rig["a"], "pi_ten")
     owner = await _platform_admin(rig, "owner")
-    unconfirmed = await owner.post(f"{API}/platform/refunds", json=_refund_body(row, confirm=False))
-    assert unconfirmed.status_code == 422, unconfirmed.text
-    assert unconfirmed.json()["error"]["code"] == "CONFIRMATION_REQUIRED"
-    assert fake.refunds() == []
-    assert await _refunded_at(rig, row) is None
-
-
-async def test_an_owner_refunds_a_ten_year_payment_once_and_it_is_audited(
-    rig: dict[str, Any], fake: FakeStripe
-) -> None:
-    row = await _seed_ten_year(rig, rig["a"], "pi_ten")
-    owner = await _platform_admin(rig, "owner")
-    made = await owner.post(f"{API}/platform/refunds", json=_refund_body(row))
-    assert made.status_code == 200, made.text
-    body = made.json()
-    assert body["stripe_refund_id"] == "re_1"
-    assert body["subscription"]["refunded_at"] is not None
-    assert body["subscription"]["status"] == "refunded"
-    [sent] = fake.refunds()
-    assert sent.headers["Idempotency-Key"] == "refund-pi_ten"
-    assert b"payment_intent=pi_ten" in sent.content
-    assert await _refunded_at(rig, row) is not None
-    assert await _audit(rig, rig["a"]) == [
-        ("platform.refund_issued", "Duplicate charge, ticket 1234")
-    ]
-    again = await owner.post(f"{API}/platform/refunds", json=_refund_body(row))
-    assert again.status_code == 409, again.text
-    assert again.json()["error"]["code"] == "ALREADY_REFUNDED"
-    assert len(fake.refunds()) == 1
-
-
-async def _company_plan(rig: dict[str, Any]) -> tuple[str, str | None]:
-    async with rig["owner"].connect() as c:
-        row = (
-            await c.execute(
-                text("select plan, subscription_status from companies where id = :c"),
-                {"c": rig["a"]},
-            )
-        ).one()
-    return (row.plan, row.subscription_status)
-
-
-async def test_a_ten_year_refund_ends_the_plan_and_the_later_webhook_changes_nothing(
-    rig: dict[str, Any], fake: FakeStripe
-) -> None:
-    async with rig["owner"].begin() as c:
-        await c.execute(
-            text(
-                "update companies set plan = 'ten_year', subscription_status = 'active' where id = :c"
-            ),
-            {"c": rig["a"]},
-        )
-    row = await _seed_ten_year(rig, rig["a"], "pi_ten")
-    owner = await _platform_admin(rig, "owner")
-    made = await owner.post(f"{API}/platform/refunds", json=_refund_body(row))
-    assert made.status_code == 200, made.text
-    assert await _company_plan(rig) == ("free", "refunded")
-    # Stripe then sends charge.refunded for the same payment: it must change nothing and not fail.
-    event = {
-        "id": "evt_after_platform_refund",
-        "type": "charge.refunded",
-        "created": int(time.time()),
-        "data": {
-            "object": {
-                "object": "charge",
-                "refunded": True,
-                "payment_intent": "pi_ten",
-                "metadata": {"company_id": str(rig["a"])},
-            }
-        },
-    }
-    body = json.dumps(event).encode()
-    stripe = anonymous(rig)
-    stripe.cookies.clear()  # Stripe has no browser: no cookie and no CSRF header
-    stripe.headers.pop("X-CSRF-Token", None)
-    async with stripe:
-        sent = await stripe.post(
-            f"{API}/webhooks/stripe",
-            content=body,
-            headers={
-                "Stripe-Signature": sign(body, "whsec_test", int(time.time())),
-                "Content-Type": "application/json",
-            },
-        )
-    assert sent.status_code == 200, sent.text
-    assert await _company_plan(rig) == ("free", "refunded")
-    assert await _refunded_at(rig, row) is not None
-
-
-async def test_an_annual_refund_uses_the_latest_payment_behind_the_subscription(
-    rig: dict[str, Any], fake: FakeStripe
-) -> None:
-    row = await _seed_annual(rig, rig["a"], "sub_annual")
-    owner = await _platform_admin(rig, "owner")
-    made = await owner.post(f"{API}/platform/refunds", json=_refund_body(row))
-    assert made.status_code == 200, made.text
-    assert made.json()["subscription"]["refunded_at"] is not None
-    [sent] = fake.refunds()
-    assert sent.headers["Idempotency-Key"] == "refund-pi_annual_latest"
-    assert b"payment_intent=pi_annual_latest" in sent.content
-
-
-async def test_a_purchase_with_no_payment_to_refund_says_so(
-    rig: dict[str, Any], fake: FakeStripe
-) -> None:
-    row = await _seed_annual(rig, rig["a"], "sub_empty")
-    owner = await _platform_admin(rig, "owner")
-    made = await owner.post(f"{API}/platform/refunds", json=_refund_body(row))
-    assert made.status_code == 409, made.text
-    assert made.json()["error"]["code"] == "NOTHING_TO_REFUND"
-    assert fake.refunds() == []
-    assert await _refunded_at(rig, row) is None
-
-
-async def test_a_refund_stripe_refuses_is_not_recorded(
-    rig: dict[str, Any], fake: FakeStripe
-) -> None:
-    row = await _seed_ten_year(rig, rig["a"], "pi_ten")
-    fake.refuse_refund = True
-    owner = await _platform_admin(rig, "owner")
-    made = await owner.post(f"{API}/platform/refunds", json=_refund_body(row))
-    assert made.status_code == 502, made.text
-    assert made.json()["error"]["code"] == "PAYMENTS_UNAVAILABLE"
-    assert await _refunded_at(rig, row) is None
-    assert await _audit(rig, rig["a"]) == []
-
-
-async def test_payments_not_set_up_refuse_the_refund(rig: dict[str, Any]) -> None:
-    row = await _seed_ten_year(rig, rig["a"], "pi_ten")
-    rig["app"].state.stripe = Stripe(None, None, {"annual": None, "ten_year": None})
-    owner = await _platform_admin(rig, "owner")
-    made = await owner.post(f"{API}/platform/refunds", json=_refund_body(row))
-    assert made.status_code == 503, made.text
-    assert made.json()["error"]["code"] == "PAYMENTS_NOT_SET_UP"
+    body = {"subscription_id": str(row), "reason": "Duplicate charge, ticket 1234", "confirm": True}
+    assert (await owner.post(f"{API}/platform/refunds", json=body)).status_code in (404, 405)
+    assert fake.requests == []
     assert await _refunded_at(rig, row) is None
 
 

@@ -131,17 +131,6 @@ class SubscriptionsOut(BaseModel):
     total: int
 
 
-class RefundIn(RequestModel):
-    subscription_id: uuid.UUID
-    reason: str = Field(min_length=REASON_MIN, max_length=REASON_MAX)
-    confirm: bool = Field(description="The second confirmation: must be true to issue the refund.")
-
-
-class RefundOut(BaseModel):
-    subscription: SubscriptionRow
-    stripe_refund_id: str
-
-
 class DeletionRequestRow(BaseModel):
     id: uuid.UUID
     company_id: uuid.UUID

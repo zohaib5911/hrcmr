@@ -529,21 +529,3 @@ async def cancel_plan(
     )
     await db.commit()
     return Cancellation(ends_at=company.subscription_ends_at)
-
-
-async def _first_payment_intent(stripe: Stripe, subscription_id: str) -> str | None:
-    """The payment behind the subscription's latest invoice (used by the owner-only refund)."""
-    live = await stripe.retrieve_subscription(subscription_id)
-    invoice_id = _id(live.get("latest_invoice"))
-    if invoice_id is None:
-        return None
-    invoice = await stripe.retrieve_invoice(invoice_id)
-    direct = _id(invoice.get("payment_intent"))
-    if direct:
-        return direct
-    # Stripe's 2025 API versions list an invoice's payments under ``payments``.
-    for entry in (invoice.get("payments") or {}).get("data") or []:
-        intent = _id((entry.get("payment") or {}).get("payment_intent"))
-        if entry.get("status") == "paid" and intent:
-            return intent
-    return None

@@ -5,10 +5,8 @@ import { useEffect, useState } from "react";
 import { PageHeader } from "@/components/app/page-header";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Select } from "@/components/ui/select";
 import { StatusChip } from "@/components/ui/status-chip";
-import { TextField } from "@/components/ui/text-field";
 import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { formatUk } from "@/lib/ui/dates";
@@ -16,19 +14,18 @@ import { formatUk } from "@/lib/ui/dates";
 type Row = components["schemas"]["SubscriptionRow"];
 
 export const PAGE_SIZE = 50;
-export const REASON_MIN = 5;
 
-/** Platform subscriptions (list, filters, paging) and, for an owner, a full refund with a reason and a second confirmation. */
-export function SubscriptionsAdmin({ isOwner }: { isOwner: boolean }) {
+/**
+ * Platform subscriptions: list, filters and paging. There is no refund action (payments are never
+ * refunded); a reversal made by the payment provider, such as a lost dispute, shows as refunded.
+ */
+export function SubscriptionsAdmin() {
   const [plan, setPlan] = useState("");
   const [refunded, setRefunded] = useState("");
   const [offset, setOffset] = useState(0);
   const [rows, setRows] = useState<Row[] | null>(null);
   const [total, setTotal] = useState(0);
-  const [reason, setReason] = useState("");
-  const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<Problem | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
 
   function fail(p: Problem) {
     if (p.code === "UNAUTHENTICATED" || p.code === "FORBIDDEN") {
@@ -58,31 +55,11 @@ export function SubscriptionsAdmin({ isOwner }: { isOwner: boolean }) {
     };
   }, [plan, refunded, offset]);
 
-  async function refund(row: Row) {
-    if (busy) return;
-    setBusy(true);
-    setProblem(null);
-    setNotice(null);
-    const result = await attempt((c) =>
-      c.POST("/platform/refunds", {
-        body: { subscription_id: row.id, reason: reason.trim(), confirm: true },
-      }),
-    );
-    setBusy(false);
-    if (!result.ok) return fail(result.problem);
-    const updated = result.data.subscription;
-    setRows((current) => (current ?? []).map((r) => (r.id === row.id ? updated : r)));
-    setNotice(`${row.company_name} was refunded in full.`);
-    setReason("");
-  }
-
-  const reasonOk = reason.trim().length >= REASON_MIN;
-
   return (
     <>
       <PageHeader
         title="Subscriptions"
-        description="Annual and 10-year purchases. Only an owner can refund, and a refund is always in full."
+        description="Annual and 10-year purchases. Payments are never refunded; a reversal by the payment provider (a lost dispute) shows as refunded."
       />
       <div className="mb-6 grid gap-3 sm:grid-cols-2">
         <Select
@@ -110,24 +87,9 @@ export function SubscriptionsAdmin({ isOwner }: { isOwner: boolean }) {
           <option value="no">Not refunded</option>
         </Select>
       </div>
-      {isOwner ? (
-        <div className="mb-6">
-          <TextField
-            label="Refund reason"
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            hint={`Required for a refund, at least ${REASON_MIN} characters. Saved in the audit log.`}
-          />
-        </div>
-      ) : null}
       {problem ? (
         <Alert tone="danger" title="That did not work" className="mb-6">
           {problem.message}
-        </Alert>
-      ) : null}
-      {notice ? (
-        <Alert tone="success" title={notice} className="mb-6">
-          The refund is in the audit log.
         </Alert>
       ) : null}
       {rows === null ? (
@@ -167,20 +129,6 @@ export function SubscriptionsAdmin({ isOwner }: { isOwner: boolean }) {
                     ? `Refunded ${formatUk(row.refunded_at.slice(0, 10))}`
                     : row.status}
                 </StatusChip>
-                {isOwner && !row.refunded_at ? (
-                  <ConfirmDialog
-                    trigger={
-                      <Button variant="gray" size="sm" disabled={busy || !reasonOk}>
-                        Refund
-                      </Button>
-                    }
-                    title="Refund this payment in full?"
-                    description={`${row.company_name} will be refunded the latest payment in full. This cannot be undone.`}
-                    confirmLabel="Refund in full"
-                    destructive
-                    onConfirm={() => refund(row)}
-                  />
-                ) : null}
               </span>
             </li>
           ))}

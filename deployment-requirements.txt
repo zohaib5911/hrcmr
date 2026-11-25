@@ -44,7 +44,7 @@ Companion file to plan.md. Version 1.0, 1 Nov 2026.
                               Use a paid plan so you can choose the EU West (Amsterdam) region and get
                               backups and private networking. Create 2 environments: staging, production.
  5. Resend                 - transactional email (sending region: EU / Ireland)
- 6. Stripe                 - UK account, business verified, for payments and refunds
+ 6. Stripe                 - UK account, business verified, for payments (no refunds are ever issued)
  7. Anthropic Console      - Claude API key with billing and a monthly spend limit set
  8. Sentry                 - error tracking (2 projects: web, api)
  9. Companies House        - free developer account and REST API key (developer.company-information.service.gov.uk)
@@ -224,10 +224,10 @@ Admin SSR ingress contract (required before enabling admin pages):
       Product "10-year plan" -> Price GBP 240.00, one-time                 -> STRIPE_PRICE_TEN_YEAR
 [ ] Tax: decide on VAT (if VAT registered, enable Stripe Tax or set tax rates) - ask your accountant.
 [ ] Customer portal settings: allow update payment method + view invoices; DISABLE cancel in portal
-    (cancellation happens in our app so the 14-day refund rule works).
+    (cancellation happens in our app: it stops renewal, and payments are never refunded).
 [ ] Restricted API key (Developers > API keys > Create restricted key), permissions:
       Checkout Sessions: Write     Customers: Write        Subscriptions: Write
-      Refunds: Write               Invoices: Read          Prices: Read      Products: Read
+      Invoices: Read               Prices: Read            Products: Read
       Payment Intents: Read        Charges: Read           Customer portal: Write
       Everything else: None
     -> STRIPE_SECRET_KEY (rk_test_... for staging, rk_live_... for production)
