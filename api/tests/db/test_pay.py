@@ -291,3 +291,50 @@ async def test_pay_schedules_need_a_pay_day_that_fits_the_frequency(rig: dict[st
             )
         ]
     assert actions == ["pay_schedule.created"] * 3 + ["pay_schedule.updated"]
+
+
+async def _primaries(rig: dict[str, Any]) -> list[str]:
+    async with rig["owner"].connect() as c:
+        rows = await c.execute(
+            text(
+                "select label from company_bank_accounts where company_id=:c "
+                "and is_primary and archived_at is null"
+            ),
+            {"c": rig["a"]},
+        )
+        return [row[0] for row in rows]
+
+
+async def test_concurrent_changes_always_leave_exactly_one_main_account(
+    rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ISS-27: first accounts created at once, and promotions at once, leave one live primary."""
+    import asyncio
+
+    admin = await rig["person"]("company_admin", rig["a"])
+    made = await asyncio.gather(
+        admin.post(f"{API}/bank-accounts", json={**ACCOUNT, "label": "First A"}),
+        admin.post(f"{API}/bank-accounts", json={**ACCOUNT, "label": "First B"}),
+    )
+    assert [r.status_code for r in made] == [201, 201], [r.text for r in made]
+    assert len(await _primaries(rig)) == 1
+
+    third = (await admin.post(f"{API}/bank-accounts", json={**ACCOUNT, "label": "Third"})).json()
+    ids = [r.json()["id"] for r in made] + [third["id"]]
+    promoted = await asyncio.gather(
+        *(admin.patch(f"{API}/bank-accounts/{i}", json={"is_primary": True}) for i in ids)
+    )
+    assert [r.status_code for r in promoted] == [200, 200, 200], [r.text for r in promoted]
+    [main] = await _primaries(rig)
+
+    # A promotion that fails before commit keeps the original main account.
+    from app.modules.rbac.deps import Access
+
+    async def broken(*_args: Any, **_kwargs: Any) -> None:
+        raise RuntimeError("audit store down")
+
+    monkeypatch.setattr(Access, "audit", broken)
+    other = next(i for i, r in zip(ids, promoted, strict=True) if r.json()["label"] != main)
+    failed = await admin.patch(f"{API}/bank-accounts/{other}", json={"is_primary": True})
+    assert failed.status_code == 500
+    assert await _primaries(rig) == [main]

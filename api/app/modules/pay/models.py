@@ -20,6 +20,7 @@ from sqlalchemy import (
     column,
     false,
     func,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -65,6 +66,16 @@ class BankAccount(Base, RecordMixin, TenantMixin):
     )
     is_primary: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=false())
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    # At most one live main account per company (ISS-27).
+    __table_args__ = (
+        Index(
+            "uq_company_bank_accounts_one_primary",
+            "company_id",
+            unique=True,
+            postgresql_where=text("is_primary AND archived_at IS NULL"),
+        ),
+    )
 
 
 class TaxCode(Base, RecordMixin, TenantMixin):
