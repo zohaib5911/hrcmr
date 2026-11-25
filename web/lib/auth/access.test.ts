@@ -37,6 +37,12 @@ describe("the permission-aware navigation", () => {
     expect(shown).not.toContain("users");
   });
 
+  it("shows My documents to a People Manager, who may sign policies (ISS-13)", () => {
+    expect(ids(["policy.acceptance.read_own", "policy.acceptance.write_own"])).toContain(
+      "my-documents",
+    );
+  });
+
   it("drops a group once none of its pages are left, and can() means any of", () => {
     const groups = visibleGroups(["billing.manage"]).map((group) => group.id);
     expect(groups).toEqual(["overview", "me", "company"]);
