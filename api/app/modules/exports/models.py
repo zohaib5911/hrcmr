@@ -17,6 +17,7 @@ from sqlalchemy import (
     Index,
     String,
     Uuid,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -38,6 +39,13 @@ class DataExport(Base, RecordMixin, TenantMixin):
         CheckConstraint("(status = 'queued') = (finished_at is null)", name="finished_state"),
         CheckConstraint("(status = 'failed') = (error_code is not null)", name="error_state"),
         Index("ix_data_exports_requester", "company_id", "requested_by", "created_at"),
+        # One queued export per company (ISS-25): a concurrent second request loses here.
+        Index(
+            "uq_data_exports_one_queued",
+            "company_id",
+            unique=True,
+            postgresql_where=text("status = 'queued'"),
+        ),
     )
 
     company_id: Mapped[uuid.UUID] = mapped_column(

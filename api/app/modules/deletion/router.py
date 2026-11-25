@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Annotated, Literal
 from fastapi import APIRouter, Depends, Request, Response
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 
 from app.core.crypto import blind_index, encrypt
 from app.core.errors import AppError, NotFoundError
@@ -194,7 +195,14 @@ async def request_deletion(body: DeletionIn, request: Request, access: Deleter) 
         ).scalar_one()
         if not queued:
             export = DataExport(company_id=access.company_id, requested_by=me)
-            db.add(export)
+            try:
+                async with db.begin_nested():
+                    db.add(export)
+                    await db.flush()
+            except IntegrityError as exc:  # another export was queued meanwhile (ISS-25)
+                if "uq_data_exports_one_queued" not in str(exc.orig):
+                    raise
+                export = None
     if row is None:
         row = DeletionRequest(company_id=access.company_id, requested_by=me)
         db.add(row)
