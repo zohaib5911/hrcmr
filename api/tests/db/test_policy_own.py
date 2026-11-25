@@ -227,3 +227,15 @@ async def test_confirmation_requires_available_scan_and_audit_is_atomic(
         ).one()
     assert receipt.accepted_at is None
     assert receipt.typed_signature is None
+
+
+async def test_a_notice_link_opens_only_the_persons_own_policy(rig: dict[str, Any]) -> None:
+    """ISS-14: the policy id in a notification resolves for its recipient and nobody else."""
+    _admin, member, row, _employee_id = await setup(rig)
+    own = await member.get(API + f"/own/{row['id']}")
+    assert own.status_code == 200, own.text
+    assert own.json()["id"] == row["id"]
+    assert own.json()["status"] == "pending"
+    other = await linked(rig, await _employee(rig, rig["a"], "OTHER-POL"))
+    assert (await other.get(API + f"/own/{row['id']}")).status_code == 404
+    assert (await member.get(API + f"/own/{uuid.uuid4()}")).status_code == 404

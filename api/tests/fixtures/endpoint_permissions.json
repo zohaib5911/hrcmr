@@ -178,6 +178,7 @@
   "GET /api/v1/policies/own": ["policy.acceptance.read"],
   "GET /api/v1/policies/own/summary": ["policy.acceptance.read"],
   "GET /api/v1/policies/own/{policy_id}/download": ["policy.acceptance.read"],
+  "GET /api/v1/policies/own/{policy_id}": ["policy.acceptance.read"],
   "GET /api/v1/policies/own/{policy_id}/view": ["policy.acceptance.read"],
   "GET /api/v1/policies/{policy_id}": ["policy.document.read"],
   "GET /api/v1/policies/{policy_id}/acceptances": ["policy.document.read"],

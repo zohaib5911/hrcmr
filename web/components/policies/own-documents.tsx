@@ -13,40 +13,97 @@ import { StatusChip } from "@/components/ui/status-chip";
 import { TextField } from "@/components/ui/text-field";
 import { attempt, baseUrl, type Problem } from "@/lib/auth/request";
 import { formatUk, formatUkDateTime } from "@/lib/ui/dates";
+import { cn } from "@/lib/utils";
 
 import { ACCEPTANCE_STATUS, VIEWABLE_MIME, type OwnPolicy, type PolicyReceipt } from "./labels";
 
-/** My Documents: policies to read, with the viewer, accept or sign, and the receipt afterwards. */
-export function OwnPolicies() {
+const PAGE = 50;
+
+/**
+ * My Documents: policies to read, with the viewer, accept or sign, and the receipt afterwards.
+ * Every assignment is reachable: the list loads more pages on request (ISS-14), and a notice's
+ * link (`?policy=<id>`) opens that policy at the top whether or not it is on a loaded page.
+ */
+export function OwnPolicies({ selectedId }: { selectedId?: string }) {
   const can = useCan();
   const mayRead = can("policy.acceptance.read_own");
   const [items, setItems] = useState<OwnPolicy[] | null>(null);
+  const [total, setTotal] = useState(0);
+  const [more, setMore] = useState(false);
+  const [linked, setLinked] = useState<OwnPolicy | null>(null);
+  const [linkProblem, setLinkProblem] = useState<Problem | null>(null);
   const [problem, setProblem] = useState<Problem | null>(null);
 
   useEffect(() => {
     if (!mayRead) return;
     let active = true;
-    void attempt((c) => c.GET("/policies/own")).then((result) => {
-      if (!active) return;
-      if (result.ok) setItems(result.data.items);
-      else setProblem(result.problem);
-    });
+    void attempt((c) => c.GET("/policies/own", { params: { query: { limit: PAGE } } })).then(
+      (result) => {
+        if (!active) return;
+        if (result.ok) {
+          setItems(result.data.items);
+          setTotal(result.data.total);
+        } else setProblem(result.problem);
+      },
+    );
     return () => {
       active = false;
     };
   }, [mayRead]);
 
+  useEffect(() => {
+    if (!mayRead || !selectedId) return;
+    let active = true;
+    void attempt((c) =>
+      c.GET("/policies/own/{policy_id}", { params: { path: { policy_id: selectedId } } }),
+    ).then((result) => {
+      if (!active) return;
+      if (result.ok) setLinked(result.data);
+      else setLinkProblem(result.problem);
+    });
+    return () => {
+      active = false;
+    };
+  }, [mayRead, selectedId]);
+
+  useEffect(() => {
+    if (!linked) return;
+    const card = document.getElementById(`policy-${linked.id}`);
+    card?.focus({ preventScroll: true });
+    card?.scrollIntoView({ block: "start" });
+  }, [linked]);
+
+  async function loadMore() {
+    if (!items) return;
+    setMore(true);
+    const result = await attempt((c) =>
+      c.GET("/policies/own", { params: { query: { limit: PAGE, offset: items.length } } }),
+    );
+    setMore(false);
+    if (!result.ok) return setProblem(result.problem);
+    setItems((rows) => [...(rows ?? []), ...result.data.items]);
+    setTotal(result.data.total);
+  }
+
+  function replace(next: OwnPolicy) {
+    setItems((rows) => rows?.map((row) => (row.id === next.id ? next : row)) ?? rows);
+    setLinked((row) => (row?.id === next.id ? next : row));
+  }
+
   if (!mayRead) return null;
   if (problem) return <Alert tone="danger" title={problem.message} />;
   if (items === null)
     return <p className="text-callout text-label-secondary">Loading your policies…</p>;
+  const rest = linked ? items.filter((item) => item.id !== linked.id) : items;
 
   return (
     <section aria-labelledby="my-policies" className="flex flex-col gap-4">
       <h2 id="my-policies" className="text-title-3 text-label font-semibold">
         Policies to read and confirm
       </h2>
-      {items.length === 0 ? (
+      {linkProblem ? <Alert tone="warning" title="That policy is not available to you." /> : null}
+      {linked ? <PolicyCard item={linked} onConfirmed={replace} highlighted /> : null}
+      {items.length === 0 && !linked ? (
         <EmptyState
           icon={ScrollText}
           headingLevel={3}
@@ -54,16 +111,13 @@ export function OwnPolicies() {
           description="Policies HR asks you to read or sign will appear here, with your receipt once you have."
         />
       ) : (
-        items.map((item) => (
-          <PolicyCard
-            key={item.id}
-            item={item}
-            onConfirmed={(next) =>
-              setItems((rows) => rows?.map((row) => (row.id === next.id ? next : row)) ?? rows)
-            }
-          />
-        ))
+        rest.map((item) => <PolicyCard key={item.id} item={item} onConfirmed={replace} />)
       )}
+      {items.length < total ? (
+        <Button variant="gray" loading={more} onClick={() => void loadMore()}>
+          Show more ({total - items.length} more)
+        </Button>
+      ) : null}
     </section>
   );
 }
@@ -71,9 +125,12 @@ export function OwnPolicies() {
 function PolicyCard({
   item,
   onConfirmed,
+  highlighted = false,
 }: {
   item: OwnPolicy;
   onConfirmed: (next: OwnPolicy) => void;
+  /** The policy a notice linked to: focused and outlined. */
+  highlighted?: boolean;
 }) {
   const [receipt, setReceipt] = useState<PolicyReceipt | null>(null);
   const [showReceipt, setShowReceipt] = useState(false);
@@ -139,7 +196,14 @@ function PolicyCard({
   }
 
   return (
-    <Card className="flex flex-col gap-4 p-5">
+    <Card
+      id={highlighted ? `policy-${item.id}` : undefined}
+      tabIndex={highlighted ? -1 : undefined}
+      className={cn(
+        "flex flex-col gap-4 p-5 outline-none scroll-mt-24",
+        highlighted && "ring-accent ring-2",
+      )}
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="text-headline text-label break-words">{item.title}</h3>

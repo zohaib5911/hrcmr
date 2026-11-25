@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import uuid  # noqa: TC003
-from typing import TYPE_CHECKING, Annotated, cast
+from datetime import date  # noqa: TC003
+from typing import TYPE_CHECKING, Annotated, Any, cast
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Query, Request, Response
@@ -136,21 +137,7 @@ async def own_policies(
 ) -> OwnPolicyPage:
     if access.employee_id is None:
         return OwnPolicyPage(items=[], total=0)
-    query = (
-        select(
-            PolicyDocument,
-            PolicyAcceptance.due_on,
-            PolicyAcceptance.status,
-            PolicyAcceptance.accepted_at,
-            File.mime,
-        )
-        .join(PolicyAcceptance, PolicyAcceptance.policy_document_id == PolicyDocument.id)
-        .join(File, File.id == PolicyDocument.file_id)
-        .where(
-            PolicyAcceptance.employee_id == access.employee_id,
-            or_(PolicyDocument.status == "sent", PolicyAcceptance.accepted_at.is_not(None)),
-        )
-    )
+    query = _own_query(access.employee_id)
     total = (
         await access.db.execute(select(func.count()).select_from(query.subquery()))
     ).scalar_one()
@@ -167,24 +154,40 @@ async def own_policies(
         )
     ).all()
     today = await service.company_day(access.db)
-    return OwnPolicyPage(
-        items=[
-            OwnPolicy(
-                id=row.id,
-                title=row.title,
-                version=row.version,
-                confirmation_mode=cast("ConfirmationMode", row.confirmation_mode),
-                due_on=due,
-                status="overdue"
-                if accepted is None and due < today
-                else cast("AcceptanceStatus", status),
-                accepted_at=accepted,
-                file_mime=mime,
-                archived=row.status == "archived",
-            )
-            for row, due, status, accepted, mime in rows
-        ],
-        total=total,
+    return OwnPolicyPage(items=[_own_out(row, today) for row in rows], total=total)
+
+
+def _own_query(employee_id: uuid.UUID) -> Any:
+    """The person's own assigned policies that are sent, or that they have already confirmed."""
+    return (
+        select(
+            PolicyDocument,
+            PolicyAcceptance.due_on,
+            PolicyAcceptance.status,
+            PolicyAcceptance.accepted_at,
+            File.mime,
+        )
+        .join(PolicyAcceptance, PolicyAcceptance.policy_document_id == PolicyDocument.id)
+        .join(File, File.id == PolicyDocument.file_id)
+        .where(
+            PolicyAcceptance.employee_id == employee_id,
+            or_(PolicyDocument.status == "sent", PolicyAcceptance.accepted_at.is_not(None)),
+        )
+    )
+
+
+def _own_out(row: Any, today: date) -> OwnPolicy:
+    policy, due, status, accepted, mime = row
+    return OwnPolicy(
+        id=policy.id,
+        title=policy.title,
+        version=policy.version,
+        confirmation_mode=cast("ConfirmationMode", policy.confirmation_mode),
+        due_on=due,
+        status="overdue" if accepted is None and due < today else cast("AcceptanceStatus", status),
+        accepted_at=accepted,
+        file_mime=mime,
+        archived=policy.status == "archived",
     )
 
 
@@ -211,6 +214,23 @@ async def own_policy_summary(access: Reads) -> OwnPolicySummary:
     return OwnPolicySummary(
         pending=counts[0] or 0, overdue=counts[1] or 0, completed=counts[2] or 0
     )
+
+
+@router.get("/own/{policy_id}", response_model=OwnPolicy)
+async def own_policy(policy_id: uuid.UUID, access: Reads) -> OwnPolicy:
+    """One of the person's own policies, for a link from a notice (ISS-14). Anyone else's is 404."""
+    row = (
+        (
+            await access.db.execute(
+                _own_query(access.employee_id).where(PolicyDocument.id == policy_id)
+            )
+        ).first()
+        if access.employee_id is not None
+        else None
+    )
+    if row is None:
+        raise AppError("NOT_FOUND", "That policy is not one of yours.", status_code=404)
+    return _own_out(row, await service.company_day(access.db))
 
 
 @router.get("/own/{policy_id}/view", response_class=Response)
