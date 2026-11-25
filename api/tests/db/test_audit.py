@@ -413,3 +413,28 @@ async def test_the_export_is_a_safe_spreadsheet_and_is_itself_recorded(api: dict
         listed = (await admin.get("/api/v1/audit-events?action=audit.exported")).json()["items"]
         assert listed[0]["summary"] == "Exported 3 events"
         assert listed[0]["actor_name"] == "Ann company_admin"
+
+
+async def test_the_export_pages_by_time_and_id_while_events_arrive(
+    api: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """ISS-10: equal timestamps, new events between pages; each expected row once, in order."""
+    from app.modules.audit import router as audit_router
+    from tests.db.audit_export_race import same_moment_events, write_between_pages
+
+    a, database = api["a"], api["db"]
+    owner = engine_for(database.owner_url, poolclass=NullPool)
+    try:
+        expected = await same_moment_events(owner, a, "keyset", 7)
+        admin = await api["person"]("company_admin", a)
+        monkeypatch.setattr(audit_router, "_EXPORT_PAGE", 2)
+        monkeypatch.setattr(audit_router, "EXPORT_LIMIT", 5)
+        write_between_pages(monkeypatch, owner, a, "keyset")
+        async with admin:
+            response = await admin.get("/api/v1/audit-events.csv?action=keyset")
+        monkeypatch.undo()
+        assert response.status_code == 200, response.text
+        rows = list(csv.reader(io.StringIO(response.content.decode("utf-8-sig"))))
+        assert [row[2] for row in rows[1:]] == expected[:5]
+    finally:
+        await owner.dispose()

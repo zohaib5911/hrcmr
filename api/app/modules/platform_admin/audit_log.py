@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, Any
 from sqlalchemy import func, select
 
 from app.modules.audit.models import AuditEvent
-from app.modules.audit.router import EXPORT_LIMIT, csv_cell
+from app.modules.audit.router import EXPORT_LIMIT, after_key, csv_cell, read_one_snapshot
 from app.modules.audit.service import AuditContext, record
 from app.modules.identity.models import User
 from app.modules.platform_admin.schemas import AuditLogOut, AuditLogRow
@@ -119,9 +119,11 @@ async def export_csv(
     writer.writerow(
         ["Time (UTC)", "Who", "Action", "What", "Summary", "Reason", "IP address", "Request id"]
     )
-    written, offset = 0, 0
+    await read_one_snapshot(db)
+    written, page = 0, base
     while written < EXPORT_LIMIT:
-        rows = (await db.execute(base.limit(EXPORT_PAGE).offset(offset))).all()
+        size = min(EXPORT_PAGE, EXPORT_LIMIT - written)
+        rows = (await db.execute(page.limit(size))).all()
         if not rows:
             break
         for event, email in rows:
@@ -138,7 +140,7 @@ async def export_csv(
                 ]
             )
             written += 1
-        offset += EXPORT_PAGE
+        page = after_key(base, rows[-1][0])
     await record(
         db,
         context,
