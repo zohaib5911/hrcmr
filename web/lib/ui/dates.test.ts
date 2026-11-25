@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   addDays,
+  ukDayIso,
   addMonths,
   compareIso,
   daysInMonth,
@@ -190,5 +191,13 @@ describe("formatUkDateTime", () => {
   it("gives nothing for a value that is not a date", () => {
     expect(formatUkDateTime("not a date")).toBe("");
     expect(formatUkDateTime("")).toBe("");
+  });
+});
+
+describe("ukDayIso (ISS-20)", () => {
+  it("gives the UK calendar day, not the UTC one", () => {
+    expect(ukDayIso("2026-07-14T23:30:00Z")).toBe("2026-07-15"); // 00:30 BST
+    expect(ukDayIso("2026-01-14T23:30:00Z")).toBe("2026-01-14"); // 23:30 GMT
+    expect(ukDayIso("not a date")).toBe("");
   });
 });

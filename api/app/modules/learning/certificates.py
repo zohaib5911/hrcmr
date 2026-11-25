@@ -13,6 +13,7 @@ import uuid  # noqa: TC003
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated
+from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Request, Response
 from jinja2 import Environment
@@ -25,6 +26,7 @@ from app.core.rbac_matrix import Scope
 from app.db.ids import uuid7
 from app.db.session import GlobalDb  # noqa: TC001
 from app.modules.auth.deps import client_ip
+from app.modules.companies.models import Company
 from app.modules.employees.models import Employee
 from app.modules.employees.record_pdf import render_pdf
 from app.modules.learning.models import Certificate, Course, CourseAssignment
@@ -61,6 +63,16 @@ def new_reference() -> str:
     return "".join(secrets.choice(ALPHABET) for _ in range(REFERENCE_LENGTH))
 
 
+async def company_zone(db: AsyncSession, company_id: uuid.UUID) -> ZoneInfo:
+    zone = await db.scalar(select(Company.timezone).where(Company.id == company_id))
+    return ZoneInfo(zone or "Europe/London")
+
+
+def local_day(instant: datetime, zone: ZoneInfo) -> date:
+    """The company's calendar day for a stored UTC instant (ISS-20)."""
+    return instant.astimezone(zone).date()
+
+
 async def issue(db: AsyncSession, assignment: CourseAssignment, course: Course) -> Certificate:
     """The certificate for a course just completed. The names are copied, so they stay put."""
     first, last = (
@@ -70,7 +82,11 @@ async def issue(db: AsyncSession, assignment: CourseAssignment, course: Course) 
             )
         )
     ).one()
-    completed = (assignment.completed_at or assignment.updated_at).date()
+    # The day the person completed it where the company is; the timestamp itself stays in UTC.
+    completed = local_day(
+        assignment.completed_at or assignment.updated_at,
+        await company_zone(db, assignment.company_id),
+    )
     certificate = Certificate(
         id=uuid7(),
         company_id=assignment.company_id,
