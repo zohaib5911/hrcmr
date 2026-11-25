@@ -8,7 +8,7 @@ existing module's table or view; nothing is cached across people.
 from __future__ import annotations
 
 import uuid  # noqa: TC003
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import and_, func, or_, select
@@ -117,8 +117,9 @@ async def _approvals(db: AsyncSession, company_id: uuid.UUID) -> ApprovalsCardOu
     return ApprovalsCardOut(pending=pending)
 
 
-async def _distribution(db: AsyncSession, company_id: uuid.UUID) -> DistributionCardOut:
-    today = func.current_date()
+async def _distribution(
+    db: AsyncSession, company_id: uuid.UUID, today: date
+) -> DistributionCardOut:
     in_force = and_(
         EmployeeAssignment.employee_id == Employee.id,
         EmployeeAssignment.company_id == company_id,
@@ -144,14 +145,14 @@ async def _distribution(db: AsyncSession, company_id: uuid.UUID) -> Distribution
     )
 
 
-async def _learning(db: AsyncSession, company_id: uuid.UUID) -> LearningCardOut:
+async def _learning(db: AsyncSession, company_id: uuid.UUID, today: date) -> LearningCardOut:
     overdue = (
         await db.execute(
             select(func.count())
             .select_from(CourseAssignment)
             .where(
                 CourseAssignment.company_id == company_id,
-                learning_report.effective_status() == "overdue",
+                learning_report.effective_status(today) == "overdue",
             )
         )
     ).scalar_one()
@@ -159,9 +160,9 @@ async def _learning(db: AsyncSession, company_id: uuid.UUID) -> LearningCardOut:
 
 
 async def _my_learning(
-    db: AsyncSession, company_id: uuid.UUID, employee_id: uuid.UUID
+    db: AsyncSession, company_id: uuid.UUID, employee_id: uuid.UUID, today: date
 ) -> MyLearningCardOut:
-    status_now = learning_report.effective_status()
+    status_now = learning_report.effective_status(today)
     rows = (
         await db.execute(
             select(status_now, func.count())
@@ -225,6 +226,7 @@ def _status_line(items: list[AttentionItemOut]) -> str:
 
 async def dashboard(access: Access) -> DashboardOut:
     db, company_id, role = access.db, access.company_id, access.role
+    today = await access.reports.today()  # the company's date, as the permissions use
     employees = (
         await _employees(db, company_id) if company_wide(role, "employee.profile.read") else None
     )
@@ -234,10 +236,14 @@ async def dashboard(access: Access) -> DashboardOut:
         await _approvals(db, company_id) if company_wide(role, "leave.request.approve") else None
     )
     distribution = (
-        await _distribution(db, company_id) if company_wide(role, "employee.profile.read") else None
+        await _distribution(db, company_id, today)
+        if company_wide(role, "employee.profile.read")
+        else None
     )
     learning = (
-        await _learning(db, company_id) if company_wide(role, "learning.assignment.read") else None
+        await _learning(db, company_id, today)
+        if company_wide(role, "learning.assignment.read")
+        else None
     )
     recruitment = (
         await _recruitment(db, company_id)
@@ -249,7 +255,7 @@ async def dashboard(access: Access) -> DashboardOut:
         access.employee_id is not None
         and scope_for(role, "learning.assignment.read_own") is not None
     ):
-        my_learning = await _my_learning(db, company_id, access.employee_id)
+        my_learning = await _my_learning(db, company_id, access.employee_id, today)
     items = _attention(approvals, rtw, learning)
     return DashboardOut(
         first_name=access.caller.user.first_name,

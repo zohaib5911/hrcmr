@@ -184,6 +184,43 @@ async def test_the_list_pages_so_nobody_is_cut_off_and_the_order_is_stable(
     assert (await admin.get(f"{API}/employees", params={"offset": -1})).status_code == 422
 
 
+async def test_the_department_shown_follows_the_company_s_own_date(rig: dict[str, Any]) -> None:
+    """Audit finding 6: "today" is the company's date, not the database server's UTC date. The
+    company is put in a zone whose date differs from UTC right now, so the test never depends on
+    the hour it runs at."""
+    from zoneinfo import ZoneInfo
+
+    now = datetime.now(UTC)
+    zone = "Pacific/Kiritimati" if now.hour >= 10 else "Pacific/Pago_Pago"  # UTC+14 / UTC-11
+    local = now.astimezone(ZoneInfo(zone)).date()
+    assert local != now.date()
+    change = max(local, now.date())  # the day the new department starts
+    expected = "New" if local >= change else "Old"
+    admin = await rig["person"]("company_admin", rig["a"])
+    old = await _department(rig, rig["a"], "Old")
+    new = await _department(rig, rig["a"], "New")
+    person = await _employee(rig, rig["a"], "E1", "Tia", "Lee", department=old)
+    async with rig["owner"].begin() as c:
+        await c.execute(
+            text("update companies set timezone = :z where id = :c"), {"z": zone, "c": rig["a"]}
+        )
+        await c.execute(
+            text("update employee_assignments set ended_at = :d where employee_id = :e"),
+            {"d": change, "e": person},
+        )
+        await c.execute(
+            text(
+                "insert into employee_assignments (employee_id, company_id, department_id, "
+                "employment_type, effective_from) values (:e, :c, :n, 'full_time', :d)"
+            ),
+            {"e": person, "c": rig["a"], "n": new, "d": change},
+        )
+    listed = (await admin.get(f"{API}/employees")).json()["employees"]
+    assert [e["department"] for e in listed] == [expected]
+    profile = (await admin.get(f"{API}/employees/{person}")).json()
+    assert expected in str(profile)
+
+
 async def test_each_role_sees_only_what_its_permission_reaches(rig: dict[str, Any]) -> None:
     boss = await _employee(rig, rig["a"], "M1", "Mona", "Boss")
     mine = await _employee(rig, rig["a"], "M2", "Rae", "Report", manager=boss)

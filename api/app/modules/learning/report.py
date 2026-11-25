@@ -7,6 +7,7 @@ that status once a day; the report computes it too, so a late job never hides a 
 from __future__ import annotations
 
 import uuid  # noqa: TC003
+from datetime import date  # noqa: TC003
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import and_, case, func, or_, select
@@ -27,20 +28,23 @@ CURRENT = ("active", "on_leave")  # people who can be assigned a course
 OPEN = ("not_started", "in_progress")
 
 
-def effective_status() -> Any:
-    """The status a person sees today: an open course past its due day is overdue."""
+def effective_status(today: date) -> Any:
+    """The status a person sees today (the company's today): an open course past its due day is
+    overdue."""
     return case(
         (
-            and_(CourseAssignment.status.in_(OPEN), CourseAssignment.due_on < func.current_date()),
+            and_(
+                CourseAssignment.status.in_(OPEN),
+                CourseAssignment.due_on < today,
+            ),
             "overdue",
         ),
         else_=CourseAssignment.status,
     )
 
 
-def in_force(company_id: uuid.UUID) -> Any:
+def in_force(company_id: uuid.UUID, today: date) -> Any:
     """The employee's assignment in force today (the rule the reports graph and org chart use)."""
-    today = func.current_date()
     return and_(
         EmployeeAssignment.employee_id == Employee.id,
         EmployeeAssignment.company_id == company_id,
@@ -56,8 +60,9 @@ def report_query(
     department_id: uuid.UUID | None,
     status: str | None,
     search: str,
+    today: date,
 ) -> Select[Any]:
-    status_now = effective_status()
+    status_now = effective_status(today)
     query = (
         select(
             CourseAssignment,
@@ -69,7 +74,7 @@ def report_query(
         )
         .join(Course, Course.id == CourseAssignment.course_id)
         .join(Employee, Employee.id == CourseAssignment.employee_id)
-        .outerjoin(EmployeeAssignment, in_force(company_id))
+        .outerjoin(EmployeeAssignment, in_force(company_id, today))
         .outerjoin(Department, Department.id == EmployeeAssignment.department_id)
         .where(CourseAssignment.company_id == company_id)
     )
@@ -103,8 +108,8 @@ def report_row(row: Any) -> ReportRowOut:
     )
 
 
-async def summary(db: AsyncSession, company_id: uuid.UUID) -> LearningSummaryOut:
-    status_now = effective_status()
+async def summary(db: AsyncSession, company_id: uuid.UUID, today: date) -> LearningSummaryOut:
+    status_now = effective_status(today)
     rows = (
         await db.execute(
             select(status_now, func.count())
@@ -123,7 +128,7 @@ async def summary(db: AsyncSession, company_id: uuid.UUID) -> LearningSummaryOut
 
 
 async def people_for(
-    db: AsyncSession, company_id: uuid.UUID, body: CourseAssignmentIn
+    db: AsyncSession, company_id: uuid.UUID, body: CourseAssignmentIn, today: date
 ) -> list[uuid.UUID]:
     """The current staff a new assignment covers. It is all checked before any row is written."""
     if body.scope == "everyone":
@@ -160,7 +165,7 @@ async def people_for(
             )
         query = (
             select(Employee.id)
-            .join(EmployeeAssignment, in_force(company_id))
+            .join(EmployeeAssignment, in_force(company_id, today))
             .where(
                 Employee.company_id == company_id,
                 Employee.status.in_(CURRENT),

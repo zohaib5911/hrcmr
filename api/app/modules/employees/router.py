@@ -85,6 +85,7 @@ async def list_employees(
     offset: Annotated[int, Query(ge=0, description="Rows to skip (from next_offset).")] = 0,
 ) -> EmployeeList:
     reach = await _reachable(access)
+    today = await access.reports.today()
     query = (
         select(
             Employee,
@@ -95,7 +96,7 @@ async def list_employees(
         )
         .outerjoin(
             EmployeeAssignment,
-            (EmployeeAssignment.employee_id == Employee.id) & current_assignment(),
+            (EmployeeAssignment.employee_id == Employee.id) & current_assignment(today),
         )
         .outerjoin(Department, Department.id == EmployeeAssignment.department_id)
         .outerjoin(Designation, Designation.id == EmployeeAssignment.designation_id)
@@ -306,7 +307,10 @@ async def _profile(access: Access, employee: Employee) -> EmployeeProfile:
             .select_from(EmployeeAssignment)
             .outerjoin(Department, Department.id == EmployeeAssignment.department_id)
             .outerjoin(Designation, Designation.id == EmployeeAssignment.designation_id)
-            .where(EmployeeAssignment.employee_id == employee.id, current_assignment())
+            .where(
+                EmployeeAssignment.employee_id == employee.id,
+                current_assignment(await access.reports.today()),
+            )
         )
     ).first()
     documents = (

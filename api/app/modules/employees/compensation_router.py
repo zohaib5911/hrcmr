@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import uuid  # noqa: TC003
-from datetime import UTC, datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
@@ -59,7 +58,8 @@ async def compensation_history(employee_id: uuid.UUID, access: Reads) -> Compens
         ).scalars()
     )
     records = [await _out(access, row) for row in rows]
-    current = next((r for r in records if r.effective_from <= datetime.now(UTC).date()), None)
+    today = await access.reports.today()  # the company's date, as the permissions use
+    current = next((r for r in records if r.effective_from <= today), None)
     return CompensationHistory(current=current, records=records)
 
 

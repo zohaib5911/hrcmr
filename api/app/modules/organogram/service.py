@@ -9,6 +9,7 @@ from __future__ import annotations
 import uuid  # noqa: TC003
 from collections import deque
 from dataclasses import dataclass
+from datetime import date  # noqa: TC003
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import and_, func, or_, select
@@ -98,8 +99,9 @@ def build_tree(members: list[Member]) -> list[OrgPerson]:
     return top
 
 
-async def org_chart(db: AsyncSession, company_id: uuid.UUID, *, with_rtw: bool) -> list[OrgPerson]:
-    today = func.current_date()
+async def org_chart(
+    db: AsyncSession, company_id: uuid.UUID, *, with_rtw: bool, today: date
+) -> list[OrgPerson]:
     in_force = and_(
         EmployeeAssignment.employee_id == Employee.id,
         EmployeeAssignment.company_id == company_id,
