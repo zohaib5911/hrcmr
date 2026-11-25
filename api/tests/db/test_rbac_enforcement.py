@@ -7,6 +7,7 @@ import os
 import uuid
 from collections.abc import AsyncIterator
 from contextlib import AsyncExitStack
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -525,6 +526,53 @@ async def test_reports_are_found_at_any_depth_per_chain_and_never_across_compani
             await graph.reports_of(ceo)
             await graph.reports_of(ceo)
             assert len(queries) == before  # remembered for the rest of the request
+    finally:
+        await app_engine.dispose()
+
+
+async def test_a_reporting_hand_over_follows_the_company_local_date(
+    database: DatabaseUnderTest,
+) -> None:
+    """ISS-06: at 00:30 London (23:30 UTC the day before) the hand-over dated today has happened."""
+    company_a, _ = await two_companies(database)
+    old_manager, new_manager, person = uuid7(), uuid7(), uuid7()
+    owner = engine_for(database.owner_url, poolclass=NullPool)
+    async with owner.begin() as c:
+        await c.execute(
+            text("update companies set timezone = 'Europe/London' where id = :c"),
+            {"c": company_a},
+        )
+        for ident in (old_manager, new_manager, person):
+            await c.execute(
+                text(
+                    "insert into employees (id, company_id, employee_number, first_name, last_name, email, hire_date) "
+                    "values (:i, :c, :n, 'Test', 'Person', 'test@example.com', '2000-01-01')"
+                ),
+                {"i": ident, "c": company_a, "n": str(ident)},
+            )
+        await c.execute(
+            text(
+                "insert into employee_assignments (employee_id, company_id, "
+                "reporting_authority_employee_id, effective_from, ended_at, employment_type) values "
+                "(:p, :c, :old, '2000-01-01', '2026-07-02', 'full_time'), "
+                "(:p, :c, :new, '2026-07-02', null, 'full_time')"
+            ),
+            {"p": person, "c": company_a, "old": old_manager, "new": new_manager},
+        )
+    await owner.dispose()
+
+    app_engine = engine_for(database.app_url, poolclass=NullPool)
+    try:
+        for instant, reports_to in [
+            (datetime(2026, 7, 1, 22, 30, tzinfo=UTC), old_manager),  # 23:30 London, 1 July
+            (datetime(2026, 7, 1, 23, 30, tzinfo=UTC), new_manager),  # 00:30 London, 2 July
+        ]:
+            async with TenantSession(app_engine, company_id=company_a) as db:
+                await db.execute(text("set local time zone 'UTC'"))
+                graph = ReportsGraph(db, company_a, clock=lambda at=instant: at)
+                assert await graph.is_report(reports_to, person)
+                other = new_manager if reports_to == old_manager else old_manager
+                assert not await graph.is_report(other, person)
     finally:
         await app_engine.dispose()
 
