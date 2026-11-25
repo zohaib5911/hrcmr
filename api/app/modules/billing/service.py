@@ -11,6 +11,11 @@ is signed by Stripe, and the customer must be the one the company holds, so the 
 
 Subscriptions are read back from Stripe instead of taken from the event body. Events can arrive out
 of order; the live subscription is always the latest state.
+
+Disputes (chargebacks) name only the payment, so its company is found from the payment Stripe holds.
+Payments are never refunded, so a dispute the customer wins is a payment reversed: it ends a 10-year
+plan at once and ends an annual subscription at once. Opening a dispute, or one we win, changes
+nothing but is audited.
 """
 
 from __future__ import annotations
@@ -57,8 +62,11 @@ HANDLED = frozenset(
         "customer.subscription.updated",
         "customer.subscription.deleted",
         "charge.refunded",
+        "charge.dispute.created",
+        "charge.dispute.closed",
     }
 )
+DISPUTED = "disputed"  # the status of a plan whose payment a lost dispute took back
 SUMMARY = ("plan", "subscription_status", "subscription_ends_at", "payment_grace_ends_at")
 BILLING_PAGE = "/company/billing"
 
@@ -144,19 +152,28 @@ async def handle_event(
     obj: dict[str, Any] = (event.get("data") or {}).get("object") or {}
     outcome = "ignored"
     if kind in HANDLED:
-        company_id = await _company_for(stripe, obj)
+        subject = await _disputed_payment(stripe, obj) if obj.get("object") == "dispute" else obj
+        company_id = await _company_for(stripe, subject)
         if company_id is not None:
             await db.scope_to_company(company_id)
             company = await db.get(
                 Company, company_id, with_for_update=True, populate_existing=True
             )
-            if company is not None and _belongs(company, obj):
+            if company is not None and _belongs(company, subject):
                 await _apply(db, stripe, company, str(kind), obj, event, web_origin)
                 outcome = "applied"
     if outcome == "ignored":
         logger.info("stripe_event_ignored", event_id=event["id"], type=kind)
     await db.commit()
     return outcome
+
+
+async def _disputed_payment(stripe: Stripe, dispute: dict[str, Any]) -> dict[str, Any]:
+    """The payment a dispute is about: it carries the customer and our metadata."""
+    payment_intent = _id(dispute.get("payment_intent"))
+    if payment_intent is None:
+        return {}
+    return await stripe.retrieve_payment_intent(payment_intent)
 
 
 def _belongs(company: Company, obj: dict[str, Any]) -> bool:
@@ -211,6 +228,16 @@ async def _apply(
         action = "billing.refunded"
         if not await _refunded(db, company, obj, event):
             return
+    elif kind == "charge.dispute.created":
+        action = "billing.dispute_opened"
+        logger.warning("stripe_dispute_opened", company_id=str(company.id))
+    elif kind == "charge.dispute.closed":
+        if obj.get("status") == "lost":
+            action = "billing.dispute_lost"
+            logger.warning("stripe_dispute_lost", company_id=str(company.id))
+            await _dispute_lost(db, stripe, company, obj, event)
+        else:
+            action = "billing.dispute_closed"
     after = summary(company)
     if after != before or action != "billing.subscription_updated":
         await record(
@@ -351,6 +378,48 @@ async def _refunded(
             company.subscription_ends_at = refunded_at
     await db.flush()
     return True
+
+
+async def _dispute_lost(
+    db: GlobalSession,
+    stripe: Stripe,
+    company: Company,
+    dispute: dict[str, Any],
+    event: dict[str, Any],
+) -> None:
+    """The customer's bank took the payment back. A 10-year plan ends now, and an annual
+    subscription is ended now (its own ``customer.subscription.deleted`` then changes nothing).
+    The payment is remembered as reversed, so a late or replayed purchase cannot restore it."""
+    lost_at = _when(event.get("created")) or datetime.now(UTC)
+    payment_intent = _id(dispute.get("payment_intent"))
+    row = None
+    if payment_intent:
+        await db.execute(
+            insert(PaymentRefund)
+            .values(
+                company_id=company.id,
+                stripe_payment_intent_id=payment_intent,
+                refunded_at=lost_at,
+            )
+            .on_conflict_do_nothing(index_elements=["stripe_payment_intent_id"])
+        )
+        row = await subscription_row(db, stripe_payment_intent_id=payment_intent)
+    if row is not None and row.plan == "ten_year":
+        row.refunded_at = row.refunded_at or lost_at
+        row.status = DISPUTED
+        if company.plan == "ten_year" and company.subscription_status == "active":
+            company.plan = "free"
+            company.subscription_status = DISPUTED
+            company.subscription_ends_at = lost_at
+        await db.flush()
+        return
+    subscription_id = company.stripe_subscription_id
+    if company.plan != "annual" or not subscription_id:
+        return  # an old payment of a plan that has already ended
+    live = await stripe.retrieve_subscription(subscription_id)
+    if live.get("status") not in ENDED:
+        await stripe.cancel_now(subscription_id)
+    await _sync_subscription(db, stripe, company, subscription_id)
 
 
 async def _start_grace(

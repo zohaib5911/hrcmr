@@ -236,7 +236,8 @@ Admin SSR ingress contract (required before enabling admin pages):
       production (live mode): https://api.yourdomain/api/v1/webhooks/stripe
     Events: checkout.session.completed, checkout.session.async_payment_succeeded,
     checkout.session.async_payment_failed, invoice.paid, invoice.payment_failed,
-            customer.subscription.updated, customer.subscription.deleted, charge.refunded
+            customer.subscription.updated, customer.subscription.deleted, charge.refunded,
+            charge.dispute.created, charge.dispute.closed
     -> signing secret = STRIPE_WEBHOOK_SECRET (different per endpoint)
 
 ---- 5.5 Anthropic ---------------------------------------------------------------------------
