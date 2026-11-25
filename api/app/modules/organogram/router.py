@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import asyncio
 import uuid  # noqa: TC003
 from datetime import UTC, datetime
 from typing import Annotated, Any
@@ -13,7 +12,7 @@ from sqlalchemy import func, select
 from app.core.errors import ConflictError
 from app.core.rbac_matrix import Scope, scope_for
 from app.db.ids import uuid7
-from app.modules.employees.record_pdf import render_pdf
+from app.modules.employees.record_pdf import render_pdf_async
 from app.modules.organogram import service
 from app.modules.organogram.models import OrganogramLevel
 from app.modules.organogram.pdf import org_chart_html
@@ -55,7 +54,7 @@ async def org_chart_pdf(access: Reads) -> Response:
         generated=generated,
         rtw_visible=with_rtw,
     )
-    pdf = await asyncio.to_thread(render_pdf, html)
+    pdf = await render_pdf_async(html)
     await access.audit("organogram.exported")
     await access.db.commit()
     return Response(

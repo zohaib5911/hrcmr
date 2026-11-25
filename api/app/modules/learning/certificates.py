@@ -7,7 +7,6 @@ policy then shows only the certificate with that reference. Nothing else is open
 
 from __future__ import annotations
 
-import asyncio
 import secrets
 import uuid  # noqa: TC003
 from datetime import UTC, date, datetime
@@ -28,7 +27,7 @@ from app.db.session import GlobalDb  # noqa: TC001
 from app.modules.auth.deps import client_ip
 from app.modules.companies.models import Company
 from app.modules.employees.models import Employee
-from app.modules.employees.record_pdf import render_pdf
+from app.modules.employees.record_pdf import render_pdf_async
 from app.modules.learning.models import Certificate, Course, CourseAssignment
 from app.modules.rbac.deps import Access, require
 
@@ -165,7 +164,7 @@ async def certificate_pdf(
         verify_url=f"{origin}/verify?ref={certificate.reference}",
         generated=datetime.now(UTC).strftime("%d %B %Y"),
     )
-    pdf = await asyncio.to_thread(render_pdf, html)
+    pdf = await render_pdf_async(html)
     await access.audit(
         "learning.certificate_downloaded", entity_type="certificate", entity_id=certificate.id
     )

@@ -66,13 +66,20 @@ class AppError(Exception):
     """Raise from services and routers; the handler turns it into the envelope."""
 
     def __init__(
-        self, code: str, message: str, *, status_code: int = 400, field: str | None = None
+        self,
+        code: str,
+        message: str,
+        *,
+        status_code: int = 400,
+        field: str | None = None,
+        headers: Mapping[str, str] | None = None,
     ) -> None:
         super().__init__(message)
         self.code = code
         self.message = message
         self.status_code = status_code
         self.field = field
+        self.headers = headers
 
 
 class NotFoundError(AppError):
@@ -125,7 +132,12 @@ def error_response(
 async def _app_error(request: Request, exc: Exception) -> JSONResponse:
     assert isinstance(exc, AppError)  # noqa: S101  (narrowing for the type checker)
     return error_response(
-        request, status_code=exc.status_code, code=exc.code, message=exc.message, field=exc.field
+        request,
+        status_code=exc.status_code,
+        code=exc.code,
+        message=exc.message,
+        field=exc.field,
+        headers=exc.headers,
     )
 
 

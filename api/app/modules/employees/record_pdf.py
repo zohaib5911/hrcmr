@@ -11,6 +11,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Response
 from jinja2 import Environment
 
+from app.core.errors import AppError
 from app.core.rbac_matrix import scope_for
 from app.modules.employees.compensation_router import compensation_history
 from app.modules.employees.document_router import list_documents
@@ -84,6 +85,37 @@ def render_pdf(html: str) -> bytes:
     return result
 
 
+# ISS-35: PDF rendering is CPU- and memory-heavy and shares the worker's threads with password
+# checks. Each worker process renders at most PDF_SLOTS at once; a request that cannot get a slot
+# within PDF_WAIT_SECONDS gets a retryable 503 instead of queueing without bound.
+PDF_SLOTS = 2
+PDF_WAIT_SECONDS = 10.0
+PDF_RETRY_AFTER = "5"
+_pdf_slots = asyncio.Semaphore(PDF_SLOTS)
+
+
+async def render_pdf_async(html: str) -> bytes:
+    """``render_pdf`` in a thread, within this worker's PDF capacity."""
+    try:
+        await asyncio.wait_for(_pdf_slots.acquire(), PDF_WAIT_SECONDS)
+    except TimeoutError:
+        raise AppError(
+            "PDF_BUSY",
+            "We are making a lot of PDFs right now. Try again in a moment.",
+            status_code=503,
+            headers={"Retry-After": PDF_RETRY_AFTER},
+        ) from None
+    try:
+        task = asyncio.create_task(asyncio.to_thread(render_pdf, html))
+        try:
+            return await asyncio.shield(task)
+        except asyncio.CancelledError:
+            await task  # the slot is held until the thread has really finished
+            raise
+    finally:
+        _pdf_slots.release()
+
+
 @router.get(
     "/employees/{employee_id}/record.pdf",
     response_class=Response,
@@ -138,7 +170,7 @@ async def employee_pdf(employee_id: uuid.UUID, access: Reports) -> Response:
         )
     generated = datetime.now(UTC).strftime("%d %b %Y %H:%M UTC")
     html = record_html(f"{employee.first_name} {employee.last_name}", generated, sections)
-    pdf = await asyncio.to_thread(render_pdf, html)
+    pdf = await render_pdf_async(html)
     await access.audit("employee.record_exported", entity_type="employee", entity_id=employee.id)
     await access.db.commit()
     return Response(
