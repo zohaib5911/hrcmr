@@ -4301,6 +4301,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/policies/own/{policy_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Own Policy
+         * @description One of the person's own policies, for a link from a notice (ISS-14). Anyone else's is 404.
+         */
+        get: operations["policies_own_policy"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/policies/own/{policy_id}/download": {
         parameters: {
             query?: never;
@@ -26926,6 +26946,46 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OwnPolicySummary"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    policies_own_policy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                policy_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OwnPolicy"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

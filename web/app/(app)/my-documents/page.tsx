@@ -20,11 +20,12 @@ export default async function Page({
   ]);
   if (!response.data) notFound();
   const selected = Array.isArray(params.reminder) ? params.reminder[0] : params.reminder;
+  const policy = Array.isArray(params.policy) ? params.policy[0] : params.policy;
   return (
     <>
       <ReceivedRemindersPage reminders={response.data} selectedId={selected} />
       <div className="mt-10">
-        <OwnPolicies />
+        <OwnPolicies selectedId={policy} />
       </div>
     </>
   );
