@@ -20,7 +20,6 @@ from sqlalchemy import (
     column,
     false,
     func,
-    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -73,7 +72,7 @@ class BankAccount(Base, RecordMixin, TenantMixin):
             "uq_company_bank_accounts_one_primary",
             "company_id",
             unique=True,
-            postgresql_where=text("is_primary AND archived_at IS NULL"),
+            postgresql_where=column("is_primary").is_(True) & column("archived_at").is_(None),
         ),
     )
 

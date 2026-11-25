@@ -17,7 +17,7 @@ from sqlalchemy import (
     Index,
     String,
     Uuid,
-    text,
+    column,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -44,7 +44,7 @@ class DataExport(Base, RecordMixin, TenantMixin):
             "uq_data_exports_one_queued",
             "company_id",
             unique=True,
-            postgresql_where=text("status = 'queued'"),
+            postgresql_where=column("status") == "queued",
         ),
     )
 
