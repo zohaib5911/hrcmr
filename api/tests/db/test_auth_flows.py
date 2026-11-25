@@ -4,6 +4,7 @@ required by policy, step-up enforcement and invitation expiry, against a real da
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 import uuid
 from collections.abc import AsyncIterator, Iterator
@@ -46,6 +47,7 @@ from app.modules.auth.service import (
 from app.modules.auth.sessions import (
     ABSOLUTE_TIMEOUT,
     IDLE_TIMEOUT,
+    SessionData,
     SessionStore,
     StepUpRequiredError,
     require_step_up,
@@ -719,3 +721,60 @@ async def test_a_post_with_no_cookie_at_all_is_refused_and_webhooks_are_exempt()
             await client.post("/change", headers={"X-CSRF-Token": "anything"})
         ).status_code == 403
         assert (await client.post("/api/v1/webhooks/stripe")).status_code == 200
+
+
+@pytest.mark.parametrize(
+    "stored",
+    [
+        "not json",
+        "[]",
+        '{"user_id": "x"}',
+        "missing-dates",
+        "bad-date",
+        "naive-date",
+        "bad-step-up",
+    ],
+)
+async def test_an_unreadable_session_record_signs_the_caller_out(
+    engine: AsyncEngine, auth: AuthService, sessions: SessionStore, redis: Redis, stored: str
+) -> None:
+    """ISS-05: a record that cannot safely be read is a signed-out caller, not a 500."""
+    outcome = await _login(engine, auth)
+    key = f"sess:{hash_token(outcome.token)}"
+    raw = await redis.get(key)
+    assert raw is not None
+    good = json.loads(raw)
+    broken = {
+        "missing-dates": json.dumps({k: v for k, v in good.items() if k != "expires_at"}),
+        "bad-date": json.dumps(good | {"expires_at": "soon"}),
+        "naive-date": json.dumps(good | {"expires_at": "2099-01-01T00:00:00"}),
+        "bad-step-up": json.dumps(good | {"step_up_at": 5}),
+    }.get(stored, stored)
+    await redis.set(key, broken, keepttl=True)
+    assert await sessions.get(outcome.token) is None
+    assert await redis.exists(key) == 0  # invalidated
+
+    await redis.set(key, broken)
+    async with GlobalSession(engine) as db:
+        with pytest.raises(AppError) as ended:
+            await sessions.rotate(db, outcome.token, SessionData(**good))
+    assert ended.value.status_code == 401
+
+
+async def test_an_older_session_record_without_the_optional_fields_still_works(
+    engine: AsyncEngine, auth: AuthService, sessions: SessionStore, redis: Redis
+) -> None:
+    outcome = await _login(engine, auth)
+    key = f"sess:{hash_token(outcome.token)}"
+    raw = await redis.get(key)
+    assert raw is not None
+    good = json.loads(raw)
+    older = {k: v for k, v in good.items() if k not in ("db_seen_at", "platform", "support_id")}
+    await redis.set(key, json.dumps(older | {"future_field": 1}), keepttl=True)
+    data = await sessions.get(outcome.token)
+    assert data is not None
+    assert (data.session_id, data.db_seen_at, data.platform) == (good["session_id"], "", False)
+    async with GlobalSession(engine) as db:
+        touched = await sessions.touch(db, outcome.token, data)
+        await db.commit()
+    assert touched.db_seen_at != ""
