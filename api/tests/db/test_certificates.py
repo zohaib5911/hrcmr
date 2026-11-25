@@ -137,3 +137,35 @@ async def test_the_public_check_is_rate_limited(rig: dict[str, Any]) -> None:
             codes.append(response.status_code)
     assert codes[-1] == 429
     assert set(codes[:30]) == {404}
+
+
+async def test_a_00_30_london_summer_completion_keeps_its_local_day(
+    rig: dict[str, Any], monkeypatch: Any
+) -> None:
+    """ISS-20: completed at 23:30 UTC on 14 July = 00:30 BST on 15 July, everywhere."""
+    from datetime import UTC, datetime
+
+    from openpyxl import load_workbook
+
+    from app.modules.learning import router as learning_router
+
+    class Moment(datetime):
+        @classmethod
+        def now(cls, tz: Any = None) -> datetime:  # type: ignore[override]
+            return datetime(2026, 7, 14, 23, 30, tzinfo=UTC)
+
+    monkeypatch.setattr(learning_router, "datetime", Moment)
+    course = await _course(rig)
+    admin = await rig["person"]("company_admin", rig["a"])
+    name, _assignment, reference = await _completed(rig, admin, course)
+
+    transport = httpx.ASGITransport(app=rig["app"])
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as anonymous:
+        found = await anonymous.get(API + "/public/certificates/verify", params={"ref": reference})
+    assert found.json()["completed_on"] == "2026-07-15"
+
+    sheet = await admin.get(API + "/learning/assignments.xlsx")
+    assert sheet.status_code == 200, sheet.text
+    rows = list(load_workbook(io.BytesIO(sheet.content)).active.iter_rows(values_only=True))
+    [row] = [r for r in rows if r and r[0] == name]
+    assert row[-1] == "2026-07-15"

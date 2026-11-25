@@ -190,3 +190,12 @@ export function formatUkDateTime(instant: string): string {
   const month = MONTH_SHORT[Number(part("month")) - 1] ?? "";
   return `${Number(part("day"))} ${month} ${part("year")}, ${part("hour")}:${part("minute")}`;
 }
+
+/** The UK calendar day of an instant, as an ISO date: 00:30 BST is that day, not the one before. */
+export function ukDayIso(instant: string): string {
+  const date = new Date(instant);
+  if (Number.isNaN(date.getTime())) return "";
+  const part = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(LONDON_PARTS.formatToParts(date).find((p) => p.type === type)?.value ?? 0);
+  return toIso({ y: part("year"), m: part("month"), d: part("day") });
+}
