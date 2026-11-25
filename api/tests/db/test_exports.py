@@ -288,6 +288,47 @@ async def test_generic_file_routes_never_expose_company_export_artifacts(
     )
 
 
+async def test_a_large_document_is_copied_into_the_archive_in_pieces() -> None:
+    """ISS-33: peak memory follows the piece size, not the file size, and the bytes match."""
+    import hashlib
+    import tempfile
+    import tracemalloc
+    from types import SimpleNamespace
+    from typing import cast
+
+    from app.integrations.storage import Storage
+    from app.modules.exports.archive import _write_document
+    from app.modules.files.models import File
+
+    piece, pieces = b"x" * (1 << 16), 512  # 32 MiB in 64 KiB pieces
+    expected = hashlib.sha256(piece * pieces).hexdigest()
+
+    class Pieces:
+        async def open(self, key: str) -> Any:
+            async def body() -> Any:
+                for _ in range(pieces):
+                    yield piece
+
+            return body()
+
+    record = cast("File", SimpleNamespace(storage_key="k"))
+    with tempfile.TemporaryFile() as target:
+        tracemalloc.start()
+        with zipfile.ZipFile(target, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            assert await _write_document(
+                archive, cast("Storage", Pieces()), record, "documents/big"
+            )
+        _, peak = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+        target.seek(0)
+        with zipfile.ZipFile(target) as archive, archive.open("documents/big") as entry:
+            digest = hashlib.sha256()
+            for chunk in iter(lambda: entry.read(1 << 20), b""):
+                digest.update(chunk)
+    assert digest.hexdigest() == expected
+    assert peak < 4 * (1 << 20)  # well under the 32 MiB file
+
+
 async def test_two_simultaneous_requests_queue_one_export(rig: dict[str, Any]) -> None:
     """ISS-25: one 202, one 409, one queued row; another company still queues its own."""
     import asyncio
