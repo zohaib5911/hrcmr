@@ -288,3 +288,36 @@ async def test_trading_hours_save_one_day_at_a_time_with_roles_isolation_and_aud
             {"c": rig["a"]},
         )
         assert [r[0] for r in rows] == ["trading_hours.updated"] * 2  # opened, then closed
+
+
+async def test_the_leave_deduction_flag_keeps_on_omission_saves_false_and_refuses_null(
+    rig: dict[str, Any],
+) -> None:
+    """ISS-21: null is a field-level 422 before anything changes."""
+    admin = await rig["person"]("company_admin", rig["a"])
+    made = await admin.post(
+        "/api/v1/company-holidays",
+        json={
+            "name": "Summer shutdown",
+            "start_date": "2026-08-03",
+            "end_date": "2026-08-07",
+            "deduct_from_annual_leave": True,
+        },
+    )
+    assert made.status_code == 201, made.text
+    url = f"/api/v1/company-holidays/{made.json()['id']}"
+
+    kept = await admin.patch(url, json={"name": "Summer closure"})
+    assert kept.json()["deduct_from_annual_leave"] is True
+    refused = await admin.patch(url, json={"name": "Renamed", "deduct_from_annual_leave": None})
+    assert refused.status_code == 422, refused.text
+    assert refused.json()["error"]["field"] == "deduct_from_annual_leave"
+    async with rig["owner"].connect() as c:
+        name = (
+            await c.execute(
+                text("select name from company_holidays where id = :i"), {"i": made.json()["id"]}
+            )
+        ).scalar_one()
+    assert name == "Summer closure"  # nothing in the refused request was saved
+    saved = await admin.patch(url, json={"deduct_from_annual_leave": False})
+    assert saved.json()["deduct_from_annual_leave"] is False

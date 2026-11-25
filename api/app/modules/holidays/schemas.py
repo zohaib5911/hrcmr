@@ -96,9 +96,17 @@ class CompanyHolidayPatch(RequestModel):
     end_date: date | None = None
     holiday_type_id: uuid.UUID | None = None
     description: Annotated[str, Field(max_length=1000)] | None = None
+    # Leave it out to keep the current setting; an explicit null is refused (ISS-21).
     deduct_from_annual_leave: bool | None = None
 
     _trim = field_validator("name", "description", mode="before")(_clean)
+
+    @field_validator("deduct_from_annual_leave", mode="before")
+    @classmethod
+    def _not_null(cls, value: object) -> object:
+        if value is None:
+            raise ValueError("Choose yes or no.")
+        return value
 
 
 class HolidayManagement(BaseModel):
