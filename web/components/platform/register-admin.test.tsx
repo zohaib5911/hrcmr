@@ -133,3 +133,31 @@ it("disables duplicate reruns while the queue request is pending", async () => {
   expect(await screen.findByText("Import queued")).toBeInTheDocument();
   expect(post).toHaveBeenCalledTimes(1);
 });
+it("shows a held import and applies it only after confirmation (ISS-11)", async () => {
+  const withHold = {
+    ...status,
+    held_import: {
+      id: "held1",
+      published_on: "2026-11-13",
+      fetched_at: "2026-11-13T10:20:00Z",
+      source_url: "https://www.gov.uk/register.csv",
+      row_count: 1,
+      status: "held",
+    },
+  };
+  render(<RegisterAdmin status={withHold} />);
+  expect(screen.getByText("An import is held for review")).toBeInTheDocument();
+  await userEvent.type(
+    screen.getByLabelText("Reason for rerunning import"),
+    "Home Office confirmed",
+  );
+  await userEvent.click(screen.getByRole("button", { name: "Apply held import" }));
+  expect(post).not.toHaveBeenCalled();
+  await userEvent.click(screen.getByRole("button", { name: "Apply import" }));
+  await waitFor(() =>
+    expect(post).toHaveBeenCalledExactlyOnceWith(
+      "/platform/register/holds/{publication_id}/approve",
+      { params: { path: { publication_id: "held1" } }, body: { reason: "Home Office confirmed" } },
+    ),
+  );
+});

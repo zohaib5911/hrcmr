@@ -120,3 +120,60 @@ def test_hash_history_migration_from_unique_constraint(stack: None) -> None:
         assert asyncio.run(hash_schema(database)) == (True, False)
         command.upgrade(config, "head")
         assert asyncio.run(hash_schema(database)) == (False, True)
+
+
+def _register(names: range) -> bytes:
+    lines = ['"Organisation Name","Town/City","County","Type & Rating","Route"']
+    lines += [
+        f'"Sponsor {i} Ltd","Leeds","West Yorkshire","Worker (A rating)","Skilled Worker"'
+        for i in names
+    ]
+    return ("\n".join(lines) + "\n").encode()
+
+
+async def test_a_truncated_file_is_held_and_a_reviewed_reduction_applies(
+    database: DatabaseUnderTest,
+) -> None:
+    """ISS-11: a parseable but truncated register does not publish false removals."""
+    from app.modules.register.ingest import APPLIED, HELD
+
+    engine = engine_for(database.owner_url)
+    content = _register(range(300))
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if request.url.path.endswith(".csv"):
+            return httpx.Response(200, content=content)
+        return httpx.Response(200, content=(FIXTURES / "publication.html").read_bytes())
+
+    try:
+        async with (
+            AsyncSession(engine) as db,
+            httpx.AsyncClient(transport=httpx.MockTransport(handler)) as client,
+        ):
+            assert await ingest(db, client, date(2026, 11, 10)) == "imported"
+            current = select(func.count()).select_from(Sponsor).where(Sponsor.current)
+            assert await db.scalar(current) == 300
+            changes = select(func.count()).select_from(Change)
+            before = await db.scalar(changes)
+
+            content = _register(range(1))  # a valid header and one complete row
+            assert await ingest(db, client, date(2026, 11, 11)) == "held"
+            assert await ingest(db, client, date(2026, 11, 11)) == "held"  # still, once
+            assert await db.scalar(current) == 300  # the public register is intact
+            held = (await db.scalars(select(Publication).where(Publication.status == HELD))).all()
+            assert len(held) == 1
+            assert await db.scalar(changes) == before  # no removals published
+
+            content = _register(range(250))  # a normal-sized reduction still publishes
+            assert await ingest(db, client, date(2026, 11, 12)) == "imported"
+            assert await db.scalar(current) == 250
+
+            content = _register(range(1))
+            held[0].status = "approved"  # what the platform approval does
+            assert await ingest(db, client, date(2026, 11, 13)) == "imported"
+            assert await db.scalar(current) == 1
+            assert held[0].status == APPLIED
+            assert await ingest(db, client, date(2026, 11, 13)) == "unchanged"
+            await db.rollback()
+    finally:
+        await engine.dispose()

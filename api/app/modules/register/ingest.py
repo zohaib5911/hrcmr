@@ -26,6 +26,13 @@ PAGE = "https://www.gov.uk/government/publications/register-of-licensed-sponsors
 ASSETS_HOST = "assets.publishing.service.gov.uk"
 HOSTS = {"www.gov.uk", ASSETS_HOST}
 HEADERS = ("Organisation Name", "Town/City", "County", "Type & Rating", "Route")
+# ISS-11: an import that would remove more current sponsors than this is held for review instead
+# of published. The limit is the largest of: HOLD_MIN, HOLD_SHARE of the current register, and
+# HOLD_FACTOR times the most removals any accepted publication has made.
+HOLD_MIN = 100
+HOLD_SHARE = 0.01
+HOLD_FACTOR = 2
+COMPLETE, HELD, APPROVED, APPLIED = "complete", "held", "approved", "applied"
 
 
 def allowed(url: str) -> str:
@@ -104,6 +111,19 @@ def parse(content: bytes) -> dict[tuple[str, str, str], tuple[str, set[tuple[str
     return rows
 
 
+async def removal_limit(db: AsyncSession, current: int) -> int:
+    """How many removals one import may make before it is held for review."""
+    per_publication = (
+        select(func.count(Change.id).label("n"))
+        .join(Publication, Publication.id == Change.publication_id)
+        .where(Change.change == "removed", Publication.status == COMPLETE)
+        .group_by(Change.publication_id)
+        .subquery()
+    )
+    largest = int(await db.scalar(select(func.max(per_publication.c.n))) or 0)
+    return max(HOLD_MIN, int(current * HOLD_SHARE), HOLD_FACTOR * largest)
+
+
 async def ingest(db: AsyncSession, client: httpx.AsyncClient, on: date) -> str:
     html = await download(client, PAGE, 5_000_000)
     url = discover(html.decode("utf-8"))
@@ -112,18 +132,46 @@ async def ingest(db: AsyncSession, client: httpx.AsyncClient, on: date) -> str:
     # Serialize snapshot writers, including manual reruns. Caller owns commit/rollback.
     await db.execute(select(func.pg_advisory_xact_lock(20201101)))
     previous = await db.scalar(
-        select(Publication).order_by(Publication.fetched_at.desc(), Publication.id.desc()).limit(1)
+        select(Publication)
+        .where(Publication.status == COMPLETE)
+        .order_by(Publication.fetched_at.desc(), Publication.id.desc())
+        .limit(1)
     )
     if previous and previous.sha256 == digest:
         return "unchanged"
     rows = parse(content)
+    sponsors = (await db.scalars(select(Sponsor))).all()
+    hold = await db.scalar(
+        select(Publication)
+        .where(Publication.sha256 == digest, Publication.status.in_((HELD, APPROVED)))
+        .order_by(Publication.fetched_at.desc())
+        .limit(1)
+    )
+    if previous and (hold is None or hold.status != APPROVED):
+        current = [s for s in sponsors if s.current]
+        removals = sum((s.normalised_name, s.town, s.county) not in rows for s in current)
+        if removals > await removal_limit(db, len(current)):
+            # A truncated or partial file: keep the public register as it is until reviewed.
+            if hold is None:
+                db.add(
+                    Publication(
+                        published_on=on,
+                        source_url=url,
+                        row_count=sum(len(v[1]) for v in rows.values()),
+                        sha256=digest,
+                        status=HELD,
+                    )
+                )
+                await db.flush()
+            return "held"
+    if hold is not None:
+        hold.status = APPLIED
     old: dict[object, set[tuple[str, str]]] = defaultdict(set)
     if previous:
         for entry in (
             await db.scalars(select(Entry).where(Entry.publication_id == previous.id))
         ).all():
             old[entry.sponsor_id].add((entry.type_rating, entry.route))
-    sponsors = (await db.scalars(select(Sponsor))).all()
     by_key = {(s.normalised_name, s.town, s.county): s for s in sponsors}
     publication = Publication(
         published_on=on,

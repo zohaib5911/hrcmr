@@ -4075,6 +4075,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/platform/register/holds/{publication_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve Register Hold
+         * @description Apply an import that was held for removing unusually many sponsors (ISS-11).
+         */
+        post: operations["platform_admin_approve_register_hold"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/platform/register/run": {
         parameters: {
             query?: never;
@@ -12065,6 +12085,7 @@ export interface components {
             current_sponsors: number;
             /** Errors */
             errors: components["schemas"]["JobFailureRow"][];
+            held_import?: components["schemas"]["RegisterPublicationOut"] | null;
             last_publication: components["schemas"]["RegisterPublicationOut"] | null;
             /** Total Sponsors */
             total_sponsors: number;
@@ -26313,6 +26334,50 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RefundOut"];
+                };
+            };
+            /** @description The request could not be completed. `error.code` says why. */
+            "4XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+            /** @description Something failed on our side. Quote `error.request_id` to support. */
+            "5XX": {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorEnvelope"];
+                };
+            };
+        };
+    };
+    platform_admin_approve_register_hold: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                publication_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReasonIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobRerunOut"];
                 };
             };
             /** @description The request could not be completed. `error.code` says why. */

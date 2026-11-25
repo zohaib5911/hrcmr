@@ -40,6 +40,7 @@ async def test_register_status_empty_then_publication_counts_and_ingest_errors(
     assert empty.status_code == 200, empty.text
     assert empty.json() == {
         "last_publication": None,
+        "held_import": None,
         "current_sponsors": 0,
         "total_sponsors": 0,
         "errors": [],
@@ -108,3 +109,48 @@ async def test_register_rerun_requires_reason_queues_allow_listed_job_and_audits
     assert event.reason == "Refresh after source outage"
     assert event.after == made
     assert event.actor_type == "platform_admin"
+
+
+async def test_a_held_import_is_shown_and_approving_it_queues_the_import(
+    rig: dict[str, Any],
+) -> None:
+    """ISS-11: the operator reviews a held import and approves it for the next run."""
+    admin = await _platform_admin(rig, "support")
+    async with rig["owner"].begin() as c:
+        held = (
+            await c.execute(
+                text(
+                    "insert into register_publications "
+                    "(id, published_on, source_url, row_count, sha256, status) values "
+                    "(gen_random_uuid(), '2026-11-13', 'https://www.gov.uk/register.csv', 1, "
+                    "repeat('b', 64), 'held') returning id"
+                )
+            )
+        ).scalar_one()
+    status = (await admin.get(f"{API}/platform/register/status")).json()
+    assert status["held_import"]["id"] == str(held)
+    assert status["held_import"]["status"] == "held"
+    url = f"{API}/platform/register/holds/{held}/approve"
+    assert (await admin.post(url, json={})).status_code == 422
+    approved = await admin.post(url, json={"reason": "Home Office confirmed the reduction"})
+    assert approved.status_code == 202, approved.text
+    assert approved.json()["job"] == "register_ingest"
+    again = await admin.post(url, json={"reason": "Twice"})
+    assert again.status_code == 404  # no longer held
+    async with rig["owner"].connect() as c:
+        state = (
+            await c.execute(
+                text("select status from register_publications where id = :i"), {"i": held}
+            )
+        ).scalar_one()
+        audited = (
+            await c.execute(
+                text(
+                    "select count(*) from audit_events "
+                    "where action = 'platform.register_hold_approved' and entity_id = :i"
+                ),
+                {"i": held},
+            )
+        ).scalar_one()
+    assert state == "approved"
+    assert audited == 1

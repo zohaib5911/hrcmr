@@ -319,6 +319,8 @@ class RegisterPublicationOut(BaseModel):
 
 class RegisterStatusOut(BaseModel):
     last_publication: RegisterPublicationOut | None
+    # ISS-11: an import held because it would remove unusually many sponsors, awaiting review.
+    held_import: RegisterPublicationOut | None = None
     current_sponsors: int
     total_sponsors: int
     errors: list[JobFailureRow]  # latest 20 failed ingest runs, newest first
