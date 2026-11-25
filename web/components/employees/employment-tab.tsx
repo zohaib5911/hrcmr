@@ -6,6 +6,7 @@ import { useCan } from "@/components/app/session-context";
 import { SalarySection } from "@/components/employees/salary-section";
 import { FormSheet } from "@/components/company/form-sheet";
 import { Button } from "@/components/ui/button";
+import { Combobox, type ComboboxOption } from "@/components/ui/combobox";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Select } from "@/components/ui/select";
 import { Toggle } from "@/components/ui/toggle";
@@ -148,29 +149,31 @@ export function EmploymentTab({ id, employment }: { id: string; employment: Empl
   const [sheet, setSheet] = useState<
     "hire" | "role" | { kind: Kind; record: RecordData | null } | null
   >(null);
-  const [lookups, setLookups] = useState<Lookups>(EMPTY_LOOKUPS);
+  const [lookups, setLookups] = useState<Lookups | null>(null);
+  // ISS-17: the role editor's lists load when it opens, not with the read-only view; the
+  // authorities are searched as you type (permission-scoped), never the whole directory.
+  const editing = sheet === "role";
   useEffect(() => {
+    if (!mayEdit || !editing || lookups) return;
     let active = true;
     async function load() {
-      const [departments, designations, locations, employees] = await Promise.all([
+      const [departments, designations, locations] = await Promise.all([
         attempt((c) => c.GET("/departments")),
         attempt((c) => c.GET("/designations")),
         attempt((c) => c.GET("/locations")),
-        attempt((c) => c.GET("/employees")),
       ]);
       if (active)
         setLookups({
           departments: departments.ok ? departments.data : [],
           designations: designations.ok ? designations.data : [],
           locations: locations.ok ? locations.data : [],
-          employees: employees.ok ? employees.data.employees : [],
         });
     }
-    if (mayEdit) void load();
+    void load();
     return () => {
       active = false;
     };
-  }, [mayEdit]);
+  }, [mayEdit, editing, lookups]);
   const current = employment.assignments.find(
     (a) => a.effective_from <= today() && (!a.ended_at || a.ended_at > today()),
   );
@@ -300,7 +303,7 @@ export function EmploymentTab({ id, employment }: { id: string; employment: Empl
           id={id}
           hireDate={employment.hire_date}
           current={employment.assignments[0]}
-          lookups={lookups}
+          lookups={lookups ?? EMPTY_LOOKUPS}
           onClose={() => setSheet(null)}
         />
       )}
@@ -316,13 +319,27 @@ export function EmploymentTab({ id, employment }: { id: string; employment: Empl
   );
 }
 
+type AuthorityKey = "reporting_authority_employee_id" | "leave_sanctioning_employee_id";
 type Lookups = {
   departments: Schemas["DepartmentOut"][];
   designations: Schemas["DesignationOut"][];
   locations: Schemas["LocationOut"][];
-  employees: Schemas["EmployeeRow"][];
 };
-const EMPTY_LOOKUPS: Lookups = { departments: [], designations: [], locations: [], employees: [] };
+const EMPTY_LOOKUPS: Lookups = { departments: [], designations: [], locations: [] };
+
+/** Eligible authorities by name or number, from the caller's permission-scoped directory. */
+async function searchPeople(q: string, signal: AbortSignal, self: string) {
+  const result = await attempt((c) => c.GET("/employees", { params: { query: { q } }, signal }));
+  if (!result.ok) throw new Error(result.problem.message);
+  return result.data.employees
+    .filter((p) => p.id !== self)
+    .slice(0, 50)
+    .map((p) => ({
+      value: p.id,
+      label: `${p.first_name} ${p.last_name}`,
+      description: p.employee_number,
+    }));
+}
 function HireDateSheet({ id, value, onClose }: { id: string; value: string; onClose: () => void }) {
   const [date, setDate] = useState<string | null>(value);
   const [reason, setReason] = useState("");
@@ -403,9 +420,21 @@ function RoleSheet({
       }),
     );
   }
-  const people = lookups.employees
-    .filter((e) => e.id !== id && e.status !== "archived")
-    .map((e) => ({ id: e.id, name: `${e.first_name} ${e.last_name}` }));
+  // The current choices are shown by id with the names the assignment already carries.
+  const [chosen, setChosen] = useState<Record<AuthorityKey, ComboboxOption | null>>(() => ({
+    reporting_authority_employee_id: current?.reporting_authority_employee_id
+      ? {
+          value: current.reporting_authority_employee_id,
+          label: current.reporting_authority ?? "Current authority",
+        }
+      : null,
+    leave_sanctioning_employee_id: current?.leave_sanctioning_employee_id
+      ? {
+          value: current.leave_sanctioning_employee_id,
+          label: current.leave_sanctioning_authority ?? "Current authority",
+        }
+      : null,
+  }));
   return (
     <FormSheet
       open
@@ -465,20 +494,18 @@ function RoleSheet({
           ["leave_sanctioning_employee_id", "Leave Sanctioning Authority"],
         ] as const
       ).map(([key, title]) => (
-        <Select
+        <Combobox
           key={key}
           label={title}
           name={key}
-          value={form[key] ?? ""}
-          onChange={(e) => set(key, e.target.value || null)}
-        >
-          <option value="">Not set</option>
-          {people.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </Select>
+          hint="Type a name or employee number. Leave empty for none."
+          value={chosen[key]}
+          onChange={(option) => {
+            setChosen((c) => ({ ...c, [key]: option }));
+            set(key, option?.value ?? null);
+          }}
+          loadOptions={(q, signal) => searchPeople(q, signal, id)}
+        />
       ))}
       <p className="text-caption text-label-secondary">
         Hierarchy levels will be available with the organogram.
