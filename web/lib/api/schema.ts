@@ -23092,7 +23092,10 @@ export interface operations {
     };
     leave_own_approvals: {
         parameters: {
-            query?: never;
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -23213,6 +23216,9 @@ export interface operations {
         parameters: {
             query?: {
                 status?: string | null;
+                employee_id?: string | null;
+                limit?: number;
+                offset?: number;
             };
             header?: never;
             path?: never;
@@ -23293,7 +23299,11 @@ export interface operations {
     };
     leave_own_requests: {
         parameters: {
-            query?: never;
+            query?: {
+                status?: string | null;
+                limit?: number;
+                offset?: number;
+            };
             header?: never;
             path?: never;
             cookie?: never;
