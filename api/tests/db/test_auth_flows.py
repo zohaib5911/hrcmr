@@ -741,7 +741,9 @@ async def test_an_unreadable_session_record_signs_the_caller_out(
     """ISS-05: a record that cannot safely be read is a signed-out caller, not a 500."""
     outcome = await _login(engine, auth)
     key = f"sess:{hash_token(outcome.token)}"
-    good = json.loads(await redis.get(key))
+    raw = await redis.get(key)
+    assert raw is not None
+    good = json.loads(raw)
     broken = {
         "missing-dates": json.dumps({k: v for k, v in good.items() if k != "expires_at"}),
         "bad-date": json.dumps(good | {"expires_at": "soon"}),
@@ -764,7 +766,9 @@ async def test_an_older_session_record_without_the_optional_fields_still_works(
 ) -> None:
     outcome = await _login(engine, auth)
     key = f"sess:{hash_token(outcome.token)}"
-    good = json.loads(await redis.get(key))
+    raw = await redis.get(key)
+    assert raw is not None
+    good = json.loads(raw)
     older = {k: v for k, v in good.items() if k not in ("db_seen_at", "platform", "support_id")}
     await redis.set(key, json.dumps(older | {"future_field": 1}), keepttl=True)
     data = await sessions.get(outcome.token)
