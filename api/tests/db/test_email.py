@@ -191,9 +191,9 @@ async def test_a_service_that_is_down_is_retried_later_and_given_up_on_after_fiv
     row = await OutboxMailer(engine).save(
         to="amira@example.com", template="password_changed", data={"first_name": "Amira"}
     )
-    start = datetime.now(UTC)
+    start = moment = datetime.now(UTC)
     for attempt in range(1, MAX_ATTEMPTS):
-        outcome = await delivery.deliver(row.id, now=start)
+        outcome = await delivery.deliver(row.id, now=moment)
         assert (outcome.status, outcome.retry_in) == ("retry", BACKOFF[min(attempt, 4) - 1])
         stored = await _row(database, row.id)
         assert stored["attempts"] == attempt
@@ -202,7 +202,8 @@ async def test_a_service_that_is_down_is_retried_later_and_given_up_on_after_fiv
             seconds=1
         )
         assert stored["payload"] is not None
-    assert (await delivery.deliver(row.id, now=start)).status == "failed"
+        moment = stored["next_attempt_at"]  # each try waits for its backoff
+    assert (await delivery.deliver(row.id, now=moment)).status == "failed"
     final = await _row(database, row.id)
     assert (final["status"], final["payload"], final["attempts"]) == ("failed", None, MAX_ATTEMPTS)
     assert final["last_error"] == "down"
@@ -224,10 +225,25 @@ async def test_a_message_the_service_refuses_is_not_retried_and_the_job_asks_to_
     row = await mailer.save(
         to="x@example.com", template="password_changed", data={"first_name": "X"}
     )
-    blip = EmailDelivery(engine, FakeTransport(TransportError("blip", retry=True)), SETTINGS)
+    transport = FakeTransport(TransportError("blip", retry=True))
+    blip = EmailDelivery(engine, transport, SETTINGS)
     with pytest.raises(Retry):
         await deliver_email({"email": blip}, str(row.id))
+    # ISS-29: a duplicate job before the backoff ends calls nobody and uses no attempt.
+    assert await deliver_email({"email": blip}, str(row.id)) == "skipped"
+    assert (await _row(database, row.id))["attempts"] == 1
+    assert len(transport.sent) == 0
+    owner = engine_for(database.owner_url, poolclass=NullPool)
+    try:
+        async with owner.begin() as c:  # the backoff has passed
+            await c.execute(
+                text("update email_outbox set next_attempt_at = now() where id = :i"),
+                {"i": row.id},
+            )
+    finally:
+        await owner.dispose()
     assert await deliver_email({"email": blip}, str(row.id)) == "sent"
+    assert (await _row(database, row.id))["attempts"] == 2
 
 
 # --- a real mail server ------------------------------------------------------------------------------------
