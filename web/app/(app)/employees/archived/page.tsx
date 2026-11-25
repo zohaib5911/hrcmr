@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { EmployeesPage } from "@/components/employees/employees-page";
 import { serverApi } from "@/lib/auth/server";
+import { allEmployees } from "@/lib/employees/list";
 
 export const metadata: Metadata = { title: "Archived employees" };
 
@@ -10,7 +11,7 @@ export default async function Page() {
   const client = await serverApi();
   if (!client) notFound();
   const [list, summary] = await Promise.all([
-    client.GET("/employees", { params: { query: { status: "archived" } } }),
+    allEmployees(client, { status: "archived" }),
     client.GET("/employees/summary"),
   ]);
   if (!list.data || !summary.data) notFound();

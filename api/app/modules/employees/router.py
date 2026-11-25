@@ -48,7 +48,7 @@ Reads = Annotated[Access, Depends(require("employee.profile.read"))]
 Writes = Annotated[Access, Depends(require("employee.profile.write"))]
 Deletes = Annotated[Access, Depends(require("employee.profile.delete"))]
 AGREEMENT_NOTE = "48-hour week opt-out agreement"
-LIMIT = 2000
+LIMIT = 2000  # rows per page; follow next_offset for the rest (nobody is ever cut off)
 
 
 def _require_full_write(access: Access) -> None:
@@ -82,6 +82,7 @@ async def list_employees(
     archived: Annotated[
         bool, Query(description="Include archived records (or, with status=archived, only them).")
     ] = False,
+    offset: Annotated[int, Query(ge=0, description="Rows to skip (from next_offset).")] = 0,
 ) -> EmployeeList:
     reach = await _reachable(access)
     query = (
@@ -134,9 +135,11 @@ async def list_employees(
     ).scalar_one()
     rows = (
         await access.db.execute(
-            query.order_by(func.lower(Employee.last_name), func.lower(Employee.first_name)).limit(
-                LIMIT
+            query.order_by(
+                func.lower(Employee.last_name), func.lower(Employee.first_name), Employee.id
             )
+            .offset(offset)
+            .limit(LIMIT)
         )
     ).all()
     return EmployeeList(
@@ -158,6 +161,7 @@ async def list_employees(
             for e, department_id_, department, designation, rtw_status_ in rows
         ],
         total=total,
+        next_offset=offset + len(rows) if rows and offset + len(rows) < total else None,
     )
 
 

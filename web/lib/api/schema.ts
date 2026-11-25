@@ -9198,8 +9198,13 @@ export interface components {
             /** Employees */
             employees: components["schemas"]["EmployeeRow"][];
             /**
+             * Next Offset
+             * @description Pass as offset for the next page; null on the last page.
+             */
+            next_offset?: number | null;
+            /**
              * Total
-             * @description Matches before the 2000-row cap.
+             * @description Every match, on all pages.
              */
             total: number;
         };
@@ -19500,6 +19505,8 @@ export interface operations {
                 rtw?: ("NeedsAttention" | "Verified" | "Expiring" | "EvidenceMissing" | "Expired" | "Pending" | "NotRecorded") | null;
                 /** @description Include archived records (or, with status=archived, only them). */
                 archived?: boolean;
+                /** @description Rows to skip (from next_offset). */
+                offset?: number;
             };
             header?: never;
             path?: never;

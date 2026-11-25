@@ -153,6 +153,37 @@ async def test_the_list_filters_searches_and_summarises(rig: dict[str, Any]) -> 
     }
 
 
+async def test_the_list_pages_so_nobody_is_cut_off_and_the_order_is_stable(
+    rig: dict[str, Any], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Audit finding 3: past one page the rest came back nowhere. Two people share a name, so only
+    the id tie-breaker keeps the pages from repeating or skipping one of them."""
+    from app.modules.employees import router
+
+    monkeypatch.setattr(router, "LIMIT", 2)
+    admin = await rig["person"]("company_admin", rig["a"])
+    made = {
+        await _employee(rig, rig["a"], "E1", "Sam", "Smith"),
+        await _employee(rig, rig["a"], "E2", "Sam", "Smith", status="leaver"),
+        await _employee(rig, rig["a"], "E3", "Ann", "Adams"),
+        await _employee(rig, rig["a"], "E4", "Zoe", "Young"),
+        await _employee(rig, rig["a"], "E5", "Max", "Moss"),
+    }
+    seen: list[str] = []
+    offset: int | None = 0
+    while offset is not None:
+        page = (await admin.get(f"{API}/employees", params={"offset": offset})).json()
+        assert page["total"] == 5
+        assert len(page["employees"]) <= 2
+        seen += [e["id"] for e in page["employees"]]
+        offset = page["next_offset"]
+    assert len(seen) == 5  # each person exactly once
+    assert {uuid.UUID(i) for i in seen} == made
+    again = (await admin.get(f"{API}/employees", params={"offset": 2})).json()
+    assert [e["id"] for e in again["employees"]] == seen[2:4]  # the same page every time
+    assert (await admin.get(f"{API}/employees", params={"offset": -1})).status_code == 422
+
+
 async def test_each_role_sees_only_what_its_permission_reaches(rig: dict[str, Any]) -> None:
     boss = await _employee(rig, rig["a"], "M1", "Mona", "Boss")
     mine = await _employee(rig, rig["a"], "M2", "Rae", "Report", manager=boss)

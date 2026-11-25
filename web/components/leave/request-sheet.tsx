@@ -12,6 +12,7 @@ import type { components } from "@/lib/api/client";
 import { attempt, type Problem } from "@/lib/auth/request";
 import { todayIso } from "@/lib/ui/dates";
 import { days } from "./balances";
+import { allEmployees } from "@/lib/employees/list";
 
 type Kind = components["schemas"]["LeaveTypeOut"];
 type Person = components["schemas"]["EmployeeRow"];
@@ -54,7 +55,7 @@ export function RequestSheet({ own, saved }: { own: boolean; saved: () => void }
         setKind(kinds.data[0]?.id ?? "");
       } else setProblem(kinds.problem);
       if (!own) {
-        const result = await attempt((c) => c.GET("/employees"));
+        const result = await attempt((c) => allEmployees(c));
         if (!active) return;
         if (result.ok) setPeople(result.data.employees.filter((p) => p.status !== "archived"));
         else setProblem(result.problem);

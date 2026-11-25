@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { EmployeesPage } from "@/components/employees/employees-page";
 import { serverApi } from "@/lib/auth/server";
 import { rtwFilterFromParam } from "@/lib/employees/rtw";
-import { pillFromParam } from "@/lib/employees/list";
+import { pillFromParam, allEmployees } from "@/lib/employees/list";
 
 export const metadata: Metadata = { title: "Employees" };
 
@@ -16,7 +16,7 @@ export default async function Page({
   const client = await serverApi();
   if (!client) notFound();
   const [list, summary, params] = await Promise.all([
-    client.GET("/employees"),
+    allEmployees(client),
     client.GET("/employees/summary"),
     searchParams,
   ]);

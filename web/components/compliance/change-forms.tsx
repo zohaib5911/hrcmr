@@ -22,6 +22,7 @@ import {
 } from "@/lib/compliance/changes";
 import { documentLabel, DOCUMENT_STATUS } from "@/lib/compliance/sponsor-documents";
 import { shortDate } from "@/lib/employees/profile";
+import { allEmployees } from "@/lib/employees/list";
 
 type Schemas = components["schemas"];
 const today = () => new Date().toISOString().slice(0, 10);
@@ -150,7 +151,7 @@ export function EmployeeChangeSheet({
     if (employeeId) return;
     let active = true;
     async function load() {
-      const result = await attempt((c) => c.GET("/employees"));
+      const result = await attempt((c) => allEmployees(c));
       if (!active) return;
       if (result.ok) setPeople(result.data.employees);
       else setProblem(result.problem);
