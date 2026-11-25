@@ -195,19 +195,22 @@ async def update_bank_account(
             "label",
             except_id=row.id,
         )
+    # Compare the real values before masking (ISS-07): a new account number that keeps the same
+    # last four digits must still be audited. Only the field names go in the trail.
+    changed = [name for name, value in changes.items() if getattr(row, name) != value]
     before = _bank_audit(row)
     for name, value in changes.items():
         setattr(row, name, value)
     if changes.get("is_primary"):
         await _make_only_primary(access, row.id)
-    after = _bank_audit(row)
-    if before != after:
+    if changed:
         await access.audit(
             "bank_account.updated",
             entity_type="bank_account",
             entity_id=row.id,
             before=before,
-            after=after,
+            after=_bank_audit(row),
+            summary=f"Changed: {', '.join(changed)}",
         )
     await access.db.commit()
     return _bank_out(row)
