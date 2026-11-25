@@ -3,6 +3,7 @@ consent and Turnstile and writes the candidate, the application and the messages
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 from typing import Any
 
@@ -380,3 +381,52 @@ async def test_existing_candidate_public_application_needs_review(rig: dict[str,
         "First careers": False,
         "Second careers": True,
     }
+
+
+@pytest.mark.parametrize("existing", [False, True])
+async def test_concurrent_submissions_make_one_application(
+    rig: dict[str, Any], existing: bool
+) -> None:
+    """ISS-09: two submissions at once, for a new e-mail or an existing candidate, both get 202
+    and leave one candidate, one application, one acknowledgment and one CV."""
+    form = {**APPLY, "email": f"race-{uuid.uuid4().hex[:8]}@example.com"}
+    admin = await rig["person"]("company_admin", rig["a"])
+    slug = await company_slug(rig, rig["a"])
+    await open_posting(admin, "Race careers")
+    await open_posting(admin, "Earlier careers")
+    async with anonymous(rig) as public:
+        if existing:
+            earlier = await public.post(
+                f"{API}/public/postings/{slug}/earlier-careers/apply", data=form
+            )
+            assert earlier.status_code == 202
+        url = f"{API}/public/postings/{slug}/race-careers/apply"
+        sent = await asyncio.gather(
+            *(
+                public.post(url, data=form, files={"cv": ("cv.pdf", PDF, "application/pdf")})
+                for _ in range(2)
+            )
+        )
+    assert [r.status_code for r in sent] == [202, 202], [r.text for r in sent]
+    async with rig["owner"].connect() as db:
+
+        async def count(sql: str) -> int:
+            params = {"c": rig["a"], "e": form["email"]}
+            return int((await db.execute(text(sql), params)).scalar_one())
+
+        assert await count("select count(*) from candidates where company_id=:c and email=:e") == 1
+        assert (
+            await count(
+                "select count(*) from applications a join postings p on p.id = a.posting_id "
+                "where a.company_id=:c and p.slug = 'race-careers'"
+            )
+            == 1
+        )
+        assert await count(
+            "select count(*) from email_outbox "
+            "where template='application_received' and to_address=:e"
+        ) == (2 if existing else 1)
+        assert (
+            await count("select count(*) from files where company_id=:c and owner_type='candidate'")
+            == 1
+        )

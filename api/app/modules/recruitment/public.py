@@ -15,6 +15,7 @@ from fastapi import APIRouter, Form, Request, Response, UploadFile
 from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, EmailStr, StringConstraints, ValidationError, field_validator
 from sqlalchemy import func, select
+from sqlalchemy.exc import IntegrityError
 
 from app.core.crypto import encrypt
 from app.core.errors import AppError, NotFoundError
@@ -286,6 +287,13 @@ async def apply(
         )
     email = str(body.email).strip().lower()
     async with TenantSession(get_engine(request), company_id=company.id) as tenant:
+        # One lookup-or-create at a time per company and e-mail (ISS-09): a second submission
+        # waits here, then finds the first one's candidate and application.
+        await tenant.execute(
+            select(
+                func.pg_advisory_xact_lock(func.hashtextextended(f"apply:{company.id}:{email}", 0))
+            )
+        )
         posting, _place = await _open_external(tenant, posting_slug)
         candidate = (
             await tenant.execute(
@@ -318,22 +326,36 @@ async def apply(
             context = AuditContext(
                 company_id=company.id, actor_user_id=None, actor_type="system", ip=ip
             )
-            if cv is not None and cv.filename:
-                files: FileService = request.app.state.files
-                # Checked and scanned before anything is kept: a refused CV saves nothing.
-                await files.store_public(
-                    tenant,
-                    context,
-                    cv.file,
-                    filename=cv.filename,
-                    owner_type="candidate",
-                    owner_id=candidate.id,
-                    kinds=CV_KINDS,
-                    max_bytes=CV_MAX_BYTES,
-                )
-            await _record_application(
-                tenant, company, posting, candidate, body, ip, request, needs_review=needs_review
-            )
+            try:
+                async with tenant.begin_nested():
+                    if cv is not None and cv.filename:
+                        files: FileService = request.app.state.files
+                        # Checked and scanned before anything is kept: a refused CV saves nothing.
+                        await files.store_public(
+                            tenant,
+                            context,
+                            cv.file,
+                            filename=cv.filename,
+                            owner_type="candidate",
+                            owner_id=candidate.id,
+                            kinds=CV_KINDS,
+                            max_bytes=CV_MAX_BYTES,
+                        )
+                    await _record_application(
+                        tenant,
+                        company,
+                        posting,
+                        candidate,
+                        body,
+                        ip,
+                        request,
+                        needs_review=needs_review,
+                    )
+            except IntegrityError as exc:
+                # The same application was made another way meanwhile (e.g. by a recruiter): the
+                # submission is already in, so it is accepted once and nothing more is written.
+                if "uq_applications_candidate_posting" not in str(exc.orig):
+                    raise
         await tenant.commit()
     return ApplyOut()
 
