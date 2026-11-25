@@ -155,6 +155,11 @@ export function DeleteAccountPage({
           can withdraw it until then.
         </Alert>
       ) : null}
+      {request?.status === "in_progress" ? (
+        <Alert tone="danger" title="Deletion is in progress">
+          The company&apos;s records are being deleted. This can no longer be withdrawn.
+        </Alert>
+      ) : null}
       {request?.status === "awaiting_code" && !request.requested_by_me ? (
         <Alert tone="warning" title="A deletion request has been started">
           {request.requested_by_name ?? "Another Company Admin"} asked to delete the account and has
@@ -245,7 +250,9 @@ export function DeleteAccountPage({
         </Card>
       ) : null}
 
-      {request !== null && !(request.status === "awaiting_code" && request.requested_by_me) ? (
+      {request !== null &&
+      request.status !== "in_progress" &&
+      !(request.status === "awaiting_code" && request.requested_by_me) ? (
         <div>{withdrawButton("Withdraw deletion request")}</div>
       ) : null}
 

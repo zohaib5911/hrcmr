@@ -8822,7 +8822,7 @@ export interface components {
              * Status
              * @enum {string}
              */
-            status: "awaiting_code" | "scheduled";
+            status: "awaiting_code" | "scheduled" | "in_progress";
         };
         /** DeletionRequestRow */
         DeletionRequestRow: {

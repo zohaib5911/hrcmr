@@ -251,7 +251,7 @@ async def list_deletion_requests(
     access: Reader,
     status: Annotated[
         str | None,
-        Query(pattern="^(awaiting_code|scheduled|withdrawn|completed)$"),
+        Query(pattern="^(awaiting_code|scheduled|in_progress|withdrawn|completed)$"),
     ] = None,
     limit: Annotated[int, Query(ge=1, le=queues.PAGE_MAX)] = 50,
     offset: Annotated[int, Query(ge=0, le=100_000)] = 0,

@@ -14,7 +14,13 @@ import { PAGE_SIZE, Pager } from "./pager";
 type DeletionRow = components["schemas"]["DeletionRequestRow"];
 type ExportRow = components["schemas"]["DataExportRow"];
 
-const DELETION_STATUSES = ["awaiting_code", "scheduled", "withdrawn", "completed"] as const;
+const DELETION_STATUSES = [
+  "awaiting_code",
+  "scheduled",
+  "in_progress",
+  "withdrawn",
+  "completed",
+] as const;
 const EXPORT_STATUSES = ["queued", "ready", "failed"] as const;
 type DeletionStatus = (typeof DELETION_STATUSES)[number];
 type ExportStatus = (typeof EXPORT_STATUSES)[number];

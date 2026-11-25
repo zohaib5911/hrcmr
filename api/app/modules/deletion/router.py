@@ -46,7 +46,8 @@ CODE_MINUTES = 15
 RESEND_SECONDS = 60
 MAX_ATTEMPTS = 5
 
-DeletionStatus = Literal["awaiting_code", "scheduled"]
+# in_progress: the worker began the irreversible purge (ISS-22); it can no longer be withdrawn.
+DeletionStatus = Literal["awaiting_code", "scheduled", "in_progress"]
 
 
 class DeletionIn(RequestModel):
@@ -91,7 +92,13 @@ async def _out(db: TenantSession, row: DeletionRequest, me: uuid.UUID) -> Deleti
             name = f"{person.first_name} {person.last_name}".strip()
     return DeletionOut(
         id=row.id,
-        status="scheduled" if row.confirmed_at is not None else "awaiting_code",
+        status=(
+            "in_progress"
+            if row.started_at is not None
+            else "scheduled"
+            if row.confirmed_at is not None
+            else "awaiting_code"
+        ),
         requested_by_name=name,
         requested_by_me=row.requested_by == me,
         created_at=row.created_at,

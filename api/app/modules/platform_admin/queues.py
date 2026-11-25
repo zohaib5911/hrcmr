@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from app.db.session import GlobalSession
 
 PAGE_MAX = 100
-DELETION_STATUSES = ("awaiting_code", "scheduled", "withdrawn", "completed")
+DELETION_STATUSES = ("awaiting_code", "scheduled", "in_progress", "withdrawn", "completed")
 EXPORT_STATUSES = ("queued", "ready", "failed")
 
 
@@ -34,6 +34,8 @@ def _deletion_status(request: DeletionRequest) -> str:
         return "completed"
     if request.withdrawn_at is not None:
         return "withdrawn"
+    if request.started_at is not None:  # the irreversible purge began (ISS-22); retries continue
+        return "in_progress"
     if request.confirmed_at is not None:
         return "scheduled"
     return "awaiting_code"
@@ -48,9 +50,12 @@ def _deletion_filter(status: str) -> Any:
     open_request = and_(
         DeletionRequest.withdrawn_at.is_(None), DeletionRequest.completed_at.is_(None)
     )
+    if status == "in_progress":
+        return and_(open_request, DeletionRequest.started_at.is_not(None))
+    not_started = and_(open_request, DeletionRequest.started_at.is_(None))
     if status == "scheduled":
-        return and_(open_request, DeletionRequest.confirmed_at.is_not(None))
-    return and_(open_request, DeletionRequest.confirmed_at.is_(None))
+        return and_(not_started, DeletionRequest.confirmed_at.is_not(None))
+    return and_(not_started, DeletionRequest.confirmed_at.is_(None))
 
 
 async def deletion_requests(
