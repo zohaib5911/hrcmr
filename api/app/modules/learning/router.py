@@ -246,6 +246,7 @@ async def assignment_export(
             )
         )
     ).all()
+    zone = await certificates.company_zone(access.db, access.company_id)
     values = [
         [
             item.employee_name,
@@ -254,7 +255,9 @@ async def assignment_export(
             item.due_on.isoformat(),
             item.status.replace("_", " ").capitalize(),
             "" if item.quiz_score is None else item.quiz_score,
-            item.completed_at.date().isoformat() if item.completed_at else "",
+            certificates.local_day(item.completed_at, zone).isoformat()
+            if item.completed_at
+            else "",
         ]
         for item in (report.report_row(row) for row in rows)
     ]
