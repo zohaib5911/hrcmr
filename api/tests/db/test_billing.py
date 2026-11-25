@@ -52,6 +52,7 @@ class FakeStripe:
         self.checkout_operations: dict[str, str] = {}
         self.lose_checkout_response = False
         self.fail_cancel = False  # makes the immediate cancel (DELETE) refuse
+        self.payment_intents: dict[str, dict[str, Any]] = {}
 
     def __call__(self, request: httpx.Request) -> httpx.Response:
         self.requests.append(request)
@@ -91,6 +92,10 @@ class FakeStripe:
             return httpx.Response(
                 200, json={"id": "re_1", "object": "refund", "status": "succeeded"}
             )
+        if path.startswith("/v1/payment_intents/"):
+            ident = path.split("/")[3]
+            if ident in self.payment_intents:
+                return httpx.Response(200, json={"id": ident} | self.payment_intents[ident])
         if path == "/v1/customers/cus_1":
             return httpx.Response(200, json={"id": "cus_1", "metadata": self.customer_company})
         return httpx.Response(404, json={})
@@ -734,3 +739,113 @@ async def test_plan_changes_require_recent_step_up_before_provider_calls(
     assert response.json()["error"]["code"] == "STEP_UP_REQUIRED"
     assert fake.requests == []
     assert await _count(rig, audit_sql) == before
+
+
+DISPUTE_AUDIT = (
+    "select action from audit_events where company_id = :c and action like 'billing.dispute%' "
+    "order by created_at, id"
+)
+
+
+async def _actions(rig: dict[str, Any], sql: str) -> list[str]:
+    async with rig["owner"].connect() as c:
+        return list((await c.execute(text(sql), {"c": rig["a"]})).scalars())
+
+
+def _dispute(event_id: str, kind: str, payment_intent: str, status: str) -> dict[str, Any]:
+    return _event(
+        event_id,
+        kind,
+        {"object": "dispute", "charge": "ch_1", "payment_intent": payment_intent, "status": status},
+    )
+
+
+async def test_a_lost_dispute_ends_a_ten_year_plan_and_a_late_purchase_cannot_restore_it(
+    rig: dict[str, Any], fake: FakeStripe
+) -> None:
+    await _start_ten_year(rig, fake, days_ago=30)
+    fake.payment_intents["pi_1"] = {"customer": "cus_1", "metadata": {"company_id": str(rig["a"])}}
+
+    opened = _dispute("evt_dispute_open", "charge.dispute.created", "pi_1", "needs_response")
+    assert (await _deliver(rig, opened)).status_code == 200
+    company = await _company(rig)
+    assert (company["plan"], company["subscription_status"]) == ("ten_year", "active")
+
+    lost = _dispute("evt_dispute_lost", "charge.dispute.closed", "pi_1", "lost")
+    assert (await _deliver(rig, lost)).status_code == 200
+    company = await _company(rig)
+    assert (company["plan"], company["subscription_status"]) == ("free", "disputed")
+    assert await _actions(rig, DISPUTE_AUDIT) == ["billing.dispute_opened", "billing.dispute_lost"]
+    assert (await _deliver(rig, lost)).status_code == 200  # a replay changes nothing
+    assert await _actions(rig, DISPUTE_AUDIT) == ["billing.dispute_opened", "billing.dispute_lost"]
+
+    # The purchase event arriving again later (a new delivery id) does not bring the plan back.
+    late = _event(
+        "evt_late_purchase",
+        "checkout.session.completed",
+        {
+            "object": "checkout.session",
+            "mode": "payment",
+            "payment_status": "paid",
+            "payment_intent": "pi_1",
+            "customer": "cus_1",
+            "metadata": {"company_id": str(rig["a"]), "plan": "ten_year"},
+        },
+    )
+    assert (await _deliver(rig, late)).status_code == 200
+    company = await _company(rig)
+    assert (company["plan"], company["subscription_status"]) == ("free", "disputed")
+    assert not [r for r in fake.requests if r.url.path == "/v1/refunds"]
+
+
+async def test_a_lost_dispute_ends_an_annual_subscription_now(
+    rig: dict[str, Any], fake: FakeStripe
+) -> None:
+    await _start_annual(rig, fake, days_ago=40)
+    # An invoice payment carries no metadata of ours: the company comes from the customer.
+    fake.payment_intents["pi_annual_1"] = {"customer": "cus_1", "metadata": {}}
+    fake.customer_company = {"company_id": str(rig["a"])}  # type: ignore[assignment]
+
+    lost = _dispute("evt_annual_lost", "charge.dispute.closed", "pi_annual_1", "lost")
+    assert (await _deliver(rig, lost)).status_code == 200
+    assert ("DELETE", "/v1/subscriptions/sub_1") in [(r.method, r.url.path) for r in fake.requests]
+    company = await _company(rig)
+    assert (company["plan"], company["subscription_status"]) == ("free", "canceled")
+    assert await _actions(rig, DISPUTE_AUDIT) == ["billing.dispute_lost"]
+
+    # Stripe's own "subscription deleted" event that follows changes nothing more.
+    deleted = _event(
+        "evt_annual_deleted",
+        "customer.subscription.deleted",
+        {"object": "subscription", "id": "sub_1", "customer": "cus_1"},
+    )
+    assert (await _deliver(rig, deleted)).status_code == 200
+    assert (await _company(rig))["plan"] == "free"
+
+
+@pytest.mark.parametrize("status", ["won", "warning_closed"])
+async def test_a_dispute_we_win_keeps_the_plan(
+    rig: dict[str, Any], fake: FakeStripe, status: str
+) -> None:
+    await _start_ten_year(rig, fake, days_ago=30)
+    fake.payment_intents["pi_1"] = {"customer": "cus_1", "metadata": {"company_id": str(rig["a"])}}
+    closed = _dispute("evt_dispute_won", "charge.dispute.closed", "pi_1", status)
+    assert (await _deliver(rig, closed)).status_code == 200
+    company = await _company(rig)
+    assert (company["plan"], company["subscription_status"]) == ("ten_year", "active")
+    assert await _actions(rig, DISPUTE_AUDIT) == ["billing.dispute_closed"]
+    assert [r.method for r in fake.requests] == ["GET"]  # only the payment was read
+
+
+async def test_a_dispute_for_another_customer_is_ignored(
+    rig: dict[str, Any], fake: FakeStripe
+) -> None:
+    await _start_ten_year(rig, fake, days_ago=30)
+    fake.payment_intents["pi_1"] = {
+        "customer": "cus_other",
+        "metadata": {"company_id": str(rig["a"])},
+    }
+    lost = _dispute("evt_other_lost", "charge.dispute.closed", "pi_1", "lost")
+    assert (await _deliver(rig, lost)).status_code == 200
+    company = await _company(rig)
+    assert (company["plan"], company["subscription_status"]) == ("ten_year", "active")

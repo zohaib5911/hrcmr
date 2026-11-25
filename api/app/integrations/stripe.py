@@ -241,6 +241,10 @@ class Stripe:
     async def retrieve_invoice(self, invoice_id: str) -> dict[str, Any]:
         return await self._get("/v1/invoices", invoice_id)
 
+    async def retrieve_payment_intent(self, payment_intent_id: str) -> dict[str, Any]:
+        """A payment, with its customer and metadata (a dispute names only the payment)."""
+        return await self._get("/v1/payment_intents", payment_intent_id)
+
     async def create_refund(self, *, payment_intent: str, idempotency_key: str) -> dict[str, Any]:
         """A full refund of one payment. The key is the payment's own, so a retry never
         refunds twice."""

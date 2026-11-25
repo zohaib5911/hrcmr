@@ -44,6 +44,7 @@ const STATUS: Record<string, { label: string; tone: Tone }> = {
   past_due: { label: "Payment due", tone: "warning" },
   canceled: { label: "Cancelled", tone: "neutral" },
   refunded: { label: "Refunded", tone: "neutral" },
+  disputed: { label: "Ended: payment disputed", tone: "warning" },
 };
 
 /** Stripe's statuses in which a paid plan is still the company's plan (as the API counts them). */
