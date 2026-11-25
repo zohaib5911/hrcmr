@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 from datetime import date, datetime
 from decimal import Decimal  # noqa: TC003  (pydantic reads the field types at runtime)
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 from zoneinfo import ZoneInfo
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -117,13 +117,29 @@ class SocMatchOut(BaseModel):
     checks: list[CheckResult]  # the rules engine's answer for the top three codes
 
 
+async def embedder(state: Any) -> Embedder:
+    """The worker's model, loaded once (ISS-37): concurrent first searches share one load in
+    flight, and a failed load is forgotten so a later request can try again."""
+    embed: Embedder | None = getattr(state, "soc_embedder", None)
+    if embed is not None:
+        return embed
+    loading: asyncio.Task[Embedder] | None = getattr(state, "soc_embedder_loading", None)
+    if loading is None:
+        loading = asyncio.create_task(asyncio.to_thread(fastembed_embedder))
+        state.soc_embedder_loading = loading
+    try:
+        embed = await asyncio.shield(loading)
+    finally:
+        if loading.done() and getattr(state, "soc_embedder_loading", None) is loading:
+            state.soc_embedder_loading = None
+    state.soc_embedder = embed
+    return embed
+
+
 async def query_embedding(request: Request, text: str) -> list[float]:
     """The query embedding. The local model loads on first use and is then kept on the app."""
     try:
-        embed: Embedder | None = getattr(request.app.state, "soc_embedder", None)
-        if embed is None:
-            embed = await asyncio.to_thread(fastembed_embedder)
-            request.app.state.soc_embedder = embed
+        embed = await embedder(request.app.state)
         return await query_vector(embed, text)
     except Exception as exc:  # the weights could not load, or the model failed on this input
         logger.warning("soc_embedding_failed")
