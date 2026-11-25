@@ -48,4 +48,32 @@ describe("ensureCsrfCookie", () => {
     );
     expect(get).toHaveBeenCalledWith("https://api.test/api/v1/health", { credentials: "include" });
   });
+
+  it("shares one bootstrap between parallel first requests, and retries after a failure (ISS-24)", async () => {
+    const { ensureCsrfCookie } = await import("./request");
+    const base = () => "https://api.test/api/v1";
+    const none = () => "other=1";
+    let release: () => void = () => {};
+    const get = vi.fn(
+      () =>
+        new Promise<Response>((resolve) => {
+          release = () => resolve(new Response("{}"));
+        }),
+    );
+    const both = Promise.all([
+      ensureCsrfCookie(base, none, get),
+      ensureCsrfCookie(base, none, get),
+    ]);
+    expect(get).toHaveBeenCalledTimes(1);
+    release();
+    await both;
+
+    const failing = vi.fn(async () => {
+      throw new TypeError("offline");
+    });
+    await expect(ensureCsrfCookie(base, none, failing)).rejects.toThrow("offline");
+    const retry = vi.fn(async () => new Response("{}"));
+    await ensureCsrfCookie(base, none, retry);
+    expect(retry).toHaveBeenCalledTimes(1);
+  });
 });
